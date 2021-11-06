@@ -1,0 +1,10 @@
+OrderedDictionary {
+	'packages/Sandblocks-TreeSitter' : #SquotTonelSerializer,
+	'packages/Sandblocks-GDScript' : #SquotTonelSerializer,
+	'packages/Sandblocks-Java' : #SquotTonelSerializer,
+	'packages/Sandblocks-Javascript' : #SquotTonelSerializer,
+	'packages/Sandblocks-Json' : #SquotTonelSerializer,
+	'packages/Sandblocks-Python' : #SquotTonelSerializer,
+	'packages/Sandblocks-Regex' : #SquotTonelSerializer,
+	'packages/Sandblocks-Ruby' : #SquotTonelSerializer
+}
