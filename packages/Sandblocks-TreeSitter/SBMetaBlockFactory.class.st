@@ -294,6 +294,11 @@ SBMetaBlockFactory >> buildBlocksFor: anObject parentFieldName: aString visitedS
 
 	anObject type = 'FIELD' ifTrue: [^ self buildBlocksFor: anObject content parentFieldName: anObject name visitedSymbols: aSet].
 	
+	anObject type = 'ALIAS' ifTrue: [
+		^ (self buildBlocksFor: anObject content parentFieldName: anObject name visitedSymbols: aSet)
+			alias: (anObject at: #value);
+			yourself].
+	
 	(self unpackTypes includes: anObject type) ifTrue: [^ self buildBlocksFor: anObject content parentFieldName: aString visitedSymbols: aSet].
 	
 	(#('STRING') includes: anObject type) ifTrue: [
@@ -438,10 +443,13 @@ SBMetaBlockFactory >> cleanGrammar [
 		comment: ''
 		active: 1
 		do: {[grammar rules do: [:rule | self mergeRedundantRepeats: rule]]}.
-	SBToggledCode
-		comment: ''
-		active: 1
-		do: {[grammar rules do: [:rule | self removeAliases: rule]]}.
+	SBToggledCode comment: '' active: 1 do: {
+		[
+			grammar rules do: [:rule |
+				SBToggledCode
+					comment: ''
+					active: 1
+					do: {[self noteAliases: rule]. [self removeAliases: rule]}]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -788,6 +796,15 @@ SBMetaBlockFactory >> name: aSymbol preprocess: aBlock postprocess: anotherBlock
 	
 	" make sure all rules are in the cache "
 	grammar rules keysAndValuesDo: [:name :r | self getTemplate: name]
+]
+
+{ #category : #'grammar clean' }
+SBMetaBlockFactory >> noteAliases: anObject [
+
+	anObject type = 'ALIAS' ifTrue: [aliases add: anObject value -> anObject content veryDeepCopy].
+	
+	anObject content ifNotNil: [:c | self noteAliases: c].
+	anObject members ifNotNil: [:c | c do: [:m | self noteAliases: m]]
 ]
 
 { #category : #configuration }

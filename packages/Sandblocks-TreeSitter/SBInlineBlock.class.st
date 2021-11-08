@@ -5,7 +5,8 @@ Class {
 		'name',
 		'built',
 		'highlight',
-		'factory'
+		'factory',
+		'alias'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -22,6 +23,18 @@ SBInlineBlock >> advanceParseFrom: aCursor index: aNumber [
 	^ self subclassResponsibility
 ]
 
+{ #category : #accessing }
+SBInlineBlock >> alias [
+
+	^ alias
+]
+
+{ #category : #accessing }
+SBInlineBlock >> alias: aString [
+
+	alias := aString
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> allElementsDo: aBlock [
 
@@ -33,16 +46,21 @@ SBInlineBlock >> applyReplacements [
 	<action>
 
 	| replacements commands |
-	replacements := SBInlineBlockReplace allSubclasses gather: [:class |
-		(Pragma allNamed: #lang:match: in: class class) select: [:pragma |
-			pragma arguments first = self factory name]].
+	replacements := SBInlineBlockReplace allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class class) select: [:pragma | pragma arguments first = self factory name]].
 	commands := Array streamContents: [:stream |
 		self allBlocksDo: [:block |
 			replacements do: [:pragma |
 				SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures |
 					(pragma methodClass theNonMetaClass
 						perform: pragma selector
-						with: captures) ifNotNil: [:cmd | stream nextPut: cmd]]]]].
+						withArguments: {
+							captures.
+							[:target :replacer |
+								SBReplaceCommand new
+									target: target
+									replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
+						self assert: (cmd isKindOf: SBCommand).
+						stream nextPut: cmd]]]]].
 	commands ifNotEmpty: [self sandblockEditor do: (SBCombinedCommand newWith: commands)]
 ]
 
@@ -649,6 +667,13 @@ SBInlineBlock >> repeaterChild [
 
 	self submorphsDo: [:m | (m isSandblock not and: [m isInlineBlock]) ifTrue: [m repeaterChild ifNotNil: [:c | ^ c]]].
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
+
+	Clipboard clipboardText: self sourceString.
+	^ true
 ]
 
 { #category : #'as yet unclassified' }

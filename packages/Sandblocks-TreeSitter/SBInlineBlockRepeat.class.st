@@ -44,7 +44,8 @@ SBInlineBlockRepeat >> buildEmpty [
 
 	^ self class new
 		multiple: multiple required: required element: element;
-		factory: factory
+		factory: factory;
+		alias: self alias
 ]
 
 { #category : #'as yet unclassified' }

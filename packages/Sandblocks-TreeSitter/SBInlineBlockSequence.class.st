@@ -50,7 +50,8 @@ SBInlineBlockSequence >> buildEmpty [
 
 	^ self class new
 		elements: self elements;
-		factory: factory
+		factory: factory;
+		alias: self alias
 ]
 
 { #category : #'as yet unclassified' }

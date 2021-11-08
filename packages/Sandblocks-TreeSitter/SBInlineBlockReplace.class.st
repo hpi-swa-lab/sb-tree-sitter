@@ -35,7 +35,9 @@ SBInlineBlockReplace >> initialize [
 
 	super initialize.
 	
-	self layoutPolicy: TableLayout new
+	self
+		layoutPolicy: TableLayout new;
+		cellPositioning: #topLeft
 ]
 
 { #category : #'as yet unclassified' }
@@ -51,7 +53,7 @@ SBInlineBlockReplace >> printTitleOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockReplace >> type [
+SBInlineBlockReplace >> writeSourceOn: aStream [
 
 	^ self subclassResponsibility
 ]

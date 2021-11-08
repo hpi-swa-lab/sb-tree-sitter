@@ -14,8 +14,18 @@ Class {
 SBTSQuery >> evalExpression: anExpression against: aBlock ifMatch: aMatchBlock ifFail: aFailBlock ifSpecial: aSpecialBlock [
 	" symbol "
 
+	(anExpression isArray and: [#($? $+ $*) includes: anExpression type]) ifTrue: [
+		" see SBTSQueryTests>>#testCaptureOptional "
+		self shouldBeImplemented.
+		^ self
+			evalExpression: anExpression first
+			against: aBlock
+			ifMatch: aMatchBlock
+			ifFail: [aMatchBlock value]
+			ifSpecial: aSpecialBlock].
+	
 	(anExpression isArray and: [anExpression type = $( and: [anExpression first isString]]) ifTrue: [
-		((aBlock isKindOf: SBInlineBlockSymbol) and: [aBlock type = anExpression first or: [anExpression first = '_']])
+		((aBlock isKindOf: SBInlineBlockSymbol) and: [aBlock type = anExpression first or: [anExpression first = '_' or: [aBlock alias = anExpression first]]])
 			ifTrue: [
 				^ self
 					evalExpression: anExpression allButFirst
@@ -62,6 +72,15 @@ SBTSQuery >> evalExpression: anExpression against: aBlock ifMatch: aMatchBlock i
 		self lastMatch ifNotNil: [
 			captures at: anExpression allButFirst put: self lastMatch.
 			self lastMatch: nil].
+		^ aSpecialBlock value].
+	
+	" string match"
+	anExpression first = $= ifTrue: [
+		" TODO: should wrap node during parsing and then fail early "
+		self lastMatch ifNotNil: [
+			self lastMatch contents = (anExpression copyFrom: 3 to: anExpression size - 1)
+				ifTrue: [^ aSpecialBlock value]
+				ifFalse: [^ aFailBlock value]].
 		^ aSpecialBlock value].
 	
 	" anonymous/label node "
@@ -121,9 +140,15 @@ SBTSQuery >> lastMatch: aBlock [
 { #category : #'as yet unclassified' }
 SBTSQuery >> parseExpression [
 
-	| c |
+	| c expr |
 	c := stream peek.
-	^ (c = $( or: [c = $[]) ifTrue: [self parseSExpression] ifFalse: [self parseLiteral]
+	expr := (c = $( or: [c = $[])
+		ifTrue: [self parseSExpression]
+		ifFalse: [self parseLiteral].
+	
+	^ (#($+ $* $?) includes: stream peek)
+		ifTrue: [(SBArrayWithType with: expr) type: stream next]
+		ifFalse: [expr]
 ]
 
 { #category : #'as yet unclassified' }
@@ -156,6 +181,7 @@ SBTSQuery >> parseSExpression [
 			s nextPut: self parseExpression.
 			self skipWhitespaces]]) type: start.
 	SBToggledCode comment: ') or ]' active: 1 do: {[stream next]}.
+	
 	^ expr
 ]
 

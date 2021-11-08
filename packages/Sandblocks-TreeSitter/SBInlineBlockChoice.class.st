@@ -59,7 +59,8 @@ SBInlineBlockChoice >> buildEmpty [
 
 	^ self class new
 		alternatives: self alternatives;
-		factory: factory
+		factory: factory;
+		alias: self alias
 ]
 
 { #category : #'as yet unclassified' }

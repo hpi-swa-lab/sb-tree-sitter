@@ -37,7 +37,8 @@ SBInlineBlockSymbol >> buildEmpty [
 
 	^ self class new
 		type: self type factory: factory;
-		field: self field
+		field: self field;
+		alias: self alias
 ]
 
 { #category : #'as yet unclassified' }

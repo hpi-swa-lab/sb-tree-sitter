@@ -33,7 +33,8 @@ SBInlineBlockLabel >> buildEmpty [
 
 	^ self class new
 		label: self label;
-		factory: factory
+		factory: factory;
+		alias: self alias
 ]
 
 { #category : #'as yet unclassified' }

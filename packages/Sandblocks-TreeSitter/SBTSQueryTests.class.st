@@ -5,6 +5,26 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSQueryTests >> testCaptureOptional [
+
+	| factory |
+	factory := SBMetaBlockFactory new.
+	self assert: (SBTSQuery new
+		execute: '((comment) (identifier)? @id)'
+		against: (SBInlineBlockSequence new addAllMorphsBack: {
+			SBInlineBlockSymbol new type: 'comment' factory: factory.
+			SBInlineBlockSymbol new type: 'test' factory: factory.
+			SBInlineBlockSymbol new type: 'identifier' factory: factory})
+		capturesDo: [:c | self assert: 'identifier' equals: (c at: 'id') type]).
+	self assert: (SBTSQuery new
+		execute: '((comment) (identifier (test))? @id)'
+		against: (SBInlineBlockSequence new addAllMorphsBack: {
+			SBInlineBlockSymbol new type: 'comment' factory: factory.
+			SBInlineBlockSymbol new type: 'identifier' factory: factory})
+		capturesDo: [:c | self assert: (c at: 'id') isNil])
+]
+
+{ #category : #'as yet unclassified' }
 SBTSQueryTests >> testIgnoresComments [
 
 	| structure |
@@ -117,6 +137,25 @@ SBTSQueryTests >> testMatchNestedSymbolsWithCaptures [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSQueryTests >> testMatchOptional [
+
+	| factory |
+	factory := SBMetaBlockFactory new.
+	self assert: (SBTSQuery new
+		execute: '(identifier)?'
+		against: (SBInlineBlockSymbol new
+			type: 'identifier' factory: factory;
+			yourself)
+		capturesDo: [:c | ]).
+	self assert: (SBTSQuery new
+		execute: '(identifier)?'
+		against: (SBInlineBlockSymbol new
+			type: 'abc' factory: factory;
+			yourself)
+		capturesDo: [:c | ])
+]
+
+{ #category : #'as yet unclassified' }
 SBTSQueryTests >> testMatchSequence [
 
 	| factory |
@@ -192,4 +231,31 @@ SBTSQueryTests >> testMatchWildcard [
   key: (_) @keyword)'
 		against: structure
 		capturesDo: [:c | self assert: structure firstSubmorph equals: (c at: 'keyword')])
+]
+
+{ #category : #'as yet unclassified' }
+SBTSQueryTests >> testMatchWithAlias [
+
+	| factory |
+	factory := SBMetaBlockFactory new.
+	self assert: (SBTSQuery new
+		execute: '(property_identifier)'
+		against: (SBInlineBlockSymbol new
+			type: 'identifier' factory: factory;
+			alias: 'property_identifier';
+			yourself)
+		capturesDo: [:c | ])
+]
+
+{ #category : #'as yet unclassified' }
+SBTSQueryTests >> testMatchWithStringCompare [
+
+	self assert: (SBTSQuery new
+		execute: '(identifier) ="id"'
+		against: ((SBInlineBlockSymbol new type: 'identifier' factory: nil) addMorphBack: (SBInlineBlockText new contents: 'id'))
+		capturesDo: [:c | ]).
+	self deny: (SBTSQuery new
+		execute: '(identifier) ="id"'
+		against: ((SBInlineBlockSymbol new type: 'identifier' factory: nil) addMorphBack: (SBInlineBlockText new contents: 'ida'))
+		capturesDo: [:c | ])
 ]
