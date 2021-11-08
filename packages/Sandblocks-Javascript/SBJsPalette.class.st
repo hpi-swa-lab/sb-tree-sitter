@@ -5,13 +5,16 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBJsPalette class >> buildOn: aContainer [
+SBJsPalette class >> buildOn: aBuilder [ 
 
-	aContainer addSectionHeader: 'Javascript'.
-	aContainer addBlock: 'simple fetch' as: (SBJavascript parse: 'window.fetch("")').
-	aContainer
-		addBlock: 'json fetch'
-		as: (SBJavascript parse: 'window.fetch("", {headers: {"Content-Type": "application/json"}})')
+	aBuilder addHeader: 'Javascript'.
+	
+	aBuilder addSectionHeader: 'Fetch'.
+	aBuilder addBlock: 'simple fetch' as: (SBJavascript parse: 'window.fetch("")').
+	aBuilder addBlock: 'json fetch' as: (SBJavascript parse: 'window.fetch("", {headers: {"Content-Type": "application/json"}})').
+	aBuilder addBlock: 'json fetch' as: (SBJsFetch new
+		factory: SBJavascript new;
+		url: 'http://...' params: (SBJavascript parse: '{headers: {"Content-Type": "application/json"}}') childSandblocks first).
 ]
 
 { #category : #'as yet unclassified' }
