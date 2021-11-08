@@ -1,6 +1,6 @@
 Class {
 	#name : #SBPyPalette,
-	#superclass : #SBPalette,
+	#superclass : #SBTSPalette,
 	#category : #'Sandblocks-Python'
 }
 
@@ -8,20 +8,14 @@ Class {
 SBPyPalette class >> buildOn: aBuilder [
 
 	aBuilder addSectionHeader: 'Python'.
-	aBuilder addBlock: 'Open' as: (SBPython parse: 'open("")') childSandblocks first.
+	aBuilder addBlock: 'Open' as: (SBPython parse: 'open("")').
 	aBuilder addBlock: 'Path' as: (SBPyFilepath new
 		factory: SBPython new;
 		path: '')
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPalette class >> context [
+SBPyPalette class >> language [
 
-	^ {#isInlineBlock. [:block | block language = #python]}
-]
-
-{ #category : #'as yet unclassified' }
-SBPyPalette class >> grammarHandler [
-
-	^ SBMetaGrammarHandler new
+	^ #python
 ]
