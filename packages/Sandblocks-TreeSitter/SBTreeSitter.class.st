@@ -113,8 +113,8 @@ SBTreeSitter >> externalCallFailed [
 	^ ExternalFunction getLastError = 15
 		ifTrue: [ | path |
 			Smalltalk platformName = 'Mac OS' ifTrue: [
-				thisContext sender method externalLibraryName: (FileDirectory default / 'libtree-sitter.dylib.bundle' / 'Contents' / 'MacOS' / 'libtree-sitter.dylib') fullName.
-				^ thisContext sender method externalLibraryFunction invoke].
+				thisContext sender method externalLibraryName: 'libtree-sitter.dylib'.
+				^ thisContext sender method externalLibraryFunction invokeWithArguments: thisContext sender arguments].
 			
 			path := SBMetaBlockFactory fetchTreeSitter fullName.
 			self class methodDict valuesDo: [:method | " only change for those that don't have an explicit module (lang-specific) "
