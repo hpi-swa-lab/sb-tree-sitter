@@ -188,6 +188,10 @@ SBMetaBlockFactory class >> tryPatchLibrary: aGithubString name: aString context
 	| path library |
 	ExternalFunction getLastError = 15 ifFalse: [^ self externalCallFailed].
 	
+	Smalltalk platformName = 'Mac OS' ifTrue: [
+		aContext method externalLibraryName: (FileDirectory default / ('tree-sitter-', (aString, '.so.bundle')) / 'Contents' / 'MacOS' / ('tree-sitter-', aString, '.so')) fullName.
+		^ aContext method externalLibraryFunction invoke].
+	
 	path := self fetchLibrary: aGithubString.
 	library := self compileParserIn: path name: aString.
 	aContext method externalLibraryName: library fullName.
