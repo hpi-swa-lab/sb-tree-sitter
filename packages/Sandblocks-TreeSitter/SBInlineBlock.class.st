@@ -168,7 +168,7 @@ recursion, which tends to produce more complex, combined blocks"
 						choices do: [:block | block first setProperty: #rootBlock toValue: current].
 						stream nextPutAll: choices]].
 				current := current owner.
-				(current notNil and: [current isInlineBlock and: [current inline not and: [current ~= self]]]) ifTrue: [current := nil]]]) ifNotEmpty: [:results | ^ SBTSRuleExplore deduplicateResults: results]].
+				(current notNil and: [current isInlineBlock and: [current inline not and: [current ~= self and: [current owner isInlineBlock]]]]) ifTrue: [current := nil]]]) ifNotEmpty: [:results | ^ SBTSRuleExplore deduplicateResults: results]].
 	^ #()
 ]
 
