@@ -51,6 +51,7 @@ SBInlineBlockSequence >> buildEmpty [
 	^ self class new
 		elements: self elements;
 		factory: factory;
+		field: self field;
 		alias: self alias
 ]
 

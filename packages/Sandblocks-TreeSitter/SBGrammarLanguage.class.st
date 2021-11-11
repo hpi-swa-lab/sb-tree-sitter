@@ -1,8 +1,17 @@
 Class {
 	#name : #SBGrammarLanguage,
 	#superclass : #SBMetaBlockFactory,
+	#classInstVars : [
+		'instance'
+	],
 	#category : #'Sandblocks-TreeSitter'
 }
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> build: aRuleName [
+
+	^ self instance instantiateTemplate: aRuleName
+]
 
 { #category : #'as yet unclassified' }
 SBGrammarLanguage class >> grammarJson [
@@ -17,6 +26,12 @@ SBGrammarLanguage class >> highlightQuery [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> instance [
+
+	^ instance ifNil: [instance := self new]
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> language [
 
 	^ self subclassResponsibility
@@ -25,7 +40,13 @@ SBGrammarLanguage class >> language [
 { #category : #'as yet unclassified' }
 SBGrammarLanguage class >> parse: aString [
 
-	^ self new parse: aString
+	^ self instance parse: aString
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> rebuild [
+
+	instance := nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -43,7 +64,7 @@ SBGrammarLanguage class >> statementContainerTypes [
 { #category : #'as yet unclassified' }
 SBGrammarLanguage class >> toplevel [
 
-	^ self new toplevel
+	^ self instance toplevel
 ]
 
 { #category : #'as yet unclassified' }

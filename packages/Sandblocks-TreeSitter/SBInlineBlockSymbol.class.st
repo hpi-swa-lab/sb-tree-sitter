@@ -2,8 +2,7 @@ Class {
 	#name : #SBInlineBlockSymbol,
 	#superclass : #SBInlineBlock,
 	#instVars : [
-		'type',
-		'field'
+		'type'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -99,23 +98,19 @@ SBInlineBlockSymbol >> factory: aFactory [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> field [
-
-	^ field
-]
-
-{ #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> field: aString [
-
-	field := aString
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> firstDifferingBlocksWith: aMorph do: aBlock [
 
 	self class = aMorph class ifFalse: [^ aBlock value: self value: aMorph].
 	self type = aMorph type ifFalse: [^ aBlock value: self value: aMorph].
 	^ self firstSubmorph firstDifferingBlocksWith: aMorph firstSubmorph do: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> get: aFieldString [
+
+	^ self childSandblocks
+		detect: [:block | (block orOwnerUpTo: self satisfying: [:b | b field = aFieldString]) notNil]
+		ifNone: [nil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -165,6 +160,12 @@ SBInlineBlockSymbol >> instantiate [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> isArtefact [
+
+	^ (self owner isNil or: [self owner isInlineBlock not]) and: [self type = self factory rootRuleName]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> isHidden [
 
 	^ self type first = $_ or: [factory isSuperType: self type]
@@ -211,13 +212,7 @@ SBInlineBlockSymbol >> layoutCommands [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> newEmptyChildNear: aBlock before: aBoolean [
 
-	^ SBToggledCode comment: '' active: 1 do: {
-		[self repeaterChild newEmptyChildNear: aBlock before: aBoolean].
-		[
-			aBlock ifNotNil: [(aBlock ownerThatIsA: SBInlineBlockRepeat) ifNotNil: [:container | ^ container newEmptyChildNear: aBlock before: aBoolean]].
-			^ (self firstSubmorph isKindOf: SBInlineBlockRepeat)
-				ifTrue: [self firstSubmorph newEmptyChildNear: aBlock before: aBoolean]
-				ifFalse: [nil]]}
+	^ self repeaterChild ifNotNil: [:r | r newEmptyChildNear: aBlock before: aBoolean]
 ]
 
 { #category : #'as yet unclassified' }

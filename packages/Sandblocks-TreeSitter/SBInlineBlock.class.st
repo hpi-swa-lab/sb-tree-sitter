@@ -6,7 +6,8 @@ Class {
 		'built',
 		'highlight',
 		'factory',
-		'alias'
+		'alias',
+		'field'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -287,10 +288,16 @@ SBInlineBlock >> factory: aFactory [
 	factory := aFactory
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBInlineBlock >> field [
 
-	^ nil
+	^ field
+]
+
+{ #category : #accessing }
+SBInlineBlock >> field: aString [
+
+	field := aString
 ]
 
 { #category : #'as yet unclassified' }
@@ -432,7 +439,7 @@ SBInlineBlock >> instantiate [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> isArtefact [
 
-	^ self owner isNil or: [self owner isInlineBlock not]
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -595,6 +602,17 @@ SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
 	^ {#isInlineBlock. [:o | false]. aSymbol = #replace ifTrue: [self] ifFalse: [self repeaterChild element]}
 ]
 
+{ #category : #hierarchy }
+SBInlineBlock >> orOwnerUpTo: aBlock satisfying: aCondBlock [
+
+	| p |
+	p := self.
+	[p notNil and: [p ~= aBlock]] whileTrue: [
+		(aCondBlock value: p) ifTrue: [^ p].
+		p := p owner].
+	^ nil
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> preferredColorIn: aColorPolicy [
 
@@ -750,8 +768,10 @@ SBInlineBlock >> updateAllHighlights [
 
 	factory hasHighlight ifFalse: [^ self].
 	
-	self allMorphsDo: [:m | m isInlineBlock ifTrue: [m highlight: nil]].
-	self updateHighlight
+	self allMorphsDo: [:m |
+		m isInlineBlock ifTrue: [
+			m highlight: nil.
+			m updateHighlight]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -759,8 +779,7 @@ SBInlineBlock >> updateHighlight [
 
 	self factory highlightQuery
 		executeAgainst: self
-		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | block highlight ifNil: [block highlight: id]]].
-	self submorphsDo: [:m | m isInlineBlock ifTrue: [m updateHighlight]]
+		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | block highlight ifNil: [block highlight: id]]]
 ]
 
 { #category : #'as yet unclassified' }

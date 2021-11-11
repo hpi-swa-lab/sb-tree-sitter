@@ -60,6 +60,7 @@ SBInlineBlockChoice >> buildEmpty [
 	^ self class new
 		alternatives: self alternatives;
 		factory: factory;
+		field: self field;
 		alias: self alias
 ]
 

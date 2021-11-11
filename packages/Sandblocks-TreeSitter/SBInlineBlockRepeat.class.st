@@ -45,6 +45,7 @@ SBInlineBlockRepeat >> buildEmpty [
 	^ self class new
 		multiple: multiple required: required element: element;
 		factory: factory;
+		field: self field;
 		alias: self alias
 ]
 

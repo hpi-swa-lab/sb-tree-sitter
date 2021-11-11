@@ -294,16 +294,19 @@ SBMetaBlockFactory >> blockInline: aCollection [
 ]
 
 { #category : #helper }
-SBMetaBlockFactory >> buildBlocksFor: anObject parentFieldName: aString visitedSymbols: aSet [
+SBMetaBlockFactory >> buildBlocksFor: anObject visitedSymbols: aSet [
 
-	anObject type = 'FIELD' ifTrue: [^ self buildBlocksFor: anObject content parentFieldName: anObject name visitedSymbols: aSet].
+	anObject type = 'FIELD' ifTrue: [
+		^ (self buildBlocksFor: anObject content visitedSymbols: aSet)
+			field: anObject name;
+			yourself].
 	
 	anObject type = 'ALIAS' ifTrue: [
-		^ (self buildBlocksFor: anObject content parentFieldName: anObject name visitedSymbols: aSet)
+		^ (self buildBlocksFor: anObject content visitedSymbols: aSet)
 			alias: (anObject at: #value);
 			yourself].
 	
-	(self unpackTypes includes: anObject type) ifTrue: [^ self buildBlocksFor: anObject content parentFieldName: aString visitedSymbols: aSet].
+	(self unpackTypes includes: anObject type) ifTrue: [^ self buildBlocksFor: anObject content visitedSymbols: aSet].
 	
 	(#('STRING') includes: anObject type) ifTrue: [
 		^ SBInlineBlockLabel new
@@ -318,21 +321,20 @@ SBMetaBlockFactory >> buildBlocksFor: anObject parentFieldName: aString visitedS
 	(#('SYMBOL') includes: anObject type) ifTrue: [
 		^ SBInlineBlockSymbol new
 			type: anObject name factory: self visitedSymbols: aSet;
-			field: aString;
 			factory: self].
 	
 	'REPEAT' = anObject type ifTrue: [
 		^ SBInlineBlockRepeat new
 			multiple: true
 				required: false
-				element: (self buildBlocksFor: anObject content parentFieldName: aString visitedSymbols: aSet);
+				element: (self buildBlocksFor: anObject content visitedSymbols: aSet);
 			factory: self].
 	
 	'REPEAT1' = anObject type ifTrue: [
 		^ SBInlineBlockRepeat new
 			multiple: true
 				required: true
-				element: (self buildBlocksFor: anObject content parentFieldName: aString visitedSymbols: aSet);
+				element: (self buildBlocksFor: anObject content visitedSymbols: aSet);
 			factory: self].
 	
 	'CHOICE' = anObject type ifTrue: [
@@ -340,17 +342,17 @@ SBMetaBlockFactory >> buildBlocksFor: anObject parentFieldName: aString visitedS
 			^ SBInlineBlockRepeat new
 				multiple: false
 					required: false
-					element: (self buildBlocksFor: anObject members first parentFieldName: aString visitedSymbols: aSet);
+					element: (self buildBlocksFor: anObject members first visitedSymbols: aSet);
 				factory: self].
 		
 		^ SBInlineBlockChoice new
-			alternatives: (anObject members collect: [:member | self buildBlocksFor: member parentFieldName: aString visitedSymbols: aSet]);
+			alternatives: (anObject members collect: [:member | self buildBlocksFor: member visitedSymbols: aSet]);
 			factory: self].
 	
 	'SEQ' = anObject type ifTrue: [
 		^ SBInlineBlockSequence new
 			factory: self;
-			elements: (anObject members collect: [:member | self buildBlocksFor: member parentFieldName: aString visitedSymbols: aSet])].
+			elements: (anObject members collect: [:member | self buildBlocksFor: member visitedSymbols: aSet])].
 	
 	self assert: false
 ]
@@ -571,7 +573,7 @@ SBMetaBlockFactory >> getTemplate: aTypeString ifAbsent: aBlock [
 		
 		templateCache
 			at: aTypeString
-			put: (self buildBlocksFor: rule parentFieldName: nil visitedSymbols: Set new)]
+			put: (self buildBlocksFor: rule visitedSymbols: Set new)]
 ]
 
 { #category : #accessing }
