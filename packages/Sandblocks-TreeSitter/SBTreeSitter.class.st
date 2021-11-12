@@ -40,7 +40,7 @@ SBTreeSitter >> buildTreeFrom: aCursor [
 		explore: fieldStream
 		type: type
 		factory: aCursor factory.
-	self assert: block notNil.
+	self assert: block notNil description: 'failed to build ', type.
 	^ SBInlineBlockSymbol new type: type factory: aCursor factory block: block
 ]
 
@@ -202,6 +202,13 @@ SBTreeSitter >> nodeEndByte: aNode [
 ]
 
 { #category : #ffi }
+SBTreeSitter >> nodeHasError: aNode [
+
+	<apicall: bool ts_node_has_error (SBTSNode)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
 SBTreeSitter >> nodeIsNamed: aNode [
 
 	<apicall: bool ts_node_is_named (SBTSNode)>
@@ -263,6 +270,7 @@ SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 	tree := self parser: parser old: nil parseString: currentString length: currentString size.
 	
 	root := self treeRootNode: tree.
+	(self nodeHasError: root) ifTrue: [^ self error: 'Could not parse input'].
 	
 	cursor := self cursorNew: root.
 	

@@ -6761,7 +6761,18 @@ SBJavascript class >> statementContainerTypes [
 { #category : #'as yet unclassified' }
 SBJavascript >> configure [
 
+	self addDelimitedRules: ({'object' -> ','. 'arguments' -> ','. 'formal_parameters' -> ','. 'array_pattern' -> ','} as: Dictionary).
+	self hardLineBreakMatcher: [:block | (block submorphAfter ifNotNil: #type) = 'statement_block'].
+	
+	self blockInline: {'expression_statement'. 'jsx_closing_element'. 'jsx_opening_element'. 'arguments'. 'formal_parameters'}
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> preprocessGrammar [
+
 	| rulesWithSemicolon |
+	self ignoreExternals: #('_automatic_semicolon').
+	
 	rulesWithSemicolon := ((self grammar rules associations collect: [:pair |
 		self
 			traverse: pair value
@@ -6769,16 +6780,7 @@ SBJavascript >> configure [
 			ifFound: [:obj | pair key -> ';']
 			ifNone: [nil]]) select: #notNil) as: Dictionary.
 	self addDelimitedRules: rulesWithSemicolon.
-	self addDelimitedRules: ({'object' -> ','. 'arguments' -> ','} as: Dictionary).
-	self hardLineBreakMatcher: [:block | (block submorphAfter ifNotNil: #type) = 'statement_block'].
 	
-	self blockInline: {'expression_statement'. 'arguments'. 'formal_parameters'}
-]
-
-{ #category : #'as yet unclassified' }
-SBJavascript >> preprocessGrammar [
-
-	self ignoreExternals: #('_automatic_semicolon').
 	self grammar rules
 		at: '_template_chars'
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).

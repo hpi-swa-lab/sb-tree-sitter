@@ -267,6 +267,12 @@ SBInlineBlock >> differenceTo: aMorph labelsDo: aBlock [
 	^ ret
 ]
 
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> drawOn: aCanvas [
+
+	self inline ifFalse: [super drawOn: aCanvas]
+]
+
 { #category : #geometry }
 SBInlineBlock >> extent: aPoint [
 
