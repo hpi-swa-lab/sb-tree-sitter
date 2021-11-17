@@ -15,19 +15,32 @@ SBTreeSitter class >> moduleName [
 ]
 
 { #category : #'as yet unclassified' }
-SBTreeSitter >> buildTreeFrom: aCursor [
+SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 
-	| field fallback type fieldStream block template |
+	| field fallback type fieldStream block template root |
 	type := aCursor type.
 	field := aCursor currentFieldName.
 	fallback := {field. aCursor text}.
-	template := aCursor isNamed ifTrue: [aCursor factory getTemplate: type ifAbsent: [^ aCursor text]] ifFalse: [^ aCursor text].
-	template = 'ALIAS' ifTrue: [type := aCursor resolveCurrentAliasIfString: [:str | ^ str]].
+	template := aCursor isNamed
+		ifTrue: [aCursor factory getTemplate: type ifAbsent: [^ aBlock value: aCursor text]]
+		ifFalse: [^ aBlock value: aCursor text].
+	
+	template = 'ALIAS'
+		ifTrue: [
+			aCursor
+				resolveCurrentAliasIfString: [:str | ^ aBlock value: str]
+				ifBlock: [:t :b |
+					type := t.
+					root := b]
+				ifSymbol: [:t |
+					type := t.
+					root := aCursor factory getTemplate: type]]
+		ifFalse: [root := aCursor factory getTemplate: type].
 	
 	fieldStream := ((Array streamContents: [:stream |
 		aCursor gotoFirstChild ifTrue: [ | first |
 			first := aCursor node.
-			[stream nextPut: {aCursor currentFieldName. self buildTreeFrom: aCursor}] doWhileFalse: [ | gap atEnd |
+			[self buildTreeFrom: aCursor do: [:b | stream nextPut: {aCursor currentFieldName. b}]] doWhileFalse: [ | gap atEnd |
 				atEnd := aCursor gotoNextSibling.
 				(atEnd not and: [aCursor factory noteUncapturedText includes: type]) ifTrue: [
 					gap := aCursor textBetween: first and: aCursor node.
@@ -36,12 +49,15 @@ SBTreeSitter >> buildTreeFrom: aCursor [
 				atEnd].
 			aCursor gotoParent]]) ifEmpty: [{fallback}]) readStream.
 	
-	block := SBTSParseExplore new
-		explore: fieldStream
-		type: type
-		factory: aCursor factory.
-	self assert: block notNil description: 'failed to build ', type.
-	^ SBInlineBlockSymbol new type: type factory: aCursor factory block: block
+	^ (template = 'ALIAS' and: [(aCursor factory grammar rules includesKey: type) not])
+		ifTrue: [fieldStream contents do: [:pair | aBlock value: pair second]]
+		ifFalse: [
+			block := SBTSParseExplore new
+				explore: fieldStream
+				root: root
+				factory: aCursor factory.
+			self assert: block notNil description: 'failed to build ', type.
+			aBlock value: (SBInlineBlockSymbol new type: type factory: aCursor factory block: block)]
 ]
 
 { #category : #ffi }
@@ -276,7 +292,7 @@ SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 	
 	cursor := self cursorNew: root.
 	block := (SBToggledCode comment: '' active: 1 do: {
-		[self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory)].
+		[self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory) do: [:b | b]].
 		[SBTSParseExplore new explore: (SBTSCursor new library: self cursor: cursor factory: aFactory)].
 		[(SBInlineBlockSymbol new type: (self nodeType: root) factory: aFactory) takeParsedFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory)]})
 		hResizing: #rigid;

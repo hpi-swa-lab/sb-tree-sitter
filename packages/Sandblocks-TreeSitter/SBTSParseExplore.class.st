@@ -30,17 +30,14 @@ SBTSParseExplore >> expandSymbol: aSymbolBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSParseExplore >> explore: aStream type: aString factory: aFactory [
+SBTSParseExplore >> explore: aStream root: aBlock factory: aFactory [
 
 	lastOptions := OrderedCollection new.
 	choiceIndices := Dictionary new.
 	stack := OrderedCollection new.
 	stream := aStream.
 	
-	root := self push: (SBToggledCode
-		comment: ''
-		active: 1
-		do: {[aFactory getTemplate: aString]. [SBInlineBlockSymbol new type: aString factory: aFactory]}).
+	root := self push: aBlock.
 	
 	[stack notEmpty] whileTrue: [ | block pair index |
 		pair := stack last.

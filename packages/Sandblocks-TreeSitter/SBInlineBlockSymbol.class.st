@@ -159,6 +159,12 @@ SBInlineBlockSymbol >> instantiate [
 		ifFalse: [self buildEmpty addMorphBack: (factory instantiateTemplate: self type)]
 ]
 
+{ #category : #testing }
+SBInlineBlockSymbol >> isAlias [
+
+	^ self factory aliases anySatisfy: [:a | a key = self type and: [(self factory grammar rules includesKey: self type) not]]
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> isArtefact [
 
@@ -252,16 +258,6 @@ SBInlineBlockSymbol >> printTitleOn: aStream [
 	SBToggledCode comment: '' active: 0 do: {
 		[((factory shouldBlockInline: self type) and: [self hasSubmorphs and: [self firstSubmorph isUnknown not]]) ifTrue: [^ self firstSubmorph printTitleOn: aStream]]}.
 	aStream nextPutAll: self type
-]
-
-{ #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> takeParseFrom: aCursor [
-
-	aCursor type = self type ifTrue: [
-		" if there was more on this level, fail "
-		aCursor gotoNextSibling ifTrue: [^ false].
-		(self valueOfProperty: #didDescend) ifTrue: [aCursor gotoParent]].
-	^ true
 ]
 
 { #category : #'as yet unclassified' }

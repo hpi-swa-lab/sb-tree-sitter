@@ -110,7 +110,7 @@ SBTSCursor >> position: aPosition [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSCursor >> resolveCurrentAliasIfString: aBlock [
+SBTSCursor >> resolveCurrentAliasIfString: aBlock ifBlock: anotherBlock ifSymbol: aThirdBlock [
 
 	| symbolIndex rule |
 	symbolIndex := self node context at: 4.
@@ -122,11 +122,14 @@ SBTSCursor >> resolveCurrentAliasIfString: aBlock [
 		factory: factory.
 	
 	rule value type = 'STRING' ifTrue: [^ aBlock value: rule value value].
-	self flag: #todo.
-	" support other types "
-	self assert: rule value type = 'SYMBOL'.
+	rule value type = 'SYMBOL' ifTrue: [^ aThirdBlock value: rule value name].
 	
-	^ rule value name
+	^ SBToggledCode comment: '' active: 1 do: {
+		[
+			anotherBlock
+				value: rule key
+				value: ((self factory buildBlocksFor: rule value) alias: rule key)].
+		[anotherBlock value: ((self factory buildBlocksFor: rule value) alias: rule key)]}
 ]
 
 { #category : #'as yet unclassified' }

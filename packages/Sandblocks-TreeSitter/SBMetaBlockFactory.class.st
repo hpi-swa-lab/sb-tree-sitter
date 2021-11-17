@@ -294,19 +294,19 @@ SBMetaBlockFactory >> blockInline: aCollection [
 ]
 
 { #category : #helper }
-SBMetaBlockFactory >> buildBlocksFor: anObject visitedSymbols: aSet [
+SBMetaBlockFactory >> buildBlocksFor: anObject [
 
 	anObject type = 'FIELD' ifTrue: [
-		^ (self buildBlocksFor: anObject content visitedSymbols: aSet)
+		^ (self buildBlocksFor: anObject content)
 			field: anObject name;
 			yourself].
 	
 	anObject type = 'ALIAS' ifTrue: [
-		^ (self buildBlocksFor: anObject content visitedSymbols: aSet)
+		^ (self buildBlocksFor: anObject content)
 			alias: (anObject at: #value);
 			yourself].
 	
-	(self unpackTypes includes: anObject type) ifTrue: [^ self buildBlocksFor: anObject content visitedSymbols: aSet].
+	(self unpackTypes includes: anObject type) ifTrue: [^ self buildBlocksFor: anObject content].
 	
 	(#('STRING') includes: anObject type) ifTrue: [
 		^ SBInlineBlockLabel new
@@ -320,21 +320,17 @@ SBMetaBlockFactory >> buildBlocksFor: anObject visitedSymbols: aSet [
 	
 	(#('SYMBOL') includes: anObject type) ifTrue: [
 		^ SBInlineBlockSymbol new
-			type: anObject name factory: self visitedSymbols: aSet;
+			type: anObject name factory: self;
 			factory: self].
 	
 	'REPEAT' = anObject type ifTrue: [
 		^ SBInlineBlockRepeat new
-			multiple: true
-				required: false
-				element: (self buildBlocksFor: anObject content visitedSymbols: aSet);
+			multiple: true required: false element: (self buildBlocksFor: anObject content);
 			factory: self].
 	
 	'REPEAT1' = anObject type ifTrue: [
 		^ SBInlineBlockRepeat new
-			multiple: true
-				required: true
-				element: (self buildBlocksFor: anObject content visitedSymbols: aSet);
+			multiple: true required: true element: (self buildBlocksFor: anObject content);
 			factory: self].
 	
 	'CHOICE' = anObject type ifTrue: [
@@ -342,17 +338,17 @@ SBMetaBlockFactory >> buildBlocksFor: anObject visitedSymbols: aSet [
 			^ SBInlineBlockRepeat new
 				multiple: false
 					required: false
-					element: (self buildBlocksFor: anObject members first visitedSymbols: aSet);
+					element: (self buildBlocksFor: anObject members first);
 				factory: self].
 		
 		^ SBInlineBlockChoice new
-			alternatives: (anObject members collect: [:member | self buildBlocksFor: member visitedSymbols: aSet]);
+			alternatives: (anObject members collect: [:member | self buildBlocksFor: member]);
 			factory: self].
 	
 	'SEQ' = anObject type ifTrue: [
 		^ SBInlineBlockSequence new
 			factory: self;
-			elements: (anObject members collect: [:member | self buildBlocksFor: member visitedSymbols: aSet])].
+			elements: (anObject members collect: [:member | self buildBlocksFor: member])].
 	
 	self assert: false
 ]
@@ -571,9 +567,7 @@ SBMetaBlockFactory >> getTemplate: aTypeString ifAbsent: aBlock [
 		" reserve spot in case of recursion "
 		templateCache at: aTypeString put: nil.
 		
-		templateCache
-			at: aTypeString
-			put: (self buildBlocksFor: rule visitedSymbols: Set new)]
+		templateCache at: aTypeString put: (self buildBlocksFor: rule)]
 ]
 
 { #category : #accessing }

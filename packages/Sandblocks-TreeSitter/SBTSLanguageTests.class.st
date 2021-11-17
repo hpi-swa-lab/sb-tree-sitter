@@ -5,6 +5,17 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSLanguageTests >> testJavascriptImport [
+
+	| block |
+	block := SBJavascript parse: 'import {A} from ''a'''.
+	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (identifier)))))').
+	
+	block := SBJavascript parse: 'import {A as B} from ''a'''.
+	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (identifier) (identifier)))))')
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageTests >> testPythonBinaryOperator [
 
 	| block e |
