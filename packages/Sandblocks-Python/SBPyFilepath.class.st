@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBPyFilepath class >> matchPython: aDictionary [
+SBPyFilepath class >> matchPython: aDictionary do: aBlock [
 	<lang: #python match: '(call
 	(identifier) @open
     (argument_list
@@ -13,11 +13,9 @@ SBPyFilepath class >> matchPython: aDictionary [
 
 	(aDictionary at: 'open') contents = 'open' ifFalse: [^ nil].
 	
-	^ SBReplaceCommand new
-		target: (aDictionary at: 'path');
-		replacer: (self new
-			factory: (aDictionary at: 'path') factory;
-			path: (aDictionary at: 'path') contents)
+	^ aBlock value: (aDictionary at: 'path') value: (self new
+		factory: (aDictionary at: 'path') factory;
+		path: (aDictionary at: 'path') contents)
 ]
 
 { #category : #'as yet unclassified' }

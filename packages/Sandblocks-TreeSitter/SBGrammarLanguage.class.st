@@ -44,6 +44,12 @@ SBGrammarLanguage class >> parse: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> parseAndReplace: aString [
+
+	^ (self instance parse: aString) applyReplacements
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> parseElement: aString [
 
 	| program |
