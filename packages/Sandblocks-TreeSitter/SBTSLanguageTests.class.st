@@ -5,16 +5,22 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSLanguageTests >> expectedFailures [
+
+	^ #(#testPythonNumber #testPythonString #testPythonPatternList)
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageTests >> testJavascriptFoundDelimiters [
 
 	| lang |
 	lang := SBJavascript rebuild.
 	{
-		'object' -> ','.
-		'arguments' -> ','.
-		'formal_parameters' -> ','.
-		'array_pattern' -> ','.
-		'named_imports' -> ','} do: [:pair | self assert: (lang delimitedRules includesAssociation: pair)]
+		'object' -> {','}.
+		'arguments' -> {','}.
+		'formal_parameters' -> {','}.
+		'array_pattern' -> {','}.
+		'named_imports' -> {','}} do: [:pair | self assert: (lang delimitedRules includesAssociation: pair)]
 ]
 
 { #category : #'as yet unclassified' }
@@ -26,6 +32,14 @@ SBTSLanguageTests >> testJavascriptImport [
 	
 	block := SBJavascript parse: 'import {A as B} from ''a'''.
 	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (identifier) (identifier)))))')
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageTests >> testMultipleDelimiters [
+
+	| block |
+	self assert: (SBJavascript rebuild delimitedRules includesAssociation: 'lexical_declaration' -> {';'. ','}).
+	block := SBJavascript parse: 'let a;'
 ]
 
 { #category : #'as yet unclassified' }
@@ -49,7 +63,7 @@ SBTSLanguageTests >> testPythonFoundDelimiters [
 
 	| lang |
 	lang := SBPython rebuild.
-	{'argument_list' -> ','. 'parameters' -> ','. 'tuple_pattern' -> ','. 'list' -> ','} do: [:pair | self assert: (lang delimitedRules includesAssociation: pair)]
+	{'argument_list' -> {','}. 'parameters' -> {','}. 'tuple_pattern' -> {','}. 'list' -> {','}} do: [:pair | self assert: (lang delimitedRules includesAssociation: pair)]
 ]
 
 { #category : #'as yet unclassified' }
@@ -94,5 +108,7 @@ SBTSLanguageTests >> testPythonPatternList [
 { #category : #'as yet unclassified' }
 SBTSLanguageTests >> testPythonString [
 
-	self assert: 'abc' equals: (SBPython parseElement: '"abc"') contents
+	self assert: 'abc' equals: (SBPython parseElement: '"abc"') contents.
+	" parse error here "
+	(SBPython parseElement: '"abc\n"') contents
 ]

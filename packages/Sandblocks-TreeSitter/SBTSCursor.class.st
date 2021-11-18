@@ -145,7 +145,10 @@ SBTSCursor >> shouldSkipParsedNode: aNode [
 	parentType := library nodeType: (library nodeParent: aNode).
 	type := library nodeType: aNode.
 	
-	^ ((factory delimitedRules includesKey: parentType) and: [self type = (factory delimitedRules at: parentType)]) or: [factory extras includes: type]
+	^ (factory delimitedRules
+		at: parentType
+		ifPresent: [:delims | delims includes: self type]
+		ifAbsent: [false]) or: [factory extras includes: type]
 ]
 
 { #category : #'as yet unclassified' }

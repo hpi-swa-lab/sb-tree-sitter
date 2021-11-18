@@ -201,7 +201,11 @@ SBMetaBlockFactory class >> tryPatchLibrary: aGithubString name: aString context
 { #category : #configuration }
 SBMetaBlockFactory >> addDelimitedRules: aCollection [
 
-	delimitedRules addAll: aCollection
+	(aCollection as: Dictionary) keysAndValuesDo: [:rule :delimiter |
+		delimitedRules at: rule put: (delimitedRules
+			at: rule
+			ifPresent: [:list | list copyWith: delimiter]
+			ifAbsent: [{delimiter}])]
 ]
 
 { #category : #accessing }
@@ -491,13 +495,6 @@ SBMetaBlockFactory >> deepCompare: anObject to: anotherObject [
 SBMetaBlockFactory >> delimitedRules [
 
 	^ delimitedRules
-]
-
-{ #category : #configuration }
-SBMetaBlockFactory >> delimitedRules: aDictionary [
-	" ruleName -> delimiterString, e.g. 'parameters'->',' "
-
-	delimitedRules := aDictionary
 ]
 
 { #category : #helper }
