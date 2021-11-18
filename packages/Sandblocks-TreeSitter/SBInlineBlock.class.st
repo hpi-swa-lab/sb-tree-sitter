@@ -191,6 +191,12 @@ SBInlineBlock >> containingSandblock [
 	^ self inline ifTrue: [self owner ifNotNil: #containingSandblock] ifFalse: [self]
 ]
 
+{ #category : #hierarchy }
+SBInlineBlock >> containingSymbol [
+
+	^ self owner containingSymbol
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> containsEqual: aBlock [
 
@@ -642,6 +648,31 @@ SBInlineBlock >> preferredColorIn: aColorPolicy [
 SBInlineBlock >> prefersNoBorder [
 
 	^ self inline
+]
+
+{ #category : #printing }
+SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
+
+	| first |
+	first := true.
+	aCollection do: [:element | | string |
+		string := String streamContents: [:stream | element writeSourceOn: stream].
+		(self isKindOf: SBInlineBlockRepeat)
+			ifTrue: [
+				first ifFalse: [
+					self factory delimitedRules
+						at: self containingSymbol type
+						ifPresent: [:delim | aStream nextPutAll: delim first]
+						ifAbsent: []].
+				((self factory hardLineBreakMatcher value: self) or: [self containingSandblock isStatementContainer]) ifTrue: [aStream cr]]
+			ifFalse: [
+				((string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]) ifTrue: [
+					self factory delimitedRules
+						at: self containingSymbol type
+						ifPresent: [:delim | aStream nextPutAll: delim first]
+						ifAbsent: [aStream space]]].
+		aStream nextPutAll: string.
+		first := false]
 ]
 
 { #category : #'as yet unclassified' }

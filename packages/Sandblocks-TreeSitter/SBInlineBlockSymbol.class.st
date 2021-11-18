@@ -85,6 +85,12 @@ SBInlineBlockSymbol >> childrenIn: anExplore [
 		ifFalse: [{SBInlineBlockNever new}]
 ]
 
+{ #category : #hierarchy }
+SBInlineBlockSymbol >> containingSymbol [
+
+	^ self
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> deleteTargetFor: aBlock [
 

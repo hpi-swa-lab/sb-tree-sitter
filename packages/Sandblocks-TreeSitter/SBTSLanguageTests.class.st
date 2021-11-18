@@ -35,6 +35,30 @@ SBTSLanguageTests >> testJavascriptImport [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageTests >> testJavascriptToString [
+
+	| source |
+	source := '<h2>Hi</h2>'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	
+	source := 'class A extends B{}'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	
+	source := 'class Car extends React.Component{
+example={};
+render(){
+a
+return<h2>Hi</h2>}}'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	
+	source := 'a(b,c)'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	
+	source := 'a(2,3)'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageTests >> testMultipleDelimiters [
 
 	| block |
@@ -108,7 +132,9 @@ SBTSLanguageTests >> testPythonPatternList [
 { #category : #'as yet unclassified' }
 SBTSLanguageTests >> testPythonString [
 
+	SBPython rebuild.
 	self assert: 'abc' equals: (SBPython parseElement: '"abc"') contents.
+	(SBPython parseElement: 'f"abc"') contents.
 	" parse error here "
 	(SBPython parseElement: '"abc\n"') contents
 ]

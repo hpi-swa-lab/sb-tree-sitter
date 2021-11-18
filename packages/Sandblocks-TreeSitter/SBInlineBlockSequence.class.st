@@ -188,7 +188,5 @@ SBInlineBlockSequence >> takeStreamFrom: anObject [
 { #category : #'as yet unclassified' }
 SBInlineBlockSequence >> writeSourceOn: aStream [
 
-	self submorphs
-		do: [:element | element writeSourceOn: aStream]
-		separatedBy: [aStream space]
+	self printElementsSeparated: self submorphs on: aStream
 ]

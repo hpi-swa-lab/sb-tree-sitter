@@ -5151,7 +5151,7 @@ SBPython >> preprocessGrammar [
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
 	self grammar rules
 		at: '_string_start'
-		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '''|"'}).
+		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '[fFrRbBuU]?''|"'}).
 	self grammar rules
 		at: '_string_end'
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '''|"'}).

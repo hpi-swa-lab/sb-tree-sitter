@@ -6755,7 +6755,7 @@ SBJavascript class >> rootRuleName [
 { #category : #'as yet unclassified' }
 SBJavascript class >> statementContainerTypes [
 
-	^ #('program' 'statement_block')
+	^ #('program' 'statement_block' 'class_body')
 ]
 
 { #category : #'as yet unclassified' }
