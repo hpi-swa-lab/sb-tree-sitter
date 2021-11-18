@@ -5115,7 +5115,6 @@ SBPython >> configure [
 
 	self blockInline: {'expression_statement'. 'parameters'}.
 	self noteUncapturedText: #('string').
-	self delimitedRules: ({'argument_list' -> ','. 'pattern_list' -> ','. 'parameters' -> ','. 'tuple_pattern' -> ','. 'list' -> ','} as: Dictionary).
 	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type']]
 ]
 
@@ -5166,7 +5165,5 @@ SBPython >> preprocessGrammar [
 				#members -> {
 					JsonObject fromAssociations: {#type -> 'STRING'. #value -> '"'}.
 					JsonObject fromAssociations: {#type -> 'STRING'. #value -> ''''}}})]}.
-	self ignoreExternals: #('_indent' '_dedent' '_newline').
-	
-	self rulesDo: [:r | self removeOptionalString: ',' in: r]
+	self ignoreExternals: #('_indent' '_dedent' '_newline')
 ]

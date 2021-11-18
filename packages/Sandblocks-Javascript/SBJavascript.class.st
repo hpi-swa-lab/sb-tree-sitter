@@ -6761,12 +6761,6 @@ SBJavascript class >> statementContainerTypes [
 { #category : #'as yet unclassified' }
 SBJavascript >> configure [
 
-	self addDelimitedRules: ({
-		'object' -> ','.
-		'arguments' -> ','.
-		'formal_parameters' -> ','.
-		'array_pattern' -> ','.
-		'named_imports' -> ','} as: Dictionary).
 	self hardLineBreakMatcher: [:block | (block submorphAfter ifNotNil: #type) = 'statement_block'].
 	
 	self blockInline: {'expression_statement'. 'jsx_closing_element'. 'jsx_opening_element'. 'arguments'. 'formal_parameters'}

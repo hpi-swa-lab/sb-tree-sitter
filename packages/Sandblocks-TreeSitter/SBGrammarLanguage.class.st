@@ -44,9 +44,20 @@ SBGrammarLanguage class >> parse: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> parseElement: aString [
+
+	| program |
+	program := self instance parse: aString.
+	^ self instance rootRuleName = program type
+		ifTrue: [program childSandblocks first]
+		ifFalse: [program]
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> rebuild [
 
-	instance := nil
+	instance := nil.
+	^ self instance
 ]
 
 { #category : #'as yet unclassified' }

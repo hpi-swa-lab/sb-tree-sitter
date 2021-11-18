@@ -224,7 +224,7 @@ SBMetaBlockFactory >> allSymbolsProducedBy: anObject on: aStream [
 ]
 
 { #category : #'grammar clean' }
-SBMetaBlockFactory >> applyInlining: rule [
+SBMetaBlockFactory >> applyInlining: rule name: aString [
 
 	(rule type = 'SYMBOL' and: [
 		(grammar inline includes: rule name) and: [
@@ -248,12 +248,13 @@ SBMetaBlockFactory >> applyInlining: rule [
 	(rule type = 'SYMBOL' and: [rule name first = $_ and: [(grammar externals noneSatisfy: [:e | e name = rule name]) and: [(grammar supertypes includes: rule name) not]]]) ifTrue: [ | inline |
 		inline := grammar rules at: rule name.
 		(self includesNonHiddenParts: inline visited: Set new) ifTrue: [
+			(delimitedRules includesKey: rule name) ifTrue: [delimitedRules at: aString put: (delimitedRules at: rule name)].
 			rule removeAll.
 			inline keysAndValuesDo: [:key :val | rule at: key put: val]].
 		^ self].
 	
-	rule content ifNotNil: [:c | self applyInlining: c].
-	rule members ifNotNil: [:c | c do: [:child | self applyInlining: child]]
+	rule content ifNotNil: [:c | self applyInlining: c name: aString].
+	rule members ifNotNil: [:c | c do: [:child | self applyInlining: child name: aString]]
 ]
 
 { #category : #templates }
@@ -416,7 +417,7 @@ SBMetaBlockFactory >> cleanGrammar [
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[grammar rules do: [:rule | self removeHiddenTerminals: rule]]}.
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self removeHiddenTerminals: rule]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -424,7 +425,7 @@ SBMetaBlockFactory >> cleanGrammar [
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[grammar rules do: [:rule | self removeHiddenTerminals: rule]]}.
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self removeHiddenTerminals: rule]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -436,11 +437,11 @@ SBMetaBlockFactory >> cleanGrammar [
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[grammar rules keysAndValuesDo: [:name :rule | self flattenSeparatedList: rule]]}.
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self flattenSeparatedList: rule name: name]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[grammar rules keysAndValuesDo: [:name :rule | self applyInlining: rule]]}.
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self applyInlining: rule name: name]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -519,7 +520,7 @@ SBMetaBlockFactory >> extras: aCollection [
 ]
 
 { #category : #'grammar clean' }
-SBMetaBlockFactory >> flattenSeparatedList: anObject [
+SBMetaBlockFactory >> flattenSeparatedList: anObject name: aString [
 
 	| looksLikeSepList looksLikeOptionalSep |
 	looksLikeSepList := [:obj | obj type = 'SEQ' and: [obj members size = 2 and: [obj members second type = 'REPEAT' and: [obj members second content type = 'SEQ' and: [self deepCompare: obj members first to: obj members second content members second]]]]].
@@ -527,6 +528,7 @@ SBMetaBlockFactory >> flattenSeparatedList: anObject [
 	
 	" seq(seq(rule, repeat(seq(separator, rule))), (separator|blank)) "
 	(anObject type = 'SEQ' and: [(looksLikeSepList value: anObject members first) and: [looksLikeOptionalSep value: anObject members second]]) ifTrue: [
+		self addDelimitedRules: {aString -> anObject members second members first value}.
 		^ anObject
 			type: 'REPEAT';
 			content: anObject members first members first;
@@ -534,13 +536,14 @@ SBMetaBlockFactory >> flattenSeparatedList: anObject [
 	
 	" seq(rule, repeat(seq(separator, rule))) "
 	(looksLikeSepList value: anObject) ifTrue: [
+		self addDelimitedRules: {aString -> anObject members second content members first value}.
 		^ anObject
 			type: 'REPEAT';
 			content: anObject members first;
 			removeKey: #members].
 	
-	anObject content ifNotNil: [:c | self flattenSeparatedList: c].
-	anObject members ifNotNil: [:c | c do: [:m | self flattenSeparatedList: m]]
+	anObject content ifNotNil: [:c | self flattenSeparatedList: c name: aString].
+	anObject members ifNotNil: [:c | c do: [:m | self flattenSeparatedList: m name: aString]]
 ]
 
 { #category : #helper }
