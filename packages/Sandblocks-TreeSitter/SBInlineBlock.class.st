@@ -412,7 +412,7 @@ SBInlineBlock >> initialize [
 	self
 		hResizing: #shrinkWrap;
 		vResizing: #shrinkWrap;
-		layoutPolicy: (SBToggledCode comment: '' active: 2 do: {[TableLayout new]. [SBAlgebraLayout new]});
+		layoutPolicy: SBAlgebraLayout new;
 		listDirection: #leftToRight;
 		color: Color transparent;
 		cellGap: 2;
@@ -675,7 +675,7 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 						ifAbsent: []].
 				((self factory hardLineBreakMatcher value: self) or: [self containingSandblock isStatementContainer]) ifTrue: [aStream cr]]
 			ifFalse: [
-				((string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]) ifTrue: [
+				(factory wordRule notNil and: [((string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]])]) ifTrue: [
 					self factory delimitedRules
 						at: self containingSymbol type
 						ifPresent: [:delim | aStream nextPutAll: delim first]
