@@ -47,7 +47,7 @@ SBInlineBlock >> applyReplacements [
 	<action>
 
 	| replacements commands |
-	replacements := SBInlineBlockReplace allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class class) select: [:pragma | pragma arguments first = self factory name]].
+	replacements := SBInlineBlockReplace allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class class), (Pragma allNamed: #lang:match:sample: in: class class) select: [:pragma | pragma arguments first = self factory name]].
 	commands := Array streamContents: [:stream |
 		self allBlocksDo: [:block |
 			replacements do: [:pragma |
@@ -63,7 +63,9 @@ SBInlineBlock >> applyReplacements [
 						self assert: (cmd isKindOf: SBCommand).
 						stream nextPut: cmd]]]]].
 	commands ifNotEmpty: [
-		self sandblockEditor ifNotNil: [:e | e do: (SBCombinedCommand newWith: commands)] ifNil: [commands do: #do]]
+		self sandblockEditor
+			ifNotNil: [:e | e do: (SBCombinedCommand newWith: commands)]
+			ifNil: [commands do: #do]]
 ]
 
 { #category : #'as yet unclassified' }

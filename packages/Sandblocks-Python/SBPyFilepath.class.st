@@ -9,7 +9,7 @@ SBPyFilepath class >> matchPython: aDictionary do: aBlock [
 	<lang: #python match: '(call
 	(identifier) @open
     (argument_list
-    	(string) @path))'>
+    	(string) @path))' sample: 'open("asd")'>
 
 	(aDictionary at: 'open') contents = 'open' ifFalse: [^ nil].
 	

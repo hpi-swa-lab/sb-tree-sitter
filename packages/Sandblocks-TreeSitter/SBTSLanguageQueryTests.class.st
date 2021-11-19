@@ -19,7 +19,9 @@ example
 example = {}
 render() {}
 }'.
-	self assert: (block matchesQuery: '(class_declaration (class_body
+	self assert: (block matchesQuery: '(class_declaration
+name: (identifier)
+(class_body
 	member: (field_definition
 		property: (property_identifier)
 		value: (object))

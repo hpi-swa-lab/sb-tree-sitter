@@ -286,7 +286,7 @@ SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 	tree := self parser: parser old: nil parseString: currentString length: currentString size.
 	
 	root := self treeRootNode: tree.
-	(self nodeHasError: root) ifTrue: [^ self error: 'Could not parse input'].
+	(self nodeHasError: root) ifTrue: [^ SBTSSyntaxError new signal].
 	
 	cursor := self cursorNew: root.
 	
