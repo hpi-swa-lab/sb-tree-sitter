@@ -34,7 +34,7 @@ SBInlineBlockLabel >> buildEmpty [
 	^ self class new
 		label: self label;
 		factory: factory;
-		field: self field;
+		field: self basicField;
 		alias: self alias
 ]
 

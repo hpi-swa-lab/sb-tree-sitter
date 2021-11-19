@@ -38,7 +38,7 @@ SBInlineBlockText >> buildEmpty [
 	^ self class new
 		regexString: self regexString;
 		factory: factory;
-		field: self field;
+		field: self basicField;
 		alias: self alias
 ]
 

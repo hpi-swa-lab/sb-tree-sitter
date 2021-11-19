@@ -72,6 +72,12 @@ SBInlineBlock >> artefactChanged: aMethodBlock [
 	aMethodBlock = self ifTrue: [self updateAllHighlights]
 ]
 
+{ #category : #accessing }
+SBInlineBlock >> basicField [
+
+	^ field
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> buildCopy [
 
@@ -304,7 +310,7 @@ SBInlineBlock >> factory: aFactory [
 { #category : #accessing }
 SBInlineBlock >> field [
 
-	^ field
+	^ self basicField ifNil: [self owner inline ifTrue: [self owner field]]
 ]
 
 { #category : #accessing }
