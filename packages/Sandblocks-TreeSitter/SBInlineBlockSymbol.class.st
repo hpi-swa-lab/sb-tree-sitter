@@ -145,10 +145,7 @@ SBInlineBlockSymbol >> includesNestedSameStructure: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> inline [
 
-	^ SBToggledCode
-		comment: ''
-		active: 1
-		do: {[factory shouldBlockInline: self type]. [self inlineIfPossible]}
+	^ factory isNil or: [factory shouldBlockInline: self type]
 ]
 
 { #category : #'as yet unclassified' }
