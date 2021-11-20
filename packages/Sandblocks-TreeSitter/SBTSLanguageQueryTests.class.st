@@ -26,5 +26,5 @@ name: (identifier)
 		property: (property_identifier)
 		value: (object))
 	member: (method_definition
-		name: (property_identifier)))))')
+		name: (property_identifier))))')
 ]

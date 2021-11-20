@@ -26,9 +26,21 @@ SBGrammarLanguage class >> highlightQuery [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> initialize [
+
+	self allSubclassesDo: #invalidate
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> instance [
 
 	^ instance ifNil: [instance := self new]
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> invalidate [
+
+	instance := nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -62,7 +74,7 @@ SBGrammarLanguage class >> parseElement: aString [
 { #category : #'as yet unclassified' }
 SBGrammarLanguage class >> rebuild [
 
-	instance := nil.
+	self invalidate.
 	^ self instance
 ]
 

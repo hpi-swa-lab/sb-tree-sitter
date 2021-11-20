@@ -6532,7 +6532,7 @@ SBJavascript class >> grammarJson [
 SBJavascript class >> highlightQuery [
 	" https://github.com/tree-sitter/tree-sitter-javascript/blob/master/queries/highlights.scm "
 
-	^ '''; Special identifiers
+	^ '; Special identifiers
 	;--------------------
 	
 	([
@@ -6736,8 +6736,7 @@ SBJavascript class >> highlightQuery [
 	  "while"
 	  "with"
 	  "yield"
-	] @keyword
-	'''
+	] @keyword'
 ]
 
 { #category : #'as yet unclassified' }

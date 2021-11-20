@@ -6400,6 +6400,12 @@ SBRuby class >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBRuby class >> rootRuleName [
+
+	^ 'program'
+]
+
+{ #category : #'as yet unclassified' }
 SBRuby class >> statementContainerTypes [
 
 	^ #('program' 'do_block')
