@@ -138,7 +138,7 @@ SBInlineBlockSequence >> inline [
 { #category : #'as yet unclassified' }
 SBInlineBlockSequence >> isTemplate [
 
-	^ self submorphCount = self elements size
+	^ self submorphCount ~= self elements size
 ]
 
 { #category : #'as yet unclassified' }
