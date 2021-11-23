@@ -27,7 +27,7 @@ SBInlineBlock >> advanceParseFrom: aCursor index: aNumber [
 { #category : #accessing }
 SBInlineBlock >> alias [
 
-	^ alias
+	^ self basicAlias ifNil: [self owner notNil and: [self owner isInlineBlock] ifTrue: [self owner inline ifTrue: [self owner alias] ifFalse: [nil]] ifFalse: [nil]]
 ]
 
 { #category : #accessing }
@@ -51,17 +51,18 @@ SBInlineBlock >> applyReplacements [
 	commands := Array streamContents: [:stream |
 		self allBlocksDo: [:block |
 			replacements do: [:pragma |
-				SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures |
-					(pragma methodClass theNonMetaClass
-						perform: pragma selector
-						withArguments: {
-							captures.
-							[:target :replacer |
-								SBReplaceCommand new
-									target: target
-									replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
-						self assert: (cmd isKindOf: SBCommand).
-						stream nextPut: cmd]]]]].
+				SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures :success |
+					success ifTrue: [
+						(pragma methodClass theNonMetaClass
+							perform: pragma selector
+							withArguments: {
+								captures.
+								[:target :replacer |
+									SBReplaceCommand new
+										target: target
+										replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
+							self assert: (cmd isKindOf: SBCommand).
+							stream nextPut: cmd]]]]]].
 	commands ifNotEmpty: [
 		self sandblockEditor
 			ifNotNil: [:e | e do: (SBCombinedCommand newWith: commands)]
@@ -72,6 +73,12 @@ SBInlineBlock >> applyReplacements [
 SBInlineBlock >> artefactChanged: aMethodBlock [
 
 	aMethodBlock = self ifTrue: [self updateAllHighlights]
+]
+
+{ #category : #accessing }
+SBInlineBlock >> basicAlias [
+
+	^ alias
 ]
 
 { #category : #accessing }

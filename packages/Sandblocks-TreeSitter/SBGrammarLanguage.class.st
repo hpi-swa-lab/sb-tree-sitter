@@ -87,7 +87,7 @@ SBGrammarLanguage class >> rootRuleName [
 { #category : #'as yet unclassified' }
 SBGrammarLanguage class >> statementContainerTypes [
 
-	^ self subclassResponsibility
+	^ #()
 ]
 
 { #category : #'as yet unclassified' }

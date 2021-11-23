@@ -27,15 +27,9 @@ SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 	
 	template = 'ALIAS'
 		ifTrue: [
-			aCursor
-				resolveCurrentAliasIfString: [:str | ^ aBlock value: str]
-				ifBlock: [:t :b |
-					type := t.
-					root := b]
-				ifSymbol: [:t |
-					type := t.
-					root := aCursor factory getTemplate: type]]
-		ifFalse: [root := aCursor factory getTemplate: type].
+			root := aCursor resolveAlias: type in: aCursor parentType.
+			(root isKindOf: SBInlineBlockSymbol) ifTrue: [type := root type]]
+		ifFalse: [root := SBInlineBlockSymbol new type: type factory: aCursor factory].
 	
 	fieldStream := ((Array streamContents: [:stream |
 		aCursor gotoFirstChild ifTrue: [ | first |
@@ -49,15 +43,13 @@ SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 				atEnd].
 			aCursor gotoParent]]) ifEmpty: [{fallback}]) readStream.
 	
-	^ (template = 'ALIAS' and: [(aCursor factory grammar rules includesKey: type) not])
-		ifTrue: [fieldStream contents do: [:pair | aBlock value: pair second]]
-		ifFalse: [
-			block := SBTSParseExplore new
-				explore: fieldStream
-				root: root
-				factory: aCursor factory.
-			self assert: block notNil description: 'failed to build ', type.
-			aBlock value: (SBInlineBlockSymbol new type: type factory: aCursor factory block: block)]
+	block := SBTSParseExplore new
+		explore: fieldStream
+		root: root
+		factory: aCursor factory.
+	template = 'ALIAS' ifTrue: [block alias: type].
+	self assert: block notNil description: 'failed to build ', type.
+	^ aBlock value: block
 ]
 
 { #category : #ffi }
@@ -276,7 +268,17 @@ SBTreeSitter >> nodeType: aNode [
 { #category : #'as yet unclassified' }
 SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 
-	| parser root tree block cursor |
+	^ self parseAsCursor: aString language: aSymbol do: [:cursor |
+		(self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory) do: [:b | b])
+			hResizing: #rigid;
+			attachDecorator: SBResizableDecorator new;
+			updateAllHighlights]
+]
+
+{ #category : #'as yet unclassified' }
+SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
+
+	| parser root tree cursor wasFreed |
 	currentString := aString withUnixLineEndings.
 	parser := self parserNew.
 	language := self perform: aSymbol asSymbol.
@@ -286,25 +288,15 @@ SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 	tree := self parser: parser old: nil parseString: currentString length: currentString size.
 	
 	root := self treeRootNode: tree.
-	(self nodeHasError: root) ifTrue: [^ SBTSSyntaxError new signal].
-	
 	cursor := self cursorNew: root.
+	wasFreed := false.
 	
-	cursor := self cursorNew: root.
-	block := (SBToggledCode comment: '' active: 1 do: {
-		[self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory) do: [:b | b]].
-		[SBTSParseExplore new explore: (SBTSCursor new library: self cursor: cursor factory: aFactory)].
-		[(SBInlineBlockSymbol new type: (self nodeType: root) factory: aFactory) takeParsedFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory)]})
-		hResizing: #rigid;
-		attachDecorator: SBResizableDecorator new;
-		updateAllHighlights.
-	
-	self nodeString: root.
-	
-	self cursorDelete: cursor.
-	self parserDelete: parser.
-	
-	^ block
+	^ [aBlock value: cursor] ensure: [
+		" there were problems with double-free when debugging "
+		wasFreed ifFalse: [
+			wasFreed := true.
+			self cursorDelete: cursor.
+			self parserDelete: parser]]
 ]
 
 { #category : #ffi }
@@ -384,6 +376,13 @@ SBTreeSitter >> ruby [
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-ruby' name: 'ruby' context: thisContext
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> sexp [
+
+	<apicall: SBTSLanguage* tree_sitter_sexp () module: 'tree-sitter-sexp'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'AbstractMachinesLab/tree-sitter-sexp' name: 'sexp' context: thisContext
+]
+
 { #category : #helper }
 SBTreeSitter >> textBetween: aNode and: anEndNode [
 	" TODO: will break with UTF-8 "
@@ -403,4 +402,11 @@ SBTreeSitter >> treeRootNode: aTree [
 
 	<apicall: SBTSNode ts_tree_root_node (void*)>
 	^ self externalCallFailed
+]
+
+{ #category : #'ffi languages' }
+SBTreeSitter >> tsq [
+
+	<apicall: SBTSLanguage* tree_sitter_tsq () module: 'tree-sitter-tsq'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-tsq' name: 'tsq' context: thisContext
 ]

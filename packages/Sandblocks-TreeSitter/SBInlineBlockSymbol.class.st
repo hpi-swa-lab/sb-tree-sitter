@@ -37,12 +37,13 @@ SBInlineBlockSymbol >> buildEmpty [
 	^ self class new
 		type: self type factory: factory;
 		field: self basicField;
-		alias: self alias
+		alias: self basicAlias
 ]
 
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> buildWithFields: aStream alternatives: aDictionary [
 
+	self isRootSymbol ifTrue: [^ true].
 	self isSuperType ifTrue: [^ true].
 	aStream peek second isMorph ifFalse: [^ false].
 	
@@ -52,7 +53,7 @@ SBInlineBlockSymbol >> buildWithFields: aStream alternatives: aDictionary [
 			block := aStream next second.
 			self addMorphBack: (block type = self type
 				ifTrue: [block firstSubmorph buildCopy]
-				ifFalse: [self template buildEmpty addMorphBack: block]).
+				ifFalse: [self template buildEmpty addMorphBack: block buildCopy]).
 			true]
 		ifFalse: [false]
 ]
@@ -165,7 +166,7 @@ SBInlineBlockSymbol >> instantiate [
 { #category : #testing }
 SBInlineBlockSymbol >> isAlias [
 
-	^ self factory aliases anySatisfy: [:a | a key = self type and: [(self factory grammar rules includesKey: self type) not]]
+	^ self factory aliases anySatisfy: [:a | a name = self type and: [(self factory grammar rules includesKey: self type) not]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -178,6 +179,24 @@ SBInlineBlockSymbol >> isArtefact [
 SBInlineBlockSymbol >> isHidden [
 
 	^ self type first = $_ or: [factory isSuperType: self type]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> isRootSymbol [
+	" used by ParseExplore: the exploration either receives a symbol block (general case), which
+first has to be unwrapped. Or it receives an arbitrary block that was aliased. In either case,
+the elements that we have will start only one level deeper. But, for aliased blocks, we cannot
+simply unpack the first elements as there may be choices in between.
+
+Simple case: (identifier), stream: (identifier)
+Complex case: (property_identifier, aliased as: (identifier)|(reserved)), stream: 'abc'
+Complex case: ((identifier), ('as' (identifier)?), stream: (identifier)
+Complex case: (''', string_fragment, '''), stream: (''', string_fragment, ''')"
+
+	^ self owner isNil or: [ | owners |
+		owners := self allOwners.
+		(owners allSatisfy: [:owner | (owner isKindOf: SBInlineBlockSymbol) not]) and: [" if we have a sequence, we can still be the root symbol, if we're in an alias (see cases 3 vs. 4) "
+		owners last alias notNil and: [owners allSatisfy: [:owner | (owner isKindOf: SBInlineBlockSequence) not]]]]
 ]
 
 { #category : #'as yet unclassified' }

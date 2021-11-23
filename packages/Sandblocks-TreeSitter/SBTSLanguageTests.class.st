@@ -11,6 +11,17 @@ SBTSLanguageTests >> expectedFailures [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageTests >> testApplyPyFilePathReplacement [
+
+	| parsed |
+	parsed := SBPython parseAndReplace: 'with open(''data.csv'', newline='''') as csvfile:
+	spamreader = csv.reader(csvfile, delimiter='' '', quotechar=''|'')
+	for row in spamreader:
+		print('', ''.join(row))'.
+	self assert: (parsed childSandblocks first childSandblocks first childSandblocks first childSandblocks first childSandblocks second isKindOf: SBPyFilepath)
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageTests >> testJavascriptFoundDelimiters [
 
 	| lang |

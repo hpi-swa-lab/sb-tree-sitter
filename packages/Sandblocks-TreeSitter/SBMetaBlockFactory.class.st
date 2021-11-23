@@ -43,20 +43,10 @@ SBMetaBlockFactory class >> compileParserIn: path name: aString [
 { #category : #helper }
 SBMetaBlockFactory class >> fetchLibrary: aGithubString [
 
-	SBToggledCode comment: '' active: 1 do: {
-		[ | path |
-			path := (MCFetchGithubRepository new
-				projectPath: aGithubString
-				projectVersion: 'master'
-				repoPath: nil) directory.
-			^ path].
-		[ | zip |
-			zip := WebClient httpGet: 'https://api.github.com/repos/', aGithubString, '/zipball/master'.
-			ZipArchive new
-				readFrom: zip getContent readStream binary;
-				extractAllTo: (FileDirectory default / 'tree-sitter-languages') assureExistence
-					informing: nil
-					overwrite: false]}
+	^ (MCFetchGithubRepository new
+		projectPath: aGithubString
+		projectVersion: 'master'
+		repoPath: nil) directory
 ]
 
 { #category : #helper }
@@ -81,7 +71,7 @@ SBMetaBlockFactory class >> generateFFIMethodFor: aName github: aGithubString [
 ]
 
 { #category : #helper }
-SBMetaBlockFactory class >> generateGrammarMethodFrom: path name: aString github: anotherString [
+SBMetaBlockFactory class >> generateGrammarClassFrom: path name: aString github: anotherString [
 
 	| grammarFile highlightsFile |
 	[ | class |
@@ -105,9 +95,11 @@ SBMetaBlockFactory class >> generateGrammarMethodFrom: path name: aString github
 
     ^ {1}' format: {aString asSymbol storeString})
 			classified: 'properties'.
-		class class compile: 'rootRuleName
+		class class
+			compile: ('rootRuleName
 
-    ^ self shouldImplement' classified: 'properties'.
+    ^ {1}' format: {'self subclassResponsibility'})
+			classified: 'properties'.
 		
 		highlightsFile ifNotNil: [:f |
 			class class
@@ -132,7 +124,7 @@ SBMetaBlockFactory class >> loadLanguage: aGithubString name: aString [
 	| path |
 	path := self fetchLibrary: aGithubString.
 	self compileParserIn: path name: aString.
-	self generateGrammarMethodFrom: path name: aString github: aGithubString.
+	self generateGrammarClassFrom: path name: aString github: aGithubString.
 	self generateFFIMethodFor: aString github: aGithubString
 ]
 
@@ -446,17 +438,20 @@ SBMetaBlockFactory >> cleanGrammar [
 		comment: ''
 		active: 1
 		do: {[grammar rules keysAndValuesDo: [:name :rule | self applyInlining: rule name: name]]}.
+	SBToggledCode comment: '' active: 1 do: {
+		[" depends on inlining, requires removing blanks (hidden terminals) "
+		grammar rules keysAndValuesDo: [:name :rule | delimitedRules at: name ifPresent: [:r | self removeMarkedDelimiters: rule rule: name]]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
 		do: {[grammar rules do: [:rule | self mergeRedundantRepeats: rule]]}.
 	SBToggledCode comment: '' active: 1 do: {
 		[
-			grammar rules do: [:rule |
+			grammar rules keysAndValuesDo: [:name :rule |
 				SBToggledCode
 					comment: ''
 					active: 1
-					do: {[self noteAliases: rule]. [self removeAliases: rule]}]]}.
+					do: {[self noteAliases: rule name: name]. [self removeAliases: rule]}]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -477,6 +472,10 @@ SBMetaBlockFactory >> cleanGrammar [
 		comment: ''
 		active: 1
 		do: {[grammar rules do: [:rule | self mergeAdjacentOptions: rule]]}.
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self removeHiddenTerminals: rule]]}.
 	grammar rules do: [:rule | self checkStructure: rule]
 ]
 
@@ -561,7 +560,7 @@ SBMetaBlockFactory >> getTemplate: aTypeString ifAbsent: aBlock [
 
 	^ templateCache at: aTypeString ifAbsent: [ | rule |
 		rule := grammar rules at: aTypeString ifAbsent: [
-			(aliases anySatisfy: [:pair | pair key = aTypeString]) ifTrue: [^ 'ALIAS'].
+			(self aliases anySatisfy: [:pair | pair name = aTypeString]) ifTrue: [^ 'ALIAS'].
 			^ aBlock value].
 		
 		" reserve spot in case of recursion "
@@ -631,7 +630,8 @@ SBMetaBlockFactory >> ignoreExternals: aCollection [
 SBMetaBlockFactory >> includesNonHiddenParts: anObject visited: aCollection [
 
 	(#('PREC' 'PREC_DYNAMIC' 'PREC_LEFT' 'PREC_RIGHT' 'REPEAT' 'FIELD' 'REPEAT1') includes: anObject type) ifTrue: [^ self includesNonHiddenParts: anObject content visited: aCollection].
-	(#('STRING' 'PATTERN' 'BLANK' 'TOKEN') includes: anObject type) ifTrue: [^ false].
+	(#('STRING' 'PATTERN' 'TOKEN' 'IMMEDIATE_TOKEN') includes: anObject type) ifTrue: [^ true].
+	'BLANK' = anObject type ifTrue: [^ false].
 	
 	^ anObject type caseOf: {
 		['CHOICE'] -> [anObject members anySatisfy: [:m | self includesNonHiddenParts: m visited: aCollection]].
@@ -799,12 +799,16 @@ SBMetaBlockFactory >> name: aSymbol preprocess: aBlock postprocess: anotherBlock
 ]
 
 { #category : #'grammar clean' }
-SBMetaBlockFactory >> noteAliases: anObject [
+SBMetaBlockFactory >> noteAliases: anObject name: aString [
 
-	anObject type = 'ALIAS' ifTrue: [aliases add: anObject value -> anObject content veryDeepCopy].
+	anObject type = 'ALIAS' ifTrue: [
+		aliases add: (SBTSAlias new
+			name: anObject value;
+			object: (self buildBlocksFor: anObject);
+			parentType: aString)].
 	
-	anObject content ifNotNil: [:c | self noteAliases: c].
-	anObject members ifNotNil: [:c | c do: [:m | self noteAliases: m]]
+	anObject content ifNotNil: [:c | self noteAliases: c name: aString].
+	anObject members ifNotNil: [:c | c do: [:m | self noteAliases: m name: aString]]
 ]
 
 { #category : #configuration }
@@ -831,7 +835,12 @@ SBMetaBlockFactory >> removeAliases: anObject [
 	SBToggledCode comment: '' active: 1 do: {
 		[
 			anObject type = 'ALIAS' ifTrue: [ | copyFrom |
-				aliases add: anObject value -> anObject content veryDeepCopy.
+				" how to get parentType? "
+				self flag: #fixme.
+				aliases add: (SBTSAlias new
+					name: anObject value;
+					object: anObject content veryDeepCopy;
+					parentType: nil).
 				
 				copyFrom := anObject content.
 				anObject removeAll.
@@ -878,6 +887,15 @@ SBMetaBlockFactory >> removeHiddenTerminals: anObject [
 	anObject members ifNotNil: [
 		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | ((member type = 'SYMBOL' and: [(self includesNonHiddenParts: member visited: Set new) not]) or: [anObject type = 'SEQ' and: [member type = 'BLANK']]) ifTrue: [stream nextPut: member]]])).
 		anObject members do: [:m | self removeHiddenTerminals: m]]
+]
+
+{ #category : #'grammar clean' }
+SBMetaBlockFactory >> removeMarkedDelimiters: anObject rule: aString [
+
+	anObject content ifNotNil: [:c | self removeMarkedDelimiters: c rule: aString].
+	anObject members ifNotNil: [
+		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | (member type = 'STRING' and: [(delimitedRules at: aString) includes: member value]) ifTrue: [stream nextPut: member]]])).
+		anObject members do: [:m | self removeMarkedDelimiters: m rule: aString]]
 ]
 
 { #category : #'grammar clean' }

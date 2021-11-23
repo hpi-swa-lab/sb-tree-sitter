@@ -26,7 +26,7 @@ SBTSParseExplore >> canVisitSymbol: aString [
 { #category : #'as yet unclassified' }
 SBTSParseExplore >> expandSymbol: aSymbolBlock [
 
-	^ aSymbolBlock = root
+	^ aSymbolBlock isRootSymbol
 ]
 
 { #category : #'as yet unclassified' }
@@ -47,7 +47,9 @@ SBTSParseExplore >> explore: aStream root: aBlock factory: aFactory [
 			at: index
 			ifPresent: [:template | | child |
 				pair at: 1 put: index + 1.
-				child := self push: template.
+				child := (stream atEnd not and: [stream peek second isSandblock and: [template alias notNil and: [template alias = stream peek second alias]]])
+					ifTrue: [stream next second buildCopy]
+					ifFalse: [self push: template].
 				self assert: block submorphCount < (block unbuiltChildrenIn: self) size.
 				block addMorphBack: child]
 			ifAbsent: [

@@ -98,6 +98,12 @@ SBTSCursor >> node [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursor >> parentType [
+
+	^ library nodeType: (library nodeParent: self node)
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursor >> position [
 
 	^ self createRestorePoint
@@ -110,16 +116,38 @@ SBTSCursor >> position: aPosition [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursor >> resolveAlias: aString in: aParentString [
+
+	| candidates indices symbolIndex |
+	candidates := factory aliases select: [:alias | alias name = aString and: [alias parentType = aParentString]].
+	candidates size = 1 ifTrue: [^ candidates first object].
+	
+	self assert: cursor notNil.
+	" treesitter has an internal table that maps aliases to indices. if the same alias is used
+	twice in the same method, we cannot tell which use we are. We take the assumption
+	that treesitter stores these symbols in order of apperance. With this assumption, we can
+	now look up the index of our aliased node and look at what point in the symbol table it appears.
+	For an example of this, see string_fragment in javascript, where double/single quotes take indices 100/101 "
+	symbolIndex := self node context at: 4.
+	symbolIndex = 0 ifTrue: [symbolIndex := self node id symbol].
+	indices := library language symbolIndicesFor: aString.
+	
+	^ (candidates at: (indices indexOf: symbolIndex)) object
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursor >> resolveCurrentAliasIfString: aBlock ifBlock: anotherBlock ifSymbol: aThirdBlock [
 
-	| symbolIndex rule |
+	| symbolIndex rule parentType |
+	parentType := library nodeType: (library nodeParent: self node).
 	symbolIndex := self node context at: 4.
 	symbolIndex = 0 ifTrue: [symbolIndex := self node id symbol].
 	
 	rule := library language
 		resolveAlias: self type
 		symbolIndex: symbolIndex
-		factory: factory.
+		factory: factory
+		parentType: parentType.
 	
 	rule value type = 'STRING' ifTrue: [^ aBlock value: rule value value].
 	rule value type = 'SYMBOL' ifTrue: [^ aThirdBlock value: rule value name].

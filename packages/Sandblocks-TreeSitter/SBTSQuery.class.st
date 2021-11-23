@@ -30,11 +30,11 @@ SBTSQuery >> executeAgainst: aBlock capturesDo: aClosure [
 			ifNotNil: [ret := true]
 			ifNil: [expression isOptional ifTrue: [ret := true]]].
 	
-	ret ifFalse: [^ false].
-	predicates do: [:predicate | (predicate verify: captures) ifFalse: [^ false]].
+	predicates do: [:predicate | (predicate verify: captures) ifFalse: [ret := false]].
 	
-	aClosure value: captures.
-	^ true
+	aClosure cull: captures cull: ret.
+	
+	^ ret
 ]
 
 { #category : #'as yet unclassified' }

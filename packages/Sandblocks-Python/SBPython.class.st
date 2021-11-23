@@ -5113,7 +5113,7 @@ SBPython class >> statementContainerTypes [
 { #category : #'as yet unclassified' }
 SBPython >> configure [
 
-	self blockInline: {'expression_statement'. 'parameters'}.
+	self blockInline: {'expression_statement'. 'parameters'. 'argument_list'}.
 	self noteUncapturedText: #('string').
 	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type']]
 ]

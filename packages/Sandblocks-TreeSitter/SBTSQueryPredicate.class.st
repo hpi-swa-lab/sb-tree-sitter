@@ -42,15 +42,20 @@ SBTSQueryPredicate >> predicatesOn: stream [
 SBTSQueryPredicate >> verify: aDictionary [
 
 	| element argument predicate |
-	predicate := (self elements first isKindOf: SBTSQueryCapture) ifTrue: [self elements first element contents] ifFalse: [self elements first contents].
+	predicate := (self elements first isKindOf: SBTSQueryCapture)
+		ifTrue: [self elements first element contents]
+		ifFalse: [self elements first contents].
 	
-	(#('#match?' '#eq?') includes: predicate) ifTrue: [
-		element := aDictionary at: self elements first contents allButFirst ifAbsent: [^ true].
+	(#('#match?' '#eq?') includes: predicate) ifTrue: [ | matches key |
+		key := self elements first contents allButFirst.
+		element := aDictionary at: key ifAbsent: [^ true].
 		argument := self elements second contents allButFirst allButLast.
-	
-		^ predicate caseOf: {
+		
+		matches := predicate caseOf: {
 			['#match?'] -> [element contents matchesRegex: argument].
-			['#eq?'] -> [element contents = argument]}].
+			['#eq?'] -> [element contents = argument]}.
+		matches ifFalse: [aDictionary removeKey: key].
+		^ matches].
 	
 	" unknown predicate, just pass "
 	^ true

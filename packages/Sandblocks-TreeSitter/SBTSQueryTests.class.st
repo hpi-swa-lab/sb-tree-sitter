@@ -281,13 +281,13 @@ SBTSQueryTests >> testMatchWithAlias [
 SBTSQueryTests >> testMatchWithStringCompare [
 
 	self assert: (SBTSQuery new
-		execute: '(identifier) ="id"'
+		execute: '(identifier) ="id" @a'
 		against: ((SBInlineBlockSymbol new type: 'identifier' factory: nil) addMorphBack: (SBInlineBlockText new contents: 'id'))
-		capturesDo: [:c | ]).
+		capturesDo: [:c | self assert: 'id' equals: (c at: 'a') contents]).
 	self deny: (SBTSQuery new
-		execute: '(identifier) ="id"'
+		execute: '(identifier) ="id" @a'
 		against: ((SBInlineBlockSymbol new type: 'identifier' factory: nil) addMorphBack: (SBInlineBlockText new contents: 'ida'))
-		capturesDo: [:c | ])
+		capturesDo: [:c | self assert: c isEmpty])
 ]
 
 { #category : #'as yet unclassified' }
