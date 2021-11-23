@@ -27,7 +27,10 @@ SBInlineBlock >> advanceParseFrom: aCursor index: aNumber [
 { #category : #accessing }
 SBInlineBlock >> alias [
 
-	^ self basicAlias ifNil: [self owner notNil and: [self owner isInlineBlock] ifTrue: [self owner inline ifTrue: [self owner alias] ifFalse: [nil]] ifFalse: [nil]]
+	^ self basicAlias ifNil: [
+		(self owner notNil and: [self owner isInlineBlock])
+			ifTrue: [self owner inline ifTrue: [self owner alias] ifFalse: [nil]]
+			ifFalse: [nil]]
 ]
 
 { #category : #accessing }

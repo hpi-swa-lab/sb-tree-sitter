@@ -83,7 +83,7 @@ SBTSQuery >> parseLiteral [
 			[$@] -> [SBTSQueryCapture new contents: contents].
 			[$=] -> [SBTSQueryStringMatch new contents: contents].
 			[$"] -> [SBTSQueryLiteral new contents: contents]}
-		otherwise: (SBTSQueryElement new contents: contents)
+		otherwise: [SBTSQueryElement new contents: contents]
 ]
 
 { #category : #'as yet unclassified' }
