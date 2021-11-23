@@ -1,0 +1,16 @@
+SmalltalkCISpec {
+  #loading : [
+    SCIMetacelloLoadSpec {
+      #baseline : 'SBTreeSitter',
+      #platforms : [ #squeak ],
+      #directory: 'packages',
+	  #useLatestMetacello : true
+    }
+  ],
+  #testing : {
+    #coverage : {
+      #packages : [ 'SBTreeSitter' ],
+      #format : #coveralls
+    }
+  }
+}
