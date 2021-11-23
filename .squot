@@ -6,5 +6,7 @@ OrderedDictionary {
 	'packages/Sandblocks-Json' : #SquotTonelSerializer,
 	'packages/Sandblocks-Python' : #SquotTonelSerializer,
 	'packages/Sandblocks-Regex' : #SquotTonelSerializer,
-	'packages/Sandblocks-Ruby' : #SquotTonelSerializer
+	'packages/Sandblocks-Ruby' : #SquotTonelSerializer,
+	'packages/Sandblocks-Tsq' : #SquotTonelSerializer,
+	'packages/BaselineOfSBTreeSitter' : #SquotTonelSerializer
 }
