@@ -701,7 +701,7 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
 				((self factory hardLineBreakMatcher value: self) or: [self containingSandblock isStatementContainer]) ifTrue: [aStream cr]]
-			ifFalse: [(factory wordRule notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [aStream nextPutAll: delimiter]].
+			ifFalse: [(factory wordRule notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [delimiter ifEmpty: [aStream space] ifNotEmpty: [aStream nextPutAll: delimiter]]].
 		aStream nextPutAll: string.
 		first := false]
 ]
