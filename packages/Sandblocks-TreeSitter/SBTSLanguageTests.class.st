@@ -94,6 +94,18 @@ SBTSLanguageTests >> testPythonBinaryOperator [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageTests >> testPythonDeleteStatement [
+
+	| block e |
+	block := SBPython parse: 'a'.
+	e := self editorFor: block.
+	block childSandblocks first
+		select;
+		deleteBlock.
+	self assert: block childSandblocks isEmpty
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageTests >> testPythonFoundDelimiters [
 
 	| lang |
@@ -110,6 +122,21 @@ SBTSLanguageTests >> testPythonImport [
 	
 	block := SBPython parse: 'import numpy as np'.
 	self assert: (block matchesQuery: '(module (import_statement (aliased_import (dotted_name (identifier)) alias: (identifier))))')
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageTests >> testPythonInsertLambdaParameter [
+
+	| module e |
+	module := SBPython parse: 'lambda: x'.
+	e := self editorFor: module.
+	
+	e performForSelection: #moveCursorRight.
+	e performForSelection: #moveCursorRight.
+	e performForSelection: #moveCursorRight.
+	e handle: (self keyboardEvent: $a).
+	
+	self assert: 'a' equals: module access children first parameters first contents
 ]
 
 { #category : #'as yet unclassified' }

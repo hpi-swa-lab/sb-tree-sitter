@@ -26,7 +26,7 @@ SBTSInlineBlockTest >> exampleLanguageFactory [
 	^ factory
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #failures }
 SBTSInlineBlockTest >> expectedFailures [
 
 	^ #(#testMatchRecursive #testPasteAfter #testMatchIfBeforeAndAfter #testMatchWithUnknownBetween)

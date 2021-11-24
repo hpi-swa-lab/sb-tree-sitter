@@ -8,13 +8,9 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSRelInsertCommand >> continueAfterInsert [
+SBTSRelInsertCommand >> continueAfterInsert: aCharacter [
 
-	element allMorphsDo: [:m |
-		" if we're likely to have matched against a label, don't input as that label will already be there "
-		(m isKindOf: SBInlineBlockLabel) ifTrue: [^ false].
-		(m isKindOf: SBInlineBlockText) ifTrue: [^ true]].
-	^ true
+	^ (morph sourceString includes: aCharacter) not
 ]
 
 { #category : #'as yet unclassified' }
@@ -22,7 +18,7 @@ SBTSRelInsertCommand >> do [
 
 	morph := morph ifNil: [element isTemplate ifTrue: [element instantiate] ifFalse: [element]].
 	super do.
-	^ morph firstBlock ifNil: #containingSandblock
+	^ morph firstBlock ifNil: [morph containingSandblock]
 ]
 
 { #category : #'as yet unclassified' }

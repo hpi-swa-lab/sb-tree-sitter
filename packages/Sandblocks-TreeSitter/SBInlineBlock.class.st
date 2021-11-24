@@ -13,6 +13,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> access [
+
+	^ SBTSFieldAccessor new element: self
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> actionProviders [
 
 	^ {self grammarHandler}, super actionProviders
@@ -146,7 +152,7 @@ SBInlineBlock >> childSymbolsDo: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> childrenForQuery [
 
-	^ Array streamContents: [:s | self submorphsDo: [:m | (m isKindOf: SBInlineBlock) ifTrue: [m childrenForQueryDo: [:child | s nextPut: child]]]]
+	^ Array streamContents: [:s | self submorphsDo: [:m | m isInlineBlock ifTrue: [m childrenForQueryDo: [:child | s nextPut: child]]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -329,6 +335,12 @@ SBInlineBlock >> field [
 SBInlineBlock >> field: aString [
 
 	field := aString
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> fields [
+
+	^ self childrenForQuery select: [:child | child field notNil] thenCollect: #field
 ]
 
 { #category : #'as yet unclassified' }

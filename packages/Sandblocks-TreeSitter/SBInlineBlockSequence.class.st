@@ -74,6 +74,12 @@ SBInlineBlockSequence >> childrenIn: anExplore [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockSequence >> deleteTargetFor: aBlock [
+
+	^ self owner deleteTargetFor: self
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockSequence >> elements [
 
 	^ elements
