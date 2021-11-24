@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBMetaGrammarHandler >> characterCanStartInput: aCharacter [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 SBMetaGrammarHandler >> newNullBlock [
 
 	^ SBTSUnknown new grammarHandler: self
@@ -18,6 +24,12 @@ SBMetaGrammarHandler >> promptMetaTransform [
 	self block
 		tryInterpretInput: ((UIManager default request: 'type operator') ifEmpty: [^ self])
 		before: ActiveEvent shiftPressed not
+]
+
+{ #category : #'as yet unclassified' }
+SBMetaGrammarHandler >> startOverrideInput: anEvent in: anEditor [
+
+	self block tryInterpretInput: anEvent keyCharacter asString before: false
 ]
 
 { #category : #'as yet unclassified' }

@@ -51,7 +51,7 @@ SBInlineBlock >> allElementsDo: aBlock [
 	^ self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #actions }
 SBInlineBlock >> applyReplacements [
 	<action>
 
@@ -132,7 +132,7 @@ SBInlineBlock >> candidatesForWrappingOn: aStream [
 	(self hasSubmorphs and: [self firstSubmorph isInlineBlock]) ifTrue: [self firstSubmorph candidatesForWrappingOn: aStream]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #actions }
 SBInlineBlock >> changeToUnknown [
 	<action>
 
@@ -219,7 +219,7 @@ SBInlineBlock >> containingSandblock [
 { #category : #hierarchy }
 SBInlineBlock >> containingSymbol [
 
-	^ self owner containingSymbol
+	^ self owner isInlineBlock ifTrue: [self owner containingSymbol] ifFalse: [nil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -684,24 +684,24 @@ SBInlineBlock >> prefersNoBorder [
 { #category : #printing }
 SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 
-	| first |
+	| first delimiter |
 	first := true.
+	
+	delimiter := (self containingSymbol ifNotNil: #type)
+		ifNotNil: [:parentType |
+			self factory delimitedRules
+				at: parentType
+				ifPresent: [:delim | delim first]
+				ifAbsent: ['']]
+		ifNil: [''].
+	
 	aCollection do: [:element | | string |
 		string := String streamContents: [:stream | element writeSourceOn: stream].
 		(self isKindOf: SBInlineBlockRepeat)
 			ifTrue: [
-				first ifFalse: [
-					self factory delimitedRules
-						at: self containingSymbol type
-						ifPresent: [:delim | aStream nextPutAll: delim first]
-						ifAbsent: []].
+				first ifFalse: [aStream nextPutAll: delimiter].
 				((self factory hardLineBreakMatcher value: self) or: [self containingSandblock isStatementContainer]) ifTrue: [aStream cr]]
-			ifFalse: [
-				(factory wordRule notNil and: [((string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]])]) ifTrue: [
-					self factory delimitedRules
-						at: self containingSymbol type
-						ifPresent: [:delim | aStream nextPutAll: delim first]
-						ifAbsent: [aStream space]]].
+			ifFalse: [(factory wordRule notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [aStream nextPutAll: delimiter]].
 		aStream nextPutAll: string.
 		first := false]
 ]

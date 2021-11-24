@@ -5,6 +5,14 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSGrammarTests >> testPythonForInClauseRepeat [
+
+	| clause |
+	clause := SBPython instance getTemplate: 'for_in_clause'.
+	self assert: clause elements last required
+]
+
+{ #category : #'as yet unclassified' }
 SBTSGrammarTests >> testResolveAlias [
 
 	| resolved |

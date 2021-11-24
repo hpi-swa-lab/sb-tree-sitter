@@ -534,7 +534,7 @@ SBMetaBlockFactory >> flattenSeparatedList: anObject name: aString [
 	(looksLikeSepList value: anObject) ifTrue: [
 		self addDelimitedRules: {aString -> anObject members second content members first value}.
 		^ anObject
-			type: 'REPEAT';
+			type: 'REPEAT1';
 			content: anObject members first;
 			removeKey: #members].
 	
