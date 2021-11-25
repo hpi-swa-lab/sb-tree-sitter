@@ -43,7 +43,7 @@ SBInlineBlockSymbol >> buildEmpty [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> buildWithFields: aStream alternatives: aDictionary [
 
-	self isRootSymbol ifTrue: [^ true].
+	(self isRootSymbol or: [factory promotedInlineSymbols includes: self type]) ifTrue: [^ true].
 	self isSuperType ifTrue: [^ true].
 	aStream peek second isMorph ifFalse: [^ false].
 	
@@ -90,6 +90,14 @@ SBInlineBlockSymbol >> childrenIn: anExplore [
 SBInlineBlockSymbol >> containingSymbol [
 
 	^ self
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> contents [
+
+	^ (self factory ifNotNil: [:f | f containsPromotedInlineSymbol: self type] ifNil: [false])
+		ifTrue: [String streamContents: [:stream | self childSandblocks do: [:child | child contents ifNotNil: [:content | stream nextPutAll: content]]]]
+		ifFalse: [super contents]
 ]
 
 { #category : #'as yet unclassified' }

@@ -16,7 +16,9 @@ Class {
 		'wordRule',
 		'extras',
 		'noteUncapturedText',
-		'aliases'
+		'aliases',
+		'promotedInlineSymbols',
+		'containersOfPromotedInlineSymbols'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -266,20 +268,22 @@ SBMetaBlockFactory >> autofixExternals [
 	externals := (grammar externals select: [:rule | rule type = 'SYMBOL']) collect: #name.
 	
 	externals do: [:external |
-		grammar rules keysAndValuesDo: [:name :rule |
-			self
-				traverse: rule
-				detect: [:obj | obj type = 'ALIAS' and: obj content name = external]
-				ifFound: [:obj |
-					self grammar rules
-						at: external
-						put: (JsonObject fromAssociations: {'type' -> 'STRING'. 'value' -> obj value})]
-				ifNone: []]].
+		self grammar rules at: external ifAbsent: [
+			grammar rules keysAndValuesDo: [:name :rule |
+				self
+					traverse: rule
+					detect: [:obj | obj type = 'ALIAS' and: obj content name = external]
+					ifFound: [:obj |
+						self grammar rules
+							at: external
+							put: (JsonObject fromAssociations: {'type' -> 'STRING'. 'value' -> obj value})]
+					ifNone: []]]].
 	
 	(grammar externals select: [:rule | rule type = 'STRING']) do: [:external |
-		self grammar rules
-			at: external
-			put: (JsonObject fromAssociations: {'type' -> 'STRING'. 'value' -> external value})].
+		self grammar rules at: external ifAbsent: [
+			self grammar rules
+				at: external
+				put: (JsonObject fromAssociations: {'type' -> 'STRING'. 'value' -> external value})]].
 	
 	(externals reject: [:external | grammar rules includesKey: external]) ifNotEmpty: [:missing | UIManager default inform: 'Missing declarations for: ', (missing joinSeparatedBy: ', ')]
 ]
@@ -479,6 +483,12 @@ SBMetaBlockFactory >> cleanGrammar [
 	grammar rules do: [:rule | self checkStructure: rule]
 ]
 
+{ #category : #testing }
+SBMetaBlockFactory >> containsPromotedInlineSymbol: aString [
+
+	^ containersOfPromotedInlineSymbols includes: aString
+]
+
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> deepCompare: anObject to: anotherObject [
 
@@ -660,6 +670,8 @@ SBMetaBlockFactory >> initialize [
 	aliases := OrderedCollection new.
 	blockInline := {}.
 	statementContainerTypes := {}.
+	promotedInlineSymbols := OrderedCollection new.
+	containersOfPromotedInlineSymbols := OrderedCollection new.
 	supertypes := {}.
 	noteUncapturedText := #().
 	hardLineBreakMatcher := [:block | false].
@@ -829,6 +841,12 @@ SBMetaBlockFactory >> parse: aString [
 	^ SBTreeSitter new parse: aString language: name factory: self
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> promotedInlineSymbols [
+
+	^ promotedInlineSymbols
+]
+
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> removeAliases: anObject [
 
@@ -876,7 +894,7 @@ SBMetaBlockFactory >> removeExternals: anObject [
 
 	anObject content ifNotNil: [:c | self removeExternals: c].
 	anObject members ifNotNil: [
-		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | (member type = 'SYMBOL' and: [grammar externals anySatisfy: [:external | external name = member name]]) ifTrue: [stream nextPut: member]]])).
+		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | (member type = 'SYMBOL' and: [(grammar externals anySatisfy: [:external | external name = member name]) and: [((grammar at: #inline) includes: member name) not]]) ifTrue: [stream nextPut: member]]])).
 		anObject members do: [:m | self removeExternals: m]]
 ]
 
@@ -913,6 +931,24 @@ SBMetaBlockFactory >> removeOptionalString: aString in: anObject [
 				copyFrom keysAndValuesDo: [:key :value | anObject at: key put: value]]].
 	anObject content ifNotNil: [:c | self removeOptionalString: aString in: c].
 	anObject members ifNotNil: [:c | c do: [:m | self removeOptionalString: aString in: m]]
+]
+
+{ #category : #helper }
+SBMetaBlockFactory >> renameSymbol: aString to: anotherString [
+
+	| affectedRules |
+	affectedRules := Array streamContents: [:stream |
+		self grammar rules keysAndValuesDo: [:name :rule |
+			self traverse: rule do: [:obj |
+				(obj type = 'SYMBOL' and: [obj name = aString]) ifTrue: [
+					obj name: anotherString.
+					stream nextPut: name]]]].
+	self grammar rules at: anotherString put: (self grammar rules at: aString).
+	self grammar rules removeKey: aString.
+	
+	(aString first = $_ and: [anotherString first ~= $_]) ifTrue: [
+		promotedInlineSymbols add: anotherString.
+		containersOfPromotedInlineSymbols addAll: affectedRules]
 ]
 
 { #category : #accessing }

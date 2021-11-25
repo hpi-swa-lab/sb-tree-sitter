@@ -523,12 +523,6 @@ SBInlineBlock >> isInlineBlock [
 	^ true
 ]
 
-{ #category : #testing }
-SBInlineBlock >> isRootSymbol [
-
-	^ false
-]
-
 { #category : #'as yet unclassified' }
 SBInlineBlock >> isSandblock [
 

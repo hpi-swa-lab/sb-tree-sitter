@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSLanguageTests >> expectedFailures [
 
-	^ #(#testPythonNumber #testPythonString #testPythonPatternList)
+	^ #(#testPythonNumber #testPythonPatternList)
 ]
 
 { #category : #'as yet unclassified' }
@@ -78,9 +78,19 @@ SBTSLanguageTests >> testMultipleDelimiters [
 ]
 
 { #category : #'testing - parse' }
-SBTSLanguageTests >> testParseNestedAttribute [
+SBTSLanguageTests >> testParsePythonFormatString [
 
-	SBPython parse: 'tweet.user.id'
+	| string |
+	SBPython rebuild.
+	SBPython instance grammar rules at: '_newline'.
+	string := SBPython parseElement: '"abc"'.
+	self assert: 'abc' equals: string contents.
+	
+	string := SBPython parseElement: 'f"abc"'.
+	self assert: 'abc' equals: string contents.
+	
+	string := SBPython parseElement: 'f"abc{var1}def{var2}ghi"'.
+	self assert: 'abcdefghi' equals: string contents
 ]
 
 { #category : #'as yet unclassified' }
@@ -176,7 +186,6 @@ SBTSLanguageTests >> testPythonPatternList [
 { #category : #'as yet unclassified' }
 SBTSLanguageTests >> testPythonString [
 
-	SBPython rebuild.
 	self assert: 'abc' equals: (SBPython parseElement: '"abc"') contents.
 	(SBPython parseElement: 'f"abc"') contents.
 	" parse error here "

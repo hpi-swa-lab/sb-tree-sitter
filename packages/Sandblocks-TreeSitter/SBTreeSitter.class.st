@@ -21,6 +21,7 @@ SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 	type := aCursor type.
 	field := aCursor currentFieldName.
 	fallback := {field. aCursor text}.
+	
 	template := aCursor isNamed
 		ifTrue: [aCursor factory getTemplate: type ifAbsent: [^ aBlock value: aCursor text]]
 		ifFalse: [^ aBlock value: aCursor text].
@@ -288,9 +289,6 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 	tree := self parser: parser old: nil parseString: currentString length: currentString size.
 	
 	root := self treeRootNode: tree.
-	
-	(self nodeHasError: root) ifTrue: [^ SBTSSyntaxError new signal].
-	
 	cursor := self cursorNew: root.
 	wasFreed := false.
 	
