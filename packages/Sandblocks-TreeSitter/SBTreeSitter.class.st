@@ -288,6 +288,9 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 	tree := self parser: parser old: nil parseString: currentString length: currentString size.
 	
 	root := self treeRootNode: tree.
+	
+	(self nodeHasError: root) ifTrue: [^ SBTSSyntaxError new signal].
+	
 	cursor := self cursorNew: root.
 	wasFreed := false.
 	

@@ -77,6 +77,12 @@ SBTSLanguageTests >> testMultipleDelimiters [
 	block := SBJavascript parse: 'let a;'
 ]
 
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testParseNestedAttribute [
+
+	SBPython parse: 'tweet.user.id'
+]
+
 { #category : #'as yet unclassified' }
 SBTSLanguageTests >> testPythonBinaryOperator [
 

@@ -66,7 +66,7 @@ SBTSParseExplore >> hasOptionOnStack: aBlock [
 
 	self flag: #fixme.
 	" is it =2? or is it =indexOf(recur)? "
-	^ stack anySatisfy: [:pair | (pair second hasSameStructureAs: aBlock) and: [pair first = 2]]
+	^ stack anySatisfy: [:pair | pair second isRootSymbol not and: [(pair second hasSameStructureAs: aBlock) and: [pair first = 2]]]
 ]
 
 { #category : #'as yet unclassified' }
