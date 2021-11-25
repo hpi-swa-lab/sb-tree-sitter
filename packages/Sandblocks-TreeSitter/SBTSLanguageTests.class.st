@@ -183,11 +183,10 @@ SBTSLanguageTests >> testPythonPatternList [
 	self assert: (lang delimitedRules includesAssociation: 'pattern_list' -> ',')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - parse' }
 SBTSLanguageTests >> testPythonString [
 
 	self assert: 'abc' equals: (SBPython parseElement: '"abc"') contents.
 	(SBPython parseElement: 'f"abc"') contents.
-	" parse error here "
 	(SBPython parseElement: '"abc\n"') contents
 ]

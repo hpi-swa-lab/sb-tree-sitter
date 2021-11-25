@@ -5115,7 +5115,7 @@ SBPython >> configure [
 
 	self blockInline: {'expression_statement'. 'parameters'. 'argument_list'. 'lambda_parameters'}.
 	self noteUncapturedText: #('string').
-	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type']]
+	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type' and: [(b parentSandblock ifNotNil: #type) ~= 'pair']]]
 ]
 
 { #category : #'as yet unclassified' }

@@ -271,8 +271,14 @@ SBInlineBlockSymbol >> ownerWithColor [
 SBInlineBlockSymbol >> printSExprOn: aStream depth: aNumber [
 
 	| any |
+	(self field notNil and: [self inline not]) ifTrue: [
+		aStream
+			nextPutAll: self field;
+			nextPutAll: ': '].
 	aStream nextPutAll: '('.
+	self inline ifTrue: [aStream nextPutAll: '['].
 	aStream nextPutAll: self type.
+	self inline ifTrue: [aStream nextPutAll: ']'].
 	any := false.
 	self childSymbolsDo: [:morph |
 		any ifFalse: [any := true].
