@@ -71,20 +71,6 @@ SBInlineBlockChoice >> buildWithFields: aStream alternatives: aDictionary [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockChoice >> changeToUnknown [
-	<action>
-
-	| new |
-	new := self buildCopy
-		removeAllMorphs;
-		buildDefault.
-	self sandblockEditor do: (SBReplaceCommand new
-		target: self;
-		replacer: new).
-	new startInputAtEnd
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockChoice >> childrenForQueryDo: aBlock [
 
 	self firstSubmorph childrenForQueryDo: aBlock

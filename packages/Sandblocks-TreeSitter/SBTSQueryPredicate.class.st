@@ -46,14 +46,15 @@ SBTSQueryPredicate >> verify: aDictionary [
 		ifTrue: [self elements first element contents]
 		ifFalse: [self elements first contents].
 	
-	(#('#match?' '#eq?') includes: predicate) ifTrue: [ | matches key |
+	(#('#match?' '#eq?') includes: predicate) ifTrue: [ | matches key contents |
 		key := self elements first contents allButFirst.
 		element := aDictionary at: key ifAbsent: [^ true].
+		contents := element contents ifNil: [''].
 		argument := self elements second contents allButFirst allButLast.
 		
 		matches := predicate caseOf: {
-			['#match?'] -> [element contents matchesRegex: argument].
-			['#eq?'] -> [element contents = argument]}.
+			['#match?'] -> [contents matchesRegex: argument].
+			['#eq?'] -> [contents = argument]}.
 		matches ifFalse: [aDictionary removeKey: key].
 		^ matches].
 	

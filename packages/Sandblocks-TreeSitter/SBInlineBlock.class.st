@@ -136,7 +136,14 @@ SBInlineBlock >> candidatesForWrappingOn: aStream [
 SBInlineBlock >> changeToUnknown [
 	<action>
 
-	self owner isInlineBlock ifTrue: [self owner changeToUnknown]
+	self lastInlineChoiceOwner ifNotNil: [:owner | | new |
+		new := owner buildCopy
+			removeAllMorphs;
+			buildDefault.
+		self sandblockEditor do: (SBReplaceCommand new
+			target: owner;
+			replacer: new).
+		new startInputAtEnd]
 ]
 
 { #category : #'as yet unclassified' }
@@ -202,6 +209,13 @@ SBInlineBlock >> clearCache [
 
 	self allMorphsDo: [:morph | morph layoutChanged].
 	self allMorphsDo: [:morph | (morph isSandblock or: [morph isInlineBlock]) ifTrue: [morph clearCacheSelf]]
+]
+
+{ #category : #actions }
+SBInlineBlock >> clearInput [
+	<action>
+
+	self changeToUnknown
 ]
 
 { #category : #'as yet unclassified' }
@@ -563,6 +577,24 @@ SBInlineBlock >> labelDifferenceOf: aMorph do: aBlock [
 SBInlineBlock >> language [
 
 	^ self factory name
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> lastInlineChoiceOwner [
+
+	| last matchesCount hasOtherBlockSiblings |
+	last := nil.
+	matchesCount := 0.
+	self allBlocksDo: [:block | matchesCount := matchesCount + 1].
+	
+	hasOtherBlockSiblings := [:block | | myCount |
+		myCount := 0.
+		block allBlocksDo: [:b | myCount := myCount + 1].
+		myCount ~= matchesCount].
+	
+	^ self allOwnersDo: [:choice |
+		(choice isKindOf: SBInlineBlockChoice) ifTrue: [last := choice].
+		(choice owner isInlineBlock not or: [hasOtherBlockSiblings value: choice]) ifTrue: [^ last]]
 ]
 
 { #category : #'as yet unclassified' }
