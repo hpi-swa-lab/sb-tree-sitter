@@ -670,6 +670,15 @@ SBInlineBlock >> numAlternativesIn: anExplore [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> numberOfElements [
+
+	| count |
+	count := 0.
+	self allBlocksDo: [:block | block isUnknown ifTrue: [count := count + 1]].
+	^ self sourceString size + count
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
 	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
  this and does special handling. other handlers will get blocked by the false"
@@ -733,7 +742,7 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
 				((self factory hardLineBreakMatcher value: self) or: [self containingSandblock isStatementContainer]) ifTrue: [aStream cr]]
-			ifFalse: [(factory wordRule notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [delimiter ifEmpty: [aStream space] ifNotEmpty: [aStream nextPutAll: delimiter]]].
+			ifFalse: [((factory ifNotNil: #wordRule) notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [delimiter ifEmpty: [aStream space] ifNotEmpty: [aStream nextPutAll: delimiter]]].
 		aStream nextPutAll: string.
 		first := false]
 ]

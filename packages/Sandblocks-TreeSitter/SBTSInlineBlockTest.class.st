@@ -298,7 +298,10 @@ SBTSInlineBlockTest >> testMatchIfBeforeAndAfter [
 	editor := self editorFor: (unknown := SBTSUnknown new
 		template: [factory getTemplate: 'expr'];
 		type: 'expr' factory: factory).
-	unknown keyStroke: (self keyboardEvent: $1).
+	[unknown keyStroke: (self keyboardEvent: $1)]
+		on: ProvideAnswerNotification
+		do: [:n | self assert: false].
+	
 	num := editor childSandblocks first.
 	self assert: 1 equals: (num choicesForInput: 'if' before: true) size.
 	self assert: 1 equals: (num choicesForInput: 'if' before: false) size
@@ -353,15 +356,19 @@ SBTSInlineBlockTest >> testMatchPartialLabel [
 
 	| factory unknown editor num label result |
 	factory := SBMetaBlockFactory new.
-	factory at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
-		SBInlineBlockText new regexString: '[0-9]+'.
-		SBInlineBlockSequence new elements: {
-			SBInlineBlockSymbol new type: 'expr' factory: factory.
-			SBInlineBlockChoice new alternatives: {SBInlineBlockLabel new label: '-='. SBInlineBlockLabel new label: '+='}.
-			SBInlineBlockSymbol new type: 'expr' factory: factory}}).
+	factory
+		at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
+			SBInlineBlockSymbol new type: 'number' factory: factory.
+			SBInlineBlockSequence new elements: {
+				SBInlineBlockSymbol new type: 'expr' factory: factory.
+				SBInlineBlockChoice new alternatives: {SBInlineBlockLabel new label: '-='. SBInlineBlockLabel new label: '+='}.
+				SBInlineBlockSymbol new type: 'expr' factory: factory}});
+		at: 'number' putTemplate: (SBInlineBlockText new regexString: '[0-9]+').
 	
 	editor := self editorFor: (unknown := factory instantiateTemplate: 'expr').
-	unknown keyStroke: (self keyboardEvent: $1).
+	[unknown keyStroke: (self keyboardEvent: $1)]
+		on: ProvideAnswerNotification
+		do: [:n | self assert: false].
 	num := editor childSandblocks first.
 	
 	result := num choicesForInput: '+' before: true.

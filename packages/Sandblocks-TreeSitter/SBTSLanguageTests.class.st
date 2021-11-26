@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSLanguageTests >> expectedFailures [
 
-	^ #(#testPythonNumber #testPythonPatternList)
+	^ #(#testPythonPatternList)
 ]
 
 { #category : #'as yet unclassified' }

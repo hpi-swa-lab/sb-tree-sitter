@@ -41,6 +41,8 @@ SBTSBlockChooseDialog >> keyStroke: anEvent [
 		ifTrue: [query := query allButLast]
 		ifFalse: [query := query, anEvent keyCharacter].
 	
+	query ifEmpty: [^ self delete].
+	
 	self update
 ]
 
