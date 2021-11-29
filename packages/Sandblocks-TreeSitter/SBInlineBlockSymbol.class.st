@@ -8,12 +8,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> allElementsDo: aBlock [
-
-	aBlock value: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> buildCopy [
 
 	^ self buildEmpty addMorphBack: self firstSubmorph buildCopy
@@ -104,6 +98,12 @@ SBInlineBlockSymbol >> contents [
 SBInlineBlockSymbol >> deleteTargetFor: aBlock [
 
 	^ self owner deleteTargetFor: self
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> elementsDo: aBlock [
+
+	
 ]
 
 { #category : #'as yet unclassified' }

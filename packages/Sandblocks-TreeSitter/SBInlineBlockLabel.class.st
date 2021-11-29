@@ -11,12 +11,6 @@ SBInlineBlockLabel >> advanceParseFrom: aCursor index: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockLabel >> allElementsDo: aBlock [
-
-	aBlock value: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockLabel >> buildCopy [
 
 	^ self buildEmpty
@@ -72,6 +66,12 @@ SBInlineBlockLabel >> childrenIn: anExplore [
 SBInlineBlockLabel >> contents [
 
 	^ self label
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockLabel >> elementsDo: aBlock [
+
+	
 ]
 
 { #category : #'as yet unclassified' }

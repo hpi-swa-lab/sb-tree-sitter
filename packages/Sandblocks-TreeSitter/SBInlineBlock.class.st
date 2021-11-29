@@ -45,10 +45,18 @@ SBInlineBlock >> alias: aString [
 	alias := aString
 ]
 
+{ #category : #hierarchy }
+SBInlineBlock >> allElementsDetect: aBlock ifFound: aSuccessBlock ifNone: aFailureBlock [
+
+	self allElementsDo: [:element | (aBlock value: element) ifTrue: [^ aSuccessBlock value: element]].
+	^ aFailureBlock value
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> allElementsDo: aBlock [
 
-	^ self subclassResponsibility
+	self elementsDo: [:element | element allElementsDo: aBlock].
+	aBlock value: self
 ]
 
 { #category : #actions }
@@ -316,6 +324,12 @@ SBInlineBlock >> differenceTo: aMorph labelsDo: aBlock [
 SBInlineBlock >> drawOn: aCanvas [
 
 	self inline ifFalse: [super drawOn: aCanvas]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> elementsDo: aBlock [
+
+	^ self subclassResponsibility
 ]
 
 { #category : #geometry }
@@ -694,6 +708,15 @@ SBInlineBlock >> orOwnerUpTo: aBlock satisfying: aCondBlock [
 	[p notNil and: [p ~= aBlock]] whileTrue: [
 		(aCondBlock value: p) ifTrue: [^ p].
 		p := p owner].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> parentElementIn: rule [
+	" for our elements, we don' have an easy way to get to the owner, so this is an 'expensive' workaround "
+
+	rule elementsDo: [:elem | elem = self ifTrue: [^ rule]].
+	rule elementsDo: [:elem | self parentElementIn: elem].
 	^ nil
 ]
 

@@ -23,13 +23,6 @@ SBInlineBlockSequence >> advanceParseFrom: aCursor index: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSequence >> allElementsDo: aBlock [
-
-	elements do: [:el | el allElementsDo: aBlock].
-	aBlock value: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockSequence >> buildCopy [
 
 	| copy |
@@ -89,6 +82,12 @@ SBInlineBlockSequence >> elements [
 SBInlineBlockSequence >> elements: aCollection [
 
 	elements := aCollection
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSequence >> elementsDo: aBlock [
+
+	elements do: [:el | aBlock value: el]
 ]
 
 { #category : #'as yet unclassified' }

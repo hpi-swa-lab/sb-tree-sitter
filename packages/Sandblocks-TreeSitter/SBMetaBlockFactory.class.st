@@ -222,6 +222,12 @@ SBMetaBlockFactory >> allSymbolsProducedBy: anObject on: aStream [
 ]
 
 { #category : #'grammar clean' }
+SBMetaBlockFactory >> allUsagesOf: aString [
+
+	^ Array streamContents: [:stream | templateCache keysAndValuesDo: [:name :root | root allElementsDo: [:block | block type = aString ifTrue: [stream nextPut: {block. name}]]]]
+]
+
+{ #category : #'grammar clean' }
 SBMetaBlockFactory >> applyInlining: rule name: aString [
 
 	(rule type = 'SYMBOL' and: [
@@ -291,7 +297,7 @@ SBMetaBlockFactory >> autofixExternals [
 { #category : #configuration }
 SBMetaBlockFactory >> blockInline: aCollection [
 
-	blockInline := aCollection
+	blockInline := Set newFrom: aCollection
 ]
 
 { #category : #helper }
@@ -526,6 +532,30 @@ SBMetaBlockFactory >> extras: aCollection [
 ]
 
 { #category : #'grammar clean' }
+SBMetaBlockFactory >> findBlockInlineCandidates [
+	" unit productions, A -> B, or A -> B | C | D "
+
+	templateCache keysAndValuesDo: [:rule :root |
+		(((grammar at: #inline) includes: rule) or: [((grammar at: #supertypes) includes: rule) or: [rule first = $_]]) ifFalse: [
+			root
+				allElementsDetect: [:block | ((block isKindOf: SBInlineBlockSymbol) or: [block isKindOf: SBInlineBlockChoice]) not]
+				ifFound: [:block | ]
+				ifNone: [blockInline add: name]]].
+	
+	" seq inside seq "
+	templateCache keysAndValuesDo: [:name :root |
+		root allElementsDo: [:block |
+			(block isKindOf: SBInlineBlockSequence) ifTrue: [
+				block elementsDo: [:element |
+					((element isKindOf: SBInlineBlockSymbol) and: [ | usages |
+						usages := self allUsagesOf: element type.
+						usages notEmpty and: [
+							usages allSatisfy: [:pair | | parent |
+								parent := pair first parentElementIn: (self getTemplate: pair second).
+								(parent isKindOf: SBInlineBlockSequence) or: [parent isNil]]]]) ifTrue: [blockInline add: element type]]]]]
+]
+
+{ #category : #'grammar clean' }
 SBMetaBlockFactory >> flattenSeparatedList: anObject name: aString [
 
 	| looksLikeSepList looksLikeOptionalSep |
@@ -668,7 +698,7 @@ SBMetaBlockFactory >> initialize [
 	
 	templateCache := Dictionary new.
 	aliases := OrderedCollection new.
-	blockInline := {}.
+	blockInline := Set new.
 	statementContainerTypes := {}.
 	promotedInlineSymbols := OrderedCollection new.
 	containersOfPromotedInlineSymbols := OrderedCollection new.

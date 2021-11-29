@@ -123,8 +123,13 @@ SBGrammarLanguage >> initialize [
 	self preprocessGrammar.
 	self cleanGrammar.
 	self configure.
-	
-	" make sure all rules are in the cache "
+	self prepareBlocks.
+	self findBlockInlineCandidates
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage >> prepareBlocks [
+
 	grammar rules keysAndValuesDo: [:name :r | self getTemplate: name]
 ]
 

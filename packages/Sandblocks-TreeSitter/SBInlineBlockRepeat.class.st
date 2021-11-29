@@ -17,13 +17,6 @@ SBInlineBlockRepeat >> advanceParseFrom: aCursor index: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockRepeat >> allElementsDo: aBlock [
-
-	element allElementsDo: aBlock.
-	aBlock value: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> buildCopy [
 
 	| copy |
@@ -104,6 +97,12 @@ SBInlineBlockRepeat >> deleteTargetFor: aBlock [
 SBInlineBlockRepeat >> element [
 
 	^ element
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockRepeat >> elementsDo: aBlock [
+
+	aBlock value: element
 ]
 
 { #category : #'as yet unclassified' }

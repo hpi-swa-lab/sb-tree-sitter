@@ -15,12 +15,6 @@ SBInlineBlockText >> advanceParseFrom: aCursor index: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockText >> allElementsDo: aBlock [
-
-	aBlock value: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockText >> buildCopy [
 
 	^ self buildEmpty contents: self contents
@@ -96,6 +90,12 @@ SBInlineBlockText >> cursorPositionsDo: aBlock [
 		aBlock value: (SBCursorText new
 			block: self containingSandblock;
 			currentCommand: command)]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockText >> elementsDo: aBlock [
+
+	
 ]
 
 { #category : #'as yet unclassified' }

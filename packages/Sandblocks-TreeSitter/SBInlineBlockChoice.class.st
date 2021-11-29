@@ -14,13 +14,6 @@ SBInlineBlockChoice >> advanceParseFrom: aCursor index: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockChoice >> allElementsDo: aBlock [
-
-	self alternatives do: [:alt | alt allElementsDo: aBlock].
-	aBlock value: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockChoice >> alternatives [
 
 	^ alternatives
@@ -98,6 +91,12 @@ SBInlineBlockChoice >> deleteTargetFor: aBlock [
 	self owner isInlineBlock not ifTrue: [^ self].
 	
 	^ self owner deleteTargetFor: self
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockChoice >> elementsDo: aBlock [
+
+	self alternatives do: [:alt | aBlock value: alt]
 ]
 
 { #category : #'as yet unclassified' }
