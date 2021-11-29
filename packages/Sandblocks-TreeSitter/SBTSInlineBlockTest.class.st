@@ -218,6 +218,45 @@ SBTSInlineBlockTest >> testMatchBinaryOp [
 		equals: editor childSandblocks first firstSubmorph submorphs second firstSubmorph contents
 ]
 
+{ #category : #'tests - continue match' }
+SBTSInlineBlockTest >> testMatchCastOwner [
+
+	| factory container editor |
+	factory := SBMetaBlockFactory new.
+	factory
+		at: 'body' putTemplate: (SBInlineBlockRepeat new
+			factory: factory;
+			multiple: true
+				required: true
+				element: (SBInlineBlockSymbol new type: 'field' factory: factory));
+		at: 'field' putTemplate: (SBInlineBlockChoice new
+			factory: factory;
+			alternatives: {
+				SBInlineBlockSymbol new type: 'property_field' factory: factory.
+				SBInlineBlockSymbol new type: 'method_field' factory: factory});
+		at: 'method_field' putTemplate: (SBInlineBlockSequence new
+			factory: factory;
+			elements: {
+				SBInlineBlockSymbol new type: 'identifier' factory: factory.
+				SBInlineBlockLabel new
+					label: '(';
+					factory: factory});
+		at: 'identifier' putTemplate: (SBInlineBlockText new
+			regexString: '[a-z]+';
+			factory: factory);
+		at: 'property_field' putTemplate: (SBInlineBlockSymbol new type: 'identifier' factory: factory).
+	
+	editor := self editorFor: (container := factory instantiateTemplate: 'body').
+	container childSandblocks first childSandblocks first keyStroke: (self keyboardEvent: $a).
+	self assert: 'property_field' equals: container childSandblocks first childSandblocks first type.
+	self
+		assert: 'identifier'
+		equals: container childSandblocks first childSandblocks first childSandblocks first type.
+	self assert: 1 equals: (container childSandblocks first childSandblocks first childSandblocks first
+		choicesForInput: '('
+		before: true) size
+]
+
 { #category : #'tests - match in unknown' }
 SBTSInlineBlockTest >> testMatchChoice [
 

@@ -160,6 +160,12 @@ SBInlineBlockRepeat >> insertCommandRequest: aMorph near: aBlock before: aBoolea
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockRepeat >> isSkippedFor: anExplore [
+
+	^ required not and: [(anExplore indexFor: self) = 1]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> isTemplate [
 
 	^ required and: [self hasSubmorphs not]
@@ -174,7 +180,7 @@ SBInlineBlockRepeat >> layoutCommands [
 			self submorphs withIndexDo: [:morph :index |
 				stream nextPut: morph layoutCommands.
 				index ~= self submorphCount ifTrue: [
-					stream nextPut: (((self factory hardLineBreakMatcher value: morph) or: [self containingSandblock isStatementContainer])
+					stream nextPut: (((self factory hardLineBreakMatcher value: morph) or: [self containingSymbol isStatementContainer])
 						ifTrue: [SBAlgebraCommand hardLine]
 						ifFalse: [SBAlgebraCommand softLineOrGap])]]])
 ]

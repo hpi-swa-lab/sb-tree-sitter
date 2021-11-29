@@ -18,7 +18,13 @@ SBTSLanguageTests >> testApplyPyFilePathReplacement [
 	spamreader = csv.reader(csvfile, delimiter='' '', quotechar=''|'')
 	for row in spamreader:
 		print('', ''.join(row))'.
-	self assert: (parsed childSandblocks first childSandblocks first childSandblocks first childSandblocks first childSandblocks second isKindOf: SBPyFilepath)
+	self assert: (parsed childSandblocks first childSandblocks first childSandblocks first childSandblocks second childSandblocks first isKindOf: SBPyFilepath)
+]
+
+{ #category : #'testing - block inline' }
+SBTSLanguageTests >> testJavascriptBlockInline [
+
+	self assert: (SBJavascript instance shouldBlockInline: 'formal_parameters')
 ]
 
 { #category : #'as yet unclassified' }
@@ -43,6 +49,21 @@ SBTSLanguageTests >> testJavascriptImport [
 	
 	block := SBJavascript parse: 'import {A as B} from ''a'''.
 	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (identifier) (identifier)))))')
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageTests >> testJavascriptNestedIdentifierForMethodField [
+
+	| identifier |
+	identifier := SBJavascript parseElement: 'abc'.
+	
+	self assert: 1 equals: (SBTSRuleExplore new
+		maxRecursionDepth: 1;
+		explore: (SBJavascript instance getTemplate: 'class_body') elements second element
+			withNested: identifier
+			nestedBefore: true
+			for: '('
+			startSymbol: nil) size
 ]
 
 { #category : #'as yet unclassified' }
@@ -152,7 +173,7 @@ SBTSLanguageTests >> testPythonInsertLambdaParameter [
 	e performForSelection: #moveCursorRight.
 	e handle: (self keyboardEvent: $a).
 	
-	self assert: 'a' equals: module access children first parameters first contents
+	self assert: 'a' equals: module access children first parameters children first contents
 ]
 
 { #category : #'as yet unclassified' }

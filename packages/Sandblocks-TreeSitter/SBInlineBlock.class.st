@@ -194,21 +194,26 @@ first query the entire hierarchy as each element should have equal importance, b
 recursion, which tends to produce more complex, combined blocks"
 	recursionDepth := 0.
 	2 timesRepeat: [
-		(Array streamContents: [:stream | | current |
+		(Array streamContents: [:stream | | current source |
 			current := self currentTextMorph ifNil: [self] ifNotNil: [:t | t owner].
+			source := current sourceString.
 			[current notNil and: [current isInlineBlock]] whileTrue: [
 				(current isKindOf: SBInlineBlockChoice) ifTrue: [
 					(SBTSRuleExplore new
 						maxRecursionDepth: recursionDepth;
 						explore: current
-							withNested: current firstBlock
+							withNested: self firstBlock
 							nestedBefore: aBoolean
 							for: aString
 							startSymbol: nil) ifNotEmpty: [:choices |
 						choices do: [:block | block first setProperty: #rootBlock toValue: current].
 						stream nextPutAll: choices]].
 				current := current owner.
-				(current notNil and: [current isInlineBlock and: [current inline not and: [current ~= self and: [current owner isInlineBlock]]]]) ifTrue: [current := nil]]]) ifNotEmpty: [:results | ^ SBTSRuleExplore deduplicateResults: results]].
+				(current notNil and: [
+					current isInlineBlock and: [
+						SBToggledCode comment: '' active: 1 do: {
+							[current sourceString ~= source].
+							[current inline not and: [current ~= self and: [current owner isInlineBlock]]]}]]) ifTrue: [current := nil]]]) ifNotEmpty: [:results | ^ SBTSRuleExplore deduplicateResults: results]].
 	^ #()
 ]
 
@@ -543,6 +548,12 @@ SBInlineBlock >> isSandblock [
 	^ self inline not
 ]
 
+{ #category : #testing }
+SBInlineBlock >> isSkippedFor: anExplore [
+
+	^ false
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> isStatement [
 
@@ -716,7 +727,7 @@ SBInlineBlock >> parentElementIn: rule [
 	" for our elements, we don' have an easy way to get to the owner, so this is an 'expensive' workaround "
 
 	rule elementsDo: [:elem | elem = self ifTrue: [^ rule]].
-	rule elementsDo: [:elem | self parentElementIn: elem].
+	rule elementsDo: [:elem | (self parentElementIn: elem) ifNotNil: [:p | ^ p]].
 	^ nil
 ]
 
@@ -750,7 +761,6 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 
 	| first delimiter |
 	first := true.
-	
 	delimiter := (self containingSymbol ifNotNil: #type)
 		ifNotNil: [:parentType |
 			self factory delimitedRules
@@ -758,13 +768,12 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 				ifPresent: [:delim | delim first]
 				ifAbsent: ['']]
 		ifNil: [''].
-	
 	aCollection do: [:element | | string |
 		string := String streamContents: [:stream | element writeSourceOn: stream].
 		(self isKindOf: SBInlineBlockRepeat)
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
-				((self factory hardLineBreakMatcher value: self) or: [self containingSandblock isStatementContainer]) ifTrue: [aStream cr]]
+				((self factory hardLineBreakMatcher value: self) or: [self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]]) ifTrue: [aStream cr]]
 			ifFalse: [((factory ifNotNil: #wordRule) notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [delimiter ifEmpty: [aStream space] ifNotEmpty: [aStream nextPutAll: delimiter]]].
 		aStream nextPutAll: string.
 		first := false]

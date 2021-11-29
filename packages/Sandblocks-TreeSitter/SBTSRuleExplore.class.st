@@ -171,7 +171,7 @@ SBTSRuleExplore >> doExplore: aBlock withNested: aSubBlock nestedBefore: aBoolea
 								self addResult.
 								self restartFromLastChoiceIfDone: [^ self]]]
 						ifFalse: [
-							((nestedBefore not or: [foundNested]) and: [self tryTakeStreamWith: block])
+							((nestedBefore not or: [foundNested or: [block isSkippedFor: self]]) and: [self tryTakeStreamWith: block])
 								ifTrue: [
 									stack ifEmpty: [
 										self done ifTrue: [self addResult].

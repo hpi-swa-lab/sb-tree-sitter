@@ -5114,6 +5114,7 @@ SBPython class >> statementContainerTypes [
 SBPython >> configure [
 
 	self noteUncapturedText: #('string').
+	self blockInline: #('expression_statement').
 	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type' and: [(b parentSandblock ifNotNil: #type) ~= 'pair']]]
 ]
 

@@ -6760,6 +6760,7 @@ SBJavascript class >> statementContainerTypes [
 { #category : #'as yet unclassified' }
 SBJavascript >> configure [
 
+	self blockInline: #('expression_statement' 'statement_block' 'formal_parameters').
 	self hardLineBreakMatcher: [:block | (block submorphAfter ifNotNil: #type) = 'statement_block']
 ]
 
