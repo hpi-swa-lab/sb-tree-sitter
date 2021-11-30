@@ -578,13 +578,13 @@ SBInlineBlock >> keyStroke: anEvent [
 	super keyStroke: anEvent.
 	
 	(self currentTextMorph notNil and: [self currentTextMorph owner valid not]) ifTrue: [
-		self deleteBeforeCursor.
-		
-		self
-			tryInterpretInput: (anEvent keyCharacter = Character space
-				ifTrue: [(UIManager default request: 'type operator') ifEmpty: [^ self]]
-				ifFalse: [anEvent keyCharacter asString])
-			before: (anEvent keyCharacter = Character space and: [anEvent shiftPressed]) not]
+		self tryCastType: self contents ifNone: [
+			self deleteBeforeCursor.
+			self
+				tryInterpretInput: (anEvent keyCharacter = Character space
+					ifTrue: [(UIManager default request: 'type operator') ifEmpty: [^ self]]
+					ifFalse: [anEvent keyCharacter asString])
+				before: (anEvent keyCharacter = Character space and: [anEvent shiftPressed]) not]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -863,6 +863,35 @@ SBInlineBlock >> takeStreamFrom: aMorph [
 SBInlineBlock >> title [
 
 	^ String streamContents: [:stream | self printTitleOn: stream]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> tryCastType: aString ifNone: aBlock [
+
+	| alternatives selected |
+	" accept only changes that do not contain a nested copy of myself; this is to enable casts from e.g.
+integer -> float with higher priority.
+
+If none match, we proceed with the more complicated way of querying up the owner hierarchy to
+find variation points. "
+	alternatives := self ownerThatIsA: SBInlineBlockChoice.
+	selected := SBTSBlockChooseDialog new
+		do: [:query | | results |
+			results := SBTSRuleExplore deduplicateResults: (SBTSRuleExplore new
+				maxRecursionDepth: 1;
+				explore: alternatives withNested: nil nestedBefore: false for: query startSymbol: nil).
+			results reject: [:result |
+				result
+					allBlocksDetect: [:block | block hasSameStructureAs: self]
+					ifFound: [:b | true]
+					ifNone: [false]]]
+		query: aString.
+	
+	selected ifNil: [^ aBlock value].
+	
+	self sandblockEditor do: (SBReplaceCommand new
+		target: self;
+		replacer: selected)
 ]
 
 { #category : #'as yet unclassified' }

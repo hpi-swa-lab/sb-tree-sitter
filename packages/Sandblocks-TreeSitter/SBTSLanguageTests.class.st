@@ -177,6 +177,23 @@ SBTSLanguageTests >> testPythonInsertLambdaParameter [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageTests >> testPythonIntToFloat [
+
+	| block e |
+	block := SBPython parse: '123'.
+	e := self editorFor: block.
+	[
+		block childSandblocks first
+			select;
+			moveCursorToEnd;
+			keyStroke: (self keyboardEvent: $.)]
+		on: ProvideAnswerNotification
+		do: [:notification | " expect to receive float and member access "
+		notification resume: 1].
+	self assert: (block matchesQuery: '(module (expression_statement (float)))')
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageTests >> testPythonNumber [
 
 	| block e |
