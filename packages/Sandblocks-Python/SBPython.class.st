@@ -5119,6 +5119,12 @@ SBPython >> configure [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> postConfigure [
+
+	blockInline remove: 'block'
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> preprocessGrammar [
 
 	self grammar rules

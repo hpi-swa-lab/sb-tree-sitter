@@ -124,7 +124,14 @@ SBGrammarLanguage >> initialize [
 	self cleanGrammar.
 	self configure.
 	self prepareBlocks.
-	self findBlockInlineCandidates
+	self findBlockInlineCandidates.
+	self postConfigure
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage >> postConfigure [
+
+	
 ]
 
 { #category : #'as yet unclassified' }

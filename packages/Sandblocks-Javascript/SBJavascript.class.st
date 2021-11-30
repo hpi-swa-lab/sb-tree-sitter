@@ -6765,6 +6765,12 @@ SBJavascript >> configure [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript >> postConfigure [
+
+	blockInline remove: 'statement_block'
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript >> preprocessGrammar [
 
 	| rulesWithSemicolon |
