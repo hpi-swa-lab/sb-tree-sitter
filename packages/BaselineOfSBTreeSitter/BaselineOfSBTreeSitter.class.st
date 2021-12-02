@@ -44,7 +44,6 @@ BaselineOfSBTreeSitter >> baseline: spec [
 BaselineOfSBTreeSitter >> preload: loader package: packageSpec [
 	
 	Installer squeakInbox
-		install: 'Kernel-ct.1419';
 		install: 'Multilingual-ct.259'.
 	(Installer url: 'https://tmbe.me/c/Regex-Core-ct.75.mcz') install
 ]
