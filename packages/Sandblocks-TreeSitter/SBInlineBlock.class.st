@@ -774,7 +774,7 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
 				((self factory hardLineBreakMatcher value: self) or: [self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]]) ifTrue: [aStream cr]]
-			ifFalse: [((factory ifNotNil: #wordRule) notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [delimiter ifEmpty: [aStream space] ifNotEmpty: [aStream nextPutAll: delimiter]]].
+			ifFalse: [((factory ifNotNil: #wordRule) notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [aStream space]].
 		aStream nextPutAll: string.
 		first := false]
 ]
