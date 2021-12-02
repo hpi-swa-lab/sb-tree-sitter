@@ -67,6 +67,14 @@ SBTSLanguageTests >> testJavascriptNestedIdentifierForMethodField [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageTests >> testJavascriptNestedMemberExpression [
+
+	| source |
+	source := 'a.b.c'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageTests >> testJavascriptToString [
 
 	| source |

@@ -71,11 +71,7 @@ SBInlineBlockSymbol >> childrenForQueryDo: aBlock [
 SBInlineBlockSymbol >> childrenIn: anExplore [
 
 	((anExplore expandSymbol: self) not and: [self isSuperType not]) ifTrue: [^ #()].
-	^ (anExplore notNil and: [
-		SBToggledCode
-			comment: ''
-			active: 1
-			do: {[anExplore canVisitSymbol: self type]. [anExplore hasVisitedSymbol: self type factory: factory]}])
+	^ (anExplore notNil and: [anExplore canVisitSymbol: self type])
 		ifTrue: [{self template}]
 		ifFalse: [{SBInlineBlockNever new}]
 ]
