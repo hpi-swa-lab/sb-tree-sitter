@@ -176,7 +176,7 @@ SBInlineBlockSymbol >> isAlias [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> isArtefact [
 
-	^ (self owner isNil or: [self owner isInlineBlock not]) and: [self type = self factory rootRuleName]
+	^ (self owner isNil or: [self owner isInlineBlock not and: [(self owner isKindOf: SBTSFile) not]]) and: [self type = self factory rootRuleName]
 ]
 
 { #category : #'as yet unclassified' }
