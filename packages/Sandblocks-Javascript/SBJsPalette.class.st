@@ -14,7 +14,14 @@ SBJsPalette class >> buildOn: aBuilder [
 	aBuilder addBlock: 'json fetch' as: (SBJavascript parse: 'window.fetch("", {headers: {"Content-Type": "application/json"}})').
 	aBuilder addBlock: 'json fetch' as: (SBJsFetch new
 		factory: SBJavascript new;
-		url: 'http://...' params: (SBJavascript parse: '{headers: {"Content-Type": "application/json"}}') childSandblocks first).
+		url: 'http://...' options: (SBJavascript parse: '{headers: {"Content-Type": "application/json"}}') childSandblocks first).
+	aBuilder addBlock: 'GET' as: (SBJsFetch new
+		factory: SBJavascript new;
+		url: 'http://...' method: #get headers: (Dictionary newFrom: {'Content-Type' -> 'text/html'}) data: 'key : value').
+		
+	aBuilder addBlock: 'POST' as: (SBJsFetch new
+		factory: SBJavascript new;
+		url: 'http://...' method: #post headers: (Dictionary newFrom: {'Content-Type' -> 'application/json'})data: '{key : value}').
 ]
 
 { #category : #'as yet unclassified' }
