@@ -21,7 +21,7 @@ SBTSFile >> filepath: aString language: aLanguageClass [
 	FileStream readOnlyFileNamed: aString do: [:stream |
 		self addMorphBack: (SBRow new
 			cellGap: 4;
-			addMorphBack: (aLanguageClass icon ifNotNil: #asMorph ifNil: [SBIcon iconFile]);
+			addMorphBack: aLanguageClass iconMorph;
 			addMorphBack: (SBStringMorph new
 				contents: (FileDirectory localNameFor: aString);
 				bold)).

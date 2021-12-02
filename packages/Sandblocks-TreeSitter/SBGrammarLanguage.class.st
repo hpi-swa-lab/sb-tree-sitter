@@ -38,6 +38,12 @@ SBGrammarLanguage class >> icon [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> iconMorph [
+
+	^ self icon ifNotNil: #asMorph ifNil: [SBIcon iconFile]
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> initialize [
 
 	self allSubclassesDo: #invalidate
