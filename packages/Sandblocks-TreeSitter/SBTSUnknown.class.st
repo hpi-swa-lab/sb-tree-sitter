@@ -156,9 +156,7 @@ SBTSUnknown >> tryInterpretInput: aString [
 		query: aString.
 	selected ifNil: [^ self].
 	
-	replacer := type
-		ifNotNil: [SBInlineBlockSymbol new type: type factory: self factory block: selected]
-		ifNil: [selected].
+	replacer := selected.
 	self sandblockEditor do: (SBReplaceCommand new
 		target: self;
 		replacer: replacer).

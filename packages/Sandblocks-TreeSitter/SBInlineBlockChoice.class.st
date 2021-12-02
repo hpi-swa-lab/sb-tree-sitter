@@ -14,13 +14,6 @@ SBInlineBlockChoice >> advanceParseFrom: aCursor index: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockChoice >> allElementsDo: aBlock [
-
-	self alternatives do: [:alt | alt allElementsDo: aBlock].
-	aBlock value: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockChoice >> alternatives [
 
 	^ alternatives
@@ -60,27 +53,14 @@ SBInlineBlockChoice >> buildEmpty [
 	^ self class new
 		alternatives: self alternatives;
 		factory: factory;
-		alias: self alias
+		field: self basicField;
+		alias: self basicAlias
 ]
 
 { #category : #'as yet unclassified' }
 SBInlineBlockChoice >> buildWithFields: aStream alternatives: aDictionary [
 
 	^ true
-]
-
-{ #category : #'as yet unclassified' }
-SBInlineBlockChoice >> changeToUnknown [
-	<action>
-
-	| new |
-	new := self buildCopy
-		removeAllMorphs;
-		buildDefault.
-	self sandblockEditor do: (SBReplaceCommand new
-		target: self;
-		replacer: new).
-	new startInputAtEnd
 ]
 
 { #category : #'as yet unclassified' }
@@ -111,6 +91,12 @@ SBInlineBlockChoice >> deleteTargetFor: aBlock [
 	self owner isInlineBlock not ifTrue: [^ self].
 	
 	^ self owner deleteTargetFor: self
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockChoice >> elementsDo: aBlock [
+
+	self alternatives do: [:alt | aBlock value: alt]
 ]
 
 { #category : #'as yet unclassified' }

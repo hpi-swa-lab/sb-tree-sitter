@@ -1,8 +1,17 @@
 Class {
 	#name : #SBGrammarLanguage,
 	#superclass : #SBMetaBlockFactory,
+	#classInstVars : [
+		'instance'
+	],
 	#category : #'Sandblocks-TreeSitter'
 }
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> build: aRuleName [
+
+	^ self instance instantiateTemplate: aRuleName
+]
 
 { #category : #'as yet unclassified' }
 SBGrammarLanguage class >> grammarJson [
@@ -17,6 +26,24 @@ SBGrammarLanguage class >> highlightQuery [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> initialize [
+
+	self allSubclassesDo: #invalidate
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> instance [
+
+	^ instance ifNil: [instance := self new]
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> invalidate [
+
+	instance := nil
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> language [
 
 	^ self subclassResponsibility
@@ -25,7 +52,30 @@ SBGrammarLanguage class >> language [
 { #category : #'as yet unclassified' }
 SBGrammarLanguage class >> parse: aString [
 
-	^ self new parse: aString
+	^ self instance parse: aString
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> parseAndReplace: aString [
+
+	^ (self instance parse: aString) applyReplacements
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> parseElement: aString [
+
+	| program |
+	program := self instance parse: aString.
+	^ self instance rootRuleName = program type
+		ifTrue: [program childSandblocks first]
+		ifFalse: [program]
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> rebuild [
+
+	self invalidate.
+	^ self instance
 ]
 
 { #category : #'as yet unclassified' }
@@ -37,13 +87,13 @@ SBGrammarLanguage class >> rootRuleName [
 { #category : #'as yet unclassified' }
 SBGrammarLanguage class >> statementContainerTypes [
 
-	^ self subclassResponsibility
+	^ #()
 ]
 
 { #category : #'as yet unclassified' }
 SBGrammarLanguage class >> toplevel [
 
-	^ self new toplevel
+	^ self instance toplevel
 ]
 
 { #category : #'as yet unclassified' }
@@ -73,8 +123,20 @@ SBGrammarLanguage >> initialize [
 	self preprocessGrammar.
 	self cleanGrammar.
 	self configure.
+	self prepareBlocks.
+	self findBlockInlineCandidates.
+	self postConfigure
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage >> postConfigure [
+
 	
-	" make sure all rules are in the cache "
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage >> prepareBlocks [
+
 	grammar rules keysAndValuesDo: [:name :r | self getTemplate: name]
 ]
 

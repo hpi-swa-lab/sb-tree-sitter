@@ -23,13 +23,6 @@ SBInlineBlockSequence >> advanceParseFrom: aCursor index: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSequence >> allElementsDo: aBlock [
-
-	elements do: [:el | el allElementsDo: aBlock].
-	aBlock value: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockSequence >> buildCopy [
 
 	| copy |
@@ -51,7 +44,8 @@ SBInlineBlockSequence >> buildEmpty [
 	^ self class new
 		elements: self elements;
 		factory: factory;
-		alias: self alias
+		field: self basicField;
+		alias: self basicAlias
 ]
 
 { #category : #'as yet unclassified' }
@@ -73,6 +67,12 @@ SBInlineBlockSequence >> childrenIn: anExplore [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockSequence >> deleteTargetFor: aBlock [
+
+	^ self owner deleteTargetFor: self
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockSequence >> elements [
 
 	^ elements
@@ -82,6 +82,12 @@ SBInlineBlockSequence >> elements [
 SBInlineBlockSequence >> elements: aCollection [
 
 	elements := aCollection
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSequence >> elementsDo: aBlock [
+
+	elements do: [:el | aBlock value: el]
 ]
 
 { #category : #'as yet unclassified' }
@@ -137,7 +143,7 @@ SBInlineBlockSequence >> inline [
 { #category : #'as yet unclassified' }
 SBInlineBlockSequence >> isTemplate [
 
-	^ self submorphCount = self elements size
+	^ self submorphCount ~= self elements size
 ]
 
 { #category : #'as yet unclassified' }
@@ -187,7 +193,5 @@ SBInlineBlockSequence >> takeStreamFrom: anObject [
 { #category : #'as yet unclassified' }
 SBInlineBlockSequence >> writeSourceOn: aStream [
 
-	self submorphs
-		do: [:element | element writeSourceOn: aStream]
-		separatedBy: [aStream space]
+	self printElementsSeparated: self submorphs on: aStream
 ]

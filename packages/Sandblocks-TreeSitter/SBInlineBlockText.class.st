@@ -15,12 +15,6 @@ SBInlineBlockText >> advanceParseFrom: aCursor index: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockText >> allElementsDo: aBlock [
-
-	aBlock value: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockText >> buildCopy [
 
 	^ self buildEmpty contents: self contents
@@ -38,7 +32,8 @@ SBInlineBlockText >> buildEmpty [
 	^ self class new
 		regexString: self regexString;
 		factory: factory;
-		alias: self alias
+		field: self basicField;
+		alias: self basicAlias
 ]
 
 { #category : #'as yet unclassified' }
@@ -95,6 +90,12 @@ SBInlineBlockText >> cursorPositionsDo: aBlock [
 		aBlock value: (SBCursorText new
 			block: self containingSandblock;
 			currentCommand: command)]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockText >> elementsDo: aBlock [
+
+	
 ]
 
 { #category : #'as yet unclassified' }

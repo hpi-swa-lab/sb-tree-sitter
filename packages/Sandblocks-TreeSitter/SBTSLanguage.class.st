@@ -11,14 +11,14 @@ SBTSLanguage class >> fields [
 ]
 
 { #category : #helper }
-SBTSLanguage >> resolveAlias: aString symbolIndex: aNumber factory: aFactory [
+SBTSLanguage >> resolveAlias: aString symbolIndex: aNumber factory: aFactory parentType: aTypeString [
 
 	| indices index |
 	indices := self symbolIndicesFor: aString.
 	index := indices indexOf: aNumber.
 	self assert: index > 0.
 	
-	^ (aFactory aliases select: [:pair | pair key = aString]) at: index
+	^ (aFactory aliases select: [:alias | alias name = aString]) at: index
 ]
 
 { #category : #helper }

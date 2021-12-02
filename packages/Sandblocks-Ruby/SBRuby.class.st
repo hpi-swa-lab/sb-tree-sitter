@@ -6244,7 +6244,7 @@ SBRuby class >> grammarJson [
 SBRuby class >> highlightQuery [
 	" https://github.com/tree-sitter/tree-sitter-ruby/blob/master/queries/highlights.scm "
 
-	^ '''; Keywords
+	^ '; Keywords
 
 [
   "alias"
@@ -6389,14 +6389,19 @@ SBRuby class >> highlightQuery [
   "}"
   "%w("
   "%i("
-] @punctuation.bracket
-'''
+] @punctuation.bracket'
 ]
 
 { #category : #'as yet unclassified' }
 SBRuby class >> language [
 
 	^ #ruby
+]
+
+{ #category : #'as yet unclassified' }
+SBRuby class >> rootRuleName [
+
+	^ 'program'
 ]
 
 { #category : #'as yet unclassified' }

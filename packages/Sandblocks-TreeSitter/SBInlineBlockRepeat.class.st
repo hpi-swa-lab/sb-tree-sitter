@@ -17,13 +17,6 @@ SBInlineBlockRepeat >> advanceParseFrom: aCursor index: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockRepeat >> allElementsDo: aBlock [
-
-	element allElementsDo: aBlock.
-	aBlock value: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> buildCopy [
 
 	| copy |
@@ -45,7 +38,8 @@ SBInlineBlockRepeat >> buildEmpty [
 	^ self class new
 		multiple: multiple required: required element: element;
 		factory: factory;
-		alias: self alias
+		field: self basicField;
+		alias: self basicAlias
 ]
 
 { #category : #'as yet unclassified' }
@@ -106,6 +100,12 @@ SBInlineBlockRepeat >> element [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockRepeat >> elementsDo: aBlock [
+
+	aBlock value: element
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> firstDifferingBlocksWith: aMorph do: aBlock [
 
 	self class ~= aMorph class ifTrue: [^ aBlock value: self value: aMorph].
@@ -160,6 +160,12 @@ SBInlineBlockRepeat >> insertCommandRequest: aMorph near: aBlock before: aBoolea
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockRepeat >> isSkippedFor: anExplore [
+
+	^ required not and: [(anExplore indexFor: self) = 1]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> isTemplate [
 
 	^ required and: [self hasSubmorphs not]
@@ -174,7 +180,7 @@ SBInlineBlockRepeat >> layoutCommands [
 			self submorphs withIndexDo: [:morph :index |
 				stream nextPut: morph layoutCommands.
 				index ~= self submorphCount ifTrue: [
-					stream nextPut: (((self factory hardLineBreakMatcher value: morph) or: [self containingSandblock isStatementContainer])
+					stream nextPut: (((self factory hardLineBreakMatcher value: morph) or: [self containingSymbol isStatementContainer])
 						ifTrue: [SBAlgebraCommand hardLine]
 						ifFalse: [SBAlgebraCommand softLineOrGap])]]])
 ]
@@ -276,7 +282,5 @@ SBInlineBlockRepeat >> takeStreamFrom: anObject [
 { #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> writeSourceOn: aStream [
 
-	self submorphs
-		do: [:element | element writeSourceOn: aStream]
-		separatedBy: [aStream space]
+	self printElementsSeparated: self submorphs on: aStream
 ]

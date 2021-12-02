@@ -6,10 +6,17 @@ Class {
 		'built',
 		'highlight',
 		'factory',
-		'alias'
+		'alias',
+		'field'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> access [
+
+	^ SBTSFieldAccessor new element: self
+]
 
 { #category : #'as yet unclassified' }
 SBInlineBlock >> actionProviders [
@@ -26,7 +33,10 @@ SBInlineBlock >> advanceParseFrom: aCursor index: aNumber [
 { #category : #accessing }
 SBInlineBlock >> alias [
 
-	^ alias
+	^ self basicAlias ifNil: [
+		(self owner notNil and: [self owner isInlineBlock])
+			ifTrue: [self owner inline ifTrue: [self owner alias] ifFalse: [nil]]
+			ifFalse: [nil]]
 ]
 
 { #category : #accessing }
@@ -35,39 +45,63 @@ SBInlineBlock >> alias: aString [
 	alias := aString
 ]
 
-{ #category : #'as yet unclassified' }
-SBInlineBlock >> allElementsDo: aBlock [
+{ #category : #hierarchy }
+SBInlineBlock >> allElementsDetect: aBlock ifFound: aSuccessBlock ifNone: aFailureBlock [
 
-	^ self subclassResponsibility
+	self allElementsDo: [:element | (aBlock value: element) ifTrue: [^ aSuccessBlock value: element]].
+	^ aFailureBlock value
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> allElementsDo: aBlock [
+
+	self elementsDo: [:element | element allElementsDo: aBlock].
+	aBlock value: self
+]
+
+{ #category : #actions }
 SBInlineBlock >> applyReplacements [
 	<action>
 
 	| replacements commands |
-	replacements := SBInlineBlockReplace allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class class) select: [:pragma | pragma arguments first = self factory name]].
+	replacements := SBInlineBlockReplace allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class class), (Pragma allNamed: #lang:match:sample: in: class class) select: [:pragma | pragma arguments first = self factory name]].
 	commands := Array streamContents: [:stream |
 		self allBlocksDo: [:block |
 			replacements do: [:pragma |
-				SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures |
-					(pragma methodClass theNonMetaClass
-						perform: pragma selector
-						withArguments: {
-							captures.
-							[:target :replacer |
-								SBReplaceCommand new
-									target: target
-									replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
-						self assert: (cmd isKindOf: SBCommand).
-						stream nextPut: cmd]]]]].
-	commands ifNotEmpty: [self sandblockEditor do: (SBCombinedCommand newWith: commands)]
+				SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures :success |
+					success ifTrue: [
+						(pragma methodClass theNonMetaClass
+							perform: pragma selector
+							withArguments: {
+								captures.
+								[:target :replacer |
+									SBReplaceCommand new
+										target: target
+										replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
+							self assert: (cmd isKindOf: SBCommand).
+							stream nextPut: cmd]]]]]].
+	commands ifNotEmpty: [
+		self sandblockEditor
+			ifNotNil: [:e | e do: (SBCombinedCommand newWith: commands)]
+			ifNil: [commands do: #do]]
 ]
 
 { #category : #'as yet unclassified' }
 SBInlineBlock >> artefactChanged: aMethodBlock [
 
 	aMethodBlock = self ifTrue: [self updateAllHighlights]
+]
+
+{ #category : #accessing }
+SBInlineBlock >> basicAlias [
+
+	^ alias
+]
+
+{ #category : #accessing }
+SBInlineBlock >> basicField [
+
+	^ field
 ]
 
 { #category : #'as yet unclassified' }
@@ -106,11 +140,18 @@ SBInlineBlock >> candidatesForWrappingOn: aStream [
 	(self hasSubmorphs and: [self firstSubmorph isInlineBlock]) ifTrue: [self firstSubmorph candidatesForWrappingOn: aStream]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #actions }
 SBInlineBlock >> changeToUnknown [
 	<action>
 
-	self owner isInlineBlock ifTrue: [self owner changeToUnknown]
+	self lastInlineChoiceOwner ifNotNil: [:owner | | new |
+		new := owner buildCopy
+			removeAllMorphs;
+			buildDefault.
+		self sandblockEditor do: (SBReplaceCommand new
+			target: owner;
+			replacer: new).
+		new startInputAtEnd]
 ]
 
 { #category : #'as yet unclassified' }
@@ -126,7 +167,7 @@ SBInlineBlock >> childSymbolsDo: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> childrenForQuery [
 
-	^ Array streamContents: [:s | self submorphsDo: [:m | (m isKindOf: SBInlineBlock) ifTrue: [m childrenForQueryDo: [:child | s nextPut: child]]]]
+	^ Array streamContents: [:s | self submorphsDo: [:m | m isInlineBlock ifTrue: [m childrenForQueryDo: [:child | s nextPut: child]]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -153,21 +194,26 @@ first query the entire hierarchy as each element should have equal importance, b
 recursion, which tends to produce more complex, combined blocks"
 	recursionDepth := 0.
 	2 timesRepeat: [
-		(Array streamContents: [:stream | | current |
+		(Array streamContents: [:stream | | current source |
 			current := self currentTextMorph ifNil: [self] ifNotNil: [:t | t owner].
+			source := current sourceString.
 			[current notNil and: [current isInlineBlock]] whileTrue: [
 				(current isKindOf: SBInlineBlockChoice) ifTrue: [
 					(SBTSRuleExplore new
 						maxRecursionDepth: recursionDepth;
 						explore: current
-							withNested: current firstBlock
+							withNested: self firstBlock
 							nestedBefore: aBoolean
 							for: aString
 							startSymbol: nil) ifNotEmpty: [:choices |
 						choices do: [:block | block first setProperty: #rootBlock toValue: current].
 						stream nextPutAll: choices]].
 				current := current owner.
-				(current notNil and: [current isInlineBlock and: [current inline not and: [current ~= self]]]) ifTrue: [current := nil]]]) ifNotEmpty: [:results | ^ SBTSRuleExplore deduplicateResults: results]].
+				(current notNil and: [
+					current isInlineBlock and: [
+						SBToggledCode comment: '' active: 1 do: {
+							[current sourceString ~= source].
+							[current inline not and: [current ~= self and: [current owner isInlineBlock]]]}]]) ifTrue: [current := nil]]]) ifNotEmpty: [:results | ^ SBTSRuleExplore deduplicateResults: results]].
 	^ #()
 ]
 
@@ -176,6 +222,13 @@ SBInlineBlock >> clearCache [
 
 	self allMorphsDo: [:morph | morph layoutChanged].
 	self allMorphsDo: [:morph | (morph isSandblock or: [morph isInlineBlock]) ifTrue: [morph clearCacheSelf]]
+]
+
+{ #category : #actions }
+SBInlineBlock >> clearInput [
+	<action>
+
+	self changeToUnknown
 ]
 
 { #category : #'as yet unclassified' }
@@ -188,6 +241,12 @@ SBInlineBlock >> click: anEvent [
 SBInlineBlock >> containingSandblock [
 
 	^ self inline ifTrue: [self owner ifNotNil: #containingSandblock] ifFalse: [self]
+]
+
+{ #category : #hierarchy }
+SBInlineBlock >> containingSymbol [
+
+	^ self owner isInlineBlock ifTrue: [self owner containingSymbol] ifFalse: [nil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -266,6 +325,18 @@ SBInlineBlock >> differenceTo: aMorph labelsDo: aBlock [
 	^ ret
 ]
 
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> drawOn: aCanvas [
+
+	self inline ifFalse: [super drawOn: aCanvas]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> elementsDo: aBlock [
+
+	^ self subclassResponsibility
+]
+
 { #category : #geometry }
 SBInlineBlock >> extent: aPoint [
 
@@ -287,10 +358,22 @@ SBInlineBlock >> factory: aFactory [
 	factory := aFactory
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBInlineBlock >> field [
 
-	^ nil
+	^ self basicField ifNil: [self owner inline ifTrue: [self owner field]]
+]
+
+{ #category : #accessing }
+SBInlineBlock >> field: aString [
+
+	field := aString
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> fields [
+
+	^ self childrenForQuery select: [:child | child field notNil] thenCollect: #field
 ]
 
 { #category : #'as yet unclassified' }
@@ -384,7 +467,7 @@ SBInlineBlock >> initialize [
 	self
 		hResizing: #shrinkWrap;
 		vResizing: #shrinkWrap;
-		layoutPolicy: (SBToggledCode comment: '' active: 2 do: {[TableLayout new]. [SBAlgebraLayout new]});
+		layoutPolicy: SBAlgebraLayout new;
 		listDirection: #leftToRight;
 		color: Color transparent;
 		cellGap: 2;
@@ -432,7 +515,7 @@ SBInlineBlock >> instantiate [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> isArtefact [
 
-	^ self owner isNil or: [self owner isInlineBlock not]
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -465,6 +548,12 @@ SBInlineBlock >> isSandblock [
 	^ self inline not
 ]
 
+{ #category : #testing }
+SBInlineBlock >> isSkippedFor: anExplore [
+
+	^ false
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> isStatement [
 
@@ -489,13 +578,13 @@ SBInlineBlock >> keyStroke: anEvent [
 	super keyStroke: anEvent.
 	
 	(self currentTextMorph notNil and: [self currentTextMorph owner valid not]) ifTrue: [
-		self deleteBeforeCursor.
-		
-		self
-			tryInterpretInput: (anEvent keyCharacter = Character space
-				ifTrue: [(UIManager default request: 'type operator') ifEmpty: [^ self]]
-				ifFalse: [anEvent keyCharacter asString])
-			before: (anEvent keyCharacter = Character space and: [anEvent shiftPressed]) not]
+		self tryCastType: self contents ifNone: [
+			self deleteBeforeCursor.
+			self
+				tryInterpretInput: (anEvent keyCharacter = Character space
+					ifTrue: [(UIManager default request: 'type operator') ifEmpty: [^ self]]
+					ifFalse: [anEvent keyCharacter asString])
+				before: (anEvent keyCharacter = Character space and: [anEvent shiftPressed]) not]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -513,6 +602,24 @@ SBInlineBlock >> labelDifferenceOf: aMorph do: aBlock [
 SBInlineBlock >> language [
 
 	^ self factory name
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> lastInlineChoiceOwner [
+
+	| last matchesCount hasOtherBlockSiblings |
+	last := nil.
+	matchesCount := 0.
+	self allBlocksDo: [:block | matchesCount := matchesCount + 1].
+	
+	hasOtherBlockSiblings := [:block | | myCount |
+		myCount := 0.
+		block allBlocksDo: [:b | myCount := myCount + 1].
+		myCount ~= matchesCount].
+	
+	^ self allOwnersDo: [:choice |
+		(choice isKindOf: SBInlineBlockChoice) ifTrue: [last := choice].
+		(choice owner isInlineBlock not or: [hasOtherBlockSiblings value: choice]) ifTrue: [^ last]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -588,11 +695,40 @@ SBInlineBlock >> numAlternativesIn: anExplore [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> numberOfElements [
+
+	| count |
+	count := 0.
+	self allBlocksDo: [:block | block isUnknown ifTrue: [count := count + 1]].
+	^ self sourceString size + count
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
 	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
  this and does special handling. other handlers will get blocked by the false"
 
 	^ {#isInlineBlock. [:o | false]. aSymbol = #replace ifTrue: [self] ifFalse: [self repeaterChild element]}
+]
+
+{ #category : #hierarchy }
+SBInlineBlock >> orOwnerUpTo: aBlock satisfying: aCondBlock [
+
+	| p |
+	p := self.
+	[p notNil and: [p ~= aBlock]] whileTrue: [
+		(aCondBlock value: p) ifTrue: [^ p].
+		p := p owner].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> parentElementIn: rule [
+	" for our elements, we don' have an easy way to get to the owner, so this is an 'expensive' workaround "
+
+	rule elementsDo: [:elem | elem = self ifTrue: [^ rule]].
+	rule elementsDo: [:elem | (self parentElementIn: elem) ifNotNil: [:p | ^ p]].
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -618,6 +754,29 @@ SBInlineBlock >> preferredColorIn: aColorPolicy [
 SBInlineBlock >> prefersNoBorder [
 
 	^ self inline
+]
+
+{ #category : #printing }
+SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
+
+	| first delimiter |
+	first := true.
+	delimiter := (self containingSymbol ifNotNil: #type)
+		ifNotNil: [:parentType |
+			self factory delimitedRules
+				at: parentType
+				ifPresent: [:delim | delim first]
+				ifAbsent: ['']]
+		ifNil: [''].
+	aCollection do: [:element | | string |
+		string := String streamContents: [:stream | element writeSourceOn: stream].
+		(self isKindOf: SBInlineBlockRepeat)
+			ifTrue: [
+				first ifFalse: [aStream nextPutAll: delimiter].
+				((self factory hardLineBreakMatcher value: self) or: [self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]]) ifTrue: [aStream cr]]
+			ifFalse: [((factory ifNotNil: #wordRule) notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [delimiter ifEmpty: [aStream space] ifNotEmpty: [aStream nextPutAll: delimiter]]].
+		aStream nextPutAll: string.
+		first := false]
 ]
 
 { #category : #'as yet unclassified' }
@@ -707,6 +866,35 @@ SBInlineBlock >> title [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> tryCastType: aString ifNone: aBlock [
+
+	| alternatives selected |
+	" accept only changes that do not contain a nested copy of myself; this is to enable casts from e.g.
+integer -> float with higher priority.
+
+If none match, we proceed with the more complicated way of querying up the owner hierarchy to
+find variation points. "
+	alternatives := self ownerThatIsA: SBInlineBlockChoice.
+	selected := SBTSBlockChooseDialog new
+		do: [:query | | results |
+			results := SBTSRuleExplore deduplicateResults: (SBTSRuleExplore new
+				maxRecursionDepth: 1;
+				explore: alternatives withNested: nil nestedBefore: false for: query startSymbol: nil).
+			results reject: [:result |
+				result
+					allBlocksDetect: [:block | block hasSameStructureAs: self]
+					ifFound: [:b | true]
+					ifNone: [false]]]
+		query: aString.
+	
+	selected ifNil: [^ aBlock value].
+	
+	self sandblockEditor do: (SBReplaceCommand new
+		target: self;
+		replacer: selected)
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> tryInterpretInput: aString before: aBoolean [
 
 	| selected |
@@ -750,8 +938,10 @@ SBInlineBlock >> updateAllHighlights [
 
 	factory hasHighlight ifFalse: [^ self].
 	
-	self allMorphsDo: [:m | m isInlineBlock ifTrue: [m highlight: nil]].
-	self updateHighlight
+	self allMorphsDo: [:m |
+		m isInlineBlock ifTrue: [
+			m highlight: nil.
+			m updateHighlight]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -759,8 +949,7 @@ SBInlineBlock >> updateHighlight [
 
 	self factory highlightQuery
 		executeAgainst: self
-		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | block highlight ifNil: [block highlight: id]]].
-	self submorphsDo: [:m | m isInlineBlock ifTrue: [m updateHighlight]]
+		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | block highlight ifNil: [block highlight: id]]]
 ]
 
 { #category : #'as yet unclassified' }

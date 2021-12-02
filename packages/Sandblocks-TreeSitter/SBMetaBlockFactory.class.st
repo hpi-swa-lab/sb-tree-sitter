@@ -16,7 +16,9 @@ Class {
 		'wordRule',
 		'extras',
 		'noteUncapturedText',
-		'aliases'
+		'aliases',
+		'promotedInlineSymbols',
+		'containersOfPromotedInlineSymbols'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -43,20 +45,10 @@ SBMetaBlockFactory class >> compileParserIn: path name: aString [
 { #category : #helper }
 SBMetaBlockFactory class >> fetchLibrary: aGithubString [
 
-	SBToggledCode comment: '' active: 1 do: {
-		[ | path |
-			path := (MCFetchGithubRepository new
-				projectPath: aGithubString
-				projectVersion: 'master'
-				repoPath: nil) directory.
-			^ path].
-		[ | zip |
-			zip := WebClient httpGet: 'https://api.github.com/repos/', aGithubString, '/zipball/master'.
-			ZipArchive new
-				readFrom: zip getContent readStream binary;
-				extractAllTo: (FileDirectory default / 'tree-sitter-languages') assureExistence
-					informing: nil
-					overwrite: false]}
+	^ (MCFetchGithubRepository new
+		projectPath: aGithubString
+		projectVersion: 'master'
+		repoPath: nil) directory
 ]
 
 { #category : #helper }
@@ -81,7 +73,7 @@ SBMetaBlockFactory class >> generateFFIMethodFor: aName github: aGithubString [
 ]
 
 { #category : #helper }
-SBMetaBlockFactory class >> generateGrammarMethodFrom: path name: aString github: anotherString [
+SBMetaBlockFactory class >> generateGrammarClassFrom: path name: aString github: anotherString [
 
 	| grammarFile highlightsFile |
 	[ | class |
@@ -105,9 +97,11 @@ SBMetaBlockFactory class >> generateGrammarMethodFrom: path name: aString github
 
     ^ {1}' format: {aString asSymbol storeString})
 			classified: 'properties'.
-		class class compile: 'rootRuleName
+		class class
+			compile: ('rootRuleName
 
-    ^ self shouldImplement' classified: 'properties'.
+    ^ {1}' format: {'self subclassResponsibility'})
+			classified: 'properties'.
 		
 		highlightsFile ifNotNil: [:f |
 			class class
@@ -132,7 +126,7 @@ SBMetaBlockFactory class >> loadLanguage: aGithubString name: aString [
 	| path |
 	path := self fetchLibrary: aGithubString.
 	self compileParserIn: path name: aString.
-	self generateGrammarMethodFrom: path name: aString github: aGithubString.
+	self generateGrammarClassFrom: path name: aString github: aGithubString.
 	self generateFFIMethodFor: aString github: aGithubString
 ]
 
@@ -201,7 +195,11 @@ SBMetaBlockFactory class >> tryPatchLibrary: aGithubString name: aString context
 { #category : #configuration }
 SBMetaBlockFactory >> addDelimitedRules: aCollection [
 
-	delimitedRules addAll: aCollection
+	(aCollection as: Dictionary) keysAndValuesDo: [:rule :delimiter |
+		delimitedRules at: rule put: (delimitedRules
+			at: rule
+			ifPresent: [:list | list copyWith: delimiter]
+			ifAbsent: [{delimiter}])]
 ]
 
 { #category : #accessing }
@@ -224,7 +222,13 @@ SBMetaBlockFactory >> allSymbolsProducedBy: anObject on: aStream [
 ]
 
 { #category : #'grammar clean' }
-SBMetaBlockFactory >> applyInlining: rule [
+SBMetaBlockFactory >> allUsagesOf: aString [
+
+	^ Array streamContents: [:stream | templateCache keysAndValuesDo: [:name :root | root allElementsDo: [:block | block type = aString ifTrue: [stream nextPut: {block. name}]]]]
+]
+
+{ #category : #'grammar clean' }
+SBMetaBlockFactory >> applyInlining: rule name: aString [
 
 	(rule type = 'SYMBOL' and: [
 		(grammar inline includes: rule name) and: [
@@ -248,12 +252,13 @@ SBMetaBlockFactory >> applyInlining: rule [
 	(rule type = 'SYMBOL' and: [rule name first = $_ and: [(grammar externals noneSatisfy: [:e | e name = rule name]) and: [(grammar supertypes includes: rule name) not]]]) ifTrue: [ | inline |
 		inline := grammar rules at: rule name.
 		(self includesNonHiddenParts: inline visited: Set new) ifTrue: [
+			(delimitedRules includesKey: rule name) ifTrue: [delimitedRules at: aString put: (delimitedRules at: rule name)].
 			rule removeAll.
 			inline keysAndValuesDo: [:key :val | rule at: key put: val]].
 		^ self].
 	
-	rule content ifNotNil: [:c | self applyInlining: c].
-	rule members ifNotNil: [:c | c do: [:child | self applyInlining: child]]
+	rule content ifNotNil: [:c | self applyInlining: c name: aString].
+	rule members ifNotNil: [:c | c do: [:child | self applyInlining: child name: aString]]
 ]
 
 { #category : #templates }
@@ -269,20 +274,22 @@ SBMetaBlockFactory >> autofixExternals [
 	externals := (grammar externals select: [:rule | rule type = 'SYMBOL']) collect: #name.
 	
 	externals do: [:external |
-		grammar rules keysAndValuesDo: [:name :rule |
-			self
-				traverse: rule
-				detect: [:obj | obj type = 'ALIAS' and: obj content name = external]
-				ifFound: [:obj |
-					self grammar rules
-						at: external
-						put: (JsonObject fromAssociations: {'type' -> 'STRING'. 'value' -> obj value})]
-				ifNone: []]].
+		self grammar rules at: external ifAbsent: [
+			grammar rules keysAndValuesDo: [:name :rule |
+				self
+					traverse: rule
+					detect: [:obj | obj type = 'ALIAS' and: obj content name = external]
+					ifFound: [:obj |
+						self grammar rules
+							at: external
+							put: (JsonObject fromAssociations: {'type' -> 'STRING'. 'value' -> obj value})]
+					ifNone: []]]].
 	
 	(grammar externals select: [:rule | rule type = 'STRING']) do: [:external |
-		self grammar rules
-			at: external
-			put: (JsonObject fromAssociations: {'type' -> 'STRING'. 'value' -> external value})].
+		self grammar rules at: external ifAbsent: [
+			self grammar rules
+				at: external
+				put: (JsonObject fromAssociations: {'type' -> 'STRING'. 'value' -> external value})]].
 	
 	(externals reject: [:external | grammar rules includesKey: external]) ifNotEmpty: [:missing | UIManager default inform: 'Missing declarations for: ', (missing joinSeparatedBy: ', ')]
 ]
@@ -290,20 +297,23 @@ SBMetaBlockFactory >> autofixExternals [
 { #category : #configuration }
 SBMetaBlockFactory >> blockInline: aCollection [
 
-	blockInline := aCollection
+	blockInline := Set newFrom: aCollection
 ]
 
 { #category : #helper }
-SBMetaBlockFactory >> buildBlocksFor: anObject parentFieldName: aString visitedSymbols: aSet [
+SBMetaBlockFactory >> buildBlocksFor: anObject [
 
-	anObject type = 'FIELD' ifTrue: [^ self buildBlocksFor: anObject content parentFieldName: anObject name visitedSymbols: aSet].
+	anObject type = 'FIELD' ifTrue: [
+		^ (self buildBlocksFor: anObject content)
+			field: anObject name;
+			yourself].
 	
 	anObject type = 'ALIAS' ifTrue: [
-		^ (self buildBlocksFor: anObject content parentFieldName: anObject name visitedSymbols: aSet)
+		^ (self buildBlocksFor: anObject content)
 			alias: (anObject at: #value);
 			yourself].
 	
-	(self unpackTypes includes: anObject type) ifTrue: [^ self buildBlocksFor: anObject content parentFieldName: aString visitedSymbols: aSet].
+	(self unpackTypes includes: anObject type) ifTrue: [^ self buildBlocksFor: anObject content].
 	
 	(#('STRING') includes: anObject type) ifTrue: [
 		^ SBInlineBlockLabel new
@@ -317,22 +327,17 @@ SBMetaBlockFactory >> buildBlocksFor: anObject parentFieldName: aString visitedS
 	
 	(#('SYMBOL') includes: anObject type) ifTrue: [
 		^ SBInlineBlockSymbol new
-			type: anObject name factory: self visitedSymbols: aSet;
-			field: aString;
+			type: anObject name factory: self;
 			factory: self].
 	
 	'REPEAT' = anObject type ifTrue: [
 		^ SBInlineBlockRepeat new
-			multiple: true
-				required: false
-				element: (self buildBlocksFor: anObject content parentFieldName: aString visitedSymbols: aSet);
+			multiple: true required: false element: (self buildBlocksFor: anObject content);
 			factory: self].
 	
 	'REPEAT1' = anObject type ifTrue: [
 		^ SBInlineBlockRepeat new
-			multiple: true
-				required: true
-				element: (self buildBlocksFor: anObject content parentFieldName: aString visitedSymbols: aSet);
+			multiple: true required: true element: (self buildBlocksFor: anObject content);
 			factory: self].
 	
 	'CHOICE' = anObject type ifTrue: [
@@ -340,17 +345,17 @@ SBMetaBlockFactory >> buildBlocksFor: anObject parentFieldName: aString visitedS
 			^ SBInlineBlockRepeat new
 				multiple: false
 					required: false
-					element: (self buildBlocksFor: anObject members first parentFieldName: aString visitedSymbols: aSet);
+					element: (self buildBlocksFor: anObject members first);
 				factory: self].
 		
 		^ SBInlineBlockChoice new
-			alternatives: (anObject members collect: [:member | self buildBlocksFor: member parentFieldName: aString visitedSymbols: aSet]);
+			alternatives: (anObject members collect: [:member | self buildBlocksFor: member]);
 			factory: self].
 	
 	'SEQ' = anObject type ifTrue: [
 		^ SBInlineBlockSequence new
 			factory: self;
-			elements: (anObject members collect: [:member | self buildBlocksFor: member parentFieldName: aString visitedSymbols: aSet])].
+			elements: (anObject members collect: [:member | self buildBlocksFor: member])].
 	
 	self assert: false
 ]
@@ -418,7 +423,7 @@ SBMetaBlockFactory >> cleanGrammar [
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[grammar rules do: [:rule | self removeHiddenTerminals: rule]]}.
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self removeHiddenTerminals: rule]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -426,7 +431,7 @@ SBMetaBlockFactory >> cleanGrammar [
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[grammar rules do: [:rule | self removeHiddenTerminals: rule]]}.
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self removeHiddenTerminals: rule]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -438,22 +443,25 @@ SBMetaBlockFactory >> cleanGrammar [
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[grammar rules keysAndValuesDo: [:name :rule | self flattenSeparatedList: rule]]}.
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self flattenSeparatedList: rule name: name]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[grammar rules keysAndValuesDo: [:name :rule | self applyInlining: rule]]}.
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self applyInlining: rule name: name]]}.
+	SBToggledCode comment: '' active: 1 do: {
+		[" depends on inlining, requires removing blanks (hidden terminals) "
+		grammar rules keysAndValuesDo: [:name :rule | delimitedRules at: name ifPresent: [:r | self removeMarkedDelimiters: rule rule: name]]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
 		do: {[grammar rules do: [:rule | self mergeRedundantRepeats: rule]]}.
 	SBToggledCode comment: '' active: 1 do: {
 		[
-			grammar rules do: [:rule |
+			grammar rules keysAndValuesDo: [:name :rule |
 				SBToggledCode
 					comment: ''
 					active: 1
-					do: {[self noteAliases: rule]. [self removeAliases: rule]}]]}.
+					do: {[self noteAliases: rule name: name]. [self removeAliases: rule]}]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -474,7 +482,17 @@ SBMetaBlockFactory >> cleanGrammar [
 		comment: ''
 		active: 1
 		do: {[grammar rules do: [:rule | self mergeAdjacentOptions: rule]]}.
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self removeHiddenTerminals: rule]]}.
 	grammar rules do: [:rule | self checkStructure: rule]
+]
+
+{ #category : #testing }
+SBMetaBlockFactory >> containsPromotedInlineSymbol: aString [
+
+	^ containersOfPromotedInlineSymbols includes: aString
 ]
 
 { #category : #'grammar clean' }
@@ -492,13 +510,6 @@ SBMetaBlockFactory >> deepCompare: anObject to: anotherObject [
 SBMetaBlockFactory >> delimitedRules [
 
 	^ delimitedRules
-]
-
-{ #category : #configuration }
-SBMetaBlockFactory >> delimitedRules: aDictionary [
-	" ruleName -> delimiterString, e.g. 'parameters'->',' "
-
-	delimitedRules := aDictionary
 ]
 
 { #category : #helper }
@@ -521,7 +532,31 @@ SBMetaBlockFactory >> extras: aCollection [
 ]
 
 { #category : #'grammar clean' }
-SBMetaBlockFactory >> flattenSeparatedList: anObject [
+SBMetaBlockFactory >> findBlockInlineCandidates [
+	" unit productions, A -> B, or A -> B | C | D "
+
+	templateCache keysAndValuesDo: [:rule :root |
+		(((grammar at: #inline) includes: rule) or: [((grammar at: #supertypes) includes: rule) or: [rule first = $_]]) ifFalse: [
+			root
+				allElementsDetect: [:block | ((block isKindOf: SBInlineBlockSymbol) or: [block isKindOf: SBInlineBlockChoice]) not]
+				ifFound: [:block | ]
+				ifNone: [blockInline add: name]]].
+	
+	" seq inside seq "
+	templateCache keysAndValuesDo: [:name :root |
+		root allElementsDo: [:block |
+			(block isKindOf: SBInlineBlockSequence) ifTrue: [
+				block elementsDo: [:element |
+					((element isKindOf: SBInlineBlockSymbol) and: [ | usages |
+						usages := self allUsagesOf: element type.
+						usages notEmpty and: [
+							usages allSatisfy: [:pair | | parent |
+								parent := pair first parentElementIn: (self getTemplate: pair second).
+								(parent isKindOf: SBInlineBlockSequence) or: [parent isNil]]]]) ifTrue: [blockInline add: element type]]]]]
+]
+
+{ #category : #'grammar clean' }
+SBMetaBlockFactory >> flattenSeparatedList: anObject name: aString [
 
 	| looksLikeSepList looksLikeOptionalSep |
 	looksLikeSepList := [:obj | obj type = 'SEQ' and: [obj members size = 2 and: [obj members second type = 'REPEAT' and: [obj members second content type = 'SEQ' and: [self deepCompare: obj members first to: obj members second content members second]]]]].
@@ -529,6 +564,7 @@ SBMetaBlockFactory >> flattenSeparatedList: anObject [
 	
 	" seq(seq(rule, repeat(seq(separator, rule))), (separator|blank)) "
 	(anObject type = 'SEQ' and: [(looksLikeSepList value: anObject members first) and: [looksLikeOptionalSep value: anObject members second]]) ifTrue: [
+		self addDelimitedRules: {aString -> anObject members second members first value}.
 		^ anObject
 			type: 'REPEAT';
 			content: anObject members first members first;
@@ -536,13 +572,14 @@ SBMetaBlockFactory >> flattenSeparatedList: anObject [
 	
 	" seq(rule, repeat(seq(separator, rule))) "
 	(looksLikeSepList value: anObject) ifTrue: [
+		self addDelimitedRules: {aString -> anObject members second content members first value}.
 		^ anObject
-			type: 'REPEAT';
+			type: 'REPEAT1';
 			content: anObject members first;
 			removeKey: #members].
 	
-	anObject content ifNotNil: [:c | self flattenSeparatedList: c].
-	anObject members ifNotNil: [:c | c do: [:m | self flattenSeparatedList: m]]
+	anObject content ifNotNil: [:c | self flattenSeparatedList: c name: aString].
+	anObject members ifNotNil: [:c | c do: [:m | self flattenSeparatedList: m name: aString]]
 ]
 
 { #category : #helper }
@@ -563,15 +600,13 @@ SBMetaBlockFactory >> getTemplate: aTypeString ifAbsent: aBlock [
 
 	^ templateCache at: aTypeString ifAbsent: [ | rule |
 		rule := grammar rules at: aTypeString ifAbsent: [
-			(aliases anySatisfy: [:pair | pair key = aTypeString]) ifTrue: [^ 'ALIAS'].
+			(self aliases anySatisfy: [:pair | pair name = aTypeString]) ifTrue: [^ 'ALIAS'].
 			^ aBlock value].
 		
 		" reserve spot in case of recursion "
 		templateCache at: aTypeString put: nil.
 		
-		templateCache
-			at: aTypeString
-			put: (self buildBlocksFor: rule parentFieldName: nil visitedSymbols: Set new)]
+		templateCache at: aTypeString put: (self buildBlocksFor: rule)]
 ]
 
 { #category : #accessing }
@@ -635,7 +670,8 @@ SBMetaBlockFactory >> ignoreExternals: aCollection [
 SBMetaBlockFactory >> includesNonHiddenParts: anObject visited: aCollection [
 
 	(#('PREC' 'PREC_DYNAMIC' 'PREC_LEFT' 'PREC_RIGHT' 'REPEAT' 'FIELD' 'REPEAT1') includes: anObject type) ifTrue: [^ self includesNonHiddenParts: anObject content visited: aCollection].
-	(#('STRING' 'PATTERN' 'BLANK' 'TOKEN') includes: anObject type) ifTrue: [^ false].
+	(#('STRING' 'PATTERN' 'TOKEN' 'IMMEDIATE_TOKEN') includes: anObject type) ifTrue: [^ true].
+	'BLANK' = anObject type ifTrue: [^ false].
 	
 	^ anObject type caseOf: {
 		['CHOICE'] -> [anObject members anySatisfy: [:m | self includesNonHiddenParts: m visited: aCollection]].
@@ -662,8 +698,10 @@ SBMetaBlockFactory >> initialize [
 	
 	templateCache := Dictionary new.
 	aliases := OrderedCollection new.
-	blockInline := {}.
+	blockInline := Set new.
 	statementContainerTypes := {}.
+	promotedInlineSymbols := OrderedCollection new.
+	containersOfPromotedInlineSymbols := OrderedCollection new.
 	supertypes := {}.
 	noteUncapturedText := #().
 	hardLineBreakMatcher := [:block | false].
@@ -803,12 +841,16 @@ SBMetaBlockFactory >> name: aSymbol preprocess: aBlock postprocess: anotherBlock
 ]
 
 { #category : #'grammar clean' }
-SBMetaBlockFactory >> noteAliases: anObject [
+SBMetaBlockFactory >> noteAliases: anObject name: aString [
 
-	anObject type = 'ALIAS' ifTrue: [aliases add: anObject value -> anObject content veryDeepCopy].
+	anObject type = 'ALIAS' ifTrue: [
+		aliases add: (SBTSAlias new
+			name: anObject value;
+			object: (self buildBlocksFor: anObject);
+			parentType: aString)].
 	
-	anObject content ifNotNil: [:c | self noteAliases: c].
-	anObject members ifNotNil: [:c | c do: [:m | self noteAliases: m]]
+	anObject content ifNotNil: [:c | self noteAliases: c name: aString].
+	anObject members ifNotNil: [:c | c do: [:m | self noteAliases: m name: aString]]
 ]
 
 { #category : #configuration }
@@ -829,13 +871,24 @@ SBMetaBlockFactory >> parse: aString [
 	^ SBTreeSitter new parse: aString language: name factory: self
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> promotedInlineSymbols [
+
+	^ promotedInlineSymbols
+]
+
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> removeAliases: anObject [
 
 	SBToggledCode comment: '' active: 1 do: {
 		[
 			anObject type = 'ALIAS' ifTrue: [ | copyFrom |
-				aliases add: anObject value -> anObject content veryDeepCopy.
+				" how to get parentType? "
+				self flag: #fixme.
+				aliases add: (SBTSAlias new
+					name: anObject value;
+					object: anObject content veryDeepCopy;
+					parentType: nil).
 				
 				copyFrom := anObject content.
 				anObject removeAll.
@@ -871,7 +924,7 @@ SBMetaBlockFactory >> removeExternals: anObject [
 
 	anObject content ifNotNil: [:c | self removeExternals: c].
 	anObject members ifNotNil: [
-		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | (member type = 'SYMBOL' and: [grammar externals anySatisfy: [:external | external name = member name]]) ifTrue: [stream nextPut: member]]])).
+		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | (member type = 'SYMBOL' and: [(grammar externals anySatisfy: [:external | external name = member name]) and: [((grammar at: #inline) includes: member name) not]]) ifTrue: [stream nextPut: member]]])).
 		anObject members do: [:m | self removeExternals: m]]
 ]
 
@@ -882,6 +935,15 @@ SBMetaBlockFactory >> removeHiddenTerminals: anObject [
 	anObject members ifNotNil: [
 		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | ((member type = 'SYMBOL' and: [(self includesNonHiddenParts: member visited: Set new) not]) or: [anObject type = 'SEQ' and: [member type = 'BLANK']]) ifTrue: [stream nextPut: member]]])).
 		anObject members do: [:m | self removeHiddenTerminals: m]]
+]
+
+{ #category : #'grammar clean' }
+SBMetaBlockFactory >> removeMarkedDelimiters: anObject rule: aString [
+
+	anObject content ifNotNil: [:c | self removeMarkedDelimiters: c rule: aString].
+	anObject members ifNotNil: [
+		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | (member type = 'STRING' and: [(delimitedRules at: aString) includes: member value]) ifTrue: [stream nextPut: member]]])).
+		anObject members do: [:m | self removeMarkedDelimiters: m rule: aString]]
 ]
 
 { #category : #'grammar clean' }
@@ -899,6 +961,24 @@ SBMetaBlockFactory >> removeOptionalString: aString in: anObject [
 				copyFrom keysAndValuesDo: [:key :value | anObject at: key put: value]]].
 	anObject content ifNotNil: [:c | self removeOptionalString: aString in: c].
 	anObject members ifNotNil: [:c | c do: [:m | self removeOptionalString: aString in: m]]
+]
+
+{ #category : #helper }
+SBMetaBlockFactory >> renameSymbol: aString to: anotherString [
+
+	| affectedRules |
+	affectedRules := Array streamContents: [:stream |
+		self grammar rules keysAndValuesDo: [:name :rule |
+			self traverse: rule do: [:obj |
+				(obj type = 'SYMBOL' and: [obj name = aString]) ifTrue: [
+					obj name: anotherString.
+					stream nextPut: name]]]].
+	self grammar rules at: anotherString put: (self grammar rules at: aString).
+	self grammar rules removeKey: aString.
+	
+	(aString first = $_ and: [anotherString first ~= $_]) ifTrue: [
+		promotedInlineSymbols add: anotherString.
+		containersOfPromotedInlineSymbols addAll: affectedRules]
 ]
 
 { #category : #accessing }

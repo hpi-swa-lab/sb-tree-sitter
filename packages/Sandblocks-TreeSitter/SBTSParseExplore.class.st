@@ -26,21 +26,18 @@ SBTSParseExplore >> canVisitSymbol: aString [
 { #category : #'as yet unclassified' }
 SBTSParseExplore >> expandSymbol: aSymbolBlock [
 
-	^ aSymbolBlock = root
+	^ aSymbolBlock isRootSymbol or: [root factory promotedInlineSymbols includes: aSymbolBlock type]
 ]
 
 { #category : #'as yet unclassified' }
-SBTSParseExplore >> explore: aStream type: aString factory: aFactory [
+SBTSParseExplore >> explore: aStream root: aBlock factory: aFactory [
 
 	lastOptions := OrderedCollection new.
 	choiceIndices := Dictionary new.
 	stack := OrderedCollection new.
 	stream := aStream.
 	
-	root := self push: (SBToggledCode
-		comment: ''
-		active: 1
-		do: {[aFactory getTemplate: aString]. [SBInlineBlockSymbol new type: aString factory: aFactory]}).
+	root := self push: aBlock.
 	
 	[stack notEmpty] whileTrue: [ | block pair index |
 		pair := stack last.
@@ -50,7 +47,9 @@ SBTSParseExplore >> explore: aStream type: aString factory: aFactory [
 			at: index
 			ifPresent: [:template | | child |
 				pair at: 1 put: index + 1.
-				child := self push: template.
+				child := (stream atEnd not and: [stream peek second isSandblock and: [template alias notNil and: [template alias = stream peek second alias]]])
+					ifTrue: [stream next second buildCopy]
+					ifFalse: [self push: template].
 				self assert: block submorphCount < (block unbuiltChildrenIn: self) size.
 				block addMorphBack: child]
 			ifAbsent: [
@@ -67,7 +66,7 @@ SBTSParseExplore >> hasOptionOnStack: aBlock [
 
 	self flag: #fixme.
 	" is it =2? or is it =indexOf(recur)? "
-	^ stack anySatisfy: [:pair | (pair second hasSameStructureAs: aBlock) and: [pair first = 2]]
+	^ stack anySatisfy: [:pair | (pair second hasSameStructureAs: aBlock) and: [pair first = 2 and: [pair second isRootSymbol not]]]
 ]
 
 { #category : #'as yet unclassified' }

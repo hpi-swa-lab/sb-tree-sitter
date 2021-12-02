@@ -3384,6 +3384,12 @@ SBGDScript class >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBGDScript class >> rootRuleName [
+
+	^ 'source'
+]
+
+{ #category : #'as yet unclassified' }
 SBGDScript class >> statementContainerTypes [
 
 	^ #('source' 'body')

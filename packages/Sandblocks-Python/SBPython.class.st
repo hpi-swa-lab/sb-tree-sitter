@@ -5113,60 +5113,93 @@ SBPython class >> statementContainerTypes [
 { #category : #'as yet unclassified' }
 SBPython >> configure [
 
-	self blockInline: {'expression_statement'. 'parameters'}.
 	self noteUncapturedText: #('string').
-	self delimitedRules: ({'argument_list' -> ','. 'pattern_list' -> ','. 'parameters' -> ','. 'tuple_pattern' -> ','. 'list' -> ','} as: Dictionary).
-	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type']]
+	self blockInline: #('expression_statement').
+	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type' and: [(b parentSandblock ifNotNil: #type) ~= 'pair']]]
+]
+
+{ #category : #'as yet unclassified' }
+SBPython >> postConfigure [
+
+	blockInline remove: 'block'
 ]
 
 { #category : #'as yet unclassified' }
 SBPython >> preprocessGrammar [
 
-	SBToggledCode comment: '' active: 2 do: {
-		[ | str |
-			str := self grammar rules at: 'string'.
-			str members
-				at: 1
-				put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '''|"'}).
-			str members
-				at: 3
-				put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '''|"'})].
-		[
-			(self grammar rules at: 'string')
-				type: 'SEQ';
-				members: {
-					JsonObject fromAssociations: {
-						#type -> 'CHOICE'.
-						#members -> {
-							JsonObject fromAssociations: {#type -> 'STRING'. #value -> '"'}.
-							JsonObject fromAssociations: {#type -> 'STRING'. #value -> ''''}}}.
-					JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '[^''"]*'}.
-					JsonObject fromAssociations: {
-						#type -> 'CHOICE'.
-						#members -> {
-							JsonObject fromAssociations: {#type -> 'STRING'. #value -> '"'}.
-							JsonObject fromAssociations: {#type -> 'STRING'. #value -> ''''}}}}]}.
+	self grammar rules
+		at: 'string'
+		put: (Json readFrom: '{
+	"type":"CHOICE",
+	"members": [
+		{
+			"type":"SEQ",
+			"members": [
+				{
+					"type":"CHOICE",
+					"members": [
+						{"type":"STRING", "value":"\""},
+						{"type":"STRING","value":"f\""},
+						{"type":"STRING","value":"u\""},
+						{"type":"STRING","value":"b\""},
+						{"type":"STRING","value":"r\""}
+					]
+				},
+                {
+                    "type": "REPEAT",
+                    "content": {
+                        "type":"CHOICE",
+                        "members": [
+                            {"type":"SYMBOL", "name": "interpolation"},
+                            {"type":"SYMBOL", "name": "escape_sequence"},
+                            {"type":"SYMBOL", "name": "_not_escape_sequence"},
+                            {"type":"SYMBOL", "name": "_string_content"}
+                        ]
+                    }
+                },
+                {"type": "STRING", "value": "\""}
+			]
+		},
+		{
+			"type":"SEQ",
+			"members": [
+				{
+					"type":"CHOICE",
+					"members": [
+						{"type":"STRING", "value":"''"},
+						{"type":"STRING","value":"f''"},
+						{"type":"STRING","value":"u''"},
+						{"type":"STRING","value":"b''"},
+						{"type":"STRING","value":"r''"}
+					]
+				},
+                {
+                    "type": "REPEAT",
+                    "content": {
+                        "type":"CHOICE",
+                        "members": [
+                            {"type":"SYMBOL", "name": "interpolation"},
+                            {"type":"SYMBOL", "name": "escape_sequence"},
+                            {"type":"SYMBOL", "name": "_not_escape_sequence"},
+                            {"type":"SYMBOL", "name": "_string_content"}
+                        ]
+                    }
+                },
+                {"type": "STRING", "value": "''"}
+			]
+		}
+	]
+}
+' readStream).
 	
 	self grammar rules
 		at: '_string_content'
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
-	self grammar rules
-		at: '_string_start'
-		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '''|"'}).
-	self grammar rules
-		at: '_string_end'
-		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '''|"'}).
-	self grammar at: 'inline' put: (self grammar at: #inline), #('_string_start' '_string_end').
+	self grammar
+		at: 'externals'
+		put: ((self grammar at: 'externals') reject: [:obj | obj name = '_string_content']).
+	self renameSymbol: '_string_content' to: 'string_content'.
 	
 	(self grammar rules at: '_suite') members: {(self grammar rules at: '_suite') members second}.
-	SBToggledCode comment: '' active: 0 do: {
-		[
-			self grammar rules at: '"' put: (JsonObject fromAssociations: {
-				#type -> 'CHOICE'.
-				#members -> {
-					JsonObject fromAssociations: {#type -> 'STRING'. #value -> '"'}.
-					JsonObject fromAssociations: {#type -> 'STRING'. #value -> ''''}}})]}.
-	self ignoreExternals: #('_indent' '_dedent' '_newline').
-	
-	self rulesDo: [:r | self removeOptionalString: ',' in: r]
+	self ignoreExternals: #('_indent' '_dedent' '_newline' '_string_start' '_string_end')
 ]

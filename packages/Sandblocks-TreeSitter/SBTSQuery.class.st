@@ -4,98 +4,11 @@ Class {
 	#instVars : [
 		'stream',
 		'captures',
-		'lastMatch',
-		'expressions'
+		'expressions',
+		'predicates'
 	],
-	#category : #'Sandblocks-TreeSitter'
+	#category : #'Sandblocks-TreeSitter-Query'
 }
-
-{ #category : #'as yet unclassified' }
-SBTSQuery >> evalExpression: anExpression against: aBlock ifMatch: aMatchBlock ifFail: aFailBlock ifSpecial: aSpecialBlock [
-	" symbol "
-
-	(anExpression isArray and: [#($? $+ $*) includes: anExpression type]) ifTrue: [
-		" see SBTSQueryTests>>#testCaptureOptional "
-		self shouldBeImplemented.
-		^ self
-			evalExpression: anExpression first
-			against: aBlock
-			ifMatch: aMatchBlock
-			ifFail: [aMatchBlock value]
-			ifSpecial: aSpecialBlock].
-	
-	(anExpression isArray and: [anExpression type = $( and: [anExpression first isString]]) ifTrue: [
-		((aBlock isKindOf: SBInlineBlockSymbol) and: [aBlock type = anExpression first or: [anExpression first = '_' or: [aBlock alias = anExpression first]]])
-			ifTrue: [
-				^ self
-					evalExpression: anExpression allButFirst
-					against: aBlock
-					ifMatch: [
-						self lastMatch: aBlock.
-						aMatchBlock value]
-					ifFail: aFailBlock
-					ifSpecial: aSpecialBlock]
-			ifFalse: [^ aFailBlock value]].
-	
-	" alternative "
-	(anExpression isArray and: [anExpression type = $[]) ifTrue: [
-		anExpression do: [:expr | self evalExpression: expr against: aBlock ifMatch: [^ aMatchBlock value] ifFail: [] ifSpecial: []].
-		^ aFailBlock value].
-	
-	" sequence "
-	anExpression isArray ifTrue: [ | exprs blocks |
-		exprs := anExpression readStream.
-		blocks := OrderedCollection withAll: aBlock childrenForQuery.
-		[exprs atEnd not] whileTrue: [ | expr nextBlocks |
-			expr := exprs next.
-			nextBlocks := expr last = $:
-				ifTrue: [ | b |
-					b := blocks detect: [:child | child field = expr allButLast] ifNone: [^ aFailBlock value].
-					expr := exprs next.
-					{b}]
-				ifFalse: [blocks ifEmpty: [{nil}] ifNotEmpty: [blocks]].
-			(nextBlocks anySatisfy: [:nextBlock |
-				self
-					evalExpression: expr
-					against: nextBlock
-					ifMatch: [
-						self lastMatch: nextBlock.
-						blocks remove: nextBlock.
-						true]
-					ifFail: [false]
-					ifSpecial: [true]]) ifFalse: [^ aFailBlock value]].
-		exprs atEnd ifFalse: [^ aFailBlock value].
-		^ aMatchBlock value].
-	
-	" capture "
-	anExpression first = $@ ifTrue: [
-		self lastMatch ifNotNil: [
-			captures at: anExpression allButFirst put: self lastMatch.
-			self lastMatch: nil].
-		^ aSpecialBlock value].
-	
-	" string match"
-	anExpression first = $= ifTrue: [
-		" TODO: should wrap node during parsing and then fail early "
-		self lastMatch ifNotNil: [
-			self lastMatch contents = (anExpression copyFrom: 3 to: anExpression size - 1)
-				ifTrue: [^ aSpecialBlock value]
-				ifFalse: [^ aFailBlock value]].
-		^ aSpecialBlock value].
-	
-	" anonymous/label node "
-	anExpression first = $" ifTrue: [
-		((aBlock isKindOf: SBInlineBlockLabel) and: [aBlock label = (anExpression copyFrom: 2 to: anExpression size - 1)])
-			ifTrue: [
-				self lastMatch: aBlock.
-				^ aMatchBlock value]
-			ifFalse: [^ aFailBlock value]].
-	
-	" field name that we want to handle above in sequences "
-	anExpression last = $: ifTrue: [^ self assert: false].
-	
-	^ aFailBlock value
-]
 
 { #category : #'as yet unclassified' }
 SBTSQuery >> execute: aString against: aBlock capturesDo: aClosure [
@@ -113,28 +26,21 @@ SBTSQuery >> executeAgainst: aBlock capturesDo: aClosure [
 	
 	ret := false.
 	expressions do: [:expression |
-		self
-			evalExpression: expression
-			against: aBlock
-			ifMatch: [ret := true]
-			ifFail: [self lastMatch: nil]
-			ifSpecial: []].
+		(expression evaluateAgainst: aBlock captures: captures)
+			ifNotNil: [ret := true]
+			ifNil: [expression isOptional ifTrue: [ret := true]]].
 	
-	ret ifTrue: [aClosure value: captures].
+	predicates do: [:predicate | (predicate verify: captures) ifFalse: [ret := false]].
+	
+	aClosure cull: captures cull: ret.
 	
 	^ ret
 ]
 
 { #category : #'as yet unclassified' }
-SBTSQuery >> lastMatch [
+SBTSQuery >> expressions [
 
-	^ lastMatch
-]
-
-{ #category : #'as yet unclassified' }
-SBTSQuery >> lastMatch: aBlock [
-
-	lastMatch := aBlock
+	^ expressions
 ]
 
 { #category : #'as yet unclassified' }
@@ -147,53 +53,80 @@ SBTSQuery >> parseExpression [
 		ifFalse: [self parseLiteral].
 	
 	^ (#($+ $* $?) includes: stream peek)
-		ifTrue: [(SBArrayWithType with: expr) type: stream next]
+		ifTrue: [
+			SBTSQueryRepeat new
+				type: stream next;
+				element: expr]
 		ifFalse: [expr]
 ]
 
 { #category : #'as yet unclassified' }
 SBTSQuery >> parseLiteral [
 
-	| contents endCheck |
-	endCheck := stream peek
-		caseOf: {
-			[$"] -> [[:c | c = $"]]}
-		otherwise: [[:c | c isSeparator or: [c = $) or: [c = $(]]]].
-	contents := String streamContents: [:str | [str nextPut: stream next] doWhileTrue: [stream peek notNil and: [(endCheck value: stream peek) not]]].
+	| contents endCheck hasClosingDelimiter |
+	hasClosingDelimiter := #($" $=) includes: stream peek.
+	contents := String streamContents: [:str |
+		endCheck := stream peek
+			caseOf: {
+				[$"] -> [[:c | c = $"]].
+				[$=] -> [[:c | c = $"]]}
+			otherwise: [[:c | c isSeparator or: [c = $) or: [c = $(]]]].
+		stream peek = $= ifTrue: [str nextPut: stream next].
+		[str nextPut: stream next] doWhileTrue: [stream peek notNil and: [(endCheck value: stream peek) not]]].
 	
-	contents first = $" ifTrue: [SBToggledCode comment: '"' active: 1 do: {[contents := contents, stream next]}].
-	^ contents
+	hasClosingDelimiter ifTrue: [contents := contents, stream next].
+	
+	contents last = $: ifTrue: [^ SBTSQueryField new contents: contents].
+	
+	^ contents first
+		caseOf: {
+			[$@] -> [SBTSQueryCapture new contents: contents].
+			[$=] -> [SBTSQueryStringMatch new contents: contents].
+			[$"] -> [SBTSQueryLiteral new contents: contents]}
+		otherwise: [SBTSQueryElement new contents: contents]
 ]
 
 { #category : #'as yet unclassified' }
 SBTSQuery >> parseSExpression [
 
-	| expr end start |
+	| elements end start |
 	start := SBToggledCode comment: '( or [' active: 1 do: {[stream next]}.
 	end := start caseOf: {
 		[$(] -> [$)].
 		[$[] -> [$]]}.
 	
 	self skipWhitespaces.
-	expr := (SBArrayWithType streamContents: [:s |
-		[stream peek ~= end] whileTrue: [
-			self skipWhitespaces.
-			s nextPut: self parseExpression.
-			self skipWhitespaces]]) type: start.
+	elements := OrderedCollection new.
+	[stream peek ~= end] whileTrue: [ | next |
+		self skipWhitespaces.
+		next := self parseExpression.
+		(elements notEmpty and: [elements last wrapsNext and: [elements last element isNil]])
+			ifTrue: [elements last element: next]
+			ifFalse: [
+				next wrapsPrevious ifTrue: [next element: elements removeLast].
+				elements add: next].
+		self skipWhitespaces].
 	SBToggledCode comment: ') or ]' active: 1 do: {[stream next]}.
 	
-	^ expr
+	(((elements first isKindOf: SBTSQueryCapture) and: [(elements first element isKindOf: SBTSQueryElement) and: [elements first element contents first = $#]]) or: [(elements first isKindOf: SBTSQueryElement) and: [elements first contents first = $#]]) ifTrue: [^ SBTSQueryPredicate new elements: elements].
+	(elements first isKindOf: SBTSQueryElement) ifTrue: [^ SBTSQueryNesting new elements: elements].
+	start = $( ifTrue: [^ SBTSQuerySequence new elements: elements].
+	start = $[ ifTrue: [^ SBTSQueryChoice new elements: elements].
+	self assert: false
 ]
 
 { #category : #'as yet unclassified' }
 SBTSQuery >> prepare: aString [
 
 	stream := aString readStream.
-	expressions := Array streamContents: [:s |
-		self skipWhitespaces.
-		[stream atEnd] whileFalse: [
-			s nextPut: self parseExpression.
-			self skipWhitespaces]]
+	expressions := OrderedCollection new.
+	self skipWhitespaces.
+	[stream atEnd] whileFalse: [ | expr |
+		expr := self parseExpression.
+		expr wrapsPrevious ifTrue: [expr element: expressions removeLast].
+		expressions add: expr.
+		self skipWhitespaces].
+	predicates := Array streamContents: [:stream | expressions do: [:expr | expr predicatesOn: stream]]
 ]
 
 { #category : #'as yet unclassified' }

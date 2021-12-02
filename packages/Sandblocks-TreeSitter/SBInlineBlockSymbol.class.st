@@ -2,17 +2,10 @@ Class {
 	#name : #SBInlineBlockSymbol,
 	#superclass : #SBInlineBlock,
 	#instVars : [
-		'type',
-		'field'
+		'type'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
-
-{ #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> allElementsDo: aBlock [
-
-	aBlock value: self
-]
 
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> buildCopy [
@@ -37,13 +30,14 @@ SBInlineBlockSymbol >> buildEmpty [
 
 	^ self class new
 		type: self type factory: factory;
-		field: self field;
-		alias: self alias
+		field: self basicField;
+		alias: self basicAlias
 ]
 
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> buildWithFields: aStream alternatives: aDictionary [
 
+	(self isRootSymbol or: [factory promotedInlineSymbols includes: self type]) ifTrue: [^ true].
 	self isSuperType ifTrue: [^ true].
 	aStream peek second isMorph ifFalse: [^ false].
 	
@@ -53,7 +47,7 @@ SBInlineBlockSymbol >> buildWithFields: aStream alternatives: aDictionary [
 			block := aStream next second.
 			self addMorphBack: (block type = self type
 				ifTrue: [block firstSubmorph buildCopy]
-				ifFalse: [self template buildEmpty addMorphBack: block]).
+				ifFalse: [self template buildEmpty addMorphBack: block buildCopy]).
 			true]
 		ifFalse: [false]
 ]
@@ -77,13 +71,23 @@ SBInlineBlockSymbol >> childrenForQueryDo: aBlock [
 SBInlineBlockSymbol >> childrenIn: anExplore [
 
 	((anExplore expandSymbol: self) not and: [self isSuperType not]) ifTrue: [^ #()].
-	^ (anExplore notNil and: [
-		SBToggledCode
-			comment: ''
-			active: 1
-			do: {[anExplore canVisitSymbol: self type]. [anExplore hasVisitedSymbol: self type factory: factory]}])
+	^ (anExplore notNil and: [anExplore canVisitSymbol: self type])
 		ifTrue: [{self template}]
 		ifFalse: [{SBInlineBlockNever new}]
+]
+
+{ #category : #hierarchy }
+SBInlineBlockSymbol >> containingSymbol [
+
+	^ self
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> contents [
+
+	^ (self factory ifNotNil: [:f | f containsPromotedInlineSymbol: self type] ifNil: [false])
+		ifTrue: [String streamContents: [:stream | self childSandblocks do: [:child | child contents ifNotNil: [:content | stream nextPutAll: content]]]]
+		ifFalse: [super contents]
 ]
 
 { #category : #'as yet unclassified' }
@@ -93,21 +97,15 @@ SBInlineBlockSymbol >> deleteTargetFor: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> elementsDo: aBlock [
+
+	
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> factory: aFactory [
 
 	factory := aFactory
-]
-
-{ #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> field [
-
-	^ field
-]
-
-{ #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> field: aString [
-
-	field := aString
 ]
 
 { #category : #'as yet unclassified' }
@@ -116,6 +114,14 @@ SBInlineBlockSymbol >> firstDifferingBlocksWith: aMorph do: aBlock [
 	self class = aMorph class ifFalse: [^ aBlock value: self value: aMorph].
 	self type = aMorph type ifFalse: [^ aBlock value: self value: aMorph].
 	^ self firstSubmorph firstDifferingBlocksWith: aMorph firstSubmorph do: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> get: aFieldString [
+
+	^ self childSandblocks
+		detect: [:block | (block orOwnerUpTo: self satisfying: [:b | b field = aFieldString]) notNil]
+		ifNone: [nil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -144,10 +150,7 @@ SBInlineBlockSymbol >> includesNestedSameStructure: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> inline [
 
-	^ SBToggledCode
-		comment: ''
-		active: 1
-		do: {[factory shouldBlockInline: self type]. [self inlineIfPossible]}
+	^ factory isNil or: [factory shouldBlockInline: self type]
 ]
 
 { #category : #'as yet unclassified' }
@@ -164,10 +167,40 @@ SBInlineBlockSymbol >> instantiate [
 		ifFalse: [self buildEmpty addMorphBack: (factory instantiateTemplate: self type)]
 ]
 
+{ #category : #testing }
+SBInlineBlockSymbol >> isAlias [
+
+	^ self factory aliases anySatisfy: [:a | a name = self type and: [(self factory grammar rules includesKey: self type) not]]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> isArtefact [
+
+	^ (self owner isNil or: [self owner isInlineBlock not]) and: [self type = self factory rootRuleName]
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> isHidden [
 
 	^ self type first = $_ or: [factory isSuperType: self type]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> isRootSymbol [
+	" used by ParseExplore: the exploration either receives a symbol block (general case), which
+first has to be unwrapped. Or it receives an arbitrary block that was aliased. In either case,
+the elements that we have will start only one level deeper. But, for aliased blocks, we cannot
+simply unpack the first elements as there may be choices in between.
+
+Simple case: (identifier), stream: (identifier)
+Complex case: (property_identifier, aliased as: (identifier)|(reserved)), stream: 'abc'
+Complex case: ((identifier), ('as' (identifier)?), stream: (identifier)
+Complex case: (''', string_fragment, '''), stream: (''', string_fragment, ''')"
+
+	^ self owner isNil or: [ | owners |
+		owners := self allOwners.
+		(owners allSatisfy: [:owner | (owner isKindOf: SBInlineBlockSymbol) not]) and: [" if we have a sequence, we can still be the root symbol, if we're in an alias (see cases 3 vs. 4) "
+		owners last alias notNil and: [owners allSatisfy: [:owner | (owner isKindOf: SBInlineBlockSequence) not]]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -211,13 +244,7 @@ SBInlineBlockSymbol >> layoutCommands [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> newEmptyChildNear: aBlock before: aBoolean [
 
-	^ SBToggledCode comment: '' active: 1 do: {
-		[self repeaterChild newEmptyChildNear: aBlock before: aBoolean].
-		[
-			aBlock ifNotNil: [(aBlock ownerThatIsA: SBInlineBlockRepeat) ifNotNil: [:container | ^ container newEmptyChildNear: aBlock before: aBoolean]].
-			^ (self firstSubmorph isKindOf: SBInlineBlockRepeat)
-				ifTrue: [self firstSubmorph newEmptyChildNear: aBlock before: aBoolean]
-				ifFalse: [nil]]}
+	^ self repeaterChild ifNotNil: [:r | r newEmptyChildNear: aBlock before: aBoolean]
 ]
 
 { #category : #'as yet unclassified' }
@@ -240,8 +267,14 @@ SBInlineBlockSymbol >> ownerWithColor [
 SBInlineBlockSymbol >> printSExprOn: aStream depth: aNumber [
 
 	| any |
+	(self field notNil and: [self inline not]) ifTrue: [
+		aStream
+			nextPutAll: self field;
+			nextPutAll: ': '].
 	aStream nextPutAll: '('.
+	self inline ifTrue: [aStream nextPutAll: '['].
 	aStream nextPutAll: self type.
+	self inline ifTrue: [aStream nextPutAll: ']'].
 	any := false.
 	self childSymbolsDo: [:morph |
 		any ifFalse: [any := true].
@@ -257,16 +290,6 @@ SBInlineBlockSymbol >> printTitleOn: aStream [
 	SBToggledCode comment: '' active: 0 do: {
 		[((factory shouldBlockInline: self type) and: [self hasSubmorphs and: [self firstSubmorph isUnknown not]]) ifTrue: [^ self firstSubmorph printTitleOn: aStream]]}.
 	aStream nextPutAll: self type
-]
-
-{ #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> takeParseFrom: aCursor [
-
-	aCursor type = self type ifTrue: [
-		" if there was more on this level, fail "
-		aCursor gotoNextSibling ifTrue: [^ false].
-		(self valueOfProperty: #didDescend) ifTrue: [aCursor gotoParent]].
-	^ true
 ]
 
 { #category : #'as yet unclassified' }

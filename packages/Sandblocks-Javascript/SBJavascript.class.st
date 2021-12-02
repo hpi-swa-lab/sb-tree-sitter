@@ -6532,7 +6532,7 @@ SBJavascript class >> grammarJson [
 SBJavascript class >> highlightQuery [
 	" https://github.com/tree-sitter/tree-sitter-javascript/blob/master/queries/highlights.scm "
 
-	^ '''; Special identifiers
+	^ '; Special identifiers
 	;--------------------
 	
 	([
@@ -6736,8 +6736,7 @@ SBJavascript class >> highlightQuery [
 	  "while"
 	  "with"
 	  "yield"
-	] @keyword
-	'''
+	] @keyword'
 ]
 
 { #category : #'as yet unclassified' }
@@ -6755,13 +6754,28 @@ SBJavascript class >> rootRuleName [
 { #category : #'as yet unclassified' }
 SBJavascript class >> statementContainerTypes [
 
-	^ #('program' 'statement_block')
+	^ #('program' 'statement_block' 'class_body')
 ]
 
 { #category : #'as yet unclassified' }
 SBJavascript >> configure [
 
+	self blockInline: #('expression_statement' 'statement_block' 'formal_parameters').
+	self hardLineBreakMatcher: [:block | (block submorphAfter ifNotNil: #type) = 'statement_block']
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> postConfigure [
+
+	blockInline remove: 'statement_block'
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> preprocessGrammar [
+
 	| rulesWithSemicolon |
+	self ignoreExternals: #('_automatic_semicolon').
+	
 	rulesWithSemicolon := ((self grammar rules associations collect: [:pair |
 		self
 			traverse: pair value
@@ -6769,16 +6783,7 @@ SBJavascript >> configure [
 			ifFound: [:obj | pair key -> ';']
 			ifNone: [nil]]) select: #notNil) as: Dictionary.
 	self addDelimitedRules: rulesWithSemicolon.
-	self addDelimitedRules: ({'object' -> ','. 'arguments' -> ','} as: Dictionary).
-	self hardLineBreakMatcher: [:block | (block submorphAfter ifNotNil: #type) = 'statement_block'].
 	
-	self blockInline: {'expression_statement'. 'arguments'. 'formal_parameters'}
-]
-
-{ #category : #'as yet unclassified' }
-SBJavascript >> preprocessGrammar [
-
-	self ignoreExternals: #('_automatic_semicolon').
 	self grammar rules
 		at: '_template_chars'
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).

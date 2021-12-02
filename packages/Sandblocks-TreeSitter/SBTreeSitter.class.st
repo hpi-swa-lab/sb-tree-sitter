@@ -15,19 +15,27 @@ SBTreeSitter class >> moduleName [
 ]
 
 { #category : #'as yet unclassified' }
-SBTreeSitter >> buildTreeFrom: aCursor [
+SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 
-	| field fallback type fieldStream block template |
+	| field fallback type fieldStream block template root |
 	type := aCursor type.
 	field := aCursor currentFieldName.
 	fallback := {field. aCursor text}.
-	template := aCursor isNamed ifTrue: [aCursor factory getTemplate: type ifAbsent: [^ aCursor text]] ifFalse: [^ aCursor text].
-	template = 'ALIAS' ifTrue: [type := aCursor resolveCurrentAliasIfString: [:str | ^ str]].
+	
+	template := aCursor isNamed
+		ifTrue: [aCursor factory getTemplate: type ifAbsent: [^ aBlock value: aCursor text]]
+		ifFalse: [^ aBlock value: aCursor text].
+	
+	template = 'ALIAS'
+		ifTrue: [
+			root := aCursor resolveAlias: type in: aCursor parentType.
+			(root isKindOf: SBInlineBlockSymbol) ifTrue: [type := root type]]
+		ifFalse: [root := SBInlineBlockSymbol new type: type factory: aCursor factory].
 	
 	fieldStream := ((Array streamContents: [:stream |
 		aCursor gotoFirstChild ifTrue: [ | first |
 			first := aCursor node.
-			[stream nextPut: {aCursor currentFieldName. self buildTreeFrom: aCursor}] doWhileFalse: [ | gap atEnd |
+			[self buildTreeFrom: aCursor do: [:b | stream nextPut: {aCursor currentFieldName. b}]] doWhileFalse: [ | gap atEnd |
 				atEnd := aCursor gotoNextSibling.
 				(atEnd not and: [aCursor factory noteUncapturedText includes: type]) ifTrue: [
 					gap := aCursor textBetween: first and: aCursor node.
@@ -38,10 +46,11 @@ SBTreeSitter >> buildTreeFrom: aCursor [
 	
 	block := SBTSParseExplore new
 		explore: fieldStream
-		type: type
+		root: root
 		factory: aCursor factory.
-	self assert: block notNil.
-	^ SBInlineBlockSymbol new type: type factory: aCursor factory block: block
+	template = 'ALIAS' ifTrue: [block alias: type].
+	self assert: block notNil description: 'failed to build ', type.
+	^ aBlock value: block
 ]
 
 { #category : #ffi }
@@ -202,6 +211,13 @@ SBTreeSitter >> nodeEndByte: aNode [
 ]
 
 { #category : #ffi }
+SBTreeSitter >> nodeHasError: aNode [
+
+	<apicall: bool ts_node_has_error (SBTSNode)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
 SBTreeSitter >> nodeIsNamed: aNode [
 
 	<apicall: bool ts_node_is_named (SBTSNode)>
@@ -253,7 +269,17 @@ SBTreeSitter >> nodeType: aNode [
 { #category : #'as yet unclassified' }
 SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 
-	| parser root tree block cursor |
+	^ self parseAsCursor: aString language: aSymbol do: [:cursor |
+		(self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory) do: [:b | b])
+			hResizing: #rigid;
+			attachDecorator: SBResizableDecorator new;
+			updateAllHighlights]
+]
+
+{ #category : #'as yet unclassified' }
+SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
+
+	| parser root tree cursor wasFreed |
 	currentString := aString withUnixLineEndings.
 	parser := self parserNew.
 	language := self perform: aSymbol asSymbol.
@@ -263,24 +289,15 @@ SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 	tree := self parser: parser old: nil parseString: currentString length: currentString size.
 	
 	root := self treeRootNode: tree.
-	
 	cursor := self cursorNew: root.
+	wasFreed := false.
 	
-	cursor := self cursorNew: root.
-	block := (SBToggledCode comment: '' active: 1 do: {
-		[self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory)].
-		[SBTSParseExplore new explore: (SBTSCursor new library: self cursor: cursor factory: aFactory)].
-		[(SBInlineBlockSymbol new type: (self nodeType: root) factory: aFactory) takeParsedFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory)]})
-		hResizing: #rigid;
-		attachDecorator: SBResizableDecorator new;
-		updateAllHighlights.
-	
-	self nodeString: root.
-	
-	self cursorDelete: cursor.
-	self parserDelete: parser.
-	
-	^ block
+	^ [aBlock value: cursor] ensure: [
+		" there were problems with double-free when debugging "
+		wasFreed ifFalse: [
+			wasFreed := true.
+			self cursorDelete: cursor.
+			self parserDelete: parser]]
 ]
 
 { #category : #ffi }
@@ -360,6 +377,13 @@ SBTreeSitter >> ruby [
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-ruby' name: 'ruby' context: thisContext
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> sexp [
+
+	<apicall: SBTSLanguage* tree_sitter_sexp () module: 'tree-sitter-sexp'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'AbstractMachinesLab/tree-sitter-sexp' name: 'sexp' context: thisContext
+]
+
 { #category : #helper }
 SBTreeSitter >> textBetween: aNode and: anEndNode [
 	" TODO: will break with UTF-8 "
@@ -379,4 +403,11 @@ SBTreeSitter >> treeRootNode: aTree [
 
 	<apicall: SBTSNode ts_tree_root_node (void*)>
 	^ self externalCallFailed
+]
+
+{ #category : #'ffi languages' }
+SBTreeSitter >> tsq [
+
+	<apicall: SBTSLanguage* tree_sitter_tsq () module: 'tree-sitter-tsq'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-tsq' name: 'tsq' context: thisContext
 ]

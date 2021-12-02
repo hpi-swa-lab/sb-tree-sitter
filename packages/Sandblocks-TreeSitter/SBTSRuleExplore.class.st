@@ -25,6 +25,14 @@ Class {
 { #category : #deduplicate }
 SBTSRuleExplore class >> deduplicateResults: aCollection [
 
+	^ SBToggledCode comment: '' active: 2 do: {
+		[self deduplicateResultsViaCommonAncestors: aCollection].
+		[self deduplicateResultsViaRuns: aCollection]}
+]
+
+{ #category : #deduplicate }
+SBTSRuleExplore class >> deduplicateResultsViaCommonAncestors: aCollection [
+
 	| candidates |
 	" try and find a minimum of symbols the user hasn't typed "
 	SBToggledCode comment: '' active: 1 do: {
@@ -44,6 +52,22 @@ SBTSRuleExplore class >> deduplicateResults: aCollection [
 		(candidates anySatisfy: [:compare | | diff |
 			diff := candidate firstDifferingBlocksWith: compare do: [:a :b | b unwrapSuperType].
 			compare ~= candidate and: [candidate containsEqual: diff]]) or: [candidate leftMostChain anySatisfy: [:root | candidates anySatisfy: [:compare | root ~= compare and: [root hasSameContentsAs: compare]]]]]
+]
+
+{ #category : #deduplicate }
+SBTSRuleExplore class >> deduplicateResultsViaRuns: aCollection [
+
+	| groups |
+	groups := aCollection groupBy: [:pair | | first |
+		first := pair second ifNotEmpty: #first ifEmpty: [pair first].
+		{first containingSymbol ifNotNil: #type. first contents}].
+	
+	^ groups values collect: [:group |
+		(group detectMin: [:pair |
+			SBToggledCode
+				comment: ''
+				active: 1
+				do: {[pair first numberOfElements]. [pair first ownerChain size]}]) first]
 ]
 
 { #category : #deduplicate }
@@ -147,7 +171,7 @@ SBTSRuleExplore >> doExplore: aBlock withNested: aSubBlock nestedBefore: aBoolea
 								self addResult.
 								self restartFromLastChoiceIfDone: [^ self]]]
 						ifFalse: [
-							((nestedBefore not or: [foundNested]) and: [self tryTakeStreamWith: block])
+							((nestedBefore not or: [foundNested or: [block isSkippedFor: self]]) and: [self tryTakeStreamWith: block])
 								ifTrue: [
 									stack ifEmpty: [
 										self done ifTrue: [self addResult].
