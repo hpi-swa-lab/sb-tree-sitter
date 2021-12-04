@@ -759,8 +759,9 @@ SBInlineBlock >> prefersNoBorder [
 { #category : #printing }
 SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 
-	| first delimiter |
+	| first delimiter lastMatchedWordRule suffixMatchesWordRule prefixMatchesWorldRule |
 	first := true.
+	lastMatchedWordRule := false.
 	delimiter := (self containingSymbol ifNotNil: #type)
 		ifNotNil: [:parentType |
 			self factory delimitedRules
@@ -768,13 +769,17 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 				ifPresent: [:delim | delim first]
 				ifAbsent: ['']]
 		ifNil: [''].
+	suffixMatchesWordRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory wordRule matchesStream: (string readStream position: start - 1)]]].
+	prefixMatchesWorldRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [factory wordRule matchesPrefix: string]].
+	
 	aCollection do: [:element | | string |
 		string := String streamContents: [:stream | element writeSourceOn: stream].
 		(self isKindOf: SBInlineBlockRepeat)
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
 				((self factory hardLineBreakMatcher value: self) or: [self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]]) ifTrue: [aStream cr]]
-			ifFalse: [((factory ifNotNil: #wordRule) notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [aStream space]].
+			ifFalse: [(lastMatchedWordRule and: [prefixMatchesWorldRule value: string]) ifTrue: [aStream space]].
+		lastMatchedWordRule := suffixMatchesWordRule value: string.
 		aStream nextPutAll: string.
 		first := false]
 ]

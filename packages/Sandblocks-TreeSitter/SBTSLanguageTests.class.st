@@ -98,6 +98,9 @@ return<h2>Hi</h2>}}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
 	source := 'const a=5'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	
+	source := '<h2 style="color:red"></a>'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString
 ]
 
