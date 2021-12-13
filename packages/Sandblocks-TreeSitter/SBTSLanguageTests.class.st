@@ -254,6 +254,20 @@ SBTSLanguageTests >> testPythonString [
 	(SBPython parseElement: '"abc\n"') contents
 ]
 
+{ #category : #'testing - interactions' }
+SBTSLanguageTests >> testRegexResumeInput [
+
+	| block e |
+	block := SBRegex parse: 'abc'.
+	e := self editorFor: block.
+	block lastDeepChild select.
+	[e selection keyStroke: (self keyboardEvent: $d)]
+		on: ProvideAnswerNotification
+		do: [:n | self assert: false].
+	
+	self assert: 'abcd' equals: block sourceString
+]
+
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testSyntaxError [
 

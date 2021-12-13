@@ -361,7 +361,7 @@ SBInlineBlock >> factory: aFactory [
 { #category : #accessing }
 SBInlineBlock >> field [
 
-	^ self basicField ifNil: [self owner inline ifTrue: [self owner field]]
+	^ self basicField ifNil: [(self owner isInlineBlock and: [self owner inline]) ifTrue: [self owner field]]
 ]
 
 { #category : #accessing }
@@ -900,24 +900,34 @@ find variation points. "
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> tryInsertInputAdjacent: aString [
+
+	| insert |
+	insert := (self owner ownerThatIsA: SBInlineBlockRepeat) containingSandblock.
+	insert ifNotNil: [ | command |
+		command := insert insertEmptyCommandRequestNear: self containingSandblock before: false.
+		command ifNotNil: [
+			self sandblockEditor do: command.
+			insert inputContainedUnknown.
+			self sandblockEditor selection keyStroke: (SBTest keyboardEvent: aString first)]]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> tryInterpretInput: aString before: aBoolean [
 
-	| selected |
-	selected := SBTSBlockChooseDialog new
+	| result |
+	result := SBTSBlockChooseDialog new
 		do: [:query | self choicesForInput: query before: aBoolean]
 		query: aString.
-	selected ifNil: [^ self].
+	result ifNil: [^ self tryInsertInputAdjacent: aString].
 	
 	self sandblockEditor do: (SBReplaceCommand new
-		target: (selected valueOfProperty: #rootBlock);
-		replacer: selected).
-	selected removeProperty: #rootBlock.
-	SBToggledCode comment: '' active: 1 do: {
-		[
-			selected firstBlock
-				select;
-				inputContainedUnknown].
-		[selected inputContainedUnknown]}
+		target: (result valueOfProperty: #rootBlock);
+		replacer: result).
+	result removeProperty: #rootBlock.
+	result firstBlock
+		select;
+		inputContainedUnknown
 ]
 
 { #category : #accessing }

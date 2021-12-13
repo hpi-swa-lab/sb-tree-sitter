@@ -552,7 +552,9 @@ SBMetaBlockFactory >> findBlockInlineCandidates [
 						usages notEmpty and: [
 							usages allSatisfy: [:pair | | parent |
 								parent := pair first parentElementIn: (self getTemplate: pair second).
-								(parent isKindOf: SBInlineBlockSequence) or: [parent isNil]]]]) ifTrue: [blockInline add: element type]]]]]
+								(parent isKindOf: SBInlineBlockSequence) or: [parent isNil]]]]) ifTrue: [blockInline add: element type]]]]].
+	
+	blockInline remove: self rootRuleName ifAbsent: []
 ]
 
 { #category : #'grammar clean' }
