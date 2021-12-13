@@ -253,3 +253,9 @@ SBTSLanguageTests >> testPythonString [
 	(SBPython parseElement: 'f"abc"') contents.
 	(SBPython parseElement: '"abc\n"') contents
 ]
+
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testSyntaxError [
+
+	self should: [SBPython parse: '"abc"('] raise: SBTSSyntaxError
+]
