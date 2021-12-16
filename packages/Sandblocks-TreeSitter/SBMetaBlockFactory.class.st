@@ -369,10 +369,14 @@ SBMetaBlockFactory >> buildRegex: anObject on: aStream [
 		['TOKEN'] -> [self buildRegex: anObject content on: aStream].
 		['IMMEDIATE_TOKEN'] -> [self buildRegex: anObject content on: aStream].
 		['REPEAT'] -> [
+			aStream nextPut: $(.
 			self buildRegex: anObject content on: aStream.
+			aStream nextPut: $).
 			aStream nextPut: $*].
 		['REPEAT1'] -> [
+			aStream nextPut: $(.
 			self buildRegex: anObject content on: aStream.
+			aStream nextPut: $).
 			aStream nextPut: $+].
 		['PATTERN'] -> [
 			aStream nextPut: $(.

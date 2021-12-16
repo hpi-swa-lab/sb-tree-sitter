@@ -53,6 +53,13 @@ SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 	^ aBlock value: block
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> c [
+
+	<apicall: SBTSLanguage* tree_sitter_c () module: 'tree-sitter-c'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-c' name: 'c' context: thisContext
+]
+
 { #category : #ffi }
 SBTreeSitter >> cursor: aCursor reset: aNode [
 
