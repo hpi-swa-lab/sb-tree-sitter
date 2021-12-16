@@ -398,9 +398,11 @@ SBMetaBlockFactory >> buildRegexString: rule [
 	| s |
 	s := '' writeStream.
 	self buildRegex: rule on: s.
-	^ (s contents copyReplaceAll: '\p{XID_Start}' with: 'A-Za-z')
+	^ ((s contents copyReplaceAll: '\p{XID_Start}' with: 'A-Za-z')
 		copyReplaceAll: '\p{XID_Continue}'
-		with: 'A-Za-z0-9'
+		with: 'A-Za-z0-9')
+		copyReplaceAll: ':'
+		with: '\:'
 ]
 
 { #category : #'grammar clean' }
@@ -756,6 +758,7 @@ SBMetaBlockFactory >> mergeAdjacentOptions: anObject [
 
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> mergeNestedChoices: anObject [
+	" (a | (b | c)) -> (a | b | c) "
 
 	anObject type = 'CHOICE' ifTrue: [
 		(anObject members noneSatisfy: [:m | m type = 'BLANK']) ifTrue: [
@@ -790,6 +793,7 @@ SBMetaBlockFactory >> mergeOptionalRepeat: anObject [
 
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> mergeRedundantRepeats: anObject [
+	" (a* | b+)* -> (a | b)* "
 
 	(anObject type = 'REPEAT' and: [anObject content type = 'CHOICE']) ifTrue: [
 		anObject content members do: [:m |
@@ -941,6 +945,7 @@ SBMetaBlockFactory >> removeHiddenTerminals: anObject [
 
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> removeMarkedDelimiters: anObject rule: aString [
+	" (a delim) -> (a) "
 
 	anObject content ifNotNil: [:c | self removeMarkedDelimiters: c rule: aString].
 	anObject members ifNotNil: [
@@ -1108,6 +1113,7 @@ SBMetaBlockFactory >> unpackTypes [
 
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> unwrapSingleChoices: anObject [
+	" (a) -> a, (a* | BLANK) -> a* "
 
 	(((anObject type = 'CHOICE' or: [anObject type = 'SEQ']) and: [anObject members size = 1]) or: [anObject type = 'CHOICE' and: [anObject members size = 2 and: [anObject members first type = 'REPEAT' and: [anObject members second type = 'BLANK']]]]) ifTrue: [ | copyFrom |
 		copyFrom := anObject members first.
