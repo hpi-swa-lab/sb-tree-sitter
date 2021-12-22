@@ -13,6 +13,15 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBInlineBlock class >> registerShortcuts: aProvider [
+
+	aProvider
+		registerShortcut: Character space do: #promptMetaTransform;
+		registerShortcut: Character space shift do: #promptMetaTransform;
+		registerShortcut: $r command do: #applyReplacements
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> access [
 
 	^ SBTSFieldAccessor new element: self
