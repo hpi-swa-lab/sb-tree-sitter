@@ -24,7 +24,7 @@ SBJsFetch class >> matchJs: aDictionary do: aBlock [
 ]
 
 { #category : #'initialize-release' }
-SBJsFetch >> url: aString params: aSBInlineBlockSymbol [ 
+SBJsFetch >> url: aString params: aSBInlineBlockSymbol [
 
 	self
 		listDirection: #topToBottom;
@@ -33,15 +33,15 @@ SBJsFetch >> url: aString params: aSBInlineBlockSymbol [
 			addMorphBack: (SBTextBubble new contents: aString));
 		addMorphBack: (SBRow new
 			addMorphBack: (SBStringMorph new contents: 'Params: ');
-			addMorphBack: (SBStringMorph new contents: aSBInlineBlockSymbol sourceString))
+			addMorphBack: aSBInlineBlockSymbol buildCopy)
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> writeSourceOn: aStream [ 
+SBJsFetch >> writeSourceOn: aStream [
 
 	aStream nextPutAll: 'window.fetch("'.
 	aStream nextPutAll: self firstSubmorph submorphs second contents.
 	aStream nextPutAll: '", '.
-	aStream nextPutAll: self submorphs second submorphs second contents.
+	self submorphs second submorphs second writeSourceOn: aStream.
 	aStream nextPutAll: ')'
 ]

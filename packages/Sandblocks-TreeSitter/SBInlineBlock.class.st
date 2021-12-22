@@ -88,11 +88,9 @@ SBInlineBlock >> applyReplacements [
 										target: target
 										replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
 							self assert: (cmd isKindOf: SBCommand).
-							stream nextPut: cmd]]]]]].
-	commands ifNotEmpty: [
-		self sandblockEditor
-			ifNotNil: [:e | e do: (SBCombinedCommand newWith: commands)]
-			ifNil: [commands do: #do]]
+							self sandblockEditor
+								ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
+								ifNil: [cmd do]]]]]]]
 ]
 
 { #category : #'as yet unclassified' }
