@@ -659,6 +659,10 @@ SBMetaBlockFactory >> hasHighlight [
 	^ highlightQuery notNil
 ]
 
+{ #category : #helper }
+SBMetaBlockFactory >> highlightFor: aSBBlock do: aBlock [
+]
+
 { #category : #accessing }
 SBMetaBlockFactory >> highlightQuery [
 

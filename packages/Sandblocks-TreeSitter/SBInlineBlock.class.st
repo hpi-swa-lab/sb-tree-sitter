@@ -247,6 +247,14 @@ SBInlineBlock >> click: anEvent [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> color [
+
+	self containingSymbol ifNotNil: [ :aSymbol |
+		self factory highlightFor: aSymbol do: [ :color | color ifNotNil: [ :c | ^ c muchLighter ] ] ].
+	^ super color
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> containingSandblock [
 
 	^ self inline ifTrue: [self owner ifNotNil: #containingSandblock] ifFalse: [self]
