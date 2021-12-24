@@ -22,6 +22,12 @@ SBInlineBlock class >> registerShortcuts: aProvider [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> absorbsInput: anEvent [
+
+	^ anEvent keyCharacter isPrintable and: [self currentTextMorph owner regex matches: anEvent keyCharacter asString]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> access [
 
 	^ SBTSFieldAccessor new element: self
@@ -826,6 +832,15 @@ SBInlineBlock >> printSExprOn: aStream depth: aNumber [
 SBInlineBlock >> printTitleOn: aStream [
 
 	^ self subclassResponsibility
+]
+
+{ #category : #actions }
+SBInlineBlock >> promptMetaTransform [
+	<action>
+
+	self
+		tryInterpretInput: ((UIManager default request: 'type operator') ifEmpty: [^ self])
+		before: ActiveEvent shiftPressed not
 ]
 
 { #category : #accessing }
