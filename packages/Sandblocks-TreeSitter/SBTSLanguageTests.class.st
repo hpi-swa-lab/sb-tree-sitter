@@ -249,9 +249,11 @@ SBTSLanguageTests >> testPythonPatternList [
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testPythonString [
 
+	self assert: 'abc' equals: (SBPython parseElement: '''abc''') contents.
 	self assert: 'abc' equals: (SBPython parseElement: '"abc"') contents.
-	(SBPython parseElement: 'f"abc"') contents.
-	(SBPython parseElement: '"abc\n"') contents
+	self assert: 'abc' equals: (SBPython parseElement: 'f"abc"') contents.
+	self assert: 'abc\n' equals: (SBPython parseElement: '"abc\n"') contents.
+	self assert: 'abc\n' equals: (SBPython parseElement: '"""abc\n"""') contents
 ]
 
 { #category : #'testing - interactions' }

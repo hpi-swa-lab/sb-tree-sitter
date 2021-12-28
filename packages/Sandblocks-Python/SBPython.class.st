@@ -5137,40 +5137,8 @@ SBPython >> postConfigure [
 { #category : #'as yet unclassified' }
 SBPython >> preprocessGrammar [
 
-	self grammar rules
-		at: 'string'
-		put: (Json readFrom: '{
-	"type":"CHOICE",
-	"members": [
-		{
-			"type":"SEQ",
-			"members": [
-				{
-					"type":"CHOICE",
-					"members": [
-						{"type":"STRING", "value":"\""},
-						{"type":"STRING","value":"f\""},
-						{"type":"STRING","value":"u\""},
-						{"type":"STRING","value":"b\""},
-						{"type":"STRING","value":"r\""}
-					]
-				},
-                {
-                    "type": "REPEAT",
-                    "content": {
-                        "type":"CHOICE",
-                        "members": [
-                            {"type":"SYMBOL", "name": "interpolation"},
-                            {"type":"SYMBOL", "name": "escape_sequence"},
-                            {"type":"SYMBOL", "name": "_not_escape_sequence"},
-                            {"type":"SYMBOL", "name": "_string_content"}
-                        ]
-                    }
-                },
-                {"type": "STRING", "value": "\""}
-			]
-		},
-		{
+	| quotationTemplate |
+	quotationTemplate := '{
 			"type":"SEQ",
 			"members": [
 				{
@@ -5197,10 +5165,19 @@ SBPython >> preprocessGrammar [
                 },
                 {"type": "STRING", "value": "''"}
 			]
-		}
+		}'.
+	
+	self grammar rules at: 'string' put: (Json readFrom: ('\{
+	"type":"CHOICE",
+	"members": [
+		{1},
+		{2},
+		{3}
 	]
-}
-' readStream).
+\}' format: {
+		quotationTemplate.
+		quotationTemplate copyReplaceAll: '''' with: '\"'.
+		quotationTemplate copyReplaceAll: '''' with: '\"\"\"'}) readStream).
 	
 	self grammar rules
 		at: '_string_content'

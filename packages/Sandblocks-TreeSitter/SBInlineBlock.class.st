@@ -233,8 +233,9 @@ recursion, which tends to produce more complex, combined blocks"
 { #category : #'as yet unclassified' }
 SBInlineBlock >> clearCache [
 
-	self allMorphsDo: [:morph | morph layoutChanged].
-	self allMorphsDo: [:morph | (morph isSandblock or: [morph isInlineBlock]) ifTrue: [morph clearCacheSelf]]
+	self layoutChanged.
+	self clearCacheSelf.
+	self submorphsDo: [:morph | (morph isSandblock or: [morph isInlineBlock]) ifTrue: [morph clearCache]]
 ]
 
 { #category : #actions }
