@@ -1,0 +1,20 @@
+SmalltalkCISpec {
+  #preTesting : SCICustomScript {
+    #path : 'scripts/preTesting.st',
+    #platforms : [ #squeak ]
+  },
+  #loading : [
+    SCIMetacelloLoadSpec {
+      #baseline : 'SBTreeSitter',
+      #platforms : [ #squeak ],
+      #directory: 'packages',
+	  #useLatestMetacello : true
+    }
+  ],
+  #testing : {
+    #coverage : {
+      #packages : [ 'SBTreeSitter' ],
+      #format : #coveralls
+    }
+  }
+}
