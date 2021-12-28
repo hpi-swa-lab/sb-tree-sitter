@@ -20,5 +20,5 @@ SBJsFetchMethodSelect >> promptChangeValue [
 			selector: #object;
 			value: (self values at: index)).
 		self owner owner method: (self values at: index).
-		self owner owner recreate: (self values at: index)]
+		self owner owner recreateFromMorphs]
 ]

@@ -38,8 +38,8 @@ SBJsFetchBodyTextBubble >> promptChangeValue [
 		key := self values at: index.
 		key = 'Clear'
 			ifTrue: [
-				self contents: ''.
-				owner owner recreate: #post]
+				owner owner data: ''.
+				owner owner recreateFromMorphs]
 			ifFalse: [
 				values := self valuesForKey: key.
 				placeholderTxt := values at: 1.
@@ -48,7 +48,7 @@ SBJsFetchBodyTextBubble >> promptChangeValue [
 				owner owner addHeaderAction: 'Content-Type' value: contentType.
 				"Special cases when we need to change from text box to key / value pairs in the body section"
 				key = 'form-data' ifTrue: [owner owner isRawData: false].
-				owner owner recreate: #post]]
+				owner owner recreateFromMorphs]]
 ]
 
 { #category : #'as yet unclassified' }

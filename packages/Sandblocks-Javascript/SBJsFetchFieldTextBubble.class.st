@@ -20,7 +20,7 @@ SBJsFetchFieldTextBubble >> promptChangeValue [
 		key = 'Clear'
 			ifTrue: [
 				self contents: ''.
-				owner owner owner recreate: #post]
+				owner owner owner recreateFromMorphs]
 			ifFalse: [
 				values := self valuesForKey: key.
 				placeholderTxt := values at: 1.
@@ -29,7 +29,7 @@ SBJsFetchFieldTextBubble >> promptChangeValue [
 				owner owner owner addHeaderAction: 'Content-Type' value: contentType.
 				"Inverted case as in SBJsFetchBodyTextBubble"
 				key = 'form-data' ifFalse: [owner owner owner isRawData: true].
-				owner owner owner recreate: #post]]
+				owner owner owner recreateFromMorphs]]
 ]
 
 { #category : #'as yet unclassified' }
