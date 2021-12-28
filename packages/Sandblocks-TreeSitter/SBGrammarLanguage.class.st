@@ -14,6 +14,12 @@ SBGrammarLanguage class >> build: aRuleName [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> file: aFilenameString [
+
+	^ SBTSFile new filepath: aFilenameString language: self
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> grammarJson [
 
 	^ self subclassResponsibility
@@ -23,6 +29,18 @@ SBGrammarLanguage class >> grammarJson [
 SBGrammarLanguage class >> highlightQuery [
 
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> icon [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> iconMorph [
+
+	^ self icon ifNotNil: #asMorph ifNil: [SBIcon iconFile]
 ]
 
 { #category : #'as yet unclassified' }

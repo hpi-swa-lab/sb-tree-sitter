@@ -17,16 +17,6 @@ SBMetaGrammarHandler >> newNullBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBMetaGrammarHandler >> promptMetaTransform [
-	<action>
-
-	
-	self block
-		tryInterpretInput: ((UIManager default request: 'type operator') ifEmpty: [^ self])
-		before: ActiveEvent shiftPressed not
-]
-
-{ #category : #'as yet unclassified' }
 SBMetaGrammarHandler >> startOverrideInput: anEvent in: anEditor [
 
 	self block tryInterpretInput: anEvent keyCharacter asString before: false

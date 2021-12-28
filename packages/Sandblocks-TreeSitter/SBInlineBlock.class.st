@@ -13,6 +13,21 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBInlineBlock class >> registerShortcuts: aProvider [
+
+	aProvider
+		registerShortcut: Character space do: #promptMetaTransform;
+		registerShortcut: Character space shift do: #promptMetaTransform;
+		registerShortcut: $r command do: #applyReplacements
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> absorbsInput: anEvent [
+
+	^ anEvent keyCharacter isPrintable and: [self currentTextMorph owner regex matches: anEvent keyCharacter asString]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> access [
 
 	^ SBTSFieldAccessor new element: self
@@ -79,11 +94,9 @@ SBInlineBlock >> applyReplacements [
 										target: target
 										replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
 							self assert: (cmd isKindOf: SBCommand).
-							stream nextPut: cmd]]]]]].
-	commands ifNotEmpty: [
-		self sandblockEditor
-			ifNotNil: [:e | e do: (SBCombinedCommand newWith: commands)]
-			ifNil: [commands do: #do]]
+							self sandblockEditor
+								ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
+								ifNil: [cmd do]]]]]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -220,8 +233,9 @@ recursion, which tends to produce more complex, combined blocks"
 { #category : #'as yet unclassified' }
 SBInlineBlock >> clearCache [
 
-	self allMorphsDo: [:morph | morph layoutChanged].
-	self allMorphsDo: [:morph | (morph isSandblock or: [morph isInlineBlock]) ifTrue: [morph clearCacheSelf]]
+	self layoutChanged.
+	self clearCacheSelf.
+	self submorphsDo: [:morph | (morph isSandblock or: [morph isInlineBlock]) ifTrue: [morph clearCache]]
 ]
 
 { #category : #actions }
@@ -235,6 +249,14 @@ SBInlineBlock >> clearInput [
 SBInlineBlock >> click: anEvent [
 
 	self inline ifFalse: [super click: anEvent]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> color [
+
+	self containingSymbol ifNotNil: [ :aSymbol |
+		self factory highlightFor: aSymbol do: [ :color | color ifNotNil: [ :c | ^ c muchLighter ] ] ].
+	^ super color
 ]
 
 { #category : #'as yet unclassified' }
@@ -361,7 +383,7 @@ SBInlineBlock >> factory: aFactory [
 { #category : #accessing }
 SBInlineBlock >> field [
 
-	^ self basicField ifNil: [self owner inline ifTrue: [self owner field]]
+	^ self basicField ifNil: [(self owner isInlineBlock and: [self owner inline]) ifTrue: [self owner field]]
 ]
 
 { #category : #accessing }
@@ -759,8 +781,9 @@ SBInlineBlock >> prefersNoBorder [
 { #category : #printing }
 SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 
-	| first delimiter |
+	| first delimiter lastMatchedWordRule suffixMatchesWordRule prefixMatchesWorldRule |
 	first := true.
+	lastMatchedWordRule := false.
 	delimiter := (self containingSymbol ifNotNil: #type)
 		ifNotNil: [:parentType |
 			self factory delimitedRules
@@ -768,13 +791,17 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 				ifPresent: [:delim | delim first]
 				ifAbsent: ['']]
 		ifNil: [''].
+	suffixMatchesWordRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory wordRule matchesStream: (string readStream position: start - 1)]]].
+	prefixMatchesWorldRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [factory wordRule matchesPrefix: string]].
+	
 	aCollection do: [:element | | string |
 		string := String streamContents: [:stream | element writeSourceOn: stream].
 		(self isKindOf: SBInlineBlockRepeat)
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
 				((self factory hardLineBreakMatcher value: self) or: [self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]]) ifTrue: [aStream cr]]
-			ifFalse: [((factory ifNotNil: #wordRule) notNil and: [(string notEmpty and: [factory wordRule matches: string first asString]) and: [aStream size > 0 and: [factory wordRule matches: aStream last asString]]]) ifTrue: [delimiter ifEmpty: [aStream space] ifNotEmpty: [aStream nextPutAll: delimiter]]].
+			ifFalse: [(lastMatchedWordRule and: [prefixMatchesWorldRule value: string]) ifTrue: [aStream space]].
+		lastMatchedWordRule := suffixMatchesWordRule value: string.
 		aStream nextPutAll: string.
 		first := false]
 ]
@@ -806,6 +833,15 @@ SBInlineBlock >> printSExprOn: aStream depth: aNumber [
 SBInlineBlock >> printTitleOn: aStream [
 
 	^ self subclassResponsibility
+]
+
+{ #category : #actions }
+SBInlineBlock >> promptMetaTransform [
+	<action>
+
+	self
+		tryInterpretInput: ((UIManager default request: 'type operator') ifEmpty: [^ self])
+		before: ActiveEvent shiftPressed not
 ]
 
 { #category : #accessing }
@@ -895,24 +931,34 @@ find variation points. "
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> tryInsertInputAdjacent: aString [
+
+	| insert |
+	insert := (self owner ownerThatIsA: SBInlineBlockRepeat) containingSandblock.
+	insert ifNotNil: [ | command |
+		command := insert insertEmptyCommandRequestNear: self containingSandblock before: false.
+		command ifNotNil: [
+			self sandblockEditor do: command.
+			insert inputContainedUnknown.
+			self sandblockEditor selection keyStroke: (SBTest keyboardEvent: aString first)]]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> tryInterpretInput: aString before: aBoolean [
 
-	| selected |
-	selected := SBTSBlockChooseDialog new
+	| result |
+	result := SBTSBlockChooseDialog new
 		do: [:query | self choicesForInput: query before: aBoolean]
 		query: aString.
-	selected ifNil: [^ self].
+	result ifNil: [^ self tryInsertInputAdjacent: aString].
 	
 	self sandblockEditor do: (SBReplaceCommand new
-		target: (selected valueOfProperty: #rootBlock);
-		replacer: selected).
-	selected removeProperty: #rootBlock.
-	SBToggledCode comment: '' active: 1 do: {
-		[
-			selected firstBlock
-				select;
-				inputContainedUnknown].
-		[selected inputContainedUnknown]}
+		target: (result valueOfProperty: #rootBlock);
+		replacer: result).
+	result removeProperty: #rootBlock.
+	result firstBlock
+		select;
+		inputContainedUnknown
 ]
 
 { #category : #accessing }

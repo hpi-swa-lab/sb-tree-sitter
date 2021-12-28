@@ -4,13 +4,13 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Tests'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #failures }
 SBTSLanguageTests >> expectedFailures [
 
-	^ #(#testPythonPatternList)
+	^ #(#testPythonPatternList #testJavascriptToStringSemicolons)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - interactions' }
 SBTSLanguageTests >> testApplyPyFilePathReplacement [
 
 	| parsed |
@@ -27,7 +27,7 @@ SBTSLanguageTests >> testJavascriptBlockInline [
 	self assert: (SBJavascript instance shouldBlockInline: 'formal_parameters')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - parse' }
 SBTSLanguageTests >> testJavascriptFoundDelimiters [
 
 	| lang |
@@ -40,7 +40,7 @@ SBTSLanguageTests >> testJavascriptFoundDelimiters [
 		'named_imports' -> {','}} do: [:pair | self assert: (lang delimitedRules includesAssociation: pair)]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - parse' }
 SBTSLanguageTests >> testJavascriptImport [
 
 	| block |
@@ -51,7 +51,7 @@ SBTSLanguageTests >> testJavascriptImport [
 	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (identifier) (identifier)))))')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - interactions' }
 SBTSLanguageTests >> testJavascriptNestedIdentifierForMethodField [
 
 	| identifier |
@@ -66,7 +66,7 @@ SBTSLanguageTests >> testJavascriptNestedIdentifierForMethodField [
 			startSymbol: nil) size
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - printing' }
 SBTSLanguageTests >> testJavascriptNestedMemberExpression [
 
 	| source |
@@ -74,7 +74,7 @@ SBTSLanguageTests >> testJavascriptNestedMemberExpression [
 	self assert: source equals: (SBJavascript parseElement: source) sourceString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - printing' }
 SBTSLanguageTests >> testJavascriptToString [
 
 	| source |
@@ -95,10 +95,27 @@ return<h2>Hi</h2>}}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
 	source := 'a(2,3)'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	
+	source := 'const a=5'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	
+	source := '<h2 style="color:red"></a>'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - printing' }
+SBTSLanguageTests >> testJavascriptToStringSemicolons [
+
+	| source |
+	source := 'let a,b = 5;'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	
+	source := 'const a = 5;'.
+	self assert: source equals: (SBJavascript parseElement: source) sourceString
+]
+
+{ #category : #'testing - parse' }
 SBTSLanguageTests >> testMultipleDelimiters [
 
 	| block |
@@ -122,7 +139,7 @@ SBTSLanguageTests >> testParsePythonFormatString [
 	self assert: 'abcdefghi' equals: string contents
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonBinaryOperator [
 
 	| block e |
@@ -138,7 +155,7 @@ SBTSLanguageTests >> testPythonBinaryOperator [
 	self assert: (block matchesQuery: '(module (expression_statement (binary_operator)))')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonDeleteStatement [
 
 	| block e |
@@ -150,7 +167,7 @@ SBTSLanguageTests >> testPythonDeleteStatement [
 	self assert: block childSandblocks isEmpty
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - parse' }
 SBTSLanguageTests >> testPythonFoundDelimiters [
 
 	| lang |
@@ -158,7 +175,7 @@ SBTSLanguageTests >> testPythonFoundDelimiters [
 	{'argument_list' -> {','}. 'parameters' -> {','}. 'tuple_pattern' -> {','}. 'list' -> {','}} do: [:pair | self assert: (lang delimitedRules includesAssociation: pair)]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - parse' }
 SBTSLanguageTests >> testPythonImport [
 
 	| block |
@@ -169,7 +186,7 @@ SBTSLanguageTests >> testPythonImport [
 	self assert: (block matchesQuery: '(module (import_statement (aliased_import (dotted_name (identifier)) alias: (identifier))))')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonInsertLambdaParameter [
 
 	| module e |
@@ -184,7 +201,7 @@ SBTSLanguageTests >> testPythonInsertLambdaParameter [
 	self assert: 'a' equals: module access children first parameters children first contents
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonIntToFloat [
 
 	| block e |
@@ -201,7 +218,7 @@ SBTSLanguageTests >> testPythonIntToFloat [
 	self assert: (block matchesQuery: '(module (expression_statement (float)))')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonNumber [
 
 	| block e |
@@ -217,7 +234,7 @@ SBTSLanguageTests >> testPythonNumber [
 	self assert: (block matchesQuery: '(module (expression_statement (integer)))')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing - parse' }
 SBTSLanguageTests >> testPythonPatternList [
 
 	| lang |
@@ -232,7 +249,29 @@ SBTSLanguageTests >> testPythonPatternList [
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testPythonString [
 
+	self assert: 'abc' equals: (SBPython parseElement: '''abc''') contents.
 	self assert: 'abc' equals: (SBPython parseElement: '"abc"') contents.
-	(SBPython parseElement: 'f"abc"') contents.
-	(SBPython parseElement: '"abc\n"') contents
+	self assert: 'abc' equals: (SBPython parseElement: 'f"abc"') contents.
+	self assert: 'abc\n' equals: (SBPython parseElement: '"abc\n"') contents.
+	self assert: 'abc\n' equals: (SBPython parseElement: '"""abc\n"""') contents
+]
+
+{ #category : #'testing - interactions' }
+SBTSLanguageTests >> testRegexResumeInput [
+
+	| block e |
+	block := SBRegex parse: 'abc'.
+	e := self editorFor: block.
+	block lastDeepChild select.
+	[e selection keyStroke: (self keyboardEvent: $d)]
+		on: ProvideAnswerNotification
+		do: [:n | self assert: false].
+	
+	self assert: 'abcd' equals: block sourceString
+]
+
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testSyntaxError [
+
+	self should: [SBPython parse: '"abc"('] raise: SBTSSyntaxError
 ]

@@ -53,6 +53,13 @@ SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 	^ aBlock value: block
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> c [
+
+	<apicall: SBTSLanguage* tree_sitter_c () module: 'tree-sitter-c'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-c' name: 'c' context: thisContext
+]
+
 { #category : #ffi }
 SBTreeSitter >> cursor: aCursor reset: aNode [
 
@@ -280,24 +287,26 @@ SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 
 	| parser root tree cursor wasFreed |
+	wasFreed := false.
 	currentString := aString withUnixLineEndings.
-	parser := self parserNew.
 	language := self perform: aSymbol asSymbol.
 	
-	self parser: parser setLanguage: language.
-	
-	tree := self parser: parser old: nil parseString: currentString length: currentString size.
-	
-	root := self treeRootNode: tree.
-	cursor := self cursorNew: root.
-	wasFreed := false.
-	
-	^ [aBlock value: cursor] ensure: [
+	^ [
+		parser := self parserNew.
+		self parser: parser setLanguage: language.
+		
+		tree := self parser: parser old: nil parseString: currentString length: currentString size.
+		
+		root := self treeRootNode: tree.
+		cursor := self cursorNew: root.
+		(self nodeHasError: root) ifTrue: [^ SBTSSyntaxError signal].
+		
+		aBlock value: cursor] ensure: [
 		" there were problems with double-free when debugging "
 		wasFreed ifFalse: [
 			wasFreed := true.
-			self cursorDelete: cursor.
-			self parserDelete: parser]]
+			cursor ifNotNil: [self cursorDelete: cursor].
+			parser ifNotNil: [self parserDelete: parser]]]
 ]
 
 { #category : #ffi }

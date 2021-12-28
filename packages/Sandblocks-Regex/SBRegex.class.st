@@ -745,3 +745,24 @@ SBRegex class >> statementContainerTypes [
 
 	^ #()
 ]
+
+{ #category : #'as yet unclassified' }
+SBRegex >> highlightFor: aSBBlock do: aBlock [
+
+	^ aBlock value: (aSBBlock type caseOf: {
+		['character_class'] -> [Color green].
+		['any_character'] -> [Color blue].	
+		['control_escape'] -> [Color blue].
+		['control_letter_escape'] -> [Color blue].
+		['identity_escape'] -> [Color red].
+		['character_class_escape'] -> [Color green].
+		['start_assertion'] -> [Color blue].
+		['end_assertion'] -> [Color blue].
+		['count_quantifier'] -> [Color blue].
+		['anonymous_capturing_group'] -> [Color orange].
+		['named_capturing_group'] -> [Color orange].
+		['non_capturing_group'] -> [Color orange].
+		['class_range'] -> [Color green].
+		} 
+	otherwise: [nil])
+]

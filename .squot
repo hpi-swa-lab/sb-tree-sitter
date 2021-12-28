@@ -8,5 +8,7 @@ OrderedDictionary {
 	'packages/Sandblocks-Regex' : #SquotTonelSerializer,
 	'packages/Sandblocks-Ruby' : #SquotTonelSerializer,
 	'packages/Sandblocks-Tsq' : #SquotTonelSerializer,
-	'packages/BaselineOfSBTreeSitter' : #SquotTonelSerializer
+	'packages/BaselineOfSBTreeSitter' : #SquotTonelSerializer,
+	'packages/Sandblocks-TSSmalltalk' : #SquotTonelSerializer,
+	'packages/Sandblocks-C' : #SquotTonelSerializer
 }

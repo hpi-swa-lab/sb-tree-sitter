@@ -4,7 +4,7 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Tests'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testCaptureOptional [
 
 	| factory |
@@ -24,7 +24,7 @@ SBTSQueryTests >> testCaptureOptional [
 		capturesDo: [:c | self assert: 'identifier' equals: (c at: 'id') type])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testIgnoresComments [
 
 	| structure |
@@ -40,7 +40,40 @@ SBTSQueryTests >> testIgnoresComments [
 			self deny: (c includesKey: 'num')])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - languages' }
+SBTSQueryTests >> testJsClass [
+
+	| block |
+	block := SBJavascript parseElement: 'class A {
+example
+}'.
+	self assert: (block matchesQuery: '(class_declaration (class_body
+	member: (field_definition
+		property: (property_identifier))))').
+	
+	block := SBJavascript parseElement: 'class A {
+example = {}
+render() {}
+}'.
+	self assert: (block matchesQuery: '(class_declaration
+name: (identifier)
+(class_body
+	member: (field_definition
+		property: (property_identifier)
+		value: (object))
+	member: (method_definition
+		name: (property_identifier))))')
+]
+
+{ #category : #'tests - languages' }
+SBTSQueryTests >> testJsPairMatchString [
+
+	| block |
+	block := SBJavascript parseElement: '{headers: "abc"}'.
+	self assert: (block matchesQuery: '(object (pair key: [(identifier) (string)] ="headers"))')
+]
+
+{ #category : #tests }
 SBTSQueryTests >> testMatchAlternativeAnonymousNodesWithCaptures [
 
 	| structure |
@@ -50,7 +83,7 @@ SBTSQueryTests >> testMatchAlternativeAnonymousNodesWithCaptures [
 		self assert: structure equals: (c at: 'keyword')])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchAlternativeSymbols [
 
 	self assert: (SBTSQuery new
@@ -67,13 +100,13 @@ SBTSQueryTests >> testMatchAlternativeSymbols [
 		capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchAnonymousNode [
 
 	self assert: (SBTSQuery new execute: '"a"' against: (SBInlineBlockLabel new label: 'a') capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchAnyChild [
 
 	| factory |
@@ -86,7 +119,7 @@ SBTSQueryTests >> testMatchAnyChild [
 		capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchFieldName [
 
 	| factory |
@@ -99,7 +132,7 @@ SBTSQueryTests >> testMatchFieldName [
 		capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchMultiple [
 
 	| structure |
@@ -110,7 +143,7 @@ SBTSQueryTests >> testMatchMultiple [
 		self deny: (c includesKey: 'num')])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchNestedSymbols [
 
 	| factory |
@@ -125,7 +158,7 @@ SBTSQueryTests >> testMatchNestedSymbols [
 		capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchNestedSymbolsWithCaptures [
 
 	| factory structure |
@@ -136,7 +169,7 @@ SBTSQueryTests >> testMatchNestedSymbolsWithCaptures [
 		self assert: structure firstSubmorph firstSubmorph equals: (c at: 'i')])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchOptional [
 
 	| factory |
@@ -155,7 +188,7 @@ SBTSQueryTests >> testMatchOptional [
 		capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchPredicate [
 
 	| factory |
@@ -174,7 +207,7 @@ SBTSQueryTests >> testMatchPredicate [
 		capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchRequiresField [
 
 	| factory |
@@ -185,7 +218,7 @@ SBTSQueryTests >> testMatchRequiresField [
 		capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchSequence [
 
 	| factory |
@@ -198,7 +231,7 @@ SBTSQueryTests >> testMatchSequence [
 		capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchSequenceWithCaptures [
 
 	| structure factory |
@@ -212,7 +245,7 @@ SBTSQueryTests >> testMatchSequenceWithCaptures [
 		self assert: (c includesKey: 'i')])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchSkipCaptures [
 
 	self assert: (SBTSQuery new
@@ -221,7 +254,7 @@ SBTSQueryTests >> testMatchSkipCaptures [
 		capturesDo: [:c | self assert: c isEmpty])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchSymbol [
 
 	self assert: (SBTSQuery new
@@ -238,7 +271,7 @@ SBTSQueryTests >> testMatchSymbol [
 		capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchSymbolWithCapture [
 
 	| structure |
@@ -248,7 +281,7 @@ SBTSQueryTests >> testMatchSymbolWithCapture [
 		self assert: structure equals: (c at: 'id')])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchWildcard [
 
 	| factory structure |
@@ -263,7 +296,7 @@ SBTSQueryTests >> testMatchWildcard [
 		capturesDo: [:c | self assert: structure firstSubmorph equals: (c at: 'keyword')])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchWithAlias [
 
 	| factory |
@@ -277,7 +310,7 @@ SBTSQueryTests >> testMatchWithAlias [
 		capturesDo: [:c | ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testMatchWithStringCompare [
 
 	self assert: (SBTSQuery new
@@ -290,7 +323,7 @@ SBTSQueryTests >> testMatchWithStringCompare [
 		capturesDo: [:c | self assert: c isEmpty])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testParse [
 
 	| expr |
@@ -314,7 +347,7 @@ SBTSQueryTests >> testParse [
 	self assert: expr element elements third structure: {#class -> SBTSQuerySequence}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testParseFields [
 
 	| element |
@@ -325,7 +358,7 @@ SBTSQueryTests >> testParseFields [
 	self assert: element elements second element element structure: {#class -> SBTSQueryNesting}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testParsePredicate [
 
 	| element |
@@ -336,7 +369,7 @@ SBTSQueryTests >> testParsePredicate [
 	self assert: element structure: {#class -> SBTSQueryPredicate}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSQueryTests >> testParseTopLevelCaptures [
 
 	| element |

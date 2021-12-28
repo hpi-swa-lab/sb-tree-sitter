@@ -36,7 +36,7 @@ SBPyPltSubplots class >> matchPython: aDictionary do: aBlock [
 	
 	^ aBlock
 		value: (aDictionary at: 'initMatplotlib')
-		value: (self new factory: (aDictionary at: 'initMatplotlib') instance; createFigureButtonFrom: (self newNullBlock: 'Axes type'))
+		value: (self new factory: (aDictionary at: 'initMatplotlib'); createFigureButtonFrom: (self newNullBlock: 'Axes type'))
 ]
 
 { #category : #'as yet unclassified' }
