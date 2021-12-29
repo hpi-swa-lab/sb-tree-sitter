@@ -203,42 +203,61 @@ SBJsFetch >> addParamSection: aParams [
 { #category : #'as yet unclassified' }
 SBJsFetch >> addRequestToExampleMap: response [
 
-	| map  example |
-	map := Examples at:( url, method asString) ifAbsent: [nil].
+	| map example |
+	map := Examples at: url, method asString ifAbsent: [nil].
 	example := nil.
 	
 	"Create the example"
 	method caseOf: {
-		[#get] -> [  
+		[#get] -> [
 			example := SBJsFetchGetExample new
 				icon: SBIcon iconSearch
 				label: response code asString
 				do: [example promptChangeValue].
-			example code: (response code) deepCopy url: url deepCopy headers: headers deepCopy params: params deepCopy].
+			example
+				code: response code deepCopy
+				url: url deepCopy
+				headers: headers deepCopy
+				params: params deepCopy].
 		[#post] -> [
 			example := SBJsFetchPostExample new
 				icon: SBIcon iconSearch
 				label: response code asString
-				do: ["TODO"].
-			example code: response code url: url headers: (headers deepCopy) body: nil]}.
+				do: [example promptChangeValue].
+			example
+				code: response code
+				url: url deepCopy
+				headers: headers deepCopy
+				body: data deepCopy
+				params: params deepCopy]}.
 	
 	"Add the example to the existing map or into a new map"
-	map = nil
-		ifFalse: [ | examplesForUrl |
-			examplesForUrl := Examples at: (url, method asString).
-			examplesForUrl at: (response code) ifAbsentPut: [OrderedCollection new].
-			(examplesForUrl at: (response code)) size < exampleThreshold 
-				ifTrue: [
-					(examplesForUrl at: (response code)) add: example] 
-				ifFalse: [
-					(examplesForUrl at: (response code)) removeLast.
-					(examplesForUrl at: (response code)) add: example beforeIndex: 1]]
-		ifTrue: [ | initDict initColl |
-			initDict := Dictionary new.
-			initColl := OrderedCollection new.
-			initColl add: example.
-			initDict at: response code put: initColl.
-			Examples at: (url, method asString) put: (initDict)]
+	map ifNotNil: [ | examplesForUrl |
+		examplesForUrl := Examples at: url, method asString.
+		examplesForUrl at: response code ifAbsentPut: [OrderedCollection new].
+		(examplesForUrl at: response code) size < exampleThreshold ifFalse: [(examplesForUrl at: response code) removeLast].
+		(examplesForUrl at: response code) add: example beforeIndex: 1].
+	map ifNil: [ | initDict initColl |
+		initDict := Dictionary new.
+		initColl := OrderedCollection new.
+		initColl add: example.
+		initDict at: response code put: initColl.
+		Examples at: url, method asString put: initDict]
+]
+
+{ #category : #'as yet unclassified' }
+SBJsFetch >> body [
+	^ data
+]
+
+{ #category : #'as yet unclassified' }
+SBJsFetch >> body: aBody [
+	data := aBody
+]
+
+{ #category : #'as yet unclassified' }
+SBJsFetch >> bodyMorph: aBodyMorph [
+	bodyMorph := aBodyMorph
 ]
 
 { #category : #'as yet unclassified' }
@@ -324,18 +343,19 @@ SBJsFetch >> initCommons [
 ]
 
 { #category : #'initialize-release' }
-SBJsFetch >> initGet: aParams [
+SBJsFetch >> initGet [
 	self
 		initCommons;
-		addParamSection: aParams.
+		addParamSection: nil.
 ]
 
 { #category : #'initialize-release' }
-SBJsFetch >> initPost: aBody [
+SBJsFetch >> initPost [
 	self
 		initCommons;
-		addParamSection: nil;
-		addBodySection: aBody.
+		addParamSection: nil.
+	
+	data ifNotNil: [self addBodySection: data]
 	
 	
 ]
@@ -397,7 +417,7 @@ SBJsFetch >> performPostRequest: body url: aUrl [
 	tmpHeaders := headers deepCopy.
 	resp := client
 		httpPost: url
-		content: body
+		content: (body ifNil: [''])
 		type: (tmpHeaders at: 'Content-Type' ifAbsent: 'application/json')
 		do: [:req |
 			tmpHeaders removeKey: 'Content-Type' ifAbsent: [].
@@ -416,20 +436,22 @@ SBJsFetch >> performPostRequest: body url: aUrl [
 { #category : #'as yet unclassified' }
 SBJsFetch >> recreateFromMorphs [
 "Recreate the UI based on the currently filled form"
+
 	self updatePayloadInObjectInstance.
 	self clearPanel.
-	method = #get ifTrue: [self initGet: data].
-	method = #post ifTrue: [self initPost: data]
+	method = #get ifTrue: [self initGet].
+	method = #post ifTrue: [self initPost]
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> recreateFromVariables: aHeaders params: aParams [
+SBJsFetch >> recreateFromVariables: aHeaders params: aParams body: aBody [
 "Recreate the UI based on the given input. Used when recreating for Examples."
 	params := aParams.
 	headers := aHeaders.
+	data := aBody.
 	self clearPanel.
-	method = #get ifTrue: [self initGet: data].
-	method = #post ifTrue: [self initPost: data]
+	method = #get ifTrue: [self initGet].
+	method = #post ifTrue: [self initPost]
 ]
 
 { #category : #'as yet unclassified' }
@@ -442,10 +464,16 @@ SBJsFetch >> send [
 	method = #get ifTrue: [self performGetRequest: url asString, paramsString].
 	method = #post ifTrue: [
 		isRawData 
-			ifTrue: [self performPostRequest: (bodyMorph submorphs second) contents url: url asString, paramsString]
+			ifTrue: [self performPostRequest: data url: url asString, paramsString]
 			ifFalse: ["TODO: collect fields and perform request"]
 	
 	"TODO: implement other methods"]
+]
+
+{ #category : #'as yet unclassified' }
+SBJsFetch >> updateBody: body [
+	data := body contents
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -470,10 +498,11 @@ SBJsFetch >> updateParams: aParamsMorph [
 
 { #category : #'as yet unclassified' }
 SBJsFetch >> updatePayloadInObjectInstance [
-"Update the class variables (headers, params, url...) based on the current form"
+"Update the class variables (headers, params, url, body...) based on the current form"
 	self updateHeaders: headerMorph submorphs.
 	self updateParams: paramMorph submorphs.
 	url := (urlMorph submorphs second) contents.
+	method = #post ifTrue: [ isRawData ifTrue: [bodyMorph ifNotNil: [self updateBody: (bodyMorph submorphs second)]]]
 ]
 
 { #category : #'initialize-release' }
@@ -493,8 +522,8 @@ SBJsFetch >> url: aString method: aMethod headers: aHeaders data: aData [
 	"Examples := Dictionary new."
 	params := Dictionary new.
 	
-	aMethod = #post ifTrue: [self initPost: aData].
-	aMethod = #get ifTrue: [self initGet: aData]
+	aMethod = #post ifTrue: [self initPost].
+	aMethod = #get ifTrue: [self initGet]
 	"TODO: implement other methods (put, trace, delete...)"
 ]
 

@@ -36,10 +36,11 @@ SBJsFetchBodyTextBubble >> promptChangeValue [
 	
 	index > 0 ifTrue: [
 		key := self values at: index.
-		key = 'Clear'
-			ifTrue: [
-				owner owner data: ''.
-				owner owner recreateFromMorphs]
+		key = 'Remove Body'
+			ifTrue: [ | fetch |
+				fetch := owner owner.
+				fetch bodyMorph: nil.
+				fetch recreateFromVariables: fetch headers params: fetch params body: nil]
 			ifFalse: [
 				values := self valuesForKey: key.
 				placeholderTxt := values at: 1.
@@ -54,7 +55,7 @@ SBJsFetchBodyTextBubble >> promptChangeValue [
 { #category : #'as yet unclassified' }
 SBJsFetchBodyTextBubble >> values [
 
-	^ #('Raw-JSON' 'Raw-Text' 'Raw-HTML' 'Raw-JavaScript' 'Raw-XML' 'form-data' 'Clear')
+	^ #('Raw-JSON' 'Raw-Text' 'Raw-HTML' 'Raw-JavaScript' 'Raw-XML' 'form-data' 'Remove Body')
 ]
 
 { #category : #'as yet unclassified' }

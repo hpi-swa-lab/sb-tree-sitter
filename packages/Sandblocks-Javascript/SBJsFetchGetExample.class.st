@@ -1,9 +1,6 @@
 Class {
 	#name : #SBJsFetchGetExample,
 	#superclass : #SBJsFetchExample,
-	#instVars : [
-		'params'
-	],
 	#category : #'Sandblocks-Javascript'
 }
 
@@ -23,33 +20,20 @@ SBJsFetchGetExample >> code: aCode url: aUrl headers: aHeaders params: aParams [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchGetExample >> headers [
-	^headerMap.
-]
-
-{ #category : #'as yet unclassified' }
-SBJsFetchGetExample >> headersToString [
-	| out |
-	out := String new.
-	headerMap keysDo: [: key | out := out, key, ' : ', (headerMap at: key), ' '].
-	^out.
-]
-
-{ #category : #'as yet unclassified' }
 SBJsFetchGetExample >> initialize [
 	super initialize.
 	method := #get.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchGetExample >> params [
-	^params.
-]
-
-{ #category : #'as yet unclassified' }
-SBJsFetchGetExample >> paramsToString [
-	| out |
-	out := String new.
-	params keysDo: [:key |out := out,( (params at: key) key), ' : ', ((params at: key) value), ' '].
-	^out.
+SBJsFetchGetExample >> promptChangeValue [
+	| examples fetch index |
+	fetch := (self owner owner owner).
+	examples :=  ((fetch Examples at: (url, method)) at: code).
+	index := UIManager default chooseFrom: examples.
+	index > 0
+		ifTrue: [ | example |
+			example := examples at: index.
+			fetch recreateFromVariables: example headers params: example params body: nil]
+		ifFalse: [fetch recreateFromMorphs]
 ]

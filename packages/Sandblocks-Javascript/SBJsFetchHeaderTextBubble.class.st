@@ -9,26 +9,26 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBJsFetchHeaderTextBubble >> collectHeaders [
-	AllHeaders = nil ifTrue: [ | resp client xmlDoc tmpIndex |
-		AllHeaders := OrderedCollection new.
-		client := WebClient new.
-		resp := client httpGet: 'https://www.iana.org/assignments/message-headers/message-headers.xml'.
-		
-		xmlDoc := XMLDOMParser parseDocumentFrom: resp content readStream useNamespaces: true.
-		tmpIndex := 1.
-		"TODO: improve how to scan this XML response, make it safe"
-		((xmlDoc elements at: 3) elements at: 3) elementsDo: [:currentElement |
-			tmpIndex := tmpIndex + 1.
-			tmpIndex > 7 ifTrue: [AllHeaders add: ((currentElement elementsAndContents at: 1) elementsAndContents at: 1) asString]].
-		AllHeaders add: 'Remove header'.
-		AllHeaders add: 'Authorization'].
-	^AllHeaders.
+
+	| client resp tmpIndex xmlDoc |
+	AllHeaders := OrderedCollection new.
+	client := WebClient new.
+	resp := client httpGet: 'https://www.iana.org/assignments/message-headers/message-headers.xml'.
+	AllHeaders add: 'Remove header'.
+	AllHeaders add: 'Authorization'.
+	
+	xmlDoc := XMLDOMParser parseDocumentFrom: resp content readStream useNamespaces: true.
+	tmpIndex := 1.
+	"TODO: improve how to scan this XML response, make it safe"
+	((xmlDoc elements at: 3) elements at: 3) elementsDo: [:currentElement |
+		tmpIndex := tmpIndex + 1.
+		tmpIndex > 7 ifTrue: [AllHeaders add: ((currentElement elementsAndContents at: 1) elementsAndContents at: 1) asString]].
+	^ AllHeaders
 ]
 
 { #category : #'as yet unclassified' }
 SBJsFetchHeaderTextBubble >> initialize [
 	super initialize.
-	self collectHeaders.
 ]
 
 { #category : #'as yet unclassified' }

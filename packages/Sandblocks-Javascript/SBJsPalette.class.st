@@ -39,11 +39,16 @@ SBJsPalette class >> buildOn: aBuilder [
 			headers: (Dictionary newFrom: {'Content-Type' -> 'text/html'})
 			data: '{"key" : "value"}').
 			
-	aBuilder addBlock: 'GET' as: (SBJsFetchSmall new
+	aBuilder addBlock: 'Small GET' as: (SBJsFetchSmallGet new
 		factory: SBJavascript new;
-		url: 'http://localhost:8080/user'
-			method: #get
-			headers: (Dictionary newFrom: {'Content-Type' -> 'plain'})
+			url: 'http://localhost:8080/user'
+			headers: (Dictionary newFrom: {'Content-Type' -> 'text/plain'})
+			data: nil).
+			
+	aBuilder addBlock: 'Small POST' as: (SBJsFetchSmallPost new
+		factory: SBJavascript new;
+			url: 'http://localhost:8080/example'
+			headers: (Dictionary newFrom: {'Content-Type' -> 'text/plain'})
 			data: '{"key" : "value"}').
 ]
 

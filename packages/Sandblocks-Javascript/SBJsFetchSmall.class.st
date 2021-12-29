@@ -127,16 +127,7 @@ SBJsFetchSmall >> initialize [
 
 { #category : #'as yet unclassified' }
 SBJsFetchSmall >> promptAddPayload [
-	| fetch index |
-	fetch := (self owner owner owner).
-	index := UIManager default chooseFrom: #(Header Param Body).
-	index > 0
-		ifTrue: [
-			index caseOf: {
-				[ 1 ] -> [ self addHeaderAction ].
-				[ 2 ] -> [ self addParamAction ].
-				"TODO: post impl"
-				"[ #Body ] -> [ self addBody ]"  }].
+	self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
@@ -163,4 +154,9 @@ SBJsFetchSmall >> updateParams: aParamsMorph [
 		key := paramMorph submorphs first contents.
 		value := paramMorph submorphs second contents.
 		(key ~= nil) & (key ~= '') ifTrue: [params at: (key, value) put: (key -> value)]]]
+]
+
+{ #category : #'as yet unclassified' }
+SBJsFetchSmall >> values [
+	^ self subclassResponsibility
 ]
