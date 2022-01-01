@@ -723,7 +723,7 @@ SBMetaBlockFactory >> initialize [
 { #category : #templates }
 SBMetaBlockFactory >> instantiateTemplate: aString [
 
-	^ (self getTemplate: aString) buildEmpty buildDefault
+	^ (self getTemplate: aString) buildEmpty buildDefault factory: self
 ]
 
 { #category : #templates }
@@ -1025,6 +1025,12 @@ SBMetaBlockFactory >> rule: aRule inlineIn: anObject [
 SBMetaBlockFactory >> rulesDo: aBlock [
 
 	self grammar rules keysAndValuesDo: [:name :rule | aBlock cull: rule cull: name]
+]
+
+{ #category : #accessing }
+SBMetaBlockFactory >> runtime [
+
+	^ nil
 ]
 
 { #category : #'configuration helpers' }

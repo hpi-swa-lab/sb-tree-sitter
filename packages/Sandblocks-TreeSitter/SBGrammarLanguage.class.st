@@ -170,9 +170,3 @@ SBGrammarLanguage >> preprocessGrammar [
 
 	
 ]
-
-{ #category : #'as yet unclassified' }
-SBGrammarLanguage >> runtime [
-
-	^ nil
-]
