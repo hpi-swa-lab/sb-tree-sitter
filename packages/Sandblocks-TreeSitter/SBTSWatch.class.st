@@ -34,9 +34,9 @@ SBTSWatch class >> registerWatch: aWatch [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSWatch class >> reportId: aString value: aJsonObject [
+SBTSWatch class >> reportId: aString value: aValueString [
 
-	self watches do: [:watch | watch ifNotNil: [watch id = aString ifTrue: [watch reportValue: aJsonObject]]]
+	self watches do: [:watch | watch ifNotNil: [watch id = aString ifTrue: [watch reportValue: aValueString]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -88,11 +88,11 @@ SBTSWatch >> registerWatch [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSWatch >> reportValue: aJsonObject [
+SBTSWatch >> reportValue: aString [
 
 	self submorphCount > 1 ifTrue: [self submorphs second delete].
 	self addMorphBack: (SBMultilineOwnTextMorph new
-		contents: aJsonObject printString;
+		contents: aString;
 		maxWidth: 400)
 ]
 

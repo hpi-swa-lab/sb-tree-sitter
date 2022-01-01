@@ -10,11 +10,11 @@ Class {
 { #category : #'helper os process' }
 SBTSLanguageRuntime >> checkedCmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString [
 
-	^ (self cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString) wait value: [:status :stdout :stderr | status = 0 ifTrue: [stdout] ifFalse: [self error: stderr]]
+	^ (self cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString cancel: [:b | ]) wait value: [:status :stdout :stderr | status = 0 ifTrue: [stdout] ifFalse: [self error: stderr]]
 ]
 
 { #category : #'helper os process' }
-SBTSLanguageRuntime >> cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString [
+SBTSLanguageRuntime >> cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString cancel: aBlock [
 
 	| inputPipe outputPipe errorPipe process stderrPromise stdoutPromise processPromise |
 	inputPipe := aString ifNotNil: [OSPipe blockingPipe].
@@ -25,6 +25,7 @@ SBTSLanguageRuntime >> cmd: aProgramPathString arguments: aCollection env: aDict
 		arguments: aCollection
 		environment: (aDictionary ifNotNil: [:d | d as: Dictionary])
 		descriptors: {inputPipe ifNotNil: #reader. outputPipe writer. errorPipe writer}.
+	aBlock value: [process sigterm].
 	outputPipe writer close.
 	errorPipe writer close.
 	inputPipe ifNotNil: [
@@ -59,13 +60,13 @@ SBTSLanguageRuntime >> cmd: aProgramPathString arguments: aCollection env: aDict
 { #category : #'helper os process' }
 SBTSLanguageRuntime >> contentFromSocket: aSocket [
 
-	| stream |
+	| stream data |
 	stream := SocketStream on: aSocket.
 	stream timeout: 1.
-	^ String streamContents: [:out |
-		[aSocket isConnected and: [stream atEnd not]] whileTrue: [stream peek ifNotNil: [out nextPutAll: stream contents]].
-		aSocket close.
-		stream close]
+	data := stream upToEnd.
+	aSocket close.
+	stream close.
+	^ data
 ]
 
 { #category : #'runtime interface' }
@@ -110,12 +111,7 @@ SBTSLanguageRuntime >> spawnWatchDuring: aBlock [
 	listener isWaitingForConnection ifFalse: [^ self error: 'Failed to connect'].
 	
 	[
-		[listener isValid] whileTrue: [
-			Transcript showln: 'tried to get accept'.
-			(listener waitForAcceptFor: 1) ifNotNil: [:connection |
-				Transcript showln: 'got connection'.
-				self handleConnection: connection]].
-		Transcript showln: 'terminate'.
+		[listener isValid] whileTrue: [(listener waitForAcceptFor: 1) ifNotNil: [:connection | self handleConnection: connection]].
 		listener destroy]
 		forkAt: Processor lowIOPriority
 		named: '[SB: watch for expression eval]'.

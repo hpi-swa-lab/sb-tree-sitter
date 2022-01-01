@@ -42,6 +42,18 @@ SBJsRuntimeOSProcess >> evaluate: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
+
+	| node ret |
+	node := self which: 'node'.
+	node ifNil: [^ self error: 'node executable not found'].
+	
+	ret := Promise new.
+	[self spawnWatchDuring: [:port | ret resolveWith: (self cmd: node arguments: {aString} env: {'SQ_WATCH' -> port} stdin: nil cancel: aBlock) wait]] fork.
+	^ ret
+]
+
+{ #category : #'as yet unclassified' }
 SBJsRuntimeOSProcess >> prettyPrint: aString [
 
 	| prettier |
@@ -55,10 +67,10 @@ SBJsRuntimeOSProcess >> prettyPrint: aString [
 SBJsRuntimeOSProcess >> writeWatchSourceOn: aStream watch: aWatch [
 
 	aStream
-		nextPutAll: 'require("net").connect(process.env.SQ_WATCH, "localhost").end(JSON.stringify({id:"';
+		nextPutAll: '((e) => (require("net").connect(process.env.SQ_WATCH, "localhost").end(JSON.stringify({id:"';
 		nextPutAll: aWatch id;
 		nextPutAll: '", ';
-		nextPutAll: 'expression: '.
+		nextPutAll: 'expression: require("util").inspect(e)})), e))('.
 	aWatch expression writeSourceOn: aStream.
-	aStream nextPutAll: '}))'
+	aStream nextPutAll: ')'
 ]
