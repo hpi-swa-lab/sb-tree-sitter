@@ -168,13 +168,13 @@ SBInlineBlock >> changeToUnknown [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlock >> childSymbolsDo: aBlock [
+SBInlineBlock >> childSymbolsDo: aBlock includeInlined: aBoolean [
 
 	self submorphsDo: [:morph |
 		morph isInlineBlock ifTrue: [
-			(morph isKindOf: SBInlineBlockSymbol)
+			((morph isKindOf: SBInlineBlockSymbol) and: [aBoolean or: [morph inline not]])
 				ifTrue: [aBlock value: morph]
-				ifFalse: [morph childSymbolsDo: aBlock]]]
+				ifFalse: [morph childSymbolsDo: aBlock includeInlined: aBoolean]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -357,6 +357,27 @@ SBInlineBlock >> drawOn: aCanvas [
 SBInlineBlock >> elementsDo: aBlock [
 
 	^ self subclassResponsibility
+]
+
+{ #category : #'action helpers' }
+SBInlineBlock >> evaluate [
+
+	^ self factory runtime evaluate: self sourceString
+]
+
+{ #category : #actions }
+SBInlineBlock >> evaluateExpression [
+	<action>
+
+	| result |
+	result := self evaluate.
+	self sandblockEditor isSingleArtefactView ifTrue: [^ result explore].
+	result convertedFor: SBInterfaces topLevel doWithChooser: [:morph |
+		self sandblockEditor openMorphInView: morph.
+		morph focusAfterDelete: self.
+		self sandblockEditor connectFrom: self to: morph.
+		morph].
+	^ result
 ]
 
 { #category : #geometry }
@@ -779,6 +800,14 @@ SBInlineBlock >> prefersNoBorder [
 ]
 
 { #category : #printing }
+SBInlineBlock >> prettySourceString [
+
+	^ self factory runtime
+		ifNotNil: [:r | r prettyPrint: self sourceString]
+		ifNil: [self sourceString]
+]
+
+{ #category : #printing }
 SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 
 	| first delimiter lastMatchedWordRule suffixMatchesWordRule prefixMatchesWorldRule |
@@ -818,15 +847,23 @@ SBInlineBlock >> printOn: aStream [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> printSExpr [
 
-	^ String streamContents: [:s | self printSExprOn: s depth: 0]
+	^ String streamContents: [:s | self printSExprOn: s depth: 0 short: false]
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlock >> printSExprOn: aStream depth: aNumber [
+SBInlineBlock >> printSExprOn: aStream depth: aNumber short: aBoolean [
 
-	self childSymbolsDo: [:m |
-		m printSExprOn: aStream depth: aNumber.
-		aStream crtab: aNumber]
+	self
+		childSymbolsDo: [:m |
+			m printSExprOn: aStream depth: aNumber short: aBoolean.
+			aStream crtab: aNumber]
+		includeInlined: aBoolean not
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> printSExprShort [
+
+	^ String streamContents: [:s | self printSExprOn: s depth: 0 short: true]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1014,6 +1051,15 @@ SBInlineBlock >> veryDeepCopyWith: deepCopier [
 SBInlineBlock >> wantsExtraSpace [
 
 	^ self inline not
+]
+
+{ #category : #actions }
+SBInlineBlock >> wrapWithWatch [
+	<action>
+
+	self sandblockEditor do: (SBReplaceCommand new target: self replacer: (SBTSWatch new
+		type: self type factory: self factory;
+		id: UUID new asString expression: self buildCopy))
 ]
 
 { #category : #'as yet unclassified' }

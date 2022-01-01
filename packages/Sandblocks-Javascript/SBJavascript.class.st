@@ -6775,6 +6775,12 @@ SBJavascript >> configure [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript >> fileSuffix [
+
+	^ 'js'
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript >> postConfigure [
 
 	blockInline remove: 'statement_block'
@@ -6799,4 +6805,10 @@ SBJavascript >> preprocessGrammar [
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
 	self grammar at: 'inline' put: self grammar inline, {'_ternary_qmark'}.
 	self grammar rules statement members: (self grammar rules statement members reject: [:m | m name = 'labeled_statement'])
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> runtime [
+
+	^ SBJsRuntimeOSProcess new factory: self
 ]

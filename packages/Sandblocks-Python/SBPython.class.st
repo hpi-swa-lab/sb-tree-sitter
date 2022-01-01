@@ -5129,6 +5129,12 @@ SBPython >> configure [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> fileSuffix [
+
+	^ 'py'
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> postConfigure [
 
 	blockInline remove: 'block'
@@ -5189,4 +5195,10 @@ SBPython >> preprocessGrammar [
 	
 	(self grammar rules at: '_suite') members: {(self grammar rules at: '_suite') members second}.
 	self ignoreExternals: #('_indent' '_dedent' '_newline' '_string_start' '_string_end')
+]
+
+{ #category : #'as yet unclassified' }
+SBPython >> runtime [
+
+	^ SBPyRuntimeOSProcess new factory: self
 ]

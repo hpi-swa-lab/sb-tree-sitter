@@ -53,6 +53,12 @@ SBInlineBlockReplace >> layoutCommands [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockReplace >> ownerWithColor [
+
+	^ self
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockReplace >> printTitleOn: aStream [
 
 	aStream nextPutAll: self className

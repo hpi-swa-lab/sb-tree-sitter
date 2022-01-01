@@ -122,6 +122,12 @@ SBGrammarLanguage >> configure [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage >> fileSuffix [
+
+	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage >> initialize [
 
 	super initialize.
@@ -163,4 +169,10 @@ SBGrammarLanguage >> preprocessGrammar [
 	" entrypoint to clean the grammar before the automated steps happen, e.g. replacing or removing external rules "
 
 	
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage >> runtime [
+
+	^ nil
 ]
