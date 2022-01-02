@@ -10,36 +10,74 @@ Class {
 	#category : #'Sandblocks-TreeSitter'
 }
 
-{ #category : #'as yet unclassified' }
-SBTSWatch class >> matchJs: aDictionary do: aBlock [
-	<lang: #javascript match: '(call_expression (member_expression
-	(call_expression (member_expression
-		(call_expression (identifier) ="require" (arguments (string (unescaped_double_string_fragment) ="net")))
-		(property_identifier) ="connect"))
-	(property_identifier) ="end")
-	(arguments
-		(call_expression (arguments (object
-			(pair (property_identifier) ="id" (string (unescaped_double_string_fragment) @id))
-			(pair (property_identifier) ="expression" (_) @expression)))))) @watch' sample: 'require("net").connect("/home/tom/tmp/server.sock").end(JSON.stringify({id:"asda", expression:value}))'>
+{ #category : #matchers }
+SBTSWatch class >> matchC: aDictionary do: aBlock [
+	<lang: #c match: '(call_expression (identifier) ="SQ_REPORT"
+	(argument_list (string_literal) @id (_) @expr)) @watch' sample: '  return SQ_REPORT("c240af77-4dc3-47b3-b650-972ad52f1278", 2 + 3);'>
 
 	^ aBlock
 		value: (aDictionary at: 'watch')
-		value: (self new id: (aDictionary at: 'id') expression: (aDictionary at: 'expression'))
+		value: (self new id: (aDictionary at: 'id') contents expression: (aDictionary at: 'expr'))
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #matchers }
+SBTSWatch class >> matchJs: aDictionary do: aBlock [
+	<lang: #javascript match: '(call_expression (parenthesized_expression
+	(arrow_function (_(_ 
+		(call_expression (member_expression
+			(call_expression (member_expression
+				(call_expression (identifier) ="require" (arguments (string (unescaped_double_string_fragment) ="net")))
+				(property_identifier) ="connect"))
+			(property_identifier) ="end")
+			(arguments
+				(call_expression (arguments (object
+					(pair (property_identifier) ="id" (string (unescaped_double_string_fragment) @id))
+					(pair (property_identifier) ="expression"))))))))))
+	(arguments (_) @expression)
+) @watch' sample: '((e) => (
+  require("net")
+    .connect(process.env.SQ_WATCH, "localhost")
+    .end(
+      JSON.stringify({
+        id: "8760eb08-6e29-47e6-a1fc-78d5c8bcb9fb",
+        expression: require("util").inspect(e),
+      })
+    ),
+  e
+))(req.path);'>
+
+	^ aBlock
+		value: (aDictionary at: 'watch')
+		value: (self new id: (aDictionary at: 'id') contents expression: (aDictionary at: 'expression'))
+]
+
+{ #category : #matchers }
+SBTSWatch class >> matchPy: aDictionary do: aBlock [
+	<lang: #python match: '(subscript (call (parenthesized_expression (lambda (_ (_ (_
+	(lambda (tuple (call (argument_list (call (attribute (parenthesized_expression (binary_operator (binary_operator (string) @string)))))))))))))) (argument_list (_) @expression))) @watch' sample: 'print(
+        (lambda e: ((lambda s: (s.connect(("localhost", int(__import__("os").environ["SQ_WATCH"]))), s.send(
+    ("{\"id\":\"08cd4b51-8b2d-4d6a-8a2b-c1728c42cd3a\",\"expression\":"+str(e)+"}").encode()), s.close()))(__import__("socket").socket()), e))(2)[1])+2'>
+
+	^ aBlock value: (aDictionary at: 'watch') value: (self new
+		id: (((aDictionary at: 'string') contents allRegexMatches: '\\"id\\"\:\\"([^\\]+)\\"') first
+			copyFrom: 10
+			to: 45)
+		expression: (aDictionary at: 'expression'))
+]
+
+{ #category : #watches }
 SBTSWatch class >> registerWatch: aWatch [
 
 	Watches := Watches ifNil: [WeakArray with: aWatch] ifNotNil: [Watches copyWith: aWatch]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #watches }
 SBTSWatch class >> reportId: aString value: aValueString [
 
 	self watches do: [:watch | watch ifNotNil: [watch id = aString ifTrue: [watch reportValue: aValueString]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #watches }
 SBTSWatch class >> watches [
 	
 	^ Watches ifNil: [Watches := WeakArray new]
@@ -64,9 +102,9 @@ SBTSWatch >> id [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSWatch >> id: aStringBlock expression: anExpressionBlock [
+SBTSWatch >> id: aString expression: anExpressionBlock [
 
-	id := aStringBlock contents.
+	id := aString.
 	self addMorphBack: anExpressionBlock buildCopy.
 	self registerWatch
 ]

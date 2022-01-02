@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBJavascript class >> fileSuffix [
+
+	^ 'js'
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-javascript/blob/master/grammar.js "
 
@@ -6772,12 +6778,6 @@ SBJavascript >> configure [
 
 	self blockInline: #('expression_statement' 'statement_block' 'formal_parameters').
 	self hardLineBreakMatcher: [:block | (block submorphAfter ifNotNil: #type) = 'statement_block']
-]
-
-{ #category : #'as yet unclassified' }
-SBJavascript >> fileSuffix [
-
-	^ 'js'
 ]
 
 { #category : #'as yet unclassified' }

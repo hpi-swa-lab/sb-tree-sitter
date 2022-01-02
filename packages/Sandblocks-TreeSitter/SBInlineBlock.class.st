@@ -78,25 +78,25 @@ SBInlineBlock >> allElementsDo: aBlock [
 SBInlineBlock >> applyReplacements [
 	<action>
 
-	| replacements commands |
+	| replacements |
 	replacements := SBInlineBlockReplace allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class class), (Pragma allNamed: #lang:match:sample: in: class class) select: [:pragma | pragma arguments first = self factory name]].
-	commands := Array streamContents: [:stream |
-		self allBlocksDo: [:block |
-			replacements do: [:pragma |
-				SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures :success |
-					success ifTrue: [
-						(pragma methodClass theNonMetaClass
-							perform: pragma selector
-							withArguments: {
-								captures.
-								[:target :replacer |
-									SBReplaceCommand new
-										target: target
-										replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
-							self assert: (cmd isKindOf: SBCommand).
-							self sandblockEditor
-								ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
-								ifNil: [cmd do]]]]]]]
+	self allBlocksDo: [:block |
+		replacements do: [:pragma |
+			SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures :success |
+				success ifTrue: [
+					(pragma methodClass theNonMetaClass
+						perform: pragma selector
+						withArguments: {
+							captures.
+							[:target :replacer |
+								SBReplaceCommand new
+									target: target
+									replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
+						self assert: (cmd isKindOf: SBCommand).
+						self sandblockEditor
+							ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
+							ifNil: [cmd do]]]]]].
+	self inlineRoot updateAllHighlights
 ]
 
 { #category : #'as yet unclassified' }
@@ -534,7 +534,7 @@ SBInlineBlock >> inlineIfPossible [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> inlineRoot [
 
-	^ (self owner isInlineBlock and: [self owner inline not])
+	^ ((self owner isNil or: [self owner isInlineBlock and: [self owner inline not]]) or: [self owner isInlineBlock not])
 		ifTrue: [self]
 		ifFalse: [self owner inlineRoot]
 ]
@@ -810,9 +810,10 @@ SBInlineBlock >> prettySourceString [
 { #category : #printing }
 SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 
-	| first delimiter lastMatchedWordRule suffixMatchesWordRule prefixMatchesWorldRule |
+	| first delimiter lastMatchedWordRule suffixMatchesWordRule prefixMatchesWorldRule lastString |
 	first := true.
 	lastMatchedWordRule := false.
+	lastString := ''.
 	delimiter := (self containingSymbol ifNotNil: #type)
 		ifNotNil: [:parentType |
 			self factory delimitedRules
@@ -829,9 +830,11 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
 				((self factory hardLineBreakMatcher value: self) or: [self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]]) ifTrue: [aStream cr]]
-			ifFalse: [(lastMatchedWordRule and: [prefixMatchesWorldRule value: string]) ifTrue: [aStream space]].
-		lastMatchedWordRule := suffixMatchesWordRule value: string.
-		aStream nextPutAll: string.
+			ifFalse: [(lastMatchedWordRule and: [string notEmpty and: [suffixMatchesWordRule value: lastString, string first]]) ifTrue: [aStream space]].
+		string ifNotEmpty: [
+			lastMatchedWordRule := suffixMatchesWordRule value: string.
+			lastString := string.
+			aStream nextPutAll: string].
 		first := false]
 ]
 

@@ -20,6 +20,12 @@ SBGrammarLanguage class >> file: aFilenameString [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> fileSuffix [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> grammarJson [
 
 	^ self subclassResponsibility
@@ -119,12 +125,6 @@ SBGrammarLanguage >> configure [
 	" entry point for calling configuration methods on the processed grammar, e.g. blockInline:, or delimitedRules: "
 
 	
-]
-
-{ #category : #'as yet unclassified' }
-SBGrammarLanguage >> fileSuffix [
-
-	^ self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }

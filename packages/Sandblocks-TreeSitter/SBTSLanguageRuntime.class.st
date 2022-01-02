@@ -52,7 +52,7 @@ SBTSLanguageRuntime >> cmd: aProgramPathString arguments: aCollection env: aDict
 		[process runState == #complete] whileFalse: [(Delay forMilliseconds: 20) wait].
 		outputPipe close.
 		errorPipe close.
-		processPromise resolveWith: process exitStatus] fork.
+		processPromise resolveWith: (UnixProcessExitStatus for: process exitStatus) exitStatus] fork.
 	
 	^ (Promise all: {processPromise. stdoutPromise. stderrPromise}) then: [:array | [:block | block valueWithArguments: array]]
 ]
@@ -125,7 +125,7 @@ SBTSLanguageRuntime >> spawnWatchDuring: aBlock [
 SBTSLanguageRuntime >> tmpFile: aString do: aBlock [
 
 	| path |
-	path := '/tmp/', (UUID new asString, '.', self factory fileSuffix).
+	path := '/tmp/', (UUID new asString, '.', self factory class fileSuffix).
 	^ [
 		FileStream forceNewFileNamed: path do: [:tmpFile | tmpFile nextPutAll: aString].
 		aBlock value: path] ensure: [FileDirectory deleteFilePath: path]

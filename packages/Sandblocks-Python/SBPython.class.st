@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBPython class >> fileSuffix [
+
+	^ 'py'
+]
+
+{ #category : #'as yet unclassified' }
 SBPython class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-python/blob/master/src/grammar.json "
 
@@ -5126,12 +5132,6 @@ SBPython >> configure [
 	self noteUncapturedText: #('string').
 	self blockInline: #('expression_statement').
 	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type' and: [(b parentSandblock ifNotNil: #type) ~= 'pair']]]
-]
-
-{ #category : #'as yet unclassified' }
-SBPython >> fileSuffix [
-
-	^ 'py'
 ]
 
 { #category : #'as yet unclassified' }

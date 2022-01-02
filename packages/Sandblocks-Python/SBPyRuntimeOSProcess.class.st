@@ -28,11 +28,10 @@ SBPyRuntimeOSProcess >> prettyPrint: aString [
 SBPyRuntimeOSProcess >> writeWatchSourceOn: aStream watch: aWatch [
 
 	aStream
-		nextPutAll: 'print(
-        (lambda e:
+		nextPutAll: '(lambda e:
             ((lambda s: (s.connect(("localhost", int(__import__("os").environ["SQ_WATCH"]))), s.send(("{\"id\":\"';
 		nextPutAll: aWatch id;
-		nextPutAll: '\",\"expression\":"+str(e)+"}").encode()), s.close()))(__import__("socket").socket()), e))('.
+		nextPutAll: '\",\"expression\":\""+str(e)+"\"}").encode()), s.close()))(__import__("socket").socket()), e))('.
 	aWatch expression writeSourceOn: aStream.
-	aStream nextPutAll: ')[1])'
+	aStream nextPutAll: ')[1]'
 ]

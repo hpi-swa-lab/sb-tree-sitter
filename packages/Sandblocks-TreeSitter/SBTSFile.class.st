@@ -10,9 +10,23 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSFile >> artefactChanged: aMethodBlock [
+
+	aMethodBlock = self ifTrue: [self root updateAllHighlights]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> filepath [
 
 	^ filepath
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile >> filepath: aString [
+
+	self
+		filepath: aString
+		language: (SBGrammarLanguage allSubclasses detect: [:lang | lang fileSuffix = 'c'])
 ]
 
 { #category : #'as yet unclassified' }
@@ -31,11 +45,12 @@ SBTSFile >> filepath: aString language: aLanguageClass [
 			addMorphBack: (Morph new
 				extent: 8 @ 0;
 				color: Color transparent)).
-		self root runtime ifNotNil: [
-			self addMorphBack: (runButton := SBIcon iconPlay
-				balloonText: 'Run file';
-				on: #click send: #toggleRun to: self)].
-		self addMorphBack: ((aLanguageClass parseAndReplace: stream contents) hResizing: #spaceFill)]
+		self addMorphBack: ((aLanguageClass parseAndReplace: stream contents) hResizing: #spaceFill)].
+	
+	self root factory runtime ifNotNil: [
+		self firstSubmorph addMorphBack: (runButton := SBIcon iconPlay
+			balloonText: 'Run file';
+			on: #click send: #toggleRun to: self)]
 ]
 
 { #category : #'as yet unclassified' }
