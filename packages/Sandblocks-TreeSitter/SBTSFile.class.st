@@ -115,7 +115,7 @@ SBTSFile >> toggleRun [
 			runButton changeIconName: #iconPlay.
 			runCancelBlock := nil]
 		ifNil: [
-			((runtime object evaluateFileAsync: self filepath cancel: [:b | runCancelBlock := b]) then: [:b |
+			((runtime object new evaluateFileAsync: self filepath cancel: [:b | runCancelBlock := b]) then: [:b |
 				b value: [:status :stdout :stderr |
 					{status. stdout. stderr} explore.
 					runButton changeIconName: #iconPlay.

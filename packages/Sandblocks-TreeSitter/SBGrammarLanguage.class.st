@@ -186,7 +186,7 @@ SBGrammarLanguage >> preprocessGrammar [
 { #category : #'as yet unclassified' }
 SBGrammarLanguage >> runtime [
 
-	SBTSActiveRuntime value ifNotNil: [:runtime | runtime language = self class ifTrue: [^ runtime]].
+	SBTSActiveRuntime value ifNotNil: [:runtime | runtime class language = self class ifTrue: [^ runtime]].
 	
 	^ self class defaultRuntimeClass ifNotNil: [:cl | cl new factory: self]
 ]

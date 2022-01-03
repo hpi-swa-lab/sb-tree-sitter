@@ -804,6 +804,8 @@ SBInlineBlock >> prefersNoBorder [
 { #category : #printing }
 SBInlineBlock >> prettySourceString [
 
+	self allBlocksDo: [:b | b valid ifFalse: [^ self sourceString]].
+	
 	^ self factory runtime
 		ifNotNil: [:r | r prettyPrint: self sourceString]
 		ifNil: [self sourceString]

@@ -59,10 +59,9 @@ SBJsRuntimeWeb >> stopWatchServer [
 SBJsRuntimeWeb >> writeWatchSourceOn: aStream watch: aWatch [
 
 	aStream
-		nextPutAll: '';
+		nextPutAll: '((e) => (fetch(`http://localhost:51234/sqReport?id=${"';
 		nextPutAll: aWatch id;
-		nextPutAll: '", ';
-		nextPutAll: ''.
+		nextPutAll: '"}&expression=${escape(JSON.stringify(e))}`), e))('.
 	aWatch expression writeSourceOn: aStream.
 	aStream nextPutAll: ')'
 ]
