@@ -17,6 +17,18 @@ SBPyNumberWithPrefix >> castToUnknownWhenEmpty [
 ]
 
 { #category : #'as yet unclassified' }
+SBPyNumberWithPrefix >> isPyPltPlotParam [
+	"indicates that this is a parameter of matplotlib's ax.plot() method."
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBPyNumberWithPrefix >> isSmalltalk [
+	
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBPyNumberWithPrefix >> keyStroke: anEvent [
 
 	self acceptInputEvent: anEvent

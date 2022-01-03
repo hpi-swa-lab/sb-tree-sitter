@@ -12,3 +12,9 @@ SBPyPltPlots >> isAxes [
 	
 	^ true
 ]
+
+{ #category : #'as yet unclassified' }
+SBPyPltPlots >> type [
+
+	^ 'call'
+]

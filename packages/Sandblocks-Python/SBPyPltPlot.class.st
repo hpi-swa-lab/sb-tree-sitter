@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltPlot class >> matchPython: aDictionary do: aBlock [
+SBPyPltPlot class >> match: aDictionary do: aBlock [
 	<lang: #python match: '(call
         	function: (attribute
             	object: (identifier) ="ax" @ax
@@ -29,10 +29,9 @@ SBPyPltPlot class >> matchPython: aDictionary do: aBlock [
 SBPyPltPlot >> createReplacementOfArgs: aTSBlock [
 "creates plot replacement, nesting the replacements of aTSBlock inside."
 
-	self halt.
 	self addMorphBack: (SBRow new
 			addMorphBack: (SBStringMorph new contents: 'line plot:(');
-			addMorphBack: (SBBlock new addMorphBack: aTSBlock buildCopy);
+			addMorphBack: (SBPyPltPlotArgs new factory: (SBPython instance); wrapInReplacement: (aTSBlock buildCopy));
 			addMorphBack: (SBStringMorph new contents: ')');
 			addMorphBack: (SBPyPltImage linePlot);
 			cellGap: 4
@@ -63,12 +62,12 @@ SBPyPltPlot >> createReplacementOfArgsOld: aTSBlock [
 	| argBlocks argsLayout |
 	
 	argBlocks := aTSBlock children collect: [:arg | SBBlock new addMorphBack: arg buildCopy].
-	argsLayout := SBRow new.
+	argsLayout := SBColumn new.
 	argBlocks do: [:aBlock | argsLayout addMorphBack: aBlock ].
 	
 	self addMorphBack: (SBRow new
 			addMorphBack: (SBStringMorph new contents: 'line plot:(');
-			addMorphBack: argsLayout;
+			addMorphBack: (SBPyPltPlotArgs new factory: SBPython instance; wrapInReplacement: argsLayout);
 			addMorphBack: (SBStringMorph new contents: ')');
 			addMorphBack: (SBPyPltImage linePlot);
 			cellGap: 4
