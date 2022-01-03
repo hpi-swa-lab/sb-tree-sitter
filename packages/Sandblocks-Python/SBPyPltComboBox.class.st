@@ -18,3 +18,9 @@ SBPyPltComboBox >> display: anObject [
 			(sBStringMorphs size > 0) ifTrue: [^ sBStringMorphs first contents]
 		] ifFalse: [^ super display: anObject]
 ]
+
+{ #category : #'as yet unclassified' }
+SBPyPltComboBox >> isPyPltPlotParam [
+	"indicates that this is a parameter of matplotlib's ax.plot() method."
+	^ true
+]
