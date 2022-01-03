@@ -227,7 +227,9 @@ SBInlineBlockRepeat >> ownerWithColor [
 { #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> printTitleOn: aStream [
 
+	aStream nextPut: $(.
 	element printTitleOn: aStream.
+	aStream nextPut: $).
 	(multiple and: [required]) ifTrue: [^ aStream nextPut: $+].
 	(multiple and: [required not]) ifTrue: [^ aStream nextPut: $*].
 	aStream nextPut: $?
@@ -280,7 +282,7 @@ SBInlineBlockRepeat >> takeStreamFrom: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockRepeat >> writeSourceOn: aStream [
+SBInlineBlockRepeat >> writeSourceOn: aStream indent: aNumber [
 
-	self printElementsSeparated: self submorphs on: aStream
+	self printElementsSeparated: self submorphs on: aStream indent: aNumber
 ]

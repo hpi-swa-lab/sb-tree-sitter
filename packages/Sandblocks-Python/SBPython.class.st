@@ -5135,9 +5135,15 @@ SBPython >> configure [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> indentMatch: aBlock [
+
+	^ aBlock type = 'block'
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> postConfigure [
 
-	blockInline remove: 'block'
+	blockInline remove: 'block' ifAbsent: []
 ]
 
 { #category : #'as yet unclassified' }

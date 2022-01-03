@@ -205,6 +205,16 @@ SBTSLanguageTests >> testPythonImport [
 	self assert: (block matchesQuery: '(module (import_statement (aliased_import (dotted_name (identifier)) alias: (identifier))))')
 ]
 
+{ #category : #'testing - printing' }
+SBTSLanguageTests >> testPythonIndent [
+
+	| source |
+	source := 'if a:
+	if b:
+		pass'.
+	self assert: source equals: (SBPython parse: source) sourceString
+]
+
 { #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonInsertLambdaParameter [
 

@@ -366,7 +366,7 @@ SBInlineBlockSymbol >> unwrapSuperType [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> writeSourceOn: aStream [
+SBInlineBlockSymbol >> writeSourceOn: aStream indent: aNumber [
 
-	self firstSubmorph writeSourceOn: aStream
+	self firstSubmorph writeSourceOn: aStream indent: aNumber
 ]

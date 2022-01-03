@@ -212,7 +212,7 @@ SBInlineBlockChoice >> takeStreamFrom: aMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockChoice >> writeSourceOn: aStream [
+SBInlineBlockChoice >> writeSourceOn: aStream indent: aNumber [
 
-	self firstSubmorph writeSourceOn: aStream
+	self firstSubmorph writeSourceOn: aStream indent: aNumber
 ]

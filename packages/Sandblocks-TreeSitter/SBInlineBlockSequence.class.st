@@ -202,7 +202,7 @@ SBInlineBlockSequence >> takeStreamFrom: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSequence >> writeSourceOn: aStream [
+SBInlineBlockSequence >> writeSourceOn: aStream indent: aNumber [
 
-	self printElementsSeparated: self submorphs on: aStream
+	self printElementsSeparated: self submorphs on: aStream indent: aNumber
 ]

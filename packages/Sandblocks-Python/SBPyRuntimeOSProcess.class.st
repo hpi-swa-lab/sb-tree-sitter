@@ -19,9 +19,18 @@ SBPyRuntimeOSProcess >> evaluate: aString [
 { #category : #'as yet unclassified' }
 SBPyRuntimeOSProcess >> prettyPrint: aString [
 
-	| printer |
-	printer := (self which: 'autopep8') ifNil: [^ aString].
-	^ self checkedCmd: printer arguments: {'-'} env: nil stdin: aString
+	| printer args |
+	args := #().
+	printer := nil.
+	printer ifNil: [(self which: 'yapf3') ifNotNil: [:path | printer := path]].
+	printer ifNil: [(self which: 'yapf') ifNotNil: [:path | printer := path]].
+	printer ifNil: [
+		(self which: 'autopep8') ifNotNil: [:path |
+			printer := path.
+			args := #('-')]].
+	printer ifNil: [^ aString].
+	
+	^ self checkedCmd: printer arguments: args env: nil stdin: aString withUnixLineEndings
 ]
 
 { #category : #'as yet unclassified' }

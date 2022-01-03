@@ -704,6 +704,12 @@ SBMetaBlockFactory >> includesNonHiddenParts: anObject visited: aCollection [
 		['SEQ'] -> [anObject members anySatisfy: [:member | self includesNonHiddenParts: member visited: aCollection]]}
 ]
 
+{ #category : #'configuration helpers' }
+SBMetaBlockFactory >> indentMatch: aBlock [
+
+	^ false
+]
+
 { #category : #'initialize-release' }
 SBMetaBlockFactory >> initialize [
 

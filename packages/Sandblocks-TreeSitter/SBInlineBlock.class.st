@@ -810,9 +810,9 @@ SBInlineBlock >> prettySourceString [
 ]
 
 { #category : #printing }
-SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
+SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber [
 
-	| first delimiter lastMatchedWordRule suffixMatchesWordRule prefixMatchesWorldRule lastString |
+	| first delimiter lastMatchedWordRule suffixMatchesWordRule lastString |
 	first := true.
 	lastMatchedWordRule := false.
 	lastString := ''.
@@ -824,15 +824,17 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 				ifAbsent: ['']]
 		ifNil: [''].
 	suffixMatchesWordRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory wordRule matchesStream: (string readStream position: start - 1)]]].
-	prefixMatchesWorldRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [factory wordRule matchesPrefix: string]].
 	
 	aCollection do: [:element | | string |
-		string := String streamContents: [:stream | element writeSourceOn: stream].
+		string := String streamContents: [:stream |
+			element writeSourceOn: stream indent: ((self factory indentMatch: element)
+				ifTrue: [aNumber + 1]
+				ifFalse: [aNumber])].
 		(self isKindOf: SBInlineBlockRepeat)
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
-				((self factory hardLineBreakMatcher value: self) or: [self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]]) ifTrue: [aStream cr]]
-			ifFalse: [(lastMatchedWordRule and: [string notEmpty and: [suffixMatchesWordRule value: lastString, string first]]) ifTrue: [aStream space]].
+				(((self factory hardLineBreakMatcher value: self) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [self containingSymbol parentSandblock isInlineBlock or: [first not]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
+			ifFalse: [(string notEmpty and: [lastMatchedWordRule and: [suffixMatchesWordRule value: lastString, string first]]) ifTrue: [aStream space]].
 		string ifNotEmpty: [
 			lastMatchedWordRule := suffixMatchesWordRule value: string.
 			lastString := string.
@@ -843,7 +845,6 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> printOn: aStream [
 
-	SBToggledCode comment: '' active: 0 do: {[aStream nextPutAll: self className]}.
 	aStream nextPut: $(.
 	self printTitleOn: aStream.
 	aStream nextPut: $)
@@ -1070,5 +1071,11 @@ SBInlineBlock >> wrapWithWatch [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> writeSourceOn: aStream [
 
-	self subclassResponsibility
+	self writeSourceOn: aStream indent: 0
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> writeSourceOn: aStream indent: aNumber [
+
+	^ self subclassResponsibility
 ]

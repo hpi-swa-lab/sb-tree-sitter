@@ -69,3 +69,9 @@ SBInlineBlockReplace >> writeSourceOn: aStream [
 
 	^ self subclassResponsibility
 ]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockReplace >> writeSourceOn: aStream indent: aNumber [
+
+	^ self writeSourceOn: aStream
+]
