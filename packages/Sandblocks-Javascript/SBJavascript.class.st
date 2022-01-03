@@ -6782,13 +6782,14 @@ SBJavascript >> configure [
 { #category : #'as yet unclassified' }
 SBJavascript >> hardLineBreakMatch: aBlock [
 
-	^ (aBlock submorphAfter ifNotNil: #type) = 'statement_block'
+	^ (aBlock submorphAfter ifNotNil: #type) = 'statement_block' or: [(aBlock submorphAfter ifNotNil: #type) = 'class_body']
 ]
 
 { #category : #'as yet unclassified' }
 SBJavascript >> postConfigure [
 
-	blockInline remove: 'statement_block'
+	blockInline remove: 'statement_block'.
+	blockInline remove: 'class_body'
 ]
 
 { #category : #'as yet unclassified' }
@@ -6821,5 +6822,5 @@ SBJavascript >> runtime [
 { #category : #'as yet unclassified' }
 SBJavascript >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 
-	^ aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']
+	^ (aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']) or: [(aBlock isKindOf: SBInlineBlockLabel) and: [aBlock contents = ':']]
 ]
