@@ -24,6 +24,8 @@ SBInlineBlock class >> registerShortcuts: aProvider [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> absorbsInput: anEvent [
 
+	(anEvent commandKeyPressed or: [anEvent optionKeyPressed or: [anEvent controlKeyPressed]]) ifTrue: [^ false].
+	
 	^ anEvent keyCharacter isPrintable and: [self currentTextMorph owner regex matches: anEvent keyCharacter asString]
 ]
 
