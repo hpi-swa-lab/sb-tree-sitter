@@ -6776,7 +6776,8 @@ SBJavascript class >> statementContainerTypes [
 { #category : #'as yet unclassified' }
 SBJavascript >> configure [
 
-	self blockInline: #('expression_statement' 'statement_block' 'formal_parameters')
+	self blockInline: #('expression_statement' 'statement_block' 'formal_parameters').
+	self noteUncapturedText: {'template_string'}
 ]
 
 { #category : #'as yet unclassified' }
@@ -6809,6 +6810,7 @@ SBJavascript >> preprocessGrammar [
 	self grammar rules
 		at: '_template_chars'
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
+	self grammar externals: (self grammar externals copyWithout: (self grammar externals detect: [:e | e name = '_template_chars'])).
 	self grammar at: 'inline' put: self grammar inline, {'_ternary_qmark'}.
 	self grammar rules statement members: (self grammar rules statement members reject: [:m | m name = 'labeled_statement'])
 ]

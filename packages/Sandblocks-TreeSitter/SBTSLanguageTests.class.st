@@ -93,6 +93,20 @@ SBTSLanguageTests >> testJavascriptNestedMemberExpression [
 	self assert: source equals: (SBJavascript parseElement: source) sourceString
 ]
 
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testJavascriptTemplateString [
+
+	| source |
+	source := '`ab`'.
+	self assert: source equals: (SBJavascript parse: source) sourceString.
+	
+	source := '`ab${a}`'.
+	self assert: source equals: (SBJavascript parse: source) sourceString.
+	
+	source := '`ab${a}def${c}`'.
+	self assert: source equals: (SBJavascript parse: source) sourceString
+]
+
 { #category : #'testing - printing' }
 SBTSLanguageTests >> testJavascriptToString [
 
