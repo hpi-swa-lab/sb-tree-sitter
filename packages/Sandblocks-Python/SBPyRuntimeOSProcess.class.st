@@ -29,6 +29,18 @@ SBPyRuntimeOSProcess >> evaluate: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
+
+	| python ret |
+	python := self which: 'python'.
+	python ifNil: [^ self error: 'python executable not found'].
+	
+	ret := Promise new.
+	[self spawnWatchDuring: [:port | ret resolveWith: (self cmd: python arguments: {aString} env: {'SQ_WATCH' -> port} stdin: nil cancel: aBlock) wait]] fork.
+	^ ret
+]
+
+{ #category : #'as yet unclassified' }
 SBPyRuntimeOSProcess >> prettyPrint: aString [
 
 	| printer args |

@@ -1,7 +1,7 @@
 Class {
 	#name : #SBJsDemoJSON,
 	#superclass : #SBInlineBlockReplace,
-	#category : #'Sandblocks-Javascript'
+	#category : #'Sandblocks-TreeSitter-Examples'
 }
 
 { #category : #'as yet unclassified' }

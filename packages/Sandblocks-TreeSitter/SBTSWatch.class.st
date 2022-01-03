@@ -78,6 +78,12 @@ SBTSWatch class >> matchWebJs: aDictionary do: aBlock [
 		value: (self new id: (aDictionary at: 'id') contents expression: (aDictionary at: 'expression'))
 ]
 
+{ #category : #'instance creation' }
+SBTSWatch class >> newEmpty [
+
+	^ self new id: UUID new asString
+]
+
 { #category : #watches }
 SBTSWatch class >> registerWatch: aWatch [
 
@@ -109,17 +115,32 @@ SBTSWatch >> expression [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSWatch >> expression: aBlock [
+
+	self submorphCount > 1 ifTrue: [self firstSubmorph delete].
+	self addMorphFront: aBlock buildCopy.
+	self type: aBlock type factory: aBlock factory
+]
+
+{ #category : #'as yet unclassified' }
 SBTSWatch >> id [
 
 	^ id
 ]
 
 { #category : #'as yet unclassified' }
+SBTSWatch >> id: aString [
+
+	id ifNotNil: [^ self error: 'watch already has an id'].
+	id := aString.
+	self registerWatch
+]
+
+{ #category : #'as yet unclassified' }
 SBTSWatch >> id: aString expression: anExpressionBlock [
 
-	id := aString.
-	self addMorphBack: anExpressionBlock buildCopy.
-	self registerWatch
+	self expression: anExpressionBlock.
+	self id: aString
 ]
 
 { #category : #'as yet unclassified' }
@@ -144,7 +165,8 @@ SBTSWatch >> reportValue: aString [
 	self submorphCount > 1 ifTrue: [self submorphs second delete].
 	self addMorphBack: (SBMultilineOwnTextMorph new
 		contents: aString;
-		maxWidth: 400)
+		maxWidth: 400).
+	self triggerEvent: #reportedValue with: aString
 ]
 
 { #category : #'as yet unclassified' }

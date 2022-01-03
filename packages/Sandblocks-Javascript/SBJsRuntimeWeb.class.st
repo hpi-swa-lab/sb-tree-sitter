@@ -29,7 +29,9 @@ SBJsRuntimeWeb class >> watchServer: aServer [
 SBJsRuntimeWeb >> evaluateFileAsync: aString cancel: aBlock [
 	" we cannot actually evaluate the file -- but we can start the watch server "
 
-	self startWatchServer
+	self startWatchServer.
+	aBlock value: [self stopWatchServer].
+	^ Promise new
 ]
 
 { #category : #'as yet unclassified' }
@@ -52,7 +54,9 @@ SBJsRuntimeWeb >> startWatchServer [
 { #category : #'as yet unclassified' }
 SBJsRuntimeWeb >> stopWatchServer [
 
-	self class watchServer ifNotNil: [:s | s destroy]
+	self class watchServer ifNotNil: [:s |
+		s destroy.
+		self class watchServer: nil]
 ]
 
 { #category : #'as yet unclassified' }

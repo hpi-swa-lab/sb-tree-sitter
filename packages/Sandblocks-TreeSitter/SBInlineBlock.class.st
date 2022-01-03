@@ -1065,9 +1065,9 @@ SBInlineBlock >> wantsExtraSpace [
 SBInlineBlock >> wrapWithWatch [
 	<action>
 
-	self sandblockEditor do: (SBReplaceCommand new target: self replacer: (SBTSWatch new
-		type: self type factory: self factory;
-		id: UUID new asString expression: self buildCopy))
+	self sandblockEditor do: (SBReplaceCommand new
+		target: self
+		replacer: (SBTSWatch newEmpty expression: self buildCopy))
 ]
 
 { #category : #'as yet unclassified' }
