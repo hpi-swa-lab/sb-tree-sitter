@@ -280,6 +280,7 @@ SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 		(self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory) do: [:b | b])
 			hResizing: #rigid;
 			attachDecorator: SBResizableDecorator new;
+			attachDecorator: SBForceMoveDecorator new;
 			updateAllHighlights]
 ]
 
