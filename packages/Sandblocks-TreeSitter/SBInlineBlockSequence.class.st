@@ -157,7 +157,10 @@ SBInlineBlockSequence >> layoutCommands [
 				index ~= self submorphCount ifTrue: [
 					stream nextPut: ((self hardLineBreakMatch: morph)
 						ifTrue: [SBAlgebraCommand hardLine]
-						ifFalse: [SBAlgebraCommand gap])]]])
+						ifFalse: [
+							(self softLineBreakMatchBetween: morph and: (self submorphs at: index + 1))
+								ifTrue: [SBAlgebraCommand softLineOrGap]
+								ifFalse: [SBAlgebraCommand gap]])]]])
 ]
 
 { #category : #'as yet unclassified' }
@@ -170,6 +173,14 @@ SBInlineBlockSequence >> ownerWithColor [
 SBInlineBlockSequence >> printTitleOn: aStream [
 
 	elements do: [:m | m printTitleOn: aStream] separatedBy: [aStream nextPutAll: ', ']
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSequence >> softLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ self factory
+		ifNotNil: [:f | f softLineBreakMatchBetween: aBlock and: anotherBlock]
+		ifNil: [false]
 ]
 
 { #category : #'as yet unclassified' }

@@ -6776,8 +6776,13 @@ SBJavascript class >> statementContainerTypes [
 { #category : #'as yet unclassified' }
 SBJavascript >> configure [
 
-	self blockInline: #('expression_statement' 'statement_block' 'formal_parameters').
-	self hardLineBreakMatcher: [:block | (block submorphAfter ifNotNil: #type) = 'statement_block']
+	self blockInline: #('expression_statement' 'statement_block' 'formal_parameters')
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> hardLineBreakMatch: aBlock [
+
+	^ (aBlock submorphAfter ifNotNil: #type) = 'statement_block'
 ]
 
 { #category : #'as yet unclassified' }
@@ -6811,4 +6816,10 @@ SBJavascript >> preprocessGrammar [
 SBJavascript >> runtime [
 
 	^ SBJsRuntimeOSProcess new factory: self
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> softLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']
 ]

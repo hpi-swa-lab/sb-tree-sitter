@@ -18,7 +18,8 @@ Class {
 		'noteUncapturedText',
 		'aliases',
 		'promotedInlineSymbols',
-		'containersOfPromotedInlineSymbols'
+		'containersOfPromotedInlineSymbols',
+		'softLineBreakMatcher'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -1051,6 +1052,20 @@ SBMetaBlockFactory >> simplifyList: anObject [
 	
 	anObject content ifNotNil: [:c | self simplifyList: c].
 	anObject members ifNotNil: [anObject members do: [:m | self simplifyList: m]]
+]
+
+{ #category : #'configuration helpers' }
+SBMetaBlockFactory >> softLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ softLineBreakMatcher
+		ifNotNil: [:b | b value: aBlock value: anotherBlock]
+		ifNil: [false]
+]
+
+{ #category : #configuration }
+SBMetaBlockFactory >> softLineBreakMatcher: aBlock [
+
+	softLineBreakMatcher := aBlock
 ]
 
 { #category : #configuration }
