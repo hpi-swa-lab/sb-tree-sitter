@@ -29,6 +29,14 @@ SBConsoleLogReporter >> expression: aBlock [
 			bold);
 		addMorphBack: aBlock buildCopy.
 	
+	
+]
+
+{ #category : #'as yet unclassified' }
+SBConsoleLogReporter >> initialize [
+
+	super initialize.
+	
 	watch := SBTSWatch newEmpty when: #reportedValue send: #newValue: to: self
 ]
 
