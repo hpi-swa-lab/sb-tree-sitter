@@ -223,3 +223,9 @@ SBTSUnknown >> writeMetaSourceOn: aStream [
 
 	aStream nextPutAll: ' '
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSUnknown >> writeSourceOn: aStream indent: aNumber [
+
+	
+]
