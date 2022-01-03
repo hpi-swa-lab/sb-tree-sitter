@@ -30,6 +30,18 @@ SBJsRuntimeOSProcess class >> exampleOpenSocket [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsRuntimeOSProcess class >> language [
+
+	^ SBJavascript
+]
+
+{ #category : #'as yet unclassified' }
+SBJsRuntimeOSProcess class >> runtimeName [
+
+	^ 'node.js'
+]
+
+{ #category : #'as yet unclassified' }
 SBJsRuntimeOSProcess >> evaluate: aString [
 
 	| node |

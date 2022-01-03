@@ -65,6 +65,19 @@ SBTSWatch class >> matchPy: aDictionary do: aBlock [
 		expression: (aDictionary at: 'expression'))
 ]
 
+{ #category : #matchers }
+SBTSWatch class >> matchWebJs: aDictionary do: aBlock [
+	<lang: #javascript match: '(call_expression (parenthesized_expression
+	(arrow_function (parenthesized_expression (sequence_expression (call_expression (arguments
+		(template_string (template_substitution (string (unescaped_single_string_fragment) @id)))))))))
+	(arguments (_) @expression)
+) @watch' sample: '((e) => (fetch(`http://localhost:51234/sqReport?id=${''asdasd''}&expression=${escape(JSON.stringify(e))}`), e))(2 + 2)'>
+
+	^ aBlock
+		value: (aDictionary at: 'watch')
+		value: (self new id: (aDictionary at: 'id') contents expression: (aDictionary at: 'expression'))
+]
+
 { #category : #watches }
 SBTSWatch class >> registerWatch: aWatch [
 

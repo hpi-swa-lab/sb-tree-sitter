@@ -8,9 +8,21 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> allRuntimes [
+
+	^ Array streamContents: [:stream | SBTSLanguageRuntime allSubclassesDo: [:cl | cl language = self ifTrue: [stream nextPut: cl]]]
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> build: aRuleName [
 
 	^ self instance instantiateTemplate: aRuleName
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> defaultRuntimeClass [
+
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -169,4 +181,12 @@ SBGrammarLanguage >> preprocessGrammar [
 	" entrypoint to clean the grammar before the automated steps happen, e.g. replacing or removing external rules "
 
 	
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage >> runtime [
+
+	SBTSActiveRuntime value ifNotNil: [:runtime | runtime language = self class ifTrue: [^ runtime]].
+	
+	^ self class defaultRuntimeClass ifNotNil: [:cl | cl new factory: self]
 ]

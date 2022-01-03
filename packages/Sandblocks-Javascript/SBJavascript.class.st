@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBJavascript class >> defaultRuntimeClass [
+
+	^ SBJsRuntimeOSProcess
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript class >> fileSuffix [
 
 	^ 'js'
@@ -6813,12 +6819,6 @@ SBJavascript >> preprocessGrammar [
 	self grammar externals: (self grammar externals copyWithout: (self grammar externals detect: [:e | e name = '_template_chars'])).
 	self grammar at: 'inline' put: self grammar inline, {'_ternary_qmark'}.
 	self grammar rules statement members: (self grammar rules statement members reject: [:m | m name = 'labeled_statement'])
-]
-
-{ #category : #'as yet unclassified' }
-SBJavascript >> runtime [
-
-	^ SBJsRuntimeOSProcess new factory: self
 ]
 
 { #category : #'as yet unclassified' }

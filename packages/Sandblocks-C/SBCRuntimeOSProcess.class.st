@@ -5,6 +5,18 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBCRuntimeOSProcess class >> language [
+
+	^ SBC
+]
+
+{ #category : #'as yet unclassified' }
+SBCRuntimeOSProcess class >> runtimeName [
+
+	^ 'clang'
+]
+
+{ #category : #'as yet unclassified' }
 SBCRuntimeOSProcess >> evaluate: aString [
 
 	| node |

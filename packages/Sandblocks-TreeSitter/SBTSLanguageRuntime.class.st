@@ -7,6 +7,18 @@ Class {
 	#category : #'Sandblocks-TreeSitter'
 }
 
+{ #category : #'as yet unclassified' }
+SBTSLanguageRuntime class >> available [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageRuntime class >> language [
+
+	^ self subclassResponsibility
+]
+
 { #category : #'helper os process' }
 SBTSLanguageRuntime >> checkedCmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString [
 

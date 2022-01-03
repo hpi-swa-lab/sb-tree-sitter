@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBPython class >> defaultRuntimeClass [
+
+	^ SBPyRuntimeOSProcess
+]
+
+{ #category : #'as yet unclassified' }
 SBPython class >> fileSuffix [
 
 	^ 'py'
@@ -5201,10 +5207,4 @@ SBPython >> preprocessGrammar [
 	
 	(self grammar rules at: '_suite') members: {(self grammar rules at: '_suite') members second}.
 	self ignoreExternals: #('_indent' '_dedent' '_newline' '_string_start' '_string_end')
-]
-
-{ #category : #'as yet unclassified' }
-SBPython >> runtime [
-
-	^ SBPyRuntimeOSProcess new factory: self
 ]

@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'filepath',
 		'runButton',
-		'runCancelBlock'
+		'runCancelBlock',
+		'runtime'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -47,7 +48,13 @@ SBTSFile >> filepath: aString language: aLanguageClass [
 				color: Color transparent)).
 		self addMorphBack: ((aLanguageClass parseAndReplace: stream contents) hResizing: #spaceFill)].
 	
-	self root factory runtime ifNotNil: [
+	self root factory runtime ifNotNil: [ | runtimes |
+		runtimes := aLanguageClass allRuntimes.
+		self firstSubmorph addMorphBack: (runtime := SBComboBox new
+			prefix: 'Runtime: ';
+			values: runtimes;
+			labels: (runtimes collect: #runtimeName);
+			object: aLanguageClass defaultRuntimeClass).
 		self firstSubmorph addMorphBack: (runButton := SBIcon iconPlay
 			balloonText: 'Run file';
 			on: #click send: #toggleRun to: self)]
@@ -85,15 +92,17 @@ SBTSFile >> layoutCommands [
 { #category : #'as yet unclassified' }
 SBTSFile >> root [
 
-	^ self childSandblocks first
+	^ self submorphs second
 ]
 
 { #category : #'as yet unclassified' }
 SBTSFile >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 
-	FileStream
-		forceNewFileNamed: self filepath
-		do: [:stream | stream nextPutAll: (aQuickBoolean ifTrue: [self root sourceString] ifFalse: [self root prettySourceString])].
+	| source |
+	source := SBTSActiveRuntime
+		value: (runtime object new factory: self root factory)
+		during: [aQuickBoolean ifTrue: [self root sourceString] ifFalse: [self root prettySourceString]].
+	FileStream forceNewFileNamed: self filepath do: [:stream | stream nextPutAll: source].
 	^ true
 ]
 
@@ -106,9 +115,7 @@ SBTSFile >> toggleRun [
 			runButton changeIconName: #iconPlay.
 			runCancelBlock := nil]
 		ifNil: [
-			((self root factory runtime
-				evaluateFileAsync: self filepath
-				cancel: [:b | runCancelBlock := b]) then: [:b |
+			((runtime object evaluateFileAsync: self filepath cancel: [:b | runCancelBlock := b]) then: [:b |
 				b value: [:status :stdout :stderr |
 					{status. stdout. stderr} explore.
 					runButton changeIconName: #iconPlay.

@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBC class >> defaultRuntimeClass [
+
+	^ SBCRuntimeOSProcess
+]
+
+{ #category : #'as yet unclassified' }
 SBC class >> fileSuffix [
 
 	^ 'c'
@@ -6765,10 +6771,4 @@ SBC class >> statementContainerTypes [
 SBC >> configure [
 
 	self noteUncapturedText: #('string_literal')
-]
-
-{ #category : #'as yet unclassified' }
-SBC >> runtime [
-
-	^ SBCRuntimeOSProcess new
 ]

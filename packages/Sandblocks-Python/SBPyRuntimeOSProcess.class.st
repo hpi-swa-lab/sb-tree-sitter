@@ -5,6 +5,18 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess class >> language [
+
+	^ SBPython
+]
+
+{ #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess class >> runtimeName [
+
+	^ 'python interpreter'
+]
+
+{ #category : #'as yet unclassified' }
 SBPyRuntimeOSProcess >> evaluate: aString [
 
 	| python |
