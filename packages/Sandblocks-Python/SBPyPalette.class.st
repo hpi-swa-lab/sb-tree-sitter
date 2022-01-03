@@ -11,7 +11,11 @@ SBPyPalette class >> buildOn: aBuilder [
 	aBuilder addBlock: 'Open' as: (SBPython parse: 'open("")').
 	aBuilder addBlock: 'Path' as: (SBPyFilepath new
 		factory: SBPython new;
-		path: '')
+		path: '').
+	aBuilder addBlock: 'Create Figure' as: 
+		(SBPyPltSubplots new 
+			factory: SBPython new;
+			createFigureButtonFrom: (self newNullBlock: 'Axes type')).
 ]
 
 { #category : #'as yet unclassified' }
