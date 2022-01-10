@@ -11,7 +11,18 @@ Class {
 { #category : #'as yet unclassified' }
 SBJsFetchSmall >> addExampleSection [
 
-	showExamples ifTrue: [super addExampleSection]
+	showExamples ifTrue: [
+		 | map |
+		
+			self addMorphBack: (SBRow new
+				cellGap: cellGapConstant;
+				addMorphBack: (SBStringMorph new contents: 'Examples');
+				addMorphBack: (SBRow new cellGap: cellGapConstant)).
+				
+			method = #post ifTrue: [exampleMorph := self submorphs seventh].
+			method = #get ifTrue: [exampleMorph := self submorphs sixth].
+			map := Examples at: url, method asString ifAbsent: [].
+			map ifNotNil: [ map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -64,7 +75,7 @@ SBJsFetchSmall >> addParamSection: aParams [
 		addMorphBack: (SBRow new
 			cellGap: cellGapConstant).
 	
-	paramMorph := self submorphs sixth.
+	paramMorph := self submorphs fifth.
 	params keysDo: [:key | self addParamAction: ((params at: key) key) asString  value:  ((params at: key) value) asString].
 	
 	"Whats have I done here :)"
@@ -83,6 +94,14 @@ SBJsFetchSmall >> addParamSection: aParams [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsFetchSmall >> hideExamplesButton [
+	^(SBButton new icon: SBIcon iconEye shortcut: nil do: [
+				showExamples := true.
+				(((self submorphs first) submorphs fourth) submorphs second) replaceBy: self showExamplesButton.
+				self recreateFromMorphs])
+]
+
+{ #category : #'as yet unclassified' }
 SBJsFetchSmall >> initCommons [
 	"Setup shared UI elements"
 
@@ -91,29 +110,25 @@ SBJsFetchSmall >> initCommons [
 			changeTableLayout;
 			hResizing: #spaceFill;
 			cellGap: cellGapConstant;
-			addMorphBack: (SBStringMorph new contents: 'URL ');
+			addMorphBack: (SBStringMorph new contents: 'URL');
 			addMorphBack: (SBTextBubble new
 				hResizing: #spaceFill;
 				contents: url);
-			addMorphBack: (SBButton new icon: SBIcon iconPlusCircle label: 'Send' do: [self send]));
-		listDirection: #topToBottom;
-		addMorphBack: (SBRow new
+			addMorphBack: (SBButton new icon: SBIcon iconPlay shortcut: nil do: [self send]);
+			addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
 			addMorphBack: (SBButton new
 				color: (Color r: 0.0 g: 1 b: 0.0);
-				icon: SBIcon iconPlusCircle label: 'Payload' do: [self promptAddPayload]);
-			addMorphBack: (SBButton new icon: SBIcon iconSearch label: showExamplesButtonTxt do: [
-				showExamples := showExamples not.
-				showExamples
-					ifTrue: [showExamplesButtonTxt := 'Hide Examples']
-					ifFalse: [showExamplesButtonTxt := 'Show Examples'].
-				self recreateFromMorphs]));
-		addMorphBack: SBRow new;
-		addMorphBack: SBRow new.
+				icon: SBIcon iconPlus shortcut: nil do: [self promptAddPayload]);
+			addMorphBack: (showExamples ifTrue: [self showExamplesButton] ifFalse: [self hideExamplesButton])));
+			listDirection: #topToBottom;
+			addMorphBack: SBRow new;
+			addMorphBack: SBRow new.
+			
 	
 	"Initialize the the morphs centrally for easier acces"
 	urlMorph := self submorphs first.
-	headerMorph := self submorphs fourth.
+	headerMorph := self submorphs second.
 	
 	headers ifNotNil: [headers keysDo: [:key | self addHeaderAction: key asString value: (headers at: key) asString]]
 ]
@@ -122,12 +137,19 @@ SBJsFetchSmall >> initCommons [
 SBJsFetchSmall >> initialize [
 	super initialize.
 	showExamples := false.
-	showExamplesButtonTxt := 'Show Examples'.
 ]
 
 { #category : #'as yet unclassified' }
 SBJsFetchSmall >> promptAddPayload [
 	self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SBJsFetchSmall >> showExamplesButton [
+	^(SBButton new icon: SBIcon iconEyeSlash shortcut: nil do: [
+				showExamples := false.
+				(((self submorphs first) submorphs fourth) submorphs second) replaceBy: self hideExamplesButton.
+				self recreateFromMorphs])
 ]
 
 { #category : #'as yet unclassified' }

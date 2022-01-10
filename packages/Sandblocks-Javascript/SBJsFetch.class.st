@@ -25,21 +25,33 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBJsFetch class >> matchJs: aDictionary do: aBlock [
-	<lang: #javascript match: '(call_expression
+	<lang: #javascript match: '
+(call_expression
 	(member_expression
-    	(identifier) @window
-        (property_identifier) @fetch)
+    	(identifier) 
+        (property_identifier) @method) @member
     (arguments
     	(string) @url
-        (object) @params)
-) @call' sample: 'window.fetch(''url'', {})'>
+        (arrow_function) @callback)
+)'>
 
-	(aDictionary at: 'fetch') contents = 'fetch' ifFalse: [^ nil].
-	(aDictionary at: 'window') contents = 'window' ifFalse: [^ nil].
+	| url method |
+	method := (aDictionary at: 'method') contents.
+	url := (aDictionary at: 'url') childSandblocks first contents deepCopy.
 	
-	^ aBlock value: (aDictionary at: 'call') value: (self new
-		url: (aDictionary at: 'url') childSandblocks first contents
-		options: (aDictionary at: 'params'))
+	method
+		caseOf: {
+			['post'] -> [
+				(aDictionary at: 'url') deleteBlock.
+				^ aBlock value: (aDictionary at: 'member') value: (SBJsFetchSmallPost new
+					factory: SBJavascript new;
+					url: url headers: Dictionary new data: nil)].
+			['get'] -> [
+				(aDictionary at: 'url') deleteBlock.
+				^ aBlock value: (aDictionary at: 'member') value: (SBJsFetchSmallGet new
+					factory: SBJavascript new;
+					url: url headers: Dictionary new data: nil)]}
+		otherwise: [^ nil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -74,7 +86,7 @@ SBJsFetch >> addBodySection: aBody [
 				addMorphBack: (SBStringMorph new contents: 'Body');
 				addMorphBack: (SBJsFetchBodyTextBubble new contents: aBody))].
 	
-	bodyMorph := self submorphs seventh.
+	bodyMorph := self submorphs sixth.
 	
 	key := url, (method asString).
 	Examples at: key ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]]
@@ -158,7 +170,7 @@ SBJsFetch >> addParamAction [
 
 { #category : #'as yet unclassified' }
 SBJsFetch >> addParamAction: key value: value [
-	self submorphs sixth
+	paramMorph
 		submorphs;
 		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
@@ -514,7 +526,7 @@ SBJsFetch >> url: aString method: aMethod headers: aHeaders data: aData [
 	url := aString.
 	method := aMethod.
 	headers := aHeaders.
-	cellGapConstant := 7.
+	cellGapConstant := 3.
 	data := aData.
 	"isRawData indicates if body in POST is of type raw. TODO: might be improved"
 	isRawData := true.
@@ -544,6 +556,7 @@ SBJsFetch >> url: aString options: aSBInlineBlockSymbol [
 
 { #category : #'as yet unclassified' }
 SBJsFetch >> writeSourceOn: aStream [ 
+	self halt.
 	"Transforms into JS source code"
 	
 	aStream nextPutAll: 'window.fetch("'.
