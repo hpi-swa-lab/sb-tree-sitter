@@ -111,6 +111,14 @@ SBInlineBlockSequence >> hardLineBreakMatch: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockSequence >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ self factory
+		ifNotNil: [:f | f hardLineBreakMatchBetween: aBlock and: anotherBlock]
+		ifNil: [false]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockSequence >> hasSameContentsAs: aBlock [
 
 	(super hasSameContentsAs: aBlock) ifFalse: [^ false].
@@ -154,11 +162,12 @@ SBInlineBlockSequence >> layoutCommands [
 		data: (Array streamContents: [:stream |
 			self submorphs withIndexDo: [:morph :index |
 				stream nextPut: morph layoutCommands.
-				index ~= self submorphCount ifTrue: [
-					stream nextPut: ((self hardLineBreakMatch: morph)
+				index ~= self submorphCount ifTrue: [ | next |
+					next := self submorphs at: index + 1.
+					stream nextPut: ((self hardLineBreakMatchBetween: morph and: next)
 						ifTrue: [SBAlgebraCommand hardLine]
 						ifFalse: [
-							(self softLineBreakMatchBetween: morph and: (self submorphs at: index + 1))
+							(self softLineBreakMatchBetween: morph and: next)
 								ifTrue: [SBAlgebraCommand softLineOrGap]
 								ifFalse: [SBAlgebraCommand gap]])]]])
 ]

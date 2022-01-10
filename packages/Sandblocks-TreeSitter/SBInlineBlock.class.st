@@ -446,6 +446,17 @@ SBInlineBlock >> firstDifferingUpBlocksWith: aMorph do: aBlock ifNone: anotherBl
 	^ anotherBlock value
 ]
 
+{ #category : #accessing }
+SBInlineBlock >> firstVisibleType [
+
+	^ (self type notNil and: [self inline not])
+		ifTrue: [self type]
+		ifFalse: [
+			(self hasSubmorphs and: [self firstSubmorph isInlineBlock])
+				ifTrue: [self firstSubmorph firstVisibleType]
+				ifFalse: [nil]]
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> fixedNumberOfChildren [
 
@@ -844,6 +855,25 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber
 		first := false]
 ]
 
+{ #category : #printing }
+SBInlineBlock >> printFull [
+
+	^ String streamContents: [:s | self printFullOn: s depth: 0]
+]
+
+{ #category : #printing }
+SBInlineBlock >> printFullOn: aStream depth: aNumber [
+
+	aStream nextPut: $(.
+	aStream print: self.
+	self submorphs do: [:m |
+		m isInlineBlock ifTrue: [
+			aStream crtab: aNumber + 1.
+			m printFullOn: aStream depth: aNumber + 1]].
+	aStream crtab: aNumber + 1.
+	aStream nextPut: $)
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> printOn: aStream [
 
@@ -852,13 +882,13 @@ SBInlineBlock >> printOn: aStream [
 	aStream nextPut: $)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBInlineBlock >> printSExpr [
 
 	^ String streamContents: [:s | self printSExprOn: s depth: 0 short: false]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBInlineBlock >> printSExprOn: aStream depth: aNumber short: aBoolean [
 
 	self
@@ -868,7 +898,7 @@ SBInlineBlock >> printSExprOn: aStream depth: aNumber short: aBoolean [
 		includeInlined: aBoolean not
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBInlineBlock >> printSExprShort [
 
 	^ String streamContents: [:s | self printSExprOn: s depth: 0 short: true]

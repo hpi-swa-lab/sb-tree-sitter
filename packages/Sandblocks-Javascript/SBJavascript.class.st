@@ -6793,6 +6793,12 @@ SBJavascript >> hardLineBreakMatch: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ #('statement_block' 'class_body') includes: anotherBlock firstVisibleType
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript >> postConfigure [
 
 	blockInline remove: 'statement_block'.

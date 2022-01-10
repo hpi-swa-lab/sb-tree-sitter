@@ -643,6 +643,12 @@ SBMetaBlockFactory >> hardLineBreakMatch: aBlock [
 ]
 
 { #category : #'configuration helpers' }
+SBMetaBlockFactory >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ hardLineBreakMatcher ifNotNil: [:b | b value: aBlock] ifNil: [false]
+]
+
+{ #category : #'configuration helpers' }
 SBMetaBlockFactory >> hardLineBreakMatcher [
 
 	^ hardLineBreakMatcher
