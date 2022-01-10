@@ -39,7 +39,7 @@ SBTSFile >> filepath: aString [
 
 	self
 		filepath: aString
-		language: (SBGrammarLanguage allSubclasses detect: [:lang | lang fileSuffix = 'c'])
+		language: (SBGrammarLanguage allSubclasses detect: [:lang | lang fileSuffix = (FileDirectory extensionFor: aString)])
 ]
 
 { #category : #'as yet unclassified' }
