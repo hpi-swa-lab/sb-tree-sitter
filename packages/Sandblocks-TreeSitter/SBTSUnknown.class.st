@@ -58,6 +58,12 @@ SBTSUnknown >> firstDifferingBlocksWith: aMorph do: aBlock [
 	^ nil
 ]
 
+{ #category : #accessing }
+SBTSUnknown >> firstVisibleType [
+
+	^ nil
+]
+
 { #category : #'as yet unclassified' }
 SBTSUnknown >> grammarHandler [
 
