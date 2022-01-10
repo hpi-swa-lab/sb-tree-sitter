@@ -1,14 +1,12 @@
 Class {
 	#name : #SBPyPltSetLim,
-	#superclass : #SBInlineBlockReplace,
+	#superclass : #SBPyPltAxis,
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #'as yet unclassified' }
 SBPyPltSetLim class >> matchPython: aDictionary do: aBlock [
-	<lang: #python match: '(module
-	(expression_statement
-    	(call
+	<lang: #python match: '(call
         	function: (attribute
             	object: (identifier) @ax
                 (#eq @ax "ax")
@@ -18,9 +16,7 @@ SBPyPltSetLim class >> matchPython: aDictionary do: aBlock [
 			(integer) @paramFrom
 			(integer) @paramTo
 		)
-        )
-    ) @expression  
-)' sample: 'ax.set_ylim(from, to)'>
+        ) @call' sample: 'ax.set_ylim(from, to)'>
 	
 	| functionName axis |
 	functionName := (aDictionary at: 'setLim') contents.
@@ -30,8 +26,8 @@ SBPyPltSetLim class >> matchPython: aDictionary do: aBlock [
 	axis := functionName = 'set_xlim' ifTrue: 'x' ifFalse: 'y'.
 	
 	^ aBlock
-		value: (aDictionary at: 'expression')
-		value: (self new factory: (aDictionary at: 'expression') factory;
+		value: (aDictionary at: 'call')
+		value: (self new factory: (aDictionary at: 'call') factory;
 			createReplacementFrom: (aDictionary at: 'paramFrom') contents 
 			to: (aDictionary at: 'paramTo') contents 
 			ofAxis: axis)
@@ -41,15 +37,16 @@ SBPyPltSetLim class >> matchPython: aDictionary do: aBlock [
 SBPyPltSetLim >> createReplacementFrom: minNumber to: maxNumber  ofAxis: anAxis [
 
 	self
-		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: 'Limit ');
 			addMorphBack: (SBTextBubble new contents: anAxis);
-			addMorphBack: (SBStringMorph new contents: ' axis')
-		);
-		addMorphBack: (SBRow new
-			addMorphBack: (SBStNumberWithPrefix new prefix: 'From'; contents: minNumber);
-			addMorphBack: (SBStNumberWithPrefix new prefix: 'To'; contents: maxNumber)
+			addMorphBack: (SBStringMorph new contents: 'axis');
+			addMorphBack: (SBStringMorph new contents: 'imit:');
+			addMorphBack: (SBStringMorph new contents: '[');
+			addMorphBack: (SBStNumberWithPrefix new contents: minNumber);
+			addMorphBack: (SBStringMorph new contents: ',');
+			addMorphBack: (SBStNumberWithPrefix new contents: maxNumber);
+			addMorphBack: (SBStringMorph new contents: ']');
+			cellGap: 4
 		).
 ]
 

@@ -1,12 +1,21 @@
 Class {
 	#name : #SBJsFetchMethodSelect,
-	#superclass : #SBMethodSelect,
+	#superclass : #SBComboBox,
 	#category : #'Sandblocks-Javascript'
 }
 
 { #category : #'as yet unclassified' }
+SBJsFetchMethodSelect >> display: anObject [
+
+	^ anObject asString asUppercase
+]
+
+{ #category : #'as yet unclassified' }
 SBJsFetchMethodSelect >> initialize [
-	super initialize
+
+	super initialize.
+	
+	self layoutInset: (SBEdgeInsets left: 2 right: 2 top: 1 bottom: 2)
 ]
 
 { #category : #'as yet unclassified' }
@@ -21,4 +30,10 @@ SBJsFetchMethodSelect >> promptChangeValue [
 			value: (self values at: index)).
 		self owner owner method: (self values at: index).
 		self owner owner recreateFromMorphs]
+]
+
+{ #category : #'as yet unclassified' }
+SBJsFetchMethodSelect >> values [
+
+	^ #(#get #put #post #delete #patch #head #options #trace #connect)
 ]

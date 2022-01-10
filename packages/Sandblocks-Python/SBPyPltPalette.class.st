@@ -1,33 +1,28 @@
+"
+This is the entry palette for matplotlib.
+"
 Class {
 	#name : #SBPyPltPalette,
-	#superclass : #SBTSPalette,
+	#superclass : #SBPyPalette,
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #'as yet unclassified' }
 SBPyPltPalette class >> buildOn: aBuilder [
 
-	aBuilder addSectionHeader: 'Matplotlib'.
-	aBuilder addBlock: 'Create Figure' as: 
-		(SBPyPltSubplots new 
-			factory: SBPython new;
-			createFigureButtonFrom: (self newNullBlock: 'Axes type')).
-	aBuilder addBlock: 'Add plot' as:
-		(SBPyPltPlot new 
-			factory: SBPython instance;
-			createReplacementWithX: 'X' Y: 'Y').
-	aBuilder addBlock: 'Set title of x or y label' as: 
-		(SBPyPltSetLabel new 
-			factory: SBPython instance;
-			createReplacement: 'Your X-Axis' ofAxis: 'x').
-	aBuilder addBlock: 'Set limits of x or y label' as:
-		(SBPyPltSetLim new
-			factory: SBPython instance;
-			createReplacementFrom: '0' to: '30' ofAxis: 'y').
+	aBuilder addSectionHeader: 'Plots'.
+	aBuilder addBlock: 'Create plot with evenly spaced y axis' as: (SBPython parseAndReplace: 'ax.plot(X)') childSandblocks first.
+	aBuilder addBlock: 'Create plots' as: (SBPython parseElement: 'ax.plot(X, Y)').
+]
+
+{ #category : #'as yet unclassified' }
+SBPyPltPalette class >> context [
+
+	^ super context, { [:aBlock | aBlock relatedClass canUnderstand: #isAxes]. #isAxes}
 ]
 
 { #category : #'as yet unclassified' }
 SBPyPltPalette class >> language [
 
-	^ #python
+	^#python
 ]

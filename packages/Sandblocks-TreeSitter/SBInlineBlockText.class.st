@@ -232,7 +232,7 @@ SBInlineBlockText >> valid [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockText >> writeSourceOn: aStream [
+SBInlineBlockText >> writeSourceOn: aStream indent: aNumber [
 
 	aStream nextPutAll: self contents
 ]

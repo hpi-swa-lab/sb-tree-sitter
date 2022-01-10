@@ -24,6 +24,8 @@ SBInlineBlock class >> registerShortcuts: aProvider [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> absorbsInput: anEvent [
 
+	(anEvent commandKeyPressed or: [anEvent optionKeyPressed or: [anEvent controlKeyPressed]]) ifTrue: [^ false].
+	
 	^ anEvent keyCharacter isPrintable and: [self currentTextMorph owner regex matches: anEvent keyCharacter asString]
 ]
 
@@ -78,25 +80,25 @@ SBInlineBlock >> allElementsDo: aBlock [
 SBInlineBlock >> applyReplacements [
 	<action>
 
-	| replacements commands |
+	| replacements |
 	replacements := SBInlineBlockReplace allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class class), (Pragma allNamed: #lang:match:sample: in: class class) select: [:pragma | pragma arguments first = self factory name]].
-	commands := Array streamContents: [:stream |
-		self allBlocksDo: [:block |
-			replacements do: [:pragma |
-				SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures :success |
-					success ifTrue: [
-						(pragma methodClass theNonMetaClass
-							perform: pragma selector
-							withArguments: {
-								captures.
-								[:target :replacer |
-									SBReplaceCommand new
-										target: target
-										replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
-							self assert: (cmd isKindOf: SBCommand).
-							self sandblockEditor
-								ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
-								ifNil: [cmd do]]]]]]]
+	self allBlocksDo: [:block |
+		replacements do: [:pragma |
+			SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures :success |
+				success ifTrue: [
+					(pragma methodClass theNonMetaClass
+						perform: pragma selector
+						withArguments: {
+							captures.
+							[:target :replacer |
+								SBReplaceCommand new
+									target: target
+									replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
+						self assert: (cmd isKindOf: SBCommand).
+						self sandblockEditor
+							ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
+							ifNil: [cmd do]]]]]].
+	self inlineRoot updateAllHighlights
 ]
 
 { #category : #'as yet unclassified' }
@@ -168,13 +170,13 @@ SBInlineBlock >> changeToUnknown [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlock >> childSymbolsDo: aBlock [
+SBInlineBlock >> childSymbolsDo: aBlock includeInlined: aBoolean [
 
 	self submorphsDo: [:morph |
 		morph isInlineBlock ifTrue: [
-			(morph isKindOf: SBInlineBlockSymbol)
+			((morph isKindOf: SBInlineBlockSymbol) and: [aBoolean or: [morph inline not]])
 				ifTrue: [aBlock value: morph]
-				ifFalse: [morph childSymbolsDo: aBlock]]]
+				ifFalse: [morph childSymbolsDo: aBlock includeInlined: aBoolean]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -359,6 +361,27 @@ SBInlineBlock >> elementsDo: aBlock [
 	^ self subclassResponsibility
 ]
 
+{ #category : #'action helpers' }
+SBInlineBlock >> evaluate [
+
+	^ self factory runtime evaluate: self sourceString
+]
+
+{ #category : #actions }
+SBInlineBlock >> evaluateExpression [
+	<action>
+
+	| result |
+	result := self evaluate.
+	self sandblockEditor isSingleArtefactView ifTrue: [^ result explore].
+	result convertedFor: SBInterfaces topLevel doWithChooser: [:morph |
+		self sandblockEditor openMorphInView: morph.
+		morph focusAfterDelete: self.
+		self sandblockEditor connectFrom: self to: morph.
+		morph].
+	^ result
+]
+
 { #category : #geometry }
 SBInlineBlock >> extent: aPoint [
 
@@ -421,6 +444,17 @@ SBInlineBlock >> firstDifferingUpBlocksWith: aMorph do: aBlock ifNone: anotherBl
 	(self hasSameStructureAs: aMorph) ifFalse: [^ aBlock value: self value: aMorph].
 	(self owner notNil and: [self owner isInlineBlock]) ifTrue: [^ self owner firstDifferingUpBlocksWith: aMorph owner do: aBlock ifNone: anotherBlock].
 	^ anotherBlock value
+]
+
+{ #category : #accessing }
+SBInlineBlock >> firstVisibleType [
+
+	^ (self type notNil and: [self inline not])
+		ifTrue: [self type]
+		ifFalse: [
+			(self hasSubmorphs and: [self firstSubmorph isInlineBlock])
+				ifTrue: [self firstSubmorph firstVisibleType]
+				ifFalse: [nil]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -513,7 +547,7 @@ SBInlineBlock >> inlineIfPossible [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> inlineRoot [
 
-	^ (self owner isInlineBlock and: [self owner inline not])
+	^ ((self owner isNil or: [self owner isInlineBlock and: [self owner inline not]]) or: [self owner isInlineBlock not])
 		ifTrue: [self]
 		ifFalse: [self owner inlineRoot]
 ]
@@ -779,11 +813,22 @@ SBInlineBlock >> prefersNoBorder [
 ]
 
 { #category : #printing }
-SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
+SBInlineBlock >> prettySourceString [
 
-	| first delimiter lastMatchedWordRule suffixMatchesWordRule prefixMatchesWorldRule |
+	self allBlocksDo: [:b | b valid ifFalse: [^ self sourceString]].
+	
+	^ self factory runtime
+		ifNotNil: [:r | r prettyPrint: self sourceString]
+		ifNil: [self sourceString]
+]
+
+{ #category : #printing }
+SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber [
+
+	| first delimiter lastMatchedWordRule suffixMatchesWordRule lastString |
 	first := true.
 	lastMatchedWordRule := false.
+	lastString := ''.
 	delimiter := (self containingSymbol ifNotNil: #type)
 		ifNotNil: [:parentType |
 			self factory delimitedRules
@@ -792,41 +837,71 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream [
 				ifAbsent: ['']]
 		ifNil: [''].
 	suffixMatchesWordRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory wordRule matchesStream: (string readStream position: start - 1)]]].
-	prefixMatchesWorldRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [factory wordRule matchesPrefix: string]].
 	
 	aCollection do: [:element | | string |
-		string := String streamContents: [:stream | element writeSourceOn: stream].
+		string := String streamContents: [:stream |
+			element writeSourceOn: stream indent: ((self factory indentMatch: element)
+				ifTrue: [aNumber + 1]
+				ifFalse: [aNumber])].
 		(self isKindOf: SBInlineBlockRepeat)
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
-				((self factory hardLineBreakMatcher value: self) or: [self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]]) ifTrue: [aStream cr]]
-			ifFalse: [(lastMatchedWordRule and: [prefixMatchesWorldRule value: string]) ifTrue: [aStream space]].
-		lastMatchedWordRule := suffixMatchesWordRule value: string.
-		aStream nextPutAll: string.
+				(((self factory hardLineBreakMatcher value: self) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [self containingSymbol parentSandblock isInlineBlock or: [first not]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
+			ifFalse: [(string notEmpty and: [lastMatchedWordRule and: [suffixMatchesWordRule value: lastString, string first]]) ifTrue: [aStream space]].
+		string ifNotEmpty: [
+			lastMatchedWordRule := suffixMatchesWordRule value: string.
+			lastString := string.
+			aStream nextPutAll: string].
 		first := false]
+]
+
+{ #category : #printing }
+SBInlineBlock >> printFull [
+
+	^ String streamContents: [:s | self printFullOn: s depth: 0]
+]
+
+{ #category : #printing }
+SBInlineBlock >> printFullOn: aStream depth: aNumber [
+
+	aStream nextPut: $(.
+	aStream print: self.
+	self submorphs do: [:m |
+		m isInlineBlock ifTrue: [
+			aStream crtab: aNumber + 1.
+			m printFullOn: aStream depth: aNumber + 1]].
+	aStream crtab: aNumber + 1.
+	aStream nextPut: $)
 ]
 
 { #category : #'as yet unclassified' }
 SBInlineBlock >> printOn: aStream [
 
-	SBToggledCode comment: '' active: 0 do: {[aStream nextPutAll: self className]}.
 	aStream nextPut: $(.
 	self printTitleOn: aStream.
 	aStream nextPut: $)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBInlineBlock >> printSExpr [
 
-	^ String streamContents: [:s | self printSExprOn: s depth: 0]
+	^ String streamContents: [:s | self printSExprOn: s depth: 0 short: false]
 ]
 
-{ #category : #'as yet unclassified' }
-SBInlineBlock >> printSExprOn: aStream depth: aNumber [
+{ #category : #printing }
+SBInlineBlock >> printSExprOn: aStream depth: aNumber short: aBoolean [
 
-	self childSymbolsDo: [:m |
-		m printSExprOn: aStream depth: aNumber.
-		aStream crtab: aNumber]
+	self
+		childSymbolsDo: [:m |
+			m printSExprOn: aStream depth: aNumber short: aBoolean.
+			aStream crtab: aNumber]
+		includeInlined: aBoolean not
+]
+
+{ #category : #printing }
+SBInlineBlock >> printSExprShort [
+
+	^ String streamContents: [:s | self printSExprOn: s depth: 0 short: true]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1016,8 +1091,23 @@ SBInlineBlock >> wantsExtraSpace [
 	^ self inline not
 ]
 
+{ #category : #actions }
+SBInlineBlock >> wrapWithWatch [
+	<action>
+
+	self sandblockEditor do: (SBReplaceCommand new
+		target: self
+		replacer: (SBTSWatch newEmpty expression: self buildCopy))
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> writeSourceOn: aStream [
 
-	self subclassResponsibility
+	self writeSourceOn: aStream indent: 0
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> writeSourceOn: aStream indent: aNumber [
+
+	^ self subclassResponsibility
 ]

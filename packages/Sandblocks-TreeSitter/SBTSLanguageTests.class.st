@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSLanguageTests >> expectedFailures [
 
-	^ #(#testPythonPatternList #testJavascriptToStringSemicolons)
+	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude)
 ]
 
 { #category : #'testing - interactions' }
@@ -19,6 +19,25 @@ SBTSLanguageTests >> testApplyPyFilePathReplacement [
 	for row in spamreader:
 		print('', ''.join(row))'.
 	self assert: (parsed childSandblocks first childSandblocks first childSandblocks first childSandblocks second childSandblocks first isKindOf: SBPyFilepath)
+]
+
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testCInclude [
+
+	SBC parse: '#include <stdio.h>
+'.
+	" fails because tree-sitter reports two \n as the last element of the directive "
+	SBC parse: '#include <stdio.h>
+
+'
+]
+
+{ #category : #'testing - printing' }
+SBTSLanguageTests >> testCReturn [
+
+	| source |
+	source := 'return 2;'.
+	self assert: source equals: (SBC parse: source) sourceString
 ]
 
 { #category : #'testing - block inline' }
@@ -72,6 +91,20 @@ SBTSLanguageTests >> testJavascriptNestedMemberExpression [
 	| source |
 	source := 'a.b.c'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString
+]
+
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testJavascriptTemplateString [
+
+	| source |
+	source := '`ab`'.
+	self assert: source equals: (SBJavascript parse: source) sourceString.
+	
+	source := '`ab${a}`'.
+	self assert: source equals: (SBJavascript parse: source) sourceString.
+	
+	source := '`ab${a}def${c}`'.
+	self assert: source equals: (SBJavascript parse: source) sourceString
 ]
 
 { #category : #'testing - printing' }
@@ -184,6 +217,16 @@ SBTSLanguageTests >> testPythonImport [
 	
 	block := SBPython parse: 'import numpy as np'.
 	self assert: (block matchesQuery: '(module (import_statement (aliased_import (dotted_name (identifier)) alias: (identifier))))')
+]
+
+{ #category : #'testing - printing' }
+SBTSLanguageTests >> testPythonIndent [
+
+	| source |
+	source := 'if a:
+	if b:
+		pass'.
+	self assert: source equals: (SBPython parse: source) sourceString
 ]
 
 { #category : #'testing - interactions' }

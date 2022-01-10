@@ -155,7 +155,9 @@ SBInlineBlockLabel >> ownerWithColor [
 { #category : #'as yet unclassified' }
 SBInlineBlockLabel >> printTitleOn: aStream [
 
-	aStream nextPutAll: self label
+	aStream nextPut: $".
+	aStream nextPutAll: self label.
+	aStream nextPut: $"
 ]
 
 { #category : #'as yet unclassified' }
@@ -209,7 +211,7 @@ SBInlineBlockLabel >> takeStreamFrom: option [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockLabel >> writeSourceOn: aStream [
+SBInlineBlockLabel >> writeSourceOn: aStream indent: aNumber [
 
 	aStream nextPutAll: self label
 ]

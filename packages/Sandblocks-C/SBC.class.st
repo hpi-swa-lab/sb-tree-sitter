@@ -4,6 +4,18 @@ Class {
 	#category : #'Sandblocks-C'
 }
 
+{ #category : #'as yet unclassified' }
+SBC class >> defaultRuntimeClass [
+
+	^ SBCRuntimeOSProcess
+]
+
+{ #category : #'as yet unclassified' }
+SBC class >> fileSuffix [
+
+	^ 'c'
+]
+
 { #category : #properties }
 SBC class >> grammarJson [
 
@@ -6747,4 +6759,16 @@ SBC class >> language [
 SBC class >> rootRuleName [
 
 	^ 'translation_unit'
+]
+
+{ #category : #properties }
+SBC class >> statementContainerTypes [
+
+	^ #('compound_statement')
+]
+
+{ #category : #'as yet unclassified' }
+SBC >> configure [
+
+	self noteUncapturedText: #('string_literal')
 ]

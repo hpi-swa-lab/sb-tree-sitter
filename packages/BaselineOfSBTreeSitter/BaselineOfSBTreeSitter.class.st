@@ -9,9 +9,12 @@ BaselineOfSBTreeSitter >> baseline: spec [
 	<baseline>
 
 	spec for: #common do: [
-		spec preLoadDoIt: #'preload:package:'.
+		spec preLoadDoIt: #preload:package:.
 		" smalltalk needed for the tool integration "
-		spec baseline: 'Sandblocks' with: [spec repository: 'github://tom95/sandblocks/packages'; loads: #('Sandblocks-Core' 'Sandblocks-Smalltalk')].
+		spec baseline: 'Sandblocks' with: [
+			spec
+				repository: 'github://tom95/sandblocks/packages';
+				loads: #('Sandblocks-Core' 'Sandblocks-Smalltalk')].
 		spec project: 'FFI' with: [
 			spec
 				className: 'ConfigurationOfFFI';
@@ -25,19 +28,21 @@ BaselineOfSBTreeSitter >> baseline: spec [
 				versionString: #stable;
 				loads: #('Core')].
 		spec package: 'JSON' with: [
-			spec file: 'JSON-ul.35';
-			repository: 'https://www.squeaksource.com/JSON'].
+			spec
+				file: 'JSON-ul.35';
+				repository: 'https://www.squeaksource.com/JSON'].
 		
 		spec
 			package: 'Sandblocks-TreeSitter' with: [spec requires: #('Sandblocks' 'FFI' 'JSON' 'OSProcess')];
 			package: 'Sandblocks-Javascript' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Python' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Regex' with: [spec requires: #('Sandblocks-TreeSitter')];
-			package: 'Sandblocks-Json' with: [spec requires: #('Sandblocks-TreeSitter')].
-
+			package: 'Sandblocks-Json' with: [spec requires: #('Sandblocks-TreeSitter')];
+			package: 'Sandblocks-C' with: [spec requires: #('Sandblocks-TreeSitter')].
+		
 		spec
 			group: 'default'
-			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json')]
+			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C')]
 ]
 
 { #category : #baseline }

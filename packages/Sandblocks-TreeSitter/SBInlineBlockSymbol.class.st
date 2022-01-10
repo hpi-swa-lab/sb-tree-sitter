@@ -264,9 +264,11 @@ SBInlineBlockSymbol >> ownerWithColor [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> printSExprOn: aStream depth: aNumber [
+SBInlineBlockSymbol >> printSExprOn: aStream depth: aNumber short: aBoolean [
 
 	| any |
+	(aBoolean and: [self inline]) ifTrue: [^ super printSExprOn: aStream depth: aNumber short: aBoolean].
+	
 	(self field notNil and: [self inline not]) ifTrue: [
 		aStream
 			nextPutAll: self field;
@@ -276,10 +278,12 @@ SBInlineBlockSymbol >> printSExprOn: aStream depth: aNumber [
 	aStream nextPutAll: self type.
 	self inline ifTrue: [aStream nextPutAll: ']'].
 	any := false.
-	self childSymbolsDo: [:morph |
-		any ifFalse: [any := true].
-		aStream crtab: aNumber + 1.
-		morph printSExprOn: aStream depth: aNumber + 1].
+	self
+		childSymbolsDo: [:morph |
+			any ifFalse: [any := true].
+			aStream crtab: aNumber + 1.
+			morph printSExprOn: aStream depth: aNumber + 1 short: aBoolean]
+		includeInlined: aBoolean not.
 	any ifTrue: [aStream crtab: aNumber].
 	aStream nextPutAll: ')'
 ]
@@ -362,7 +366,7 @@ SBInlineBlockSymbol >> unwrapSuperType [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> writeSourceOn: aStream [
+SBInlineBlockSymbol >> writeSourceOn: aStream indent: aNumber [
 
-	self firstSubmorph writeSourceOn: aStream
+	self firstSubmorph writeSourceOn: aStream indent: aNumber
 ]

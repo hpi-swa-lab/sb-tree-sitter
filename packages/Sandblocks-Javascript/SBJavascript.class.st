@@ -5,6 +5,18 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBJavascript class >> defaultRuntimeClass [
+
+	^ SBJsRuntimeOSProcess
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript class >> fileSuffix [
+
+	^ 'js'
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-javascript/blob/master/grammar.js "
 
@@ -6771,13 +6783,26 @@ SBJavascript class >> statementContainerTypes [
 SBJavascript >> configure [
 
 	self blockInline: #('expression_statement' 'statement_block' 'formal_parameters').
-	self hardLineBreakMatcher: [:block | (block submorphAfter ifNotNil: #type) = 'statement_block']
+	self noteUncapturedText: {'template_string'}
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> hardLineBreakMatch: aBlock [
+
+	^ (aBlock submorphAfter ifNotNil: #type) = 'statement_block' or: [(aBlock submorphAfter ifNotNil: #type) = 'class_body']
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ #('statement_block' 'class_body') includes: anotherBlock firstVisibleType
 ]
 
 { #category : #'as yet unclassified' }
 SBJavascript >> postConfigure [
 
-	blockInline remove: 'statement_block'
+	blockInline remove: 'statement_block'.
+	blockInline remove: 'class_body'
 ]
 
 { #category : #'as yet unclassified' }
@@ -6797,6 +6822,13 @@ SBJavascript >> preprocessGrammar [
 	self grammar rules
 		at: '_template_chars'
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
+	self grammar externals: (self grammar externals copyWithout: (self grammar externals detect: [:e | e name = '_template_chars'])).
 	self grammar at: 'inline' put: self grammar inline, {'_ternary_qmark'}.
 	self grammar rules statement members: (self grammar rules statement members reject: [:m | m name = 'labeled_statement'])
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> softLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ (aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']) or: [(aBlock isKindOf: SBInlineBlockLabel) and: [aBlock contents = ':']]
 ]

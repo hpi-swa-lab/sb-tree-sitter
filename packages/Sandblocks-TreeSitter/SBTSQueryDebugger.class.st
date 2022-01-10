@@ -7,7 +7,8 @@ Class {
 		'query',
 		'program',
 		'inline',
-		'syntaxInvalid'
+		'syntaxInvalid',
+		'sourceTree'
 	],
 	#category : #'Sandblocks-TreeSitter-Tools'
 }
@@ -63,6 +64,9 @@ SBTSQueryDebugger >> initialize [
 		addMorphBack: (source := SBTextBubble multiLine
 			placeholderText: 'void main() ...';
 			hResizing: #spaceFill);
+		addMorphBack: (sourceTree := SBTextBubble multiLine
+			placeholderText: '';
+			hResizing: #spaceFill);
 		addMorphBack: (SBStringMorph new contents: 'Query:');
 		addMorphBack: (query := SBTextBubble multiLine
 			placeholderText: '(program (...';
@@ -88,6 +92,7 @@ SBTSQueryDebugger >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 		do: [:error |
 			source attachDecorator: (SBErrorDecorator new message: 'syntax invalid').
 			^ false].
+	sourceTree contents: program printSExprShort.
 	self addMorphBack: program.
 	program hResizing: #spaceFill.
 	

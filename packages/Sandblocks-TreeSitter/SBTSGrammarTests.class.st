@@ -48,12 +48,12 @@ SBTSGrammarTests >> testResolveAlias [
 	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript new)
 		resolveAlias: 'property_identifier'
 		in: '_property_name'.
-	self assert: '(identifier | get | set | async | static | export)' equals: resolved printString.
+	self assert: '(identifier | "get" | "set" | "async" | "static" | "export")' equals: resolved printString.
 	
 	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript new)
 		resolveAlias: 'property_identifier'
 		in: 'pair_pattern'.
-	self assert: '(identifier | get | set | async | static | export)' equals: resolved printString
+	self assert: '(identifier | "get" | "set" | "async" | "static" | "export")' equals: resolved printString
 ]
 
 { #category : #'as yet unclassified' }

@@ -92,7 +92,7 @@ SBInlineBlockNever >> takeStreamFrom: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockNever >> writeSourceOn: aStream [
+SBInlineBlockNever >> writeSourceOn: aStream indent: aNumber [
 
 	self shouldNotImplement
 ]

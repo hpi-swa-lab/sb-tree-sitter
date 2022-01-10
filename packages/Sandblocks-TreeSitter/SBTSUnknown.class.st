@@ -58,6 +58,12 @@ SBTSUnknown >> firstDifferingBlocksWith: aMorph do: aBlock [
 	^ nil
 ]
 
+{ #category : #accessing }
+SBTSUnknown >> firstVisibleType [
+
+	^ nil
+]
+
 { #category : #'as yet unclassified' }
 SBTSUnknown >> grammarHandler [
 
@@ -222,4 +228,10 @@ SBTSUnknown >> veryDeepCopyWith: deepCopier [
 SBTSUnknown >> writeMetaSourceOn: aStream [
 
 	aStream nextPutAll: ' '
+]
+
+{ #category : #'as yet unclassified' }
+SBTSUnknown >> writeSourceOn: aStream indent: aNumber [
+
+	
 ]

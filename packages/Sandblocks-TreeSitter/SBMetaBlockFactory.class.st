@@ -18,7 +18,8 @@ Class {
 		'noteUncapturedText',
 		'aliases',
 		'promotedInlineSymbols',
-		'containersOfPromotedInlineSymbols'
+		'containersOfPromotedInlineSymbols',
+		'softLineBreakMatcher'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -642,6 +643,12 @@ SBMetaBlockFactory >> hardLineBreakMatch: aBlock [
 ]
 
 { #category : #'configuration helpers' }
+SBMetaBlockFactory >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ hardLineBreakMatcher ifNotNil: [:b | b value: aBlock] ifNil: [false]
+]
+
+{ #category : #'configuration helpers' }
 SBMetaBlockFactory >> hardLineBreakMatcher [
 
 	^ hardLineBreakMatcher
@@ -703,6 +710,12 @@ SBMetaBlockFactory >> includesNonHiddenParts: anObject visited: aCollection [
 		['SEQ'] -> [anObject members anySatisfy: [:member | self includesNonHiddenParts: member visited: aCollection]]}
 ]
 
+{ #category : #'configuration helpers' }
+SBMetaBlockFactory >> indentMatch: aBlock [
+
+	^ false
+]
+
 { #category : #'initialize-release' }
 SBMetaBlockFactory >> initialize [
 
@@ -723,7 +736,7 @@ SBMetaBlockFactory >> initialize [
 { #category : #templates }
 SBMetaBlockFactory >> instantiateTemplate: aString [
 
-	^ (self getTemplate: aString) buildEmpty buildDefault
+	^ (self getTemplate: aString) buildEmpty buildDefault factory: self
 ]
 
 { #category : #templates }
@@ -732,6 +745,7 @@ SBMetaBlockFactory >> instantiateToplevel: aString [
 	^ SBInlineBlockSymbol new
 		type: aString factory: self block: (self instantiateTemplate: aString);
 		attachDecorator: SBResizableDecorator new;
+		attachDecorator: SBForceMoveDecorator new;
 		hResizing: #rigid;
 		updateAllHighlights
 ]
@@ -1027,6 +1041,12 @@ SBMetaBlockFactory >> rulesDo: aBlock [
 	self grammar rules keysAndValuesDo: [:name :rule | aBlock cull: rule cull: name]
 ]
 
+{ #category : #accessing }
+SBMetaBlockFactory >> runtime [
+
+	^ nil
+]
+
 { #category : #'configuration helpers' }
 SBMetaBlockFactory >> shouldBlockInline: aTypeString [
 
@@ -1044,6 +1064,20 @@ SBMetaBlockFactory >> simplifyList: anObject [
 	
 	anObject content ifNotNil: [:c | self simplifyList: c].
 	anObject members ifNotNil: [anObject members do: [:m | self simplifyList: m]]
+]
+
+{ #category : #'configuration helpers' }
+SBMetaBlockFactory >> softLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ softLineBreakMatcher
+		ifNotNil: [:b | b value: aBlock value: anotherBlock]
+		ifNil: [false]
+]
+
+{ #category : #configuration }
+SBMetaBlockFactory >> softLineBreakMatcher: aBlock [
+
+	softLineBreakMatcher := aBlock
 ]
 
 { #category : #configuration }

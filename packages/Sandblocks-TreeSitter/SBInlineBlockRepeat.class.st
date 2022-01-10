@@ -181,8 +181,8 @@ SBInlineBlockRepeat >> layoutCommands [
 				stream nextPut: morph layoutCommands.
 				index ~= self submorphCount ifTrue: [
 					stream nextPut: (((self factory hardLineBreakMatcher value: morph) or: [self containingSymbol isStatementContainer])
-						ifTrue: [SBAlgebraCommand hardLine]
-						ifFalse: [SBAlgebraCommand softLineOrGap])]]])
+						ifTrue: [SBAlgebraCommand hardLine withGap: true]
+						ifFalse: [SBAlgebraCommand softLineOrGap withGap: true])]]])
 ]
 
 { #category : #'as yet unclassified' }
@@ -227,7 +227,9 @@ SBInlineBlockRepeat >> ownerWithColor [
 { #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> printTitleOn: aStream [
 
+	aStream nextPut: $(.
 	element printTitleOn: aStream.
+	aStream nextPut: $).
 	(multiple and: [required]) ifTrue: [^ aStream nextPut: $+].
 	(multiple and: [required not]) ifTrue: [^ aStream nextPut: $*].
 	aStream nextPut: $?
@@ -280,7 +282,7 @@ SBInlineBlockRepeat >> takeStreamFrom: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockRepeat >> writeSourceOn: aStream [
+SBInlineBlockRepeat >> writeSourceOn: aStream indent: aNumber [
 
-	self printElementsSeparated: self submorphs on: aStream
+	self printElementsSeparated: self submorphs on: aStream indent: aNumber
 ]

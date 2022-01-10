@@ -1,14 +1,12 @@
 Class {
 	#name : #SBPyPltSetLabel,
-	#superclass : #SBInlineBlockReplace,
+	#superclass : #SBPyPltAxis,
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #'as yet unclassified' }
 SBPyPltSetLabel class >> matchPython: aDictionary do: aBlock [
-	<lang: #python match: '(module
-	(expression_statement
-    	(call
+	<lang: #python match: '(call
         	function: (attribute
             	object: (identifier) @ax
                 (#eq @ax "ax")
@@ -17,9 +15,7 @@ SBPyPltSetLabel class >> matchPython: aDictionary do: aBlock [
         	arguments: (argument_list
 			(string) @param
 		)
-        )
-    ) @expression  
-)' sample: 'ax.set_xlabel("example")'>
+        ) @call' sample: 'ax.set_xlabel("example")'>
 	
 	| functionName axisOflabel |
 	functionName := (aDictionary at: 'setLabel') contents.
@@ -29,8 +25,8 @@ SBPyPltSetLabel class >> matchPython: aDictionary do: aBlock [
 	axisOflabel := functionName = 'set_xlabel' ifTrue: 'x' ifFalse: 'y'.
 	
 	^ aBlock
-		value: (aDictionary at: 'expression')
-		value: (self new factory: (aDictionary at: 'expression') factory;
+		value: (aDictionary at: 'call')
+		value: (self new factory: (aDictionary at: 'call') factory;
 			createReplacement: (aDictionary at: 'param') contents
 			ofAxis: axisOflabel
 			)
@@ -41,10 +37,11 @@ SBPyPltSetLabel >> createReplacement: aLabel ofAxis: anAxis [
 
 	self
 		addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: 'Label at ');
 			addMorphBack: (SBTextBubble new contents: anAxis);
-			addMorphBack: (SBStringMorph new contents: '-axis: ');
-			addMorphBack: (SBTextBubble new contents: aLabel)
+			addMorphBack: (SBStringMorph new contents: 'axis');
+			addMorphBack: (SBStringMorph new contents: 'label:');
+			addMorphBack: (SBTextBubble new contents: aLabel);
+			cellGap: 4
 		)
 ]
 

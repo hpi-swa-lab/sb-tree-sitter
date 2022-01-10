@@ -1,57 +1,102 @@
+"
+I am the class representing the matplotlib plot function
+"
 Class {
 	#name : #SBPyPltPlot,
-	#superclass : #SBInlineBlockReplace,
+	#superclass : #SBPyPltPlots,
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltPlot class >> matchPython: aDictionary do: aBlock [
-	<lang: #python match: '(module
-	(expression_statement
-    	(call
+SBPyPltPlot class >> match: aDictionary do: aBlock [
+	<lang: #python match: '(call
         	function: (attribute
-            	object: (identifier) @ax
-                (#eq @ax "ax")
-                attribute: (identifier) @plot
+            	object: (identifier) ="ax" @ax
+                attribute: (identifier) ="plot" @plot
             )
-        	arguments: (argument_list
-			(identifier) @paramX
-            (identifier) @paramY
-		)
-        )
-    ) @expression  
-)' sample: 'ax.plot(X, Y)'>
+        	arguments: (argument_list)
+        ) @call' sample: 'ax.plot(Y)'>
 	
 	^ aBlock
-		value: (aDictionary at: 'expression')
-		value: (self new factory: (aDictionary at: 'expression') factory;
-			createReplacementWithX: (aDictionary at: 'paramX') contents
-			Y:  (aDictionary at: 'paramY') contents)
+		value: (aDictionary at: 'call')
+		value: (self new factory: (aDictionary at: 'call') factory;
+			createReplacementOfArgs: (aDictionary at: 'call') access arguments)
+			
+		
 ]
 
 { #category : #'initialize-release' }
-SBPyPltPlot >> createReplacementWithX: xString Y: yString [ 
+SBPyPltPlot >> createReplacementOfArgs: aTSBlock [
+"creates plot replacement, nesting the replacements of aTSBlock inside."
 
 	self addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: 'line plot of (');
-			addMorphBack: (SBTextBubble new contents: xString);
-			addMorphBack: (SBStringMorph new contents: ', ');
-			addMorphBack: (SBTextBubble new contents: yString);
-			addMorphBack: (SBStringMorph new contents: ')')
-		)
+			addMorphBack: (SBStringMorph new contents: 'line plot:(');
+			addMorphBack: (SBPyPltPlotArgs new factory: (SBPython instance); wrapInReplacement: (aTSBlock buildCopy));
+			addMorphBack: (SBStringMorph new contents: ')');
+			addMorphBack: (SBPyPltImage linePlot);
+			cellGap: 4
+		).
+]
+
+{ #category : #'as yet unclassified' }
+SBPyPltPlot >> createReplacementOfArgsAsStrings: anArray [
+
+	| argBlocks argsLayout |
+	
+	argBlocks := anArray collect: [:aString | SBPython parseElement: aString].
+	argsLayout := SBRow new cellGap: 2.
+	argBlocks do: [:aBlock | argsLayout addMorphBack: aBlock ].
+	
+	self addMorphBack: (SBRow new
+			addMorphBack: (SBStringMorph new contents: 'line plot:(');
+			addMorphBack: argsLayout;
+			addMorphBack: (SBStringMorph new contents: ')');
+			addMorphBack: (SBPyPltImage linePlot);
+			cellGap: 4
+		).
+]
+
+{ #category : #'initialize-release' }
+SBPyPltPlot >> createReplacementOfArgsOld: aTSBlock [
+"creates plot replacement, nesting the replacements of aTSBlock inside."
+	| argBlocks argsLayout |
+	
+	argBlocks := aTSBlock children collect: [:arg | SBBlock new addMorphBack: arg buildCopy].
+	argsLayout := SBColumn new.
+	argBlocks do: [:aBlock | argsLayout addMorphBack: aBlock ].
+	
+	self addMorphBack: (SBRow new
+			addMorphBack: (SBStringMorph new contents: 'line plot:(');
+			addMorphBack: (SBPyPltPlotArgs new factory: SBPython instance; wrapInReplacement: argsLayout);
+			addMorphBack: (SBStringMorph new contents: ')');
+			addMorphBack: (SBPyPltImage linePlot);
+			cellGap: 4
+		).
+]
+
+{ #category : #'initialize-release' }
+SBPyPltPlot >> createReplacementWithY: aString [
+
+	self addMorphBack: (SBRow new
+			addMorphBack: (SBStringMorph new contents: 'line plot:(');
+			addMorphBack: (SBTextBubble new contents: aString);
+			addMorphBack: (SBStringMorph new contents: ')');
+			addMorphBack: (SBPyPltImage linePlot);
+			cellGap: 4
+		).
+]
+
+{ #category : #'initialize-release' }
+SBPyPltPlot >> isAxes [
+	"indicates whether this replacement is to be shown in the Axes Palette"
+
+	^ true
 ]
 
 { #category : #'as yet unclassified' }
 SBPyPltPlot >> writeSourceOn: aStream [
-"called when blocks are copied. It transforms the block back to source code"
 
-	| xArg yArg |
-	xArg := self submorphs first submorphs second contents.
-	yArg := (self submorphs first submorphs at: 4) contents.
-	
-	aStream nextPutAll: 'ax.plot('.
-	aStream nextPutAll: xArg.
-	aStream nextPutAll: ', '.
-	aStream nextPutAll: yArg.
-	aStream nextPutAll: ')'.
+	aStream nextPutAll: 'ax.plot'.
+	aStream nextPutAll: ((self firstSubmorph submorphs at: 2) firstSubmorph sourceString).
+	aStream nextPutAll: '\n'
 ]

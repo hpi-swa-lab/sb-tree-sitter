@@ -111,6 +111,14 @@ SBInlineBlockSequence >> hardLineBreakMatch: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockSequence >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ self factory
+		ifNotNil: [:f | f hardLineBreakMatchBetween: aBlock and: anotherBlock]
+		ifNil: [false]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockSequence >> hasSameContentsAs: aBlock [
 
 	(super hasSameContentsAs: aBlock) ifFalse: [^ false].
@@ -154,10 +162,14 @@ SBInlineBlockSequence >> layoutCommands [
 		data: (Array streamContents: [:stream |
 			self submorphs withIndexDo: [:morph :index |
 				stream nextPut: morph layoutCommands.
-				index ~= self submorphCount ifTrue: [
-					stream nextPut: ((self hardLineBreakMatch: morph)
+				index ~= self submorphCount ifTrue: [ | next |
+					next := self submorphs at: index + 1.
+					stream nextPut: ((self hardLineBreakMatchBetween: morph and: next)
 						ifTrue: [SBAlgebraCommand hardLine]
-						ifFalse: [SBAlgebraCommand gap])]]])
+						ifFalse: [
+							(self softLineBreakMatchBetween: morph and: next)
+								ifTrue: [SBAlgebraCommand softLineOrGap]
+								ifFalse: [SBAlgebraCommand gap]])]]])
 ]
 
 { #category : #'as yet unclassified' }
@@ -170,6 +182,14 @@ SBInlineBlockSequence >> ownerWithColor [
 SBInlineBlockSequence >> printTitleOn: aStream [
 
 	elements do: [:m | m printTitleOn: aStream] separatedBy: [aStream nextPutAll: ', ']
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSequence >> softLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ self factory
+		ifNotNil: [:f | f softLineBreakMatchBetween: aBlock and: anotherBlock]
+		ifNil: [false]
 ]
 
 { #category : #'as yet unclassified' }
@@ -191,7 +211,7 @@ SBInlineBlockSequence >> takeStreamFrom: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSequence >> writeSourceOn: aStream [
+SBInlineBlockSequence >> writeSourceOn: aStream indent: aNumber [
 
-	self printElementsSeparated: self submorphs on: aStream
+	self printElementsSeparated: self submorphs on: aStream indent: aNumber
 ]

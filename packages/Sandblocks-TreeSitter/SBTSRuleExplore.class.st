@@ -58,10 +58,12 @@ SBTSRuleExplore class >> deduplicateResultsViaCommonAncestors: aCollection [
 SBTSRuleExplore class >> deduplicateResultsViaRuns: aCollection [
 
 	| groups |
+	" group by the inner-most symbol that absorbed the input "
 	groups := aCollection groupBy: [:pair | | first |
 		first := pair second ifNotEmpty: #first ifEmpty: [pair first].
 		{first containingSymbol ifNotNil: #type. first contents}].
 	
+	" now, in each group, select the shortest element with the shortest resulting string output "
 	^ groups values collect: [:group |
 		(group detectMin: [:pair |
 			SBToggledCode

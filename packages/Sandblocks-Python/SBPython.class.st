@@ -5,6 +5,18 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBPython class >> defaultRuntimeClass [
+
+	^ SBPyRuntimeOSProcess
+]
+
+{ #category : #'as yet unclassified' }
+SBPython class >> fileSuffix [
+
+	^ 'py'
+]
+
+{ #category : #'as yet unclassified' }
 SBPython class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-python/blob/master/src/grammar.json "
 
@@ -5129,9 +5141,15 @@ SBPython >> configure [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> indentMatch: aBlock [
+
+	^ aBlock type = 'block'
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> postConfigure [
 
-	blockInline remove: 'block'
+	blockInline remove: 'block' ifAbsent: []
 ]
 
 { #category : #'as yet unclassified' }

@@ -5,13 +5,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltSubplots class >> fixedNumberOfChildren [
-	"signals that this block may have multiple children"
-
-	^ false
-]
-
-{ #category : #'as yet unclassified' }
 SBPyPltSubplots class >> matchPython: aDictionary do: aBlock [
 	<lang: #python match: '(module
   (expression_statement
@@ -36,20 +29,7 @@ SBPyPltSubplots class >> matchPython: aDictionary do: aBlock [
 	
 	^ aBlock
 		value: (aDictionary at: 'initMatplotlib')
-		value: (self new factory: (aDictionary at: 'initMatplotlib'); createFigureButtonFrom: (self newNullBlock: 'Axes type'))
-]
-
-{ #category : #'as yet unclassified' }
-SBPyPltSubplots class >> newEmptyChildNear: aBlock before: aBoolean [
-
-	^ nil
-]
-
-{ #category : #'as yet unclassified' }
-SBPyPltSubplots class >> objectInterfaceNear: aBlock at: aSymbol [
-"TODO change if know how works"
-
-	^{[:o | o isKindOf: SBPyPltSetLabel]}
+		value: (self new factory: (aDictionary at: 'initMatplotlib') factory; createFigureButtonFrom: (self newNullBlock: 'Axes type'))
 ]
 
 { #category : #'initialize-release' }

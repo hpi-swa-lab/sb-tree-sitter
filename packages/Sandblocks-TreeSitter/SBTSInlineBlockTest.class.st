@@ -78,7 +78,7 @@ SBTSInlineBlockTest >> testDeduplicateExtraChoice [
 	factory
 		at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
 			SBInlineBlockSymbol new type: 'id' factory: factory.
-			SBInlineBlockSequence new elements: {
+			SBInlineBlockSequence new factory: factory; elements: {
 				SBInlineBlockSymbol new type: 'expr' factory: factory.
 				SBInlineBlockChoice new alternatives: {SBInlineBlockLabel new label: '.'. SBInlineBlockLabel new label: '?.'}.
 				SBInlineBlockSymbol new type: 'expr' factory: factory}});
@@ -98,8 +98,8 @@ SBTSInlineBlockTest >> testDeduplicateExtraLabels [
 	factory
 		at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
 			SBInlineBlockSymbol new type: 'id' factory: factory.
-			SBInlineBlockSequence new elements: {SBInlineBlockSymbol new type: 'expr' factory: factory. SBInlineBlockLabel new label: '=>'}.
-			SBInlineBlockSequence new elements: {
+			SBInlineBlockSequence new factory: factory; elements: {SBInlineBlockSymbol new type: 'expr' factory: factory. SBInlineBlockLabel new label: '=>'}.
+			SBInlineBlockSequence new factory: factory; elements: {
 				SBInlineBlockSymbol new type: 'expr' factory: factory.
 				SBInlineBlockLabel new label: ','.
 				SBInlineBlockSymbol new type: 'expr' factory: factory}});
@@ -203,7 +203,7 @@ SBTSInlineBlockTest >> testMatchBinaryOp [
 	| factory unknown editor num |
 	factory := SBMetaBlockFactory new.
 	factory at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
-		SBInlineBlockSequence new elements: {
+		SBInlineBlockSequence new factory: factory; elements: {
 			SBInlineBlockSymbol new type: 'expr' factory: factory.
 			SBInlineBlockChoice new alternatives: {SBInlineBlockLabel new label: '-'. SBInlineBlockLabel new label: '+'}.
 			SBInlineBlockSymbol new type: 'expr' factory: factory}.
@@ -274,7 +274,7 @@ SBTSInlineBlockTest >> testMatchEarlyExplorationStoppedRegression [
 	factory := SBMetaBlockFactory new.
 	
 	factory at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
-		SBInlineBlockSequence new elements: {SBInlineBlockLabel new label: '(?<'. SBInlineBlockSymbol new type: 'nested' factory: factory}.
+		SBInlineBlockSequence new factory: factory; elements: {SBInlineBlockLabel new label: '(?<'. SBInlineBlockSymbol new type: 'nested' factory: factory}.
 		SBInlineBlockSymbol new type: 'basic' factory: factory}).
 	factory
 		at: 'nested'
@@ -398,7 +398,7 @@ SBTSInlineBlockTest >> testMatchPartialLabel [
 	factory
 		at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
 			SBInlineBlockSymbol new type: 'number' factory: factory.
-			SBInlineBlockSequence new elements: {
+			SBInlineBlockSequence new factory: factory; elements: {
 				SBInlineBlockSymbol new type: 'expr' factory: factory.
 				SBInlineBlockChoice new alternatives: {SBInlineBlockLabel new label: '-='. SBInlineBlockLabel new label: '+='}.
 				SBInlineBlockSymbol new type: 'expr' factory: factory}});
@@ -423,7 +423,7 @@ SBTSInlineBlockTest >> testMatchPrefixOp [
 	| factory unknown editor num |
 	factory := SBMetaBlockFactory new.
 	factory at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
-		SBInlineBlockSequence new elements: {
+		SBInlineBlockSequence new factory: factory; elements: {
 			SBInlineBlockChoice new alternatives: {SBInlineBlockLabel new label: '-'. SBInlineBlockLabel new label: '+'}.
 			SBInlineBlockSymbol new type: 'expr' factory: factory}.
 		SBInlineBlockText new regexString: '[0-9]+'}).
