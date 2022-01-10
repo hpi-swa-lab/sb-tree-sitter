@@ -154,11 +154,12 @@ SBTSLanguageRuntime >> trimEOF: aString [
 { #category : #'helper os process' }
 SBTSLanguageRuntime >> which: aString [
 
-	^ self
-		checkedCmd: ExternalUnixOSProcess defaultShellPath
+	^ (self
+		cmd: ExternalUnixOSProcess defaultShellPath
 		arguments: {'-c'. 'which {1}' format: {aString}}
 		env: nil
-		stdin: nil
+		stdin: aString
+		cancel: [:b | ]) wait value: [:status :stdout :stderr | status = 0 ifTrue: [stdout] ifFalse: [nil]]
 ]
 
 { #category : #'helper os process' }
