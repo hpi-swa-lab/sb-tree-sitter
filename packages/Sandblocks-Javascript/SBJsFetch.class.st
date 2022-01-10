@@ -125,7 +125,6 @@ SBJsFetch >> addFieldAction [
 { #category : #'as yet unclassified' }
 SBJsFetch >> addHeaderAction [
 	headerMorph
-		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
 			addMorphBack: (SBJsFetchHeaderTextBubble new
 				placeholderText: 'key');
@@ -142,7 +141,6 @@ SBJsFetch >> addHeaderAction: key value: value [
 	valueTextBubble := value = '' ifTrue: [(SBTextBubble new placeholderText: 'value')] ifFalse: [(SBTextBubble new contents: value)].
 	
 	headerMorph
-		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
 			addMorphBack: (SBJsFetchHeaderTextBubble new
 				contents: key);
@@ -157,7 +155,6 @@ SBJsFetch >> addHeaderAction: key value: value [
 SBJsFetch >> addParamAction [
 	paramMorph
 		submorphs;
-		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
 			addMorphBack: (SBJsFetchParamTextBubble new
 				placeholderText: 'key');
@@ -172,7 +169,6 @@ SBJsFetch >> addParamAction [
 SBJsFetch >> addParamAction: key value: value [
 	paramMorph
 		submorphs;
-		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
 			addMorphBack: (SBJsFetchParamTextBubble new
 				contents: key);
