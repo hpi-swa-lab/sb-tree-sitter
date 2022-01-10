@@ -11,6 +11,18 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSFile class >> filepath: aString [
+
+	^ self new filepath: aString
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile class >> for: aFilepathString [
+
+	^ self filepath: aFilepathString
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> artefactChanged: aMethodBlock [
 
 	aMethodBlock = self ifTrue: [self root updateAllHighlights]
@@ -27,7 +39,7 @@ SBTSFile >> filepath: aString [
 
 	self
 		filepath: aString
-		language: (SBGrammarLanguage allSubclasses detect: [:lang | lang fileSuffix = 'c'])
+		language: (SBGrammarLanguage allSubclasses detect: [:lang | lang fileSuffix = (FileDirectory extensionFor: aString)])
 ]
 
 { #category : #'as yet unclassified' }
