@@ -74,6 +74,7 @@ int SQ_REPORT(char *id, int expr) {
   char *data;
   asprintf(&data, "{\"id\":\"%s\",\"expression\":\"%i\"}", id, expr);
   if (send(s, data, strlen(data), 0) < 0) {perror("Send failed"); }
+  free(data);
   return expr;
 }'.
 	aStream

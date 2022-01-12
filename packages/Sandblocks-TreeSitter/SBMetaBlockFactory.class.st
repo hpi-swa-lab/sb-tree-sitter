@@ -362,6 +362,70 @@ SBMetaBlockFactory >> buildBlocksFor: anObject [
 ]
 
 { #category : #helper }
+SBMetaBlockFactory >> buildNodesFor: anObject [
+
+	anObject type = 'FIELD' ifTrue: [
+		^ (self buildNodesFor: anObject content)
+			field: anObject name;
+			yourself].
+	
+	anObject type = 'ALIAS' ifTrue: [
+		^ (self buildNodesFor: anObject content)
+			alias: (anObject at: #value);
+			yourself].
+	
+	(self unpackTypes includes: anObject type) ifTrue: [^ self buildNodesFor: anObject content].
+	
+	(#('STRING') includes: anObject type) ifTrue: [
+		^ SBTSNodeLabel new
+			label: anObject value;
+			factory: self].
+	
+	(#('PATTERN' 'TOKEN' 'IMMEDIATE_TOKEN') includes: anObject type) ifTrue: [
+		^ SBTSNodeText new
+			regexString: (self buildRegexString: anObject);
+			factory: self].
+	
+	(#('SYMBOL') includes: anObject type) ifTrue: [
+		^ SBTSNodeSymbol new
+			type: anObject name factory: self;
+			factory: self].
+	
+	'REPEAT' = anObject type ifTrue: [
+		^ SBTSNodeRepeat new
+			multiple: true required: false element: (self buildNodesFor: anObject content);
+			factory: self].
+	
+	'REPEAT1' = anObject type ifTrue: [
+		^ SBTSNodeRepeat new
+			multiple: true required: true element: (self buildNodesFor: anObject content);
+			factory: self].
+	
+	'CHOICE' = anObject type ifTrue: [
+		(anObject members size = 2 and: [anObject members second type = 'BLANK']) ifTrue: [
+			^ SBTSNodeRepeat new
+				multiple: false required: false element: (self buildNodesFor: anObject members first);
+				factory: self].
+		
+		^ SBTSNodeChoice new
+			alternatives: (anObject members collect: [:member | self buildNodesFor: member]);
+			factory: self].
+	
+	'SEQ' = anObject type ifTrue: [
+		^ SBTSNodeSeq new
+			factory: self;
+			elements: (anObject members collect: [:member | self buildNodesFor: member])].
+	
+	self assert: false
+]
+
+{ #category : #helper }
+SBMetaBlockFactory >> buildNodesForRule: aString [
+
+	^ self buildNodesFor: (grammar rules at: aString)
+]
+
+{ #category : #helper }
 SBMetaBlockFactory >> buildRegex: anObject on: aStream [
 
 	(self unpackTypes includes: (anObject at: #type)) ifTrue: [^ self buildRegex: anObject content on: aStream].
