@@ -38,7 +38,8 @@ BaselineOfSBTreeSitter >> baseline: spec [
 			package: 'Sandblocks-Python' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Regex' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Json' with: [spec requires: #('Sandblocks-TreeSitter')];
-			package: 'Sandblocks-C' with: [spec requires: #('Sandblocks-TreeSitter')].
+			package: 'Sandblocks-C' with: [spec requires: #('Sandblocks-TreeSitter')];
+			package: 'Sandblocks-Vhdl' with: [spec requires: #('Sandblocks-TreeSitter')].
 		
 		spec
 			group: 'default'
