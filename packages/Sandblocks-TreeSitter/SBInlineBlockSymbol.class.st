@@ -39,7 +39,7 @@ SBInlineBlockSymbol >> buildWithFields: aStream alternatives: aDictionary [
 
 	(self isRootSymbol or: [factory promotedInlineSymbols includes: self type]) ifTrue: [^ true].
 	self isSuperType ifTrue: [^ true].
-	aStream peek second isMorph ifFalse: [^ false].
+	(aStream atEnd or: [aStream peek second isMorph not]) ifTrue: [^ false].
 	
 	^ ((aStream peek second isKindOf: SBInlineBlockSymbol) and: [self type = aStream peek second type])
 		ifTrue: [ | block |
@@ -195,12 +195,14 @@ simply unpack the first elements as there may be choices in between.
 Simple case: (identifier), stream: (identifier)
 Complex case: (property_identifier, aliased as: (identifier)|(reserved)), stream: 'abc'
 Complex case: ((identifier), ('as' (identifier)?), stream: (identifier)
+Complex case: (x, aliased as: (a | b | c)), stream: a
 Complex case: (''', string_fragment, '''), stream: (''', string_fragment, ''')"
 
 	^ self owner isNil or: [ | owners |
 		owners := self allOwners.
-		(owners allSatisfy: [:owner | (owner isKindOf: SBInlineBlockSymbol) not]) and: [" if we have a sequence, we can still be the root symbol, if we're in an alias (see cases 3 vs. 4) "
-		owners last alias notNil and: [owners allSatisfy: [:owner | (owner isKindOf: SBInlineBlockSequence) not]]]]
+		(owners allSatisfy: [:owner | (owner isKindOf: SBInlineBlockSymbol) not]) and: [" if we have a sequence, we can still be the root symbol, if we're in an alias (see cases 3 vs. 4).
+			Importantly, if we're not directly being aliased, we won't be the root symbol (size<2) "
+		owners last alias notNil and: [owners size < 2 and: [owners allSatisfy: [:owner | (owner isKindOf: SBInlineBlockSequence) not]]]]]
 ]
 
 { #category : #'as yet unclassified' }

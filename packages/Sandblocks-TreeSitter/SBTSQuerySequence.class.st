@@ -30,21 +30,23 @@ SBTSQuerySequence >> evaluateAgainst: aBlock captures: aDictionary [
 	
 	[exprs atEnd] whileFalse: [ | expr nextBlocks |
 		expr := exprs next.
-		nextBlocks := expr requiresField
-			ifNotNil: [:field | | b |
-				b := blocks detect: [:child | child field = field] ifNone: [^ nil].
-				{b}]
-			ifNil: [blocks].
-		
-		((nextBlocks notEmpty and: [
-			nextBlocks anySatisfy: [:nextBlock | | captures |
-				captures := Dictionary new.
-				(expr evaluateAgainst: nextBlock captures: captures)
-					ifNotNil: [
-						localCaptures addAll: captures associations.
-						blocks remove: nextBlock.
-						true]
-					ifNil: [false]]]) not and: [expr isOptional not]) ifTrue: [^ nil]].
+		" no support for anchor . yet "
+		self flag: #todo.
+		((expr isKindOf: SBTSQueryElement) and: [expr contents = '.']) ifFalse: [
+			nextBlocks := expr requiresField
+				ifNotNil: [:field | | b |
+					b := blocks detect: [:child | child field = field] ifNone: [^ nil].
+					{b}]
+				ifNil: [blocks].
+			((nextBlocks notEmpty and: [
+				nextBlocks anySatisfy: [:nextBlock | | captures |
+					captures := Dictionary new.
+					(expr evaluateAgainst: nextBlock captures: captures)
+						ifNotNil: [
+							localCaptures addAll: captures associations.
+							blocks remove: nextBlock.
+							true]
+						ifNil: [false]]]) not and: [expr isOptional not]) ifTrue: [^ nil]]].
 	
 	exprs atEnd ifFalse: [^ nil].
 	aDictionary addAll: localCaptures associations.

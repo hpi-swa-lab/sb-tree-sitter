@@ -39,7 +39,7 @@ SBInlineBlockText >> buildEmpty [
 { #category : #'as yet unclassified' }
 SBInlineBlockText >> buildWithFields: aStream alternatives: aDictionary [
 
-	aStream peek second isString ifFalse: [
+	(aStream atEnd or: [aStream peek second isString not]) ifTrue: [
 		(regex matches: '')
 			ifTrue: [
 				self contents: ''.
@@ -47,7 +47,9 @@ SBInlineBlockText >> buildWithFields: aStream alternatives: aDictionary [
 			ifFalse: [^ false]].
 	
 	^ (regex matches: aStream peek second)
-		ifTrue: [self contents: aStream next second. true]
+		ifTrue: [
+			self contents: aStream next second.
+			true]
 		ifFalse: [regex matches: '']
 ]
 

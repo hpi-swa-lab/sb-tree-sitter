@@ -586,7 +586,7 @@ SBMetaBlockFactory >> delimitedRules [
 { #category : #helper }
 SBMetaBlockFactory >> escapeStringForRegex: aString [
 
-	^ aString copyWithRegex: '[.*+?^${}:()|\[\]\\]' matchesTranslatedUsing: [:m | '\', m]
+	^ aString copyWithRegex: '[.*+?^${}()|\[\]\\]' matchesTranslatedUsing: [:m | '\', m]
 ]
 
 { #category : #accessing }
