@@ -19,7 +19,8 @@ Class {
 		'aliases',
 		'promotedInlineSymbols',
 		'containersOfPromotedInlineSymbols',
-		'softLineBreakMatcher'
+		'softLineBreakMatcher',
+		'nodesCache'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -48,7 +49,7 @@ SBMetaBlockFactory class >> fetchLibrary: aGithubString [
 
 	^ (MCFetchGithubRepository new
 		projectPath: aGithubString
-		projectVersion: 'master'
+		projectVersion: 'main'
 		repoPath: nil) directory
 ]
 
@@ -302,6 +303,21 @@ SBMetaBlockFactory >> blockInline: aCollection [
 ]
 
 { #category : #helper }
+SBMetaBlockFactory >> bodyNodeForRule: aString [
+
+	^ self bodyNodeForRule: aString ifAbsent: [^ self error: 'no such rule']
+]
+
+{ #category : #helper }
+SBMetaBlockFactory >> bodyNodeForRule: aString ifAbsent: aBlock [
+
+	nodesCache ifNil: [nodesCache := Dictionary new].
+	^ nodesCache
+		at: aString
+		ifAbsentPut: [self buildNodesFor: (grammar rules at: aString ifAbsent: [^ aBlock value])]
+]
+
+{ #category : #helper }
 SBMetaBlockFactory >> buildBlocksFor: anObject [
 
 	anObject type = 'FIELD' ifTrue: [
@@ -417,12 +433,6 @@ SBMetaBlockFactory >> buildNodesFor: anObject [
 			elements: (anObject members collect: [:member | self buildNodesFor: member])].
 	
 	self assert: false
-]
-
-{ #category : #helper }
-SBMetaBlockFactory >> buildNodesForRule: aString [
-
-	^ self buildNodesFor: (grammar rules at: aString)
 ]
 
 { #category : #helper }

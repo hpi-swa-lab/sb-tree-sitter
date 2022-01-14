@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSNodeLabel >> copy [
+
+	^ super copy label: self label
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeLabel >> label [
 
 	^ label
@@ -25,4 +31,17 @@ SBTSNodeLabel >> printOn: aStream [
 	aStream nextPut: $".
 	aStream nextPutAll: self label.
 	aStream nextPut: $"
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeLabel >> resultsFor: aParser [
+
+	| labelStream oldPosition |
+	labelStream := self label readStream.
+	oldPosition := aParser position.
+	[aParser atEnd or: [labelStream atEnd]] whileFalse: [
+		labelStream next = aParser next ifFalse: [
+			aParser position: oldPosition.
+			^ #noMatch]].
+	^ {self copy parser: aParser copy}
 ]

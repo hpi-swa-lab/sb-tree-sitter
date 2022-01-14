@@ -1,13 +1,21 @@
 Class {
 	#name : #SBTSNodeBase,
-	#superclass : #Object,
+	#superclass : #SBBlock,
 	#instVars : [
 		'alias',
 		'field',
-		'factory'
+		'factory',
+		'parser'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> addChild: aNode [
+
+	self addMorphBack: aNode.
+	parser := aNode parser
+]
 
 { #category : #'as yet unclassified' }
 SBTSNodeBase >> alias [
@@ -19,6 +27,22 @@ SBTSNodeBase >> alias [
 SBTSNodeBase >> alias: aString [
 
 	alias := aString
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> child [
+
+	^ self firstSubmorph
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> copy [
+
+	^ self class new
+		field: field;
+		alias: alias;
+		factory: factory;
+		parser: parser
 ]
 
 { #category : #'as yet unclassified' }
@@ -43,4 +67,28 @@ SBTSNodeBase >> field [
 SBTSNodeBase >> field: aString [
 
 	field := aString
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> lastChild [
+
+	^ self lastSubmorph
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> parser [
+
+	^ parser
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> parser: aParser [
+
+	parser := aParser
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> resultsFor: aParser [
+
+	^ self subclassResponsibility
 ]

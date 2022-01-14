@@ -394,6 +394,13 @@ SBTreeSitter >> sexp [
 	^ SBMetaBlockFactory tryPatchLibrary: 'AbstractMachinesLab/tree-sitter-sexp' name: 'sexp' context: thisContext
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> smalltalk [
+
+	<apicall: SBTSLanguage* tree_sitter_smalltalk () module: 'tree-sitter-smalltalk'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tom95/tree-sitter-smalltalk' name: 'smalltalk' context: thisContext
+]
+
 { #category : #helper }
 SBTreeSitter >> textBetween: aNode and: anEndNode [
 	" TODO: will break with UTF-8 "

@@ -10,6 +10,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSNodeRepeat >> copy [
+
+	^ super copy multiple: self multiple required: self required element: self element
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeRepeat >> element [
 
 	^ element
@@ -42,4 +48,13 @@ SBTSNodeRepeat >> printOn: aStream [
 SBTSNodeRepeat >> required [
 
 	^ required
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeRepeat >> resultsFor: aParser [
+
+	| results |
+	results := self element resultsFor: aParser.
+	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{self copy}]].
+	^ results collect: [:result | self copy addChild: result]
 ]
