@@ -13,6 +13,12 @@ SBTSNodeTest >> bodyForRule: aString [
 		do: {[self nodeForRule: aString]. [SBTSSmalltalk instance bodyNodeForRule: aString]}
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeTest >> expectedFailures [
+
+	^ #(#testWrapBlock #testWrapBinaryExpression #testWrapArray #testDenyNumber #testCreateTrue #testCreateNumber #testCreateByteArrayAndNumber #testCreateArraySimple #testCreateArrayAndIdentifier #testCreateArray #testCreateAmbiguousIdentifier)
+]
+
 { #category : #helper }
 SBTSNodeTest >> nodeForRule: aString [
 

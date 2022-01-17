@@ -433,5 +433,5 @@ SBTreeSitter >> tsq [
 SBTreeSitter >> vhdl [
 
 	<apicall: SBTSLanguage* tree_sitter_vhdl () module: 'tree-sitter-vhdl'>
-	^ SBMetaBlockFactory tryPatchLibrary: 'alemuller/tree-sitter-vhdl' name: 'vhdl' context: thisContext
+	^ SBMetaBlockFactory tryPatchLibrary: 'alemuller/tree-sitter-vhdl' name: 'vhdl' context: thisContext branch: 'main'
 ]

@@ -14,7 +14,6 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSNodeBase >> addChild: aNode [
 
-	isCopy ifFalse: [self haltOnce].
 	self addMorphBack: aNode.
 	parser := aNode parser
 ]

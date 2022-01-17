@@ -45,11 +45,11 @@ SBMetaBlockFactory class >> compileParserIn: path name: aString [
 ]
 
 { #category : #helper }
-SBMetaBlockFactory class >> fetchLibrary: aGithubString [
+SBMetaBlockFactory class >> fetchLibrary: aGithubString branch: aString [
 
 	^ (MCFetchGithubRepository new
 		projectPath: aGithubString
-		projectVersion: 'master'
+		projectVersion: aString
 		repoPath: nil) directory
 ]
 
@@ -57,7 +57,7 @@ SBMetaBlockFactory class >> fetchLibrary: aGithubString [
 SBMetaBlockFactory class >> fetchTreeSitter [
 
 	| path |
-	path := self fetchLibrary: 'tree-sitter/tree-sitter'.
+	path := self fetchLibrary: 'tree-sitter/tree-sitter' branch: 'master'.
 	self assert: (OSProcess waitForCommand: ('cd {1}; make' format: {path fullName})) exitStatus = 0.
 	path / 'libtree-sitter.so' copyTo: FileDirectory default.
 	^ FileDirectory default / 'libtree-sitter.so'
@@ -117,16 +117,16 @@ SBMetaBlockFactory class >> generateGrammarClassFrom: path name: aString github:
 ]
 
 { #category : #languages }
-SBMetaBlockFactory class >> loadDefaultLanguage: aString [
+SBMetaBlockFactory class >> loadDefaultLanguage: aString branch: anotherString [
 
-	^ self loadLanguage: 'tree-sitter/tree-sitter-', aString name: aString
+	^ self loadLanguage: 'tree-sitter/tree-sitter-', aString name: aString branch: anotherString
 ]
 
 { #category : #languages }
-SBMetaBlockFactory class >> loadLanguage: aGithubString name: aString [
+SBMetaBlockFactory class >> loadLanguage: aGithubString name: aString branch: anotherString [
 
 	| path |
-	path := self fetchLibrary: aGithubString.
+	path := self fetchLibrary: aGithubString branch: anotherString.
 	self compileParserIn: path name: aString.
 	self generateGrammarClassFrom: path name: aString github: aGithubString.
 	self generateFFIMethodFor: aString github: aGithubString
@@ -181,6 +181,12 @@ SBMetaBlockFactory class >> removeDuplicateChoices: aCollection [
 { #category : #helper }
 SBMetaBlockFactory class >> tryPatchLibrary: aGithubString name: aString context: aContext [
 
+	^ self tryPatchLibrary: aGithubString name: aString context: aContext branch: 'master'
+]
+
+{ #category : #helper }
+SBMetaBlockFactory class >> tryPatchLibrary: aGithubString name: aString context: aContext branch: anotherString [
+
 	| path library |
 	ExternalFunction getLastError = 15 ifFalse: [^ self externalCallFailed].
 	
@@ -188,7 +194,7 @@ SBMetaBlockFactory class >> tryPatchLibrary: aGithubString name: aString context
 		aContext method externalLibraryName: 'tree-sitter-', aString, '.so'.
 		^ aContext method externalLibraryFunction invoke].
 	
-	path := self fetchLibrary: aGithubString.
+	path := self fetchLibrary: aGithubString branch: anotherString.
 	library := self compileParserIn: path name: aString.
 	aContext method externalLibraryName: library fullName.
 	^ aContext method externalLibraryFunction invoke
