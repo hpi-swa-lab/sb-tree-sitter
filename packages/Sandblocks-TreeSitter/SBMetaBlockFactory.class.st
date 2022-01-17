@@ -305,7 +305,7 @@ SBMetaBlockFactory >> blockInline: aCollection [
 { #category : #helper }
 SBMetaBlockFactory >> bodyNodeForRule: aString [
 
-	^ self bodyNodeForRule: aString ifAbsent: [^ self error: 'no such rule']
+	^ self bodyNodeForRule: aString ifAbsent: [^ self error: 'no such rule: ', aString]
 ]
 
 { #category : #helper }

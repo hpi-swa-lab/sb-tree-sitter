@@ -41,7 +41,7 @@ SBTSNodeSeq >> resultsFor: aParser [
 	| queue |
 	queue := OrderedCollection new.
 	
-	^ Array streamContents: [:stream | | reportResultsBlock |
+	^ (Array streamContents: [:stream | | reportResultsBlock |
 		reportResultsBlock := [:seq :isLast | | newResults |
 			newResults := (self elements at: seq submorphCount + 1) resultsFor: (seq hasSubmorphs ifTrue: [seq lastChild parser] ifFalse: [aParser]) copy.
 			newResults = #noMatch ifFalse: [
@@ -57,5 +57,5 @@ SBTSNodeSeq >> resultsFor: aParser [
 			seq := queue removeFirst.
 			isLast := seq submorphCount = (self elements size - 1).
 			
-			reportResultsBlock value: seq value: isLast]]
+			reportResultsBlock value: seq value: isLast]]) ifEmpty: [#noMatch]
 ]

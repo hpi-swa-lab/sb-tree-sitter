@@ -5,7 +5,8 @@ Class {
 		'alias',
 		'field',
 		'factory',
-		'parser'
+		'parser',
+		'isCopy'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -13,6 +14,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSNodeBase >> addChild: aNode [
 
+	isCopy ifFalse: [self haltOnce].
 	self addMorphBack: aNode.
 	parser := aNode parser
 ]
@@ -30,6 +32,12 @@ SBTSNodeBase >> alias: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeBase >> allSuperTypesDo: aBlock [
+
+	self owner ifNotNil: [:o | o allSuperTypesDo: aBlock]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeBase >> child [
 
 	^ self firstSubmorph
@@ -42,7 +50,8 @@ SBTSNodeBase >> copy [
 		field: field;
 		alias: alias;
 		factory: factory;
-		parser: parser
+		parser: parser;
+		isCopy: true
 ]
 
 { #category : #'as yet unclassified' }
@@ -70,6 +79,20 @@ SBTSNodeBase >> field: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeBase >> initialize [
+
+	super initialize.
+	
+	isCopy := false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> isCopy: aBoolean [
+
+	isCopy := aBoolean
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeBase >> lastChild [
 
 	^ self lastSubmorph
@@ -85,6 +108,25 @@ SBTSNodeBase >> parser [
 SBTSNodeBase >> parser: aParser [
 
 	parser := aParser
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> printFull [
+
+	^ String streamContents: [:s | self printFullOn: s depth: 0]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> printFullOn: aStream depth: aNumber [
+
+	aStream nextPut: $(.
+	aStream print: self.
+	self submorphs do: [:m |
+		(m isKindOf: SBTSNodeBase) ifTrue: [
+			aStream crtab: aNumber + 1.
+			m printFullOn: aStream depth: aNumber + 1]].
+	aStream crtab: aNumber + 1.
+	aStream nextPut: $)
 ]
 
 { #category : #'as yet unclassified' }

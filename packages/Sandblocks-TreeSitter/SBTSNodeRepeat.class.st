@@ -12,7 +12,9 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSNodeRepeat >> copy [
 
-	^ super copy multiple: self multiple required: self required element: self element
+	^ super copy
+		multiple: self multiple required: self required element: self element;
+		addAllMorphs: (self submorphs collect: #copy)
 ]
 
 { #category : #'as yet unclassified' }
@@ -55,6 +57,6 @@ SBTSNodeRepeat >> resultsFor: aParser [
 
 	| results |
 	results := self element resultsFor: aParser.
-	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{self copy}]].
+	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{self copy parser: aParser}]].
 	^ results collect: [:result | self copy addChild: result]
 ]

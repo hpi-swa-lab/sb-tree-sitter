@@ -7,15 +7,20 @@ Class {
 { #category : #helper }
 SBTSNodeTest >> bodyForRule: aString [
 
-	^ SBTSSmalltalk instance bodyNodeForRule: aString
+	^ SBToggledCode
+		comment: ''
+		active: 1
+		do: {[self nodeForRule: aString]. [SBTSSmalltalk instance bodyNodeForRule: aString]}
 ]
 
 { #category : #helper }
 SBTSNodeTest >> nodeForRule: aString [
 
+	| lang |
+	lang := SBTSSmalltalk new.
 	^ SBTSNodeSymbol new
-		type: aString factory: SBTSSmalltalk instance;
-		addChild: (SBTSSmalltalk instance bodyNodeForRule: aString)
+		type: aString factory: lang;
+		addChild: (lang bodyNodeForRule: aString)
 ]
 
 { #category : #helper }
@@ -51,7 +56,7 @@ SBTSNodeTest >> testCreateAmbiguousIdentifier [
 	self assert: 3 equals: results size.
 	self
 		assert: #('identifier' 'true' 'thisContext') asSet
-		equals: (results collect: [:choice | choice child type] as: Set)
+		equals: (results collect: [:choice | choice child child type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -60,22 +65,24 @@ SBTSNodeTest >> testCreateArray [
 	| results |
 	results := SBTSParser new optionsForTemplate: (self bodyForRule: 'primary') given: '{'.
 	self assert: 1 equals: results size.
-	self assert: 'dynamic_array' equals: results first child type
+	self assert: 'dynamic_array' equals: results first child child type
 ]
 
 { #category : #'tests - create' }
 SBTSNodeTest >> testCreateArrayAndIdentifier [
 
 	| results |
+	"assignment gets reported as well"
+	self flag: #todo.
 	results := SBTSParser new
 		optionsForTemplate: (self bodyForRule: 'dynamic_array')
 		given: '{a'.
-	self assert: 1 equals: results size.
+	self assert: 2 equals: results size.
 	
 	results := SBTSParser new
 		optionsForTemplate: (self bodyForRule: 'dynamic_array')
 		given: '{a'.
-	self assert: 1 equals: results size
+	self assert: 2 equals: results size
 ]
 
 { #category : #'tests - create' }
@@ -105,7 +112,7 @@ SBTSNodeTest >> testCreateNumber [
 	| results |
 	results := SBTSParser new optionsForTemplate: (self bodyForRule: 'primary') given: '1'.
 	self assert: 1 equals: results size.
-	self assert: 'number' equals: results first child type
+	self assert: 'number' equals: results first child child type
 ]
 
 { #category : #'tests - create' }
@@ -117,7 +124,7 @@ SBTSNodeTest >> testCreateTrue [
 	self assert: 2 equals: results size.
 	self
 		assert: #('identifier' 'true') asSet
-		equals: (results collect: [:choice | choice child type] as: Set)
+		equals: (results collect: [:choice | choice child child type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -133,7 +140,10 @@ SBTSNodeTest >> testWrapArray [
 
 	| stmt results |
 	stmt := self statement: 'number' with: '123'.
-	results := SBTSParser new optionsFor: stmt given: '{' before: true.
+	results := SBTSParser new
+		optionsFor: stmt child child child child child child
+		given: '{'
+		before: true.
 	self assert: 1 equals: results size.
 	self assert: 'dynamic_array' equals: results first child child child child child child type
 ]
@@ -141,25 +151,38 @@ SBTSNodeTest >> testWrapArray [
 { #category : #'tests - wrap' }
 SBTSNodeTest >> testWrapBinaryExpression [
 
-	| expr number primary |
-	expr := SBTSNodeSymbol new type: 'expression' factory: SBTSSmalltalk instance.
-	primary := SBTSNodeSymbol new type: 'primary' factory: SBTSSmalltalk instance.
-	number := SBTSNodeSymbol new type: 'number' factory: SBTSSmalltalk instance.
-	self assert: nil equals: (self input: '+' in: primary withNested: number inputBefore: false).
-	self
-		assert: 'expression'
-		equals: (self input: '+' in: expr withNested: number inputBefore: false) type
+	| stmt results |
+	1 clearHaltOnce.
+	stmt := self statement: 'number' with: '123'.
+	1 setHaltOnce.
+	results := SBTSParser new
+		optionsFor: stmt child child child child child child
+		given: '+'
+		before: false.
+	results first printFull inspect.
+	self assert: 1 equals: results size
 ]
 
 { #category : #'tests - wrap' }
 SBTSNodeTest >> testWrapBlock [
 
-	| expr number primary |
-	expr := SBTSNodeSymbol new type: 'expression' factory: SBTSSmalltalk instance.
-	primary := SBTSNodeSymbol new type: 'primary' factory: SBTSSmalltalk instance.
-	number := SBTSNodeSymbol new type: 'number' factory: SBTSSmalltalk instance.
-	self assert: nil equals: (self input: '[' in: primary withNested: number inputBefore: true).
-	self
-		assert: 'expression'
-		equals: (self input: '[' in: expr withNested: number inputBefore: false) type
+	| stmt results |
+	stmt := self statement: 'number' with: '123'.
+	results := SBTSParser new
+		optionsFor: stmt child child child child child child
+		given: '['
+		before: true.
+	self assert: 1 equals: results size
+]
+
+{ #category : #'tests - wrap' }
+SBTSNodeTest >> testWrapByteArray [
+
+	| stmt results |
+	stmt := self statement: 'identifier' with: 'abc'.
+	results := SBTSParser new
+		optionsFor: stmt child child child child child child
+		given: '#['
+		before: true.
+	self assert: #() equals: results
 ]

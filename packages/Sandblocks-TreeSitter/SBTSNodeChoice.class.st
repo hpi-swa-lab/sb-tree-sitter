@@ -22,7 +22,9 @@ SBTSNodeChoice >> alternatives: aCollection [
 { #category : #'as yet unclassified' }
 SBTSNodeChoice >> copy [
 
-	^ super copy alternatives: self alternatives
+	^ super copy
+		alternatives: self alternatives;
+		addAllMorphs: (self submorphs collect: #copy)
 ]
 
 { #category : #'as yet unclassified' }
