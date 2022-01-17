@@ -398,7 +398,7 @@ SBTreeSitter >> sexp [
 SBTreeSitter >> smalltalk [
 
 	<apicall: SBTSLanguage* tree_sitter_smalltalk () module: 'tree-sitter-smalltalk'>
-	^ SBMetaBlockFactory tryPatchLibrary: 'tom95/tree-sitter-smalltalk' name: 'smalltalk' context: thisContext
+	^ SBMetaBlockFactory tryPatchLibrary: 'tom95/tree-sitter-smalltalk' name: 'smalltalk' context: thisContext branch: 'main'
 ]
 
 { #category : #helper }
