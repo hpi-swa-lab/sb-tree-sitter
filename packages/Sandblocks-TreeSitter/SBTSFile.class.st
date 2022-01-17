@@ -60,13 +60,8 @@ SBTSFile >> filepath: aString language: aLanguageClass [
 				color: Color transparent)).
 		self addMorphBack: ((aLanguageClass parseAndReplace: stream contents) hResizing: #spaceFill)].
 	
-	self root factory runtime ifNotNil: [ | runtimes |
-		runtimes := aLanguageClass allRuntimes.
-		self firstSubmorph addMorphBack: (runtime := SBComboBox new
-			prefix: 'Runtime: ';
-			values: runtimes;
-			labels: (runtimes collect: #runtimeName);
-			object: aLanguageClass defaultRuntimeClass).
+	self root factory runtime ifNotNil: [
+		self firstSubmorph addMorphBack: (runtime := SBTSRuntimeChooser new language: aLanguageClass).
 		self firstSubmorph addMorphBack: (runButton := SBIcon iconPlay
 			balloonText: 'Run file';
 			on: #click send: #toggleRun to: self)]

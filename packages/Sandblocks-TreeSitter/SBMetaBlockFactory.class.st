@@ -49,7 +49,7 @@ SBMetaBlockFactory class >> fetchLibrary: aGithubString [
 
 	^ (MCFetchGithubRepository new
 		projectPath: aGithubString
-		projectVersion: 'main'
+		projectVersion: 'master'
 		repoPath: nil) directory
 ]
 
