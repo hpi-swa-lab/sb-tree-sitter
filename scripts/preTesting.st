@@ -2,4 +2,6 @@
 SBTreeSitter new
 	javascript;
 	python;
+	vhdl;
+	smalltalk;
 	parserNew.
