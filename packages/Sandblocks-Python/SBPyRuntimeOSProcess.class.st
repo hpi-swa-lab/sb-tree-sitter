@@ -1,13 +1,34 @@
 Class {
 	#name : #SBPyRuntimeOSProcess,
 	#superclass : #SBTSLanguageRuntime,
+	#classVars : [
+		'PythonPath'
+	],
 	#category : #'Sandblocks-Python'
 }
+
+{ #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess class >> defaultPythonPath [
+
+	^ (self pythonPath ifNil: [self which: 'python3']) ifNil: [self selectPath]
+]
 
 { #category : #'as yet unclassified' }
 SBPyRuntimeOSProcess class >> language [
 
 	^ SBPython
+]
+
+{ #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess class >> pythonPath [
+
+	^ PythonPath
+]
+
+{ #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess class >> pythonPath: aString [
+
+	PythonPath := aString
 ]
 
 { #category : #'as yet unclassified' }
@@ -17,11 +38,20 @@ SBPyRuntimeOSProcess class >> runtimeName [
 ]
 
 { #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess class >> selectPath [
+	<action>
+
+	self pythonPath: (UIManager default
+		request: 'Path to python executable?'
+		initialAnswer: (self pythonPath ifNil: [self which: 'python3'])).
+	^ self pythonPath
+]
+
+{ #category : #'as yet unclassified' }
 SBPyRuntimeOSProcess >> evaluate: aString [
 
 	| python |
-	python := self which: 'python'.
-	python ifNil: [^ self error: 'python executable not found'].
+	python := self class defaultPythonPath ifNil: [^ nil].
 	
 	^ self
 		tmpFile: aString
@@ -32,8 +62,7 @@ SBPyRuntimeOSProcess >> evaluate: aString [
 SBPyRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 
 	| python ret |
-	python := self which: 'python'.
-	python ifNil: [^ self error: 'python executable not found'].
+	python := self class defaultPythonPath ifNil: [^ nil].
 	
 	ret := Promise new.
 	[self spawnWatchDuring: [:port | ret resolveWith: (self cmd: python arguments: {aString} env: {'SQ_WATCH' -> port} stdin: nil cancel: aBlock) wait]] fork.
@@ -55,6 +84,15 @@ SBPyRuntimeOSProcess >> prettyPrint: aString [
 	printer ifNil: [^ aString].
 	
 	^ self checkedCmd: printer arguments: args env: nil stdin: aString withUnixLineEndings
+]
+
+{ #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess >> selectPath [
+	<action>
+
+	self class pythonPath: (UIManager default
+		request: 'Path to python executable?'
+		initialAnswer: (self class pythonPath ifNil: [self which: 'python3']))
 ]
 
 { #category : #'as yet unclassified' }

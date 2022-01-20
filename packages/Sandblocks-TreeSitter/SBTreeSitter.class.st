@@ -48,8 +48,8 @@ SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 		explore: fieldStream
 		root: root
 		factory: aCursor factory.
-	template = 'ALIAS' ifTrue: [block alias: type].
 	self assert: block notNil description: 'failed to build ', type.
+	template = 'ALIAS' ifTrue: [block alias: type].
 	^ aBlock value: block
 ]
 
@@ -394,6 +394,13 @@ SBTreeSitter >> sexp [
 	^ SBMetaBlockFactory tryPatchLibrary: 'AbstractMachinesLab/tree-sitter-sexp' name: 'sexp' context: thisContext
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> smalltalk [
+
+	<apicall: SBTSLanguage* tree_sitter_smalltalk () module: 'tree-sitter-smalltalk'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tom95/tree-sitter-smalltalk' name: 'smalltalk' context: thisContext branch: 'main'
+]
+
 { #category : #helper }
 SBTreeSitter >> textBetween: aNode and: anEndNode [
 	" TODO: will break with UTF-8 "
@@ -420,4 +427,11 @@ SBTreeSitter >> tsq [
 
 	<apicall: SBTSLanguage* tree_sitter_tsq () module: 'tree-sitter-tsq'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-tsq' name: 'tsq' context: thisContext
+]
+
+{ #category : #'ffi languages' }
+SBTreeSitter >> vhdl [
+
+	<apicall: SBTSLanguage* tree_sitter_vhdl () module: 'tree-sitter-vhdl'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'alemuller/tree-sitter-vhdl' name: 'vhdl' context: thisContext branch: 'main'
 ]

@@ -10,6 +10,13 @@ SBTSLanguageTests >> expectedFailures [
 	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude)
 ]
 
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testAliasedRootSymbol [
+
+	SBVhdl parse: 'assert << constant obj : bar_t  >>;'.
+	SBJavascript parse: '{headers: "abc"}'
+]
+
 { #category : #'testing - interactions' }
 SBTSLanguageTests >> testApplyPyFilePathReplacement [
 

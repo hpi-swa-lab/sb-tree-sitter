@@ -7,26 +7,20 @@ Class {
 	#category : #'Sandblocks-TreeSitter'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSLanguageRuntime class >> available [
 
 	^ true
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSLanguageRuntime class >> language [
-
-	^ self subclassResponsibility
-]
-
-{ #category : #'helper os process' }
-SBTSLanguageRuntime >> checkedCmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString [
+{ #category : #'os process' }
+SBTSLanguageRuntime class >> checkedCmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString [
 
 	^ (self cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString cancel: [:b | ]) wait value: [:status :stdout :stderr | status = 0 ifTrue: [stdout] ifFalse: [self error: stderr]]
 ]
 
-{ #category : #'helper os process' }
-SBTSLanguageRuntime >> cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString cancel: aBlock [
+{ #category : #'os process' }
+SBTSLanguageRuntime class >> cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString cancel: aBlock [
 
 	| inputPipe outputPipe errorPipe process stderrPromise stdoutPromise processPromise |
 	inputPipe := aString ifNotNil: [OSPipe blockingPipe].
@@ -67,6 +61,52 @@ SBTSLanguageRuntime >> cmd: aProgramPathString arguments: aCollection env: aDict
 		processPromise resolveWith: (UnixProcessExitStatus for: process exitStatus) exitStatus] fork.
 	
 	^ (Promise all: {processPromise. stdoutPromise. stderrPromise}) then: [:array | [:block | block valueWithArguments: array]]
+]
+
+{ #category : #accessing }
+SBTSLanguageRuntime class >> language [
+
+	^ self subclassResponsibility
+]
+
+{ #category : #'os process' }
+SBTSLanguageRuntime class >> trimEOF: aString [
+
+	aString ifEmpty: [^ aString].
+	aString last = Character lf ifTrue: [^ aString allButLast].
+	^ aString
+]
+
+{ #category : #'os process' }
+SBTSLanguageRuntime class >> which: aString [
+
+	^ (self
+		cmd: ExternalUnixOSProcess defaultShellPath
+		arguments: {'-c'. 'which {1}' format: {aString}}
+		env: nil
+		stdin: aString
+		cancel: [:b | ]) wait value: [:status :stdout :stderr | status = 0 ifTrue: [stdout] ifFalse: [nil]]
+]
+
+{ #category : #'helper os process' }
+SBTSLanguageRuntime >> checkedCmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString [
+
+	^ self class
+		checkedCmd: aProgramPathString
+		arguments: aCollection
+		env: aDictionary
+		stdin: aString
+]
+
+{ #category : #'helper os process' }
+SBTSLanguageRuntime >> cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString cancel: aBlock [
+
+	^ self class
+		cmd: aProgramPathString
+		arguments: aCollection
+		env: aDictionary
+		stdin: aString
+		cancel: aBlock
 ]
 
 { #category : #'helper os process' }
@@ -144,21 +184,9 @@ SBTSLanguageRuntime >> tmpFile: aString do: aBlock [
 ]
 
 { #category : #'helper os process' }
-SBTSLanguageRuntime >> trimEOF: aString [
-
-	aString ifEmpty: [^ aString].
-	aString last = Character lf ifTrue: [^ aString allButLast].
-	^ aString
-]
-
-{ #category : #'helper os process' }
 SBTSLanguageRuntime >> which: aString [
 
-	^ self
-		checkedCmd: ExternalUnixOSProcess defaultShellPath
-		arguments: {'-c'. 'which {1}' format: {aString}}
-		env: nil
-		stdin: nil
+	^ self class which: aString
 ]
 
 { #category : #'helper os process' }

@@ -103,7 +103,11 @@ SBGrammarLanguage class >> parseElement: aString [
 	| program |
 	program := self instance parse: aString.
 	^ self instance rootRuleName = program type
-		ifTrue: [program childSandblocks first]
+		ifTrue: [
+			self
+				assert: program childSandblocks size = 1
+				description: 'More than one child was returned from the parsed expression. Consider using parse: instead.'.
+			program childSandblocks first]
 		ifFalse: [program]
 ]
 

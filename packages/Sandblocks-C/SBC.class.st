@@ -6764,11 +6764,17 @@ SBC class >> rootRuleName [
 { #category : #properties }
 SBC class >> statementContainerTypes [
 
-	^ #('compound_statement')
+	^ #('compound_statement' 'translation_unit')
 ]
 
 { #category : #'as yet unclassified' }
 SBC >> configure [
 
 	self noteUncapturedText: #('string_literal')
+]
+
+{ #category : #'as yet unclassified' }
+SBC >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ #('compound_statement') includes: anotherBlock firstVisibleType
 ]
