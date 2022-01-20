@@ -129,11 +129,17 @@ SBJsEmbeddedRequestTool >> addParamSection: aParams [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> drawnColor [
+
+	^ Color veryLightGray.
+]
+
+{ #category : #'as yet unclassified' }
 SBJsEmbeddedRequestTool >> hideExamplesButton [
 	^(SBButton new icon: SBIcon iconEye shortcut: nil do: [
 				showExamples := true.
 				(((self submorphs first) submorphs fourth) submorphs second) replaceBy: self showExamplesButton.
-				self recreateFromMorphs])
+				self recreateFromMorphs]; balloonText: 'Show Examples')
 ]
 
 { #category : #'as yet unclassified' }
@@ -149,12 +155,12 @@ SBJsEmbeddedRequestTool >> initCommons [
 			addMorphBack: (SBTextBubble new
 				hResizing: #spaceFill;
 				contents: url);
-			addMorphBack: (SBButton new icon: SBIcon iconPlay shortcut: nil do: [self send]);
+			addMorphBack: (SBButton new icon: SBIcon iconPlay shortcut: nil do: [self send]; balloonText: 'Send Request');
 			addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
 			addMorphBack: (SBButton new
 				color: (Color r: 0.0 g: 1 b: 0.0);
-				icon: SBIcon iconPlus shortcut: nil do: [self promptAddPayload]);
+				icon: SBIcon iconPlus shortcut: nil do: [self promptAddPayload]; balloonText: 'Add Data');
 			addMorphBack: (showExamples ifTrue: [self showExamplesButton] ifFalse: [self hideExamplesButton])));
 		listDirection: #topToBottom;
 		addMorphBack: SBRow new;
@@ -170,6 +176,20 @@ SBJsEmbeddedRequestTool >> initCommons [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> initPost [
+	self
+		initCommons;
+		addParamSection: nil.
+
+	"Init the body section and add it"
+	self	addMorphBack: SBRow new.
+	bodyMorph := self submorphs fourth.
+	self addBodySection: data
+	
+	
+]
+
+{ #category : #'as yet unclassified' }
 SBJsEmbeddedRequestTool >> initialize [
 	super initialize.
 	showExamples := false.
@@ -178,12 +198,6 @@ SBJsEmbeddedRequestTool >> initialize [
 { #category : #'as yet unclassified' }
 SBJsEmbeddedRequestTool >> promptAddPayload [
 	self subclassResponsibility
-]
-
-{ #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> recreateFromMorphs [
-	super recreateFromMorphs.
-	self addMorphBack: (SBJavascript parse: ((sourceString) sourceString))
 ]
 
 { #category : #'as yet unclassified' }
@@ -215,7 +229,7 @@ SBJsEmbeddedRequestTool >> showExamplesButton [
 	^(SBButton new icon: SBIcon iconEyeSlash shortcut: nil do: [
 				showExamples := false.
 				(((self submorphs first) submorphs fourth) submorphs second) replaceBy: self hideExamplesButton.
-				self recreateFromMorphs])
+				self recreateFromMorphs]; balloonText: 'Hide Examples')
 ]
 
 { #category : #'as yet unclassified' }

@@ -27,20 +27,6 @@ SBJsEmbeddedExpressPost >> addExampleSection [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedExpressPost >> initPost [
-	self
-		initCommons;
-		addParamSection: nil.
-
-	"Init the body section and add it"
-	self	addMorphBack: SBRow new.
-	bodyMorph := self submorphs fourth.
-	self addBodySection: data
-	
-	
-]
-
-{ #category : #'as yet unclassified' }
 SBJsEmbeddedExpressPost >> promptAddPayload [	
 	| fetch index |
 	fetch := (self owner owner owner).

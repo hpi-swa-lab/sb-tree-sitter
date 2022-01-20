@@ -14,6 +14,17 @@ SBJsDemoJSON class >> matchJs: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsDemoJSON >> pairs [
+	| map |
+	map := Dictionary new.
+	(1 to: self childSandblocks size) do: [:n| | key value |
+		key := (self childSandblocks at: n) childSandblocks first childSandblocks first contents.
+		value := (self childSandblocks at: n) childSandblocks second childSandblocks first contents.
+		map at: key put: value].
+	^map
+]
+
+{ #category : #'as yet unclassified' }
 SBJsDemoJSON >> pairs: aCollection [
 
 	self

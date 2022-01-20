@@ -1,5 +1,5 @@
 "
-Base class to replace routes in express.js applications with the HTTP request tool.
+Base class to replace in JavaScript source code fetch calls.
 "
 Class {
 	#name : #SBJsEmbeddedExpress,
@@ -44,6 +44,12 @@ SBJsEmbeddedExpress class >> matchJs: aDictionary do: aBlock [
 { #category : #'as yet unclassified' }
 SBJsEmbeddedExpress >> promptAddPayload [
 	self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedExpress >> recreateFromMorphs [
+	super recreateFromMorphs.
+	self addMorphBack: (SBJavascript parse: ((sourceString) sourceString))
 ]
 
 { #category : #'as yet unclassified' }
