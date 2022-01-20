@@ -41,7 +41,6 @@ SBJsEmbeddedFetch class >> matchJs: aDictionary do: aBlock [
 			['headers'] -> [headers := SBJsEmbeddedFetch extractHeaders: value]
 		} otherwise: nil.
 		].
-	self halt.
 	
 	method
 		caseOf: {
@@ -57,4 +56,9 @@ SBJsEmbeddedFetch class >> matchJs: aDictionary do: aBlock [
 					url: 'url' headers: headers data: nil;
 					source: nil)]}
 		otherwise: [^ nil]
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedFetch >> promptAddPayload [
+	self subclassResponsibility
 ]

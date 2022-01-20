@@ -24,7 +24,26 @@ SBJsEmbeddedFetchPost >> addExampleSection [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsEmbeddedFetchPost >> promptAddPayload [	
+	| fetch index |
+	fetch := (self owner owner owner).
+	index := UIManager default chooseFrom: (self values).
+	index > 0
+		ifTrue: [
+			index caseOf: {
+				[ 1 ] -> [ self addHeaderAction ].
+				[ 2 ] -> [ self addParamAction ].
+				[ 3 ] -> [ self addBodySection: '...' ]
+			}].
+]
+
+{ #category : #'as yet unclassified' }
 SBJsEmbeddedFetchPost >> url: aString headers: aHeaders data: aData [
 	"Constructs a lean designed SBJsFetch object"
 	super url: aString method: #post headers: aHeaders data: aData
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedFetchPost >> values [
+	^ #(Header Param Body)
 ]

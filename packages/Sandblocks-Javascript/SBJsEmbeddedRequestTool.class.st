@@ -201,12 +201,6 @@ SBJsEmbeddedRequestTool >> promptAddPayload [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> recreateFromVariables: aHeaders params: aParams body: aBody [
-	super recreateFromVariables: aHeaders params: aParams body: aBody.
-	self addMorphBack: (SBJavascript parse: ((sourceString) sourceString))
-]
-
-{ #category : #'as yet unclassified' }
 SBJsEmbeddedRequestTool >> send [
 
 	| paramsString |

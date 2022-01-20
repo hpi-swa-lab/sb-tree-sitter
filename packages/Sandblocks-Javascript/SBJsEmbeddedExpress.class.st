@@ -53,6 +53,12 @@ SBJsEmbeddedExpress >> recreateFromMorphs [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsEmbeddedExpress >> recreateFromVariables: aHeaders params: aParams body: aBody [
+	super recreateFromVariables: aHeaders params: aParams body: aBody.
+	self addMorphBack: (SBJavascript parse: ((sourceString) sourceString))
+]
+
+{ #category : #'as yet unclassified' }
 SBJsEmbeddedExpress >> values [
 	^ self subclassResponsibility
 ]
