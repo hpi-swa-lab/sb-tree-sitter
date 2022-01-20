@@ -1,11 +1,11 @@
 Class {
-	#name : #SBJsFetchGetExample,
-	#superclass : #SBJsFetchExample,
+	#name : #SBJsRequestToolGetExample,
+	#superclass : #SBJsRequestToolExample,
 	#category : #'Sandblocks-Javascript'
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchGetExample >> code: aCode url: aUrl headers: aHeaders params: aParams [
+SBJsRequestToolGetExample >> code: aCode url: aUrl headers: aHeaders params: aParams [
 
 	| msg |
 	method := #get.
@@ -20,13 +20,13 @@ SBJsFetchGetExample >> code: aCode url: aUrl headers: aHeaders params: aParams [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchGetExample >> initialize [
+SBJsRequestToolGetExample >> initialize [
 	super initialize.
 	method := #get.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchGetExample >> promptChangeValue [
+SBJsRequestToolGetExample >> promptChangeValue [
 	| examples fetch index |
 	fetch := (self owner owner owner).
 	examples :=  ((fetch Examples at: (url, method)) at: code).

@@ -1,17 +1,17 @@
 Class {
-	#name : #SBJsFetchMethodSelect,
+	#name : #SBJsRequestToolMethodSelect,
 	#superclass : #SBComboBox,
 	#category : #'Sandblocks-Javascript'
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchMethodSelect >> display: anObject [
+SBJsRequestToolMethodSelect >> display: anObject [
 
 	^ anObject asString asUppercase
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchMethodSelect >> initialize [
+SBJsRequestToolMethodSelect >> initialize [
 
 	super initialize.
 	
@@ -19,7 +19,7 @@ SBJsFetchMethodSelect >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchMethodSelect >> promptChangeValue [
+SBJsRequestToolMethodSelect >> promptChangeValue [
 
 	| index |
 	index := UIManager default chooseFrom: self values.
@@ -33,7 +33,7 @@ SBJsFetchMethodSelect >> promptChangeValue [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchMethodSelect >> values [
+SBJsRequestToolMethodSelect >> values [
 
 	^ #(#get #put #post #delete #patch #head #options #trace #connect)
 ]

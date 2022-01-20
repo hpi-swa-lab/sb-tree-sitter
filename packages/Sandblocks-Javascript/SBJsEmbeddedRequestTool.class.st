@@ -29,7 +29,7 @@ SBJsEmbeddedRequestTool >> addBodySection: aBody [
 						cellGap: cellGapConstant;
 						addMorphBack: (SBRow new
 							cellGap: 0;
-							addMorphBack: (SBJsFetchFieldTextBubble new
+							addMorphBack: (SBJsRequestToolFieldTextBubble new
 								cellGap: 0;
 								placeholderText: 'key');
 							addMorphBack: (SBTextBubble new
@@ -38,7 +38,7 @@ SBJsEmbeddedRequestTool >> addBodySection: aBody [
 			ifTrue: [
 				bodyMorph
 					addMorphBack: (SBStringMorph new contents: 'Body');
-					addMorphBack: (SBJsFetchBodyTextBubble new contents: aBody)].
+					addMorphBack: (SBJsRequestToolBodyTextBubble new contents: aBody)].
 		
 		
 		].

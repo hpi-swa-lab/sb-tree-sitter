@@ -1,6 +1,6 @@
 Class {
-	#name : #SBJsFetchPostExample,
-	#superclass : #SBJsFetchExample,
+	#name : #SBJsRequestToolPostExample,
+	#superclass : #SBJsRequestToolExample,
 	#instVars : [
 		'body'
 	],
@@ -11,12 +11,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchPostExample >> body [
+SBJsRequestToolPostExample >> body [
 	^body
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchPostExample >> code: aCode url: aUrl headers: aHeaders body: aBody params: aParams [
+SBJsRequestToolPostExample >> code: aCode url: aUrl headers: aHeaders body: aBody params: aParams [
 	| msg |
 	method := #post.
 	code := aCode.
@@ -31,12 +31,12 @@ SBJsFetchPostExample >> code: aCode url: aUrl headers: aHeaders body: aBody para
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchPostExample >> initialize [
+SBJsRequestToolPostExample >> initialize [
 	super initialize.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchPostExample >> promptChangeValue [
+SBJsRequestToolPostExample >> promptChangeValue [
 	| examples fetch index |
 	fetch := (self owner owner owner).
 	examples :=  ((fetch Examples at: (url, method)) at: code).

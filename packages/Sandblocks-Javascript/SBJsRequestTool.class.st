@@ -50,7 +50,7 @@ SBJsRequestTool >> addBodySection: aBody [
 					cellGap: cellGapConstant;
 					addMorphBack: (SBRow new
 						cellGap: 0;
-						addMorphBack: (SBJsFetchFieldTextBubble new
+						addMorphBack: (SBJsRequestToolFieldTextBubble new
 							cellGap: 0;
 							placeholderText: 'key');
 						addMorphBack: (SBTextBubble new
@@ -59,7 +59,7 @@ SBJsRequestTool >> addBodySection: aBody [
 		ifTrue: [
 			bodyMorph
 				addMorphBack: (SBStringMorph new contents: 'Body');
-				addMorphBack: (SBJsFetchBodyTextBubble new contents: aBody)].
+				addMorphBack: (SBJsRequestToolBodyTextBubble new contents: aBody)].
 	
 	key := url, (method asString).
 	Examples at: key ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]]].
@@ -87,7 +87,7 @@ SBJsRequestTool >> addFieldAction [
 	self submorphs sixth
 		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsFetchFieldTextBubble new
+			addMorphBack: (SBJsRequestToolFieldTextBubble new
 				placeholderText: 'key');
 			addMorphBack: (SBTextBubble new
 				placeholderText: 'value');
@@ -99,7 +99,7 @@ SBJsRequestTool >> addFieldAction [
 SBJsRequestTool >> addHeaderAction [
 	headerMorph
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsFetchHeaderTextBubble new
+			addMorphBack: (SBJsRequestToolHeaderTextBubble new
 				placeholderText: 'key');
 			addMorphBack: (SBTextBubble new
 				placeholderText: 'value');
@@ -115,7 +115,7 @@ SBJsRequestTool >> addHeaderAction: key value: value [
 	
 	headerMorph
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsFetchHeaderTextBubble new
+			addMorphBack: (SBJsRequestToolHeaderTextBubble new
 				contents: key);
 			addMorphBack: valueTextBubble;
 			 cellGap: 0);
@@ -129,7 +129,7 @@ SBJsRequestTool >> addParamAction [
 	paramMorph
 		submorphs;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsFetchParamTextBubble new
+			addMorphBack: (SBJsRequestToolParamTextBubble new
 				placeholderText: 'key');
 			addMorphBack: (SBTextBubble new
 				placeholderText: 'value');
@@ -143,7 +143,7 @@ SBJsRequestTool >> addParamAction: key value: value [
 	paramMorph
 		submorphs;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsFetchParamTextBubble new
+			addMorphBack: (SBJsRequestToolParamTextBubble new
 				contents: key);
 			addMorphBack: (SBTextBubble new
 				contents: value);
@@ -191,7 +191,7 @@ SBJsRequestTool >> addRequestToExampleMap: response [
 	"Create the example"
 	method caseOf: {
 		[#get] -> [
-			example := SBJsFetchGetExample new
+			example := SBJsRequestToolGetExample new
 				icon: SBIcon iconSearch
 				label: response code asString
 				do: [example promptChangeValue].
@@ -201,7 +201,7 @@ SBJsRequestTool >> addRequestToExampleMap: response [
 				headers: headers deepCopy
 				params: params deepCopy].
 		[#post] -> [
-			example := SBJsFetchPostExample new
+			example := SBJsRequestToolPostExample new
 				icon: SBIcon iconSearch
 				label: response code asString
 				do: [example promptChangeValue].
@@ -306,7 +306,7 @@ SBJsRequestTool >> initCommons [
 		addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
 			addMorphBack: (SBStringMorph new contents: 'Method');
-			addMorphBack: (SBJsFetchMethodSelect new object: method));
+			addMorphBack: (SBJsRequestToolMethodSelect new object: method));
 		addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
 			addMorphBack: (SBStringMorph new contents: 'Headers');

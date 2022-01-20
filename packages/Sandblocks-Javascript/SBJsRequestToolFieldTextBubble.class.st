@@ -1,16 +1,16 @@
 Class {
-	#name : #SBJsFetchFieldTextBubble,
-	#superclass : #SBJsFetchBodyTextBubble,
+	#name : #SBJsRequestToolFieldTextBubble,
+	#superclass : #SBJsRequestToolBodyTextBubble,
 	#category : #'Sandblocks-Javascript'
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchFieldTextBubble >> initialize [
+SBJsRequestToolFieldTextBubble >> initialize [
 	super initialize.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchFieldTextBubble >> promptChangeValue [
+SBJsRequestToolFieldTextBubble >> promptChangeValue [
 
 	| index key values placeholderTxt contentType |
 	index := UIManager default chooseFrom: self values.
@@ -33,7 +33,7 @@ SBJsFetchFieldTextBubble >> promptChangeValue [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchFieldTextBubble >> values [
+SBJsRequestToolFieldTextBubble >> values [
 
 	^ super values.
 ]

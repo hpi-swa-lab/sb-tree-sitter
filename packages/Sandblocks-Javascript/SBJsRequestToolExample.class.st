@@ -1,5 +1,5 @@
 Class {
-	#name : #SBJsFetchExample,
+	#name : #SBJsRequestToolExample,
 	#superclass : #SBButton,
 	#instVars : [
 		'code',
@@ -13,17 +13,17 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchExample >> code [
+SBJsRequestToolExample >> code [
  ^code.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchExample >> headers [
+SBJsRequestToolExample >> headers [
  	^headerMap.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchExample >> headersToString [
+SBJsRequestToolExample >> headersToString [
 	| out |
 	out := String new.
 	headerMap keysDo: [: key | out := out, key, ' : ', (headerMap at: key), ' '].
@@ -31,17 +31,17 @@ SBJsFetchExample >> headersToString [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchExample >> initialize [
+SBJsRequestToolExample >> initialize [
 	super initialize.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchExample >> params [
+SBJsRequestToolExample >> params [
 	^params.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchExample >> paramsToString [
+SBJsRequestToolExample >> paramsToString [
 	| out |
 	out := String new.
 	params keysDo: [:key |out := out,( (params at: key) key), ' : ', ((params at: key) value), ' '].
@@ -49,11 +49,11 @@ SBJsFetchExample >> paramsToString [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchExample >> promptChangeValue [
+SBJsRequestToolExample >> promptChangeValue [
 	self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchExample >> url [
+SBJsRequestToolExample >> url [
  ^url.
 ]

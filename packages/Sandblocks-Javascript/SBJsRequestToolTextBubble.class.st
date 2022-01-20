@@ -1,16 +1,16 @@
 Class {
-	#name : #SBJsFetchTextBubble,
+	#name : #SBJsRequestToolTextBubble,
 	#superclass : #SBTextBubble,
 	#category : #'Sandblocks-Javascript'
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchTextBubble >> doubleClick: evt [
+SBJsRequestToolTextBubble >> doubleClick: evt [
 
 	self promptChangeValue
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchTextBubble >> initialize [
+SBJsRequestToolTextBubble >> initialize [
 	super initialize
 ]

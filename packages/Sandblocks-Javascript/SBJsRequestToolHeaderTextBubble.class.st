@@ -1,6 +1,6 @@
 Class {
-	#name : #SBJsFetchHeaderTextBubble,
-	#superclass : #SBJsFetchTextBubble,
+	#name : #SBJsRequestToolHeaderTextBubble,
+	#superclass : #SBJsRequestToolTextBubble,
 	#classVars : [
 		'AllHeaders'
 	],
@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchHeaderTextBubble >> collectHeaders [
+SBJsRequestToolHeaderTextBubble >> collectHeaders [
 
 	| client resp tmpIndex xmlDoc |
 	AllHeaders := OrderedCollection new.
@@ -27,12 +27,12 @@ SBJsFetchHeaderTextBubble >> collectHeaders [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchHeaderTextBubble >> initialize [
+SBJsRequestToolHeaderTextBubble >> initialize [
 	super initialize.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchHeaderTextBubble >> promptChangeValue [
+SBJsRequestToolHeaderTextBubble >> promptChangeValue [
 
 	| index key headersCopy fetch |
 	index := UIManager default chooseFrom: self values.
@@ -53,6 +53,6 @@ SBJsFetchHeaderTextBubble >> promptChangeValue [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchHeaderTextBubble >> values [
+SBJsRequestToolHeaderTextBubble >> values [
 	^ AllHeaders ifNil: [self collectHeaders].
 ]
