@@ -1,11 +1,14 @@
+"
+Replaces get routes in express.js applications.
+"
 Class {
-	#name : #SBJsFetchSmallGet,
-	#superclass : #SBJsFetchSmall,
+	#name : #SBJsEmbeddedExpressGet,
+	#superclass : #SBJsEmbeddedExpress,
 	#category : #'Sandblocks-Javascript'
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmallGet >> promptAddPayload [	
+SBJsEmbeddedExpressGet >> promptAddPayload [	
 	| fetch index |
 	fetch := (self owner owner owner).
 	index := UIManager default chooseFrom: (self values).
@@ -18,12 +21,12 @@ SBJsFetchSmallGet >> promptAddPayload [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmallGet >> url: aString headers: aHeaders data: aData [
+SBJsEmbeddedExpressGet >> url: aString headers: aHeaders data: aData [
 	"Constructs a lean designed SBJsFetch object"
 	super url: aString method: #get headers: aHeaders data: aData
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmallGet >> values [
+SBJsEmbeddedExpressGet >> values [
 	^ #(Header Param)
 ]

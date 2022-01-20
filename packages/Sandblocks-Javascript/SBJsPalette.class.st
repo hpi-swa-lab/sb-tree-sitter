@@ -11,27 +11,27 @@ SBJsPalette class >> buildOn: aBuilder [
 	
 	aBuilder addSectionHeader: 'Fetch'.
 	
-	aBuilder addBlock: 'POST' as: (SBJsFetch new
+	aBuilder addBlock: 'POST' as: (SBJsRequestTool new
 		factory: SBJavascript new;
 		url: 'http://localhost:8080'
 			method: #post
 			headers: (Dictionary newFrom: {'Content-Type' -> 'application/json'})
 			data: '{"key" : "value"}').
 			
-	aBuilder addBlock: 'GET' as: (SBJsFetch new
+	aBuilder addBlock: 'GET' as: (SBJsRequestTool new
 		factory: SBJavascript new;
 		url: 'http://localhost:8080/'
 			method: #get
 			headers: (Dictionary newFrom: {'Content-Type' -> 'text/html'})
 			data: '{"key" : "value"}').
 			
-	aBuilder addBlock: 'Small GET' as: (SBJsFetchSmallGet new
+	aBuilder addBlock: 'Small GET' as: (SBJsEmbeddedExpressGet new
 		factory: SBJavascript new;
 			url: 'http://localhost:8080/user'
 			headers: (Dictionary newFrom: {'Content-Type' -> 'text/plain'})
 			data: nil).
 			
-	aBuilder addBlock: 'Small POST' as: (SBJsFetchSmallPost new
+	aBuilder addBlock: 'Small POST' as: (SBJsEmbeddedExpressPost new
 		factory: SBJavascript new;
 			url: 'http://localhost:8080/example'
 			headers: (Dictionary newFrom: {'Content-Type' -> 'text/plain'})

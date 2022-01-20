@@ -1,32 +1,73 @@
+"
+Base class which replaces source code with a tool to perform HTTP requests.
+"
 Class {
-	#name : #SBJsFetchSmall,
-	#superclass : #SBJsFetch,
+	#name : #SBJsEmbeddedRequestTool,
+	#superclass : #SBJsRequestTool,
 	#instVars : [
 		'showExamples',
-		'showExamplesButtonTxt'
+		'showExamplesButtonTxt',
+		'sourceString',
+		'sourceMorph'
 	],
 	#category : #'Sandblocks-Javascript'
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> addExampleSection [
+SBJsEmbeddedRequestTool >> addBodySection: aBody [
 
+	| tmpUrl |
+	self addMorphBack: SBRow new.
+	bodyMorph := self submorphs fourth.
+	aBody ifNotNil: [
+		isRawData
+			ifFalse: [
+				bodyMorph
+					addMorphBack: (SBStringMorph new contents: 'Body');
+					addMorphBack: (SBButton new icon: SBIcon iconPlus label: 'Field' do: [self addFieldAction]);
+					addMorphBack: (SBRow new
+						cellGap: cellGapConstant;
+						addMorphBack: (SBRow new
+							cellGap: 0;
+							addMorphBack: (SBJsFetchFieldTextBubble new
+								cellGap: 0;
+								placeholderText: 'key');
+							addMorphBack: (SBTextBubble new
+								cellGap: 0;
+								placeholderText: 'value')))]
+			ifTrue: [
+				bodyMorph
+					addMorphBack: (SBStringMorph new contents: 'Body');
+					addMorphBack: (SBJsFetchBodyTextBubble new contents: aBody)].
+		
+		
+		].
+"TODO, improve tmpUrl workaround"
+tmpUrl := 'http://localhost:8080', url.
+Examples at: tmpUrl, method ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]].
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> addExampleSection [
+	
 	showExamples ifTrue: [
-		 | map |
+		 | map tmpUrl |
 		
 			self addMorphBack: (SBRow new
 				cellGap: cellGapConstant;
 				addMorphBack: (SBStringMorph new contents: 'Examples');
 				addMorphBack: (SBRow new cellGap: cellGapConstant)).
 				
-			method = #post ifTrue: [exampleMorph := self submorphs seventh].
-			method = #get ifTrue: [exampleMorph := self submorphs sixth].
-			map := Examples at: url, method asString ifAbsent: [].
+			exampleMorph := self submorphs fourth.
+			"TODO, improve tmpUrl workaround"
+			tmpUrl := 'http://localhost:8080', url.
+			
+			map := Examples at: tmpUrl, method asString ifAbsent: [].
 			map ifNotNil: [ map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> addHeaderAction [
+SBJsEmbeddedRequestTool >> addHeaderAction [
 	(headerMorph submorphs size) = 0 ifTrue: [
 		headerMorph
 			addMorphBack: (SBStringMorph new contents: 'Headers')].
@@ -35,7 +76,7 @@ SBJsFetchSmall >> addHeaderAction [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> addHeaderAction: key value: value [
+SBJsEmbeddedRequestTool >> addHeaderAction: key value: value [
 
 	(headerMorph submorphs size) = 0 ifTrue: [
 			headerMorph
@@ -45,7 +86,7 @@ SBJsFetchSmall >> addHeaderAction: key value: value [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> addParamAction [
+SBJsEmbeddedRequestTool >> addParamAction [
 
 	(paramMorph submorphs size) = 0 ifTrue: [
 		paramMorph
@@ -56,7 +97,7 @@ SBJsFetchSmall >> addParamAction [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> addParamAction: key value: value [
+SBJsEmbeddedRequestTool >> addParamAction: key value: value [
 
 	(paramMorph submorphs size) = 0 ifTrue: [
 		paramMorph
@@ -66,16 +107,9 @@ SBJsFetchSmall >> addParamAction: key value: value [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> addParamSection: aParams [
+SBJsEmbeddedRequestTool >> addParamSection: aParams [
 
-	| s |
-	self
-		addMorphBack: (SBRow new
-			cellGap: cellGapConstant);
-		addMorphBack: (SBRow new
-			cellGap: cellGapConstant).
 	
-	paramMorph := self submorphs fifth.
 	params keysDo: [:key | self addParamAction: ((params at: key) key) asString  value:  ((params at: key) value) asString].
 	
 	"Whats have I done here :)"
@@ -86,15 +120,16 @@ SBJsFetchSmall >> addParamSection: aParams [
 				v := (params at: key) submorphs second.
 				self addParamAction: k contents value: v contents]]}.
 
-	method = #get ifTrue: [
-		s := url, method.
-		Examples at: s
+	method = #get ifTrue: [ | tmpUrl |
+		"TODO, improve tmpUrl workaround"
+		tmpUrl := 'http://localhost:8080', url, method.
+		Examples at: tmpUrl
 			ifPresent: [: e |
 			e size > 0 ifTrue: [self addExampleSection]]].
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> hideExamplesButton [
+SBJsEmbeddedRequestTool >> hideExamplesButton [
 	^(SBButton new icon: SBIcon iconEye shortcut: nil do: [
 				showExamples := true.
 				(((self submorphs first) submorphs fourth) submorphs second) replaceBy: self showExamplesButton.
@@ -102,7 +137,7 @@ SBJsFetchSmall >> hideExamplesButton [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> initCommons [
+SBJsEmbeddedRequestTool >> initCommons [
 	"Setup shared UI elements"
 
 	self
@@ -121,31 +156,62 @@ SBJsFetchSmall >> initCommons [
 				color: (Color r: 0.0 g: 1 b: 0.0);
 				icon: SBIcon iconPlus shortcut: nil do: [self promptAddPayload]);
 			addMorphBack: (showExamples ifTrue: [self showExamplesButton] ifFalse: [self hideExamplesButton])));
-			listDirection: #topToBottom;
-			addMorphBack: SBRow new;
-			addMorphBack: SBRow new.
+		listDirection: #topToBottom;
+		addMorphBack: SBRow new;
+		addMorphBack: SBRow new.
 			
 	
 	"Initialize the the morphs centrally for easier acces"
 	urlMorph := self submorphs first.
 	headerMorph := self submorphs second.
+	paramMorph := self submorphs third.
 	
 	headers ifNotNil: [headers keysDo: [:key | self addHeaderAction: key asString value: (headers at: key) asString]]
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> initialize [
+SBJsEmbeddedRequestTool >> initialize [
 	super initialize.
 	showExamples := false.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> promptAddPayload [
+SBJsEmbeddedRequestTool >> promptAddPayload [
 	self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> showExamplesButton [
+SBJsEmbeddedRequestTool >> recreateFromMorphs [
+	super recreateFromMorphs.
+	self addMorphBack: (SBJavascript parse: ((sourceString) sourceString))
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> recreateFromVariables: aHeaders params: aParams body: aBody [
+	super recreateFromVariables: aHeaders params: aParams body: aBody.
+	self addMorphBack: (SBJavascript parse: ((sourceString) sourceString))
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> send [
+
+	| paramsString |
+	
+	self updatePayloadInObjectInstance.
+	paramsString := self collectParamsString.
+	url := 'http://localhost:8080', url.
+
+	method = #get ifTrue: [self performGetRequest: url asString, paramsString].
+	method = #post ifTrue: [
+		isRawData 
+			ifTrue: [self performPostRequest: data url: url asString, paramsString]
+			ifFalse: ["TODO: collect fields and perform request"]
+	
+	"TODO: implement other methods"]
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> showExamplesButton [
 	^(SBButton new icon: SBIcon iconEyeSlash shortcut: nil do: [
 				showExamples := false.
 				(((self submorphs first) submorphs fourth) submorphs second) replaceBy: self hideExamplesButton.
@@ -153,7 +219,32 @@ SBJsFetchSmall >> showExamplesButton [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> updateHeaders: aHeadersMorph [
+SBJsEmbeddedRequestTool >> source [
+	^sourceString.
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> source: aSourceString [
+	sourceString := aSourceString.
+	
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> sourceMorph [
+"TODO"
+	^ sourceMorph.
+	
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> sourceMorph: aSourceMorph [
+"TODO"
+	sourceMorph := aSourceMorph.
+	
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> updateHeaders: aHeadersMorph [
 "Loop through the headers morphs and update the headers map"
 	| key value index |
 	index := 0.
@@ -166,7 +257,7 @@ SBJsFetchSmall >> updateHeaders: aHeadersMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> updateParams: aParamsMorph [
+SBJsEmbeddedRequestTool >> updateParams: aParamsMorph [
 "Loop through the params morphs and update the param map"
 	| key value index |
 	index := 0.
@@ -179,6 +270,6 @@ SBJsFetchSmall >> updateParams: aParamsMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchSmall >> values [
+SBJsEmbeddedRequestTool >> values [
 	^ self subclassResponsibility
 ]
