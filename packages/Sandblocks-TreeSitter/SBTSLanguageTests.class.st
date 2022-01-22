@@ -121,13 +121,14 @@ SBTSLanguageTests >> testJavascriptToString [
 	source := '<h2>Hi</h2>'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
-	source := 'class A extends B{}'.
+	source := 'class A extends B
+{}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
-	source := 'class Car extends React.Component{
-example={};
-render(){
-a
+	source := 'class Car extends React.Component
+{example={};
+render()
+{a
 return<h2>Hi</h2>}}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
@@ -233,6 +234,14 @@ SBTSLanguageTests >> testPythonIndent [
 	source := 'if a:
 	if b:
 		pass'.
+	self assert: source equals: (SBPython parse: source) sourceString.
+	
+	source := 'if a:
+	print("a")
+	print("b")
+else:
+	print("c")
+	print("d")'.
 	self assert: source equals: (SBPython parse: source) sourceString
 ]
 

@@ -5141,6 +5141,14 @@ SBPython >> configure [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	SBToggledCode comment: '' active: 1 do: {
+		[(((aBlock isKindOf: SBInlineBlockLabel) and: [aBlock label = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair']]) ifTrue: [^ true]]}.
+	^ #('else_clause') includes: anotherBlock firstVisibleType
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> indentMatch: aBlock [
 
 	^ aBlock type = 'block'

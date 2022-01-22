@@ -299,6 +299,16 @@ SBInlineBlockSymbol >> printTitleOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> suggestions [
+
+	self currentTextMorph ifNil: [^ self].
+	
+	^ (self
+		sortedSuggestions: (Array streamContents: [:stream | self containingArtefact allBlocksDo: [:block | (block isInlineBlock and: [block type = self type and: [block ~= self]]) ifTrue: [stream nextPut: block contents]]])
+		for: self contents) collect: [:text | SBSuggestionItem selector: text label: self type]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> takeParsedFrom: aCursor [
 
 	^ (factory type: aCursor type compatibleWith: self type)

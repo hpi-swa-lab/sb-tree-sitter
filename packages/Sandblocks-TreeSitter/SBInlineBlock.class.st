@@ -838,7 +838,11 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber
 		ifNil: [''].
 	suffixMatchesWordRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory wordRule matchesStream: (string readStream position: start - 1)]]].
 	
-	aCollection do: [:element | | string |
+	SBToggledCode
+		comment: ''
+		active: 0
+		do: {[(self isKindOf: SBInlineBlockSequence) ifTrue: [self halt]]}.
+	aCollection withIndexDo: [:element :index | | string |
 		string := String streamContents: [:stream |
 			element writeSourceOn: stream indent: ((self factory indentMatch: element)
 				ifTrue: [aNumber + 1]
@@ -846,8 +850,14 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber
 		(self isKindOf: SBInlineBlockRepeat)
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
-				(((self factory hardLineBreakMatcher value: self) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [self containingSymbol parentSandblock isInlineBlock or: [first not]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
-			ifFalse: [(string notEmpty and: [lastMatchedWordRule and: [suffixMatchesWordRule value: lastString, string first]]) ifTrue: [aStream space]].
+				((index > 1 and: [(self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [self containingSymbol parentSandblock isInlineBlock or: [first not]]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
+			ifFalse: [
+				((self isKindOf: SBInlineBlockSequence) and: [index > 1 and: [self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element]])
+					ifTrue: [
+						aStream crtab: ((self factory indentMatch: element)
+							ifTrue: [aNumber + 1]
+							ifFalse: [aNumber])]
+					ifFalse: [(string notEmpty and: [lastMatchedWordRule and: [suffixMatchesWordRule value: lastString, string first]]) ifTrue: [aStream space]]].
 		string ifNotEmpty: [
 			lastMatchedWordRule := suffixMatchesWordRule value: string.
 			lastString := string.
