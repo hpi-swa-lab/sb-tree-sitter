@@ -15,16 +15,15 @@ SBTreeSitter class >> moduleName [
 ]
 
 { #category : #'as yet unclassified' }
-SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
+SBTreeSitter >> buildTreeFrom: aCursor [
 
-	| field fallback type fieldStream block template root |
+	| field type fieldStream block template root |
 	type := aCursor type.
 	field := aCursor currentFieldName.
-	fallback := {field. aCursor text}.
 	
 	template := aCursor isNamed
-		ifTrue: [aCursor factory getTemplate: type ifAbsent: [^ aBlock value: aCursor text]]
-		ifFalse: [^ aBlock value: aCursor text].
+		ifTrue: [aCursor factory getTemplate: type ifAbsent: [^ aCursor text]]
+		ifFalse: [^ aCursor text].
 	
 	template = 'ALIAS'
 		ifTrue: [
@@ -35,14 +34,14 @@ SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 	fieldStream := ((Array streamContents: [:stream |
 		aCursor gotoFirstChild ifTrue: [ | first |
 			first := aCursor node.
-			[self buildTreeFrom: aCursor do: [:b | stream nextPut: {aCursor currentFieldName. b}]] doWhileFalse: [ | gap atEnd |
+			[stream nextPut: {aCursor currentFieldName. self buildTreeFrom: aCursor}] doWhileFalse: [ | gap atEnd |
 				atEnd := aCursor gotoNextSibling.
 				(atEnd not and: [aCursor factory noteUncapturedText includes: type]) ifTrue: [
 					gap := aCursor textBetween: first and: aCursor node.
 					gap size > 0 ifTrue: [stream nextPut: {#sp. gap}].
 					first := aCursor node].
 				atEnd].
-			aCursor gotoParent]]) ifEmpty: [{fallback}]) readStream.
+			aCursor gotoParent]]) ifEmpty: [aCursor text ifNotEmpty: [{{field. aCursor text}}] ifEmpty: [#()]]) readStream.
 	
 	block := SBTSParseExplore new
 		explore: fieldStream
@@ -50,7 +49,7 @@ SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 		factory: aCursor factory.
 	self assert: block notNil description: 'failed to build ', type.
 	template = 'ALIAS' ifTrue: [block alias: type].
-	^ aBlock value: block
+	^ block
 ]
 
 { #category : #'ffi languages' }
@@ -277,7 +276,7 @@ SBTreeSitter >> nodeType: aNode [
 SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 
 	^ self parseAsCursor: aString language: aSymbol do: [:cursor |
-		(self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory) do: [:b | b])
+		(self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory))
 			hResizing: #rigid;
 			attachDecorator: SBResizableDecorator new;
 			attachDecorator: SBForceMoveDecorator new;

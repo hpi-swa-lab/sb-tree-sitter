@@ -209,6 +209,12 @@ SBTSLanguageTests >> testPythonDeleteStatement [
 ]
 
 { #category : #'testing - parse' }
+SBTSLanguageTests >> testPythonEmptyModule [
+
+	SBPython parse: ''
+]
+
+{ #category : #'testing - parse' }
 SBTSLanguageTests >> testPythonFoundDelimiters [
 
 	| lang |
