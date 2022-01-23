@@ -196,13 +196,13 @@ SBTSQueryTests >> testMatchPredicate [
 	self assert: (SBTSQuery new
 		execute: '(identifier) @a (#match? @a "a")'
 		against: (SBInlineBlockSymbol new
-			type: 'identifier' factory: factory block: (SBInlineBlockText new contents: 'a');
+			type: 'identifier' factory: factory block: (SBInlineBlockText new regexString: 'a'; contents: 'a');
 			yourself)
 		capturesDo: [:c | ]).
 	self deny: (SBTSQuery new
 		execute: '(identifier) @a (#match? @a "a")'
 		against: (SBInlineBlockSymbol new
-			type: 'identifier' factory: factory block: (SBInlineBlockText new contents: 'b');
+			type: 'identifier' factory: factory block: (SBInlineBlockText new regexString: 'b'; contents: 'b');
 			yourself)
 		capturesDo: [:c | ])
 ]
@@ -315,11 +315,11 @@ SBTSQueryTests >> testMatchWithStringCompare [
 
 	self assert: (SBTSQuery new
 		execute: '(identifier) ="id" @a'
-		against: ((SBInlineBlockSymbol new type: 'identifier' factory: nil) addMorphBack: (SBInlineBlockText new contents: 'id'))
+		against: ((SBInlineBlockSymbol new type: 'identifier' factory: nil) addMorphBack: (SBInlineBlockText new regexString: 'id'; contents: 'id'))
 		capturesDo: [:c | self assert: 'id' equals: (c at: 'a') contents]).
 	self deny: (SBTSQuery new
 		execute: '(identifier) ="id" @a'
-		against: ((SBInlineBlockSymbol new type: 'identifier' factory: nil) addMorphBack: (SBInlineBlockText new contents: 'ida'))
+		against: ((SBInlineBlockSymbol new type: 'identifier' factory: nil) addMorphBack: (SBInlineBlockText new regexString: 'ida'; contents: 'ida'))
 		capturesDo: [:c | self assert: c isEmpty])
 ]
 

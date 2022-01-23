@@ -5143,8 +5143,10 @@ SBPython >> configure [
 { #category : #'as yet unclassified' }
 SBPython >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 
-	SBToggledCode comment: '' active: 1 do: {
-		[(((aBlock isKindOf: SBInlineBlockLabel) and: [aBlock label = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair']]) ifTrue: [^ true]]}.
+	((aBlock isKindOf: SBInlineBlockRepeat) and: [aBlock hasSubmorphs and: [aBlock submorphs first type = 'decorator']]) ifTrue: [^ true].
+	aBlock type = 'decorator' ifTrue: [^ true].
+	
+	(((aBlock isKindOf: SBInlineBlockLabel) and: [aBlock label = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair']]) ifTrue: [^ true].
 	^ #('else_clause') includes: anotherBlock firstVisibleType
 ]
 
@@ -5215,4 +5217,10 @@ SBPython >> preprocessGrammar [
 	
 	(self grammar rules at: '_suite') members: {(self grammar rules at: '_suite') members second}.
 	self ignoreExternals: #('_indent' '_dedent' '_newline' '_string_start' '_string_end')
+]
+
+{ #category : #'as yet unclassified' }
+SBPython >> separatorRule [
+
+	^ ((self buildRegexString: (grammar rules at: grammar word)), '|\d') asRegex
 ]

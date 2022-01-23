@@ -1127,6 +1127,12 @@ SBMetaBlockFactory >> runtime [
 	^ nil
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> separatorRule [
+
+	^ self wordRule
+]
+
 { #category : #'configuration helpers' }
 SBMetaBlockFactory >> shouldBlockInline: aTypeString [
 
@@ -1217,7 +1223,9 @@ SBMetaBlockFactory >> type: aRuleName compatibleWith: anotherRuleName [
 	
 	anotherRuleName isString ifFalse: [^ anotherRuleName anySatisfy: [:r | self type: aRuleName compatibleWith: r]].
 	
-	^ aRuleName = anotherRuleName or: [ | template |
+	aRuleName = anotherRuleName ifTrue: [^ true].
+	
+	^ grammar notNil and: [ | template |
 		template := self getTemplate: anotherRuleName.
 		(template isKindOf: SBInlineBlockChoice) and: [template alternatives anySatisfy: [:t |
 				(t isKindOf: SBInlineBlockSymbol)

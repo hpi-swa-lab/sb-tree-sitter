@@ -98,7 +98,7 @@ SBInlineBlock >> applyReplacements [
 						self sandblockEditor
 							ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
 							ifNil: [cmd do]]]]]].
-	self inlineRoot updateAllHighlights
+	self toplevel updateAllHighlights
 ]
 
 { #category : #'as yet unclassified' }
@@ -837,12 +837,8 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber
 				ifPresent: [:delim | delim first]
 				ifAbsent: ['']]
 		ifNil: [''].
-	suffixMatchesWordRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory wordRule matchesStream: (string readStream position: start - 1)]]].
+	suffixMatchesWordRule := [:string | (factory notNil and: [factory separatorRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory separatorRule matchesStream: (string readStream position: start - 1)]]].
 	
-	SBToggledCode
-		comment: ''
-		active: 0
-		do: {[(self isKindOf: SBInlineBlockSequence) ifTrue: [self halt]]}.
 	aCollection withIndexDo: [:element :index | | string |
 		string := String streamContents: [:stream |
 			element writeSourceOn: stream indent: ((self factory indentMatch: element)
@@ -936,6 +932,18 @@ SBInlineBlock >> query: aString capturesDo: aBlock [
 	^ SBTSQuery new execute: aString against: self capturesDo: aBlock
 ]
 
+{ #category : #accessing }
+SBInlineBlock >> queryRecursiveFirstMatch: aString capturesDo: aBlock [
+
+	self allBlocksDo: [:block |
+		block isInlineBlock ifTrue: [ | captures |
+			captures := nil.
+			(SBTSQuery new execute: aString against: block capturesDo: [:cap | captures := cap]) ifTrue: [
+				aBlock value: captures.
+				^ true]]].
+	^ false
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> removedMorph: aMorph [
 
@@ -985,6 +993,13 @@ SBInlineBlock >> takeStreamFrom: aMorph [
 SBInlineBlock >> title [
 
 	^ String streamContents: [:stream | self printTitleOn: stream]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> toplevel [
+
+	self owner isInlineBlock ifFalse: [^ self].
+	^ self owner toplevel
 ]
 
 { #category : #'as yet unclassified' }
@@ -1053,6 +1068,12 @@ SBInlineBlock >> type [
 	^ nil
 ]
 
+{ #category : #testing }
+SBInlineBlock >> typeCompatibleWith: aTypeString [
+
+	^ self type notNil and: [self factory ifNotNil: [self factory type: self type compatibleWith: aTypeString] ifNil: [self type = aTypeString]]
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> unbuiltChildrenIn: anExplore [
 
@@ -1106,6 +1127,8 @@ SBInlineBlock >> wantsExtraSpace [
 SBInlineBlock >> wrapWithWatch [
 	<action>
 
+	self isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self replacer: self expression buildCopy)].
+	self parentSandblock isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self parentSandblock replacer: self buildCopy)].
 	self sandblockEditor do: (SBReplaceCommand new
 		target: self
 		replacer: (SBTSWatch newEmpty expression: self buildCopy))

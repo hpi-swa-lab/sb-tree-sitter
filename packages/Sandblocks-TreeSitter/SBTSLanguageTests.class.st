@@ -196,6 +196,25 @@ SBTSLanguageTests >> testPythonBinaryOperator [
 	self assert: (block matchesQuery: '(module (expression_statement (binary_operator)))')
 ]
 
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testPythonComprehension [
+
+	| source |
+	source := '(0 for i in range)'.
+	self assert: source equals: (SBPython parse: source) sourceString
+]
+
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testPythonDecorators [
+
+	| source |
+	source := '@staticmethod
+@abc
+def a():
+	pass'.
+	self assert: source equals: (SBPython parse: source) sourceString
+]
+
 { #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonDeleteStatement [
 

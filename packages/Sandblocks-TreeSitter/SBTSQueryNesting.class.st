@@ -23,13 +23,12 @@ SBTSQueryNesting >> elements: aCollection [
 SBTSQueryNesting >> evaluateAgainst: aBlock captures: aDictionary [
 
 	| block |
-	block := ((aBlock isKindOf: SBInlineBlockSymbol) and: [aBlock type = self type or: [self type = '_' or: [aBlock alias = self type]]])
+	block := ((aBlock isKindOf: SBInlineBlockSymbol) and: [self type = '_' or: [(aBlock typeCompatibleWith: self type) or: [aBlock alias = self type]]])
 		ifTrue: [aBlock]
 		ifFalse: [nil].
 	
 	elements size > 1 ifTrue: [
-		((SBTSQuerySequence new
-			elements: elements allButFirst)
+		((SBTSQuerySequence new elements: elements allButFirst)
 			evaluateAgainst: aBlock
 			captures: aDictionary) ifNil: [^ nil]].
 	

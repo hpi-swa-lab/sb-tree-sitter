@@ -2,7 +2,8 @@ Class {
 	#name : #SBTSWatch,
 	#superclass : #SBInlineBlockReplace,
 	#instVars : [
-		'id'
+		'id',
+		'exampleValues'
 	],
 	#classVars : [
 		'Watches'
@@ -109,6 +110,32 @@ SBTSWatch >> drawnColor [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSWatch >> exampleFinished: anExample [
+
+	exampleValues at: anExample ifPresent: [:val | val exampleFinished: anExample]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSWatch >> exampleStarting: anExample [
+
+	(exampleValues at: anExample ifAbsentPut: [ | display |
+		display := SBExampleValueDisplay new.
+		self addMorphBack: (exampleValues at: anExample put: display).
+		anExample when: #outOfWorld send: #exampleStopped: to: self with: anExample.
+		display])
+		exampleStarting: anExample;
+		name: anExample label
+]
+
+{ #category : #'as yet unclassified' }
+SBTSWatch >> exampleStopped: anExample [
+
+	exampleValues at: anExample ifPresent: [:val |
+		self removeMorph: val.
+		exampleValues removeKey: anExample]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSWatch >> expression [
 
 	^ self firstSubmorph
@@ -148,9 +175,40 @@ SBTSWatch >> initialize [
 
 	super initialize.
 	
+	exampleValues := Dictionary new.
+	
 	self
 		layoutInset: 4;
+		layoutPolicy: SBAlgebraLayout new;
 		listDirection: #topToBottom
+]
+
+{ #category : #'as yet unclassified' }
+SBTSWatch >> isWatch [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSWatch >> layoutCommands [
+
+	^ SBAlgebraCommand container
+		morph: self;
+		data: (self submorphs
+			collect: [:m | m layoutCommands]
+			separatedBy: [SBAlgebraCommand hardLine withGap: true])
+]
+
+{ #category : #'as yet unclassified' }
+SBTSWatch >> listensToExamples [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSWatch >> ownerWithColor [
+
+	^ self owner ownerWithColor
 ]
 
 { #category : #'as yet unclassified' }
@@ -162,15 +220,13 @@ SBTSWatch >> registerWatch [
 { #category : #'as yet unclassified' }
 SBTSWatch >> reportValue: aString env: anEnvironment [
 
-	self submorphCount > 1 ifTrue: [self submorphs second delete].
-	self addMorphBack: (SBRow new
-		cellGap: 8;
-		addMorphBack: (SBStringMorph new
-			contents: (anEnvironment ifNotNil: #label ifNil: ['']);
-			bold);
-		addMorphBack: (SBMultilineOwnTextMorph new
-			contents: aString;
-			maxWidth: 400)).
+	exampleValues at: anEnvironment ifPresent: [:display | | converted |
+		converted := (aString matchesRegex: '-?\d+(\.\d+)?')
+			ifTrue: [aString asNumber]
+			ifFalse: [aString].
+		converted = 'inf' ifTrue: [converted := Float infinity].
+		
+		display reportValue: converted name: (anEnvironment ifNotNil: #label ifNil: [''])].
 	self triggerEvent: #reportedValue with: aString
 ]
 
