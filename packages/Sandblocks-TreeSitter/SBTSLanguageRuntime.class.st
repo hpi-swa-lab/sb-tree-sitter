@@ -20,6 +20,54 @@ SBTSLanguageRuntime class >> checkedCmd: aProgramPathString arguments: aCollecti
 ]
 
 { #category : #'os process' }
+SBTSLanguageRuntime class >> cmd: aProgramPathString arguments: aCollection env: aDictionary in: aWorkingDirString stdin: aString cancel: aBlock [
+
+	| inputPipe outputPipe errorPipe process stderrPromise stdoutPromise processPromise |
+	inputPipe := aString ifNotNil: [OSPipe blockingPipe].
+	outputPipe := OSPipe nonBlockingPipe.
+	errorPipe := OSPipe nonBlockingPipe.
+	process := ExternalUnixOSProcess
+		forkAndExec: aProgramPathString
+		arguments: aCollection
+		environment: (aDictionary ifNotNil: [:d | d as: Dictionary])
+		descriptors: {
+			inputPipe ifNotNil: #reader.
+			SBToggledCode comment: '' active: 1 do: {[nil]. [outputPipe writer]}.
+			errorPipe writer}
+		workingDir: aWorkingDirString.
+	aBlock value: [process sigterm].
+	outputPipe writer close.
+	errorPipe writer close.
+	inputPipe ifNotNil: [
+		inputPipe reader close.
+		inputPipe writer
+			nextPutAll: aString utf8Encoded;
+			flush;
+			close].
+	
+	processPromise := Promise new.
+	stdoutPromise := Promise new.
+	stderrPromise := Promise new.
+	[
+		stdoutPromise resolveWith: (self trimEOF: (String streamContents: [:stream |
+			[outputPipe closed] whileFalse: [
+				(Delay forMilliseconds: 20) wait.
+				stream nextPutAll: outputPipe upToEnd]]))] fork.
+	[
+		stderrPromise resolveWith: (self trimEOF: (String streamContents: [:stream |
+			[errorPipe closed] whileFalse: [
+				(Delay forMilliseconds: 20) wait.
+				stream nextPutAll: errorPipe upToEnd]]))] fork.
+	[
+		[process runState == #complete] whileFalse: [(Delay forMilliseconds: 20) wait].
+		outputPipe close.
+		errorPipe close.
+		processPromise resolveWith: (UnixProcessExitStatus for: process exitStatus) exitStatus] fork.
+	
+	^ (Promise all: {processPromise. stdoutPromise. stderrPromise}) then: [:array | [:block | block valueWithArguments: array]]
+]
+
+{ #category : #'os process' }
 SBTSLanguageRuntime class >> cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString cancel: aBlock [
 
 	| inputPipe outputPipe errorPipe process stderrPromise stdoutPromise processPromise |
@@ -142,10 +190,11 @@ SBTSLanguageRuntime >> factory: aFactory [
 { #category : #'helper os process' }
 SBTSLanguageRuntime >> handleConnection: aSocket [
 
-	| data |
+	| data env |
+	env := SBExecutionEnvironment value.
 	data := Json readFrom: (self contentFromSocket: aSocket) readStream.
 	
-	Project current addDeferredUIMessage: [SBTSWatch reportId: data id value: data expression]
+	Project current addDeferredUIMessage: [SBTSWatch reportId: data id value: data expression env: env]
 ]
 
 { #category : #'runtime interface' }
@@ -157,12 +206,15 @@ SBTSLanguageRuntime >> prettyPrint: aString [
 { #category : #'helper os process' }
 SBTSLanguageRuntime >> spawnWatchDuring: aBlock [
 
-	| listener ret |
+	| listener ret env |
 	listener := Socket newTCP.
 	listener listenOn: 0 backlogSize: 5.
 	listener isWaitingForConnection ifFalse: [^ self error: 'Failed to connect'].
 	
+	env := SBExecutionEnvironment value.
+	
 	[
+		SBExecutionEnvironment value: env.
 		[listener isValid] whileTrue: [(listener waitForAcceptFor: 1) ifNotNil: [:connection | self handleConnection: connection]].
 		listener destroy]
 		forkAt: Processor lowIOPriority

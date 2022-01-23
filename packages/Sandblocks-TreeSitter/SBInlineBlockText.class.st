@@ -124,11 +124,7 @@ SBInlineBlockText >> hasSameStructureAs: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlockText >> initialize [
 
-	super initialize.
-	
-	self addMorphBack: (SBOwnTextMorph new
-		contents: '';
-		vResizing: #shrinkWrap)
+	super initialize
 ]
 
 { #category : #'as yet unclassified' }
@@ -191,7 +187,14 @@ SBInlineBlockText >> regexString [
 SBInlineBlockText >> regexString: aString [
 
 	regexString := aString.
-	regex := aString asRegex
+	regex := aString asRegex.
+	
+	self addMorphBack: (((regex matches: String cr)
+		ifTrue: [SBMultilineOwnTextMorph new maxWidth: 500]
+		ifFalse: [SBOwnTextMorph new])
+		contents: '';
+		vResizing: #shrinkWrap;
+		yourself)
 ]
 
 { #category : #'as yet unclassified' }

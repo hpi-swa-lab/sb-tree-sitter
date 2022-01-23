@@ -91,9 +91,9 @@ SBTSWatch class >> registerWatch: aWatch [
 ]
 
 { #category : #watches }
-SBTSWatch class >> reportId: aString value: aValueString [
+SBTSWatch class >> reportId: aString value: aValueString env: anEnvironment [
 
-	self watches do: [:watch | watch ifNotNil: [watch id = aString ifTrue: [watch reportValue: aValueString]]]
+	self watches do: [:watch | watch ifNotNil: [watch id = aString ifTrue: [watch reportValue: aValueString env: anEnvironment]]]
 ]
 
 { #category : #watches }
@@ -160,12 +160,17 @@ SBTSWatch >> registerWatch [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSWatch >> reportValue: aString [
+SBTSWatch >> reportValue: aString env: anEnvironment [
 
 	self submorphCount > 1 ifTrue: [self submorphs second delete].
-	self addMorphBack: (SBMultilineOwnTextMorph new
-		contents: aString;
-		maxWidth: 400).
+	self addMorphBack: (SBRow new
+		cellGap: 8;
+		addMorphBack: (SBStringMorph new
+			contents: (anEnvironment ifNotNil: #label ifNil: ['']);
+			bold);
+		addMorphBack: (SBMultilineOwnTextMorph new
+			contents: aString;
+			maxWidth: 400)).
 	self triggerEvent: #reportedValue with: aString
 ]
 

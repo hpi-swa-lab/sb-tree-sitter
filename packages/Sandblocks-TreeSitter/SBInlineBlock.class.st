@@ -801,6 +801,7 @@ SBInlineBlock >> preferredColorIn: aColorPolicy [
 			['string'] -> [aColorPolicy literal].
 			['escape'] -> [aColorPolicy literal].
 			['punctuation.bracket'] -> [aColorPolicy builtIn].
+			['constant.builtin'] -> [aColorPolicy builtIn].
 			['operator'] -> [aColorPolicy identifier].
 			['property'] -> [aColorPolicy identifier]}
 		otherwise: [aColorPolicy default]
