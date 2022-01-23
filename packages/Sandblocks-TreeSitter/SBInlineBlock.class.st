@@ -83,21 +83,22 @@ SBInlineBlock >> applyReplacements [
 	| replacements |
 	replacements := SBInlineBlockReplace allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class class), (Pragma allNamed: #lang:match:sample: in: class class) select: [:pragma | pragma arguments first = self factory name]].
 	self allBlocksDo: [:block |
-		replacements do: [:pragma |
-			SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures :success |
-				success ifTrue: [
-					(pragma methodClass theNonMetaClass
-						perform: pragma selector
-						withArguments: {
-							captures.
-							[:target :replacer |
-								SBReplaceCommand new
-									target: target
-									replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
-						self assert: (cmd isKindOf: SBCommand).
-						self sandblockEditor
-							ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
-							ifNil: [cmd do]]]]]].
+		block isInlineBlock ifTrue: [
+			replacements do: [:pragma |
+				SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures :success |
+					success ifTrue: [
+						(pragma methodClass theNonMetaClass
+							perform: pragma selector
+							withArguments: {
+								captures.
+								[:target :replacer |
+									SBReplaceCommand new
+										target: target
+										replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
+							self assert: (cmd isKindOf: SBCommand).
+							self sandblockEditor
+								ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
+								ifNil: [cmd do]]]]]]].
 	self toplevel updateAllHighlights
 ]
 
@@ -230,14 +231,6 @@ recursion, which tends to produce more complex, combined blocks"
 							[current sourceString ~= source].
 							[current inline not and: [current ~= self and: [current owner isInlineBlock]]]}]]) ifTrue: [current := nil]]]) ifNotEmpty: [:results | ^ SBTSRuleExplore deduplicateResults: results]].
 	^ #()
-]
-
-{ #category : #'as yet unclassified' }
-SBInlineBlock >> clearCache [
-
-	self layoutChanged.
-	self clearCacheSelf.
-	self submorphsDo: [:morph | (morph isSandblock or: [morph isInlineBlock]) ifTrue: [morph clearCache]]
 ]
 
 { #category : #actions }
