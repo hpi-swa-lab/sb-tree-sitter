@@ -135,7 +135,7 @@ SBTreeSitter >> externalCallFailed [
 			self class methodDict valuesDo: [:method | " only change for those that don't have an explicit module (lang-specific) "
 			method methodReference category ~= 'ffi languages' ifTrue: [method externalLibraryName: path]].
 			thisContext sender method externalLibraryFunction invokeWithArguments: thisContext sender arguments]
-		ifFalse: [self externalCallFailed]
+		ifFalse: [super externalCallFailed]
 ]
 
 { #category : #helper }
@@ -305,8 +305,10 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 		" there were problems with double-free when debugging "
 		wasFreed ifFalse: [
 			wasFreed := true.
-			cursor ifNotNil: [self cursorDelete: cursor].
-			parser ifNotNil: [self parserDelete: parser]]]
+			(cursor notNil and: ["we can't check for cursor isNull because it is stack-allocated
+use this check instead as a best-guess to prevent crashes after a debugger popped up"
+			parser isNull not]) ifTrue: [self cursorDelete: cursor].
+			(parser notNil and: [parser isNull not]) ifTrue: [self parserDelete: parser]]]
 ]
 
 { #category : #ffi }
@@ -426,6 +428,13 @@ SBTreeSitter >> tsq [
 
 	<apicall: SBTSLanguage* tree_sitter_tsq () module: 'tree-sitter-tsq'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-tsq' name: 'tsq' context: thisContext
+]
+
+{ #category : #'ffi languages' }
+SBTreeSitter >> verilog [
+
+	<apicall: SBTSLanguage* tree_sitter_verilog () module: 'tree-sitter-verilog'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-verilog' name: 'verilog' context: thisContext
 ]
 
 { #category : #'ffi languages' }

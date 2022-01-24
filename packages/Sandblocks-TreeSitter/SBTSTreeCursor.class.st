@@ -7,5 +7,5 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSTreeCursor class >> fields [
 
-	^ #(#('tree' 'void*') #('id' 'void*') #('context' 'uint32_t[2]'))
+	^ #(#(#tree 'void*') #(#id 'void*') #(#context 'uint32_t[2]'))
 ]
