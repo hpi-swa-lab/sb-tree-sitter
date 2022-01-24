@@ -120,6 +120,13 @@ SBInlineBlock >> basicField [
 	^ field
 ]
 
+{ #category : #actions }
+SBInlineBlock >> browseImplementors [
+	<action>
+
+	self factory browseImplementorsFor: self
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> buildCopy [
 
@@ -308,6 +315,8 @@ SBInlineBlock >> cursorPositionsDo: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> deleteCommandFor: aBlock [
 
+	aBlock owner isInlineBlock ifFalse: [^ nil].
+	
 	^ (aBlock owner deleteTargetFor: aBlock)
 		ifNotNil: [:target | SBDeleteCommand new target: target]
 		ifNil: [

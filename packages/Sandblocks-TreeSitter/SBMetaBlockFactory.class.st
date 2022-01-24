@@ -323,6 +323,12 @@ SBMetaBlockFactory >> bodyNodeForRule: aString ifAbsent: aBlock [
 		ifAbsentPut: [self buildNodesFor: (grammar rules at: aString ifAbsent: [^ aBlock value])]
 ]
 
+{ #category : #actions }
+SBMetaBlockFactory >> browseImplementorsFor: aBlock [
+
+	
+]
+
 { #category : #helper }
 SBMetaBlockFactory >> buildBlocksFor: anObject [
 

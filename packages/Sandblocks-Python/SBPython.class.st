@@ -5133,11 +5133,41 @@ SBPython class >> statementContainerTypes [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> browseImplementorsFor: aBlock [
+
+	| identifier method toplevel |
+	toplevel := aBlock toplevel valueOfProperty: #module ifAbsent: [^ self].
+	identifier := aBlock contents ifNil: [^ self].
+	aBlock parentSandblock type = 'attribute' ifFalse: [^ self].
+	aBlock parentSandblock access object contents = 'self' ifFalse: [^ self].
+	
+	toplevel
+		queryRecursiveFirstMatch: ('(class_definition (block
+	(function_definition name: (identifier) ="{1}") @func))' format: {identifier})
+		capturesDo: [:captures | method := captures at: 'func'].
+	method ifNil: [^ self].
+	
+	method
+		updateAllHighlights;
+		attachToHand: ActiveHand in: aBlock sandblockEditor.
+	
+	^ method
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> configure [
 
 	self noteUncapturedText: #('string').
 	self blockInline: #('expression_statement').
 	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type' and: [(b parentSandblock ifNotNil: #type) ~= 'pair']]]
+]
+
+{ #category : #'as yet unclassified' }
+SBPython >> getModuleForSymbol: aString in: aModule [
+
+	aModule
+		queryRecursiveFirstMatch: ('(import_from_statement module_name: (dotted_name) @module name: (dotted_name (identifier) ="{1}"))' format: {aString})
+		capturesDo: [:moduleCaptures | ]
 ]
 
 { #category : #'as yet unclassified' }
