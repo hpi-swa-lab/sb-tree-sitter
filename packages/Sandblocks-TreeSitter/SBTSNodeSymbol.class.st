@@ -26,10 +26,66 @@ SBTSNodeSymbol >> bodyTemplate [
 	^ self factory bodyNodeForRule: self type
 ]
 
+{ #category : #query }
+SBTSNodeSymbol >> childrenForQueryDo: aBlock [
+
+	self isSuperType
+		ifTrue: [self firstSubmorph childrenForQueryDo: aBlock]
+		ifFalse: [aBlock value: self]
+]
+
+{ #category : #hierarchy }
+SBTSNodeSymbol >> containingSymbol [
+
+	
+]
+
+{ #category : #testing }
+SBTSNodeSymbol >> inline [
+
+	^ self isSuperType
+]
+
+{ #category : #testing }
+SBTSNodeSymbol >> isSuperType [
+
+	^ factory isSuperType: self type
+]
+
+{ #category : #testing }
+SBTSNodeSymbol >> isTSSymbol [
+
+	^ true
+]
+
 { #category : #printing }
 SBTSNodeSymbol >> printOn: aStream [
 
 	aStream nextPutAll: type
+]
+
+{ #category : #printing }
+SBTSNodeSymbol >> printSExprOn: aStream depth: aNumber short: aBoolean [
+
+	| any |
+	(aBoolean and: [self inline]) ifTrue: [^ super printSExprOn: aStream depth: aNumber short: aBoolean].
+	(self field notNil and: [self inline not]) ifTrue: [
+		aStream
+			nextPutAll: self field;
+			nextPutAll: ': '].
+	aStream nextPutAll: '('.
+	self inline ifTrue: [aStream nextPutAll: '['].
+	aStream nextPutAll: self type.
+	self inline ifTrue: [aStream nextPutAll: ']'].
+	any := false.
+	self
+		childSymbolsDo: [:morph |
+			any ifFalse: [any := true].
+			aStream crtab: aNumber + 1.
+			morph printSExprOn: aStream depth: aNumber + 1 short: aBoolean]
+		includeInlined: aBoolean not.
+	any ifTrue: [aStream crtab: aNumber].
+	aStream nextPutAll: ')'
 ]
 
 { #category : #parsing }
@@ -49,11 +105,23 @@ SBTSNodeSymbol >> resultsFor: aParser [
 					result]]
 		ifAbsentPut: [ | results |
 			results := self bodyTemplate resultsFor: aParser.
-			results = #noMatch ifTrue: [#noMatch] ifFalse: [
-				results collect: [:result |
-					self makeConcrete
-						addChild: result;
-						parser: result parser]]]
+			results = #noMatch
+				ifTrue: [#noMatch]
+				ifFalse: [results collect: [:result | self makeConcrete addChild: result]]]
+]
+
+{ #category : #parsing }
+SBTSNodeSymbol >> takeNodesFrom: aParser [
+
+	self isSuperType ifTrue: [ | results |
+		results := self bodyTemplate takeNodesFrom: aParser.
+		^ results = #noMatch
+			ifTrue: [#noMatch]
+			ifFalse: [results collect: [:r | self makeConcrete addChild: r]]].
+	
+	(aParser atEnd not and: [aParser peek isString not and: [aParser peek compatibleWithType: self type]]) ifTrue: [^ {aParser next copy parser: aParser copy}].
+	
+	^ #noMatch
 ]
 
 { #category : #accessing }
@@ -67,4 +135,10 @@ SBTSNodeSymbol >> type: aString factory: aFactory [
 
 	type := aString asSymbol.
 	factory := aFactory
+]
+
+{ #category : #printing }
+SBTSNodeSymbol >> writeSourceOn: aStream indent: aNumber [
+
+	self firstSubmorph writeSourceOn: aStream indent: aNumber
 ]

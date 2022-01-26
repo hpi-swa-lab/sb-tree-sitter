@@ -16,6 +16,18 @@ SBTSNodeText >> basicCopy [
 		contents: self contents
 ]
 
+{ #category : #query }
+SBTSNodeText >> childrenForQuery [
+
+	^ #()
+]
+
+{ #category : #query }
+SBTSNodeText >> childrenForQueryDo: aBlock [
+
+	aBlock value: self
+]
+
 { #category : #copying }
 SBTSNodeText >> copy [
 
@@ -87,4 +99,23 @@ SBTSNodeText >> resultsFor: aParser [
 		ifFalse: [
 			aParser stream position: start.
 			#noMatch]
+]
+
+{ #category : #parsing }
+SBTSNodeText >> takeNodesFrom: aParser [
+
+	(aParser atEnd or: [aParser peek isString not]) ifTrue: [^ (regex matches: '') ifTrue: [{self makeConcrete contents: ''}] ifFalse: [#noMatch]].
+	^ (self regex matches: aParser peek)
+		ifTrue: [
+			{
+				self makeConcrete
+					contents: aParser next;
+					parser: aParser copy}]
+		ifFalse: [#noMatch]
+]
+
+{ #category : #printing }
+SBTSNodeText >> writeSourceOn: aStream indent: aNumber [
+
+	aStream nextPutAll: self contents
 ]

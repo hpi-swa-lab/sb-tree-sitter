@@ -261,6 +261,15 @@ SBInlineBlock >> color [
 	^ super color
 ]
 
+{ #category : #testing }
+SBInlineBlock >> compatibleWithType: aTypeString [
+
+	^ self type notNil and: [
+		self factory
+			ifNotNil: [self factory type: self type compatibleWith: aTypeString]
+			ifNil: [self type = aTypeString]]
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> containingSandblock [
 
@@ -620,6 +629,12 @@ SBInlineBlock >> isStatement [
 
 { #category : #'as yet unclassified' }
 SBInlineBlock >> isStatementContainer [
+
+	^ false
+]
+
+{ #category : #testing }
+SBInlineBlock >> isTSSymbol [
 
 	^ false
 ]
@@ -1068,12 +1083,6 @@ SBInlineBlock >> tryInterpretInput: aString before: aBoolean [
 SBInlineBlock >> type [
 
 	^ nil
-]
-
-{ #category : #testing }
-SBInlineBlock >> typeCompatibleWith: aTypeString [
-
-	^ self type notNil and: [self factory ifNotNil: [self factory type: self type compatibleWith: aTypeString] ifNil: [self type = aTypeString]]
 ]
 
 { #category : #'as yet unclassified' }

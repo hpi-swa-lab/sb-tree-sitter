@@ -27,7 +27,7 @@ SBTreeSitter >> buildTreeFrom: aCursor [
 	
 	template = 'ALIAS'
 		ifTrue: [
-			root := aCursor resolveAlias: type in: aCursor parentType.
+			root := aCursor resolveAlias: type in: aCursor parentType with: aCursor factory aliases.
 			(root isKindOf: SBInlineBlockSymbol) ifTrue: [type := root type]]
 		ifFalse: [root := SBInlineBlockSymbol new type: type factory: aCursor factory].
 	

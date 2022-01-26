@@ -13,6 +13,18 @@ SBTSNodeLabel >> basicCopy [
 	^ super basicCopy label: self label
 ]
 
+{ #category : #query }
+SBTSNodeLabel >> childrenForQuery [
+
+	^ #()
+]
+
+{ #category : #query }
+SBTSNodeLabel >> childrenForQueryDo: aBlock [
+
+	aBlock value: self
+]
+
 { #category : #copying }
 SBTSNodeLabel >> copy [
 
@@ -57,4 +69,20 @@ SBTSNodeLabel >> resultsFor: aParser [
 			aParser position: oldPosition.
 			^ #noMatch]].
 	^ {self makeConcrete parser: aParser copy}
+]
+
+{ #category : #parsing }
+SBTSNodeLabel >> takeNodesFrom: aParser [
+
+	^ (aParser atEnd not and: [aParser peek = self label])
+		ifTrue: [
+			aParser next.
+			{self makeConcrete parser: aParser copy}]
+		ifFalse: [#noMatch]
+]
+
+{ #category : #printing }
+SBTSNodeLabel >> writeSourceOn: aStream indent: aNumber [
+
+	aStream nextPutAll: self label
 ]

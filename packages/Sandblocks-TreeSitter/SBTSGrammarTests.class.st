@@ -42,18 +42,25 @@ SBTSGrammarTests >> testResolveAlias [
 	| resolved |
 	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript new)
 		resolveAlias: 'property_identifier'
-		in: 'member_expression'.
+		in: 'member_expression'
+		with: SBJavascript instance aliases.
 	self assert: '(identifier)' equals: resolved printString.
 	
-	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript new)
+	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript instance)
 		resolveAlias: 'property_identifier'
-		in: '_property_name'.
-	self assert: '(identifier | "get" | "set" | "async" | "static" | "export")' equals: resolved printString.
+		in: '_property_name'
+		with: SBJavascript instance aliases.
+	self
+		assert: '(identifier | "get" | "set" | "async" | "static" | "export")'
+		equals: resolved printString.
 	
-	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript new)
+	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript instance)
 		resolveAlias: 'property_identifier'
-		in: 'pair_pattern'.
-	self assert: '(identifier | "get" | "set" | "async" | "static" | "export")' equals: resolved printString
+		in: 'pair_pattern'
+		with: SBJavascript instance aliases.
+	self
+		assert: '(identifier | "get" | "set" | "async" | "static" | "export")'
+		equals: resolved printString
 ]
 
 { #category : #'as yet unclassified' }
@@ -72,6 +79,9 @@ SBTSGrammarTests >> testResolveAmbiguousAlias [
 				gotoNextSibling.
 			self assert: 'string_fragment' equals: cursor type.
 			
-			resolved := cursor resolveAlias: 'string_fragment' in: 'string'.
+			resolved := cursor
+				resolveAlias: 'string_fragment'
+				in: 'string'
+				with: SBJavascript instance aliases.
 			self assert: pair second equals: resolved printString]]
 ]

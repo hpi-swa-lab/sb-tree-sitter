@@ -217,6 +217,12 @@ SBInlineBlockSymbol >> isSuperType [
 	^ factory isSuperType: self type
 ]
 
+{ #category : #testing }
+SBInlineBlockSymbol >> isTSSymbol [
+
+	^ true
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> isTemplate [
 

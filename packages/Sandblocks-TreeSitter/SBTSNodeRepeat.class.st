@@ -15,6 +15,12 @@ SBTSNodeRepeat >> basicCopy [
 	^ super basicCopy multiple: self multiple required: self required element: self element
 ]
 
+{ #category : #query }
+SBTSNodeRepeat >> childrenForQueryDo: aBlock [
+
+	self submorphsDo: [:m | m childrenForQueryDo: aBlock]
+]
+
 { #category : #accessing }
 SBTSNodeRepeat >> element [
 
@@ -63,4 +69,21 @@ SBTSNodeRepeat >> resultsFor: aParser [
 	results := self element resultsFor: aParser.
 	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{self makeConcrete parser: aParser}]].
 	^ results collect: [:result | self makeConcrete addChild: result]
+]
+
+{ #category : #parsing }
+SBTSNodeRepeat >> takeNodesFrom: aParser [
+
+	| results |
+	" parse multiple "
+	self flag: #todo.
+	results := self element takeNodesFrom: aParser.
+	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{self makeConcrete parser: aParser}]].
+	^ results collect: [:result | self makeConcrete addChild: result]
+]
+
+{ #category : #printing }
+SBTSNodeRepeat >> writeSourceOn: aStream indent: aNumber [
+
+	self printElementsSeparated: self submorphs on: aStream indent: aNumber
 ]

@@ -1,5 +1,5 @@
 Class {
-	#name : #SBTSParser,
+	#name : #SBTSInputParser,
 	#superclass : #Object,
 	#instVars : [
 		'previousAlternatives',
@@ -11,13 +11,13 @@ Class {
 }
 
 { #category : #stream }
-SBTSParser >> atEnd [
+SBTSInputParser >> atEnd [
 
 	^ stream atEnd
 ]
 
 { #category : #'initialize-release' }
-SBTSParser >> initialize [
+SBTSInputParser >> initialize [
 
 	super initialize.
 	
@@ -25,7 +25,7 @@ SBTSParser >> initialize [
 ]
 
 { #category : #memo }
-SBTSParser >> memoizationFor: aString ifPresent: aSuccessBlock ifAbsentPut: aBlock [
+SBTSInputParser >> memoizationFor: aString ifPresent: aSuccessBlock ifAbsentPut: aBlock [
 
 	| dict |
 	((visitedSupertypes includes: aString) and: [stream peek = (Character value: 0)]) ifTrue: [
@@ -40,13 +40,13 @@ SBTSParser >> memoizationFor: aString ifPresent: aSuccessBlock ifAbsentPut: aBlo
 ]
 
 { #category : #stream }
-SBTSParser >> next [
+SBTSInputParser >> next [
 
 	^ stream next
 ]
 
 { #category : #query }
-SBTSParser >> optionsFor: aNode given: aString before: aBoolean [
+SBTSInputParser >> optionsFor: aNode given: aString before: aBoolean [
 
 	| results |
 	stream := (aBoolean
@@ -67,7 +67,7 @@ SBTSParser >> optionsFor: aNode given: aString before: aBoolean [
 ]
 
 { #category : #query }
-SBTSParser >> optionsForTemplate: aNode given: aString [
+SBTSInputParser >> optionsForTemplate: aNode given: aString [
 
 	| results |
 	stream := aString readStream.
@@ -78,25 +78,25 @@ SBTSParser >> optionsForTemplate: aNode given: aString [
 ]
 
 { #category : #stream }
-SBTSParser >> peek [
+SBTSInputParser >> peek [
 
 	^ stream peek
 ]
 
 { #category : #stream }
-SBTSParser >> position [
+SBTSInputParser >> position [
 
 	^ stream position
 ]
 
 { #category : #stream }
-SBTSParser >> position: aNumber [
+SBTSInputParser >> position: aNumber [
 
 	stream position: aNumber
 ]
 
 { #category : #copying }
-SBTSParser >> postCopy [
+SBTSInputParser >> postCopy [
 
 	super postCopy.
 	stream := (ReadStream on: stream contents)
@@ -106,7 +106,7 @@ SBTSParser >> postCopy [
 ]
 
 { #category : #stream }
-SBTSParser >> stream [
+SBTSInputParser >> stream [
 
 	^ stream
 ]

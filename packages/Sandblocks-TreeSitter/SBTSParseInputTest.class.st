@@ -1,11 +1,11 @@
 Class {
-	#name : #SBTSNodeTest,
+	#name : #SBTSParseInputTest,
 	#superclass : #SBTest,
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
 { #category : #helper }
-SBTSNodeTest >> concreteNodeForRule: aString [
+SBTSParseInputTest >> concreteNodeForRule: aString [
 
 	| lang symbol |
 	lang := SBTSSmalltalk new.
@@ -14,7 +14,7 @@ SBTSNodeTest >> concreteNodeForRule: aString [
 ]
 
 { #category : #failures }
-SBTSNodeTest >> expectedFailures [
+SBTSParseInputTest >> expectedFailures [
 
 	^ SBToggledCode comment: '' active: 1 do: {
 		[#()].
@@ -22,7 +22,7 @@ SBTSNodeTest >> expectedFailures [
 ]
 
 { #category : #helper }
-SBTSNodeTest >> nodeForRule: aString [
+SBTSParseInputTest >> nodeForRule: aString [
 
 	| lang |
 	lang := SBTSSmalltalk new.
@@ -30,7 +30,7 @@ SBTSNodeTest >> nodeForRule: aString [
 ]
 
 { #category : #helper }
-SBTSNodeTest >> statement: aTypeString with: aContentsString [
+SBTSParseInputTest >> statement: aTypeString with: aContentsString [
 
 	| stmt expr primary leaf |
 	stmt := (self concreteNodeForRule: 'statement').
@@ -47,10 +47,10 @@ SBTSNodeTest >> statement: aTypeString with: aContentsString [
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateAmbiguousIdentifier [
+SBTSParseInputTest >> testCreateAmbiguousIdentifier [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self nodeForRule: 'primary') given: 't'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: 't'.
 	
 	self assert: 3 equals: results size.
 	self
@@ -59,66 +59,66 @@ SBTSNodeTest >> testCreateAmbiguousIdentifier [
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateArray [
+SBTSParseInputTest >> testCreateArray [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self nodeForRule: 'primary') given: '{'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '{'.
 	self assert: 1 equals: results size.
 	self assert: 'dynamic_array' equals: results first child child type
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateArrayAndIdentifier [
+SBTSParseInputTest >> testCreateArrayAndIdentifier [
 
 	| results |
 	"assignment gets reported as well"
 	self flag: #todo.
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsForTemplate: (self nodeForRule: 'dynamic_array')
 		given: '{a'.
 	self assert: 2 equals: results size.
 	
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsForTemplate: (self nodeForRule: 'dynamic_array')
 		given: '{a'.
 	self assert: 2 equals: results size
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateArraySimple [
+SBTSParseInputTest >> testCreateArraySimple [
 
 	| results |
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsForTemplate: (self nodeForRule: 'dynamic_array')
 		given: '{'.
 	self assert: 1 equals: results size.
 	
-	results := SBTSParser new optionsForTemplate: (self nodeForRule: 'primary') given: '{'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '{'.
 	self assert: 1 equals: results size
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateByteArrayAndNumber [
+SBTSParseInputTest >> testCreateByteArrayAndNumber [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self nodeForRule: 'byte_array') given: '#[1'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'byte_array') given: '#[1'.
 	self assert: 1 equals: results size
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateNumber [
+SBTSParseInputTest >> testCreateNumber [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self nodeForRule: 'primary') given: '1'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '1'.
 	self assert: 1 equals: results size.
 	self assert: 'number' equals: results first child child type
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateTrue [
+SBTSParseInputTest >> testCreateTrue [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self nodeForRule: 'primary') given: 'true'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: 'true'.
 	
 	self assert: 2 equals: results size.
 	self
@@ -127,19 +127,19 @@ SBTSNodeTest >> testCreateTrue [
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testDenyNumber [
+SBTSParseInputTest >> testDenyNumber [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self nodeForRule: 'primary') given: '1a'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '1a'.
 	self assert: 0 equals: results size
 ]
 
 { #category : #'tests - wrap' }
-SBTSNodeTest >> testWrapArray [
+SBTSParseInputTest >> testWrapArray [
 
 	| stmt results |
 	stmt := self statement: 'number' with: '123'.
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsFor: stmt child child child child child child
 		given: '{'
 		before: true.
@@ -148,11 +148,11 @@ SBTSNodeTest >> testWrapArray [
 ]
 
 { #category : #'tests - wrap' }
-SBTSNodeTest >> testWrapBinaryExpression [
+SBTSParseInputTest >> testWrapBinaryExpression [
 
 	| stmt results |
 	stmt := self statement: 'number' with: '123'.
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsFor: stmt child child child child child child
 		given: '+'
 		before: false.
@@ -160,11 +160,11 @@ SBTSNodeTest >> testWrapBinaryExpression [
 ]
 
 { #category : #'tests - wrap' }
-SBTSNodeTest >> testWrapBlock [
+SBTSParseInputTest >> testWrapBlock [
 
 	| stmt results |
 	stmt := self statement: 'number' with: '123'.
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsFor: stmt child child child child child child
 		given: '['
 		before: true.
@@ -172,11 +172,11 @@ SBTSNodeTest >> testWrapBlock [
 ]
 
 { #category : #'tests - wrap' }
-SBTSNodeTest >> testWrapByteArray [
+SBTSParseInputTest >> testWrapByteArray [
 
 	| stmt results |
 	stmt := self statement: 'identifier' with: 'abc'.
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsFor: stmt child child child child child child
 		given: '#['
 		before: true.

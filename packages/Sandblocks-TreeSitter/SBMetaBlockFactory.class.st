@@ -20,7 +20,8 @@ Class {
 		'promotedInlineSymbols',
 		'containersOfPromotedInlineSymbols',
 		'softLineBreakMatcher',
-		'nodesCache'
+		'nodesCache',
+		'aliasOccurrences'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -211,6 +212,12 @@ SBMetaBlockFactory >> addDelimitedRules: aCollection [
 ]
 
 { #category : #accessing }
+SBMetaBlockFactory >> aliasOccurrences [
+
+	^ aliasOccurrences
+]
+
+{ #category : #accessing }
 SBMetaBlockFactory >> aliases [
 
 	^ aliases
@@ -398,8 +405,10 @@ SBMetaBlockFactory >> buildNodesFor: anObject [
 			yourself].
 	
 	anObject type = 'ALIAS' ifTrue: [
-		^ (self buildNodesFor: anObject content)
+		^ SBTSNodeAlias new
 			alias: (anObject at: #value);
+			element: (self buildNodesFor: anObject content);
+			factory: self;
 			yourself].
 	
 	(self unpackTypes includes: anObject type) ifTrue: [^ self buildNodesFor: anObject content].
@@ -815,6 +824,7 @@ SBMetaBlockFactory >> initialize [
 	
 	templateCache := Dictionary new.
 	aliases := OrderedCollection new.
+	aliasOccurrences := OrderedCollection new.
 	blockInline := Set new.
 	statementContainerTypes := {}.
 	promotedInlineSymbols := OrderedCollection new.
@@ -967,6 +977,10 @@ SBMetaBlockFactory >> noteAliases: anObject name: aString [
 		aliases add: (SBTSAlias new
 			name: anObject value;
 			object: (self buildBlocksFor: anObject);
+			parentType: aString).
+		aliasOccurrences add: (SBTSAlias new
+			name: anObject value;
+			object: (self buildNodesFor: anObject);
 			parentType: aString)].
 	
 	anObject content ifNotNil: [:c | self noteAliases: c name: aString].
