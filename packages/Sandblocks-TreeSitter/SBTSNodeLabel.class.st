@@ -7,25 +7,38 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
-SBTSNodeLabel >> copy [
+{ #category : #copying }
+SBTSNodeLabel >> basicCopy [
 
-	^ super copy label: self label
+	^ super basicCopy label: self label
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
+SBTSNodeLabel >> copy [
+
+	self assert: self isConcrete.
+	^ self basicCopy
+]
+
+{ #category : #accessing }
 SBTSNodeLabel >> label [
 
 	^ label
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeLabel >> label: aString [
 
 	label := aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SBTSNodeLabel >> maxChildren [
+
+	^ 0
+]
+
+{ #category : #printing }
 SBTSNodeLabel >> printOn: aStream [
 
 	aStream nextPut: $".
@@ -33,7 +46,7 @@ SBTSNodeLabel >> printOn: aStream [
 	aStream nextPut: $"
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 SBTSNodeLabel >> resultsFor: aParser [
 
 	| labelStream oldPosition |
@@ -43,5 +56,5 @@ SBTSNodeLabel >> resultsFor: aParser [
 		labelStream next = aParser next ifFalse: [
 			aParser position: oldPosition.
 			^ #noMatch]].
-	^ {self copy parser: aParser copy}
+	^ {self makeConcrete parser: aParser copy}
 ]

@@ -6,116 +6,157 @@ Class {
 		'field',
 		'factory',
 		'parser',
-		'isCopy'
+		'isConcrete'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBTSNodeBase >> addChild: aNode [
 
+	self assert: self isConcrete.
+	self assert: aNode isConcrete.
+	self assert: self submorphCount + 1 <= self maxChildren.
+	
 	self addMorphBack: aNode.
 	parser := aNode parser
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeBase >> alias [
 
 	^ alias
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeBase >> alias: aString [
 
 	alias := aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBTSNodeBase >> allSuperTypesDo: aBlock [
 
 	self owner ifNotNil: [:o | o allSuperTypesDo: aBlock]
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeBase >> child [
-
-	^ self firstSubmorph
-]
-
-{ #category : #'as yet unclassified' }
-SBTSNodeBase >> copy [
+{ #category : #copying }
+SBTSNodeBase >> basicCopy [
 
 	^ self class new
 		field: field;
 		alias: alias;
 		factory: factory;
 		parser: parser;
-		isCopy: true
+		isConcrete: isConcrete
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
+SBTSNodeBase >> child [
+
+	^ self firstSubmorph
+]
+
+{ #category : #copying }
+SBTSNodeBase >> copy [
+
+	self assert: self isConcrete.
+	^ self basicCopy addAllMorphs: (self submorphs collect: [:s | s copy])
+]
+
+{ #category : #accessing }
 SBTSNodeBase >> factory [
 
 	^ factory
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeBase >> factory: aFactory [
 
 	factory := aFactory
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeBase >> field [
 
 	^ field
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeBase >> field: aString [
 
 	field := aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SBTSNodeBase >> initialize [
 
 	super initialize.
 	
-	isCopy := false
+	isConcrete := false
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeBase >> isCopy: aBoolean [
+{ #category : #accessing }
+SBTSNodeBase >> isConcrete [
 
-	isCopy := aBoolean
+	^ isConcrete
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SBTSNodeBase >> isConcrete: aBoolean [
+
+	isConcrete := aBoolean
+]
+
+{ #category : #hierarchy }
 SBTSNodeBase >> lastChild [
 
 	^ self lastSubmorph
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
+SBTSNodeBase >> makeConcrete [
+
+	self assert: self isConcrete not.
+	
+	^ self basicCopy
+		isConcrete: true;
+		yourself
+]
+
+{ #category : #copying }
+SBTSNodeBase >> makeTemplate [
+
+	^ self basicCopy
+		isConcrete: false;
+		yourself
+]
+
+{ #category : #accessing }
+SBTSNodeBase >> maxChildren [
+
+	^ 1
+]
+
+{ #category : #accessing }
 SBTSNodeBase >> parser [
 
 	^ parser
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeBase >> parser: aParser [
 
 	parser := aParser
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBTSNodeBase >> printFull [
 
 	^ String streamContents: [:s | self printFullOn: s depth: 0]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBTSNodeBase >> printFullOn: aStream depth: aNumber [
 
 	aStream nextPut: $(.
@@ -128,7 +169,7 @@ SBTSNodeBase >> printFullOn: aStream depth: aNumber [
 	aStream nextPut: $)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 SBTSNodeBase >> resultsFor: aParser [
 
 	^ self subclassResponsibility

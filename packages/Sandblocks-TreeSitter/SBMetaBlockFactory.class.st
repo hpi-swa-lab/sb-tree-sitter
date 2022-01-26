@@ -34,10 +34,10 @@ SBMetaBlockFactory class >> compileParserIn: path name: aString [
 	self assert: (OSProcess waitForCommand: ('cd {1}; npx -p tree-sitter-cli tree-sitter generate' format: {path fullName})) exitStatus = 0.
 	
 	((path / 'src' / 'scanner.c') exists or: [(path / 'src' / 'scanner.cc') exists]) ifTrue: [
-		self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src" CFLAGS="-I./src" make src/scanner.o' format: {path fullName})) exitStatus = 0.
+		self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src -fPIC" CFLAGS="-I./src -fPIC" make src/scanner.o' format: {path fullName})) exitStatus = 0.
 		hasScanner := true].
-	self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src" CFLAGS="-I./src" make src/parser.o' format: {path fullName})) exitStatus = 0.
-	self assert: (OSProcess waitForCommand: ('cd {1}; g++ -shared -fPIC -o tree-sitter-{2}.so src/parser.o {3}' format: {path fullName. aString. hasScanner ifTrue: [' src/scanner.o'] ifFalse: ['']})) exitStatus = 0.
+	self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src -fPIC" CFLAGS="-I./src  -fPIC" make src/parser.o' format: {path fullName})) exitStatus = 0.
+	self assert: (OSProcess waitForCommand: ('cd {1}; g++ -shared -fPIC -o tree-sitter-{2}.so src/parser.o {3} -fPIC' format: {path fullName. aString. hasScanner ifTrue: [' src/scanner.o'] ifFalse: ['']})) exitStatus = 0.
 	
 	path / filename copyTo: FileDirectory default.
 	
@@ -541,6 +541,10 @@ SBMetaBlockFactory >> cleanGrammar [
 		comment: ''
 		active: 1
 		do: {[grammar rules keysAndValuesDo: [:name :rule | self applyInlining: rule name: name]]}.
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self applyInlining: rule name: name]]}.
 	SBToggledCode comment: '' active: 1 do: {
 		[" depends on inlining, requires removing blanks (hidden terminals) "
 		grammar rules keysAndValuesDo: [:name :rule | delimitedRules at: name ifPresent: [:r | self removeMarkedDelimiters: rule rule: name]]]}.
@@ -693,6 +697,8 @@ SBMetaBlockFactory >> getTemplate: aTypeString [
 { #category : #templates }
 SBMetaBlockFactory >> getTemplate: aTypeString ifAbsent: aBlock [
 
+	(((self grammar at: 'inline') includes: aTypeString) and: [self aliases anySatisfy: [:pair | pair name = aTypeString]]) ifTrue: [^ 'ALIAS'].
+	
 	^ templateCache at: aTypeString ifAbsent: [ | rule |
 		rule := grammar rules at: aTypeString ifAbsent: [
 			(self aliases anySatisfy: [:pair | pair name = aTypeString]) ifTrue: [^ 'ALIAS'].
@@ -845,7 +851,7 @@ SBMetaBlockFactory >> isStatementContainer: aString [
 { #category : #'configuration helpers' }
 SBMetaBlockFactory >> isSuperType: aTypeString [
 
-	^ supertypes includes: aTypeString
+	^ self supertypes includes: aTypeString
 ]
 
 { #category : #'grammar clean' }
@@ -938,7 +944,7 @@ SBMetaBlockFactory >> name [
 SBMetaBlockFactory >> name: aSymbol preprocess: aBlock postprocess: anotherBlock grammar: aString highlight: anotherString [
 
 	grammar := Json readFrom: aString readStream.
-	supertypes := grammar supertypes.
+	self supertypes: grammar supertypes.
 	name := aSymbol.
 	highlightQuery := SBTSQuery new prepare: anotherString.
 	extras := grammar extras
@@ -1176,6 +1182,12 @@ SBMetaBlockFactory >> softLineBreakMatcher: aBlock [
 SBMetaBlockFactory >> statementContainerTypes: aCollection [
 
 	statementContainerTypes := aCollection
+]
+
+{ #category : #accessing }
+SBMetaBlockFactory >> supertypes [
+
+	^ supertypes
 ]
 
 { #category : #configuration }

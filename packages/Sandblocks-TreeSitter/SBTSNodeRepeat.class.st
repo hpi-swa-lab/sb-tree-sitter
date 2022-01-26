@@ -9,27 +9,31 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
-SBTSNodeRepeat >> copy [
+{ #category : #copying }
+SBTSNodeRepeat >> basicCopy [
 
-	^ super copy
-		multiple: self multiple required: self required element: self element;
-		addAllMorphs: (self submorphs collect: #copy)
+	^ super basicCopy multiple: self multiple required: self required element: self element
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeRepeat >> element [
 
 	^ element
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SBTSNodeRepeat >> maxChildren [
+
+	^ self multiple ifTrue: [900000000] ifFalse: [1]
+]
+
+{ #category : #accessing }
 SBTSNodeRepeat >> multiple [
 
 	^ multiple
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeRepeat >> multiple: aBoolean required: anotherBoolean element: aMorph [
 
 	multiple := aBoolean.
@@ -37,7 +41,7 @@ SBTSNodeRepeat >> multiple: aBoolean required: anotherBoolean element: aMorph [
 	element := aMorph
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBTSNodeRepeat >> printOn: aStream [
 
 	element printOn: aStream.
@@ -46,17 +50,17 @@ SBTSNodeRepeat >> printOn: aStream [
 	aStream nextPut: $?
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeRepeat >> required [
 
 	^ required
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 SBTSNodeRepeat >> resultsFor: aParser [
 
 	| results |
 	results := self element resultsFor: aParser.
-	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{self copy parser: aParser}]].
-	^ results collect: [:result | self copy addChild: result]
+	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{self makeConcrete parser: aParser}]].
+	^ results collect: [:result | self makeConcrete addChild: result]
 ]

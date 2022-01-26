@@ -149,7 +149,7 @@ SBGrammarLanguage >> initialize [
 	super initialize.
 	
 	grammar := Json readFrom: self class grammarJson readStream.
-	supertypes := grammar supertypes.
+	self supertypes: grammar supertypes.
 	name := self class language.
 	highlightQuery := self class highlightQuery ifNotNil: [:query | SBTSQuery new prepare: query].
 	extras := grammar extras

@@ -169,6 +169,13 @@ SBTreeSitter >> gdscript [
 ]
 
 { #category : #'ffi languages' }
+SBTreeSitter >> html [
+
+	<apicall: SBTSLanguage* tree_sitter_html () module: 'tree-sitter-html'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-html' name: 'html' context: thisContext
+]
+
+{ #category : #'ffi languages' }
 SBTreeSitter >> java [
 
 	<apicall: SBTSLanguage* tree_sitter_java () module: 'tree-sitter-java'>

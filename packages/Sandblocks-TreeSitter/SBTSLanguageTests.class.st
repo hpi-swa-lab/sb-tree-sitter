@@ -359,3 +359,12 @@ SBTSLanguageTests >> testSyntaxError [
 
 	self should: [SBPython parse: '"abc"('] raise: SBTSSyntaxError
 ]
+
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testVerilogAliases [
+
+	SBVerilog parse: 'module rmem_respfifo #(parameter integer WIDTH = 550) (
+    input              clock
+) ;
+endmodule'
+]

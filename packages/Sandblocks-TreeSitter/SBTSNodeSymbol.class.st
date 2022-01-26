@@ -7,68 +7,64 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBTSNodeSymbol >> allSuperTypesDo: aBlock [
 
 	aBlock value: self.
 	super allSuperTypesDo: aBlock
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeSymbol >> body [
+{ #category : #copying }
+SBTSNodeSymbol >> basicCopy [
+
+	^ super basicCopy type: self type factory: factory
+]
+
+{ #category : #accessing }
+SBTSNodeSymbol >> bodyTemplate [
 
 	^ self factory bodyNodeForRule: self type
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeSymbol >> copy [
-
-	^ super copy
-		type: self type factory: factory;
-		addAllMorphs: (self submorphs collect: #copy)
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBTSNodeSymbol >> printOn: aStream [
 
 	aStream nextPutAll: type
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 SBTSNodeSymbol >> resultsFor: aParser [
 
-	| exploreBlock |
-	exploreBlock := [ | results |
-		results := self body resultsFor: aParser.
-		results = #noMatch ifTrue: [#noMatch] ifFalse: [
-			results collect: [:result |
-				self assert: self hasSubmorphs not.
-				self copy
-					addChild: result;
-					parser: result parser]]].
 	^ aParser
 		memoizationFor: self type
 		ifPresent: [:blocks |
 			" we may not actually ever want left-recursion, because these blocks will be composed of a wrapper block and a basic block, and we always want to choose the basic block and offer the user to expand the basic block to the more complicated construct. "
-			blocks = #recur ifTrue: [#noMatch] ifFalse: [
-				blocks = #noMatch ifTrue: [#noMatch] ifFalse: [ | result |
-					result := blocks collect: #copy.
+			(blocks = #recur or: [blocks = #noMatch])
+				ifTrue: [#noMatch]
+				ifFalse: [ | result |
+					result := blocks collect: [:b | b copy].
 					aParser peek = (Character value: 0) ifTrue: [
 						aParser next.
 						result first parser: aParser].
-					result]]]
-		ifAbsentPut: exploreBlock
+					result]]
+		ifAbsentPut: [ | results |
+			results := self bodyTemplate resultsFor: aParser.
+			results = #noMatch ifTrue: [#noMatch] ifFalse: [
+				results collect: [:result |
+					self makeConcrete
+						addChild: result;
+						parser: result parser]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeSymbol >> type [
 
 	^ type
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeSymbol >> type: aString factory: aFactory [
 
-	type := aString.
+	type := aString asSymbol.
 	factory := aFactory
 ]

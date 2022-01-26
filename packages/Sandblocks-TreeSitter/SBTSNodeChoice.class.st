@@ -7,27 +7,25 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeChoice >> alternatives [
 
 	^ alternatives
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeChoice >> alternatives: aCollection [
 
 	alternatives := aCollection
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeChoice >> copy [
+{ #category : #copying }
+SBTSNodeChoice >> basicCopy [
 
-	^ super copy
-		alternatives: self alternatives;
-		addAllMorphs: (self submorphs collect: #copy)
+	^ super basicCopy alternatives: self alternatives
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBTSNodeChoice >> printOn: aStream [
 
 	aStream nextPut: $(.
@@ -41,12 +39,12 @@ SBTSNodeChoice >> printOn: aStream [
 	aStream nextPut: $)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 SBTSNodeChoice >> resultsFor: aParser [
 
 	^ (Array streamContents: [:stream |
 		self alternatives do: [:alt | | parserCopy results |
 			parserCopy := aParser copy.
 			results := alt resultsFor: parserCopy.
-			results = #noMatch ifFalse: [results do: [:result | stream nextPut: (self copy addChild: result)]]]]) ifEmpty: [#noMatch]
+			results = #noMatch ifFalse: [results do: [:result | stream nextPut: (self makeConcrete addChild: result)]]]]) ifEmpty: [#noMatch]
 ]

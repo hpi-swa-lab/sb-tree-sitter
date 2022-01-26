@@ -7,27 +7,31 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
-SBTSNodeSeq >> copy [
+{ #category : #copying }
+SBTSNodeSeq >> basicCopy [
 
-	^ super copy
-		elements: self elements;
-		addAllMorphs: (self submorphs collect: #copy)
+	^ super basicCopy elements: self elements
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeSeq >> elements [
 
 	^ elements
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeSeq >> elements: aCollection [
 
 	elements := aCollection
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SBTSNodeSeq >> maxChildren [
+
+	^ self elements size
+]
+
+{ #category : #printing }
 SBTSNodeSeq >> printOn: aStream [
 
 	aStream nextPut: $(.
@@ -35,7 +39,7 @@ SBTSNodeSeq >> printOn: aStream [
 	aStream nextPut: $)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 SBTSNodeSeq >> resultsFor: aParser [
 
 	| queue |
@@ -51,7 +55,7 @@ SBTSNodeSeq >> resultsFor: aParser [
 							ifTrue: [stream nextPut: (seq copy addChild: result)]
 							ifFalse: [queue add: (seq copy addChild: result)]]]]].
 		
-		reportResultsBlock value: self value: self elements size = 1.
+		reportResultsBlock value: self makeConcrete value: self elements size = 1.
 		
 		[queue notEmpty] whileTrue: [ | seq isLast |
 			seq := queue removeFirst.

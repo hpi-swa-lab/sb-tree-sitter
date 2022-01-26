@@ -8,21 +8,28 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
-SBTSNodeText >> copy [
+{ #category : #copying }
+SBTSNodeText >> basicCopy [
 
-	^ super copy
+	^ super basicCopy
 		regexString: self regexString;
 		contents: self contents
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
+SBTSNodeText >> copy [
+
+	self assert: self isConcrete.
+	^ self basicCopy contents: self contents
+]
+
+{ #category : #accessing }
 SBTSNodeText >> currentTextMorph [
 
 	^ self firstSubmorph
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SBTSNodeText >> initialize [
 
 	super initialize.
@@ -30,7 +37,13 @@ SBTSNodeText >> initialize [
 	self addMorphBack: SBStringMorph new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SBTSNodeText >> maxChildren [
+
+	^ 0
+]
+
+{ #category : #printing }
 SBTSNodeText >> printOn: aStream [
 
 	aStream nextPut: $/.
@@ -38,26 +51,26 @@ SBTSNodeText >> printOn: aStream [
 	aStream nextPut: $/
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeText >> regex [
 
 	^ regex
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeText >> regexString [
 
 	^ regexString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeText >> regexString: aString [
 
 	regexString := aString.
 	regex := aString asRegex
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 SBTSNodeText >> resultsFor: aParser [
 
 	| start |
@@ -68,7 +81,7 @@ SBTSNodeText >> resultsFor: aParser [
 	^ (self regex matchesStreamPrefix: aParser stream)
 		ifTrue: [
 			{
-				self copy
+				self makeConcrete
 					contents: (aParser stream originalContents copyFrom: start + 1 to: aParser position);
 					parser: aParser copy}]
 		ifFalse: [
