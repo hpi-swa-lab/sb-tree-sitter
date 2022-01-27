@@ -706,7 +706,7 @@ SBMetaBlockFactory >> getTemplate: aTypeString [
 { #category : #templates }
 SBMetaBlockFactory >> getTemplate: aTypeString ifAbsent: aBlock [
 
-	(((self grammar at: 'inline') includes: aTypeString) and: [self aliases anySatisfy: [:pair | pair name = aTypeString]]) ifTrue: [^ 'ALIAS'].
+	((self inlinedRules includes: aTypeString) and: [self aliases anySatisfy: [:pair | pair name = aTypeString]]) ifTrue: [^ 'ALIAS'].
 	
 	^ templateCache at: aTypeString ifAbsent: [ | rule |
 		rule := grammar rules at: aTypeString ifAbsent: [
@@ -833,6 +833,12 @@ SBMetaBlockFactory >> initialize [
 	noteUncapturedText := #().
 	hardLineBreakMatcher := [:block | false].
 	delimitedRules := Dictionary new
+]
+
+{ #category : #accessing }
+SBMetaBlockFactory >> inlinedRules [
+
+	^ (self grammar ifNotNil: [:g | g at: 'inline']) ifNil: [#()]
 ]
 
 { #category : #templates }

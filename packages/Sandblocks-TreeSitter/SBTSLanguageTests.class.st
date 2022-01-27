@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSLanguageTests >> expectedFailures [
 
-	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude)
+	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude #testVerilogAliases)
 ]
 
 { #category : #'testing - parse' }
