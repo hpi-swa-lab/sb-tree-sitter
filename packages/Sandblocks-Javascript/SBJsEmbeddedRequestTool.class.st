@@ -8,10 +8,20 @@ Class {
 		'showExamples',
 		'showExamplesButtonTxt',
 		'sourceString',
-		'sourceMorph'
+		'sourceMorph',
+		'sendButton',
+		'addDataButton',
+		'exampleButton'
 	],
 	#category : #'Sandblocks-Javascript'
 }
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool class >> registerShortcuts: aProvider [
+
+	aProvider
+		registerShortcut: $h command do: #toggleHelp
+]
 
 { #category : #'as yet unclassified' }
 SBJsEmbeddedRequestTool >> addBodySection: aBody [
@@ -131,7 +141,14 @@ SBJsEmbeddedRequestTool >> addParamSection: aParams [
 { #category : #'as yet unclassified' }
 SBJsEmbeddedRequestTool >> drawnColor [
 
-	^ Color veryLightGray.
+	^ Color veryVeryLightGray.
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> exploreResponse [
+   <action>
+
+   self halt.
 ]
 
 { #category : #'as yet unclassified' }
@@ -145,23 +162,25 @@ SBJsEmbeddedRequestTool >> hideExamplesButton [
 { #category : #'as yet unclassified' }
 SBJsEmbeddedRequestTool >> initCommons [
 	"Setup shared UI elements"
-
+	sendButton :=  (SBButton new icon: SBIcon iconPlay shortcut: nil do: [self send]; balloonText: 'Send Request').
+	addDataButton :=  (SBButton new
+				color: (Color r: 0.0 g: 1 b: 0.0);
+				icon: SBIcon iconPlus shortcut: nil do: [self promptAddPayload]; balloonText: 'Add Data').
+	exampleButton := (showExamples ifTrue: [self showExamplesButton] ifFalse: [self hideExamplesButton]).
 	self
 		addMorphBack: (SBRow new
 			changeTableLayout;
 			hResizing: #spaceFill;
 			cellGap: cellGapConstant;
-			addMorphBack: (SBStringMorph new contents: 'URL');
+			addMorphBack: (SBStringMorph new contents: self urlLabel);
 			addMorphBack: (SBTextBubble new
 				hResizing: #spaceFill;
 				contents: url);
-			addMorphBack: (SBButton new icon: SBIcon iconPlay shortcut: nil do: [self send]; balloonText: 'Send Request');
+			addMorphBack:sendButton;
 			addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
-			addMorphBack: (SBButton new
-				color: (Color r: 0.0 g: 1 b: 0.0);
-				icon: SBIcon iconPlus shortcut: nil do: [self promptAddPayload]; balloonText: 'Add Data');
-			addMorphBack: (showExamples ifTrue: [self showExamplesButton] ifFalse: [self hideExamplesButton])));
+			addMorphBack: addDataButton;
+			addMorphBack: exampleButton));
 		listDirection: #topToBottom;
 		addMorphBack: SBRow new;
 		addMorphBack: SBRow new.
@@ -252,6 +271,32 @@ SBJsEmbeddedRequestTool >> sourceMorph: aSourceMorph [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> toggleHelp [
+	<action>
+	
+	| dataPosition examplePosition sendPosition downConstant |
+	downConstant := 10.
+	
+	"Move data balloon down a bit and to the right."
+	sendPosition := sendButton positionInWorld.
+	sendPosition setX: (sendPosition x)  setY: (sendPosition y).
+	
+	"Move data balloon down a bit and to the right."
+	dataPosition := addDataButton positionInWorld.
+	dataPosition setX: (dataPosition x) + 20 setY: (dataPosition y) + downConstant.
+	
+	"Move example balloon up a bit."
+	examplePosition := exampleButton positionInWorld.
+	examplePosition setX: (examplePosition x) + 20 setY: (examplePosition y) +( downConstant * 3).
+
+	sendButton showBalloon: sendButton balloonText at: sendPosition.
+	addDataButton showBalloon: addDataButton balloonText at: dataPosition.
+	exampleButton showBalloon: exampleButton balloonText at:  examplePosition.
+	
+     "sendButton deleteBalloon."
+]
+
+{ #category : #'as yet unclassified' }
 SBJsEmbeddedRequestTool >> updateHeaders: aHeadersMorph [
 "Loop through the headers morphs and update the headers map"
 	| key value index |
@@ -275,6 +320,11 @@ SBJsEmbeddedRequestTool >> updateParams: aParamsMorph [
 		key := paramMorph submorphs first contents.
 		value := paramMorph submorphs second contents.
 		(key ~= nil) & (key ~= '') ifTrue: [params at: (key, value) put: (key -> value)]]]
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedRequestTool >> urlLabel [
+ self subclassResponsibility.
 ]
 
 { #category : #'as yet unclassified' }

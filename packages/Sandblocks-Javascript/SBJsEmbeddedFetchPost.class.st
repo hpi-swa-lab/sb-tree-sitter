@@ -44,6 +44,30 @@ SBJsEmbeddedFetchPost >> url: aString headers: aHeaders data: aData [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsEmbeddedFetchPost >> urlLabel [
+ ^'POST'
+]
+
+{ #category : #'as yet unclassified' }
 SBJsEmbeddedFetchPost >> values [
 	^ #(Header Param Body)
+]
+
+{ #category : #'as yet unclassified' }
+SBJsEmbeddedFetchPost >> writeSourceOn: aStream [ 
+	"Transforms into JS source code"
+	aStream nextPutAll: 'fetch('''.
+	aStream nextPutAll: url asString, self collectParamsString, '''', ','.
+	aStream nextPutAll: '{'.
+	aStream nextPutAll: 'method: "POST"', ','.
+	headers ifNotEmpty: [
+		aStream nextPutAll: 'headers: {'.
+		aStream nextPutAll: self headersToWritableString..
+		aStream nextPutAll: '}', ','].
+	data ifNotNil: [
+		aStream nextPutAll: 'body:'.
+		aStream nextPutAll: data asString].
+	
+	aStream nextPutAll:  '});'.
+
 ]

@@ -48,6 +48,11 @@ SBJsEmbeddedExpressPost >> url: aString headers: aHeaders data: aData [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsEmbeddedExpressPost >> urlLabel [
+ ^'POST'
+]
+
+{ #category : #'as yet unclassified' }
 SBJsEmbeddedExpressPost >> values [
 	^ #(Header Param Body)
 ]

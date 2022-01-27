@@ -27,6 +27,11 @@ SBJsEmbeddedExpressGet >> url: aString headers: aHeaders data: aData [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsEmbeddedExpressGet >> urlLabel [
+ ^'GET'
+]
+
+{ #category : #'as yet unclassified' }
 SBJsEmbeddedExpressGet >> values [
 	^ #(Header Param)
 ]
