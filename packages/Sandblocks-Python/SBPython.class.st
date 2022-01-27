@@ -5133,11 +5133,51 @@ SBPython class >> statementContainerTypes [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> browseImplementorsFor: aBlock [
+
+	| identifier method toplevel |
+	toplevel := aBlock toplevel valueOfProperty: #module ifAbsent: [^ self].
+	identifier := aBlock contents ifNil: [^ self].
+	aBlock parentSandblock type = 'attribute' ifFalse: [^ self].
+	aBlock parentSandblock access object contents = 'self' ifFalse: [^ self].
+	
+	toplevel
+		queryRecursiveFirstMatch: ('(class_definition (block
+	(function_definition name: (identifier) ="{1}") @func))' format: {identifier})
+		capturesDo: [:captures | method := captures at: 'func'].
+	method ifNil: [^ self].
+	
+	method
+		updateAllHighlights;
+		attachToHand: ActiveHand in: aBlock sandblockEditor.
+	
+	^ method
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> configure [
 
 	self noteUncapturedText: #('string').
 	self blockInline: #('expression_statement').
 	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type' and: [(b parentSandblock ifNotNil: #type) ~= 'pair']]]
+]
+
+{ #category : #'as yet unclassified' }
+SBPython >> getModuleForSymbol: aString in: aModule [
+
+	aModule
+		queryRecursiveFirstMatch: ('(import_from_statement module_name: (dotted_name) @module name: (dotted_name (identifier) ="{1}"))' format: {aString})
+		capturesDo: [:moduleCaptures | ]
+]
+
+{ #category : #'as yet unclassified' }
+SBPython >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	((aBlock isKindOf: SBInlineBlockRepeat) and: [aBlock hasSubmorphs and: [aBlock submorphs first type = 'decorator']]) ifTrue: [^ true].
+	aBlock type = 'decorator' ifTrue: [^ true].
+	
+	(((aBlock isKindOf: SBInlineBlockLabel) and: [aBlock label = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair']]) ifTrue: [^ true].
+	^ #('else_clause') includes: anotherBlock firstVisibleType
 ]
 
 { #category : #'as yet unclassified' }
@@ -5207,4 +5247,10 @@ SBPython >> preprocessGrammar [
 	
 	(self grammar rules at: '_suite') members: {(self grammar rules at: '_suite') members second}.
 	self ignoreExternals: #('_indent' '_dedent' '_newline' '_string_start' '_string_end')
+]
+
+{ #category : #'as yet unclassified' }
+SBPython >> separatorRule [
+
+	^ ((self buildRegexString: (grammar rules at: grammar word)), '|\d') asRegex
 ]

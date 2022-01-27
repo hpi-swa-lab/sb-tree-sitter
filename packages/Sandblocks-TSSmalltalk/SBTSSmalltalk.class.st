@@ -682,6 +682,12 @@ SBTSSmalltalk class >> grammarJson [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSmalltalk class >> icon [
+
+	^ SBStASTNode icon
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSmalltalk class >> language [
 
 	^ #smalltalk

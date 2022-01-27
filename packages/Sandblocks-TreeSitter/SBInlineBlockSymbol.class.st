@@ -217,6 +217,12 @@ SBInlineBlockSymbol >> isSuperType [
 	^ factory isSuperType: self type
 ]
 
+{ #category : #testing }
+SBInlineBlockSymbol >> isTSSymbol [
+
+	^ true
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> isTemplate [
 
@@ -296,6 +302,16 @@ SBInlineBlockSymbol >> printTitleOn: aStream [
 	SBToggledCode comment: '' active: 0 do: {
 		[((factory shouldBlockInline: self type) and: [self hasSubmorphs and: [self firstSubmorph isUnknown not]]) ifTrue: [^ self firstSubmorph printTitleOn: aStream]]}.
 	aStream nextPutAll: self type
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> suggestions [
+
+	self currentTextMorph ifNil: [^ self].
+	
+	^ (self
+		sortedSuggestions: (Array streamContents: [:stream | self toplevel allBlocksDo: [:block | (block isInlineBlock and: [block type = self type and: [block ~= self]]) ifTrue: [stream nextPut: block contents]]])
+		for: self contents) collect: [:text | SBSuggestionItem selector: text label: self type]
 ]
 
 { #category : #'as yet unclassified' }

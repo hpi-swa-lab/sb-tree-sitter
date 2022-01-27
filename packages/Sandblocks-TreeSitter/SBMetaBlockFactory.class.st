@@ -20,7 +20,8 @@ Class {
 		'promotedInlineSymbols',
 		'containersOfPromotedInlineSymbols',
 		'softLineBreakMatcher',
-		'nodesCache'
+		'nodesCache',
+		'aliasOccurrences'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -34,10 +35,10 @@ SBMetaBlockFactory class >> compileParserIn: path name: aString [
 	self assert: (OSProcess waitForCommand: ('cd {1}; npx -p tree-sitter-cli tree-sitter generate' format: {path fullName})) exitStatus = 0.
 	
 	((path / 'src' / 'scanner.c') exists or: [(path / 'src' / 'scanner.cc') exists]) ifTrue: [
-		self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src" CFLAGS="-I./src" make src/scanner.o' format: {path fullName})) exitStatus = 0.
+		self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src -fPIC" CFLAGS="-I./src -fPIC" make src/scanner.o' format: {path fullName})) exitStatus = 0.
 		hasScanner := true].
-	self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src" CFLAGS="-I./src" make src/parser.o' format: {path fullName})) exitStatus = 0.
-	self assert: (OSProcess waitForCommand: ('cd {1}; g++ -shared -fPIC -o tree-sitter-{2}.so src/parser.o {3}' format: {path fullName. aString. hasScanner ifTrue: [' src/scanner.o'] ifFalse: ['']})) exitStatus = 0.
+	self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src -fPIC" CFLAGS="-I./src  -fPIC" make src/parser.o' format: {path fullName})) exitStatus = 0.
+	self assert: (OSProcess waitForCommand: ('cd {1}; g++ -shared -fPIC -o tree-sitter-{2}.so src/parser.o {3} -fPIC' format: {path fullName. aString. hasScanner ifTrue: [' src/scanner.o'] ifFalse: ['']})) exitStatus = 0.
 	
 	path / filename copyTo: FileDirectory default.
 	
@@ -211,6 +212,12 @@ SBMetaBlockFactory >> addDelimitedRules: aCollection [
 ]
 
 { #category : #accessing }
+SBMetaBlockFactory >> aliasOccurrences [
+
+	^ aliasOccurrences
+]
+
+{ #category : #accessing }
 SBMetaBlockFactory >> aliases [
 
 	^ aliases
@@ -323,6 +330,12 @@ SBMetaBlockFactory >> bodyNodeForRule: aString ifAbsent: aBlock [
 		ifAbsentPut: [self buildNodesFor: (grammar rules at: aString ifAbsent: [^ aBlock value])]
 ]
 
+{ #category : #actions }
+SBMetaBlockFactory >> browseImplementorsFor: aBlock [
+
+	
+]
+
 { #category : #helper }
 SBMetaBlockFactory >> buildBlocksFor: anObject [
 
@@ -392,8 +405,10 @@ SBMetaBlockFactory >> buildNodesFor: anObject [
 			yourself].
 	
 	anObject type = 'ALIAS' ifTrue: [
-		^ (self buildNodesFor: anObject content)
+		^ SBTSNodeAlias new
 			alias: (anObject at: #value);
+			element: (self buildNodesFor: anObject content);
+			factory: self;
 			yourself].
 	
 	(self unpackTypes includes: anObject type) ifTrue: [^ self buildNodesFor: anObject content].
@@ -531,6 +546,10 @@ SBMetaBlockFactory >> cleanGrammar [
 		comment: ''
 		active: 1
 		do: {[grammar rules keysAndValuesDo: [:name :rule | self flattenSeparatedList: rule name: name]]}.
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[grammar rules keysAndValuesDo: [:name :rule | self applyInlining: rule name: name]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -687,6 +706,8 @@ SBMetaBlockFactory >> getTemplate: aTypeString [
 { #category : #templates }
 SBMetaBlockFactory >> getTemplate: aTypeString ifAbsent: aBlock [
 
+	((self inlinedRules includes: aTypeString) and: [self aliases anySatisfy: [:pair | pair name = aTypeString]]) ifTrue: [^ 'ALIAS'].
+	
 	^ templateCache at: aTypeString ifAbsent: [ | rule |
 		rule := grammar rules at: aTypeString ifAbsent: [
 			(self aliases anySatisfy: [:pair | pair name = aTypeString]) ifTrue: [^ 'ALIAS'].
@@ -803,6 +824,7 @@ SBMetaBlockFactory >> initialize [
 	
 	templateCache := Dictionary new.
 	aliases := OrderedCollection new.
+	aliasOccurrences := OrderedCollection new.
 	blockInline := Set new.
 	statementContainerTypes := {}.
 	promotedInlineSymbols := OrderedCollection new.
@@ -811,6 +833,12 @@ SBMetaBlockFactory >> initialize [
 	noteUncapturedText := #().
 	hardLineBreakMatcher := [:block | false].
 	delimitedRules := Dictionary new
+]
+
+{ #category : #accessing }
+SBMetaBlockFactory >> inlinedRules [
+
+	^ (self grammar ifNotNil: [:g | g at: 'inline']) ifNil: [#()]
 ]
 
 { #category : #templates }
@@ -839,7 +867,7 @@ SBMetaBlockFactory >> isStatementContainer: aString [
 { #category : #'configuration helpers' }
 SBMetaBlockFactory >> isSuperType: aTypeString [
 
-	^ supertypes includes: aTypeString
+	^ self supertypes includes: aTypeString
 ]
 
 { #category : #'grammar clean' }
@@ -932,7 +960,7 @@ SBMetaBlockFactory >> name [
 SBMetaBlockFactory >> name: aSymbol preprocess: aBlock postprocess: anotherBlock grammar: aString highlight: anotherString [
 
 	grammar := Json readFrom: aString readStream.
-	supertypes := grammar supertypes.
+	self supertypes: grammar supertypes.
 	name := aSymbol.
 	highlightQuery := SBTSQuery new prepare: anotherString.
 	extras := grammar extras
@@ -955,6 +983,10 @@ SBMetaBlockFactory >> noteAliases: anObject name: aString [
 		aliases add: (SBTSAlias new
 			name: anObject value;
 			object: (self buildBlocksFor: anObject);
+			parentType: aString).
+		aliasOccurrences add: (SBTSAlias new
+			name: anObject value;
+			object: (self buildNodesFor: anObject);
 			parentType: aString)].
 	
 	anObject content ifNotNil: [:c | self noteAliases: c name: aString].
@@ -1127,6 +1159,12 @@ SBMetaBlockFactory >> runtime [
 	^ nil
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> separatorRule [
+
+	^ self wordRule
+]
+
 { #category : #'configuration helpers' }
 SBMetaBlockFactory >> shouldBlockInline: aTypeString [
 
@@ -1164,6 +1202,12 @@ SBMetaBlockFactory >> softLineBreakMatcher: aBlock [
 SBMetaBlockFactory >> statementContainerTypes: aCollection [
 
 	statementContainerTypes := aCollection
+]
+
+{ #category : #accessing }
+SBMetaBlockFactory >> supertypes [
+
+	^ supertypes
 ]
 
 { #category : #configuration }
@@ -1217,7 +1261,9 @@ SBMetaBlockFactory >> type: aRuleName compatibleWith: anotherRuleName [
 	
 	anotherRuleName isString ifFalse: [^ anotherRuleName anySatisfy: [:r | self type: aRuleName compatibleWith: r]].
 	
-	^ aRuleName = anotherRuleName or: [ | template |
+	aRuleName = anotherRuleName ifTrue: [^ true].
+	
+	^ grammar notNil and: [ | template |
 		template := self getTemplate: anotherRuleName.
 		(template isKindOf: SBInlineBlockChoice) and: [template alternatives anySatisfy: [:t |
 				(t isKindOf: SBInlineBlockSymbol)

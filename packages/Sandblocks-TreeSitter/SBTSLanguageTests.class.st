@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSLanguageTests >> expectedFailures [
 
-	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude)
+	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude #testVerilogAliases)
 ]
 
 { #category : #'testing - parse' }
@@ -121,13 +121,14 @@ SBTSLanguageTests >> testJavascriptToString [
 	source := '<h2>Hi</h2>'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
-	source := 'class A extends B{}'.
+	source := 'class A extends B
+{}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
-	source := 'class Car extends React.Component{
-example={};
-render(){
-a
+	source := 'class Car extends React.Component
+{example={};
+render()
+{a
 return<h2>Hi</h2>}}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
@@ -195,6 +196,25 @@ SBTSLanguageTests >> testPythonBinaryOperator [
 	self assert: (block matchesQuery: '(module (expression_statement (binary_operator)))')
 ]
 
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testPythonComprehension [
+
+	| source |
+	source := '(0 for i in range)'.
+	self assert: source equals: (SBPython parse: source) sourceString
+]
+
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testPythonDecorators [
+
+	| source |
+	source := '@staticmethod
+@abc
+def a():
+	pass'.
+	self assert: source equals: (SBPython parse: source) sourceString
+]
+
 { #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonDeleteStatement [
 
@@ -205,6 +225,12 @@ SBTSLanguageTests >> testPythonDeleteStatement [
 		select;
 		deleteBlock.
 	self assert: block childSandblocks isEmpty
+]
+
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testPythonEmptyModule [
+
+	SBPython parse: ''
 ]
 
 { #category : #'testing - parse' }
@@ -233,6 +259,14 @@ SBTSLanguageTests >> testPythonIndent [
 	source := 'if a:
 	if b:
 		pass'.
+	self assert: source equals: (SBPython parse: source) sourceString.
+	
+	source := 'if a:
+	print("a")
+	print("b")
+else:
+	print("c")
+	print("d")'.
 	self assert: source equals: (SBPython parse: source) sourceString
 ]
 
@@ -324,4 +358,13 @@ SBTSLanguageTests >> testRegexResumeInput [
 SBTSLanguageTests >> testSyntaxError [
 
 	self should: [SBPython parse: '"abc"('] raise: SBTSSyntaxError
+]
+
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testVerilogAliases [
+
+	SBVerilog parse: 'module rmem_respfifo #(parameter integer WIDTH = 550) (
+    input              clock
+) ;
+endmodule'
 ]

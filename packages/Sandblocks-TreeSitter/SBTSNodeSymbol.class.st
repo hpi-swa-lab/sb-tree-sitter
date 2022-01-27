@@ -7,68 +7,138 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBTSNodeSymbol >> allSuperTypesDo: aBlock [
 
 	aBlock value: self.
 	super allSuperTypesDo: aBlock
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeSymbol >> body [
+{ #category : #copying }
+SBTSNodeSymbol >> basicCopy [
+
+	^ super basicCopy type: self type factory: factory
+]
+
+{ #category : #accessing }
+SBTSNodeSymbol >> bodyTemplate [
 
 	^ self factory bodyNodeForRule: self type
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeSymbol >> copy [
+{ #category : #query }
+SBTSNodeSymbol >> childrenForQueryDo: aBlock [
 
-	^ super copy
-		type: self type factory: factory;
-		addAllMorphs: (self submorphs collect: #copy)
+	self isSuperType
+		ifTrue: [self firstSubmorph childrenForQueryDo: aBlock]
+		ifFalse: [aBlock value: self]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
+SBTSNodeSymbol >> containingSymbol [
+
+	
+]
+
+{ #category : #testing }
+SBTSNodeSymbol >> inline [
+
+	^ self isSuperType
+]
+
+{ #category : #testing }
+SBTSNodeSymbol >> isSuperType [
+
+	^ factory isSuperType: self type
+]
+
+{ #category : #testing }
+SBTSNodeSymbol >> isTSSymbol [
+
+	^ true
+]
+
+{ #category : #printing }
 SBTSNodeSymbol >> printOn: aStream [
 
 	aStream nextPutAll: type
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
+SBTSNodeSymbol >> printSExprOn: aStream depth: aNumber short: aBoolean [
+
+	| any |
+	(aBoolean and: [self inline]) ifTrue: [^ super printSExprOn: aStream depth: aNumber short: aBoolean].
+	(self field notNil and: [self inline not]) ifTrue: [
+		aStream
+			nextPutAll: self field;
+			nextPutAll: ': '].
+	aStream nextPutAll: '('.
+	self inline ifTrue: [aStream nextPutAll: '['].
+	aStream nextPutAll: self type.
+	self inline ifTrue: [aStream nextPutAll: ']'].
+	any := false.
+	self
+		childSymbolsDo: [:morph |
+			any ifFalse: [any := true].
+			aStream crtab: aNumber + 1.
+			morph printSExprOn: aStream depth: aNumber + 1 short: aBoolean]
+		includeInlined: aBoolean not.
+	any ifTrue: [aStream crtab: aNumber].
+	aStream nextPutAll: ')'
+]
+
+{ #category : #parsing }
 SBTSNodeSymbol >> resultsFor: aParser [
 
-	| exploreBlock |
-	exploreBlock := [ | results |
-		results := self body resultsFor: aParser.
-		results = #noMatch ifTrue: [#noMatch] ifFalse: [
-			results collect: [:result |
-				self assert: self hasSubmorphs not.
-				self copy
-					addChild: result;
-					parser: result parser]]].
 	^ aParser
 		memoizationFor: self type
 		ifPresent: [:blocks |
 			" we may not actually ever want left-recursion, because these blocks will be composed of a wrapper block and a basic block, and we always want to choose the basic block and offer the user to expand the basic block to the more complicated construct. "
-			blocks = #recur ifTrue: [#noMatch] ifFalse: [
-				blocks = #noMatch ifTrue: [#noMatch] ifFalse: [ | result |
-					result := blocks collect: #copy.
+			(blocks = #recur or: [blocks = #noMatch])
+				ifTrue: [#noMatch]
+				ifFalse: [ | result |
+					result := blocks collect: [:b | b copy].
 					aParser peek = (Character value: 0) ifTrue: [
 						aParser next.
 						result first parser: aParser].
-					result]]]
-		ifAbsentPut: exploreBlock
+					result]]
+		ifAbsentPut: [ | results |
+			results := self bodyTemplate resultsFor: aParser.
+			results = #noMatch
+				ifTrue: [#noMatch]
+				ifFalse: [results collect: [:result | self makeConcrete addChild: result]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
+SBTSNodeSymbol >> takeNodesFrom: aParser [
+
+	self isSuperType ifTrue: [ | results |
+		results := self bodyTemplate takeNodesFrom: aParser.
+		^ results = #noMatch
+			ifTrue: [#noMatch]
+			ifFalse: [results collect: [:r | self makeConcrete addChild: r]]].
+	
+	(aParser atEnd not and: [aParser peek isString not and: [aParser peek compatibleWithType: self type]]) ifTrue: [^ {aParser next copy parser: aParser copy}].
+	
+	^ #noMatch
+]
+
+{ #category : #accessing }
 SBTSNodeSymbol >> type [
 
 	^ type
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSNodeSymbol >> type: aString factory: aFactory [
 
-	type := aString.
+	type := aString asSymbol.
 	factory := aFactory
+]
+
+{ #category : #printing }
+SBTSNodeSymbol >> writeSourceOn: aStream indent: aNumber [
+
+	self firstSubmorph writeSourceOn: aStream indent: aNumber
 ]

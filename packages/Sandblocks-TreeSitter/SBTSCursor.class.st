@@ -23,9 +23,31 @@ SBTSCursor >> createRestorePoint [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursor >> currentDo: aBlock [
+
+	| type node template |
+	type := self type.
+	node := SBTSNodeSymbol new type: type factory: self factory.
+	template := self factory bodyNodeForRule: type ifAbsent: [
+		node := self resolveAlias: type in: self parentType with: self factory aliasOccurrences.
+		node unpackAlias].
+	^ aBlock value: type value: node makeConcrete value: template
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursor >> currentFieldName [
 
 	^ library cursorCurrentFieldName: cursor
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCursor >> currentTemplate [
+
+	| type |
+	type := self type.
+	^ self factory
+		bodyNodeForRule: type
+		ifAbsent: [(self resolveAlias: type in: self parentType with: self factory aliasOccurrences) unpackAlias]
 ]
 
 { #category : #'as yet unclassified' }
@@ -72,6 +94,18 @@ SBTSCursor >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursor >> isAlias [
+
+	| type parentType |
+	type := self type.
+	parentType := self parentType.
+	self factory
+		bodyNodeForRule: type
+		ifAbsent: [^ self factory aliasOccurrences anySatisfy: [:alias | alias name = type and: [alias parentType = parentType]]].
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursor >> isNamed [
 
 	^ library nodeIsNamed: self node
@@ -100,7 +134,9 @@ SBTSCursor >> node [
 { #category : #'as yet unclassified' }
 SBTSCursor >> parentType [
 
-	^ library nodeType: (library nodeParent: self node)
+	| parent |
+	parent := library nodeParent: self node.
+	^ parent tree isNull ifTrue: [nil] ifFalse: [library nodeType: parent]
 ]
 
 { #category : #'as yet unclassified' }
@@ -116,10 +152,10 @@ SBTSCursor >> position: aPosition [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSCursor >> resolveAlias: aString in: aParentString [
+SBTSCursor >> resolveAlias: aString in: aParentString with: aCollection [
 
 	| candidates indices symbolIndex |
-	candidates := factory aliases select: [:alias | alias name = aString and: [alias parentType = aParentString]].
+	candidates := aCollection select: [:alias | alias name = aString and: [alias parentType = aParentString]].
 	candidates size = 1 ifTrue: [^ candidates first object].
 	
 	self assert: cursor notNil.

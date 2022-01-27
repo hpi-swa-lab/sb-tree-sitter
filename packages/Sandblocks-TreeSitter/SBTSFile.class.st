@@ -5,7 +5,8 @@ Class {
 		'filepath',
 		'runButton',
 		'runCancelBlock',
-		'runtime'
+		'runtime',
+		'root'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -13,13 +14,19 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSFile class >> filepath: aString [
 
-	^ self new filepath: aString
+	^ self filepath: aString collapsed: false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile class >> filepath: aFilepathString collapsed: aBoolean [
+
+	^ self new filepath: aFilepathString collapsed: aBoolean
 ]
 
 { #category : #'as yet unclassified' }
 SBTSFile class >> for: aFilepathString [
 
-	^ self filepath: aFilepathString
+	^ self filepath: aFilepathString collapsed: false
 ]
 
 { #category : #'as yet unclassified' }
@@ -29,38 +36,60 @@ SBTSFile >> artefactChanged: aMethodBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile >> buildCopy [
+
+	^ self class new
+		filepath: filepath
+		toplevel: self root buildCopy
+		language: self root factory class
+		collapsed: false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> filepath [
 
 	^ filepath
 ]
 
 { #category : #'as yet unclassified' }
-SBTSFile >> filepath: aString [
+SBTSFile >> filepath: aString collapsed: aBoolean [
 
 	self
 		filepath: aString
 		language: (SBGrammarLanguage allSubclasses detect: [:lang | lang fileSuffix = (FileDirectory extensionFor: aString)])
+		collapsed: aBoolean
 ]
 
 { #category : #'as yet unclassified' }
-SBTSFile >> filepath: aString language: aLanguageClass [
+SBTSFile >> filepath: aString language: aLanguageClass collapsed: aBoolean [
+
+	self
+		filepath: aString
+		toplevel: (FileStream
+			readOnlyFileNamed: aString
+			do: [:stream | aLanguageClass parseAndReplace: stream contents])
+		language: aLanguageClass
+		collapsed: aBoolean
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile >> filepath: aString toplevel: aBlock language: aLanguageClass collapsed: aBoolean [
 
 	filepath := aString.
+	self addMorphBack: (SBRow new
+		cellGap: 4;
+		cellPositioning: #center;
+		addMorphBack: aLanguageClass iconMorph;
+		addMorphBack: (SBStringMorph new
+			contents: (FileDirectory localNameFor: aString);
+			bold);
+		addMorphBack: (Morph new
+			extent: 8 @ 0;
+			color: Color transparent)).
+	root := aBlock hResizing: #spaceFill.
+	aBoolean ifFalse: [self addMorphBack: root].
 	
-	FileStream readOnlyFileNamed: aString do: [:stream |
-		self addMorphBack: (SBRow new
-			cellGap: 4;
-			cellPositioning: #center;
-			addMorphBack: aLanguageClass iconMorph;
-			addMorphBack: (SBStringMorph new
-				contents: (FileDirectory localNameFor: aString);
-				bold);
-			addMorphBack: (Morph new
-				extent: 8 @ 0;
-				color: Color transparent)).
-		self addMorphBack: ((aLanguageClass parseAndReplace: stream contents) hResizing: #spaceFill)].
-	
-	self root factory runtime ifNotNil: [
+	(self root factory runtime notNil and: [aBoolean not]) ifTrue: [
 		self firstSubmorph addMorphBack: (runtime := SBTSRuntimeChooser new language: aLanguageClass).
 		self firstSubmorph addMorphBack: (runButton := SBIcon iconPlay
 			balloonText: 'Run file';
@@ -90,16 +119,15 @@ SBTSFile >> layoutCommands [
 
 	^ SBAlgebraCommand container
 		morph: self;
-		data: {
-			self firstSubmorph layoutCommands.
-			SBAlgebraCommand hardLine withGap: true.
-			self submorphs second layoutCommands}
+		data: (self submorphs
+			collect: [:s | s layoutCommands]
+			separatedBy: [SBAlgebraCommand hardLine withGap: true])
 ]
 
 { #category : #'as yet unclassified' }
 SBTSFile >> root [
 
-	^ self submorphs second
+	^ root
 ]
 
 { #category : #'as yet unclassified' }

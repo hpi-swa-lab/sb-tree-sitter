@@ -1,51 +1,44 @@
 Class {
-	#name : #SBTSNodeTest,
+	#name : #SBTSParseInputTest,
 	#superclass : #SBTest,
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
 { #category : #helper }
-SBTSNodeTest >> bodyForRule: aString [
+SBTSParseInputTest >> concreteNodeForRule: aString [
 
-	^ SBToggledCode
-		comment: ''
-		active: 1
-		do: {[self nodeForRule: aString]. [SBTSSmalltalk instance bodyNodeForRule: aString]}
+	| lang symbol |
+	lang := SBTSSmalltalk new.
+	symbol := SBTSNodeSymbol new type: aString factory: lang.
+	^ symbol makeConcrete addChild: symbol bodyTemplate makeConcrete
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeTest >> expectedFailures [
+{ #category : #failures }
+SBTSParseInputTest >> expectedFailures [
 
-	^ #(#testWrapBlock #testWrapBinaryExpression #testWrapArray #testDenyNumber #testCreateTrue #testCreateNumber #testCreateByteArrayAndNumber #testCreateArraySimple #testCreateArrayAndIdentifier #testCreateArray #testCreateAmbiguousIdentifier)
+	^ SBToggledCode comment: '' active: 1 do: {
+		[#()].
+		[#(#testWrapBlock #testWrapBinaryExpression #testWrapArray #testDenyNumber #testCreateTrue #testCreateNumber #testCreateByteArrayAndNumber #testCreateArraySimple #testCreateArrayAndIdentifier #testCreateArray #testCreateAmbiguousIdentifier)]}
 ]
 
 { #category : #helper }
-SBTSNodeTest >> nodeForRule: aString [
+SBTSParseInputTest >> nodeForRule: aString [
 
 	| lang |
 	lang := SBTSSmalltalk new.
-	^ SBTSNodeSymbol new
-		type: aString factory: lang;
-		addChild: (lang bodyNodeForRule: aString)
+	^ SBTSNodeSymbol new type: aString factory: lang
 ]
 
 { #category : #helper }
-SBTSNodeTest >> statement: aTypeString with: aContentsString [
+SBTSParseInputTest >> statement: aTypeString with: aContentsString [
 
 	| stmt expr primary leaf |
-	stmt := (self nodeForRule: 'statement') copy.
-	stmt addChild: stmt body copy.
+	stmt := (self concreteNodeForRule: 'statement').
+	expr := (self concreteNodeForRule: 'expression').
+	primary := (self concreteNodeForRule: 'primary').
+	leaf := (self concreteNodeForRule: aTypeString).
 	
-	expr := (self nodeForRule: 'expression') copy.
-	expr addChild: expr body copy.
-	
-	primary := (self nodeForRule: 'primary') copy.
-	primary addChild: primary body copy.
-	
-	leaf := (self nodeForRule: aTypeString) copy.
-	leaf addChild: leaf body copy.
 	leaf child contents: aContentsString.
-	
 	stmt child addChild: expr.
 	expr child addChild: primary.
 	primary child addChild: leaf.
@@ -54,10 +47,10 @@ SBTSNodeTest >> statement: aTypeString with: aContentsString [
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateAmbiguousIdentifier [
+SBTSParseInputTest >> testCreateAmbiguousIdentifier [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self bodyForRule: 'primary') given: 't'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: 't'.
 	
 	self assert: 3 equals: results size.
 	self
@@ -66,66 +59,66 @@ SBTSNodeTest >> testCreateAmbiguousIdentifier [
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateArray [
+SBTSParseInputTest >> testCreateArray [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self bodyForRule: 'primary') given: '{'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '{'.
 	self assert: 1 equals: results size.
 	self assert: 'dynamic_array' equals: results first child child type
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateArrayAndIdentifier [
+SBTSParseInputTest >> testCreateArrayAndIdentifier [
 
 	| results |
 	"assignment gets reported as well"
 	self flag: #todo.
-	results := SBTSParser new
-		optionsForTemplate: (self bodyForRule: 'dynamic_array')
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'dynamic_array')
 		given: '{a'.
 	self assert: 2 equals: results size.
 	
-	results := SBTSParser new
-		optionsForTemplate: (self bodyForRule: 'dynamic_array')
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'dynamic_array')
 		given: '{a'.
 	self assert: 2 equals: results size
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateArraySimple [
+SBTSParseInputTest >> testCreateArraySimple [
 
 	| results |
-	results := SBTSParser new
-		optionsForTemplate: (self bodyForRule: 'dynamic_array')
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'dynamic_array')
 		given: '{'.
 	self assert: 1 equals: results size.
 	
-	results := SBTSParser new optionsForTemplate: (self bodyForRule: 'primary') given: '{'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '{'.
 	self assert: 1 equals: results size
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateByteArrayAndNumber [
+SBTSParseInputTest >> testCreateByteArrayAndNumber [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self bodyForRule: 'byte_array') given: '#[1'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'byte_array') given: '#[1'.
 	self assert: 1 equals: results size
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateNumber [
+SBTSParseInputTest >> testCreateNumber [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self bodyForRule: 'primary') given: '1'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '1'.
 	self assert: 1 equals: results size.
 	self assert: 'number' equals: results first child child type
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testCreateTrue [
+SBTSParseInputTest >> testCreateTrue [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self bodyForRule: 'primary') given: 'true'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: 'true'.
 	
 	self assert: 2 equals: results size.
 	self
@@ -134,19 +127,19 @@ SBTSNodeTest >> testCreateTrue [
 ]
 
 { #category : #'tests - create' }
-SBTSNodeTest >> testDenyNumber [
+SBTSParseInputTest >> testDenyNumber [
 
 	| results |
-	results := SBTSParser new optionsForTemplate: (self bodyForRule: 'primary') given: '1a'.
+	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '1a'.
 	self assert: 0 equals: results size
 ]
 
 { #category : #'tests - wrap' }
-SBTSNodeTest >> testWrapArray [
+SBTSParseInputTest >> testWrapArray [
 
 	| stmt results |
 	stmt := self statement: 'number' with: '123'.
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsFor: stmt child child child child child child
 		given: '{'
 		before: true.
@@ -155,26 +148,23 @@ SBTSNodeTest >> testWrapArray [
 ]
 
 { #category : #'tests - wrap' }
-SBTSNodeTest >> testWrapBinaryExpression [
+SBTSParseInputTest >> testWrapBinaryExpression [
 
 	| stmt results |
-	1 clearHaltOnce.
 	stmt := self statement: 'number' with: '123'.
-	1 setHaltOnce.
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsFor: stmt child child child child child child
 		given: '+'
 		before: false.
-	results first printFull inspect.
 	self assert: 1 equals: results size
 ]
 
 { #category : #'tests - wrap' }
-SBTSNodeTest >> testWrapBlock [
+SBTSParseInputTest >> testWrapBlock [
 
 	| stmt results |
 	stmt := self statement: 'number' with: '123'.
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsFor: stmt child child child child child child
 		given: '['
 		before: true.
@@ -182,11 +172,11 @@ SBTSNodeTest >> testWrapBlock [
 ]
 
 { #category : #'tests - wrap' }
-SBTSNodeTest >> testWrapByteArray [
+SBTSParseInputTest >> testWrapByteArray [
 
 	| stmt results |
 	stmt := self statement: 'identifier' with: 'abc'.
-	results := SBTSParser new
+	results := SBTSInputParser new
 		optionsFor: stmt child child child child child child
 		given: '#['
 		before: true.

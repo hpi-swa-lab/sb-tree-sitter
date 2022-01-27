@@ -83,22 +83,23 @@ SBInlineBlock >> applyReplacements [
 	| replacements |
 	replacements := SBInlineBlockReplace allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class class), (Pragma allNamed: #lang:match:sample: in: class class) select: [:pragma | pragma arguments first = self factory name]].
 	self allBlocksDo: [:block |
-		replacements do: [:pragma |
-			SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures :success |
-				success ifTrue: [
-					(pragma methodClass theNonMetaClass
-						perform: pragma selector
-						withArguments: {
-							captures.
-							[:target :replacer |
-								SBReplaceCommand new
-									target: target
-									replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
-						self assert: (cmd isKindOf: SBCommand).
-						self sandblockEditor
-							ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
-							ifNil: [cmd do]]]]]].
-	self inlineRoot updateAllHighlights
+		block isInlineBlock ifTrue: [
+			replacements do: [:pragma |
+				SBTSQuery new execute: pragma arguments second against: block capturesDo: [:captures :success |
+					success ifTrue: [
+						(pragma methodClass theNonMetaClass
+							perform: pragma selector
+							withArguments: {
+								captures.
+								[:target :replacer |
+									SBReplaceCommand new
+										target: target
+										replacer: (replacer type: target type factory: target factory)]}) ifNotNil: [:cmd |
+							self assert: (cmd isKindOf: SBCommand).
+							self sandblockEditor
+								ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
+								ifNil: [cmd do]]]]]]].
+	self toplevel updateAllHighlights
 ]
 
 { #category : #'as yet unclassified' }
@@ -117,6 +118,13 @@ SBInlineBlock >> basicAlias [
 SBInlineBlock >> basicField [
 
 	^ field
+]
+
+{ #category : #actions }
+SBInlineBlock >> browseImplementors [
+	<action>
+
+	self factory browseImplementorsFor: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -232,14 +240,6 @@ recursion, which tends to produce more complex, combined blocks"
 	^ #()
 ]
 
-{ #category : #'as yet unclassified' }
-SBInlineBlock >> clearCache [
-
-	self layoutChanged.
-	self clearCacheSelf.
-	self submorphsDo: [:morph | (morph isSandblock or: [morph isInlineBlock]) ifTrue: [morph clearCache]]
-]
-
 { #category : #actions }
 SBInlineBlock >> clearInput [
 	<action>
@@ -259,6 +259,15 @@ SBInlineBlock >> color [
 	self containingSymbol ifNotNil: [ :aSymbol |
 		self factory highlightFor: aSymbol do: [ :color | color ifNotNil: [ :c | ^ c muchLighter ] ] ].
 	^ super color
+]
+
+{ #category : #testing }
+SBInlineBlock >> compatibleWithType: aTypeString [
+
+	^ self type notNil and: [
+		self factory
+			ifNotNil: [self factory type: self type compatibleWith: aTypeString]
+			ifNil: [self type = aTypeString]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -315,6 +324,8 @@ SBInlineBlock >> cursorPositionsDo: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> deleteCommandFor: aBlock [
 
+	aBlock owner isInlineBlock ifFalse: [^ nil].
+	
 	^ (aBlock owner deleteTargetFor: aBlock)
 		ifNotNil: [:target | SBDeleteCommand new target: target]
 		ifNil: [
@@ -623,6 +634,12 @@ SBInlineBlock >> isStatementContainer [
 ]
 
 { #category : #testing }
+SBInlineBlock >> isTSSymbol [
+
+	^ false
+]
+
+{ #category : #testing }
 SBInlineBlock >> isTemplate [
 
 	^ true
@@ -801,6 +818,7 @@ SBInlineBlock >> preferredColorIn: aColorPolicy [
 			['string'] -> [aColorPolicy literal].
 			['escape'] -> [aColorPolicy literal].
 			['punctuation.bracket'] -> [aColorPolicy builtIn].
+			['constant.builtin'] -> [aColorPolicy builtIn].
 			['operator'] -> [aColorPolicy identifier].
 			['property'] -> [aColorPolicy identifier]}
 		otherwise: [aColorPolicy default]
@@ -836,9 +854,9 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber
 				ifPresent: [:delim | delim first]
 				ifAbsent: ['']]
 		ifNil: [''].
-	suffixMatchesWordRule := [:string | (factory notNil and: [factory wordRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory wordRule matchesStream: (string readStream position: start - 1)]]].
+	suffixMatchesWordRule := [:string | (factory notNil and: [factory separatorRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory separatorRule matchesStream: (string readStream position: start - 1)]]].
 	
-	aCollection do: [:element | | string |
+	aCollection withIndexDo: [:element :index | | string |
 		string := String streamContents: [:stream |
 			element writeSourceOn: stream indent: ((self factory indentMatch: element)
 				ifTrue: [aNumber + 1]
@@ -846,8 +864,14 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber
 		(self isKindOf: SBInlineBlockRepeat)
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
-				(((self factory hardLineBreakMatcher value: self) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [self containingSymbol parentSandblock isInlineBlock or: [first not]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
-			ifFalse: [(string notEmpty and: [lastMatchedWordRule and: [suffixMatchesWordRule value: lastString, string first]]) ifTrue: [aStream space]].
+				((index > 1 and: [(self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [self containingSymbol parentSandblock isInlineBlock or: [first not]]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
+			ifFalse: [
+				((self isKindOf: SBInlineBlockSequence) and: [index > 1 and: [self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element]])
+					ifTrue: [
+						aStream crtab: ((self factory indentMatch: element)
+							ifTrue: [aNumber + 1]
+							ifFalse: [aNumber])]
+					ifFalse: [(string notEmpty and: [lastMatchedWordRule and: [suffixMatchesWordRule value: lastString, string first]]) ifTrue: [aStream space]]].
 		string ifNotEmpty: [
 			lastMatchedWordRule := suffixMatchesWordRule value: string.
 			lastString := string.
@@ -925,6 +949,18 @@ SBInlineBlock >> query: aString capturesDo: aBlock [
 	^ SBTSQuery new execute: aString against: self capturesDo: aBlock
 ]
 
+{ #category : #accessing }
+SBInlineBlock >> queryRecursiveFirstMatch: aString capturesDo: aBlock [
+
+	self allBlocksDo: [:block |
+		block isInlineBlock ifTrue: [ | captures |
+			captures := nil.
+			(SBTSQuery new execute: aString against: block capturesDo: [:cap | captures := cap]) ifTrue: [
+				aBlock value: captures.
+				^ true]]].
+	^ false
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> removedMorph: aMorph [
 
@@ -974,6 +1010,13 @@ SBInlineBlock >> takeStreamFrom: aMorph [
 SBInlineBlock >> title [
 
 	^ String streamContents: [:stream | self printTitleOn: stream]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> toplevel [
+
+	self owner isInlineBlock ifFalse: [^ self].
+	^ self owner toplevel
 ]
 
 { #category : #'as yet unclassified' }
@@ -1095,6 +1138,8 @@ SBInlineBlock >> wantsExtraSpace [
 SBInlineBlock >> wrapWithWatch [
 	<action>
 
+	self isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self replacer: self expression buildCopy)].
+	self parentSandblock isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self parentSandblock replacer: self buildCopy)].
 	self sandblockEditor do: (SBReplaceCommand new
 		target: self
 		replacer: (SBTSWatch newEmpty expression: self buildCopy))

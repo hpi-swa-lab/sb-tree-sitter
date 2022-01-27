@@ -70,6 +70,28 @@ SBPyRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess >> evaluateModuleAsync: aString in: aPath args: aCollection cancel: aBlock [
+
+	| python ret env |
+	python := self class defaultPythonPath ifNil: [^ nil].
+	
+	env := SBExecutionEnvironment value.
+	
+	ret := Promise new.
+	[
+		SBExecutionEnvironment value: env.
+		self spawnWatchDuring: [:port |
+			ret resolveWith: (self class
+				cmd: python
+				arguments: {'-m'. aString}, aCollection
+				env: {'SQ_WATCH' -> port}
+				in: aPath
+				stdin: nil
+				cancel: aBlock) wait]] fork.
+	^ ret
+]
+
+{ #category : #'as yet unclassified' }
 SBPyRuntimeOSProcess >> prettyPrint: aString [
 
 	| printer args |

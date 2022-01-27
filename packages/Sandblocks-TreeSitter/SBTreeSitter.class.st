@@ -15,34 +15,33 @@ SBTreeSitter class >> moduleName [
 ]
 
 { #category : #'as yet unclassified' }
-SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
+SBTreeSitter >> buildTreeFrom: aCursor [
 
-	| field fallback type fieldStream block template root |
+	| field type fieldStream block template root |
 	type := aCursor type.
 	field := aCursor currentFieldName.
-	fallback := {field. aCursor text}.
 	
 	template := aCursor isNamed
-		ifTrue: [aCursor factory getTemplate: type ifAbsent: [^ aBlock value: aCursor text]]
-		ifFalse: [^ aBlock value: aCursor text].
+		ifTrue: [aCursor factory getTemplate: type ifAbsent: [^ aCursor text]]
+		ifFalse: [^ aCursor text].
 	
 	template = 'ALIAS'
 		ifTrue: [
-			root := aCursor resolveAlias: type in: aCursor parentType.
+			root := aCursor resolveAlias: type in: aCursor parentType with: aCursor factory aliases.
 			(root isKindOf: SBInlineBlockSymbol) ifTrue: [type := root type]]
 		ifFalse: [root := SBInlineBlockSymbol new type: type factory: aCursor factory].
 	
 	fieldStream := ((Array streamContents: [:stream |
 		aCursor gotoFirstChild ifTrue: [ | first |
 			first := aCursor node.
-			[self buildTreeFrom: aCursor do: [:b | stream nextPut: {aCursor currentFieldName. b}]] doWhileFalse: [ | gap atEnd |
+			[stream nextPut: {aCursor currentFieldName. self buildTreeFrom: aCursor}] doWhileFalse: [ | gap atEnd |
 				atEnd := aCursor gotoNextSibling.
 				(atEnd not and: [aCursor factory noteUncapturedText includes: type]) ifTrue: [
 					gap := aCursor textBetween: first and: aCursor node.
 					gap size > 0 ifTrue: [stream nextPut: {#sp. gap}].
 					first := aCursor node].
 				atEnd].
-			aCursor gotoParent]]) ifEmpty: [{fallback}]) readStream.
+			aCursor gotoParent]]) ifEmpty: [aCursor text ifNotEmpty: [{{field. aCursor text}}] ifEmpty: [#()]]) readStream.
 	
 	block := SBTSParseExplore new
 		explore: fieldStream
@@ -50,7 +49,7 @@ SBTreeSitter >> buildTreeFrom: aCursor do: aBlock [
 		factory: aCursor factory.
 	self assert: block notNil description: 'failed to build ', type.
 	template = 'ALIAS' ifTrue: [block alias: type].
-	^ aBlock value: block
+	^ block
 ]
 
 { #category : #'ffi languages' }
@@ -136,7 +135,7 @@ SBTreeSitter >> externalCallFailed [
 			self class methodDict valuesDo: [:method | " only change for those that don't have an explicit module (lang-specific) "
 			method methodReference category ~= 'ffi languages' ifTrue: [method externalLibraryName: path]].
 			thisContext sender method externalLibraryFunction invokeWithArguments: thisContext sender arguments]
-		ifFalse: [self externalCallFailed]
+		ifFalse: [super externalCallFailed]
 ]
 
 { #category : #helper }
@@ -167,6 +166,13 @@ SBTreeSitter >> gdscript [
 
 	<apicall: SBTSLanguage* tree_sitter_gdscript () module: 'tree-sitter-gdscript'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'PrestonKnopp/tree-sitter-gdscript' name: 'gdscript' context: thisContext
+]
+
+{ #category : #'ffi languages' }
+SBTreeSitter >> html [
+
+	<apicall: SBTSLanguage* tree_sitter_html () module: 'tree-sitter-html'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-html' name: 'html' context: thisContext
 ]
 
 { #category : #'ffi languages' }
@@ -277,7 +283,7 @@ SBTreeSitter >> nodeType: aNode [
 SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
 
 	^ self parseAsCursor: aString language: aSymbol do: [:cursor |
-		(self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory) do: [:b | b])
+		(self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory))
 			hResizing: #rigid;
 			attachDecorator: SBResizableDecorator new;
 			attachDecorator: SBForceMoveDecorator new;
@@ -306,8 +312,10 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 		" there were problems with double-free when debugging "
 		wasFreed ifFalse: [
 			wasFreed := true.
-			cursor ifNotNil: [self cursorDelete: cursor].
-			parser ifNotNil: [self parserDelete: parser]]]
+			(cursor notNil and: ["we can't check for cursor isNull because it is stack-allocated
+use this check instead as a best-guess to prevent crashes after a debugger popped up"
+			parser isNull not]) ifTrue: [self cursorDelete: cursor].
+			(parser notNil and: [parser isNull not]) ifTrue: [self parserDelete: parser]]]
 ]
 
 { #category : #ffi }
@@ -427,6 +435,13 @@ SBTreeSitter >> tsq [
 
 	<apicall: SBTSLanguage* tree_sitter_tsq () module: 'tree-sitter-tsq'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-tsq' name: 'tsq' context: thisContext
+]
+
+{ #category : #'ffi languages' }
+SBTreeSitter >> verilog [
+
+	<apicall: SBTSLanguage* tree_sitter_verilog () module: 'tree-sitter-verilog'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-verilog' name: 'verilog' context: thisContext
 ]
 
 { #category : #'ffi languages' }

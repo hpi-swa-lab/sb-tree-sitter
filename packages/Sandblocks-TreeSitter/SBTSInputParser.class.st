@@ -1,5 +1,5 @@
 Class {
-	#name : #SBTSParser,
+	#name : #SBTSInputParser,
 	#superclass : #Object,
 	#instVars : [
 		'previousAlternatives',
@@ -11,75 +11,63 @@ Class {
 }
 
 { #category : #stream }
-SBTSParser >> atEnd [
+SBTSInputParser >> atEnd [
 
 	^ stream atEnd
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSParser >> incrementAlternativeFor: aNode [
-
-	^ previousAlternatives at: aNode put: (self previousAlternativeFor: aNode) + 1
-]
-
 { #category : #'initialize-release' }
-SBTSParser >> initialize [
+SBTSInputParser >> initialize [
 
 	super initialize.
 	
-	
+	visitedSupertypes := Set new
 ]
 
 { #category : #memo }
-SBTSParser >> markVisitedSuperType: aString [
-
-	visitedSupertypes add: aString
-]
-
-{ #category : #memo }
-SBTSParser >> memoizationFor: aString ifPresent: aSuccessBlock ifAbsentPut: aBlock [
+SBTSInputParser >> memoizationFor: aString ifPresent: aSuccessBlock ifAbsentPut: aBlock [
 
 	| dict |
-	((visitedSupertypes includes: aString asSymbol) and: [stream peek = (Character value: 0)]) ifTrue: [
+	((visitedSupertypes includes: aString) and: [stream peek = (Character value: 0)]) ifTrue: [
 		visitedSupertypes remove: aString.
 		"TODO: can we write this back?"
 		^ aBlock value].
 	
 	dict := memoizations at: stream position + 1.
-	^ dict at: aString asSymbol ifPresent: aSuccessBlock ifAbsent: [
-		dict at: aString asSymbol put: #recur.
-		dict at: aString asSymbol put: aBlock value]
+	^ dict at: aString ifPresent: aSuccessBlock ifAbsent: [
+		dict at: aString put: #recur.
+		dict at: aString put: aBlock value]
 ]
 
 { #category : #stream }
-SBTSParser >> next [
+SBTSInputParser >> next [
 
 	^ stream next
 ]
 
 { #category : #query }
-SBTSParser >> optionsFor: aNode given: aString before: aBoolean [
+SBTSInputParser >> optionsFor: aNode given: aString before: aBoolean [
 
 	| results |
 	stream := (aBoolean
 		ifTrue: [aString, (Character value: 0)]
 		ifFalse: [(Character value: 0) asString, aString]) readStream.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
-	visitedSupertypes := Set new.
 	
 	aNode allSuperTypesDo: [:typeNode |
-		visitedSupertypes add: typeNode type asSymbol.
+		"if our nested element (char0) is at the start, we would immediately abort expanding instead of recursing. instead, allow one level of recursion for each type node that is above our nested element."
+		aBoolean ifFalse: [visitedSupertypes add: typeNode type].
 		aBoolean
-			ifTrue: [memoizations last at: typeNode type asSymbol put: {typeNode}]
-			ifFalse: [memoizations first at: typeNode type asSymbol put: {typeNode}]].
+			ifTrue: [memoizations last at: typeNode type put: {typeNode}]
+			ifFalse: [memoizations first at: typeNode type put: {typeNode}]].
 	
-	results := aNode root resultsFor: self.
+	results := aNode root makeTemplate resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
 	^ results select: [:result | result parser atEnd]
 ]
 
 { #category : #query }
-SBTSParser >> optionsForTemplate: aNode given: aString [
+SBTSInputParser >> optionsForTemplate: aNode given: aString [
 
 	| results |
 	stream := aString readStream.
@@ -90,39 +78,35 @@ SBTSParser >> optionsForTemplate: aNode given: aString [
 ]
 
 { #category : #stream }
-SBTSParser >> peek [
+SBTSInputParser >> peek [
 
 	^ stream peek
 ]
 
 { #category : #stream }
-SBTSParser >> position [
+SBTSInputParser >> position [
 
 	^ stream position
 ]
 
 { #category : #stream }
-SBTSParser >> position: aNumber [
+SBTSInputParser >> position: aNumber [
 
 	stream position: aNumber
 ]
 
 { #category : #copying }
-SBTSParser >> postCopy [
+SBTSInputParser >> postCopy [
 
 	super postCopy.
-	stream := stream veryDeepCopy.
+	stream := (ReadStream on: stream contents)
+		position: stream position;
+		yourself.
 	visitedSupertypes := visitedSupertypes copy
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSParser >> previousAlternativeFor: aNode [
-
-	^ previousAlternatives at: aNode ifAbsent: [1]
-]
-
 { #category : #stream }
-SBTSParser >> stream [
+SBTSInputParser >> stream [
 
 	^ stream
 ]
