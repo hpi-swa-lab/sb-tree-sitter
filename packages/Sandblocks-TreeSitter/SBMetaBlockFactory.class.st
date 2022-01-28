@@ -341,19 +341,19 @@ SBMetaBlockFactory >> browseImplementorsFor: aBlock [
 { #category : #helper }
 SBMetaBlockFactory >> buildBlocksFor: anObject [
 
-	anObject type = 'FIELD' ifTrue: [
+	'FIELD' = anObject type ifTrue: [
 		^ (self buildBlocksFor: anObject content)
 			field: anObject name;
 			yourself].
 	
-	anObject type = 'ALIAS' ifTrue: [
+	'ALIAS' = anObject type ifTrue: [
 		^ (self buildBlocksFor: anObject content)
 			alias: (anObject at: #value);
 			yourself].
 	
 	(self unpackTypes includes: anObject type) ifTrue: [^ self buildBlocksFor: anObject content].
 	
-	(#('STRING') includes: anObject type) ifTrue: [
+	'STRING' = anObject type ifTrue: [
 		^ SBInlineBlockLabel new
 			label: anObject value;
 			factory: self].
@@ -361,11 +361,13 @@ SBMetaBlockFactory >> buildBlocksFor: anObject [
 	(#('PATTERN' 'TOKEN' 'IMMEDIATE_TOKEN') includes: anObject type) ifTrue: [
 		^ SBInlineBlockText new
 			regexString: (self buildRegexString: anObject);
+			hint: (anObject at: #name);
 			factory: self].
 	
-	(#('SYMBOL') includes: anObject type) ifTrue: [
+	'SYMBOL' = anObject type ifTrue: [
 		^ SBInlineBlockSymbol new
 			type: anObject name factory: self;
+			hint: (anObject at: #name);
 			factory: self].
 	
 	'REPEAT' = anObject type ifTrue: [
@@ -379,16 +381,17 @@ SBMetaBlockFactory >> buildBlocksFor: anObject [
 			factory: self].
 	
 	'CHOICE' = anObject type ifTrue: [
-		(anObject members size = 2 and: [anObject members second type = 'BLANK']) ifTrue: [
-			^ SBInlineBlockRepeat new
+		(anObject members size = 2 and: [anObject members second type = 'BLANK'])
+			ifTrue: [^ SBInlineBlockRepeat new
 				multiple: false
 					required: false
 					element: (self buildBlocksFor: anObject members first);
-				factory: self].
-		
-		^ SBInlineBlockChoice new
-			alternatives: (anObject members collect: [:member | self buildBlocksFor: member]);
-			factory: self].
+				hint: (anObject at: #name);
+				factory: self]
+			ifFalse: [ ^ SBInlineBlockChoice new
+				alternatives: (anObject members collect: [:member | self buildBlocksFor: member]);
+				hint: (anObject at: #name);
+				factory: self]].
 	
 	'SEQ' = anObject type ifTrue: [
 		^ SBInlineBlockSequence new

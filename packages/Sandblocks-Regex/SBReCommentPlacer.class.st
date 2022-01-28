@@ -8,10 +8,11 @@ Class {
 SBReCommentPlacer class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(term) @term'>
-
-	^ aBlock
+	
+	^ nil
+"	^ aBlock
 		value: (aDictionary at: 'term')
-		value: (self new block: (aDictionary at: 'term'))
+		value: (self new block: (aDictionary at: 'term'))"
 ]
 
 { #category : #'as yet unclassified' }

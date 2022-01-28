@@ -2,7 +2,8 @@ Class {
 	#name : #SBInlineBlockChoice,
 	#superclass : #SBInlineBlock,
 	#instVars : [
-		'alternatives'
+		'alternatives',
+		'hint'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -54,7 +55,8 @@ SBInlineBlockChoice >> buildEmpty [
 		alternatives: self alternatives;
 		factory: factory;
 		field: self basicField;
-		alias: self basicAlias
+		alias: self basicAlias;
+		hint: self hint
 ]
 
 { #category : #'as yet unclassified' }
@@ -128,6 +130,18 @@ SBInlineBlockChoice >> hasSameStructureAs: aBlock [
 		with: aBlock alternatives
 		do: [:a :b | (a hasSameStructureAs: b) ifFalse: [^ false]].
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockChoice >> hint [
+
+	^ hint
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockChoice >> hint: aString [
+
+	hint := aString
 ]
 
 { #category : #'as yet unclassified' }

@@ -14,7 +14,9 @@ SBTSUnknown >> buildCopy [
 
 	^ self class new
 		type: self type factory: self factory;
-		template: self template
+		template: self template;
+		hint: self hint;
+		yourself
 ]
 
 { #category : #'as yet unclassified' }
@@ -83,6 +85,19 @@ SBTSUnknown >> hasSameStructureAs: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknown >> hint [
+
+	^ self label
+]
+
+{ #category : #'as yet unclassified' }
+SBTSUnknown >> hint: aString [
+
+	self haltIf: [ aString notNil and: [(aString isKindOf: String) not]].
+	self label: aString
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknown >> inline [
 
 	^ false
@@ -147,6 +162,7 @@ SBTSUnknown >> template [
 { #category : #'as yet unclassified' }
 SBTSUnknown >> template: aBlock [
 
+	self hint: aBlock value hint.
 	template := aBlock
 ]
 

@@ -516,6 +516,16 @@ SBInlineBlock >> highlight: aString [
 	highlight := aString
 ]
 
+{ #category : #accessing }
+SBInlineBlock >> hint [
+
+	^ nil
+]
+
+{ #category : #accessing }
+SBInlineBlock >> hint: aString [
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> includesNestedSameStructure: aBlock [
 

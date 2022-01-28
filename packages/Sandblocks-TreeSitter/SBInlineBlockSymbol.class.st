@@ -2,7 +2,8 @@ Class {
 	#name : #SBInlineBlockSymbol,
 	#superclass : #SBInlineBlock,
 	#instVars : [
-		'type'
+		'type',
+		'hint'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -31,7 +32,8 @@ SBInlineBlockSymbol >> buildEmpty [
 	^ self class new
 		type: self type factory: factory;
 		field: self basicField;
-		alias: self basicAlias
+		alias: self basicAlias;
+		hint: self hint
 ]
 
 { #category : #'as yet unclassified' }
@@ -134,6 +136,18 @@ SBInlineBlockSymbol >> hasSameContentsAs: aBlock [
 SBInlineBlockSymbol >> hasSameStructureAs: aBlock [
 
 	^ ((super hasSameStructureAs: aBlock) and: [self type = aBlock type]) or: [self template hasSameStructureAs: aBlock]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> hint [
+
+	^ hint
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> hint: aString [
+
+	hint := aString
 ]
 
 { #category : #'as yet unclassified' }

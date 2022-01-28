@@ -1,25 +1,26 @@
 Class {
 	#name : #SBReComment,
-	#superclass : #SBInlineBlockSymbol,
+	#superclass : #SBInlineBlockReplace,
+	#instVars : [
+		'content'
+	],
 	#category : #'Sandblocks-Regex'
 }
 
 { #category : #'as yet unclassified' }
-SBReComment >> block [
+SBReComment >> initialize [
 
-	^ self submorphs first submorphs first
-]
-
-{ #category : #'as yet unclassified' }
-SBReComment >> block: aBlock [
-
-	self addMorphBack: (SBRow new
-			addMorphBack: (SBInlineBlockSymbol new addMorphBack: aBlock buildCopy);
-			addMorphBack: (SBTextBubble new placeholderText: 'comment'))
+	self addMorphBack: (SBTextBubble new placeholderText: 'comment')
 ]
 
 { #category : #'as yet unclassified' }
 SBReComment >> type [
 
-	^ self block type
+	^ 'non_capturing_group'
+]
+
+{ #category : #'as yet unclassified' }
+SBReComment >> writeSourceOn: aStream [
+
+	aStream nextPutAll: '(?:...)'
 ]

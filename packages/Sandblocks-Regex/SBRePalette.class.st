@@ -13,16 +13,18 @@ SBRePalette class >> addAllRules: aCollection to: aBuilder [
 { #category : #private }
 SBRePalette class >> addRule: aString to: aBuilder [
 
-	aBuilder addBlock: aString as: (self factory build: aString)
+	| block |
+	block := SBInlineBlockSymbol new
+		type: aString
+		factory: self factory instance
+		block: (self factory build: aString).
+	aBuilder addBlock: aString as: block
 ]
 
 { #category : #'as yet unclassified' }
 SBRePalette class >> buildOn: aBuilder [
 
-	| grammar |
-	
-	grammar := Json readFrom: self factory grammarJson readStream.
-	self addAllRules: grammar rules keys sorted to: aBuilder
+	self addAllRules: self rules to: aBuilder
 ]
 
 { #category : #'as yet unclassified' }
@@ -35,4 +37,32 @@ SBRePalette class >> factory [
 SBRePalette class >> language [
 
 	^ self factory language
+]
+
+{ #category : #'as yet unclassified' }
+SBRePalette class >> rules [
+
+	^ {
+	'disjunction'.
+
+	'optional'.
+	'zero_or_more'.
+	'one_or_more'.
+
+	'start_assertion'.
+	'end_assertion'.
+	'boundary_assertion'.
+	'non_boundary_assertion'.
+	'lookahead_assertion'.
+
+	'anonymous_capturing_group'.
+	'named_capturing_group'.
+	'non_capturing_group'.
+	
+	'backreference_escape'.
+
+	'any_character'.
+	'character_class'.
+
+	'count_quantifier'.}
 ]

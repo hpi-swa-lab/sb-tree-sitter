@@ -747,6 +747,12 @@ SBRegex class >> statementContainerTypes [
 ]
 
 { #category : #'as yet unclassified' }
+SBRegex >> configure [
+
+	self blockInline: {'term'}
+]
+
+{ #category : #'as yet unclassified' }
 SBRegex >> highlightFor: aSBBlock do: aBlock [
 
 	^ aBlock value: (aSBBlock type caseOf: {
@@ -758,11 +764,21 @@ SBRegex >> highlightFor: aSBBlock do: aBlock [
 		['character_class_escape'] -> [Color green].
 		['start_assertion'] -> [Color blue].
 		['end_assertion'] -> [Color blue].
-		['count_quantifier'] -> [Color blue].
+		['count_quantifier'] -> [Color red].
 		['anonymous_capturing_group'] -> [Color orange].
 		['named_capturing_group'] -> [Color orange].
 		['non_capturing_group'] -> [Color orange].
 		['class_range'] -> [Color green].
+		['zero_or_more'] -> [Color red].
+		['optional'] -> [Color red].
+		['one_or_more'] -> [Color red].
 		} 
 	otherwise: [nil])
+]
+
+{ #category : #'as yet unclassified' }
+SBRegex >> preprocessGrammar [
+
+	self grammar rules keysAndValuesDo: [:name :rule | rule at: #name put: name].
+	(self grammar rules at: #lookahead_assertion) members second  at: #name put: 'type'
 ]

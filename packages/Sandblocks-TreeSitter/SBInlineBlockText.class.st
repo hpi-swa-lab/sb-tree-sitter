@@ -34,7 +34,8 @@ SBInlineBlockText >> buildEmpty [
 		regexString: self regexString;
 		factory: factory;
 		field: self basicField;
-		alias: self basicAlias
+		alias: self basicAlias;
+		hint: self hint
 ]
 
 { #category : #'as yet unclassified' }
@@ -120,6 +121,18 @@ SBInlineBlockText >> hasSameContentsAs: aBlock [
 SBInlineBlockText >> hasSameStructureAs: aBlock [
 
 	^ (super hasSameStructureAs: aBlock) and: [self regexString = aBlock regexString]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockText >> hint [
+
+	^ self currentTextMorph placeholderText
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockText >> hint: aString [
+
+	self currentTextMorph placeholderText: aString
 ]
 
 { #category : #'as yet unclassified' }
