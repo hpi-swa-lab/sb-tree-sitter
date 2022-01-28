@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSPalette class >> context [
 
-	^ {#isInlineBlock. [:block | block language = self language]}
+	^ {#language understood. [:block | block language = self language]}
 ]
 
 { #category : #'as yet unclassified' }
@@ -19,5 +19,5 @@ SBTSPalette class >> grammarHandler [
 { #category : #'as yet unclassified' }
 SBTSPalette class >> language [
 
-	^ nil
+	^ #neverMatch
 ]

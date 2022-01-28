@@ -93,12 +93,6 @@ SBInlineBlockSymbol >> contents [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> deleteTargetFor: aBlock [
-
-	^ self owner deleteTargetFor: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> elementsDo: aBlock [
 
 	

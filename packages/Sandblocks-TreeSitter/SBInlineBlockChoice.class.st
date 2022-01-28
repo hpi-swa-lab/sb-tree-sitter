@@ -88,14 +88,6 @@ SBInlineBlockChoice >> childrenIn: anExplore [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockChoice >> deleteTargetFor: aBlock [
-
-	self owner isInlineBlock not ifTrue: [^ self].
-	
-	^ self owner deleteTargetFor: self
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockChoice >> elementsDo: aBlock [
 
 	self alternatives do: [:alt | aBlock value: alt]

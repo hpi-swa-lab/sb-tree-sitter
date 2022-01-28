@@ -42,6 +42,12 @@ SBTSUnknown >> cursorPositionsDo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknown >> deleteTarget [
+
+	^ self owner deleteTarget
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknown >> factory [
 
 	^ factory ifNil: [self owner isInlineBlock ifTrue: [self owner factory] ifFalse: [nil]]
@@ -129,9 +135,23 @@ SBTSUnknown >> keyStroke: anEvent [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknown >> language [
+
+	^ self factory ifNotNil: [:f | f class language]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknown >> lengthOfLeftMostPath [
 
 	^ 1
+]
+
+{ #category : #'as yet unclassified' }
+SBTSUnknown >> newNullBlock [
+
+	^ SBTSUnknown new
+		template: self template value buildCopy;
+		grammarHandler: self grammarHandler
 ]
 
 { #category : #'as yet unclassified' }

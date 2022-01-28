@@ -271,6 +271,12 @@ SBInlineBlock >> compatibleWithType: aTypeString [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> containingRepeat [
+
+	^ self owner isInlineBlock ifTrue: [self owner containingRepeat] ifFalse: [nil]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> containingSandblock [
 
 	^ self inline ifTrue: [self owner ifNotNil: #containingSandblock] ifFalse: [self]
@@ -326,7 +332,7 @@ SBInlineBlock >> deleteCommandFor: aBlock [
 
 	aBlock owner isInlineBlock ifFalse: [^ nil].
 	
-	^ (aBlock owner deleteTargetFor: aBlock)
+	^ aBlock deleteTarget
 		ifNotNil: [:target | SBDeleteCommand new target: target]
 		ifNil: [
 			aBlock newNullBlock ifNotNil: [:nullBlock |
@@ -336,9 +342,12 @@ SBInlineBlock >> deleteCommandFor: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlock >> deleteTargetFor: aBlock [
+SBInlineBlock >> deleteTarget [
 
-	^ nil
+	self owner isInlineBlock ifFalse: [^ nil].
+	self owner inline ifFalse: [^ nil].
+	(self owner isKindOf: SBInlineBlockRepeat) ifTrue: [^ self].
+	^ self owner deleteTarget
 ]
 
 { #category : #'as yet unclassified' }
@@ -763,6 +772,15 @@ SBInlineBlock >> newEmptyChildNear: aBlock before: aBoolean [
 	self flag: #todo.
 	" if we have multiple repeating elements, get the one near aBlock "
 	^ self repeaterChild ifNotNil: [:c | c element instantiate]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> newNullBlock [
+
+	^ SBTSUnknown new
+		factory: self factory;
+		template: self buildCopy;
+		grammarHandler: self grammarHandler
 ]
 
 { #category : #'as yet unclassified' }

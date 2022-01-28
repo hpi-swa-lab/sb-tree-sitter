@@ -49,6 +49,12 @@ SBInlineBlockRepeat >> buildWithFields: aStream alternatives: aDictionary [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockRepeat >> canDeleteChild [
+
+	^ self required not or: [self submorphCount > 1]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> childrenForQueryDo: aBlock [
 
 	self submorphsDo: [:m | m childrenForQueryDo: aBlock]
@@ -62,6 +68,12 @@ SBInlineBlockRepeat >> childrenIn: anExplore [
 	
 	index := anExplore indexFor: self.
 	^ Array streamContents: [:stream | (required ifTrue: [index] ifFalse: [index - 1]) timesRepeat: [stream nextPut: self element]]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockRepeat >> containingRepeat [
+
+	^ self
 ]
 
 { #category : #'as yet unclassified' }
@@ -83,14 +95,6 @@ SBInlineBlockRepeat >> cursorPositionsDo: aBlock [
 		morph cursorPositionsDo: aBlock.
 		multiple ifTrue: [buildInsert value: morph value: false]].
 	(multiple or: [self hasSubmorphs not]) ifTrue: [buildInsert value: nil value: false]
-]
-
-{ #category : #'as yet unclassified' }
-SBInlineBlockRepeat >> deleteTargetFor: aBlock [
-
-	^ (required not or: [self submorphCount > 1])
-		ifTrue: [aBlock]
-		ifFalse: [self owner deleteTargetFor: self]
 ]
 
 { #category : #'as yet unclassified' }
