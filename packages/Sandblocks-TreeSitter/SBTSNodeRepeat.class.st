@@ -74,12 +74,24 @@ SBTSNodeRepeat >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeRepeat >> takeNodesFrom: aParser [
 
-	| results |
-	" parse multiple "
-	self flag: #todo.
-	results := self element takeNodesFrom: aParser.
-	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{self makeConcrete parser: aParser}]].
-	^ results collect: [:result | self makeConcrete addChild: result]
+	| queue |
+	queue := OrderedCollection with: self makeConcrete.
+	^ (Array streamContents: [:stream |
+		[queue notEmpty] whileTrue: [ | repeating results parserCopy currentPosition |
+			repeating := queue removeFirst.
+			parserCopy := (repeating hasSubmorphs
+				ifTrue: [repeating lastChild parser]
+				ifFalse: [aParser]) copy.
+			currentPosition := parserCopy position.
+			results := self element takeNodesFrom: parserCopy.
+			results ~= #noMatch ifTrue: [
+				results do: [:res | | candidate |
+					"to fix troubles with infinitely repeating matches, we only accept results
+if they advanced the parser."
+					res parser position > currentPosition ifTrue: [
+						candidate := repeating copy addChild: res.
+						stream nextPut: candidate.
+						queue add: candidate]]]]]) ifEmpty: [self required ifTrue: [#noMatch] ifFalse: [{self makeConcrete parser: aParser copy}]]
 ]
 
 { #category : #printing }

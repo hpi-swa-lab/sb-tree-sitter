@@ -324,6 +324,8 @@ SBMetaBlockFactory >> bodyNodeForRule: aString [
 { #category : #helper }
 SBMetaBlockFactory >> bodyNodeForRule: aString ifAbsent: aBlock [
 
+	((self inlinedRules includes: aString) and: [(self supertypes includes: aString) not]) ifTrue: [^ aBlock value].
+	
 	nodesCache ifNil: [nodesCache := Dictionary new].
 	^ nodesCache
 		at: aString

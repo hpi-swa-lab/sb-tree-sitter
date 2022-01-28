@@ -14,6 +14,12 @@ SBTSFileParser >> atEnd [
 ]
 
 { #category : #stream }
+SBTSFileParser >> contentsSize [
+
+	^ stream originalContents size
+]
+
+{ #category : #stream }
 SBTSFileParser >> next [
 
 	^ stream next
@@ -36,7 +42,7 @@ SBTSFileParser >> nodeForCursor: aCursor [
 						current := aCursor node].
 					atEnd].
 				aCursor gotoParent]].
-		stream := (fields ifEmpty: [{aCursor text}]) readStream.
+		stream := (fields ifEmpty: [aCursor text ifEmpty: [#()] ifNotEmpty: [{aCursor text}]]) readStream.
 		matches := template takeNodesFrom: self.
 		self assert: matches ~= #noMatch description: ('could not construct `{1}`' format: {type}).
 		self assert: matches size = 1.

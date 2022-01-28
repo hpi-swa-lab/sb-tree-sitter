@@ -10,6 +10,12 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #accessing }
+SBTSNodeBase >> access [
+
+	^ SBTSFieldAccessor new element: self
+]
+
 { #category : #hierarchy }
 SBTSNodeBase >> addChild: aNode [
 
@@ -35,6 +41,12 @@ SBTSNodeBase >> basicCopy [
 		factory: factory;
 		parser: parser;
 		isConcrete: isConcrete
+]
+
+{ #category : #accessing }
+SBTSNodeBase >> basicField [
+
+	^ field
 ]
 
 { #category : #hierarchy }
@@ -79,6 +91,13 @@ SBTSNodeBase >> copy [
 ]
 
 { #category : #accessing }
+SBTSNodeBase >> currentTextMorph [
+
+	self submorphsDo: [:m | (m isTSNode and: [m inline]) ifTrue: [m currentTextMorph ifNotNil: [:t | ^ t]]].
+	^ nil
+]
+
+{ #category : #accessing }
 SBTSNodeBase >> factory [
 
 	^ factory
@@ -93,7 +112,7 @@ SBTSNodeBase >> factory: aFactory [
 { #category : #accessing }
 SBTSNodeBase >> field [
 
-	^ field
+	^ self basicField ifNil: [(self owner notNil and: [self owner isTSNode and: [self owner inline]]) ifTrue: [self owner field]]
 ]
 
 { #category : #accessing }
@@ -143,6 +162,18 @@ SBTSNodeBase >> isConcrete: aBoolean [
 SBTSNodeBase >> isSandblock [
 
 	^ self inline not
+]
+
+{ #category : #statements }
+SBTSNodeBase >> isStatement [
+
+	^ self parentSandblock isTSNode and: [self parentSandblock isStatementContainer]
+]
+
+{ #category : #statements }
+SBTSNodeBase >> isStatementContainer [
+
+	^ false
 ]
 
 { #category : #testing }
@@ -225,7 +256,7 @@ SBTSNodeBase >> printElementsSeparated: aCollection on: aStream indent: aNumber 
 			element writeSourceOn: stream indent: ((self factory indentMatch: element)
 				ifTrue: [aNumber + 1]
 				ifFalse: [aNumber])].
-		(self isKindOf: SBInlineBlockRepeat)
+		(self isKindOf: SBTSNodeRepeat)
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
 				((index > 1 and: [(self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [self containingSymbol parentSandblock isInlineBlock or: [first not]]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
@@ -282,6 +313,12 @@ SBTSNodeBase >> printSExprOn: aStream depth: aNumber short: aBoolean [
 SBTSNodeBase >> resultsFor: aParser [
 
 	^ self subclassResponsibility
+]
+
+{ #category : #statements }
+SBTSNodeBase >> statements [
+
+	^ self isStatementContainer ifTrue: [self childSandblocks] ifFalse: [nil]
 ]
 
 { #category : #parsing }

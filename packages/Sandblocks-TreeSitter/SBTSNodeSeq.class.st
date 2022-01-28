@@ -75,9 +75,7 @@ SBTSNodeSeq >> resultsFor: aParser [
 SBTSNodeSeq >> takeNodesFrom: aParser [
 
 	| queue |
-	queue := OrderedCollection new
-		add: self makeConcrete;
-		yourself.
+	queue := OrderedCollection with: self makeConcrete.
 	^ (Array streamContents: [:stream |
 		[queue notEmpty] whileTrue: [ | seq results |
 			seq := queue removeFirst.

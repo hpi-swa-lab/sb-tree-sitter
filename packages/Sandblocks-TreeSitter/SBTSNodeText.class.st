@@ -104,7 +104,14 @@ SBTSNodeText >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeText >> takeNodesFrom: aParser [
 
-	(aParser atEnd or: [aParser peek isString not]) ifTrue: [^ (regex matches: '') ifTrue: [{self makeConcrete contents: ''}] ifFalse: [#noMatch]].
+	(aParser atEnd or: [aParser peek isString not]) ifTrue: [
+		^ (regex matches: '')
+			ifTrue: [
+				{
+					self makeConcrete
+						contents: '';
+						parser: aParser copy}]
+			ifFalse: [#noMatch]].
 	^ (self regex matches: aParser peek)
 		ifTrue: [
 			{

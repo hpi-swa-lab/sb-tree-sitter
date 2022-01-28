@@ -69,7 +69,11 @@ SBTSNodeAlias >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeAlias >> takeNodesFrom: aParser [
 
-	^ (aParser atEnd not and: [aParser peek isString not and: [aParser peek type = self alias or: [(aParser peek isKindOf: self class) and: [aParser peek alias = self alias]]]])
+	^ (aParser atEnd not and: [
+		aParser peek isString not and: [
+			SBToggledCode comment: '' active: 1 do: {
+				[(aParser peek isKindOf: self class) and: [aParser peek alias = self alias]].
+				[aParser peek type = self alias or: [(aParser peek isKindOf: self class) and: [aParser peek alias = self alias]]]}]])
 		ifTrue: [
 			{
 				self makeConcrete

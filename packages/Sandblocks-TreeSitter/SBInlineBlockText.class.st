@@ -3,7 +3,8 @@ Class {
 	#superclass : #SBInlineBlock,
 	#instVars : [
 		'regexString',
-		'regex'
+		'regex',
+		'valid'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -124,7 +125,8 @@ SBInlineBlockText >> hasSameStructureAs: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlockText >> initialize [
 
-	super initialize
+	super initialize.
+	valid := true
 ]
 
 { #category : #'as yet unclassified' }
@@ -193,6 +195,9 @@ SBInlineBlockText >> regexString: aString [
 		ifTrue: [SBMultilineOwnTextMorph new maxWidth: 500]
 		ifFalse: [SBOwnTextMorph new])
 		contents: '';
+		when: #contentsChanged
+			send: #updateValid
+			to: self;
 		vResizing: #shrinkWrap;
 		yourself)
 ]
@@ -231,9 +236,15 @@ SBInlineBlockText >> takeStreamFrom: anObject [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockText >> updateValid [
+
+	valid := regex matches: self contents
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockText >> valid [
 
-	^ regex matches: self contents
+	^ valid ifNil: [true]
 ]
 
 { #category : #'as yet unclassified' }

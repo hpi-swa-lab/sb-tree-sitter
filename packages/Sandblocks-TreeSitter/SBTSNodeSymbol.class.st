@@ -40,10 +40,24 @@ SBTSNodeSymbol >> containingSymbol [
 	
 ]
 
+{ #category : #accessing }
+SBTSNodeSymbol >> contents [
+
+	^ (self factory ifNotNil: [:f | f containsPromotedInlineSymbol: self type] ifNil: [false])
+		ifTrue: [String streamContents: [:stream | self childSandblocksDo: [:child | child contents ifNotNil: [:content | stream nextPutAll: content]]]]
+		ifFalse: [super contents]
+]
+
 { #category : #testing }
 SBTSNodeSymbol >> inline [
 
-	^ self isSuperType
+	^ factory isNil or: [factory shouldBlockInline: self type]
+]
+
+{ #category : #statements }
+SBTSNodeSymbol >> isStatementContainer [
+
+	^ factory isStatementContainer: self type
 ]
 
 { #category : #testing }
@@ -113,7 +127,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeSymbol >> takeNodesFrom: aParser [
 
-	self isSuperType ifTrue: [ | results |
+	(self isSuperType or: [factory promotedInlineSymbols includes: self type]) ifTrue: [ | results |
 		results := self bodyTemplate takeNodesFrom: aParser.
 		^ results = #noMatch
 			ifTrue: [#noMatch]

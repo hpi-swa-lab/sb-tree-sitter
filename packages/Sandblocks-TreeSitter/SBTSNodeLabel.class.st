@@ -25,6 +25,12 @@ SBTSNodeLabel >> childrenForQueryDo: aBlock [
 	aBlock value: self
 ]
 
+{ #category : #accessing }
+SBTSNodeLabel >> contents [
+
+	^ self label
+]
+
 { #category : #copying }
 SBTSNodeLabel >> copy [
 
