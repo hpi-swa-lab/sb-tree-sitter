@@ -93,6 +93,12 @@ SBPyPltPlot >> isAxes [
 	^ true
 ]
 
+{ #category : #'initialize-release' }
+SBPyPltPlot >> palettes [
+
+	^ super palettes,{SBPyPltPalettePlot}
+]
+
 { #category : #'as yet unclassified' }
 SBPyPltPlot >> writeSourceOn: aStream [
 

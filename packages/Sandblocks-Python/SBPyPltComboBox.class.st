@@ -1,5 +1,5 @@
 "
-This class changes its parent class such that the content of the chosen option is shown instead of the content.
+This class changes its parent class such that the content of the chosen option is shown instead of the content. It adapts to the python palette context.
 "
 Class {
 	#name : #SBPyPltComboBox,
@@ -9,7 +9,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBPyPltComboBox >> display: anObject [
-"overrides super method to display content of first SBStringMorph found."
+"overrides super method to display content of first possible selection item."
 
 	| sBStringMorphs |
 	
@@ -17,10 +17,4 @@ SBPyPltComboBox >> display: anObject [
 			sBStringMorphs := anObject submorphs select: [ :aMorph | aMorph className =  'SBStringMorph' ].
 			(sBStringMorphs size > 0) ifTrue: [^ sBStringMorphs first contents]
 		] ifFalse: [^ super display: anObject]
-]
-
-{ #category : #'as yet unclassified' }
-SBPyPltComboBox >> isPyPltPlotParam [
-	"indicates that this is a parameter of matplotlib's ax.plot() method."
-	^ true
 ]

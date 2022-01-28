@@ -51,7 +51,7 @@ SBPyRuntimeOSProcess class >> selectPath [
 SBPyRuntimeOSProcess >> evaluate: aString [
 
 	| python |
-	python := self class defaultPythonPath ifNil: [^ nil].
+	python := '/opt/homebrew/bin/python3'.
 	
 	^ self
 		tmpFile: aString
@@ -62,7 +62,7 @@ SBPyRuntimeOSProcess >> evaluate: aString [
 SBPyRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 
 	| python ret |
-	python := self class defaultPythonPath ifNil: [^ nil].
+	python := '/opt/homebrew/bin/python3'.
 	
 	ret := Promise new.
 	[self spawnWatchDuring: [:port | ret resolveWith: (self cmd: python arguments: {aString} env: {'SQ_WATCH' -> port} stdin: nil cancel: aBlock) wait]] fork.
@@ -73,7 +73,7 @@ SBPyRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 SBPyRuntimeOSProcess >> evaluateModuleAsync: aString in: aPath args: aCollection cancel: aBlock [
 
 	| python ret env |
-	python := self class defaultPythonPath ifNil: [^ nil].
+	python := '/opt/homebrew/bin/python3'.
 	
 	env := SBExecutionEnvironment value.
 	

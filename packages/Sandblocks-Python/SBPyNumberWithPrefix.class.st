@@ -1,47 +1,63 @@
-"
-A hard copy of SbStNumberWithPrefix to change the context to Python.
-"
 Class {
 	#name : #SBPyNumberWithPrefix,
-	#superclass : #SBStNumber,
+	#superclass : #SBStNumberWithPrefix,
 	#instVars : [
-		'prefix'
+		'isPyPltPlotParam',
+		'rangeMin',
+		'rangeMax'
 	],
 	#category : #'Sandblocks-Python'
 }
 
-{ #category : #'as yet unclassified' }
-SBPyNumberWithPrefix >> castToUnknownWhenEmpty [
+{ #category : #flagging }
+SBPyNumberWithPrefix >> contents: aString [
 
-	^ false
+	| aValidNumber |
+"	self halt."
+"	aValidNumber := aString asInteger min: rangeMax; max: rangeMin."
+
+	aString
+		ifNil: [super contents: '0']
+		ifNotNil: [super contents: aString asInteger asString].
 ]
 
-{ #category : #'as yet unclassified' }
-SBPyNumberWithPrefix >> isPyPltPlotParam [
-	"indicates that this is a parameter of matplotlib's ax.plot() method."
-	^ true
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #flagging }
 SBPyNumberWithPrefix >> isSmalltalk [
 	
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
-SBPyNumberWithPrefix >> keyStroke: anEvent [
+{ #category : #flagging }
+SBPyNumberWithPrefix >> language [
 
-	self acceptInputEvent: anEvent
+	^ #python
 ]
 
 { #category : #'as yet unclassified' }
-SBPyNumberWithPrefix >> prefix: aString [
+SBPyNumberWithPrefix >> rangeFrom: aNumber1 to: aNumber2 [
 
-	prefix := aString
+	aNumber1 assert: [:num | num isNil not].
+	aNumber2 assert: [:num | num isNil not].	
+	aNumber1 assert: [:num | num <= aNumber2].
+
+	rangeMin := aNumber1.
+	rangeMax := aNumber2.
 ]
 
 { #category : #'as yet unclassified' }
-SBPyNumberWithPrefix >> symbols [
+SBPyNumberWithPrefix >> rangeMax [
 
-	^ {prefix. nil}
+	^ rangeMax
+]
+
+{ #category : #'as yet unclassified' }
+SBPyNumberWithPrefix >> rangeMin [
+
+	^ rangeMin
+]
+
+{ #category : #flagging }
+SBPyNumberWithPrefix >> stopEditing: aCommand [
+	super stopEditing: aCommand.
+	self triggerEvent: #edited
 ]

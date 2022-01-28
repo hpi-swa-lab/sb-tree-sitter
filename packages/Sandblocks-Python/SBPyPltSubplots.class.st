@@ -6,30 +6,11 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBPyPltSubplots class >> matchPython: aDictionary do: aBlock [
-	<lang: #python match: '(module
-  (expression_statement
-  (assignment
-    left:
-      (pattern_list
-        (identifier) ="ax"
-        (identifier) ="fig"
-      )
-    right:
-      (call
-        function:
-          (attribute
-            object: (identifier) ="plt"
-            attribute: (identifier) ="subplots"
-          )
-      )
-  )
-) @initMatplotlib
-)' sample: 'ax, fig = plt.subplots()'>
 "TODO: replace arg of createFigureButtonFrom to enclosing node in aDictionary as soon as supported"
 	
 	^ aBlock
 		value: (aDictionary at: 'initMatplotlib')
-		value: (self new factory: (aDictionary at: 'initMatplotlib') factory; createFigureButtonFrom: (self newNullBlock: 'Axes type'))
+		value: (self new factory: (aDictionary at: 'initMatplotlib') factory; createFigureButtonFrom: (self nil))
 ]
 
 { #category : #'initialize-release' }

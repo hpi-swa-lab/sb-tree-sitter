@@ -11,11 +11,9 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltParamReplacement >> isPyPltPlotParam [
-	"indicates that this is a parameter of matplotlib's ax.plot() method.
-	
-	NOTE: This doesnt work because the child node take up all the space"
-	^ true
+SBPyPltParamReplacement >> palettes [
+
+	^ {SBPyPltPalettePlot}
 ]
 
 { #category : #'as yet unclassified' }

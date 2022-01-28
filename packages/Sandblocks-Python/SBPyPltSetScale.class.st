@@ -60,9 +60,9 @@ Since the values close to zero tend toward infinity, there is a need to have a r
 
 	self addMorphBack: (SBRow new
 			addMorphBack: (SBTextBubble new contents: anAxis);
-			addMorphBack: (SBStringMorph new contents: 'axis:');
+			addMorphBack: (SBStringMorph new contents: 'axis scale:');
 			addMorphBack: (SBComboBox new 
-				values: items; prefix: 'Scale: '; tooltips: itemsTooltips);
+				values: items; tooltips: itemsTooltips; object: aLabel);
 			cellGap: 4
 		)
 ]

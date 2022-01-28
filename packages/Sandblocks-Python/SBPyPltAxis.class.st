@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltAxis >> isAxis [
+SBPyPltAxis >> palettes [
 
-	^ true
+	^ {SBPyPltPalette}
 ]

@@ -12,7 +12,7 @@ SBPyPltDashCapStyle class >> matchPython: aDictionary do: aBlock [
 	<lang: #python match: '(keyword_argument
 	name: (identifier) ="dash_capstyle"
     value: (string) @value
-) @argument' sample: 'dash_capstyle="o"'>
+) @argument' sample: 'dash_capstyle="butt"'>
 	
 	^ aBlock
 		value: (aDictionary at: 'argument')

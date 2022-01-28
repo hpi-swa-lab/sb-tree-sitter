@@ -1,3 +1,6 @@
+"
+This is the parent class for all palettes for matplotlib. The palettes are referenced by the 'palettes' selector of the replacements. They are shown when the user clicks on a block which itself or whose parent blocks reference the palette. See the sandblocks documentation for more details. 
+"
 Class {
 	#name : #SBPyPalette,
 	#superclass : #SBTSPalette,
@@ -15,7 +18,7 @@ SBPyPalette class >> buildOn: aBuilder [
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPalette class >> language [
+SBPyPalette class >> languageOld [
 
 	^ #python
 ]

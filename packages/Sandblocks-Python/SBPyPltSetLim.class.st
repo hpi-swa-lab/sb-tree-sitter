@@ -40,7 +40,7 @@ SBPyPltSetLim >> createReplacementFrom: minNumber to: maxNumber  ofAxis: anAxis 
 		addMorphBack: (SBRow new
 			addMorphBack: (SBTextBubble new contents: anAxis);
 			addMorphBack: (SBStringMorph new contents: 'axis');
-			addMorphBack: (SBStringMorph new contents: 'imit:');
+			addMorphBack: (SBStringMorph new contents: 'limit:');
 			addMorphBack: (SBStringMorph new contents: '[');
 			addMorphBack: (SBStNumberWithPrefix new contents: minNumber);
 			addMorphBack: (SBStringMorph new contents: ',');

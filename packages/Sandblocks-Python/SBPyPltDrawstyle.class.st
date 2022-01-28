@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBPyPltDrawstyle class >> matchPython: aDictionary do: aBlock [
 	<lang: #python match: '(keyword_argument
-	name: (identifier) ="drawstyle"
+	name: [(identifier) ="drawstyle" (identifier) ="ds"]
     value: (string) @value
 ) @argument' sample: 'drawstyle="steps"'>
 	
@@ -16,21 +16,6 @@ SBPyPltDrawstyle class >> matchPython: aDictionary do: aBlock [
 		value: (self new factory: (aDictionary at: 'argument') factory;
 			createReplacement: (aDictionary at: 'value') contents;
 			source: (aDictionary at: 'argument') sourceString
-			)
-]
-
-{ #category : #'as yet unclassified' }
-SBPyPltDrawstyle class >> matchShortenedPython: aDictionary do: aBlock [
-"same as matchPython: do: but uses the abbreviation of the keyword."
-	<lang: #python match: '(keyword_argument
-	name: (identifier) ="ds"
-    value: (string) @value
-) @argument' sample: 'ds="steps"'>
-	
-	^ aBlock
-		value: (aDictionary at: 'argument')
-		value: (self new factory: (aDictionary at: 'argument') factory;
-			createReplacement: (aDictionary at: 'value') contents
 			)
 ]
 

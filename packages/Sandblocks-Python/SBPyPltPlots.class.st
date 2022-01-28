@@ -14,6 +14,11 @@ SBPyPltPlots >> isAxes [
 ]
 
 { #category : #'as yet unclassified' }
+SBPyPltPlots >> palettes [
+	^ {SBPyPltPalette}
+]
+
+{ #category : #'as yet unclassified' }
 SBPyPltPlots >> type [
 
 	^ 'call'
