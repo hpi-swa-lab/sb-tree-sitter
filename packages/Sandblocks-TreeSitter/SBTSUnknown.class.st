@@ -87,7 +87,7 @@ SBTSUnknown >> hasSameStructureAs: aBlock [
 { #category : #'as yet unclassified' }
 SBTSUnknown >> hint [
 
-	^ self label
+	^ self currentTextMorph placeholderText
 ]
 
 { #category : #'as yet unclassified' }
