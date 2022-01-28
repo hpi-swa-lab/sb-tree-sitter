@@ -11,5 +11,6 @@ OrderedDictionary {
 	'packages/BaselineOfSBTreeSitter' : #SquotTonelSerializer,
 	'packages/Sandblocks-TSSmalltalk' : #SquotTonelSerializer,
 	'packages/Sandblocks-C' : #SquotTonelSerializer,
-	'packages/Sandblocks-Vhdl' : #SquotTonelSerializer
+	'packages/Sandblocks-Vhdl' : #SquotTonelSerializer,
+	'packages/Sandblocks-Verilog' : #SquotTonelSerializer
 }
