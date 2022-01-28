@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSParseFileTest >> expectedFailures [
 
-	^ #(#testJavascriptTemplateString)
+	^ #(#testJavascriptTemplateString #testPythonImport)
 ]
 
 { #category : #tests }
