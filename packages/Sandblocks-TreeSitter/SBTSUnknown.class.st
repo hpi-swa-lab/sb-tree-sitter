@@ -168,6 +168,22 @@ SBTSUnknown >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknown >> suggestAlways [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSUnknown >> suggestions [
+
+	| t |
+	t := self template value.
+	^ ((t isKindOf: SBInlineBlockChoice) and: [t alternatives allSatisfy: [:alt | alt isKindOf: SBInlineBlockLabel]])
+		ifTrue: [t alternatives collect: [:alt | SBSuggestionItem selector: alt contents label: (self hint ifNil: [''])]]
+		ifFalse: [#()]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknown >> takeStreamFrom: anOption [
 
 	^ false
@@ -236,6 +252,12 @@ SBTSUnknown >> type: aString factory: aFactory [
 SBTSUnknown >> unbuiltChildrenIn: anOption [
 
 	^ #()
+]
+
+{ #category : #'as yet unclassified' }
+SBTSUnknown >> useSuggestion: anItem [
+
+	self tryInterpretInput: anItem contents
 ]
 
 { #category : #'as yet unclassified' }
