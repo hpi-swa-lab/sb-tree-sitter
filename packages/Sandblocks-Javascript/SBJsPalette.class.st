@@ -10,40 +10,31 @@ SBJsPalette class >> buildOn: aBuilder [
 	aBuilder addHeader: 'Javascript'.
 	
 	aBuilder addSectionHeader: 'Fetch'.
-	aBuilder addBlock: 'simple fetch' as: (SBJavascript parse: 'window.fetch("")').
-	aBuilder
-		addBlock: 'json fetch'
-		as: (SBJavascript parse: 'window.fetch("", {headers: {"Content-Type": "application/json"}})').
-	aBuilder addBlock: 'json fetch' as: (SBJsFetch new
-		factory: SBJavascript new;
-		url: 'http://...'
-			options: (SBJavascript parse: '{headers: {"Content-Type": "application/json"}}') childSandblocks first).
-	aBuilder addBlock: 'GET' as: (SBJsFetch new
-		factory: SBJavascript new;
-		url: 'http://localhost:8080'
-			method: #get
-			headers: (Dictionary newFrom: {'Content-Type' -> 'text/html'})
-			data: '{"key" : "value"}').
 	
-	aBuilder addBlock: 'POST' as: (SBJsFetch new
+	aBuilder addBlock: 'POST' as: (SBJsRequestTool new
 		factory: SBJavascript new;
 		url: 'http://localhost:8080'
 			method: #post
 			headers: (Dictionary newFrom: {'Content-Type' -> 'application/json'})
 			data: '{"key" : "value"}').
 			
-	aBuilder addBlock: 'GET' as: (SBJsFetch new
+	aBuilder addBlock: 'GET' as: (SBJsRequestTool new
 		factory: SBJavascript new;
-		url: 'http://localhost:8080/user'
+		url: 'http://localhost:8080/'
 			method: #get
 			headers: (Dictionary newFrom: {'Content-Type' -> 'text/html'})
 			data: '{"key" : "value"}').
 			
-	aBuilder addBlock: 'GET' as: (SBJsFetchSmall new
+	aBuilder addBlock: 'Small GET' as: (SBJsEmbeddedExpressGet new
 		factory: SBJavascript new;
-		url: 'http://localhost:8080/user'
-			method: #get
-			headers: (Dictionary newFrom: {'Content-Type' -> 'plain'})
+			url: 'http://localhost:8080/user'
+			headers: (Dictionary newFrom: {'Content-Type' -> 'text/plain'})
+			data: nil).
+			
+	aBuilder addBlock: 'Small POST' as: (SBJsEmbeddedExpressPost new
+		factory: SBJavascript new;
+			url: 'http://localhost:8080/example'
+			headers: (Dictionary newFrom: {'Content-Type' -> 'text/plain'})
 			data: '{"key" : "value"}').
 ]
 

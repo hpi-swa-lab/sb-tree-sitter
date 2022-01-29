@@ -1,16 +1,16 @@
 Class {
-	#name : #SBJsFetchParamTextBubble,
-	#superclass : #SBJsFetchTextBubble,
+	#name : #SBJsRequestToolParamTextBubble,
+	#superclass : #SBJsRequestToolTextBubble,
 	#category : #'Sandblocks-Javascript'
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchParamTextBubble >> initialize [
+SBJsRequestToolParamTextBubble >> initialize [
 	super initialize.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchParamTextBubble >> promptChangeValue [
+SBJsRequestToolParamTextBubble >> promptChangeValue [
 
 	| index key fetch paramsCopy |
 	index := UIManager default chooseFrom: self values.
@@ -26,7 +26,7 @@ SBJsFetchParamTextBubble >> promptChangeValue [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchParamTextBubble >> values [
+SBJsRequestToolParamTextBubble >> values [
 
 	^ #('Remove param')
 ]

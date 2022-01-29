@@ -1,6 +1,6 @@
 Class {
-	#name : #SBJsFetchBodyTextBubble,
-	#superclass : #SBJsFetchTextBubble,
+	#name : #SBJsRequestToolBodyTextBubble,
+	#superclass : #SBJsRequestToolTextBubble,
 	#instVars : [
 		'dict'
 	],
@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetchBodyTextBubble >> initMap [
+SBJsRequestToolBodyTextBubble >> initMap [
 
 	| map |
 	map := Dictionary new.
@@ -23,23 +23,24 @@ SBJsFetchBodyTextBubble >> initMap [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchBodyTextBubble >> initialize [
+SBJsRequestToolBodyTextBubble >> initialize [
 	super initialize.
 	dict := self initMap.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchBodyTextBubble >> promptChangeValue [
+SBJsRequestToolBodyTextBubble >> promptChangeValue [
 
 	| index key values placeholderTxt contentType |
 	index := UIManager default chooseFrom: self values.
 	
 	index > 0 ifTrue: [
 		key := self values at: index.
-		key = 'Clear'
-			ifTrue: [
-				owner owner data: ''.
-				owner owner recreateFromMorphs]
+		key = 'Remove Body'
+			ifTrue: [ | fetch |
+				fetch := owner owner.
+				fetch bodyMorph: nil.
+				fetch recreateFromVariables: fetch headers params: fetch params body: nil]
 			ifFalse: [
 				values := self valuesForKey: key.
 				placeholderTxt := values at: 1.
@@ -52,13 +53,13 @@ SBJsFetchBodyTextBubble >> promptChangeValue [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchBodyTextBubble >> values [
+SBJsRequestToolBodyTextBubble >> values [
 
-	^ #('Raw-JSON' 'Raw-Text' 'Raw-HTML' 'Raw-JavaScript' 'Raw-XML' 'form-data' 'Clear')
+	^ #('Raw-JSON' 'Raw-Text' 'Raw-HTML' 'Raw-JavaScript' 'Raw-XML' 'form-data' 'Remove Body')
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetchBodyTextBubble >> valuesForKey: key [
+SBJsRequestToolBodyTextBubble >> valuesForKey: key [
 "Returns for the given key an array of 2 elements. First is the placeholder text and second the content-type value"
 	^dict at: key.
 ]

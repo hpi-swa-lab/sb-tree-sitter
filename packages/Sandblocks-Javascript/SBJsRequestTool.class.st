@@ -1,5 +1,8 @@
+"
+Base class which can be used standalone to perform HTTP requests.
+"
 Class {
-	#name : #SBJsFetch,
+	#name : #SBJsRequestTool,
 	#superclass : #SBInlineBlockReplace,
 	#instVars : [
 		'url',
@@ -24,64 +27,46 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBJsFetch class >> matchJs: aDictionary do: aBlock [
-	<lang: #javascript match: '(call_expression
-	(member_expression
-    	(identifier) @window
-        (property_identifier) @fetch)
-    (arguments
-    	(string) @url
-        (object) @params)
-) @call' sample: 'window.fetch(''url'', {})'>
-
-	(aDictionary at: 'fetch') contents = 'fetch' ifFalse: [^ nil].
-	(aDictionary at: 'window') contents = 'window' ifFalse: [^ nil].
-	
-	^ aBlock value: (aDictionary at: 'call') value: (self new
-		url: (aDictionary at: 'url') childSandblocks first contents
-		options: (aDictionary at: 'params'))
+SBJsRequestTool class >> matchJs: aDictionary do: aBlock [
+	self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> Examples [
+SBJsRequestTool >> Examples [
 	^Examples.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> addBodySection: aBody [
+SBJsRequestTool >> addBodySection: aBody [
 
 	| key |
+	aBody ifNotNil: [
 	isRawData
 		ifFalse: [
-			self
-				addMorphBack: (SBRow new
-					cellGap: cellGapConstant;
+			bodyMorph
 					addMorphBack: (SBStringMorph new contents: 'Body');
-					addMorphBack: (SBButton new icon: SBIcon iconPlus label: 'Field' do: [self addFieldAction]));
+					addMorphBack: (SBButton new icon: SBIcon iconPlus label: 'Field' do: [self addFieldAction]);
 				addMorphBack: (SBRow new
 					cellGap: cellGapConstant;
 					addMorphBack: (SBRow new
 						cellGap: 0;
-						addMorphBack: (SBJsFetchFieldTextBubble new
+						addMorphBack: (SBJsRequestToolFieldTextBubble new
 							cellGap: 0;
 							placeholderText: 'key');
 						addMorphBack: (SBTextBubble new
 							cellGap: 0;
 							placeholderText: 'value')))]
 		ifTrue: [
-			self addMorphBack: (SBRow new
-				cellGap: cellGapConstant;
+			bodyMorph
 				addMorphBack: (SBStringMorph new contents: 'Body');
-				addMorphBack: (SBJsFetchBodyTextBubble new contents: aBody))].
-	
-	bodyMorph := self submorphs seventh.
+				addMorphBack: (SBJsRequestToolBodyTextBubble new contents: aBody)].
 	
 	key := url, (method asString).
-	Examples at: key ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]]
+	Examples at: key ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]]].
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> addExampleSection [
+SBJsRequestTool >> addExampleSection [
 
 	SBToggledCode comment: '' active: 1 do: {
 		[ | map |
@@ -98,11 +83,11 @@ SBJsFetch >> addExampleSection [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> addFieldAction [
+SBJsRequestTool >> addFieldAction [
 	self submorphs sixth
 		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsFetchFieldTextBubble new
+			addMorphBack: (SBJsRequestToolFieldTextBubble new
 				placeholderText: 'key');
 			addMorphBack: (SBTextBubble new
 				placeholderText: 'value');
@@ -111,11 +96,10 @@ SBJsFetch >> addFieldAction [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> addHeaderAction [
+SBJsRequestTool >> addHeaderAction [
 	headerMorph
-		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsFetchHeaderTextBubble new
+			addMorphBack: (SBJsRequestToolHeaderTextBubble new
 				placeholderText: 'key');
 			addMorphBack: (SBTextBubble new
 				placeholderText: 'value');
@@ -124,15 +108,14 @@ SBJsFetch >> addHeaderAction [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> addHeaderAction: key value: value [
+SBJsRequestTool >> addHeaderAction: key value: value [
 
 	| valueTextBubble |
 	valueTextBubble := value = '' ifTrue: [(SBTextBubble new placeholderText: 'value')] ifFalse: [(SBTextBubble new contents: value)].
 	
 	headerMorph
-		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsFetchHeaderTextBubble new
+			addMorphBack: (SBJsRequestToolHeaderTextBubble new
 				contents: key);
 			addMorphBack: valueTextBubble;
 			 cellGap: 0);
@@ -142,12 +125,11 @@ SBJsFetch >> addHeaderAction: key value: value [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> addParamAction [
+SBJsRequestTool >> addParamAction [
 	paramMorph
 		submorphs;
-		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsFetchParamTextBubble new
+			addMorphBack: (SBJsRequestToolParamTextBubble new
 				placeholderText: 'key');
 			addMorphBack: (SBTextBubble new
 				placeholderText: 'value');
@@ -157,12 +139,11 @@ SBJsFetch >> addParamAction [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> addParamAction: key value: value [
-	self submorphs sixth
+SBJsRequestTool >> addParamAction: key value: value [
+	paramMorph
 		submorphs;
-		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsFetchParamTextBubble new
+			addMorphBack: (SBJsRequestToolParamTextBubble new
 				contents: key);
 			addMorphBack: (SBTextBubble new
 				contents: value);
@@ -171,7 +152,7 @@ SBJsFetch >> addParamAction: key value: value [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> addParamSection: aParams [
+SBJsRequestTool >> addParamSection: aParams [
 
 	| s |
 	self
@@ -201,55 +182,74 @@ SBJsFetch >> addParamSection: aParams [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> addRequestToExampleMap: response [
+SBJsRequestTool >> addRequestToExampleMap: response [
 
-	| map  example |
-	map := Examples at:( url, method asString) ifAbsent: [nil].
+	| map example |
+	map := Examples at: url, method asString ifAbsent: [nil].
 	example := nil.
 	
 	"Create the example"
 	method caseOf: {
-		[#get] -> [  
-			example := SBJsFetchGetExample new
+		[#get] -> [
+			example := SBJsRequestToolGetExample new
 				icon: SBIcon iconSearch
 				label: response code asString
 				do: [example promptChangeValue].
-			example code: (response code) deepCopy url: url deepCopy headers: headers deepCopy params: params deepCopy].
+			example
+				code: response code deepCopy
+				url: url deepCopy
+				headers: headers deepCopy
+				params: params deepCopy].
 		[#post] -> [
-			example := SBJsFetchPostExample new
+			example := SBJsRequestToolPostExample new
 				icon: SBIcon iconSearch
 				label: response code asString
-				do: ["TODO"].
-			example code: response code url: url headers: (headers deepCopy) body: nil]}.
+				do: [example promptChangeValue].
+			example
+				code: response code
+				url: url deepCopy
+				headers: headers deepCopy
+				body: data deepCopy
+				params: params deepCopy]}.
 	
 	"Add the example to the existing map or into a new map"
-	map = nil
-		ifFalse: [ | examplesForUrl |
-			examplesForUrl := Examples at: (url, method asString).
-			examplesForUrl at: (response code) ifAbsentPut: [OrderedCollection new].
-			(examplesForUrl at: (response code)) size < exampleThreshold 
-				ifTrue: [
-					(examplesForUrl at: (response code)) add: example] 
-				ifFalse: [
-					(examplesForUrl at: (response code)) removeLast.
-					(examplesForUrl at: (response code)) add: example beforeIndex: 1]]
-		ifTrue: [ | initDict initColl |
-			initDict := Dictionary new.
-			initColl := OrderedCollection new.
-			initColl add: example.
-			initDict at: response code put: initColl.
-			Examples at: (url, method asString) put: (initDict)]
+	map ifNotNil: [ | examplesForUrl |
+		examplesForUrl := Examples at: url, method asString.
+		examplesForUrl at: response code ifAbsentPut: [OrderedCollection new].
+		(examplesForUrl at: response code) size < exampleThreshold ifFalse: [(examplesForUrl at: response code) removeLast].
+		(examplesForUrl at: response code) add: example beforeIndex: 1].
+	map ifNil: [ | initDict initColl |
+		initDict := Dictionary new.
+		initColl := OrderedCollection new.
+		initColl add: example.
+		initDict at: response code put: initColl.
+		Examples at: url, method asString put: initDict]
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> clearPanel [
+SBJsRequestTool >> body [
+	^ data
+]
+
+{ #category : #'as yet unclassified' }
+SBJsRequestTool >> body: aBody [
+	data := aBody
+]
+
+{ #category : #'as yet unclassified' }
+SBJsRequestTool >> bodyMorph: aBodyMorph [
+	bodyMorph := aBodyMorph
+]
+
+{ #category : #'as yet unclassified' }
+SBJsRequestTool >> clearPanel [
 	(1 to: self submorphs size) do: [:n| | morph |
 		morph := self submorphs at: 1.
 		morph abandon].
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> collectParamsString [
+SBJsRequestTool >> collectParamsString [
 
 	| paramString init |
 	"Loop through the params and put them into a single string"
@@ -269,27 +269,27 @@ SBJsFetch >> collectParamsString [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> data: body [
+SBJsRequestTool >> data: body [
 	data := body.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> headerMorph [
+SBJsRequestTool >> headerMorph [
 	^headerMorph.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> headers [
+SBJsRequestTool >> headers [
 	^headers
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> headers: aHeadersMap [
+SBJsRequestTool >> headers: aHeadersMap [
 	headers := aHeadersMap.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> initCommons [
+SBJsRequestTool >> initCommons [
 	"Setup shared UI elements"
 
 	self
@@ -306,7 +306,7 @@ SBJsFetch >> initCommons [
 		addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
 			addMorphBack: (SBStringMorph new contents: 'Method');
-			addMorphBack: (SBJsFetchMethodSelect new object: method));
+			addMorphBack: (SBJsRequestToolMethodSelect new object: method));
 		addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
 			addMorphBack: (SBStringMorph new contents: 'Headers');
@@ -324,53 +324,59 @@ SBJsFetch >> initCommons [
 ]
 
 { #category : #'initialize-release' }
-SBJsFetch >> initGet: aParams [
+SBJsRequestTool >> initGet [
 	self
 		initCommons;
-		addParamSection: aParams.
+		addParamSection: nil.
 ]
 
 { #category : #'initialize-release' }
-SBJsFetch >> initPost: aBody [
+SBJsRequestTool >> initPost [
 	self
 		initCommons;
-		addParamSection: nil;
-		addBodySection: aBody.
+		addParamSection: nil.
+
+	"Init the body section and add it"
+	self	addMorphBack: SBRow new.
+	bodyMorph := self submorphs seventh.
+	data ifNotNil: [self addBodySection: data].
+	data ifNil: [self addBodySection: '']
+	
 	
 	
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> isRawData: aBoolean [
+SBJsRequestTool >> isRawData: aBoolean [
 	isRawData := aBoolean.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> method [
+SBJsRequestTool >> method [
 "Get the method of the class instance"
 	^method.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> method: aMethod [
+SBJsRequestTool >> method: aMethod [
 "Set the method of the class instance"
 	method := aMethod.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> params [
+SBJsRequestTool >> params [
 "Get the params map of the class instance"
 	^params
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> params: aParams [
+SBJsRequestTool >> params: aParams [
 "Set the params map of the class instance"
 	params := aParams.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> performGetRequest: urlWithParams [
+SBJsRequestTool >> performGetRequest: urlWithParams [
 
 	| resp client response |
 	client := WebClient new.
@@ -389,7 +395,7 @@ SBJsFetch >> performGetRequest: urlWithParams [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> performPostRequest: body url: aUrl [
+SBJsRequestTool >> performPostRequest: body url: aUrl [
 
 	| resp client response tmpHeaders |
 	client := WebClient new.
@@ -397,7 +403,7 @@ SBJsFetch >> performPostRequest: body url: aUrl [
 	tmpHeaders := headers deepCopy.
 	resp := client
 		httpPost: url
-		content: body
+		content: (body ifNil: [''])
 		type: (tmpHeaders at: 'Content-Type' ifAbsent: 'application/json')
 		do: [:req |
 			tmpHeaders removeKey: 'Content-Type' ifAbsent: [].
@@ -414,26 +420,28 @@ SBJsFetch >> performPostRequest: body url: aUrl [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> recreateFromMorphs [
+SBJsRequestTool >> recreateFromMorphs [
 "Recreate the UI based on the currently filled form"
+
 	self updatePayloadInObjectInstance.
 	self clearPanel.
-	method = #get ifTrue: [self initGet: data].
-	method = #post ifTrue: [self initPost: data]
+	method = #get ifTrue: [self initGet].
+	method = #post ifTrue: [self initPost]
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> recreateFromVariables: aHeaders params: aParams [
+SBJsRequestTool >> recreateFromVariables: aHeaders params: aParams body: aBody [
 "Recreate the UI based on the given input. Used when recreating for Examples."
 	params := aParams.
 	headers := aHeaders.
+	data := aBody.
 	self clearPanel.
-	method = #get ifTrue: [self initGet: data].
-	method = #post ifTrue: [self initPost: data]
+	method = #get ifTrue: [self initGet].
+	method = #post ifTrue: [self initPost]
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> send [
+SBJsRequestTool >> send [
 
 	| paramsString |
 	self updatePayloadInObjectInstance.
@@ -442,14 +450,20 @@ SBJsFetch >> send [
 	method = #get ifTrue: [self performGetRequest: url asString, paramsString].
 	method = #post ifTrue: [
 		isRawData 
-			ifTrue: [self performPostRequest: (bodyMorph submorphs second) contents url: url asString, paramsString]
+			ifTrue: [self performPostRequest: data url: url asString, paramsString]
 			ifFalse: ["TODO: collect fields and perform request"]
 	
 	"TODO: implement other methods"]
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> updateHeaders: aHeadersMorph [
+SBJsRequestTool >> updateBody: body [
+	data := body contents
+	
+]
+
+{ #category : #'as yet unclassified' }
+SBJsRequestTool >> updateHeaders: aHeadersMorph [
 "Loop through the headers morphs and update the headers map"
 	| key value |
 	aHeadersMorph do: [: header |
@@ -459,7 +473,7 @@ SBJsFetch >> updateHeaders: aHeadersMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> updateParams: aParamsMorph [
+SBJsRequestTool >> updateParams: aParamsMorph [
 "Loop through the params morphs and update the param map"
 	| key value |
 	aParamsMorph do: [:paramMorph | 
@@ -469,15 +483,21 @@ SBJsFetch >> updateParams: aParamsMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> updatePayloadInObjectInstance [
-"Update the class variables (headers, params, url...) based on the current form"
+SBJsRequestTool >> updatePayloadInObjectInstance [
+"Update the class variables (headers, params, url, body...) based on the current form"
 	self updateHeaders: headerMorph submorphs.
 	self updateParams: paramMorph submorphs.
 	url := (urlMorph submorphs second) contents.
+	"TODO body morph set wrong currently BUG"
+
+	method = #post ifTrue: [ isRawData ifTrue: [
+			bodyMorph ifNotNil:[
+				bodyMorph submorphs size > 1 ifTrue: [
+					self updateBody: (bodyMorph submorphs second)]]]]
 ]
 
 { #category : #'initialize-release' }
-SBJsFetch >> url: aString method: aMethod headers: aHeaders data: aData [
+SBJsRequestTool >> url: aString method: aMethod headers: aHeaders data: aData [
 	"Constructs a SBJsFetch object"
 
 	"exampleThreshold sets the maximum of examples per request and response code."
@@ -485,7 +505,7 @@ SBJsFetch >> url: aString method: aMethod headers: aHeaders data: aData [
 	url := aString.
 	method := aMethod.
 	headers := aHeaders.
-	cellGapConstant := 7.
+	cellGapConstant := 3.
 	data := aData.
 	"isRawData indicates if body in POST is of type raw. TODO: might be improved"
 	isRawData := true.
@@ -493,13 +513,13 @@ SBJsFetch >> url: aString method: aMethod headers: aHeaders data: aData [
 	"Examples := Dictionary new."
 	params := Dictionary new.
 	
-	aMethod = #post ifTrue: [self initPost: aData].
-	aMethod = #get ifTrue: [self initGet: aData]
+	aMethod = #post ifTrue: [self initPost].
+	aMethod = #get ifTrue: [self initGet]
 	"TODO: implement other methods (put, trace, delete...)"
 ]
 
 { #category : #'initialize-release' }
-SBJsFetch >> url: aString options: aSBInlineBlockSymbol [ 
+SBJsRequestTool >> url: aString options: aSBInlineBlockSymbol [ 
 	self
 		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
@@ -514,12 +534,6 @@ SBJsFetch >> url: aString options: aSBInlineBlockSymbol [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsFetch >> writeSourceOn: aStream [ 
-	"Transforms into JS source code"
-	
-	aStream nextPutAll: 'window.fetch("'.
-	aStream nextPutAll: self firstSubmorph submorphs second contents.
-	aStream nextPutAll: '", '.
-	aStream nextPutAll: self submorphs second submorphs second contents.
-	aStream nextPutAll: ')'.
+SBJsRequestTool >> writeSourceOn: aStream [ 
+	self subclassResponsibility.
 ]
