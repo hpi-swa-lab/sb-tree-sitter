@@ -1010,6 +1010,12 @@ SBMetaBlockFactory >> noteUncapturedText: aCollection [
 	noteUncapturedText := aCollection
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> palettesFor: aBlock [
+
+	^ #()
+]
+
 { #category : #templates }
 SBMetaBlockFactory >> parse: aString [
 
@@ -1207,6 +1213,12 @@ SBMetaBlockFactory >> softLineBreakMatcher: aBlock [
 SBMetaBlockFactory >> statementContainerTypes: aCollection [
 
 	statementContainerTypes := aCollection
+]
+
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> suggestionsFor: aBlock [
+
+	^ #()
 ]
 
 { #category : #accessing }

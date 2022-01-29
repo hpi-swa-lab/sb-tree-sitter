@@ -823,6 +823,12 @@ SBInlineBlock >> orOwnerUpTo: aBlock satisfying: aCondBlock [
 	^ nil
 ]
 
+{ #category : #accessing }
+SBInlineBlock >> palettes [
+
+	^ self factory palettesFor: self
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> parentElementIn: rule [
 	" for our elements, we don' have an easy way to get to the owner, so this is an 'expensive' workaround "
