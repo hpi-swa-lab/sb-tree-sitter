@@ -636,7 +636,9 @@ SBTSInlineBlockTest >> testRejectsPasteAfter [
 	factory := self exampleLanguageFactory.
 	toplevel := factory toplevel.
 	editor := self editorFor: toplevel.
-	toplevel addBlock: (firstBlock := (factory instantiateTemplate: 'number') contents: '123').
+	toplevel addBlock: (firstBlock := SBInlineBlockSymbol new
+		type: 'number' factory: factory;
+		addMorphBack: ((factory instantiateTemplate: 'number') contents: '123')).
 	editor copyBuffer: (newBlock := factory instantiateTemplate: 'notUsed').
 	firstBlock performAction: #pasteAfter.
 	self assert: 1 equals: toplevel childSandblocks size

@@ -44,7 +44,7 @@ SBPyRuntimeOSProcess class >> selectPath [
 	| path |
 	path := UIManager default
 		request: 'Path to python executable?'
-		initialAnswer: (self pythonPath ifNil: [self which: 'python3']).
+		initialAnswer: (self pythonPath ifNil: [(self which: 'python3') ifNil: ['']]).
 	self pythonPath: (path ifEmpty: [nil]).
 	^ self pythonPath
 ]

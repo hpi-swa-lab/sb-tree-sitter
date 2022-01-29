@@ -1,3 +1,6 @@
+"
+A hard copy of SbStNumberWithPrefix to change the context to Python.
+"
 Class {
 	#name : #SBPyNumberWithPrefix,
 	#superclass : #SBStNumberWithPrefix,
