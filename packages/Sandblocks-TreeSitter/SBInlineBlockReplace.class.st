@@ -47,6 +47,12 @@ SBInlineBlockReplace >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockReplace >> inline [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockReplace >> layoutCommands [
 
 	^ SBAlgebraCommand morph data: self
