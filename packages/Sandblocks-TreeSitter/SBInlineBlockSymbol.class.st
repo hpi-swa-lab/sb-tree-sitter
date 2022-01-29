@@ -158,7 +158,7 @@ SBInlineBlockSymbol >> includesNestedSameStructure: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> inline [
 
-	^ factory isNil or: [factory shouldBlockInline: self type]
+	^ factory isNil or: [(factory shouldBlockInline: self type) and: [self inlineIfPossible]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -267,9 +267,10 @@ SBInlineBlockSymbol >> newEmptyChildNear: aBlock before: aBoolean [
 SBInlineBlockSymbol >> newNullBlock [
 
 	| parent unknown |
-	parent := self inlineRoot.
-	unknown := SBTSUnknown new template: [parent buildEmpty].
-	(parent isKindOf: self class) ifTrue: [unknown type: parent type factory: factory].
+	parent := self lastInlineChoiceOwner ifNil: [^ self buildCopy].
+	unknown := parent buildCopy
+		removeAllMorphs;
+		buildDefault.
 	^ unknown
 ]
 

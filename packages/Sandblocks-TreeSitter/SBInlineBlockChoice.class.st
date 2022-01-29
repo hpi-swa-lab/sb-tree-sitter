@@ -44,8 +44,14 @@ SBInlineBlockChoice >> buildDefaultIn: anExplore [
 		ifNotNil: [
 			(anExplore hasSeenChoice: self)
 				ifTrue: [(self alternatives at: (anExplore indexFor: self)) instantiate]
-				ifFalse: [^ SBTSUnknown new template: self]]
-		ifNil: [^ SBTSUnknown new template: self])
+				ifFalse: [
+					^ SBTSUnknown new
+						template: self;
+						factory: factory]]
+		ifNil: [
+			^ SBTSUnknown new
+				template: self;
+				factory: factory])
 ]
 
 { #category : #'as yet unclassified' }

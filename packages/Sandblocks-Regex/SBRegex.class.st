@@ -747,12 +747,6 @@ SBRegex class >> statementContainerTypes [
 ]
 
 { #category : #'as yet unclassified' }
-SBRegex >> configure [
-
-	self blockInline: {'term'}
-]
-
-{ #category : #'as yet unclassified' }
 SBRegex >> highlightFor: aSBBlock do: aBlock [
 
 	^ aBlock value: (aSBBlock type caseOf: {
@@ -774,6 +768,12 @@ SBRegex >> highlightFor: aSBBlock do: aBlock [
 		['one_or_more'] -> [Color red].
 		} 
 	otherwise: [nil])
+]
+
+{ #category : #'as yet unclassified' }
+SBRegex >> postConfigure [
+
+	self blockInline: {'term'. 'pattern'}
 ]
 
 { #category : #'as yet unclassified' }
