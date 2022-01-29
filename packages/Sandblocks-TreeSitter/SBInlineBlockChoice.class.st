@@ -139,7 +139,8 @@ SBInlineBlockChoice >> hint: aString [
 { #category : #'as yet unclassified' }
 SBInlineBlockChoice >> inline [
 
-	^ SBToggledCode comment: '' active: 3 do: {
+	^ SBToggledCode comment: '' active: 1 do: {
+		[self inlineIfPossible].
 		[self owner notNil and: [self owner isInlineBlock and: [(self owner submorphs count: [:m | (m isKindOf: SBInlineBlockLabel) not]) = 1]]].
 		[
 			self inlineIfPossible and: [

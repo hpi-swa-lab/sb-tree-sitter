@@ -133,7 +133,7 @@ SBTSLanguageRuntime class >> which: aString [
 		arguments: {'-c'. 'which {1}' format: {aString}}
 		env: nil
 		stdin: aString
-		cancel: [:b | ]) wait value: [:status :stdout :stderr | status = 0 ifTrue: [stdout] ifFalse: [nil]]
+		cancel: [:b | ]) wait value: [:status :stdout :stderr | status = 0 ifTrue: [stdout ifEmpty: [nil]] ifFalse: [nil]]
 ]
 
 { #category : #'helper os process' }

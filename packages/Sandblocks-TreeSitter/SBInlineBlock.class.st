@@ -571,7 +571,7 @@ SBInlineBlock >> inline [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> inlineIfPossible [
 
-	^ self owner notNil and: [self owner isInlineBlock and: [self owner nonInlinedChildren not]]
+	^ self owner notNil and: [self owner isInlineBlock and: [SBToggledCode comment: '' active: 1 do: {[true]. [self owner nonInlinedChildren not]}]]
 ]
 
 { #category : #'as yet unclassified' }

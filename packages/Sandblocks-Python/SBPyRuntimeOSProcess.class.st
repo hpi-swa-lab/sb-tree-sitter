@@ -41,9 +41,11 @@ SBPyRuntimeOSProcess class >> runtimeName [
 SBPyRuntimeOSProcess class >> selectPath [
 	<action>
 
-	self pythonPath: (UIManager default
+	| path |
+	path := UIManager default
 		request: 'Path to python executable?'
-		initialAnswer: (self pythonPath ifNil: [self which: 'python3'])).
+		initialAnswer: (self pythonPath ifNil: [self which: 'python3']).
+	self pythonPath: (path ifEmpty: [nil]).
 	^ self pythonPath
 ]
 
@@ -51,7 +53,7 @@ SBPyRuntimeOSProcess class >> selectPath [
 SBPyRuntimeOSProcess >> evaluate: aString [
 
 	| python |
-	python := '/opt/homebrew/bin/python3'.
+	python := self class defaultPythonPath ifNil: [^ nil].
 	
 	^ self
 		tmpFile: aString
@@ -62,7 +64,7 @@ SBPyRuntimeOSProcess >> evaluate: aString [
 SBPyRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 
 	| python ret |
-	python := '/opt/homebrew/bin/python3'.
+	python := self class defaultPythonPath ifNil: [^ nil].
 	
 	ret := Promise new.
 	[self spawnWatchDuring: [:port | ret resolveWith: (self cmd: python arguments: {aString} env: {'SQ_WATCH' -> port} stdin: nil cancel: aBlock) wait]] fork.
@@ -73,7 +75,7 @@ SBPyRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 SBPyRuntimeOSProcess >> evaluateModuleAsync: aString in: aPath args: aCollection cancel: aBlock [
 
 	| python ret env |
-	python := '/opt/homebrew/bin/python3'.
+	python := self class defaultPythonPath ifNil: [^ nil].
 	
 	env := SBExecutionEnvironment value.
 	

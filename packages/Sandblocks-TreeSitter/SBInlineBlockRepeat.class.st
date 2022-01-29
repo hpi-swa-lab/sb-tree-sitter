@@ -148,7 +148,7 @@ SBInlineBlockRepeat >> inline [
 
 	^ SBToggledCode
 		comment: ''
-		active: 1
+		active: 2
 		do: {[self owner notNil and: [self owner isInlineBlock]]. [self inlineIfPossible]}
 ]
 
