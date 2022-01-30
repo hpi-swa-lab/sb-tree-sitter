@@ -704,3 +704,9 @@ SBTSSmalltalk class >> statementContainerTypes [
 
 	^ #('method' 'block')
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> postConfigure [
+
+	self blockInline: #('statement')
+]
