@@ -23,13 +23,13 @@ SBReVerboseOptional >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseOptional >> type [
+SBReVerboseOptional >> sourceString [
 
-	^ 'optional'
+	^ '?'
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseOptional >> writeSourceOn: aStream [
+SBReVerboseOptional >> type [
 
-	aStream nextPutAll: '?'
+	^ 'optional'
 ]

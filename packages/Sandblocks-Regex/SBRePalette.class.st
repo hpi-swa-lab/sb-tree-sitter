@@ -41,8 +41,9 @@ SBRePalette class >> language [
 
 { #category : #'as yet unclassified' }
 SBRePalette class >> rules [
-
-	^ {
+	
+	^ self factory grammarJsonObject rules keys
+	"^ {
 	'disjunction'.
 
 	'optional'.
@@ -64,5 +65,5 @@ SBRePalette class >> rules [
 	'any_character'.
 	'character_class'.
 
-	'count_quantifier'.}
+	'count_quantifier'.}"
 ]

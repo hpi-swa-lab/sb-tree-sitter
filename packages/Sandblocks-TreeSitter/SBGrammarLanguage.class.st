@@ -44,6 +44,12 @@ SBGrammarLanguage class >> grammarJson [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> grammarJsonObject [
+
+	^ Json readFrom: self grammarJson readStream
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> highlightQuery [
 
 	^ nil

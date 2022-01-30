@@ -20,3 +20,15 @@ SBReVerboseBlock >> initialize [
 		vResizing: #shrinkWrap;
 		hResizing: #shrinkWrap
 ]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseBlock >> sourceString [
+
+	self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseBlock >> writeSourceOn: aStream [
+
+	aStream nextPutAll: self sourceString
+]
