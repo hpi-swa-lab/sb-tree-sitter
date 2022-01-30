@@ -23,13 +23,13 @@ SBReVerboseZeroOrMore >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseZeroOrMore >> type [
+SBReVerboseZeroOrMore >> sourceString [
 
-	^ 'zero_or_more'
+	^ '*'
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseZeroOrMore >> writeSourceOn: aStream [
+SBReVerboseZeroOrMore >> type [
 
-	aStream nextPutAll: '*'
+	^ 'zero_or_more'
 ]

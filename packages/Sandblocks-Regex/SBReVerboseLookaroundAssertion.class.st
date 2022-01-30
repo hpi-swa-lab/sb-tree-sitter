@@ -21,24 +21,16 @@ SBReVerboseLookaroundAssertion class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion class >> newFor: aBlock as: aTextBlock [
-
-	^ self new
-		name: aTextBlock;
-		pattern: aBlock
-]
-
-{ #category : #'as yet unclassified' }
 SBReVerboseLookaroundAssertion >> assertionType [
 
-	^ assertionType value
+	^ assertionType object
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseLookaroundAssertion >> assertionType: symbolOrString [
 
 	assertionType object: ((symbolOrString isKindOf: Symbol)
-		ifFalse: [self assertionTypes at: symbolOrString]
+		ifFalse: [self assertionTypes at: symbolOrString ifAbsent: self assertionTypes values first]
 		ifTrue: [symbolOrString])
 ]
 
@@ -91,18 +83,16 @@ SBReVerboseLookaroundAssertion >> pattern: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> type [
+SBReVerboseLookaroundAssertion >> sourceString [
 
-	^ 'lookahead_assertion'
+	^ '(?',
+		(self assertionTypes keyAtValue: self assertionType),
+		self pattern sourceString,
+		')'
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> writeSourceOn: aStream [
+SBReVerboseLookaroundAssertion >> type [
 
-	self halt.
-	aStream
-		nextPutAll: '(?';
-		nextPutAll: (self assertionType keyAtValue: self assertionType);
-		nextPutAll: self pattern sourceString;
-		nextPutAll: ')'
+	^ 'lookahead_assertion'
 ]

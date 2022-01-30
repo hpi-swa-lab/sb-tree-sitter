@@ -63,18 +63,16 @@ SBReVerboseNamedCapturingGroup >> pattern: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseNamedCapturingGroup >> type [
+SBReVerboseNamedCapturingGroup >> sourceString [
 
-	^ 'named_capturing_group'
+	^ '(?<',
+		self name contents,
+		'>',
+		self pattern sourceString
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseNamedCapturingGroup >> writeSourceOn: aStream [
+SBReVerboseNamedCapturingGroup >> type [
 
-	aStream
-		nextPutAll: '(?<';
-		nextPutAll: self name contents;
-		nextPutAll: '>';
-		nextPutAll: self pattern sourceString;
-		nextPutAll: ')'
+	^ 'named_capturing_group'
 ]

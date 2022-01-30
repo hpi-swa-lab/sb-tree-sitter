@@ -102,7 +102,6 @@ SBTSUnknown >> hint [
 { #category : #'as yet unclassified' }
 SBTSUnknown >> hint: aString [
 
-	self haltIf: [ aString notNil and: [(aString isKindOf: String) not]].
 	self label: aString
 ]
 
