@@ -44,6 +44,9 @@ SBTSUnknown >> cursorPositionsDo: aBlock [
 { #category : #'as yet unclassified' }
 SBTSUnknown >> deleteTarget [
 
+	self owner isInlineBlock ifFalse: [^ nil].
+	self owner inline ifFalse: [^ nil].
+	((self owner isKindOf: SBInlineBlockRepeat) and: [self owner submorphCount > 1 or: [self owner required not]]) ifTrue: [^ self].
 	^ self owner deleteTarget
 ]
 
