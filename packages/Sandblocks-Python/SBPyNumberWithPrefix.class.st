@@ -1,6 +1,3 @@
-"
-A hard copy of SbStNumberWithPrefix to change the context to Python.
-"
 Class {
 	#name : #SBPyNumberWithPrefix,
 	#superclass : #SBStNumberWithPrefix,
@@ -16,12 +13,25 @@ Class {
 SBPyNumberWithPrefix >> contents: aString [
 
 	| aValidNumber |
-"	self halt."
-"	aValidNumber := aString asInteger min: rangeMax; max: rangeMin."
+	
+	rangeMin ifNil: [
+			aString
+				ifNil: [super contents: '0']
+				ifNotNil: [super contents: aString asInteger asString].
+			^ self.
+		].
+	
+	aValidNumber := (aString asNumber min: rangeMax) max: rangeMin.
 
 	aString
 		ifNil: [super contents: '0']
-		ifNotNil: [super contents: aString asInteger asString].
+		ifNotNil: [super contents: aValidNumber asInteger asString].
+]
+
+{ #category : #flagging }
+SBPyNumberWithPrefix >> initialize [
+
+	super initialize.
 ]
 
 { #category : #flagging }
@@ -36,12 +46,16 @@ SBPyNumberWithPrefix >> language [
 	^ #python
 ]
 
+{ #category : #accessing }
+SBPyNumberWithPrefix >> prefix [
+	^ prefix
+]
+
 { #category : #'as yet unclassified' }
 SBPyNumberWithPrefix >> rangeFrom: aNumber1 to: aNumber2 [
 
-	aNumber1 assert: [:num | num isNil not].
-	aNumber2 assert: [:num | num isNil not].	
-	aNumber1 assert: [:num | num <= aNumber2].
+	self assert: [aNumber1 notNil and: aNumber2 notNil].
+	self assert: [aNumber1 <= aNumber2].
 
 	rangeMin := aNumber1.
 	rangeMax := aNumber2.
@@ -63,4 +77,9 @@ SBPyNumberWithPrefix >> rangeMin [
 SBPyNumberWithPrefix >> stopEditing: aCommand [
 	super stopEditing: aCommand.
 	self triggerEvent: #edited
+]
+
+{ #category : #flagging }
+SBPyNumberWithPrefix >> writeSourceOn: aStream [
+	aStream nextPutAll: (self prefix, self contents).
 ]

@@ -1,6 +1,6 @@
 Class {
 	#name : #SBPyPltDrawstyle,
-	#superclass : #SBPyPltParamReplacement,
+	#superclass : #SBPyPltParamCBReplace,
 	#category : #'Sandblocks-Python'
 }
 
@@ -14,8 +14,7 @@ SBPyPltDrawstyle class >> matchPython: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'argument')
 		value: (self new factory: (aDictionary at: 'argument') factory;
-			createReplacement: (aDictionary at: 'value') contents;
-			source: (aDictionary at: 'argument') sourceString
+			createReplacement: (aDictionary at: 'value') contents
 			)
 ]
 
@@ -25,11 +24,11 @@ SBPyPltDrawstyle >> createReplacement: aLabel [
 	| items itemsTooltips selection |
 	
 	items := {
-			{'"default"'. SBPyPltImage drawstyleDefault}.
-			{'"steps"'. SBPyPltImage drawstylePre}.
-			{'"steps-pre"'. SBPyPltImage drawstylePre}.
-			{'"steps-mid"'. SBPyPltImage drawstyleMid}.
-			{'"steps-post"'. SBPyPltImage drawstylePost}.
+			{'default'. SBPyPltImage drawstyleDefault}.
+			{'steps'. SBPyPltImage drawstylePre}.
+			{'steps-pre'. SBPyPltImage drawstylePre}.
+			{'steps-mid'. SBPyPltImage drawstyleMid}.
+			{'steps-post'. SBPyPltImage drawstylePost}.
 			} collect: [:pair |
 				SBRow new
 					cellGap: 8;
@@ -44,4 +43,10 @@ SBPyPltDrawstyle >> createReplacement: aLabel [
 	self
 		addMorphBack:  (SBPyPltComboBox new 
 				values: items; prefix: 'drawstyle='; object: selection; tooltips: itemsTooltips)
+]
+
+{ #category : #classification }
+SBPyPltDrawstyle >> palettes [
+
+	^ {SBPyPltPalettePlot}
 ]

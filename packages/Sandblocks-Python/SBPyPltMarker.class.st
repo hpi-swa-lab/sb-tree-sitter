@@ -1,6 +1,6 @@
 Class {
 	#name : #SBPyPltMarker,
-	#superclass : #SBPyPltParamReplacement,
+	#superclass : #SBPyPltParamCBReplace,
 	#category : #'Sandblocks-Python'
 }
 
@@ -25,13 +25,13 @@ SBPyPltMarker >> createReplacement: aLabel [
 	| items itemsTooltips selection |
 	
 	items := {
-			{'"."'. SBPyPltImage point}.
-			{'"o"'. SBPyPltImage circle}.
-			{'"^"'. SBPyPltImage triangleUp}.
-			{'"s"'. SBPyPltImage square}.
-			{'"+"'. SBPyPltImage plus}.
-			{'"1"'. SBPyPltImage triDown}.
-			{'"|"'. SBPyPltImage vline}.
+			{'.'. SBPyPltImage point}.
+			{'o'. SBPyPltImage circle}.
+			{'^'. SBPyPltImage triangleUp}.
+			{'s'. SBPyPltImage square}.
+			{'+'. SBPyPltImage plus}.
+			{'1'. SBPyPltImage triDown}.
+			{'|'. SBPyPltImage vline}.
 			} collect: [:pair |
 				SBRow new
 					cellGap: 8;
@@ -46,4 +46,10 @@ SBPyPltMarker >> createReplacement: aLabel [
 	self
 		addMorphBack:  (SBPyPltComboBox new 
 				values: items; prefix: 'marker='; object: selection; tooltips: itemsTooltips)
+]
+
+{ #category : #classification }
+SBPyPltMarker >> palettes [
+
+	^ {SBPyPltPalettePlot}
 ]

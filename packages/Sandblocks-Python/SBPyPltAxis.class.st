@@ -12,3 +12,8 @@ SBPyPltAxis >> palettes [
 
 	^ {SBPyPltPalette}
 ]
+
+{ #category : #'as yet unclassified' }
+SBPyPltAxis >> type [
+	^ 'call'
+]

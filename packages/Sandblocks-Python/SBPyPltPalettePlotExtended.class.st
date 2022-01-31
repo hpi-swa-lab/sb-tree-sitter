@@ -2,21 +2,24 @@
 This is the palette for the arguments of SBPyPltPlot.
 "
 Class {
-	#name : #SBPyPltPalettePlot,
+	#name : #SBPyPltPalettePlotExtended,
 	#superclass : #SBPyPalette,
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltPalettePlot class >> buildOn: aBuilder [
+SBPyPltPalettePlotExtended class >> buildOn: aBuilder [
 	aBuilder addSectionHeader: 'Plot Parameter'.
 	
+	aBuilder content addMorphBack: (StringMorph new contents: 'Set the alpha value used for blending - not supported on all backends.').
 	aBuilder addBlock: 'Set the alpha value used for blending - not supported on all backends.' as: 
 		(SBPyPltAlpha new factory: SBPython instance; createReplacement: '0.5').
 		
+	aBuilder content addMorphBack: (StringMorph new contents:  'Set the color.').
 	aBuilder addBlock: 'Set the color.' as:
 		(SBPyPltColor new factory: SBPython instance; createReplacement: 'blue').
 		
+		aBuilder content addMorphBack: (StringMorph new contents:   'Set a label that will be displayed in the legend.').
 	aBuilder addBlock: 'Set a label that will be displayed in the legend.' as:
 		(SBPyPltLabel new factory: SBPython instance; createReplacement: 'obj').
 
@@ -24,34 +27,45 @@ SBPyPltPalettePlot class >> buildOn: aBuilder [
 	
 	
 	aBuilder addSubSectionHeader: 'Line-specific'.
-	
+
+	aBuilder content addMorphBack: (StringMorph new contents:   'How to draw the end caps if the line is is_dashed.' ).	
 	aBuilder addBlock: 'How to draw the end caps if the line is is_dashed.' as:
 		(SBPyPltDashCapStyle new factory: SBPython instance; createReplacement: 'butt').
 		
+	aBuilder content addMorphBack: (StringMorph new contents:   'How to join segments of the line if it is_dashed.').
 	aBuilder addBlock: 'How to join segments of the line if it is_dashed.' as:
 		(SBPyPltDashJoinStyle new factory: SBPython instance; createReplacement: 'round').
 		
+	aBuilder content addMorphBack: (StringMorph new contents:  'Set the dash sequence.
+The dash sequence is a sequence of floats of even length describing the length of dashes and spaces in points.
+For example, (5, 2, 1, 2) describes a sequence of 5 point and 1 point dashes separated by 2 point spaces.').
 	aBuilder addBlock: 'Set the dash sequence.
 The dash sequence is a sequence of floats of even length describing the length of dashes and spaces in points.
 For example, (5, 2, 1, 2) describes a sequence of 5 point and 1 point dashes separated by 2 point spaces.' as:
 		(SBPyPltDashes new factory: SBPython instance; createReplacementFromSequence: {'3'. '1'}).
 		
+	aBuilder content addMorphBack: (StringMorph new contents:  'Set the drawstyle of the plot.
+The drawstyle determines how the points are connected.' ).
 	aBuilder addBlock: 'Set the drawstyle of the plot.
 The drawstyle determines how the points are connected.' as:
 		(SBPyPltDrawstyle new factory: SBPython instance; createReplacement: 'steps').
 		
 	"den"
+	aBuilder content addMorphBack: (StringMorph new contents:  'Set the linestyle of the line.' ).
 	aBuilder addBlock: 'Set the linestyle of the line.' as:
 		(SBPython parseAsKeywordArgumentAndReplace: 'linestyle="-"').
 		
+	aBuilder content addMorphBack: (StringMorph new contents:   'Set the line width in points.').
 	aBuilder addBlock: 'Set the line width in points.' as:
 		(SBPyPltLinewidth new factory: SBPython instance; createReplacement: '2').
 	
 "extract CapStyle or new replacement?"
+	aBuilder content addMorphBack: (StringMorph new contents:  'How to draw the end caps if the line is solid (not is_dashed).').
 	aBuilder addBlock: 'How to draw the end caps if the line is solid (not is_dashed).' as:
 		(SBPython parseAsKeywordArgumentAndReplace: 'solid_capstyle="butt"').
 		
 "extract CapStyle or new replacement?"
+	aBuilder content addMorphBack: (StringMorph new contents: 'How to join segments if the line is solid.').
 	aBuilder addBlock: 'How to join segments if the line is solid.' as:
 		(SBPython parseAsKeywordArgumentAndReplace: 'solid_joinstyle="round"').
 	

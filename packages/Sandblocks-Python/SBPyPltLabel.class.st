@@ -1,6 +1,6 @@
 Class {
 	#name : #SBPyPltLabel,
-	#superclass : #SBPyPltParamReplacement,
+	#superclass : #SBPyPltParamSimpleReplace,
 	#category : #'Sandblocks-Python'
 }
 
@@ -23,4 +23,10 @@ SBPyPltLabel class >> matchPython: aDictionary do: aBlock [
 SBPyPltLabel >> createReplacement: aString [
 
 	self addMorphBack: (SBTextBubble new prefix: 'label='; contents: aString)
+]
+
+{ #category : #classification }
+SBPyPltLabel >> palettes [
+
+	^ {SBPyPltPalettePlot}
 ]

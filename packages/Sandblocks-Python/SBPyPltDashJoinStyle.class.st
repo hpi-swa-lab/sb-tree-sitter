@@ -3,7 +3,7 @@ How to draw the end caps if the line is is_dashed.
 "
 Class {
 	#name : #SBPyPltDashJoinStyle,
-	#superclass : #SBPyPltParamReplacement,
+	#superclass : #SBPyPltParamCBReplace,
 	#category : #'Sandblocks-Python'
 }
 
@@ -17,8 +17,7 @@ SBPyPltDashJoinStyle class >> matchPython: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'argument')
 		value: (self new factory: (aDictionary at: 'argument') factory;
-			createReplacement: (aDictionary at: 'value') contents;
-			source: (aDictionary at: 'argument') sourceString
+			createReplacement: (aDictionary at: 'value') contents
 			)
 ]
 
@@ -28,9 +27,9 @@ SBPyPltDashJoinStyle >> createReplacement: aLabel [
 	| items itemsTooltips selection |
 	
 	items := {
-			{'"miter"'. SBPyPltImage joinStyleMiter}.
-			{'"round"'. SBPyPltImage joinStyleRound}.
-			{'"bevel"'. SBPyPltImage joinStyleBevel}.
+			{'miter'. SBPyPltImage joinStyleMiter}.
+			{'round'. SBPyPltImage joinStyleRound}.
+			{'bevel'. SBPyPltImage joinStyleBevel}.
 			} collect: [:pair |
 				SBRow new
 					cellGap: 8;
@@ -45,4 +44,10 @@ SBPyPltDashJoinStyle >> createReplacement: aLabel [
 	self
 		addMorphBack:  (SBPyPltComboBox new 
 				values: items; prefix: 'dash_joinstyle='; object: selection; tooltips: itemsTooltips)
+]
+
+{ #category : #classification }
+SBPyPltDashJoinStyle >> palettes [
+
+	^ {SBPyPltPalettePlot}
 ]
