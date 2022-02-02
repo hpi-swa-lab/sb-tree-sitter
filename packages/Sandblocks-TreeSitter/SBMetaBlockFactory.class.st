@@ -1221,6 +1221,12 @@ SBMetaBlockFactory >> suggestionsFor: aBlock [
 	^ #()
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> suggestionsForInsert: aCommand [
+
+	^ #()
+]
+
 { #category : #accessing }
 SBMetaBlockFactory >> supertypes [
 

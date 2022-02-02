@@ -82,7 +82,9 @@ SBInlineBlockRepeat >> cursorPositionsDo: aBlock [
 	| buildInsert |
 	buildInsert := [:adjacent :before |
 		aBlock value: (SBCursorInsert new
-			command: (SBTSRelInsertCommand new near: adjacent before: before in: self morph: element);
+			command: (SBTSRelInsertCommand new
+				near: adjacent before: before in: self morph: element;
+				buildSuggestions: [:cmd | self factory suggestionsForInsert: cmd]);
 			before: before;
 			adjacent: adjacent;
 			container: self)].
