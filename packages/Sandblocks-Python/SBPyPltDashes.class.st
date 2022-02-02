@@ -3,7 +3,7 @@ How to draw the end caps if the line is is_dashed.
 "
 Class {
 	#name : #SBPyPltDashes,
-	#superclass : #SBPyPltParamReplacement,
+	#superclass : #SBPyPltParamCustomReplace,
 	#instVars : [
 		'image',
 		'dialogBody',
@@ -35,7 +35,7 @@ SBPyPltDashes class >> matchPython: aDictionary do: aBlock [
 { #category : #'insert/delete' }
 SBPyPltDashes >> addRow [
 
-	self addRowWithDashLength: '1' spaceRight: '0'.
+	self addRowWithDashLength: '2' spaceRight: '1'.
 	self update.
 ]
 
@@ -44,9 +44,9 @@ SBPyPltDashes >> addRowWithDashLength: aString1 spaceRight: aString2 [
 
 	| row |
 	row := SBRow new
-				addMorphBack: (SBPyNumberWithPrefix new prefix: 'dash length'; contents: aString1;
+				addMorphBack: (SBPyNumberWithPrefix new prefix: 'dash length'; contents: aString1; rangeFrom: 0 to: 100;
 					when: #edited send: #update to: self);
-				addMorphBack: (SBPyNumberWithPrefix new prefix: 'space right:'; contents: aString2;
+				addMorphBack: (SBPyNumberWithPrefix new prefix: 'space right:'; contents: aString2; rangeFrom: 0 to: 100;
 					when: #edited send: #update to: self).
 	
 	row addMorphBack:
@@ -70,8 +70,8 @@ SBPyPltDashes >> createReplacementFromSequence: aCollection [
 	
 	self initRowsFromSequence: aCollection.
 	
-	button := SBTextBubble new prefix: 'dashes='; contents: self sequence; bordered: false.
-	self addMorphBack: (SBButton new widget: button shortcut: nil do: [popup showBelow: self closeOnDeselect: true]).
+	button := SBTextBubble new prefix: 'dashes='; contents: self sequence; when: #selected send: #openPopup to: self.
+	self addMorphBack: (SBButton new widget: button shortcut: nil do: [self openPopup]).
 ]
 
 { #category : #'insert/delete' }
@@ -116,6 +116,17 @@ SBPyPltDashes >> initialize [
 			addMorphBack: (image ifNil: ['' asMorph] ifNotNil: image)
 		).
 	popup := SBPopup new addMorphBack: dialogBody.
+]
+
+{ #category : #updating }
+SBPyPltDashes >> openPopup [
+	popup showBelow: self closeOnDeselect: true.
+]
+
+{ #category : #classification }
+SBPyPltDashes >> palettes [
+
+	^ {SBPyPltPalettePlot}
 ]
 
 { #category : #accessing }
@@ -184,4 +195,13 @@ SBPyPltDashes >> updateReplacementBtn [
 
 	(self submorphs size = 0) ifTrue: [^nil].
 	self firstSubmorph firstSubmorph contents: self sequence.
+]
+
+{ #category : #copying }
+SBPyPltDashes >> writeSourceOn: aStream [
+
+	| prefix |
+	prefix := self firstSubmorph firstSubmorph prefix.
+	
+	aStream nextPutAll: (prefix,self sequence).
 ]

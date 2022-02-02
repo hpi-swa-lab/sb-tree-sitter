@@ -1,40 +1,31 @@
 Class {
-	#name : #SBPyPltSetScale,
+	#name : #SBPyPltSetXScale,
 	#superclass : #SBPyPltAxis,
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltSetScale class >> matchPython: aDictionary do: aBlock [
+SBPyPltSetXScale class >> matchPython: aDictionary do: aBlock [
 	<lang: #python match: '(call
         	function: (attribute
             	object: (identifier) @ax
                 (#eq @ax "ax")
-                attribute: (identifier) @setScale
+                attribute: (identifier) ="set_xscale" @setScale
             )
         	arguments: (argument_list
 			(string) @param
 		)
         ) @call' sample: 'ax.set_xscale("log")'>
 	
-	| functionName axisOflabel |
-	functionName := (aDictionary at: 'setScale') contents.
-	
-	((functionName = 'set_xscale') or: (functionName = 'set_yscale')) ifFalse: [^ nil].
-	
-	axisOflabel := functionName = 'set_xscale' ifTrue: 'x' ifFalse: 'y'.
-	
 	^ aBlock
 		value: (aDictionary at: 'call')
 		value: (self new factory: (aDictionary at: 'call') factory;
 			createReplacement: (aDictionary at: 'param') contents
-			ofAxis: axisOflabel
 			)
 ]
 
 { #category : #'initialize-release' }
-SBPyPltSetScale >> createReplacement: aLabel ofAxis: anAxis [
-
+SBPyPltSetXScale >> createReplacement: aLabel [
 	| items itemsTooltips selection |
 	
 	items := {
@@ -59,21 +50,18 @@ Since the values close to zero tend toward infinity, there is a need to have a r
 	selection := (items select: [:i | i submorphs first contents = aLabel]) ifEmpty: [aLabel] ifNotEmpty: [:aCollection | aCollection first].
 
 	self addMorphBack: (SBRow new
-			addMorphBack: (SBTextBubble new contents: anAxis);
-			addMorphBack: (SBStringMorph new contents: 'axis scale:');
-			addMorphBack: (SBComboBox new 
+			addMorphBack: (SBStringMorph new contents: 'x axis scale:');
+			addMorphBack: (SBPyPltComboBox new 
 				values: items; tooltips: itemsTooltips; object: aLabel);
 			cellGap: 4
 		)
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPltSetScale >> writeSourceOn: aStream [
-"called when blocks are copied. It transforms the block back to source code"
+SBPyPltSetXScale >> writeSourceOn: aStream [
 
-	| xy label |
-	xy := self submorphs first submorphs second contents.
-	label := (self submorphs first submorphs at: 4) contents.
+	| label |
+	label := (self firstSubmorph submorphs second) contents.
 	
-	aStream nextPutAll: 'ax.set_',xy,'scale("',label,'")'.
+	aStream nextPutAll: 'ax.set_xscale("',label,'")'.
 ]

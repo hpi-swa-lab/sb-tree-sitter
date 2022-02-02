@@ -16,9 +16,3 @@ SBPyPalette class >> buildOn: aBuilder [
 		factory: SBPython new;
 		path: '').
 ]
-
-{ #category : #'as yet unclassified' }
-SBPyPalette class >> languageOld [
-
-	^ #python
-]

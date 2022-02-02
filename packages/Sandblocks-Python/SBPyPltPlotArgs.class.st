@@ -8,9 +8,8 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltPlotArgs >> isPyPltPlotParam [
-	"indicates that this is a parameter of matplotlib's ax.plot() method"
-	^ true
+SBPyPltPlotArgs >> palettes [
+	^ {SBPyPltPalettePlot}
 ]
 
 { #category : #'as yet unclassified' }
@@ -21,7 +20,16 @@ SBPyPltPlotArgs >> type [
 
 { #category : #'as yet unclassified' }
 SBPyPltPlotArgs >> wrapInReplacement: aSBInlineBlockSymbol [
-	| arguments |
-	arguments := (aSBInlineBlockSymbol firstSubmorph submorphs at: 2) submorphs.
-	arguments do: [:arg | self addMorphBack: arg].
+	self addAllMorphsBack: (aSBInlineBlockSymbol submorphs).
+]
+
+{ #category : #'as yet unclassified' }
+SBPyPltPlotArgs >> writeSourceOn: aStream [
+
+	((1 to: (self submorphCount-1)) do: [ :i |
+			(self submorphs asOrderedCollection at: i) writeSourceOn: aStream.
+			aStream nextPutAll: ', '.
+		]).
+	"write last one w/o comma"
+	(self submorphs asOrderedCollection at: (self submorphCount)) writeSourceOn: aStream.
 ]

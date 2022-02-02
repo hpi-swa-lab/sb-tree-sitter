@@ -20,3 +20,8 @@ SBPyBool class >> matchPython: aDictionary do: aBlock [
 SBPyBool >> checked: aBoolean [ 
 	self addMorphBack: (SBCheckbox new value: aBoolean)
 ]
+
+{ #category : #'initialize-release' }
+SBPyBool >> writeSourceOn: aStream [
+	self firstSubmorph value ifTrue: [aStream nextPutAll: 'True'] ifFalse: [aStream nextPutAll: 'False'].
+]

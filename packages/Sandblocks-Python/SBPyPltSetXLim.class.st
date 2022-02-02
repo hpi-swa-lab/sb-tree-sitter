@@ -1,0 +1,50 @@
+Class {
+	#name : #SBPyPltSetXLim,
+	#superclass : #SBPyPltAxis,
+	#category : #'Sandblocks-Python'
+}
+
+{ #category : #'as yet unclassified' }
+SBPyPltSetXLim class >> matchPython: aDictionary do: aBlock [
+	<lang: #python match: '(call
+        	function: (attribute
+            	object: (identifier) @ax
+                (#eq @ax "ax")
+                attribute: (identifier) ="set_xlim" @setLim
+            )
+        	arguments: (argument_list
+			(integer) @paramFrom
+			(integer) @paramTo
+		)
+        ) @call' sample: 'ax.set_xlim(0, 5)'>
+	
+	^ aBlock
+		value: (aDictionary at: 'call')
+		value: (self new factory: (aDictionary at: 'call') factory;
+			createReplacementFrom: (aDictionary at: 'paramFrom') contents 
+			to: (aDictionary at: 'paramTo') contents)
+]
+
+{ #category : #'initialize-release' }
+SBPyPltSetXLim >> createReplacementFrom: minNumber to: maxNumber [
+
+	self
+		addMorphBack: (SBRow new
+			addMorphBack: (SBStringMorph new contents: 'x axis limit: [');
+			addMorphBack: (SBPyNumberWithPrefix new contents: minNumber);
+			addMorphBack: (SBStringMorph new contents: ',');
+			addMorphBack: (SBPyNumberWithPrefix new contents: maxNumber);
+			addMorphBack: (SBStringMorph new contents: ']');
+			cellGap: 4
+		).
+]
+
+{ #category : #'as yet unclassified' }
+SBPyPltSetXLim >> writeSourceOn: aStream [
+
+	| minArg maxArg |
+	minArg := (self firstSubmorph submorphs at: 2) contents.
+	maxArg := (self firstSubmorph submorphs at: 4) contents.
+	
+	aStream nextPutAll: ('ax.set_xlim(',minArg,', ',maxArg,')').
+]

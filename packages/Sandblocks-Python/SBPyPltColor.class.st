@@ -1,6 +1,6 @@
 Class {
 	#name : #SBPyPltColor,
-	#superclass : #SBPyPltParamReplacement,
+	#superclass : #SBPyPltParamSimpleReplace,
 	#category : #'Sandblocks-Python'
 }
 
@@ -14,8 +14,7 @@ SBPyPltColor class >> matchPython: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'argument')
 		value: (self new factory: (aDictionary at: 'argument') factory;
-			createReplacement: (aDictionary at: 'value') contents;
-			source: (aDictionary at: 'argument') sourceString
+			createReplacement: (aDictionary at: 'value') contents
 			)
 ]
 
@@ -23,4 +22,10 @@ SBPyPltColor class >> matchPython: aDictionary do: aBlock [
 SBPyPltColor >> createReplacement: aString [
 
 	self addMorphBack: (SBTextBubble new prefix: 'color='; contents: aString)
+]
+
+{ #category : #classification }
+SBPyPltColor >> palettes [
+
+	^ {SBPyPltPalettePlot}
 ]
