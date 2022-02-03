@@ -53,7 +53,7 @@ SBEmbeddedRequestTool >> addBodySection: aBody [
 		
 		].
 "TODO, improve tmpUrl workaround"
-tmpUrl := 'http://localhost:8080', url.
+tmpUrl := baseUrl, url.
 Examples at: tmpUrl, method ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]].
 ]
 
@@ -70,7 +70,7 @@ SBEmbeddedRequestTool >> addExampleSection [
 				
 			exampleMorph := self submorphs fourth.
 			"TODO, improve tmpUrl workaround"
-			tmpUrl := 'http://localhost:8080', url.
+			tmpUrl := baseUrl, url.
 			
 			map := Examples at: tmpUrl, method asString ifAbsent: [].
 			map ifNotNil: [ map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
@@ -132,7 +132,7 @@ SBEmbeddedRequestTool >> addParamSection: aParams [
 
 	method = #get ifTrue: [ | tmpUrl |
 		"TODO, improve tmpUrl workaround"
-		tmpUrl := 'http://localhost:8080', url, method.
+		tmpUrl := baseUrl, url, method.
 		Examples at: tmpUrl
 			ifPresent: [: e |
 			e size > 0 ifTrue: [self addExampleSection]]].
