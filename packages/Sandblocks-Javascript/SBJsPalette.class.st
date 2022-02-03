@@ -11,14 +11,14 @@ SBJsPalette class >> buildOn: aBuilder [
 	
 	aBuilder addSectionHeader: 'Fetch'.
 	
-	aBuilder addBlock: 'POST' as: (SBJsRequestTool new
+	aBuilder addBlock: 'POST' as: (SBRequestTool new
 		factory: SBJavascript new;
 		url: 'http://localhost:8080'
 			method: #post
 			headers: (Dictionary newFrom: {'Content-Type' -> 'application/json'})
 			data: '{"key" : "value"}').
 			
-	aBuilder addBlock: 'GET' as: (SBJsRequestTool new
+	aBuilder addBlock: 'GET' as: (SBRequestTool new
 		factory: SBJavascript new;
 		url: 'http://localhost:8080/'
 			method: #get

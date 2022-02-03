@@ -3,7 +3,7 @@ Base class to replace in JavaScript source code fetch calls.
 "
 Class {
 	#name : #SBJsEmbeddedExpress,
-	#superclass : #SBJsEmbeddedRequestTool,
+	#superclass : #SBEmbeddedRequestTool,
 	#category : #'Sandblocks-Javascript'
 }
 
@@ -30,52 +30,25 @@ SBJsEmbeddedExpress class >> matchJs: aDictionary do: aBlock [
 					value:(SBJsEmbeddedExpressPost new
 						factory: SBJavascript new;
 						url: url headers: Dictionary new data: nil;
-						source: (SBJavascript parse: ((aDictionary at: 'methodBody') sourceString));
-						addMorphBack: (SBJavascript parse: ((aDictionary at: 'methodBody') sourceString)))].
+						sourceMorph: (aDictionary at: 'methodBody');
+						addMorphBack: (aDictionary at: 'methodBody'))].
 			['get'] -> [
 				^ aBlock value: (aDictionary at: 'call_expression') value: (SBJsEmbeddedExpressGet new
 					factory: SBJavascript new;
 					url: url headers: Dictionary new data: nil;
-					source: (SBJavascript parse: ((aDictionary at: 'methodBody') sourceString));
-					addMorphBack: (SBJavascript parse: ((aDictionary at: 'methodBody') sourceString)))]}
+					sourceMorph: (aDictionary at: 'methodBody');
+					addMorphBack: (aDictionary at: 'methodBody'))]}
 		otherwise: [^ nil]
-]
-
-{ #category : #'as yet unclassified' }
-SBJsEmbeddedExpress >> promptAddPayload [
-	self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
 SBJsEmbeddedExpress >> recreateFromMorphs [
 	super recreateFromMorphs.
-	self addMorphBack: (SBJavascript parse: ((sourceString) sourceString))
+	self addMorphBack: sourceMorph
 ]
 
 { #category : #'as yet unclassified' }
 SBJsEmbeddedExpress >> recreateFromVariables: aHeaders params: aParams body: aBody [
 	super recreateFromVariables: aHeaders params: aParams body: aBody.
-	self addMorphBack: (SBJavascript parse: ((sourceString) sourceString))
-]
-
-{ #category : #'as yet unclassified' }
-SBJsEmbeddedExpress >> values [
-	^ self subclassResponsibility
-]
-
-{ #category : #'as yet unclassified' }
-SBJsEmbeddedExpress >> writeSourceOn: aStream [ 
-	| prefix |
-	"Transforms into JS source code"
-	prefix := ''.
-	
-	method caseOf: {
-		[#get] -> [prefix := 'app.get("'].
-		[#post] -> [prefix := 'app.post("'].
-	}.
-	"self halt."
-	aStream nextPutAll: prefix.
-	aStream nextPutAll: url asString, '"', ','.
-	aStream nextPutAll: (self source) sourceString.
-	aStream nextPutAll:  ')'.
+	self addMorphBack: sourceMorph
 ]
