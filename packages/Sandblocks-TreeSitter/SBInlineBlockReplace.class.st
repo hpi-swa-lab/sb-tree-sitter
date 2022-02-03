@@ -23,6 +23,12 @@ SBInlineBlockReplace >> childrenIn: anExplore [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockReplace >> factory [
+
+	^ factory ifNil: [self owner factory]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockReplace >> firstDifferingBlocksWith: aMorph do: aBlock [
 
 	self class = aMorph class ifFalse: [^ aBlock value: self value: aMorph].
