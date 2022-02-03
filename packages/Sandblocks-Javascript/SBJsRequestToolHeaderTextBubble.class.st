@@ -42,8 +42,6 @@ SBJsRequestToolHeaderTextBubble >> promptChangeValue [
 		fetch := self owner owner owner.
 		key ~= 'Remove header' ifTrue: [self contents: key. fetch recreateFromMorphs]].
 		key = 'Remove header' ifTrue: [ 
-			"This removes it from the examples!!!"
-			"jsfetch headers removeKey: (self owner submorphs first contents) ifAbsent: []."
 			headersCopy := fetch headers deepCopy.
 			headersCopy removeKey: (self owner submorphs first contents) ifAbsent: [].
 			fetch headers: headersCopy.
