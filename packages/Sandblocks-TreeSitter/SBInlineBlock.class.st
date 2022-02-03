@@ -42,6 +42,18 @@ SBInlineBlock >> actionProviders [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> addBlock: aBlock [
+
+	self repeaterChild addMorphBack: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> addBlockFront: aBlock [
+
+	self repeaterChild addMorphFront: aBlock
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> advanceParseFrom: aCursor index: aNumber [
 
 	^ self subclassResponsibility
@@ -316,6 +328,12 @@ SBInlineBlock >> convertedFor: anInterfaceCollection do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> copyBlock [
+
+	^ self buildCopy
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> currentTextMorph [
 
 	self submorphsDo: [:m | (m isInlineBlock and: [m inline]) ifTrue: [m currentTextMorph ifNotNil: [:t | ^ t]]].
@@ -518,7 +536,7 @@ SBInlineBlock >> hasSameStructureAs: aBlock [
 { #category : #accessing }
 SBInlineBlock >> highlight [
 
-	^ highlight
+	^ highlight ifNil: [self updateAllHighlights]
 ]
 
 { #category : #accessing }
@@ -843,7 +861,7 @@ SBInlineBlock >> parentElementIn: rule [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> preferredColorIn: aColorPolicy [
 
-	^ highlight
+	^ self highlight
 		caseOf: {
 			['keyword'] -> [aColorPolicy keyword].
 			['function'] -> [aColorPolicy identifier].
@@ -1140,7 +1158,7 @@ SBInlineBlock >> updateAllHighlights [
 	
 	self allMorphsDo: [:m |
 		m isInlineBlock ifTrue: [
-			m highlight: nil.
+			m highlight: #'_sb_none'.
 			m updateHighlight]]
 ]
 
@@ -1149,7 +1167,7 @@ SBInlineBlock >> updateHighlight [
 
 	self factory highlightQuery
 		executeAgainst: self
-		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | block highlight ifNil: [block highlight: id]]]
+		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | (block highlight isNil or: [block highlight = #'_sb_none']) ifTrue: [block highlight: id]]]
 ]
 
 { #category : #'as yet unclassified' }

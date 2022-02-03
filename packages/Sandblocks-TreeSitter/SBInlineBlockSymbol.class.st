@@ -277,7 +277,9 @@ SBInlineBlockSymbol >> newNullBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> ownerWithColor [
 
-	^ highlight ifNil: [self owner ifNotNil: [:o | o ownerWithColor]] ifNotNil: [self]
+	^ self highlight = #'_sb_none'
+		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
+		ifFalse: [self]
 ]
 
 { #category : #'as yet unclassified' }
