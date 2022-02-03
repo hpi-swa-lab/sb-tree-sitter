@@ -177,7 +177,9 @@ SBInlineBlockText >> lengthOfLeftMostPath [
 { #category : #'as yet unclassified' }
 SBInlineBlockText >> ownerWithColor [
 
-	^ highlight ifNil: [self owner ifNotNil: [:o | o ownerWithColor]] ifNotNil: [self]
+	^ self highlight = #'_sb_none'
+		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
+		ifFalse: [self]
 ]
 
 { #category : #'as yet unclassified' }
