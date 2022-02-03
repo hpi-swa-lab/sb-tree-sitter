@@ -2,29 +2,39 @@
 Base class which replaces source code with a tool to perform HTTP requests.
 "
 Class {
-	#name : #SBJsEmbeddedRequestTool,
-	#superclass : #SBJsRequestTool,
+	#name : #SBEmbeddedRequestTool,
+	#superclass : #SBRequestTool,
 	#instVars : [
 		'showExamples',
 		'showExamplesButtonTxt',
-		'sourceString',
 		'sourceMorph',
 		'sendButton',
 		'addDataButton',
-		'exampleButton'
+		'exampleButton',
+		'baseUrl'
 	],
 	#category : #'Sandblocks-Javascript'
 }
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool class >> registerShortcuts: aProvider [
+SBEmbeddedRequestTool class >> matchJs: aDictionary do: aBlock [
+	self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SBEmbeddedRequestTool class >> matchPython: aDictionary do: aBlock [
+	self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SBEmbeddedRequestTool class >> registerShortcuts: aProvider [
 
 	aProvider
 		registerShortcut: $h command do: #toggleHelp
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> addBodySection: aBody [
+SBEmbeddedRequestTool >> addBodySection: aBody [
 
 	| tmpUrl |
 	self addMorphBack: SBRow new.
@@ -53,12 +63,13 @@ SBJsEmbeddedRequestTool >> addBodySection: aBody [
 		
 		].
 "TODO, improve tmpUrl workaround"
-tmpUrl := 'http://localhost:8080', url.
+(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url] ifTrue: [tmpUrl := url].
+
 Examples at: tmpUrl, method ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]].
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> addExampleSection [
+SBEmbeddedRequestTool >> addExampleSection [
 	
 	showExamples ifTrue: [
 		 | map tmpUrl |
@@ -70,14 +81,14 @@ SBJsEmbeddedRequestTool >> addExampleSection [
 				
 			exampleMorph := self submorphs fourth.
 			"TODO, improve tmpUrl workaround"
-			tmpUrl := 'http://localhost:8080', url.
+			(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url] ifTrue: [tmpUrl := url].
 			
 			map := Examples at: tmpUrl, method asString ifAbsent: [].
 			map ifNotNil: [ map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> addHeaderAction [
+SBEmbeddedRequestTool >> addHeaderAction [
 	(headerMorph submorphs size) = 0 ifTrue: [
 		headerMorph
 			addMorphBack: (SBStringMorph new contents: 'Headers')].
@@ -86,7 +97,7 @@ SBJsEmbeddedRequestTool >> addHeaderAction [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> addHeaderAction: key value: value [
+SBEmbeddedRequestTool >> addHeaderAction: key value: value [
 
 	(headerMorph submorphs size) = 0 ifTrue: [
 			headerMorph
@@ -96,7 +107,7 @@ SBJsEmbeddedRequestTool >> addHeaderAction: key value: value [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> addParamAction [
+SBEmbeddedRequestTool >> addParamAction [
 
 	(paramMorph submorphs size) = 0 ifTrue: [
 		paramMorph
@@ -107,7 +118,7 @@ SBJsEmbeddedRequestTool >> addParamAction [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> addParamAction: key value: value [
+SBEmbeddedRequestTool >> addParamAction: key value: value [
 
 	(paramMorph submorphs size) = 0 ifTrue: [
 		paramMorph
@@ -117,7 +128,7 @@ SBJsEmbeddedRequestTool >> addParamAction: key value: value [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> addParamSection: aParams [
+SBEmbeddedRequestTool >> addParamSection: aParams [
 
 	
 	params keysDo: [:key | self addParamAction: ((params at: key) key) asString  value:  ((params at: key) value) asString].
@@ -132,27 +143,29 @@ SBJsEmbeddedRequestTool >> addParamSection: aParams [
 
 	method = #get ifTrue: [ | tmpUrl |
 		"TODO, improve tmpUrl workaround"
-		tmpUrl := 'http://localhost:8080', url, method.
+		tmpUrl := baseUrl, url, method.
+		(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url, method] ifTrue: [tmpUrl := url, method].
+	
 		Examples at: tmpUrl
 			ifPresent: [: e |
 			e size > 0 ifTrue: [self addExampleSection]]].
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> drawnColor [
+SBEmbeddedRequestTool >> drawnColor [
 
 	^ Color veryVeryLightGray.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> exploreResponse [
+SBEmbeddedRequestTool >> exploreResponse [
    <action>
 
    self halt.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> hideExamplesButton [
+SBEmbeddedRequestTool >> hideExamplesButton [
 	^(SBButton new icon: SBIcon iconEye shortcut: nil do: [
 				showExamples := true.
 				(((self submorphs first) submorphs fourth) submorphs second) replaceBy: self showExamplesButton.
@@ -160,7 +173,7 @@ SBJsEmbeddedRequestTool >> hideExamplesButton [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> initCommons [
+SBEmbeddedRequestTool >> initCommons [
 	"Setup shared UI elements"
 	sendButton :=  (SBButton new icon: SBIcon iconPlay shortcut: nil do: [self send]; balloonText: 'Send Request').
 	addDataButton :=  (SBButton new
@@ -195,7 +208,7 @@ SBJsEmbeddedRequestTool >> initCommons [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> initPost [
+SBEmbeddedRequestTool >> initPost [
 	self
 		initCommons;
 		addParamSection: nil.
@@ -209,24 +222,42 @@ SBJsEmbeddedRequestTool >> initPost [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> initialize [
+SBEmbeddedRequestTool >> initialize [
 	super initialize.
 	showExamples := false.
+	baseUrl := 'http://localhost:8080'
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> promptAddPayload [
-	self subclassResponsibility
+SBEmbeddedRequestTool >> promptAddPayload [
+
+	| fetch index |
+	fetch := self owner owner owner.
+	index := UIManager default chooseFrom: self values.
+	
+	method caseOf: {
+		[#post] -> [
+			index > 0 ifTrue: [
+				index caseOf: {
+					[1] -> [self addHeaderAction].
+					[2] -> [self addParamAction].
+					[3] -> [self addBodySection: '{}']}]].
+		[#get] -> [
+			index > 0 ifTrue: [
+				index caseOf: {
+					[1] -> [self addHeaderAction].
+					[2] -> [self addParamAction]}]]}
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> send [
+SBEmbeddedRequestTool >> send [
 
 	| paramsString |
 	
 	self updatePayloadInObjectInstance.
 	paramsString := self collectParamsString.
-	url := 'http://localhost:8080', url.
+	(url startsWith: 'http://') ifFalse: [url := baseUrl, url].
+	
 
 	method = #get ifTrue: [self performGetRequest: url asString, paramsString].
 	method = #post ifTrue: [
@@ -238,7 +269,7 @@ SBJsEmbeddedRequestTool >> send [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> showExamplesButton [
+SBEmbeddedRequestTool >> showExamplesButton [
 	^(SBButton new icon: SBIcon iconEyeSlash shortcut: nil do: [
 				showExamples := false.
 				(((self submorphs first) submorphs fourth) submorphs second) replaceBy: self hideExamplesButton.
@@ -246,32 +277,19 @@ SBJsEmbeddedRequestTool >> showExamplesButton [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> source [
-	^sourceString.
-]
-
-{ #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> source: aSourceString [
-	sourceString := aSourceString.
-	
-]
-
-{ #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> sourceMorph [
-"TODO"
+SBEmbeddedRequestTool >> sourceMorph [
 	^ sourceMorph.
 	
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> sourceMorph: aSourceMorph [
-"TODO"
+SBEmbeddedRequestTool >> sourceMorph: aSourceMorph [
 	sourceMorph := aSourceMorph.
 	
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> toggleHelp [
+SBEmbeddedRequestTool >> toggleHelp [
 	<action>
 	
 	| dataPosition examplePosition sendPosition downConstant |
@@ -297,7 +315,7 @@ SBJsEmbeddedRequestTool >> toggleHelp [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> updateHeaders: aHeadersMorph [
+SBEmbeddedRequestTool >> updateHeaders: aHeadersMorph [
 "Loop through the headers morphs and update the headers map"
 	| key value index |
 	index := 0.
@@ -310,7 +328,7 @@ SBJsEmbeddedRequestTool >> updateHeaders: aHeadersMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> updateParams: aParamsMorph [
+SBEmbeddedRequestTool >> updateParams: aParamsMorph [
 "Loop through the params morphs and update the param map"
 	| key value index |
 	index := 0.
@@ -323,11 +341,17 @@ SBJsEmbeddedRequestTool >> updateParams: aParamsMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> urlLabel [
- self subclassResponsibility.
+SBEmbeddedRequestTool >> urlLabel [
+	method caseOf: {
+	[#post] -> [^ 'POST'].
+	[#get] -> [^ 'GET']}
+	
 ]
 
 { #category : #'as yet unclassified' }
-SBJsEmbeddedRequestTool >> values [
-	^ self subclassResponsibility
+SBEmbeddedRequestTool >> values [
+	method caseOf: {
+	[#post] -> [^ #(Header Param Body)].
+	[#get] -> [^ #(Header Param)]}
+	
 ]

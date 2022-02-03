@@ -2,7 +2,7 @@
 Base class which can be used standalone to perform HTTP requests.
 "
 Class {
-	#name : #SBJsRequestTool,
+	#name : #SBRequestTool,
 	#superclass : #SBInlineBlockReplace,
 	#instVars : [
 		'url',
@@ -27,17 +27,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool class >> matchJs: aDictionary do: aBlock [
-	self subclassResponsibility
-]
-
-{ #category : #'as yet unclassified' }
-SBJsRequestTool >> Examples [
+SBRequestTool >> Examples [
 	^Examples.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> addBodySection: aBody [
+SBRequestTool >> addBodySection: aBody [
 
 	| key |
 	aBody ifNotNil: [
@@ -66,7 +61,7 @@ SBJsRequestTool >> addBodySection: aBody [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> addExampleSection [
+SBRequestTool >> addExampleSection [
 
 	SBToggledCode comment: '' active: 1 do: {
 		[ | map |
@@ -83,7 +78,7 @@ SBJsRequestTool >> addExampleSection [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> addFieldAction [
+SBRequestTool >> addFieldAction [
 	self submorphs sixth
 		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
@@ -96,7 +91,7 @@ SBJsRequestTool >> addFieldAction [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> addHeaderAction [
+SBRequestTool >> addHeaderAction [
 	headerMorph
 		addMorphBack: (SBRow new
 			addMorphBack: (SBJsRequestToolHeaderTextBubble new
@@ -108,7 +103,7 @@ SBJsRequestTool >> addHeaderAction [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> addHeaderAction: key value: value [
+SBRequestTool >> addHeaderAction: key value: value [
 
 	| valueTextBubble |
 	valueTextBubble := value = '' ifTrue: [(SBTextBubble new placeholderText: 'value')] ifFalse: [(SBTextBubble new contents: value)].
@@ -125,7 +120,7 @@ SBJsRequestTool >> addHeaderAction: key value: value [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> addParamAction [
+SBRequestTool >> addParamAction [
 	paramMorph
 		submorphs;
 		addMorphBack: (SBRow new
@@ -139,7 +134,7 @@ SBJsRequestTool >> addParamAction [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> addParamAction: key value: value [
+SBRequestTool >> addParamAction: key value: value [
 	paramMorph
 		submorphs;
 		addMorphBack: (SBRow new
@@ -152,7 +147,7 @@ SBJsRequestTool >> addParamAction: key value: value [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> addParamSection: aParams [
+SBRequestTool >> addParamSection: aParams [
 
 	| s |
 	self
@@ -182,7 +177,7 @@ SBJsRequestTool >> addParamSection: aParams [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> addRequestToExampleMap: response [
+SBRequestTool >> addRequestToExampleMap: response [
 
 	| map example |
 	map := Examples at: url, method asString ifAbsent: [nil].
@@ -227,29 +222,29 @@ SBJsRequestTool >> addRequestToExampleMap: response [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> body [
+SBRequestTool >> body [
 	^ data
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> body: aBody [
+SBRequestTool >> body: aBody [
 	data := aBody
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> bodyMorph: aBodyMorph [
+SBRequestTool >> bodyMorph: aBodyMorph [
 	bodyMorph := aBodyMorph
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> clearPanel [
+SBRequestTool >> clearPanel [
 	(1 to: self submorphs size) do: [:n| | morph |
 		morph := self submorphs at: 1.
 		morph abandon].
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> collectParamsString [
+SBRequestTool >> collectParamsString [
 
 	| paramString init |
 	"Loop through the params and put them into a single string"
@@ -269,27 +264,27 @@ SBJsRequestTool >> collectParamsString [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> data: body [
+SBRequestTool >> data: body [
 	data := body.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> headerMorph [
+SBRequestTool >> headerMorph [
 	^headerMorph.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> headers [
+SBRequestTool >> headers [
 	^headers
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> headers: aHeadersMap [
+SBRequestTool >> headers: aHeadersMap [
 	headers := aHeadersMap.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> initCommons [
+SBRequestTool >> initCommons [
 	"Setup shared UI elements"
 
 	self
@@ -324,14 +319,14 @@ SBJsRequestTool >> initCommons [
 ]
 
 { #category : #'initialize-release' }
-SBJsRequestTool >> initGet [
+SBRequestTool >> initGet [
 	self
 		initCommons;
 		addParamSection: nil.
 ]
 
 { #category : #'initialize-release' }
-SBJsRequestTool >> initPost [
+SBRequestTool >> initPost [
 	self
 		initCommons;
 		addParamSection: nil.
@@ -347,36 +342,36 @@ SBJsRequestTool >> initPost [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> isRawData: aBoolean [
+SBRequestTool >> isRawData: aBoolean [
 	isRawData := aBoolean.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> method [
+SBRequestTool >> method [
 "Get the method of the class instance"
 	^method.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> method: aMethod [
+SBRequestTool >> method: aMethod [
 "Set the method of the class instance"
 	method := aMethod.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> params [
+SBRequestTool >> params [
 "Get the params map of the class instance"
 	^params
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> params: aParams [
+SBRequestTool >> params: aParams [
 "Set the params map of the class instance"
 	params := aParams.
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> performGetRequest: urlWithParams [
+SBRequestTool >> performGetRequest: urlWithParams [
 
 	| resp client response |
 	client := WebClient new.
@@ -395,7 +390,7 @@ SBJsRequestTool >> performGetRequest: urlWithParams [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> performPostRequest: body url: aUrl [
+SBRequestTool >> performPostRequest: body url: aUrl [
 
 	| resp client response tmpHeaders |
 	client := WebClient new.
@@ -420,7 +415,7 @@ SBJsRequestTool >> performPostRequest: body url: aUrl [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> recreateFromMorphs [
+SBRequestTool >> recreateFromMorphs [
 "Recreate the UI based on the currently filled form"
 
 	self updatePayloadInObjectInstance.
@@ -430,7 +425,7 @@ SBJsRequestTool >> recreateFromMorphs [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> recreateFromVariables: aHeaders params: aParams body: aBody [
+SBRequestTool >> recreateFromVariables: aHeaders params: aParams body: aBody [
 "Recreate the UI based on the given input. Used when recreating for Examples."
 	params := aParams.
 	headers := aHeaders.
@@ -441,7 +436,7 @@ SBJsRequestTool >> recreateFromVariables: aHeaders params: aParams body: aBody [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> send [
+SBRequestTool >> send [
 
 	| paramsString |
 	self updatePayloadInObjectInstance.
@@ -457,13 +452,13 @@ SBJsRequestTool >> send [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> updateBody: body [
+SBRequestTool >> updateBody: body [
 	data := body contents
 	
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> updateHeaders: aHeadersMorph [
+SBRequestTool >> updateHeaders: aHeadersMorph [
 "Loop through the headers morphs and update the headers map"
 	| key value |
 	aHeadersMorph do: [: header |
@@ -473,7 +468,7 @@ SBJsRequestTool >> updateHeaders: aHeadersMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> updateParams: aParamsMorph [
+SBRequestTool >> updateParams: aParamsMorph [
 "Loop through the params morphs and update the param map"
 	| key value |
 	aParamsMorph do: [:paramMorph | 
@@ -483,12 +478,11 @@ SBJsRequestTool >> updateParams: aParamsMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> updatePayloadInObjectInstance [
+SBRequestTool >> updatePayloadInObjectInstance [
 "Update the class variables (headers, params, url, body...) based on the current form"
 	self updateHeaders: headerMorph submorphs.
 	self updateParams: paramMorph submorphs.
 	url := (urlMorph submorphs second) contents.
-	"TODO body morph set wrong currently BUG"
 
 	method = #post ifTrue: [ isRawData ifTrue: [
 			bodyMorph ifNotNil:[
@@ -497,8 +491,8 @@ SBJsRequestTool >> updatePayloadInObjectInstance [
 ]
 
 { #category : #'initialize-release' }
-SBJsRequestTool >> url: aString method: aMethod headers: aHeaders data: aData [
-	"Constructs a SBJsFetch object"
+SBRequestTool >> url: aString method: aMethod headers: aHeaders data: aData [
+	"Constructs a SBRequestTool"
 
 	"exampleThreshold sets the maximum of examples per request and response code."
 	exampleThreshold := 5.
@@ -519,7 +513,7 @@ SBJsRequestTool >> url: aString method: aMethod headers: aHeaders data: aData [
 ]
 
 { #category : #'initialize-release' }
-SBJsRequestTool >> url: aString options: aSBInlineBlockSymbol [ 
+SBRequestTool >> url: aString options: aSBInlineBlockSymbol [ 
 	self
 		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
@@ -534,6 +528,6 @@ SBJsRequestTool >> url: aString options: aSBInlineBlockSymbol [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRequestTool >> writeSourceOn: aStream [ 
+SBRequestTool >> writeSourceOn: aStream [ 
 	self subclassResponsibility.
 ]

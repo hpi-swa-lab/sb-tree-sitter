@@ -1,6 +1,6 @@
 Class {
 	#name : #SBJsEmbeddedFetch,
-	#superclass : #SBJsEmbeddedRequestTool,
+	#superclass : #SBEmbeddedRequestTool,
 	#category : #'Sandblocks-Javascript'
 }
 
@@ -43,6 +43,7 @@ SBJsEmbeddedFetch class >> matchJs: aDictionary do: aBlock [
 			['headers'] -> [headers := SBJsEmbeddedFetch extractHeaders: value]
 		} otherwise: nil.
 		].
+	headers ifNil: [headers := Dictionary new].
 	url := (aDictionary at: 'url') childSandblocks first contents.
 	method
 		caseOf: {
@@ -50,13 +51,11 @@ SBJsEmbeddedFetch class >> matchJs: aDictionary do: aBlock [
 				^ aBlock value: (aDictionary at: 'call_expression') 
 					value:(SBJsEmbeddedFetchPost new
 						factory: SBJavascript new;
-						url: url headers: headers data: body;
-						source: nil)].
+						url: url headers: headers data: body)].
 			['GET'] -> [
 				^ aBlock value: (aDictionary at: 'call_expression') value: (SBJsEmbeddedFetchGet new
 					factory: SBJavascript new;
-					url: url headers: headers data: nil;
-					source: nil)]}
+					url: url headers: headers data: nil)]}
 		otherwise: [^ nil]
 ]
 
@@ -66,14 +65,4 @@ SBJsEmbeddedFetch >> headersToWritableString [
 	txt := ''.
 	headers keysDo: [:key| txt := txt, '''', key asString, '''',  ':','''', (headers at: key) asString, '''', ','].
 	^txt copyFrom: 1 to: (txt size) - 1
-]
-
-{ #category : #'as yet unclassified' }
-SBJsEmbeddedFetch >> promptAddPayload [
-	self subclassResponsibility
-]
-
-{ #category : #'as yet unclassified' }
-SBJsEmbeddedFetch >> writeSourceOn: aStream [ 
-	self subclassResponsibility.
 ]
