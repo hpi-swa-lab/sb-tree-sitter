@@ -78,8 +78,11 @@ SBEmbeddedRequestTool >> addExampleSection [
 				cellGap: cellGapConstant;
 				addMorphBack: (SBStringMorph new contents: 'Examples');
 				addMorphBack: (SBRow new cellGap: cellGapConstant)).
-				
-			exampleMorph := self submorphs fourth.
+			
+			method caseOf: {
+				[#get] -> [exampleMorph := self submorphs fourth].
+				[#post] -> [exampleMorph := self submorphs sixth]}.
+			
 			"TODO, improve tmpUrl workaround"
 			(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url] ifTrue: [tmpUrl := url].
 			

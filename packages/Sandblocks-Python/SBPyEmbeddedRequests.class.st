@@ -5,13 +5,45 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBPyEmbeddedRequests class >> extractBody: functionParameters [
-	^functionParameters pairs.
+SBPyEmbeddedRequests class >> extractBody: arguments [
+	| bodyString  |
+	bodyString := String new.
+	(1 to: arguments childSandblocks size) do: [:i| | tmp |
+		tmp := (arguments childSandblocks at: i) childSandblocks.
+		(tmp size > 1) ifTrue: [ | parameterIdentifier |
+			parameterIdentifier := tmp first contents.
+			parameterIdentifier = 'json' ifTrue: [ | dict |
+				dict := tmp second childSandblocks.
+				(1 to: dict size) do: [:n| | key value |
+				key := (dict at: n) childSandblocks first contents.
+				value := (dict at: n) childSandblocks second contents.
+				n = 1 ifTrue: [bodyString := bodyString, '{'].
+				bodyString := bodyString, '"', key asString, '"', ':', '"', value asString, '"', ','. 
+			]]
+		]].
+	bodyString = '' ifTrue: [^nil] ifFalse: [ bodyString := bodyString copyFrom: 1 to: (bodyString size) - 1. bodyString := bodyString, '}'. ^bodyString].
+	
+
+	
 ]
 
 { #category : #'as yet unclassified' }
-SBPyEmbeddedRequests class >> extractHeaders: functionParameters [
-	^functionParameters pairs.
+SBPyEmbeddedRequests class >> extractHeaders: arguments [
+	| headersMap  |
+	headersMap := Dictionary new.
+	(1 to: arguments childSandblocks size) do: [:i| | tmp |
+		tmp := (arguments childSandblocks at: i) childSandblocks.
+		(tmp size > 1) ifTrue: [ | parameterIdentifier |
+			parameterIdentifier := tmp first contents.
+			parameterIdentifier = 'headers' ifTrue: [ | dict |
+				dict := tmp second childSandblocks.
+				(1 to: dict size) do: [:n| | key value |
+				key := (dict at: n) childSandblocks first contents.
+				value := (dict at: n) childSandblocks second contents.
+				headersMap at: key asString put: value asString.
+			]
+		]]].
+	^headersMap 
 ]
 
 { #category : #'as yet unclassified' }
@@ -20,44 +52,43 @@ SBPyEmbeddedRequests class >> extractMethod: aMethod [
 ]
 
 { #category : #'as yet unclassified' }
-SBPyEmbeddedRequests class >> extractUrl: functionParameters [
-	^functionParameters childSandblocks second childSandblocks first contents
+SBPyEmbeddedRequests class >> extractUrl: arguments [
+	^arguments childSandblocks first contents
 ]
 
 { #category : #'as yet unclassified' }
 SBPyEmbeddedRequests class >> matchPython: aDictionary do: aBlock [
-	<lang: #python match: '(expression_statement
-	(call
+	<lang: #python match: '	(call
     	function:(attribute object: 
         	(identifier) @requests
-            attribute: (identifier) @method
-            	) @function
-    ) @function_parameter
-) @ex'>
+            attribute: (identifier) @method)
+         arguments: (argument_list) @arguments
+    ) @call'>
 
-	| meth function_parameter url |
-		
-	function_parameter := ( aDictionary at: 'function_parameter').
-	(self validate: function_parameter) ifFalse: [^nil].
+	| meth url body header arguments |
+	arguments := ( aDictionary at: 'arguments').
+	(self validate:  ( aDictionary at: 'requests')) ifFalse: [^nil].
 	
 	meth := self extractMethod: (aDictionary at: 'method').
-	url := self extractUrl: function_parameter.
-	
+	url := self extractUrl: arguments.
+	header := self extractHeaders: arguments.
+	body := self extractBody: arguments.
+	"self halt."
 	meth
 		caseOf: {
 			['post'] -> [
-				^ aBlock value: (aDictionary at: 'ex') 
+				^ aBlock value: (aDictionary at: 'call') 
 					value:(SBPyEmbeddedRequestsPost new
 						factory: SBJavascript new;
-						url: url headers: Dictionary new data: '{}')].
+						url: url headers: header data: body)].
 			['get'] -> [
-				^ aBlock value: (aDictionary at: 'ex') value: (SBPyEmbeddedRequestsGet new
+				^ aBlock value: (aDictionary at: 'call') value: (SBPyEmbeddedRequestsGet new
 					factory: SBJavascript new;
-					url: url headers: Dictionary new data: nil)]}
+					url: url headers: header data: nil)]}
 		otherwise: [^ nil]
 ]
 
 { #category : #'as yet unclassified' }
-SBPyEmbeddedRequests class >> validate: functionParameters [
-	^functionParameters childSandblocks first childSandblocks first contents = 'requests'.  
+SBPyEmbeddedRequests class >> validate: requests [
+	^requests contents = 'requests'.  
 ]
