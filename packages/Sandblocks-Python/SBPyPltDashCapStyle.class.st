@@ -3,7 +3,7 @@ How to draw the end caps if the line is is_dashed.
 "
 Class {
 	#name : #SBPyPltDashCapStyle,
-	#superclass : #SBPyPltParamReplacement,
+	#superclass : #SBPyPltParamCBReplace,
 	#category : #'Sandblocks-Python'
 }
 
@@ -28,9 +28,9 @@ SBPyPltDashCapStyle >> createReplacement: aLabel [
 	| items itemsTooltips selection |
 	
 	items := {
-			{'"projecting"'. SBPyPltImage capStyleProjecting}.
-			{'"butt"'. SBPyPltImage capStyleButt}.
-			{'"round"'. SBPyPltImage capStyleRound}.
+			{'projecting'. SBPyPltImage capStyleProjecting}.
+			{'butt'. SBPyPltImage capStyleButt}.
+			{'round'. SBPyPltImage capStyleRound}.
 			} collect: [:pair |
 				SBRow new
 					cellGap: 8;
@@ -45,4 +45,10 @@ SBPyPltDashCapStyle >> createReplacement: aLabel [
 	self
 		addMorphBack:  (SBPyPltComboBox new 
 				values: items; prefix: 'dash_capstyle='; object: selection; tooltips: itemsTooltips)
+]
+
+{ #category : #classification }
+SBPyPltDashCapStyle >> palettes [
+
+	^ {SBPyPltPalettePlot}
 ]

@@ -1,6 +1,6 @@
 Class {
 	#name : #SBPyPltLinewidth,
-	#superclass : #SBPyPltParamReplacement,
+	#superclass : #SBPyPltParamSimpleReplace,
 	#category : #'Sandblocks-Python'
 }
 
@@ -38,4 +38,10 @@ SBPyPltLinewidth class >> matchPythonShortened: aDictionary do: aBlock [
 SBPyPltLinewidth >> createReplacement: aNumber [
 
 	self addMorphBack: (SBPyNumberWithPrefix new prefix: 'linewidth='; contents: aNumber)
+]
+
+{ #category : #classification }
+SBPyPltLinewidth >> palettes [
+
+	^ {SBPyPltPalettePlot}
 ]

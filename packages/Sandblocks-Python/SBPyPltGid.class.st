@@ -1,6 +1,6 @@
 Class {
 	#name : #SBPyPltGid,
-	#superclass : #SBPyPltParamReplacement,
+	#superclass : #SBPyPltParamSimpleReplace,
 	#category : #'Sandblocks-Python'
 }
 
@@ -23,4 +23,10 @@ SBPyPltGid class >> matchPython: aDictionary do: aBlock [
 SBPyPltGid >> createReplacement: aString [
 
 	self addMorphBack: (SBTextBubble new prefix: 'gid='; contents: aString)
+]
+
+{ #category : #classification }
+SBPyPltGid >> palettes [
+
+	^ {SBPyPltPalettePlot}
 ]

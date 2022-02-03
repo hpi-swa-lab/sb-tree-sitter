@@ -99,6 +99,8 @@ SBInlineBlock >> applyReplacements [
 							self sandblockEditor
 								ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
 								ifNil: [cmd do]]]]]]].
+	self sandblockEditor ifNotNil: [:e | "clear the shouldMergeWithNext of the last command"
+	e history noMoreMerge].
 	self toplevel updateAllHighlights
 ]
 

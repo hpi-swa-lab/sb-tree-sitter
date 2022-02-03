@@ -2,10 +2,17 @@ Class {
 	#name : #SBTSRelInsertCommand,
 	#superclass : #SBRelInsertCommand,
 	#instVars : [
-		'element'
+		'element',
+		'buildSuggestions'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSRelInsertCommand >> buildSuggestions: aClosure [
+
+	buildSuggestions := aClosure
+]
 
 { #category : #'as yet unclassified' }
 SBTSRelInsertCommand >> continueAfterInsert: aCharacter [
@@ -38,6 +45,12 @@ SBTSRelInsertCommand >> near: aBlock before: aBoolean in: aContainer morph: aMor
 
 	element := aMorph.
 	super near: aBlock before: aBoolean in: aContainer morph: nil
+]
+
+{ #category : #'as yet unclassified' }
+SBTSRelInsertCommand >> suggestions [
+
+	^ buildSuggestions ifNotNil: [buildSuggestions value: self]
 ]
 
 { #category : #'as yet unclassified' }
