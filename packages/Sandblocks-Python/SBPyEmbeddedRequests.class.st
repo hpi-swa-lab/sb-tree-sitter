@@ -6,44 +6,42 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBPyEmbeddedRequests class >> extractBody: arguments [
-	| bodyString  |
-	bodyString := String new.
-	(1 to: arguments childSandblocks size) do: [:i| | tmp |
-		tmp := (arguments childSandblocks at: i) childSandblocks.
-		(tmp size > 1) ifTrue: [ | parameterIdentifier |
-			parameterIdentifier := tmp first contents.
-			parameterIdentifier = 'json' ifTrue: [ | dict |
-				dict := tmp second childSandblocks.
-				(1 to: dict size) do: [:n| | key value |
-				key := (dict at: n) childSandblocks first contents.
-				value := (dict at: n) childSandblocks second contents.
-				n = 1 ifTrue: [bodyString := bodyString, '{'].
-				bodyString := bodyString, '"', key asString, '"', ':', '"', value asString, '"', ','. 
-			]]
-		]].
-	bodyString = '' ifTrue: [^nil] ifFalse: [ bodyString := bodyString copyFrom: 1 to: (bodyString size) - 1. bodyString := bodyString, '}'. ^bodyString].
-	
 
-	
+	| bodyString |
+	bodyString := String new.
+	(1 to: arguments childSandblocks size) do: [:i | | parameter |
+		parameter := (arguments childSandblocks at: i) childSandblocks.
+		parameter size > 1 ifTrue: [ | parameterIdentifier |
+			parameterIdentifier := parameter first contents.
+			parameterIdentifier = 'json' ifTrue: [ | dict |
+				dict := parameter second childSandblocks.
+				(1 to: dict size) do: [:n | | key value |
+					key := (dict at: n) childSandblocks first contents.
+					value := (dict at: n) childSandblocks second contents.
+					n = 1 ifTrue: [bodyString := bodyString, '{'].
+					bodyString := bodyString, '"', key asString, '"', ':', '"', value asString, '"', ',']]]].
+	bodyString = '' ifTrue: [^ nil] ifFalse: [
+		bodyString := bodyString copyFrom: 1 to: bodyString size - 1.
+		bodyString := bodyString, '}'.
+		^ bodyString]
 ]
 
 { #category : #'as yet unclassified' }
 SBPyEmbeddedRequests class >> extractHeaders: arguments [
-	| headersMap  |
+
+	| headersMap |
 	headersMap := Dictionary new.
-	(1 to: arguments childSandblocks size) do: [:i| | tmp |
-		tmp := (arguments childSandblocks at: i) childSandblocks.
-		(tmp size > 1) ifTrue: [ | parameterIdentifier |
-			parameterIdentifier := tmp first contents.
+	(1 to: arguments childSandblocks size) do: [:i | | parameter |
+		parameter := (arguments childSandblocks at: i) childSandblocks.
+		parameter size > 1 ifTrue: [ | parameterIdentifier |
+			parameterIdentifier := parameter first contents.
 			parameterIdentifier = 'headers' ifTrue: [ | dict |
-				dict := tmp second childSandblocks.
-				(1 to: dict size) do: [:n| | key value |
-				key := (dict at: n) childSandblocks first contents.
-				value := (dict at: n) childSandblocks second contents.
-				headersMap at: key asString put: value asString.
-			]
-		]]].
-	^headersMap 
+				dict := parameter second childSandblocks.
+				(1 to: dict size) do: [:n | | key value |
+					key := (dict at: n) childSandblocks first contents.
+					value := (dict at: n) childSandblocks second contents.
+					headersMap at: key asString put: value asString]]]].
+	^ headersMap
 ]
 
 { #category : #'as yet unclassified' }
