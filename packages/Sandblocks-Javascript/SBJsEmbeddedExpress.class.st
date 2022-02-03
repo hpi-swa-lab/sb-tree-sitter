@@ -1,5 +1,5 @@
 "
-Base class to replace in JavaScript source code fetch calls.
+Base class to replace in Express.js routes.
 "
 Class {
 	#name : #SBJsEmbeddedExpress,

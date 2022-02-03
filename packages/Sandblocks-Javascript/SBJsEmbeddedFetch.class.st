@@ -1,3 +1,6 @@
+"
+Base class to replace calls from JavaScript fetch API.
+"
 Class {
 	#name : #SBJsEmbeddedFetch,
 	#superclass : #SBEmbeddedRequestTool,

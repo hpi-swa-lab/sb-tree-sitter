@@ -33,36 +33,36 @@ SBRequestTool >> Examples [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> addBodySection: aBody [
-
+"Add the UI component for a body"
 	| key |
 	aBody ifNotNil: [
-	isRawData
-		ifFalse: [
-			bodyMorph
+		isRawData
+			ifFalse: [
+				bodyMorph
 					addMorphBack: (SBStringMorph new contents: 'Body');
 					addMorphBack: (SBButton new icon: SBIcon iconPlus label: 'Field' do: [self addFieldAction]);
-				addMorphBack: (SBRow new
-					cellGap: cellGapConstant;
 					addMorphBack: (SBRow new
-						cellGap: 0;
-						addMorphBack: (SBJsRequestToolFieldTextBubble new
+						cellGap: cellGapConstant;
+						addMorphBack: (SBRow new
 							cellGap: 0;
-							placeholderText: 'key');
-						addMorphBack: (SBTextBubble new
-							cellGap: 0;
-							placeholderText: 'value')))]
-		ifTrue: [
-			bodyMorph
-				addMorphBack: (SBStringMorph new contents: 'Body');
-				addMorphBack: (SBJsRequestToolBodyTextBubble new contents: aBody)].
-	
-	key := url, (method asString).
-	Examples at: key ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]]].
+							addMorphBack: (SBJsRequestToolFieldTextBubble new
+								cellGap: 0;
+								placeholderText: 'key');
+							addMorphBack: (SBTextBubble new
+								cellGap: 0;
+								placeholderText: 'value')))]
+			ifTrue: [
+				bodyMorph
+					addMorphBack: (SBStringMorph new contents: 'Body');
+					addMorphBack: (SBJsRequestToolBodyTextBubble new contents: aBody)].
+		
+		key := url, method asString.
+		Examples at: key ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]]]
 ]
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> addExampleSection [
-
+	"Add the UI component for displaying the examples."
 	SBToggledCode comment: '' active: 1 do: {
 		[ | map |
 			self addMorphBack: (SBRow new
@@ -79,6 +79,7 @@ SBRequestTool >> addExampleSection [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> addFieldAction [
+"Add field parameter for post requests with no raw data."
 	self submorphs sixth
 		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
@@ -92,6 +93,7 @@ SBRequestTool >> addFieldAction [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> addHeaderAction [
+"Add a new header."
 	headerMorph
 		addMorphBack: (SBRow new
 			addMorphBack: (SBJsRequestToolHeaderTextBubble new
@@ -104,7 +106,7 @@ SBRequestTool >> addHeaderAction [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> addHeaderAction: key value: value [
-
+"Add a new header with a given key and value."
 	| valueTextBubble |
 	valueTextBubble := value = '' ifTrue: [(SBTextBubble new placeholderText: 'value')] ifFalse: [(SBTextBubble new contents: value)].
 	
@@ -121,6 +123,7 @@ SBRequestTool >> addHeaderAction: key value: value [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> addParamAction [
+"Add a new parameter"
 	paramMorph
 		submorphs;
 		addMorphBack: (SBRow new
@@ -135,6 +138,7 @@ SBRequestTool >> addParamAction [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> addParamAction: key value: value [
+"Add a new parameter with a given key and value."
 	paramMorph
 		submorphs;
 		addMorphBack: (SBRow new
@@ -148,7 +152,7 @@ SBRequestTool >> addParamAction: key value: value [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> addParamSection: aParams [
-
+"Add the UI component to display parameters."
 	| s |
 	self
 		addMorphBack: (SBRow new
@@ -178,7 +182,7 @@ SBRequestTool >> addParamSection: aParams [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> addRequestToExampleMap: response [
-
+"Add the response to the example map. Call this after send."
 	| map example |
 	map := Examples at: url, method asString ifAbsent: [nil].
 	example := nil.
@@ -285,7 +289,7 @@ SBRequestTool >> headers: aHeadersMap [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> initCommons [
-	"Setup shared UI elements"
+	"Setup UI elements which are shared accross different methods."
 
 	self
 		addMorphBack: (SBRow new
@@ -320,6 +324,7 @@ SBRequestTool >> initCommons [
 
 { #category : #'initialize-release' }
 SBRequestTool >> initGet [
+"Initializes a UI for get requests."
 	self
 		initCommons;
 		addParamSection: nil.
@@ -327,6 +332,7 @@ SBRequestTool >> initGet [
 
 { #category : #'initialize-release' }
 SBRequestTool >> initPost [
+"Initializes a UI for post requests."
 	self
 		initCommons;
 		addParamSection: nil.
@@ -372,7 +378,7 @@ SBRequestTool >> params: aParams [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> performGetRequest: urlWithParams [
-
+	"Does a get call."
 	| resp client response |
 	client := WebClient new.
 	resp := client
@@ -391,7 +397,7 @@ SBRequestTool >> performGetRequest: urlWithParams [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> performPostRequest: body url: aUrl [
-
+	"Does a post call."
 	| resp client response tmpHeaders |
 	client := WebClient new.
 	"Deep copy the headers so that I can set a default for Content-Type"
@@ -437,7 +443,7 @@ SBRequestTool >> recreateFromVariables: aHeaders params: aParams body: aBody [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> send [
-
+	"Send delegates to the correct method to do the actual request."
 	| paramsString |
 	self updatePayloadInObjectInstance.
 	paramsString := self collectParamsString.

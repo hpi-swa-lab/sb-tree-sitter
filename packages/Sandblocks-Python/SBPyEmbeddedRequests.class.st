@@ -1,3 +1,6 @@
+"
+Base class to replace calls from Pythons requests package.
+"
 Class {
 	#name : #SBPyEmbeddedRequests,
 	#superclass : #SBEmbeddedRequestTool,

@@ -136,7 +136,7 @@ SBEmbeddedRequestTool >> addParamSection: aParams [
 	
 	params keysDo: [:key | self addParamAction: ((params at: key) key) asString  value:  ((params at: key) value) asString].
 	
-	"Whats have I done here :)"
+	"TODO: revisit"
 	SBToggledCode comment: '' active: 0 do: {
 		[
 			params keysDo: [:key | | k v |
@@ -254,7 +254,7 @@ SBEmbeddedRequestTool >> promptAddPayload [
 
 { #category : #'as yet unclassified' }
 SBEmbeddedRequestTool >> send [
-
+	"Delegates to the correct request implementation."
 	| paramsString |
 	
 	self updatePayloadInObjectInstance.
@@ -319,28 +319,30 @@ SBEmbeddedRequestTool >> toggleHelp [
 
 { #category : #'as yet unclassified' }
 SBEmbeddedRequestTool >> updateHeaders: aHeadersMorph [
-"Loop through the headers morphs and update the headers map"
+
 	| key value index |
+	"Loop through the headers morphs and update the headers map"
 	index := 0.
-	aHeadersMorph do: [: header |
+	aHeadersMorph do: [:header |
 		index := index + 1.
 		index > 1 ifTrue: [
-		key := header submorphs first contents.
-		value := header submorphs second contents.
-		key ~= nil & (key ~= '') ifTrue: [headers at: key put: value]]]
+			key := header submorphs first contents.
+			value := header submorphs second contents.
+			key ~= nil & (key ~= '') ifTrue: [headers at: key put: value]]]
 ]
 
 { #category : #'as yet unclassified' }
 SBEmbeddedRequestTool >> updateParams: aParamsMorph [
-"Loop through the params morphs and update the param map"
+
 	| key value index |
+	"Loop through the params morphs and update the param map"
 	index := 0.
-	aParamsMorph do: [:paramMorph | 
+	aParamsMorph do: [:paramMorph |
 		index := index + 1.
 		index > 1 ifTrue: [
-		key := paramMorph submorphs first contents.
-		value := paramMorph submorphs second contents.
-		(key ~= nil) & (key ~= '') ifTrue: [params at: (key, value) put: (key -> value)]]]
+			key := paramMorph submorphs first contents.
+			value := paramMorph submorphs second contents.
+			key ~= nil & (key ~= '') ifTrue: [params at: key, value put: key -> value]]]
 ]
 
 { #category : #'as yet unclassified' }
