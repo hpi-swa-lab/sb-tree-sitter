@@ -488,7 +488,6 @@ SBRequestTool >> updatePayloadInObjectInstance [
 	self updateHeaders: headerMorph submorphs.
 	self updateParams: paramMorph submorphs.
 	url := (urlMorph submorphs second) contents.
-	"TODO body morph set wrong currently BUG"
 
 	method = #post ifTrue: [ isRawData ifTrue: [
 			bodyMorph ifNotNil:[
@@ -498,7 +497,7 @@ SBRequestTool >> updatePayloadInObjectInstance [
 
 { #category : #'initialize-release' }
 SBRequestTool >> url: aString method: aMethod headers: aHeaders data: aData [
-	"Constructs a SBJsFetch object"
+	"Constructs a SBRequestTool"
 
 	"exampleThreshold sets the maximum of examples per request and response code."
 	exampleThreshold := 5.
