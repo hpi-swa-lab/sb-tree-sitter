@@ -27,11 +27,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBRequestTool class >> matchJs: aDictionary do: aBlock [
-	self subclassResponsibility
-]
-
-{ #category : #'as yet unclassified' }
 SBRequestTool >> Examples [
 	^Examples.
 ]

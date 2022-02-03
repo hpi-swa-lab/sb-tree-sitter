@@ -17,6 +17,16 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBEmbeddedRequestTool class >> matchJs: aDictionary do: aBlock [
+	self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SBEmbeddedRequestTool class >> matchPython: aDictionary do: aBlock [
+	self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
 SBEmbeddedRequestTool class >> registerShortcuts: aProvider [
 
 	aProvider
@@ -53,7 +63,8 @@ SBEmbeddedRequestTool >> addBodySection: aBody [
 		
 		].
 "TODO, improve tmpUrl workaround"
-tmpUrl := baseUrl, url.
+(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url] ifTrue: [tmpUrl := url].
+
 Examples at: tmpUrl, method ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]].
 ]
 
@@ -70,7 +81,7 @@ SBEmbeddedRequestTool >> addExampleSection [
 				
 			exampleMorph := self submorphs fourth.
 			"TODO, improve tmpUrl workaround"
-			tmpUrl := baseUrl, url.
+			(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url] ifTrue: [tmpUrl := url].
 			
 			map := Examples at: tmpUrl, method asString ifAbsent: [].
 			map ifNotNil: [ map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
@@ -133,6 +144,8 @@ SBEmbeddedRequestTool >> addParamSection: aParams [
 	method = #get ifTrue: [ | tmpUrl |
 		"TODO, improve tmpUrl workaround"
 		tmpUrl := baseUrl, url, method.
+		(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url, method] ifTrue: [tmpUrl := url, method].
+	
 		Examples at: tmpUrl
 			ifPresent: [: e |
 			e size > 0 ifTrue: [self addExampleSection]]].
