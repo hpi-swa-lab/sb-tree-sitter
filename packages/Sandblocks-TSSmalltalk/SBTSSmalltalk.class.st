@@ -682,6 +682,16 @@ SBTSSmalltalk class >> grammarJson [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSmalltalk class >> highlightQuery [
+
+	^ '["this" "self" "true" "false" "thisContext" "super" "nil"] @keyword
+(number) @number
+(string) @string
+(identifier) @variable
+["^" "[" "]" "{" "}"] @important'
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSmalltalk class >> icon [
 
 	^ SBStASTNode icon
@@ -703,6 +713,12 @@ SBTSSmalltalk class >> rootRuleName [
 SBTSSmalltalk class >> statementContainerTypes [
 
 	^ #('method' 'block')
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	^ aBlock parentSandblock type = 'method'
 ]
 
 { #category : #'as yet unclassified' }
