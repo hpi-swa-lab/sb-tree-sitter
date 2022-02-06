@@ -322,7 +322,7 @@ SBInlineBlockSymbol >> suggestions [
 	
 	^ (self factory suggestionsFor: self) ifEmpty: [
 		(self
-			sortedSuggestions: (Array streamContents: [:stream | self toplevel allBlocksDo: [:block | (block isInlineBlock and: [block type = self type and: [block ~= self]]) ifTrue: [stream nextPut: block contents]]])
+			sortedSuggestions: (Array streamContents: [:stream | self toplevel allBlocksDo: [:block | (block isInlineBlock and: [block type = self type and: [block ~= self]]) ifTrue: [block contents ifNotNil: [:c | stream nextPut: c]]]])
 			for: self contents) collect: [:text | SBSuggestionItem selector: text label: self type]]
 ]
 

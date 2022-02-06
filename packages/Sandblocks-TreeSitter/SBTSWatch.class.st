@@ -121,10 +121,10 @@ SBTSWatch >> exampleStarting: anExample [
 	(exampleValues at: anExample ifAbsentPut: [ | display |
 		display := SBExampleValueDisplay new.
 		self addMorphBack: (exampleValues at: anExample put: display).
-		anExample when: #outOfWorld send: #exampleStopped: to: self with: anExample.
+		anExample ifNotNil: [anExample when: #outOfWorld send: #exampleStopped: to: self with: anExample].
 		display])
 		exampleStarting: anExample;
-		name: anExample label
+		name: (anExample ifNotNil: #label ifNil: ['global'])
 ]
 
 { #category : #'as yet unclassified' }
@@ -220,6 +220,8 @@ SBTSWatch >> registerWatch [
 { #category : #'as yet unclassified' }
 SBTSWatch >> reportValue: aString env: anEnvironment [
 
+	(anEnvironment isNil and: [(exampleValues includesKey: nil) not]) ifTrue: [self exampleStarting: anEnvironment].
+	
 	exampleValues at: anEnvironment ifPresent: [:display | | converted |
 		converted := (aString matchesRegex: '-?\d+(\.\d+)?')
 			ifTrue: [aString asNumber]

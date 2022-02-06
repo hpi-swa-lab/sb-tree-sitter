@@ -6,7 +6,9 @@ Class {
 		'runButton',
 		'runCancelBlock',
 		'runtime',
-		'root'
+		'root',
+		'autoRestartButton',
+		'autoRestart'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -33,6 +35,12 @@ SBTSFile class >> for: aFilepathString [
 SBTSFile >> artefactChanged: aMethodBlock [
 
 	aMethodBlock = self ifTrue: [self root updateAllHighlights]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile >> artefactSaved: aMethodBlock [
+
+	(aMethodBlock = self and: [autoRestart]) ifTrue: [self restart]
 ]
 
 { #category : #'as yet unclassified' }
@@ -76,6 +84,7 @@ SBTSFile >> filepath: aString language: aLanguageClass collapsed: aBoolean [
 SBTSFile >> filepath: aString toplevel: aBlock language: aLanguageClass collapsed: aBoolean [
 
 	filepath := aString.
+	autoRestart := false.
 	self addMorphBack: (SBRow new
 		cellGap: 4;
 		cellPositioning: #center;
@@ -90,10 +99,15 @@ SBTSFile >> filepath: aString toplevel: aBlock language: aLanguageClass collapse
 	aBoolean ifFalse: [self addMorphBack: root].
 	
 	(self root factory runtime notNil and: [aBoolean not]) ifTrue: [
-		self firstSubmorph addMorphBack: (runtime := SBTSRuntimeChooser new language: aLanguageClass).
-		self firstSubmorph addMorphBack: (runButton := SBIcon iconPlay
-			balloonText: 'Run file';
-			on: #click send: #toggleRun to: self)]
+		self firstSubmorph
+			addMorphBack: (runtime := SBTSRuntimeChooser new language: aLanguageClass);
+			addMorphBack: (runButton := SBIcon iconPlay
+				balloonText: 'Run file';
+				on: #click send: #toggleRun to: self);
+			addMorphBack: (Morph new extent: 12 @ 0);
+			addMorphBack: (autoRestartButton := SBButton new
+				icon: SBIcon iconRefresh shortcut: nil do: [self toggleAutoRestart];
+				balloonText: 'Toggle auto-restart on save')]
 ]
 
 { #category : #'as yet unclassified' }
@@ -125,6 +139,13 @@ SBTSFile >> layoutCommands [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile >> restart [
+
+	runCancelBlock ifNotNil: [self toggleRun].
+	self toggleRun
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> root [
 
 	^ root
@@ -139,6 +160,13 @@ SBTSFile >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 		during: [aQuickBoolean ifTrue: [self root sourceString] ifFalse: [self root prettySourceString]].
 	FileStream forceNewFileNamed: self filepath do: [:stream | stream nextPutAll: source].
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile >> toggleAutoRestart [
+
+	autoRestart := autoRestart not.
+	autoRestartButton active: autoRestart
 ]
 
 { #category : #'as yet unclassified' }
