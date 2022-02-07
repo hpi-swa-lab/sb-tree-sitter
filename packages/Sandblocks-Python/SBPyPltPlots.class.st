@@ -15,7 +15,7 @@ SBPyPltPlots >> isAxes [
 
 { #category : #'as yet unclassified' }
 SBPyPltPlots >> palettes [
-	^ {SBPyPltPalette}
+	^ {SBPyPltPaletteOverview}
 ]
 
 { #category : #'as yet unclassified' }

@@ -1,5 +1,5 @@
 "
-This class replaces all python boolean with checkboxes.
+Replaces all python booleans with checkboxes.
 "
 Class {
 	#name : #SBPyBool,
@@ -12,12 +12,12 @@ SBPyBool class >> matchPython: aDictionary do: aBlock [
 	<lang: #python match: '[(true) (false)] @bool' sample: 'True'>
 
 	(aDictionary at: 'bool') type = 'true'
-		ifTrue: [^ aBlock value: (aDictionary at: 'bool') value: (self new factory: (aDictionary at: 'bool') factory; checked: true)]
-		ifFalse: [^ aBlock value: (aDictionary at: 'bool') value: (self new factory: (aDictionary at: 'bool') factory; checked: false)].
+		ifTrue: [^ aBlock value: (aDictionary at: 'bool') value: (self new factory: (aDictionary at: 'bool') factory; replaceWithChecked: true)]
+		ifFalse: [^ aBlock value: (aDictionary at: 'bool') value: (self new factory: (aDictionary at: 'bool') factory; replaceWithChecked: false)].
 ]
 
 { #category : #'initialize-release' }
-SBPyBool >> checked: aBoolean [ 
+SBPyBool >> replaceWithChecked: aBoolean [ 
 	self addMorphBack: (SBCheckbox new value: aBoolean)
 ]
 

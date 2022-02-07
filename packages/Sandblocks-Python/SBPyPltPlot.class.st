@@ -26,28 +26,50 @@ SBPyPltPlot class >> match: aDictionary do: aBlock [
 ]
 
 { #category : #'initialize-release' }
-SBPyPltPlot >> createReplacementOfArgs: aTSBlock [
-"creates plot replacement, nesting the replacements of aTSBlock inside."
+SBPyPltPlot >> createReplacementOfArgs: aSBTSFieldAccessor [
 
 	self addMorphBack: (SBRow new
 			addMorphBack: (SBStringMorph new contents: 'line plot:');
-			addMorphBack: (SBPyPltPlotArgs new factory: (SBPython instance); wrapInReplacement: (aTSBlock buildCopy));
+			addMorphBack: aSBTSFieldAccessor;
 			addMorphBack: (SBPyPltImage linePlot);
 			cellGap: 4
 		).
 ]
 
 { #category : #'initialize-release' }
-SBPyPltPlot >> isAxes [
-	"indicates whether this replacement is to be shown in the Axes Palette"
-
-	^ true
-]
-
-{ #category : #'initialize-release' }
 SBPyPltPlot >> palettes [
 
 	^ super palettes,{SBPyPltPalettePlot}
+]
+
+{ #category : #'as yet unclassified' }
+SBPyPltPlot >> suggestAlways [
+    "show suggestions even when just clicked, not just when I start typing"
+    ^true
+]
+
+{ #category : #'initialize-release' }
+SBPyPltPlot >> suggestions [
+	| action |
+	action := [:block :item |
+        "insert just after the PyPltPlot block"
+		self sandblockEditor do: (SBInsertCommand new
+			container: (self ownerThatIsA: SBInlineBlockRepeat);
+			morph: item preview;
+			index: self submorphIndex + 1)].
+	^ {
+		(SBSuggestionItem selector: 'axes' label: 'attribute')
+			preview: (SBPyPltDashes new
+					factory: SBPython instance;
+					createReplacementFromSequence: {'3'. '1'})
+				previewOnly: false;
+			completionAction: action.
+		(SBSuggestionItem selector: 'array' label: 'attribute')
+			preview: (SBPyPltData new
+					factory: SBPython instance;
+					createReplacement: 'X')
+				previewOnly: false;
+			completionAction: action}
 ]
 
 { #category : #'as yet unclassified' }

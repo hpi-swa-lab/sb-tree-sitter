@@ -1,5 +1,5 @@
 "
-This is the entry palette for matplotlib.
+Entry palette for matplotlib.
 "
 Class {
 	#name : #SBPyPltPaletteEntry,

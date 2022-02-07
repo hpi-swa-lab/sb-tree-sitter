@@ -23,9 +23,3 @@ SBPyPltAlpha >> createReplacement: aNumber [
 
 	self addMorphBack: (SBPyNumberWithPrefix new prefix: 'alpha='; contents: aNumber; rangeFrom: 0 to: 1)
 ]
-
-{ #category : #classification }
-SBPyPltAlpha >> palettes [
-
-	^ {SBPyPltPalettePlot}
-]

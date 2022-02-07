@@ -1,5 +1,5 @@
 "
-This is the palette for the arguments of SBPyPltPlot.
+Palette for SBPyPltPlot, the replacement for plot().
 "
 Class {
 	#name : #SBPyPltPalettePlot,
@@ -26,10 +26,10 @@ SBPyPltPalettePlot class >> buildOn: aBuilder [
 	aBuilder addSubSectionHeader: 'Line-specific'.
 	
 	aBuilder addBlock: 'How to draw the end caps if the line is is_dashed.' as:
-		(SBPyPltDashCapStyle new factory: SBPython instance; createReplacement: 'butt').
+		(SBPyPltDashCapStyle new factory: SBPython instance; createReplacementWithSelectedLabel: 'butt').
 		
 	aBuilder addBlock: 'How to join segments of the line if it is_dashed.' as:
-		(SBPyPltDashJoinStyle new factory: SBPython instance; createReplacement: 'round').
+		(SBPyPltDashJoinStyle new factory: SBPython instance; createReplacementWithSelectedLabel: 'round').
 		
 	aBuilder addBlock: 'Set the dash sequence.
 The dash sequence is a sequence of floats of even length describing the length of dashes and spaces in points.
@@ -38,7 +38,7 @@ For example, (5, 2, 1, 2) describes a sequence of 5 point and 1 point dashes sep
 		
 	aBuilder addBlock: 'Set the drawstyle of the plot.
 The drawstyle determines how the points are connected.' as:
-		(SBPyPltDrawstyle new factory: SBPython instance; createReplacement: 'steps').
+		(SBPyPltDrawstyle new factory: SBPython instance; createReplacementWithSelectedLabel: 'steps').
 		
 	"den"
 	aBuilder addBlock: 'Set the linestyle of the line.' as:
@@ -60,7 +60,7 @@ The drawstyle determines how the points are connected.' as:
 	aBuilder addSubSectionHeader: 'Marker'.
 	
 	aBuilder addBlock: 'Set the line marker.' as:
-		(SBPyPltMarker new factory: SBPython instance; createReplacement: 'o').
+		(SBPyPltMarker new factory: SBPython instance; createReplacementWithSelectedLabel: 'o').
 		
 	aBuilder addBlock: 'Set the marker edge color.' as:
 		(SBPython parseAsKeywordArgumentAndReplace: 'markeredgecolor="red"').

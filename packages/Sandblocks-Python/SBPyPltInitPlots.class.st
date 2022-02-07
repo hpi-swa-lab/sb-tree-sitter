@@ -1,5 +1,5 @@
 "
-This replacement is the starting point for all matplotlib related content.
+The starting point for all matplotlib related content. It imports matplotlib, so it needs to be placed before any other matplotlib replacements.
 "
 Class {
 	#name : #SBPyPltInitPlots,
@@ -36,7 +36,7 @@ SBPyPltInitPlots >> createReplacement [
 { #category : #'as yet unclassified' }
 SBPyPltInitPlots >> palettes [
 
-	^ {SBPyPltPalette}
+	^ {SBPyPltPaletteOverview}
 ]
 
 { #category : #'as yet unclassified' }

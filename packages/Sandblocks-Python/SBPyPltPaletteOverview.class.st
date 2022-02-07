@@ -1,17 +1,24 @@
 "
-This is the entry palette for matplotlib.
+Palette showing basic matplotlib plots (plot, hist, scatter) and axis customizations.
 "
 Class {
-	#name : #SBPyPltPalette,
+	#name : #SBPyPltPaletteOverview,
 	#superclass : #SBPyPalette,
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltPalette class >> buildOn: aBuilder [
+SBPyPltPaletteOverview class >> buildOn: aBuilder [
 	aBuilder addSectionHeader: 'Plots'.
+	aBuilder content addMorphBack: (SBStringMorph new italic; contents: 'Plot y versus x as lines and/or markers.').
 	aBuilder addBlock: 'Create plot with evenly spaced x axis' as: (SBPython parseAndReplace: 'ax.plot(X)').
 	aBuilder addBlock: 'Create plots' as: (SBPython parseAndReplace: 'ax.plot(X, Y)').
+	
+	aBuilder content addMorphBack: (SBStringMorph new italic; contents: 'A scatter plot of y vs. x with varying marker size and/or color.').
+	aBuilder addBlock: 'Create scatter plot with x,y points' as: (SBPython parseAndReplace: 'ax.scatter(X, Y)').
+	aBuilder addBlock: 'Create plots' as: (SBPython parseAndReplace: 'ax.scatter(X, Y, sizes)').
+	aBuilder addBlock: 'Create plots' as: (SBPython parseAndReplace: 'ax.scatter(X, Y, sizes, colors)').
+	
 	
 	aBuilder addSectionHeader: 'Axis Customization'.
 	aBuilder addBlock: 'Add title to plot' as: (SBPython parseAndReplace: 'ax.set_title("plot title")').

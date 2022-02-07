@@ -1,5 +1,5 @@
 "
-This is the palette for the arguments of SBPyPltPlot.
+This is an alternative to SBPyPltPalettePlotExtended. It shows the documentation strings above the blocks. It opens in the context of the ""alternative"" which can be found in SBPyPalette for example.
 "
 Class {
 	#name : #SBPyPltPalettePlotExtended,

@@ -1,5 +1,5 @@
 "
-This is the parent class of all keyword argument replacements that have a custom replacement. Each child needs to implement writeSourceOn: 
+Base class of all keyword argument replacements that have a custom replacement.
 "
 Class {
 	#name : #SBPyPltParamCustomReplace,
@@ -10,7 +10,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBPyPltParamCustomReplace >> palettes [
 
-	self subclassResponsibility.
+	^{}
 ]
 
 { #category : #'as yet unclassified' }

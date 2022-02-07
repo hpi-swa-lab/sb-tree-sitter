@@ -1,5 +1,5 @@
 "
-This replacement is the starting point for all matplotlib related content.
+This replacements shows the image. It renders the whole AST and adds python code to write the output image to stdout.
 "
 Class {
 	#name : #SBPyPltShowPlots,
@@ -59,7 +59,7 @@ SBPyPltShowPlots >> initialize [
 { #category : #'as yet unclassified' }
 SBPyPltShowPlots >> palettes [
 
-	^ {SBPyPltPalette}
+	^ {SBPyPltPaletteOverview}
 ]
 
 { #category : #'as yet unclassified' }

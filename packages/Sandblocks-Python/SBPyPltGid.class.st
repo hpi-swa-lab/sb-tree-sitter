@@ -24,9 +24,3 @@ SBPyPltGid >> createReplacement: aString [
 
 	self addMorphBack: (SBTextBubble new prefix: 'gid='; contents: aString)
 ]
-
-{ #category : #classification }
-SBPyPltGid >> palettes [
-
-	^ {SBPyPltPalettePlot}
-]

@@ -1,8 +1,8 @@
 "
-This replacement is the starting point for all matplotlib related content.
+This replacement opens SBPyPltPalettePlotExtended. Its only for test purposes to compare it with SBPyPltPalettePlot.
 "
 Class {
-	#name : #SBPyPltOtherPaletteEntry,
+	#name : #SBPyPltReferenceExtendedPalette,
 	#superclass : #SBInlineBlockReplace,
 	#instVars : [
 		'image'
@@ -11,23 +11,23 @@ Class {
 }
 
 { #category : #'initialize-release' }
-SBPyPltOtherPaletteEntry >> createReplacement [
+SBPyPltReferenceExtendedPalette >> createReplacement [
 
 	self addMorphBack: (SBButton new icon: SBIcon iconPlay label: 'alternative' do: [nil]).
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPltOtherPaletteEntry >> palettes [
+SBPyPltReferenceExtendedPalette >> palettes [
 
 	^ {SBPyPltPalettePlotExtended}
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPltOtherPaletteEntry >> type [
+SBPyPltReferenceExtendedPalette >> type [
 
 	^ 'call'
 ]
 
 { #category : #'initialize-release' }
-SBPyPltOtherPaletteEntry >> writeSourceOn: aStream [
+SBPyPltReferenceExtendedPalette >> writeSourceOn: aStream [
 ]

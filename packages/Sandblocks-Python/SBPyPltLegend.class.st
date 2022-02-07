@@ -1,5 +1,5 @@
 "
-Show legend on axis. The legend entries are the labels of the individual plots.
+Shows the legend. The legend entries are the labels of the individual plots.
 "
 Class {
 	#name : #SBPyPltLegend,
@@ -29,7 +29,7 @@ SBPyPltLegend >> createReplacement [
 { #category : #'as yet unclassified' }
 SBPyPltLegend >> palettes [
 
-	^ {SBPyPltPalette}
+	^ {SBPyPltPaletteOverview}
 ]
 
 { #category : #'as yet unclassified' }

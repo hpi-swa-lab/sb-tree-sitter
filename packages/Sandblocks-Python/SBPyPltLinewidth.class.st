@@ -39,9 +39,3 @@ SBPyPltLinewidth >> createReplacement: aNumber [
 
 	self addMorphBack: (SBPyNumberWithPrefix new prefix: 'linewidth='; contents: aNumber)
 ]
-
-{ #category : #classification }
-SBPyPltLinewidth >> palettes [
-
-	^ {SBPyPltPalettePlot}
-]

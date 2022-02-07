@@ -1,5 +1,5 @@
 "
-This is the parent class of all keyword argument replacements that have a single SBPyPltNumberWithPrefix or SBTextBubble as replacement.
+Base class of all keyword argument replacements that have a single SBPyPltNumberWithPrefix or SBTextBubble.
 "
 Class {
 	#name : #SBPyPltParamSimpleReplace,
@@ -9,8 +9,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBPyPltParamSimpleReplace >> palettes [
-
-	self subclassResponsibility.
+"keyword args have no palettes because they can be shown in different contexts."
+	^ {}
 ]
 
 { #category : #'as yet unclassified' }

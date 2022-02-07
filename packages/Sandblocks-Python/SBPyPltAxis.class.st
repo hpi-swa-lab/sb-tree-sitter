@@ -1,5 +1,5 @@
 "
-I am the super class representing all customization of one matplotlib axis.
+Base class for all customizations of matplotlib axes. These blocks can be applied to plots, which first must have been initialized with SBPyPltInitPlots.
 "
 Class {
 	#name : #SBPyPltAxis,
@@ -10,7 +10,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBPyPltAxis >> palettes [
 
-	^ {SBPyPltPalette}
+	^ {SBPyPltPaletteOverview}
 ]
 
 { #category : #'as yet unclassified' }

@@ -1,42 +1,44 @@
 Class {
-	#name : #SBPyPltSetXLabel,
+	#name : #SBPyPltSetTitle,
 	#superclass : #SBPyPltAxis,
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltSetXLabel class >> matchPython: aDictionary do: aBlock [
+SBPyPltSetTitle class >> matchPython: aDictionary do: aBlock [
 	<lang: #python match: '(call
         	function: (attribute
             	object: (identifier) @ax ="ax"
-                attribute: (identifier) @setLabel ="set_xlabel"
+                attribute: (identifier) @setTitle ="set_title"
             )
         	arguments: (argument_list
 			(string) @param
 		)
-        ) @call' sample: 'ax.set_xlabel("example")'>
+        ) @call' sample: 'ax.set_title("example")'>
 	
 	^ aBlock
 		value: (aDictionary at: 'call')
 		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacement: (aDictionary at: 'param') contents)
+			createReplacement: (aDictionary at: 'param') contents
+			)
 ]
 
 { #category : #'initialize-release' }
-SBPyPltSetXLabel >> createReplacement: aString [
-
+SBPyPltSetTitle >> createReplacement: aLabel [
+	
 	self
 		addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: 'x axis label:');
-			addMorphBack: (SBTextBubble new contents: aString);
+			addMorphBack: (SBStringMorph new contents: ('title:'));
+			addMorphBack: (SBTextBubble new contents: aLabel);
 			cellGap: 4
 		)
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPltSetXLabel >> writeSourceOn: aStream [
+SBPyPltSetTitle >> writeSourceOn: aStream [
 
 	| label |
 	label := (self firstSubmorph submorphs at: 2) contents.
-	aStream nextPutAll: ('ax.set_xlabel("',label,'")').
+	
+	aStream nextPutAll: ('ax.set_title("',label,'")').
 ]

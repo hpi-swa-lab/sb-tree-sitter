@@ -24,9 +24,3 @@ SBPyPltLabel >> createReplacement: aString [
 
 	self addMorphBack: (SBTextBubble new prefix: 'label='; contents: aString)
 ]
-
-{ #category : #classification }
-SBPyPltLabel >> palettes [
-
-	^ {SBPyPltPalettePlot}
-]

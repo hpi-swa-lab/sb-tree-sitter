@@ -14,27 +14,21 @@ Class {
 
 { #category : #flagging }
 SBPyNumberWithPrefix >> contents: aString [
+"This is called whenever the content of this object has changed."
 
 	| aValidNumber |
 	
 	rangeMin ifNil: [
-			aString
-				ifNil: [super contents: '0']
-				ifNotNil: [super contents: aString asInteger asString].
-			^ self.
-		].
+		aString ifNil: [super contents: '0'] ifNotNil: [super contents: aString asInteger asString].
+		^ self.
+	].
 	
+	"aValidNumber is enforced to be in the range"
 	aValidNumber := (aString asNumber min: rangeMax) max: rangeMin.
 
 	aString
 		ifNil: [super contents: '0']
 		ifNotNil: [super contents: aValidNumber asInteger asString].
-]
-
-{ #category : #flagging }
-SBPyNumberWithPrefix >> initialize [
-
-	super initialize.
 ]
 
 { #category : #flagging }
@@ -54,7 +48,7 @@ SBPyNumberWithPrefix >> prefix [
 	^ prefix
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBPyNumberWithPrefix >> rangeFrom: aNumber1 to: aNumber2 [
 
 	self assert: [aNumber1 notNil and: aNumber2 notNil].
@@ -64,13 +58,13 @@ SBPyNumberWithPrefix >> rangeFrom: aNumber1 to: aNumber2 [
 	rangeMax := aNumber2.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBPyNumberWithPrefix >> rangeMax [
 
 	^ rangeMax
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBPyNumberWithPrefix >> rangeMin [
 
 	^ rangeMin
@@ -78,6 +72,7 @@ SBPyNumberWithPrefix >> rangeMin [
 
 { #category : #flagging }
 SBPyNumberWithPrefix >> stopEditing: aCommand [
+"this is called after the number has changed"
 	super stopEditing: aCommand.
 	self triggerEvent: #edited
 ]

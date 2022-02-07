@@ -8,59 +8,41 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltScatter class >> matchPython: aDictionary do: aBlock [
-	<lang: #python match: '
-    	(call
+SBPyPltScatter class >> match: aDictionary do: aBlock [
+	<lang: #python match: '(call
         	function: (attribute
             	object: (identifier) ="ax" @ax
-                	attribute: (identifier) ="scatter" @plot
+                attribute: (identifier) ="scatter" @plot
             )
-        	arguments: (argument_list
-			(identifier) @paramX
-            	(identifier) @paramY
-		) @args
+        	arguments: (argument_list)
         ) @call' sample: 'ax.scatter(X, Y)'>
-	
-	(((aDictionary at: 'args') firstSubmorph submorphs size) > 2) ifTrue: [^nil].
 	
 	^ aBlock
 		value: (aDictionary at: 'call')
 		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacementWithX: (aDictionary at: 'paramX') contents Y:  (aDictionary at: 'paramY') contents)
+			createReplacementOfArgs: (aDictionary at: 'call') access arguments)
 ]
 
 { #category : #'initialize-release' }
-SBPyPltScatter >> createReplacementWithX: xString Y: yString [ 
+SBPyPltScatter >> createReplacementOfArgs: aSBTSFieldAccessor [
 
 	self addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: 'scatter plot: (');
-			addMorphBack: (SBTextBubble new contents: xString);
-			addMorphBack: (SBStringMorph new contents: ',');
-			addMorphBack: (SBTextBubble new contents: yString);
-			addMorphBack: (SBStringMorph new contents: ')');
+			addMorphBack: (SBStringMorph new contents: 'scatter:');
+			addMorphBack: aSBTSFieldAccessor;
 			addMorphBack: (SBPyPltImage scatterPlot);
 			cellGap: 4
 		).
 ]
 
 { #category : #'initialize-release' }
-SBPyPltScatter >> isAxes [
-	"indicates whether this replacement is to be shown in the Axes Palette"
+SBPyPltScatter >> palettes [
 
-	^ true
+	^ super palettes,{SBPyPltPaletteScatter}
 ]
 
 { #category : #'as yet unclassified' }
 SBPyPltScatter >> writeSourceOn: aStream [
-"called when blocks are copied. It transforms the block back to source code"
 
-	| xArg yArg |
-	xArg := self submorphs first submorphs second contents.
-	yArg := (self submorphs first submorphs at: 4) contents.
-	
-	aStream nextPutAll: 'ax.scatter('.
-	aStream nextPutAll: xArg.
-	aStream nextPutAll: ', '.
-	aStream nextPutAll: yArg.
-	aStream nextPutAll: ')'.
+	aStream nextPutAll: 'ax.scatter'.
+	(self firstSubmorph submorphs asOrderedCollection at: 2) writeSourceOn: aStream.
 ]

@@ -1,5 +1,5 @@
 "
-How to draw the end caps if the line is is_dashed.
+A custom replacement for the 'dashes=x' keyword argument. The value of the argument is sequence, a tuple of numbers. When clicked, a popup opens that shows the sequence entries as rows.
 "
 Class {
 	#name : #SBPyPltDashes,
@@ -120,13 +120,11 @@ SBPyPltDashes >> initialize [
 
 { #category : #updating }
 SBPyPltDashes >> openPopup [
+	| firstTimeOpened |
 	popup showBelow: self closeOnDeselect: true.
-]
-
-{ #category : #classification }
-SBPyPltDashes >> palettes [
-
-	^ {SBPyPltPalettePlot}
+	
+	firstTimeOpened := popup firstSubmorph lastSubmorph class = StringMorph.
+	firstTimeOpened ifTrue: [self update].
 ]
 
 { #category : #accessing }
@@ -154,6 +152,8 @@ SBPyPltDashes >> sequenceValues [
 
 { #category : #updating }
 SBPyPltDashes >> update [
+	popup isInWorld ifFalse: [^ self].
+
 	super update.
 	self updateImage.
 	self updateReplacementBtn.

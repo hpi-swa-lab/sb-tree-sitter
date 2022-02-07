@@ -1,5 +1,5 @@
 "
-This is the parent class for all palettes for matplotlib. The palettes are referenced by the 'palettes' selector of the replacements. They are shown when the user clicks on a block which itself or whose parent blocks reference the palette. See the sandblocks documentation for more details. 
+Base class for all python palettes. Palettes are referenced by the 'palettes' selector. See the sandblocks documentation for more details. 
 "
 Class {
 	#name : #SBPyPalette,
