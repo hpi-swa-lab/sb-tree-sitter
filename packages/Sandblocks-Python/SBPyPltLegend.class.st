@@ -3,7 +3,7 @@ Shows the legend. The legend entries are the labels of the individual plots.
 "
 Class {
 	#name : #SBPyPltLegend,
-	#superclass : #SBInlineBlockReplace,
+	#superclass : #SBPyPltAxis,
 	#category : #'Sandblocks-Python'
 }
 
@@ -24,18 +24,6 @@ SBPyPltLegend class >> matchPython: aDictionary do: aBlock [
 SBPyPltLegend >> createReplacement [
 
 	self addMorphBack: (SBStringMorph new contents: 'Show legend').
-]
-
-{ #category : #'as yet unclassified' }
-SBPyPltLegend >> palettes [
-
-	^ {SBPyPltPaletteOverview}
-]
-
-{ #category : #'as yet unclassified' }
-SBPyPltLegend >> type [
-
-	^ 'call'
 ]
 
 { #category : #'as yet unclassified' }

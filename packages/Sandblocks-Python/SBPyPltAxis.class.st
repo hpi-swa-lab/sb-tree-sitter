@@ -1,5 +1,5 @@
 "
-Base class for all customizations of matplotlib axes. These blocks can be applied to plots, which first must have been initialized with SBPyPltInitPlots.
+Base class for all customizations of matplotlib axes. The axis must have been initialized with SBPyPltInitPlots before.
 "
 Class {
 	#name : #SBPyPltAxis,
