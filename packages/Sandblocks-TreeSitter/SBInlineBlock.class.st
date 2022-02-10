@@ -1095,14 +1095,14 @@ SBInlineBlock >> toplevel [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> tryCastType: aString ifNone: aBlock [
 
-	| alternatives selected |
+	| alternatives |
 	" accept only changes that do not contain a nested copy of myself; this is to enable casts from e.g.
 integer -> float with higher priority.
 
 If none match, we proceed with the more complicated way of querying up the owner hierarchy to
 find variation points. "
 	alternatives := self ownerThatIsA: SBInlineBlockChoice.
-	selected := SBTSBlockChooseDialog new
+	SBTSBlockChooseDialog new
 		do: [:query | | results |
 			results := SBTSRuleExplore deduplicateResults: (SBTSRuleExplore new
 				maxRecursionDepth: 1;
@@ -1112,13 +1112,12 @@ find variation points. "
 					allBlocksDetect: [:block | block hasSameStructureAs: self]
 					ifFound: [:b | true]
 					ifNone: [false]]]
-		query: aString.
-	
-	selected ifNil: [^ aBlock value].
-	
-	self sandblockEditor do: (SBReplaceCommand new
-		target: self;
-		replacer: selected)
+		query: aString
+		onSuccess: [:selected |
+			^ self sandblockEditor do: (SBReplaceCommand new
+				target: self;
+				replacer: selected)].
+		aBlock value
 ]
 
 { #category : #'as yet unclassified' }
@@ -1137,19 +1136,20 @@ SBInlineBlock >> tryInsertInputAdjacent: aString [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> tryInterpretInput: aString before: aBoolean [
 
-	| result |
-	result := SBTSBlockChooseDialog new
+	SBTSBlockChooseDialog new
 		do: [:query | self choicesForInput: query before: aBoolean]
-		query: aString.
-	result ifNil: [^ self tryInsertInputAdjacent: aString].
+		query: aString
+		onSuccess: [:result |
+			self sandblockEditor do: (SBReplaceCommand new
+				target: (result valueOfProperty: #rootBlock);
+				replacer: result).
+			result removeProperty: #rootBlock.
+			result firstBlock
+				select;
+				inputContainedUnknown.
+			^ self].
 	
-	self sandblockEditor do: (SBReplaceCommand new
-		target: (result valueOfProperty: #rootBlock);
-		replacer: result).
-	result removeProperty: #rootBlock.
-	result firstBlock
-		select;
-		inputContainedUnknown
+	self tryInsertInputAdjacent: aString
 ]
 
 { #category : #accessing }

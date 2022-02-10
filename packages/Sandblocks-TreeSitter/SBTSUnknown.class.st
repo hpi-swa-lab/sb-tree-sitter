@@ -231,34 +231,31 @@ SBTSUnknown >> template: aBlock [
 { #category : #'as yet unclassified' }
 SBTSUnknown >> tryInterpretInput: aString [
 
-	| selected replacer |
-	selected := SBTSBlockChooseDialog new
+	SBTSBlockChooseDialog new
 		do: [:query |
 			SBTSRuleExplore new
 				explore: template value withNested: nil nestedBefore: false for: query startSymbol: type;
 				deduplicate]
-		query: aString.
-	selected ifNil: [^ self].
-	
-	replacer := selected.
-	self sandblockEditor do: (SBReplaceCommand new
-		target: self;
-		replacer: replacer).
-	
-	SBToggledCode
-		comment: ''
-		active: 0
-		do: {[(replacer firstBlock ifNil: [replacer containingSandblock]) inputContainedUnknown]}.
-	SBToggledCode comment: '' active: 1 do: {
-		[
-			(replacer firstBlock ifNil: [replacer containingSandblock]) select.
-			3 timesRepeat: [replacer sandblockEditor performForSelection: #moveCursorSmaller]].
-		[
-			(replacer startInputCommand
-				ifNotNil: [replacer]
-				ifNil: [replacer nextBlockThat: [:m | m startInputCommand notNil]])
-				ifNotNil: [:m | ((m hasOwner: replacer) or: [m = replacer]) ifTrue: [replacer sandblockEditor startInput: m at: 900000000 replacingContents: false]]
-				ifNil: [replacer firstBlock ifNotNil: #select]]}
+		query: aString
+		onSuccess: [:selected | | replacer |
+			replacer := selected.
+			self sandblockEditor do: (SBReplaceCommand new
+				target: self;
+				replacer: replacer).
+			SBToggledCode
+				comment: ''
+				active: 0
+				do: {[(replacer firstBlock ifNil: [replacer containingSandblock]) inputContainedUnknown]}.
+			SBToggledCode comment: '' active: 1 do: {
+				[
+					(replacer firstBlock ifNil: [replacer containingSandblock]) select.
+					3 timesRepeat: [replacer sandblockEditor performForSelection: #moveCursorSmaller]].
+				[
+					(replacer startInputCommand
+						ifNotNil: [replacer]
+						ifNil: [replacer nextBlockThat: [:m | m startInputCommand notNil]])
+						ifNotNil: [:m | ((m hasOwner: replacer) or: [m = replacer]) ifTrue: [replacer sandblockEditor startInput: m at: 900000000 replacingContents: false]]
+						ifNil: [replacer firstBlock ifNotNil: #select]]}]
 ]
 
 { #category : #'as yet unclassified' }
