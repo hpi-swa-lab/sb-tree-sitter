@@ -26,7 +26,7 @@ SBTSBlockChooseDialog >> do: aBlock query: aString onSuccess: anotherBlock [
 			^ currentValues at: answer].
 		self getUserResponseAtHand.
 		"we had an odd race condition where an event would be dispatched to the editor while the popup was still open. the successBlock was the hotfix for that, if it has already been used then it's set to nil."
-		successBlock ifNotNil: [successBlock value: result]]
+		successBlock ifNotNil: [result ifNotNil: [successBlock value: result]]]
 ]
 
 { #category : #'as yet unclassified' }
