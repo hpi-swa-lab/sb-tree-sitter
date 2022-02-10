@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSParseFileTest >> expectedFailures [
 
-	^ #(#testPythonImport #testPythonDecorators)
+	^ #()
 ]
 
 { #category : #tests }
@@ -108,18 +108,5 @@ SBTSParseFileTest >> testPythonImport [
 	block := SBTSFileParser new parse: 'import numpy' language: SBPython instance.
 	self assert: (block matchesQuery: '(module (import_statement (dotted_name (identifier))))').
 	block := SBTSFileParser new parse: 'import numpy as np' language: SBPython instance.
-	block printSExpr.
 	self assert: (block matchesQuery: '(module (import_statement (aliased_import (dotted_name (identifier)) alias: (identifier))))')
-]
-
-{ #category : #tests }
-SBTSParseFileTest >> testVerilogAliases [
-
-	false ifTrue: [
-		SBTSFileParser new
-			parse: 'module rmem_respfifo #(parameter integer WIDTH = 550) (
-    input              clock
-) ;
-endmodule'
-			language: SBVerilog instance]
 ]

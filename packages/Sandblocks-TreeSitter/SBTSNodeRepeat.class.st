@@ -27,6 +27,12 @@ SBTSNodeRepeat >> element [
 	^ element
 ]
 
+{ #category : #testing }
+SBTSNodeRepeat >> isTSRepeat [
+
+	^ true
+]
+
 { #category : #accessing }
 SBTSNodeRepeat >> maxChildren [
 

@@ -109,6 +109,12 @@ SBInlineBlockLabel >> inline [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockLabel >> isTSLabel [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockLabel >> isTemplate [
 
 	^ false

@@ -673,6 +673,24 @@ SBInlineBlock >> isStatementContainer [
 ]
 
 { #category : #testing }
+SBInlineBlock >> isTSLabel [
+
+	^ false
+]
+
+{ #category : #testing }
+SBInlineBlock >> isTSRepeat [
+
+	^ false
+]
+
+{ #category : #testing }
+SBInlineBlock >> isTSSeq [
+
+	^ false
+]
+
+{ #category : #testing }
 SBInlineBlock >> isTSSymbol [
 
 	^ false

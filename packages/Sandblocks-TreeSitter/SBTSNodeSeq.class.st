@@ -31,6 +31,12 @@ SBTSNodeSeq >> elements: aCollection [
 	elements := aCollection
 ]
 
+{ #category : #testing }
+SBTSNodeSeq >> isTSSeq [
+
+	^ true
+]
+
 { #category : #accessing }
 SBTSNodeSeq >> maxChildren [
 

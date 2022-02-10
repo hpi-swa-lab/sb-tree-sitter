@@ -5173,10 +5173,10 @@ SBPython >> getModuleForSymbol: aString in: aModule [
 { #category : #'as yet unclassified' }
 SBPython >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 
-	((aBlock isKindOf: SBInlineBlockRepeat) and: [aBlock hasSubmorphs and: [aBlock submorphs first type = 'decorator']]) ifTrue: [^ true].
+	(aBlock isTSRepeat and: [aBlock hasSubmorphs and: [aBlock submorphs first type = 'decorator']]) ifTrue: [^ true].
 	aBlock type = 'decorator' ifTrue: [^ true].
 	
-	(((aBlock isKindOf: SBInlineBlockLabel) and: [aBlock label = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair']]) ifTrue: [^ true].
+	((aBlock isTSLabel and: [aBlock label = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair']]) ifTrue: [^ true].
 	^ #('else_clause') includes: anotherBlock firstVisibleType
 ]
 

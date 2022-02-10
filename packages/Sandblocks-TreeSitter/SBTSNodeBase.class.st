@@ -127,7 +127,7 @@ SBTSNodeBase >> firstVisibleType [
 	^ (self type notNil and: [self inline not])
 		ifTrue: [self type]
 		ifFalse: [
-			(self hasSubmorphs and: [self firstSubmorph isInlineBlock])
+			(self hasSubmorphs and: [self firstSubmorph isTSNode])
 				ifTrue: [self firstSubmorph firstVisibleType]
 				ifFalse: [nil]]
 ]
@@ -177,9 +177,27 @@ SBTSNodeBase >> isStatementContainer [
 ]
 
 { #category : #testing }
+SBTSNodeBase >> isTSLabel [
+
+	^ false
+]
+
+{ #category : #testing }
 SBTSNodeBase >> isTSNode [
 
 	^ true
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isTSRepeat [
+
+	^ false
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isTSSeq [
+
+	^ false
 ]
 
 { #category : #testing }
@@ -259,7 +277,7 @@ SBTSNodeBase >> printElementsSeparated: aCollection on: aStream indent: aNumber 
 		(self isKindOf: SBTSNodeRepeat)
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
-				((index > 1 and: [(self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [self containingSymbol parentSandblock isInlineBlock or: [first not]]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
+				((index > 1 and: [(self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [self containingSymbol parentSandblock isTSNode or: [first not]]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
 			ifFalse: [
 				((self isKindOf: SBTSNodeSeq) and: [index > 1 and: [self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element]])
 					ifTrue: [

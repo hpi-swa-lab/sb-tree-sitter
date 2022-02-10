@@ -133,7 +133,11 @@ SBTSNodeSymbol >> takeNodesFrom: aParser [
 			ifTrue: [#noMatch]
 			ifFalse: [results collect: [:r | self makeConcrete addChild: r]]].
 	
-	(aParser atEnd not and: [aParser peek isString not and: [aParser peek compatibleWithType: self type]]) ifTrue: [^ {aParser next copy parser: aParser copy}].
+	(aParser atEnd not and: [aParser peek isString not and: [aParser peek compatibleWithType: self type]]) ifTrue: [
+		^ {
+			aParser next copy
+				parser: aParser copy;
+				field: field}].
 	
 	^ #noMatch
 ]
