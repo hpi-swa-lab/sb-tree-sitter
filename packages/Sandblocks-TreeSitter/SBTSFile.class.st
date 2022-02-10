@@ -155,7 +155,7 @@ SBTSFile >> layoutCommands [
 SBTSFile >> restart [
 
 	runCancelBlock ifNotNil: [self toggleRun].
-	self toggleRun
+	self addAlarm: #toggleRun after: 500
 ]
 
 { #category : #'as yet unclassified' }
