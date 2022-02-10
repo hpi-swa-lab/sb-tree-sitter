@@ -123,6 +123,30 @@ SBTSUnknown >> isBuilt [
 	^ true
 ]
 
+{ #category : #testing }
+SBTSUnknown >> isTSLabel [
+
+	^ false
+]
+
+{ #category : #testing }
+SBTSUnknown >> isTSNode [
+
+	^ false
+]
+
+{ #category : #testing }
+SBTSUnknown >> isTSRepeat [
+
+	^ false
+]
+
+{ #category : #testing }
+SBTSUnknown >> isTSSeq [
+
+	^ false
+]
+
 { #category : #'as yet unclassified' }
 SBTSUnknown >> isTemplate [
 

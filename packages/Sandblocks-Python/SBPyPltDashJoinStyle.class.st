@@ -1,3 +1,6 @@
+"
+How to draw the end caps if the line is is_dashed.
+"
 Class {
 	#name : #SBPyPltDashJoinStyle,
 	#superclass : #SBPyPltParamCBReplace,
