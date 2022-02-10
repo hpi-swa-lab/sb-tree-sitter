@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSLanguageTests >> expectedFailures [
 
-	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude #testVerilogAliases #testApplyPyFilePathReplacement)
+	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude #testApplyPyFilePathReplacement)
 ]
 
 { #category : #'testing - parse' }
@@ -281,7 +281,6 @@ SBTSLanguageTests >> testPythonInsertLambdaParameter [
 	
 	e performForSelection: #moveCursorRight.
 	e performForSelection: #moveCursorRight.
-	e performForSelection: #moveCursorRight.
 	e handle: (self keyboardEvent: $a).
 	
 	self assert: 'a' equals: module access children first parameters children first contents
@@ -360,13 +359,4 @@ SBTSLanguageTests >> testRegexResumeInput [
 SBTSLanguageTests >> testSyntaxError [
 
 	self should: [SBPython parse: '"abc"('] raise: SBTSSyntaxError
-]
-
-{ #category : #'testing - parse' }
-SBTSLanguageTests >> testVerilogAliases [
-
-	SBVerilog parse: 'module rmem_respfifo #(parameter integer WIDTH = 550) (
-    input              clock
-) ;
-endmodule'
 ]
