@@ -110,3 +110,14 @@ SBTSParseFileTest >> testPythonImport [
 	block := SBTSFileParser new parse: 'import numpy as np' language: SBPython instance.
 	self assert: (block matchesQuery: '(module (import_statement (aliased_import (dotted_name (identifier)) alias: (identifier))))')
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSParseFileTest >> testPythonStatements [
+
+	| source |
+	source := 'a
+b'.
+	self
+		assert: source
+		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
+]

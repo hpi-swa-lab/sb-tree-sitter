@@ -37,6 +37,24 @@ SBTSNodeSeq >> isTSSeq [
 	^ true
 ]
 
+{ #category : #layout }
+SBTSNodeSeq >> layoutCommands [
+
+	^ SBAlgebraCommand container
+		morph: self;
+		data: (Array streamContents: [:stream |
+			self submorphs withIndexDo: [:morph :index |
+				stream nextPut: morph layoutCommands.
+				index ~= self submorphCount ifTrue: [ | next |
+					next := self submorphs at: index + 1.
+					stream nextPut: ((self factory hardLineBreakMatchBetween: morph and: next)
+						ifTrue: [SBAlgebraCommand hardLine]
+						ifFalse: [
+							(self factory softLineBreakMatchBetween: morph and: next)
+								ifTrue: [SBAlgebraCommand softLineOrGap]
+								ifFalse: [SBAlgebraCommand gap]])]]])
+]
+
 { #category : #accessing }
 SBTSNodeSeq >> maxChildren [
 
