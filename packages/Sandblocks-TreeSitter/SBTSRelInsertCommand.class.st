@@ -15,6 +15,12 @@ SBTSRelInsertCommand >> buildSuggestions: aClosure [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSRelInsertCommand >> canInsert: aBlock [
+
+	^ aBlock isTSSymbol and: [(element isKindOf: SBInlineBlockChoice) and: [element alternatives anySatisfy: [:alt | alt isTSSymbol and: [alt compatibleWithType: aBlock type]]]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSRelInsertCommand >> continueAfterInsert: aCharacter [
 
 	^ (morph sourceString includes: aCharacter) not
