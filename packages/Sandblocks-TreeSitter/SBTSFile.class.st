@@ -32,6 +32,22 @@ SBTSFile class >> for: aFilepathString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile class >> forNoReplace: aFilepathString [
+
+	^ self new
+		filepath: aFilepathString
+		language: (self languageForPath: aFilepathString)
+		collapsed: false
+		replace: false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile class >> languageForPath: aString [
+
+	^ SBGrammarLanguage allSubclasses detect: [:lang | lang fileSuffix = (FileDirectory extensionFor: aString)]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> artefactChanged: aMethodBlock [
 
 	aMethodBlock = self ifTrue: [self root updateAllHighlights]
@@ -62,22 +78,19 @@ SBTSFile >> filepath [
 { #category : #'as yet unclassified' }
 SBTSFile >> filepath: aString collapsed: aBoolean [
 
-	self
-		filepath: aString
-		language: (SBGrammarLanguage allSubclasses detect: [:lang | lang fileSuffix = (FileDirectory extensionFor: aString)])
-		collapsed: aBoolean
+	self filepath: aString language: (self class languageForPath: aString) collapsed: aBoolean replace: true
 ]
 
 { #category : #'as yet unclassified' }
-SBTSFile >> filepath: aString language: aLanguageClass collapsed: aBoolean [
+SBTSFile >> filepath: aString language: aLanguageClass collapsed: aCollapsedBoolean replace: aReplaceBoolean [
 
 	self
 		filepath: aString
-		toplevel: (FileStream
-			readOnlyFileNamed: aString
-			do: [:stream | aLanguageClass parseAndReplace: stream contents])
+		toplevel: (FileStream readOnlyFileNamed: aString do: [:stream | | toplevel |
+			toplevel := aLanguageClass parse: stream contents.
+			aReplaceBoolean ifTrue: [toplevel applyReplacements] ifFalse: [toplevel]])
 		language: aLanguageClass
-		collapsed: aBoolean
+		collapsed: aCollapsedBoolean
 ]
 
 { #category : #'as yet unclassified' }

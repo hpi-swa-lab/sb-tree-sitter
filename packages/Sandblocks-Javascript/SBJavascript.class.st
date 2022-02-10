@@ -6830,5 +6830,8 @@ SBJavascript >> preprocessGrammar [
 { #category : #'as yet unclassified' }
 SBJavascript >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 
-	^ (aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']) or: [(aBlock isKindOf: SBInlineBlockLabel) and: [aBlock contents = ':']]
+	(aBlock isTSLabel and: [aBlock contents = ':']) ifTrue: [^ true].
+	(aBlock isTSLabel and: [aBlock contents = '?']) ifTrue: [^ true].
+	(aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']) ifTrue: [^ true].
+	^ false
 ]
