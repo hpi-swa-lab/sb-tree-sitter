@@ -256,15 +256,17 @@ SBInlineBlockRepeat >> printTitleOn: aStream [
 { #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> repeaterChild [
 
-	^ self
+	^ (self multiple or: [self hasSubmorphs not])
+		ifTrue: [self]
+		ifFalse: [super repeaterChild]
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockRepeat >> repeaterChildFor: aBlock [
+SBInlineBlockRepeat >> repeaterChildThat: aBlock [
 
-	^ (self element canLikelyContainType: aBlock type)
+	^ ((aBlock value: self) and: [self multiple or: [self hasSubmorphs not]])
 		ifTrue: [self]
-		ifFalse: [super repeaterChildFor: aBlock]
+		ifFalse: [super repeaterChildThat: aBlock]
 ]
 
 { #category : #'as yet unclassified' }

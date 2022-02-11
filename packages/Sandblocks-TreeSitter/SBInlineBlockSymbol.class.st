@@ -267,12 +267,6 @@ SBInlineBlockSymbol >> layoutCommands [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> newEmptyChildNear: aBlock before: aBoolean [
-
-	^ self repeaterChild ifNotNil: [:r | r newEmptyChildNear: aBlock before: aBoolean]
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> newNullBlock [
 
 	| parent unknown |
