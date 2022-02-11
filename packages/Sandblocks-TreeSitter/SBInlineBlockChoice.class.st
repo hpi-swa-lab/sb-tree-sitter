@@ -94,6 +94,13 @@ SBInlineBlockChoice >> childrenIn: anExplore [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockChoice >> compatibleWithType: aTypeString [
+
+	self alternatives do: [:alt | (alt isTSSymbol or: [alt class = self class and: [alt compatibleWithType: aTypeString]]) ifTrue: [^ true]].
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockChoice >> elementsDo: aBlock [
 
 	self alternatives do: [:alt | aBlock value: alt]

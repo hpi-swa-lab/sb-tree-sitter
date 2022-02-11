@@ -313,7 +313,6 @@ SBInlineBlock >> containsEqual: aBlock [
 SBInlineBlock >> convertedFor: anInterfaceCollection do: aBlock [
 
 	anInterfaceCollection first = #isInlineBlock ifTrue: [
-		SBToggledCode comment: '' active: 0 do: {[self halt]}.
 		^ (SBTSRuleExplore new
 			explore: anInterfaceCollection last
 				withNested: self
@@ -844,10 +843,17 @@ SBInlineBlock >> numberOfElements [
 
 { #category : #'as yet unclassified' }
 SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
+
+	| reference |
 	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
  this and does special handling. other handlers will get blocked by the false"
-
-	^ {#isInlineBlock. [:o | false]. aSymbol = #replace ifTrue: [self] ifFalse: [self repeaterChild element]}
+	reference := aBlock owner.
+	"walk up the chain from the child so we grab the closest repeaterChild"
+	[reference isInlineBlock not or: [reference repeaterChild isNil and: [reference ~= self]]] whileTrue: [reference := reference owner].
+	^ {
+		#isInlineBlock.
+		[:o | false].
+		aSymbol = #replace ifTrue: [self] ifFalse: [reference repeaterChild element]}
 ]
 
 { #category : #hierarchy }

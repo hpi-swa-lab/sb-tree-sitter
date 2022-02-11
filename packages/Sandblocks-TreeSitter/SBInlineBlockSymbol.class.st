@@ -164,7 +164,10 @@ SBInlineBlockSymbol >> inline [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> insertCommandRequest: aMorph near: aBlock before: aBoolean [
 
-	^ self repeaterChild ifNotNil: [:c | c insertCommandRequest: aMorph near: aBlock before: aBoolean]
+	| reference |
+	reference := aBlock owner.
+	[reference repeaterChild isNil and: [reference ~= self]] whileTrue: [reference := reference owner].
+	^ reference repeaterChild ifNotNil: [:c | c insertCommandRequest: aMorph near: aBlock before: aBoolean]
 ]
 
 { #category : #'as yet unclassified' }

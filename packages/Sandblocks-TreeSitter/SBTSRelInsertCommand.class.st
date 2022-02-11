@@ -64,3 +64,11 @@ SBTSRelInsertCommand >> title [
 
 	^ 'insert ', element title
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSRelInsertCommand >> undo [
+
+	| ret |
+	ret := super undo.
+	^ ret firstBlock ifNil: [ret containingSandblock]
+]
