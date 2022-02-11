@@ -26,12 +26,14 @@ SBTSCursor >> createRestorePoint [
 SBTSCursor >> currentDo: aBlock [
 
 	| type node template |
-	type := self type.
+	type := self unaliasedType.
 	node := SBTSNodeSymbol new type: type factory: self factory.
 	template := self factory bodyNodeForRule: type ifAbsent: [
-		node := self resolveAlias: type in: self parentType with: self factory aliasOccurrences.
+		node := self resolveAlias: self type in: self parentType with: self factory aliasOccurrences.
 		node unpackAlias].
-	^ aBlock value: type value: node makeConcrete value: ((template isKindOf: SBTSNodeAlias) ifTrue: [template element] ifFalse: [template])
+	^ aBlock value: type value: node makeConcrete value: ((template isKindOf: SBTSNodeAlias)
+		ifTrue: [template element]
+		ifFalse: [template])
 ]
 
 { #category : #'as yet unclassified' }
@@ -231,6 +233,39 @@ SBTSCursor >> textBetween: aNode and: anEndNode [
 SBTSCursor >> type [
 
 	^ library nodeType: self node
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCursor >> unaliasedType [
+
+	| index n |
+	n := self node.
+	" here things get real tricky: tree-sitter subtrees (id) can have a compact representation that is directly in the struct or point to a larger structure.	
+	 below are the excerpts from the structs that are relevant. let's hope they never change -.-
+
+	typedef struct {
+	  uint32_t bytes;
+	  TSPoint extent;
+	} Length; 12
+
+	typedef struct {
+	  uint32_t row;
+	  uint32_t column;
+	} TSPoint; 8
+
+	typedef struct {
+	  volatile uint32_t ref_count; 	4   4
+	  Length padding;               	12  16
+	  Length size;                  		12  28
+	  uint32_t lookahead_bytes;     	4   32
+	  uint32_t error_cost;          		4   36
+	  uint32_t child_count;         	4   40
+	  TSSymbol symbol;              	2
+	"
+	index := (n id ignore bitAt: 1) ~= 0 ifTrue: [n id symbol] ifFalse: [(n id getHandle pointerAt: 1) getHandle uint16At: 41].
+	^ index = 0
+		ifTrue: [library nodeType: n]
+		ifFalse: [library language symbolNames at: index + 1]
 ]
 
 { #category : #'as yet unclassified' }

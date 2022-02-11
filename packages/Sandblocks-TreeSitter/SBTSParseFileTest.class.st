@@ -71,6 +71,13 @@ SBTSParseFileTest >> testParsePythonFormatString [
 ]
 
 { #category : #tests }
+SBTSParseFileTest >> testParseRegexClassCharacter [
+
+	SBTSFileParser new parse: '[-]' language: SBRegex instance.
+	SBTSFileParser new parse: '[a]' language: SBRegex instance
+]
+
+{ #category : #tests }
 SBTSParseFileTest >> testParseStatement [
 
 	| module |
@@ -111,7 +118,7 @@ SBTSParseFileTest >> testPythonImport [
 	self assert: (block matchesQuery: '(module (import_statement (aliased_import (dotted_name (identifier)) alias: (identifier))))')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBTSParseFileTest >> testPythonStatements [
 
 	| source |
