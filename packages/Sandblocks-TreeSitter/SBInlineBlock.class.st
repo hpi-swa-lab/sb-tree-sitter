@@ -357,9 +357,9 @@ SBInlineBlock >> deleteCommandFor: aBlock [
 
 	aBlock owner isInlineBlock ifFalse: [^ nil].
 	
-	^ aBlock deleteTarget
-		ifNotNil: [:target | SBDeleteCommand new target: target]
-		ifNil: [
+	^ (aBlock isInlineBlock and: [aBlock deleteTarget notNil])
+		ifTrue: [SBDeleteCommand new target: aBlock deleteTarget]
+		ifFalse: [
 			aBlock newNullBlock ifNotNil: [:nullBlock |
 				SBReplaceCommand new
 					target: aBlock;
