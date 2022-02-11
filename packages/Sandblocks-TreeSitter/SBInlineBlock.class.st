@@ -172,6 +172,12 @@ SBInlineBlock >> buildWithFields: aStream alternatives: aDictionary [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> canLikelyContainType: aString [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> candidatesForWrappingOn: aStream [
 
 	(self hasSubmorphs and: [self firstSubmorph isInlineBlock]) ifTrue: [self firstSubmorph candidatesForWrappingOn: aStream]
@@ -842,18 +848,27 @@ SBInlineBlock >> numberOfElements [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
+SBInlineBlock >> objectInterfaceForDrop: aBlock near: anotherBlock at: aSymbol [
 
 	| reference |
 	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
  this and does special handling. other handlers will get blocked by the false"
-	reference := aBlock owner.
-	"walk up the chain from the child so we grab the closest repeaterChild"
-	[reference isInlineBlock not or: [reference repeaterChild isNil and: [reference ~= self]]] whileTrue: [reference := reference owner].
-	^ {
-		#isInlineBlock.
-		[:o | false].
-		aSymbol = #replace ifTrue: [self] ifFalse: [reference repeaterChild element]}
+	anotherBlock
+		ifNotNil: [
+			"walk up the chain from the child so we grab the closest repeaterChild"
+			reference := anotherBlock owner.
+			[reference isInlineBlock not or: [(reference repeaterChildFor: aBlock) isNil and: [reference ~= self]]] whileTrue: [reference := reference owner]]
+		ifNil: [reference := aBlock].
+	
+	^ (reference isNil or: [(reference repeaterChildFor: aBlock) isNil])
+		ifTrue: [SBInterfaces never]
+		ifFalse: [
+			{
+				#isInlineBlock.
+				[:o | false].
+				anotherBlock = #replace
+					ifTrue: [self]
+					ifFalse: [(reference repeaterChildFor: aBlock) element]}]
 ]
 
 { #category : #hierarchy }
@@ -1051,6 +1066,13 @@ SBInlineBlock >> removedMorph: aMorph [
 SBInlineBlock >> repeaterChild [
 
 	self submorphsDo: [:m | (m isSandblock not and: [m isInlineBlock]) ifTrue: [m repeaterChild ifNotNil: [:c | ^ c]]].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> repeaterChildFor: aBlock [
+
+	self submorphsDo: [:m | (m isSandblock not and: [m isInlineBlock]) ifTrue: [(m repeaterChildFor: aBlock) ifNotNil: [:c | ^ c]]].
 	^ nil
 ]
 

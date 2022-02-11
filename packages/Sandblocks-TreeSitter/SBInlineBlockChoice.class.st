@@ -72,6 +72,12 @@ SBInlineBlockChoice >> buildWithFields: aStream alternatives: aDictionary [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockChoice >> canLikelyContainType: aTypeString [
+
+	^ self alternatives anySatisfy: [:alt | alt canLikelyContainType: aTypeString]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockChoice >> childrenForQueryDo: aBlock [
 
 	self firstSubmorph childrenForQueryDo: aBlock
@@ -91,13 +97,6 @@ SBInlineBlockChoice >> childrenIn: anExplore [
 		index > self alternatives size
 			ifTrue: [SBInlineBlockNever new]
 			ifFalse: [self alternatives at: index]}
-]
-
-{ #category : #'as yet unclassified' }
-SBInlineBlockChoice >> compatibleWithType: aTypeString [
-
-	self alternatives do: [:alt | (alt isTSSymbol or: [alt class = self class and: [alt compatibleWithType: aTypeString]]) ifTrue: [^ true]].
-	^ false
 ]
 
 { #category : #'as yet unclassified' }

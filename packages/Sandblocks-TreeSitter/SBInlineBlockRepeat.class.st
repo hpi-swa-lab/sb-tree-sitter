@@ -55,6 +55,12 @@ SBInlineBlockRepeat >> canDeleteChild [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockRepeat >> canLikelyContainType: aString [
+
+	^ self element canLikelyContainType: aString
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> childrenForQueryDo: aBlock [
 
 	self submorphsDo: [:m | m childrenForQueryDo: aBlock]
@@ -250,7 +256,15 @@ SBInlineBlockRepeat >> printTitleOn: aStream [
 { #category : #'as yet unclassified' }
 SBInlineBlockRepeat >> repeaterChild [
 
-	^ self multiple ifTrue: [self] ifFalse: [super repeaterChild]
+	^ self
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlockRepeat >> repeaterChildFor: aBlock [
+
+	^ (self element canLikelyContainType: aBlock type)
+		ifTrue: [self]
+		ifFalse: [super repeaterChildFor: aBlock]
 ]
 
 { #category : #'as yet unclassified' }

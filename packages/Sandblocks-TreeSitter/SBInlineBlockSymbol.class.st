@@ -55,6 +55,12 @@ SBInlineBlockSymbol >> buildWithFields: aStream alternatives: aDictionary [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> canLikelyContainType: aString [
+
+	^ self compatibleWithType: aString
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> candidatesForWrappingOn: aStream [
 
 	(factory isSuperType: self type) ifTrue: [aStream nextPut: self].
