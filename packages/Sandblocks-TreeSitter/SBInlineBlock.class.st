@@ -859,7 +859,7 @@ SBInlineBlock >> objectInterfaceForDrop: aBlock near: anotherBlock at: aSymbol [
 			"walk up the chain from the child so we grab the closest repeaterChild"
 			reference := anotherBlock owner.
 			[reference isInlineBlock not or: [(reference repeaterChildFor: aBlock) isNil and: [reference ~= self]]] whileTrue: [reference := reference owner]]
-		ifNil: [reference := aBlock].
+		ifNil: [reference := anotherBlock].
 	
 	^ (reference isNil or: [(reference repeaterChildFor: aBlock) isNil])
 		ifTrue: [SBInterfaces never]
@@ -870,6 +870,30 @@ SBInlineBlock >> objectInterfaceForDrop: aBlock near: anotherBlock at: aSymbol [
 				anotherBlock = #replace
 					ifTrue: [self]
 					ifFalse: [(reference repeaterChildFor: aBlock) element]}]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
+
+	| reference |
+	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
+ this and does special handling. other handlers will get blocked by the false"
+	aBlock
+		ifNotNil: [
+			"walk up the chain from the child so we grab the closest repeaterChild"
+			reference := aBlock owner.
+			[reference isInlineBlock not or: [reference repeaterChild isNil and: [reference ~= self]]] whileTrue: [reference := reference owner]]
+		ifNil: [reference := aBlock].
+	
+	^ (reference isNil or: [reference repeaterChild isNil])
+		ifTrue: [SBInterfaces never]
+		ifFalse: [
+			{
+				#isInlineBlock.
+				[:o | false].
+				aBlock = #replace
+					ifTrue: [self]
+					ifFalse: [reference repeaterChild element]}]
 ]
 
 { #category : #hierarchy }
