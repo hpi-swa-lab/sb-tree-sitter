@@ -281,7 +281,6 @@ SBTSLanguageTests >> testPythonInsertLambdaParameter [
 	
 	e performForSelection: #moveCursorRight.
 	e performForSelection: #moveCursorRight.
-	e performForSelection: #moveCursorRight.
 	e handle: (self keyboardEvent: $a).
 	
 	self assert: 'a' equals: module access children first parameters children first contents

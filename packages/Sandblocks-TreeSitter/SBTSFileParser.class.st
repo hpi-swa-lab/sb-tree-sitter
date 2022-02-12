@@ -42,8 +42,9 @@ SBTSFileParser >> nodeForCursor: aCursor [
 					atEnd].
 				aCursor gotoParent]].
 		stream := (fields ifEmpty: [aCursor text ifEmpty: [#()] ifNotEmpty: [{aCursor text}]]) readStream.
-		matches := (template takeNodesFrom: self) select: [:match | match parser atEnd].
+		matches := template takeNodesFrom: self.
 		self assert: matches ~= #noMatch description: ('could not construct `{1}`' format: {type}).
+		matches := matches select: [:match | match parser atEnd].
 		self assert: matches size = 1.
 		node addChild: matches first]
 ]
