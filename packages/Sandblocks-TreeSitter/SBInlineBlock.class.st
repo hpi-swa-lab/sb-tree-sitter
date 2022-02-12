@@ -736,7 +736,7 @@ SBInlineBlock >> labelDifferenceOf: aMorph do: aBlock [
 { #category : #accessing }
 SBInlineBlock >> language [
 
-	^ self factory name
+	^ self factory ifNotNil: [:f | f name]
 ]
 
 { #category : #'as yet unclassified' }

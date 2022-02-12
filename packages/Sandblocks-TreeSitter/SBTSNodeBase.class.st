@@ -223,6 +223,12 @@ SBTSNodeBase >> isTSSymbol [
 	^ false
 ]
 
+{ #category : #accessing }
+SBTSNodeBase >> language [
+
+	^ self factory name
+]
+
 { #category : #hierarchy }
 SBTSNodeBase >> lastChild [
 
