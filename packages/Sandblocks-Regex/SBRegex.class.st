@@ -735,6 +735,12 @@ SBRegex class >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBRegex class >> palettesFor: aBlock [
+
+	^ {SBRePalette}
+]
+
+{ #category : #'as yet unclassified' }
 SBRegex class >> rootRuleName [
 
 	^ 'pattern'
@@ -766,6 +772,8 @@ SBRegex >> highlightFor: aSBBlock do: aBlock [
 		['zero_or_more'] -> [Color red].
 		['optional'] -> [Color red].
 		['one_or_more'] -> [Color red].
+		['count_quantifier'] -> [Color red].
+		['lookahead_assertion'] -> [Color blue].
 		} 
 	otherwise: [nil])
 ]

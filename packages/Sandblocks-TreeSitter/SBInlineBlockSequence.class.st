@@ -55,12 +55,6 @@ SBInlineBlockSequence >> buildWithFields: aStream alternatives: aDictionary [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockSequence >> canLikelyContainType: aString [
-
-	^ self elements anySatisfy: [:e | e canLikelyContainType: aString]
-]
-
-{ #category : #'as yet unclassified' }
 SBInlineBlockSequence >> childrenForQueryDo: aBlock [
 
 	self submorphsDo: [:m | m childrenForQueryDo: aBlock]

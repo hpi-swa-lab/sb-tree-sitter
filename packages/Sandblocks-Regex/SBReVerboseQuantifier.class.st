@@ -1,5 +1,5 @@
 Class {
-	#name : #SBReVerboseExactQuantifier,
+	#name : #SBReVerboseQuantifier,
 	#superclass : #SBReVerboseBlock,
 	#instVars : [
 		'number'
@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier class >> matchRegex: aDictionary do: aBlock [
+SBReVerboseQuantifier class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(count_quantifier
 	(decimal_digits) @value
@@ -25,7 +25,7 @@ SBReVerboseExactQuantifier class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> initialize [
+SBReVerboseQuantifier >> initialize [
 
 	super initialize.
 	
@@ -33,28 +33,33 @@ SBReVerboseExactQuantifier >> initialize [
 		addMorphBack: (SBInlineBlockLabel new
 			label: 'exactly: ';
 			factory: self factory);
-		addMorphBack: (number := SBInlineBlockText new
-			regexString: '[0-9]+';
+		addMorphBack: (number := SBReNumberInput new
 			hint: 'number';
-			factory: self factory)
+			minimum: 0)
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> number [
+SBReVerboseQuantifier >> number [
 
-	^ number contents ifEmpty: [0] ifNotEmpty: [:value | value asNumber]
+	^ number value ifNil: [0]
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> number: aNumber [
+SBReVerboseQuantifier >> number: aNumber [
 
 	number contents: aNumber asString
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> sourceString [
+SBReVerboseQuantifier >> sourceString [
 
 	^ '{',
 		self number asString,
 		'}'
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseQuantifier >> type [
+
+	^ 'count_quantifier'
 ]
