@@ -64,7 +64,8 @@ SBReVerboseLookaroundAssertion >> initialize [
 	self
 		addMorphBack: (assertionType := SBComboBox new
 			values: self assertionTypes values;
-			labels: self assertionTypesDisplayStrings);
+			labels: self assertionTypesDisplayStrings;
+			placeholderText: 'assertion type');
 		addMorphBack: (SBTSUnknown new
 			factory: self factory;
 			template: (self factory getTemplate: 'pattern'))
@@ -85,10 +86,14 @@ SBReVerboseLookaroundAssertion >> pattern: aBlock [
 { #category : #'as yet unclassified' }
 SBReVerboseLookaroundAssertion >> sourceString [
 
-	^ '(?',
-		(self assertionTypes keyAtValue: self assertionType),
-		self pattern sourceString,
-		')'
+	^ self assertionType notNil
+		ifTrue: [
+			'(?',
+			(self assertionTypes keyAtValue: self assertionType),
+			self pattern sourceString,
+			')']
+		ifFalse: [''] 
+	
 ]
 
 { #category : #'as yet unclassified' }

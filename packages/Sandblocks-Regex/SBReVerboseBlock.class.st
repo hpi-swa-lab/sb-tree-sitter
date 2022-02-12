@@ -11,6 +11,12 @@ SBReVerboseBlock class >> factory [
 ]
 
 { #category : #'as yet unclassified' }
+SBReVerboseBlock class >> type [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBReVerboseBlock >> initialize [
 
 	super initialize.
