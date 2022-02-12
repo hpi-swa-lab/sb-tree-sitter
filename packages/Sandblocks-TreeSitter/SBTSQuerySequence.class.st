@@ -25,7 +25,7 @@ SBTSQuerySequence >> evaluateAgainst: aBlock captures: aDictionary [
 
 	| exprs blocks localCaptures |
 	exprs := self elements readStream.
-	blocks := OrderedCollection withAll: aBlock childrenForQuery.
+	blocks := OrderedCollection withAll: (aBlock childrenForQuery select: [:c | c language = aBlock language]).
 	localCaptures := Dictionary new.
 	
 	[exprs atEnd] whileFalse: [ | expr nextBlocks |

@@ -30,7 +30,9 @@ SBJsRegex >> layoutCommands [
 { #category : #'as yet unclassified' }
 SBJsRegex >> regex: aString [
 
-	self addMorphBack: ((SBRegex parse: aString) hResizing: #shrinkWrap)
+	self addMorphBack: ((SBRegex parse: aString)
+		hResizing: #shrinkWrap;
+		detachDecorators: SBForceMoveDecorator)
 ]
 
 { #category : #'as yet unclassified' }
