@@ -14,13 +14,15 @@ SBReVerboseQuantifierRange class >> matchRegex: aDictionary do: aBlock [
 '(count_quantifier
 	(decimal_digits) @minimum
 	(decimal_digits) @maximum
+	"?"? @lazy
 ) @count_quantifier'>
 
 	^ aBlock
 		value: (aDictionary at: 'count_quantifier')
 		value: (self new
 			minimum: (aDictionary at: 'minimum') contents asNumber;
-			maximum: (aDictionary at: 'maximum') contents asNumber)
+			maximum: (aDictionary at: 'maximum') contents asNumber;
+			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
 { #category : #'as yet unclassified' }
@@ -28,18 +30,18 @@ SBReVerboseQuantifierRange >> buildOn: aSBRow [
 
 	aSBRow
 		addMorphBack: (SBInlineBlockLabel new
-			label: 'at least: ';
+			label: 'at least:';
 			factory: self factory);
 		addMorphBack: (minimum := SBReNumberInput new
-			hint: 'minimum';
+			hint: 'min';
 			minimum: 0;
 			onChange: [:value |
 				maximum minimum: value]);
 		addMorphBack: (SBInlineBlockLabel new
-			label: 'at most: ';
+			label: 'at most:';
 			factory: self factory);
 		addMorphBack: (maximum := SBReNumberInput new
-			hint: 'maximum';
+			hint: 'max';
 			minimum: 0;
 			onChange: [:value |
 				minimum maximum: value])

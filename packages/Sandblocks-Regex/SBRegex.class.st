@@ -757,7 +757,7 @@ SBRegex >> highlightFor: aSBBlock do: aBlock [
 
 	^ aBlock value: (aSBBlock type caseOf: {
 		['character_class'] -> [Color green].
-		['any_character'] -> [Color blue].	
+		['any_character'] -> [Color green].	
 		['control_escape'] -> [Color blue].
 		['control_letter_escape'] -> [Color blue].
 		['identity_escape'] -> [Color red].

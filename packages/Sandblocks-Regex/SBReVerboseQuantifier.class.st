@@ -52,13 +52,13 @@ SBReVerboseQuantifier >> initialize [
 { #category : #'as yet unclassified' }
 SBReVerboseQuantifier >> lazy [
 
-	lazy value
+	^ lazy value
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseQuantifier >> lazy: aBoolean [
 
-	lazy value: aBoolean
+	lazy changeValue: aBoolean
 ]
 
 { #category : #'as yet unclassified' }
@@ -78,5 +78,5 @@ SBReVerboseQuantifier >> quantifierString [
 { #category : #'as yet unclassified' }
 SBReVerboseQuantifier >> sourceString [
 
-	^ self quantifierString
+	^ self quantifierString , self lazySourceString
 ]

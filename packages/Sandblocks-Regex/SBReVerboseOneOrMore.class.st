@@ -6,12 +6,15 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBReVerboseOneOrMore class >> matchRegex: aDictionary do: aBlock [
-	<lang: #regex match:
-'(one_or_more) @one_or_more'>
+	<lang: #regex match:'
+(one_or_more
+	"?"? @lazy
+) @one_or_more'>
 
 	^ aBlock
 		value: (aDictionary at: 'one_or_more')
-		value: (self new)
+		value: (self new
+			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
 { #category : #'as yet unclassified' }

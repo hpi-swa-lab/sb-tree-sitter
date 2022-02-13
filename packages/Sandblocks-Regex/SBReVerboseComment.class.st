@@ -43,9 +43,11 @@ SBReVerboseComment class >> matchRegex: aDictionary do: aBlock [
 	text := (aDictionary at: 'text') sourceString.
 	(self isEncodedComment: text) ifFalse: [^ nil].
 
-	^ aBlock value: (aDictionary at: 'comment') value: (self new
-		pattern: (aDictionary at: 'pattern');
-		encodedComment: text)
+	^ aBlock
+		value: (aDictionary at: 'comment')
+		value: (self new
+			pattern: (aDictionary at: 'pattern');
+			encodedComment: text)
 ]
 
 { #category : #'as yet unclassified' }

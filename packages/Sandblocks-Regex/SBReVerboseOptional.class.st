@@ -7,11 +7,15 @@ Class {
 { #category : #'as yet unclassified' }
 SBReVerboseOptional class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
-'(optional) @optional'>
+'(optional
+	"?"
+	"?"? @lazy
+) @optional'>
 
 	^ aBlock
 		value: (aDictionary at: 'optional')
-		value: (self new)
+		value: (self new
+			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
 { #category : #'as yet unclassified' }

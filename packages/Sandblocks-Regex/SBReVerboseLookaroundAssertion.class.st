@@ -27,11 +27,11 @@ SBReVerboseLookaroundAssertion >> assertionType [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> assertionType: symbolOrString [
+SBReVerboseLookaroundAssertion >> assertionType: aSymbolOrString [
 
-	assertionType object: ((symbolOrString isKindOf: Symbol)
-		ifFalse: [self assertionTypes at: symbolOrString ifAbsent: self assertionTypes values first]
-		ifTrue: [symbolOrString])
+	assertionType object: ((aSymbolOrString isKindOf: Symbol)
+		ifFalse: [self assertionTypes at: aSymbolOrString ifAbsent: self assertionTypes values first]
+		ifTrue: [aSymbolOrString])
 ]
 
 { #category : #'as yet unclassified' }
@@ -65,7 +65,7 @@ SBReVerboseLookaroundAssertion >> initialize [
 		addMorphBack: (assertionType := SBComboBox new
 			values: self assertionTypes values;
 			labels: self assertionTypesDisplayStrings;
-			placeholderText: 'assertion type');
+			placeholderText: 'select assertion type...');
 		addMorphBack: (SBTSUnknown new
 			factory: self factory;
 			template: (self factory getTemplate: 'pattern'))
