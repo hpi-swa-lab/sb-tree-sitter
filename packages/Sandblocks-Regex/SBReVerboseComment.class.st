@@ -9,8 +9,21 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBReVerboseComment class >> commentMarker [
+
+	^ 'SBReVerboseComment:'
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseComment class >> isEncodedComment: aString [
+
+	^ aString beginsWith: self commentMarker
+]
+
+{ #category : #'as yet unclassified' }
 SBReVerboseComment class >> matchRegex: aDictionary do: aBlock [
-	<lang: #regex match: '(non_capturing_group
+	<lang: #regex match:
+'(non_capturing_group
 	(pattern
 		(term
 			(non_capturing_group
@@ -22,17 +35,17 @@ SBReVerboseComment class >> matchRegex: aDictionary do: aBlock [
 			)
 		)
 	)
-) @comment' sample: '(?:(?:kommentar){0}(?:pattern))'>
+) @comment'
+	sample: '(?:(?:comment){0}(?:pattern))'>
+
+	| text |
+	
+	text := (aDictionary at: 'text') sourceString.
+	(self isEncodedComment: text) ifFalse: [^ nil].
 
 	^ aBlock value: (aDictionary at: 'comment') value: (self new
 		pattern: (aDictionary at: 'pattern');
-		name: (aDictionary at: 'name') submorphs first contents)
-]
-
-{ #category : #'as yet unclassified' }
-SBReVerboseComment >> absorbsInput: anEvent [
-
-	^ SBGrammarHandler eventValidForString: anEvent
+		encodedComment: text)
 ]
 
 { #category : #'as yet unclassified' }
@@ -48,9 +61,16 @@ SBReVerboseComment >> comment: aString [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseComment >> commentMarker [
+SBReVerboseComment >> encodedComment [
 
-	^ 'SBReVerboseComment:'
+	^ self class commentMarker, self comment base64Encoded
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseComment >> encodedComment: aString [
+
+	self assert: [self class isEncodedComment: aString].
+	self comment: (aString from: self class commentMarker size + 1) base64Decoded
 ]
 
 { #category : #'as yet unclassified' }
@@ -59,7 +79,7 @@ SBReVerboseComment >> initialize [
 	super initialize.
 	
 	self
-		addMorphBack: (pattern := SBTSUnknown new
+		addMorphBack: (SBTSUnknown new
 			factory: self factory;
 			template: (self factory getTemplate: 'pattern'));
 		addMorphBack: (comment := SBTextBubble multiLine
@@ -69,23 +89,25 @@ SBReVerboseComment >> initialize [
 { #category : #'as yet unclassified' }
 SBReVerboseComment >> pattern [
 
-	^ pattern
+	^ self submorphs first
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseComment >> pattern: aBlock [
 
-	pattern := aBlock
+	self submorphs first replaceBy: aBlock buildCopy
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseComment >> sourceString [
 
 	^ '(?:(?:',
-		self comment,
-		'){0}',
+		self encodedComment,
+		')',
+		'{0}',
+		'(?:',
 		self pattern sourceString,
-		')'
+		'))'
 ]
 
 { #category : #'as yet unclassified' }

@@ -59,7 +59,7 @@ SBReVerboseNamedCapturingGroup >> pattern [
 { #category : #'as yet unclassified' }
 SBReVerboseNamedCapturingGroup >> pattern: aBlock [
 
-	(self submorphs at: 2) replaceBy: aBlock
+	(self submorphs at: 2) replaceBy: aBlock buildCopy
 ]
 
 { #category : #'as yet unclassified' }

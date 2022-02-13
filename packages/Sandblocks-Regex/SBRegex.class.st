@@ -779,6 +779,12 @@ SBRegex >> highlightFor: aSBBlock do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBRegex >> palettesFor: aBlock [
+
+	^ {SBRePalette}
+]
+
+{ #category : #'as yet unclassified' }
 SBRegex >> postConfigure [
 
 	"self blockInline: {'term'. 'pattern'}"

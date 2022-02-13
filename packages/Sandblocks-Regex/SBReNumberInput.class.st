@@ -10,9 +10,24 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBReNumberInput >> acceptInputEvent: anEvent [
+
+	anEvent keyCharacter isDigit
+		ifTrue: [super acceptInputEvent: anEvent]
+]
+
+{ #category : #'as yet unclassified' }
 SBReNumberInput >> canDrag [
 
 	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBReNumberInput >> contents: aString [
+
+	aString asNumber negative
+		ifTrue: [self contents: 0 asString]
+		ifFalse: [super contents: aString]
 ]
 
 { #category : #'as yet unclassified' }

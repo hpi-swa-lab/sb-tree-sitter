@@ -2,64 +2,81 @@ Class {
 	#name : #SBReVerboseQuantifier,
 	#superclass : #SBReVerboseBlock,
 	#instVars : [
-		'number'
+		'lazy'
 	],
 	#category : #'Sandblocks-Regex'
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier class >> matchRegex: aDictionary do: aBlock [
-	<lang: #regex match:
-'(count_quantifier
-	(decimal_digits) @value
-) @count_quantifier'>
+SBReVerboseQuantifier >> buildConcrete [
+]
 
-	((aDictionary at: 'count_quantifier') childrenForQuery
-		select: [:each | each type = 'decimal_digits']) size > 1
-		ifTrue: [^ nil].
+{ #category : #'as yet unclassified' }
+SBReVerboseQuantifier >> buildConcreteOn: aSBRow [
 
-	^ aBlock
-		value: (aDictionary at: 'count_quantifier')
-		value: (self new
-			number: (aDictionary at: 'value') contents asNumber)
+	self buildOn: aSBRow.
+	^ aSBRow
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseQuantifier >> buildLazyToggleOn: aSBRow [
+
+	^ aSBRow
+		addMorphBack: (lazy := SBCheckbox new
+			value: false;
+			canDrag: false);
+		addMorphBack: (SBInlineBlockLabel new
+			label: 'lazy';
+			factory: self factory);
+		yourself
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseQuantifier >> buildOn: aSBRow [
+
+	^ self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseQuantifier >> initialize [
 
 	super initialize.
-	
+
 	self
-		addMorphBack: (SBInlineBlockLabel new
-			label: 'exactly: ';
-			factory: self factory);
-		addMorphBack: (number := SBReNumberInput new
-			hint: 'number';
-			minimum: 0)
+		addMorphBack: (self buildConcreteOn: SBRow new);
+		addMorphBack: (self buildLazyToggleOn: SBRow new);
+		changeTableLayout;
+		listDirection: #topToBottom
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> number [
+SBReVerboseQuantifier >> lazy [
 
-	^ number value ifNil: [0]
+	lazy value
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> number: aNumber [
+SBReVerboseQuantifier >> lazy: aBoolean [
 
-	number contents: aNumber asString
+	lazy value: aBoolean
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseQuantifier >> lazySourceString [
+
+	^ self lazy
+		ifTrue: ['?']
+		ifFalse: ['']
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseQuantifier >> quantifierString [
+
+	^ self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseQuantifier >> sourceString [
 
-	^ '{',
-		self number asString,
-		'}'
-]
-
-{ #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> type [
-
-	^ 'count_quantifier'
+	^ self quantifierString
 ]

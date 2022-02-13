@@ -12,6 +12,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBReVerboseCharacterClass class >> matchRegex: aDictionary do: aBlock [
+
 	<lang: #regex match:
 '(character_class
 	"^"? @negated
@@ -21,6 +22,7 @@ SBReVerboseCharacterClass class >> matchRegex: aDictionary do: aBlock [
 	
 	| children class_atoms class_ranges |
 	
+	true ifTrue: [^nil].
 	children := (aDictionary at: 'character_class') childrenForQuery select: [:each | each isSandblock].
 	class_ranges := children select: [:each | each  type = 'class_range'].
 	class_atoms := children difference: class_ranges.

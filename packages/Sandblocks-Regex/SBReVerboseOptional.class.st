@@ -1,6 +1,6 @@
 Class {
 	#name : #SBReVerboseOptional,
-	#superclass : #SBReVerboseBlock,
+	#superclass : #SBReVerboseQuantifier,
 	#category : #'Sandblocks-Regex'
 }
 
@@ -15,15 +15,19 @@ SBReVerboseOptional class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseOptional >> initialize [
+SBReVerboseOptional >> buildOn: aSBRow [
 
-	super initialize.
+	aSBRow addMorphBack: (SBInlineBlockLabel new label: 'optional'; factory: self factory)
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseOptional >> buildSelf [
 
 	self addMorphBack: (SBInlineBlockLabel new label: 'optional'; factory: self factory)
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseOptional >> sourceString [
+SBReVerboseOptional >> quantifierString [
 
 	^ '?'
 ]

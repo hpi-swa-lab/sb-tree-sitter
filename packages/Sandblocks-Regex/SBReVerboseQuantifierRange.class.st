@@ -1,6 +1,6 @@
 Class {
 	#name : #SBReVerboseQuantifierRange,
-	#superclass : #SBReVerboseBlock,
+	#superclass : #SBReVerboseQuantifier,
 	#instVars : [
 		'minimum',
 		'maximum'
@@ -24,9 +24,29 @@ SBReVerboseQuantifierRange class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> initialize [
+SBReVerboseQuantifierRange >> buildOn: aSBRow [
 
-	super initialize.
+	aSBRow
+		addMorphBack: (SBInlineBlockLabel new
+			label: 'at least: ';
+			factory: self factory);
+		addMorphBack: (minimum := SBReNumberInput new
+			hint: 'minimum';
+			minimum: 0;
+			onChange: [:value |
+				maximum minimum: value]);
+		addMorphBack: (SBInlineBlockLabel new
+			label: 'at most: ';
+			factory: self factory);
+		addMorphBack: (maximum := SBReNumberInput new
+			hint: 'maximum';
+			minimum: 0;
+			onChange: [:value |
+				minimum maximum: value])
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseQuantifierRange >> buildSelf [
 	
 	self
 		addMorphBack: (SBInlineBlockLabel new
@@ -72,7 +92,7 @@ SBReVerboseQuantifierRange >> minimum: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> sourceString [
+SBReVerboseQuantifierRange >> quantifierString [
 
 	^ '{',
 		self minimum asString,

@@ -95,7 +95,7 @@ SBRePalette class >> quantifier [
 		[SBReVerboseOptional new].
 		[SBReVerboseZeroOrMore new].
 		[SBReVerboseOneOrMore new].
-		[SBReVerboseQuantifier new].
+		[SBReVerboseExactQuantifier new].
 		[SBReVerboseQuantifierRange new].
 	}
 ]

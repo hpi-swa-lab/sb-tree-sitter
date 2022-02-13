@@ -1,6 +1,6 @@
 Class {
 	#name : #SBReVerboseZeroOrMore,
-	#superclass : #SBReVerboseBlock,
+	#superclass : #SBReVerboseQuantifier,
 	#category : #'Sandblocks-Regex'
 }
 
@@ -15,15 +15,19 @@ SBReVerboseZeroOrMore class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseZeroOrMore >> initialize [
+SBReVerboseZeroOrMore >> buildOn: aSBRow [
 
-	super initialize.
+	aSBRow addMorphBack: (SBInlineBlockLabel new label: 'zero or more times'; factory: self factory)
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseZeroOrMore >> buildSelf [
 
 	self addMorphBack: (SBInlineBlockLabel new label: 'zero or more times'; factory: self factory)
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseZeroOrMore >> sourceString [
+SBReVerboseZeroOrMore >> quantifierString [
 
 	^ '*'
 ]
