@@ -290,13 +290,19 @@ SBInlineBlock >> compatibleWithType: aTypeString [
 			ifNil: [self type = aTypeString]]
 ]
 
+{ #category : #hierarchy }
+SBInlineBlock >> containingInlineblock [
+
+	^ self
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> containingRepeat [
 
 	^ self owner isInlineBlock ifTrue: [self owner containingRepeat] ifFalse: [nil]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBInlineBlock >> containingSandblock [
 
 	^ self inline ifTrue: [self owner ifNotNil: #containingSandblock] ifFalse: [self]
@@ -813,8 +819,8 @@ SBInlineBlock >> name: aString [
 SBInlineBlock >> newEmptyChildNear: aBlock before: aBoolean [
 
 	| reference |
-	reference := aBlock owner.
-	[reference repeaterChild isNil and: [reference ~= self]] whileTrue: [reference := reference owner].
+	reference := aBlock owner containingInlineBlock.
+	[reference repeaterChild isNil and: [reference ~= self]] whileTrue: [reference := reference owner containingInlineBlock].
 	^ reference repeaterChild ifNotNil: [:c | c element instantiate]
 ]
 
@@ -905,6 +911,15 @@ SBInlineBlock >> orOwnerUpTo: aBlock satisfying: aCondBlock [
 		(aCondBlock value: p) ifTrue: [^ p].
 		p := p owner].
 	^ nil
+]
+
+{ #category : #hierarchy }
+SBInlineBlock >> ownerInlineBlock [
+
+	self owner ifNil: [^ nil].
+	^ self owner isInlineBlock
+		ifTrue: [self owner]
+		ifFalse: [self owner ownerInlineBlock]
 ]
 
 { #category : #accessing }
