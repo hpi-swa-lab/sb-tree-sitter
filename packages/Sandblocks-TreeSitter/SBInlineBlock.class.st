@@ -995,6 +995,7 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber
 			lastMatchedWordRule := suffixMatchesWordRule value: string.
 			lastString := string.
 			aStream nextPutAll: string].
+		self factory terminatorFor: element on: aStream.
 		first := false]
 ]
 

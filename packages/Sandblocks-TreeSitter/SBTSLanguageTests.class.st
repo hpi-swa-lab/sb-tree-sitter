@@ -106,13 +106,13 @@ SBTSLanguageTests >> testJavascriptNestedMemberExpression [
 SBTSLanguageTests >> testJavascriptTemplateString [
 
 	| source |
-	source := '`ab`'.
+	source := '`ab`;'.
 	self assert: source equals: (SBJavascript parse: source) sourceString.
 	
-	source := '`ab${a}`'.
+	source := '`ab${a}`;'.
 	self assert: source equals: (SBJavascript parse: source) sourceString.
 	
-	source := '`ab${a}def${c}`'.
+	source := '`ab${a}def${c}`;'.
 	self assert: source equals: (SBJavascript parse: source) sourceString
 ]
 
@@ -120,6 +120,10 @@ SBTSLanguageTests >> testJavascriptTemplateString [
 SBTSLanguageTests >> testJavascriptToString [
 
 	| source |
+	source := 'a;
+b;'.
+	self assert: source equals: (SBJavascript parse: source) sourceString.
+	
 	source := '<h2>Hi</h2>'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
@@ -130,8 +134,8 @@ SBTSLanguageTests >> testJavascriptToString [
 	source := 'class Car extends React.Component
 {example={};
 render()
-{a
-return<h2>Hi</h2>}}'.
+{a;
+return<h2>Hi</h2>;}}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
 	source := 'a(b,c)'.

@@ -1256,6 +1256,12 @@ SBMetaBlockFactory >> symbolsProducedBy: anObject on: aStream [
 			aStream nextPut: nonHidden first name value]}
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> terminatorFor: anElement on: aStream [
+
+	
+]
+
 { #category : #templates }
 SBMetaBlockFactory >> toplevel [
 

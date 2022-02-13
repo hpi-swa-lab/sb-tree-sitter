@@ -6835,3 +6835,9 @@ SBJavascript >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 	(aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']) ifTrue: [^ true].
 	^ false
 ]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> terminatorFor: anElement on: aStream [
+
+	anElement type = 'statement' ifTrue: [aStream nextPut: $;]
+]
