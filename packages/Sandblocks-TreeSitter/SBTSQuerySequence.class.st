@@ -51,7 +51,7 @@ SBTSQuerySequence >> evaluateAgainst: aBlock captures: aDictionary [
 	exprs atEnd ifFalse: [^ nil].
 	aDictionary addAll: localCaptures associations.
 	
-	^ aBlock childrenForQuery first
+	^ aBlock childrenForQuery ifNotEmpty: [:l | l first] ifEmpty: [nil]
 ]
 
 { #category : #'as yet unclassified' }
