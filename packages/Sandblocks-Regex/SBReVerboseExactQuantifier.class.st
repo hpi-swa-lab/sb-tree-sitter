@@ -25,6 +25,7 @@ SBReVerboseExactQuantifier class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(count_quantifier
 	(decimal_digits) @value
+	"?"? @lazy
 ) @count_quantifier'>
 
 	"Don't replace if the quantify is 0. {0} is used in the encoding of a comment. The comment would not be replaced because the quantifier was replaced first."
@@ -33,7 +34,8 @@ SBReVerboseExactQuantifier class >> matchRegex: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'count_quantifier')
 		value: (self new
-			number: (aDictionary at: 'value') contents asNumber)
+			number: (aDictionary at: 'value') contents asNumber;
+			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
 { #category : #'as yet unclassified' }
@@ -41,7 +43,7 @@ SBReVerboseExactQuantifier >> buildOn: aSBRow [
 
 	aSBRow
 		addMorphBack: (SBInlineBlockLabel new
-			label: 'exactly: ';
+			label: 'exactly:';
 			factory: self factory);
 		addMorphBack: (number := SBReNumberInput new
 			hint: 'number';
