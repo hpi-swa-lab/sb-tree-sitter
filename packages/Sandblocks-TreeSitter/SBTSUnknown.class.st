@@ -242,11 +242,8 @@ SBTSUnknown >> tryInterpretInput: aString [
 			self sandblockEditor do: (SBReplaceCommand new
 				target: self;
 				replacer: replacer).
-			SBToggledCode
-				comment: ''
-				active: 0
-				do: {[(replacer firstBlock ifNil: [replacer containingSandblock]) inputContainedUnknown]}.
 			SBToggledCode comment: '' active: 1 do: {
+				[(replacer firstBlock ifNil: [replacer containingSandblock]) startInputAtEnd].
 				[
 					(replacer firstBlock ifNil: [replacer containingSandblock]) select.
 					3 timesRepeat: [replacer sandblockEditor performForSelection: #moveCursorSmaller]].
