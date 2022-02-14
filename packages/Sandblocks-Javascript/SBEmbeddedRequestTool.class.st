@@ -30,7 +30,7 @@ SBEmbeddedRequestTool class >> matchPython: aDictionary do: aBlock [
 SBEmbeddedRequestTool class >> registerShortcuts: aProvider [
 
 	aProvider
-		registerShortcut: $h command do: #toggleHelp
+		registerShortcut: $h command do: #toggleHelp.
 ]
 
 { #category : #'as yet unclassified' }
@@ -76,7 +76,7 @@ SBEmbeddedRequestTool >> addExampleSection [
 		
 			self addMorphBack: (SBRow new
 				cellGap: cellGapConstant;
-				addMorphBack: (SBStringMorph new contents: 'Examples');
+				addMorphBack: (SBStringMorph new contents: #examples);
 				addMorphBack: (SBRow new cellGap: cellGapConstant)).
 			
 			method caseOf: {
@@ -161,13 +161,6 @@ SBEmbeddedRequestTool >> drawnColor [
 ]
 
 { #category : #'as yet unclassified' }
-SBEmbeddedRequestTool >> exploreResponse [
-   <action>
-
-   self halt.
-]
-
-{ #category : #'as yet unclassified' }
 SBEmbeddedRequestTool >> hideExamplesButton [
 	^(SBButton new icon: SBIcon iconEye shortcut: nil do: [
 				showExamples := true.
@@ -178,7 +171,9 @@ SBEmbeddedRequestTool >> hideExamplesButton [
 { #category : #'as yet unclassified' }
 SBEmbeddedRequestTool >> initCommons [
 	"Setup shared UI elements"
-	sendButton :=  (SBButton new icon: SBIcon iconPlay shortcut: nil do: [self send]; balloonText: 'Send Request').
+	exploreResponse := false.
+	sendButton :=  (SBButton new icon: SBIcon iconPlay shortcut: nil do: [ActiveEvent shiftPressed ifTrue: [self sendAndExploreResponse] ifFalse: [self send].]; balloonText: 'Send Request (Shift + Click to explore response)').
+	"sendButton on: #doubleClick send: #sendAndExploreResponse to: self."
 	addDataButton :=  (SBButton new
 				color: (Color r: 0.0 g: 1 b: 0.0);
 				icon: SBIcon iconPlus shortcut: nil do: [self promptAddPayload]; balloonText: 'Add Data').
@@ -255,20 +250,29 @@ SBEmbeddedRequestTool >> promptAddPayload [
 { #category : #'as yet unclassified' }
 SBEmbeddedRequestTool >> send [
 	"Delegates to the correct request implementation."
-	| paramsString |
+	| paramsString tmpUrl |
 	
 	self updatePayloadInObjectInstance.
 	paramsString := self collectParamsString.
-	(url startsWith: 'http://') ifFalse: [url := baseUrl, url].
+	tmpUrl := url.
+	(tmpUrl startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, tmpUrl].
 	
 
-	method = #get ifTrue: [self performGetRequest: url asString, paramsString].
+	method = #get ifTrue: [self performGetRequest: tmpUrl asString, paramsString].
 	method = #post ifTrue: [
 		isRawData 
-			ifTrue: [self performPostRequest: data url: url asString, paramsString]
+			ifTrue: [self performPostRequest: data url: tmpUrl asString, paramsString]
 			ifFalse: ["TODO: collect fields and perform request"]
 	
 	"TODO: implement other methods"]
+]
+
+{ #category : #'as yet unclassified' }
+SBEmbeddedRequestTool >> sendAndExploreResponse [
+	exploreResponse := true.
+	self send.
+	exploreResponse := false.
+
 ]
 
 { #category : #'as yet unclassified' }

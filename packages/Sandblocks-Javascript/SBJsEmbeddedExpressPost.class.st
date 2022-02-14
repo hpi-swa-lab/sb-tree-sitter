@@ -20,6 +20,6 @@ SBJsEmbeddedExpressPost >> writeSourceOn: aStream [
 	
 	aStream nextPutAll: 'app.post("'.
 	aStream nextPutAll: url asString, '"', ','.
-	aStream nextPutAll: (self source) sourceString.
+	aStream nextPutAll: self sourceMorph sourceString.
 	aStream nextPutAll:  ')'.
 ]

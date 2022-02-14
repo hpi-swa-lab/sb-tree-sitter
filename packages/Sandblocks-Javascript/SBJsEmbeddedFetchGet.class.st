@@ -19,7 +19,7 @@ SBJsEmbeddedFetchGet >> writeSourceOn: aStream [
 	aStream nextPutAll: 'method: "GET"', ','.
 	headers ifNotEmpty: [
 		aStream nextPutAll: 'headers: {'.
-		aStream nextPutAll: self headersToWritableString..
+		aStream nextPutAll: self headersToWritableString.
 		aStream nextPutAll: '}', ','].
 	
 	aStream nextPutAll:  '});'.

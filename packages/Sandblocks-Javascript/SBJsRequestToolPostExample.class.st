@@ -39,7 +39,7 @@ SBJsRequestToolPostExample >> initialize [
 SBJsRequestToolPostExample >> promptChangeValue [
 	| examples fetch index |
 	fetch := (self owner owner owner).
-	examples :=  ((fetch Examples at: (url, method)) at: code).
+	examples :=  ((fetch examples at: (url, method)) at: code).
 	index := UIManager default chooseFrom: examples.
 	index > 0
 		ifTrue: [ | example |

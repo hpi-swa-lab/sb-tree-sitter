@@ -18,18 +18,14 @@ Class {
 		'bodyMorph',
 		'methodMorph',
 		'exampleMorph',
-		'exampleThreshold'
+		'exampleThreshold',
+		'exploreResponse'
 	],
 	#classVars : [
 		'Examples'
 	],
 	#category : #'Sandblocks-Javascript'
 }
-
-{ #category : #'as yet unclassified' }
-SBRequestTool >> Examples [
-	^Examples.
-]
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> addBodySection: aBody [
@@ -67,7 +63,7 @@ SBRequestTool >> addExampleSection [
 		[ | map |
 			self addMorphBack: (SBRow new
 				cellGap: cellGapConstant;
-				addMorphBack: (SBStringMorph new contents: 'Examples');
+				addMorphBack: (SBStringMorph new contents: #examples);
 				addMorphBack: (SBRow new cellGap: cellGapConstant)).
 				
 			method = #post ifTrue: [exampleMorph := self submorphs eighth].
@@ -273,6 +269,11 @@ SBRequestTool >> data: body [
 ]
 
 { #category : #'as yet unclassified' }
+SBRequestTool >> examples [
+	^Examples.
+]
+
+{ #category : #'as yet unclassified' }
 SBRequestTool >> headerMorph [
 	^headerMorph.
 ]
@@ -389,6 +390,9 @@ SBRequestTool >> performGetRequest: urlWithParams [
 	
 	self addRequestToExampleMap: resp.
 	
+	"Only works for JSON responses"
+	exploreResponse ifTrue: [(Json readFrom: (response readStream)) explore].
+	
 	Transcript
 		show: response asString;
 		cr.
@@ -414,9 +418,13 @@ SBRequestTool >> performPostRequest: body url: aUrl [
 	
 	self addRequestToExampleMap: resp.
 	
+	"Only works for JSON responses"
+	exploreResponse ifTrue: [(Json readFrom: (response readStream)) explore].
+	
 	Transcript
 		show: response asString;
 		cr.
+	
 	self recreateFromMorphs.
 ]
 
@@ -512,6 +520,7 @@ SBRequestTool >> url: aString method: aMethod headers: aHeaders data: aData [
 	Examples ifNil: [Examples := Dictionary new].
 	"Examples := Dictionary new."
 	params := Dictionary new.
+	exploreResponse := true.
 	
 	aMethod = #post ifTrue: [self initPost].
 	aMethod = #get ifTrue: [self initGet]

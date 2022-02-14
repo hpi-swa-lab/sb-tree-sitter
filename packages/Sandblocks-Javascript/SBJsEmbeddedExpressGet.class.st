@@ -19,6 +19,6 @@ SBJsEmbeddedExpressGet >> writeSourceOn: aStream [
 	
 	aStream nextPutAll: 'app.get("'.
 	aStream nextPutAll: url asString, '"', ','.
-	aStream nextPutAll: (self source) sourceString.
+	aStream nextPutAll: self sourceMorph sourceString.
 	aStream nextPutAll:  ')'.
 ]
