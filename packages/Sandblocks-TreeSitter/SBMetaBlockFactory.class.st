@@ -1321,6 +1321,12 @@ SBMetaBlockFactory >> unwrapSingleChoices: anObject [
 	anObject members ifNotNil: [anObject members do: [:m | self unwrapSingleChoices: m]]
 ]
 
+{ #category : #testing }
+SBMetaBlockFactory >> validDropDestination: aBlock [
+
+	^ true
+]
+
 { #category : #accessing }
 SBMetaBlockFactory >> wordRule [
 

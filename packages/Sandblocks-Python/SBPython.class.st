@@ -5254,3 +5254,9 @@ SBPython >> separatorRule [
 
 	^ ((self buildRegexString: (grammar rules at: grammar word)), '|\d') asRegex
 ]
+
+{ #category : #'as yet unclassified' }
+SBPython >> validDropDestination: aBlock [
+
+	^ aBlock element type ~= 'expression'
+]

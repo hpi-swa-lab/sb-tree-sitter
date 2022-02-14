@@ -857,25 +857,20 @@ SBInlineBlock >> numberOfElements [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> objectInterfaceForDrop: aBlock near: anotherBlock at: aSymbol [
 
-	| reference |
+	| reference repeater |
 	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
  this and does special handling. other handlers will get blocked by the false"
-	anotherBlock
-		ifNotNil: [
-			"walk up the chain from the child so we grab the closest repeaterChild"
-			reference := anotherBlock owner.
-			[reference isInlineBlock not or: [(reference repeaterChildFor: aBlock) isNil and: [reference ~= self]]] whileTrue: [reference := reference owner]]
-		ifNil: [reference := anotherBlock].
+	repeater := nil.
+	anotherBlock ifNotNil: [
+		"walk up the chain from the child so we grab the closest repeaterChild"
+		reference := anotherBlock owner.
+		[
+			reference isInlineBlock not or: [" arrived at top "
+			reference ~= self and: [(repeater := reference repeaterChildFor: aBlock) isNil or: [(self factory validDropDestination: repeater) not]]]] whileTrue: [reference := reference owner]].
 	
-	^ (reference isNil or: [(reference repeaterChildFor: aBlock) isNil])
-		ifTrue: [SBInterfaces never]
-		ifFalse: [
-			{
-				#isInlineBlock.
-				[:o | false].
-				anotherBlock = #replace
-					ifTrue: [self]
-					ifFalse: [(reference repeaterChildFor: aBlock) element]}]
+	^ repeater
+		ifNil: [SBInterfaces never]
+		ifNotNil: [{#isInlineBlock. [:o | false]. anotherBlock = #replace ifTrue: [self] ifFalse: [repeater element]}]
 ]
 
 { #category : #'as yet unclassified' }
