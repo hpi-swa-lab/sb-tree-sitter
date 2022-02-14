@@ -57,7 +57,7 @@ SBInlineBlockSymbol >> buildWithFields: aStream alternatives: aDictionary [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> canLikelyContainType: aString [
 
-	^ self compatibleWithType: aString
+	^ self factory type: aString compatibleWith: self type
 ]
 
 { #category : #'as yet unclassified' }
