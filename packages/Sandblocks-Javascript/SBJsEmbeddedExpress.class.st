@@ -19,9 +19,10 @@ SBJsEmbeddedExpress class >> matchJs: aDictionary do: aBlock [
         (arrow_function) @methodBody)
 ) @call_expression'>
 
-	| url method |
+	| url method morph |
 	method := (aDictionary at: 'method') contents.
 	url := (aDictionary at: 'url') childSandblocks first contents deepCopy.
+	morph := (aDictionary at: 'methodBody') buildCopy.
 	
 	method
 		caseOf: {
@@ -30,14 +31,14 @@ SBJsEmbeddedExpress class >> matchJs: aDictionary do: aBlock [
 					value:(SBJsEmbeddedExpressPost new
 						factory: SBJavascript new;
 						url: url headers: Dictionary new data: nil;
-						sourceMorph: (aDictionary at: 'methodBody');
-						addMorphBack: (aDictionary at: 'methodBody'))].
+						sourceMorph: morph;
+						addMorphBack: morph)].
 			['get'] -> [
 				^ aBlock value: (aDictionary at: 'call_expression') value: (SBJsEmbeddedExpressGet new
 					factory: SBJavascript new;
 					url: url headers: Dictionary new data: nil;
-					sourceMorph: (aDictionary at: 'methodBody');
-					addMorphBack: (aDictionary at: 'methodBody'))]}
+					sourceMorph: morph;
+					addMorphBack: morph)]}
 		otherwise: [^ nil]
 ]
 
