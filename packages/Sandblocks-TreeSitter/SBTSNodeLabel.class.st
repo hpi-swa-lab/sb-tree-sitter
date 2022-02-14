@@ -38,6 +38,12 @@ SBTSNodeLabel >> copy [
 	^ self basicCopy
 ]
 
+{ #category : #testing }
+SBTSNodeLabel >> isTSLabel [
+
+	^ true
+]
+
 { #category : #accessing }
 SBTSNodeLabel >> label [
 

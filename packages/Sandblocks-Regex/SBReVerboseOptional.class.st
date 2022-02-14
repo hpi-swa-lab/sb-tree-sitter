@@ -1,29 +1,37 @@
 Class {
 	#name : #SBReVerboseOptional,
-	#superclass : #SBReVerboseBlock,
+	#superclass : #SBReVerboseQuantifier,
 	#category : #'Sandblocks-Regex'
 }
 
 { #category : #'as yet unclassified' }
 SBReVerboseOptional class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
-'(optional) @optional'>
+'(optional
+	"?"
+	"?"? @lazy
+) @optional'>
 
 	^ aBlock
 		value: (aDictionary at: 'optional')
-		value: (self new)
+		value: (self new
+			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseOptional >> initialize [
+SBReVerboseOptional >> buildOn: aSBRow [
 
-	super initialize.
+	aSBRow addMorphBack: (SBInlineBlockLabel new label: 'optional'; factory: self factory)
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseOptional >> buildSelf [
 
 	self addMorphBack: (SBInlineBlockLabel new label: 'optional'; factory: self factory)
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseOptional >> sourceString [
+SBReVerboseOptional >> quantifierString [
 
 	^ '?'
 ]

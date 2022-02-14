@@ -378,7 +378,7 @@ SBTreeSitter >> printTreeFrom: aCursor depth: aNumber [
 SBTreeSitter >> python [
 
 	<apicall: SBTSLanguage* tree_sitter_python () module: 'tree-sitter-python'>
-	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-python' name: 'python' context: thisContext
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-python' name: 'python' context: thisContext branch: '24b530ca158d2782ea9046e756057a412e16b52f'
 ]
 
 { #category : #'ffi languages' }

@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSParseFileTest >> expectedFailures [
 
-	^ #(#testPythonImport #testPythonDecorators)
+	^ #()
 ]
 
 { #category : #tests }
@@ -71,6 +71,13 @@ SBTSParseFileTest >> testParsePythonFormatString [
 ]
 
 { #category : #tests }
+SBTSParseFileTest >> testParseRegexClassCharacter [
+
+	SBTSFileParser new parse: '[-]' language: SBRegex instance.
+	SBTSFileParser new parse: '[a]' language: SBRegex instance
+]
+
+{ #category : #tests }
 SBTSParseFileTest >> testParseStatement [
 
 	| module |
@@ -108,18 +115,16 @@ SBTSParseFileTest >> testPythonImport [
 	block := SBTSFileParser new parse: 'import numpy' language: SBPython instance.
 	self assert: (block matchesQuery: '(module (import_statement (dotted_name (identifier))))').
 	block := SBTSFileParser new parse: 'import numpy as np' language: SBPython instance.
-	block printSExpr.
 	self assert: (block matchesQuery: '(module (import_statement (aliased_import (dotted_name (identifier)) alias: (identifier))))')
 ]
 
 { #category : #tests }
-SBTSParseFileTest >> testVerilogAliases [
+SBTSParseFileTest >> testPythonStatements [
 
-	false ifTrue: [
-		SBTSFileParser new
-			parse: 'module rmem_respfifo #(parameter integer WIDTH = 550) (
-    input              clock
-) ;
-endmodule'
-			language: SBVerilog instance]
+	| source |
+	source := 'a
+b'.
+	self
+		assert: source
+		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
 ]

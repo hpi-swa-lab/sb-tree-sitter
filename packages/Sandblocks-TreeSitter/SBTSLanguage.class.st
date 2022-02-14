@@ -1,6 +1,9 @@
 Class {
 	#name : #SBTSLanguage,
 	#superclass : #ExternalStructure,
+	#instVars : [
+		'symbolNames'
+	],
 	#category : #'Sandblocks-TreeSitter-FFI'
 }
 
@@ -26,7 +29,7 @@ SBTSLanguage >> symbolIndicesFor: aString [
 
 	^ Array streamContents: [:stream |
 		1 to: self symbol_count + self alias_count do: [:index | | name |
-			name := self symbolNameAt: index.
+			name := self symbolNames at: index.
 			name = aString ifTrue: [stream nextPut: index - 1]]]
 ]
 
@@ -35,4 +38,10 @@ SBTSLanguage >> symbolNameAt: aNumber [
 
 	self assert: (aNumber >= 1 and: [aNumber <= (self symbol_count + self alias_count)]).
 	^ (ExternalData fromHandle: (ExternalAddress fromInteger: (self symbol_names at: aNumber)) type: ExternalType string) fromCString
+]
+
+{ #category : #helper }
+SBTSLanguage >> symbolNames [
+
+	^ symbolNames ifNil: [symbolNames := (1 to: self symbol_count + self alias_count) collect: [:index | self symbolNameAt: index]]
 ]

@@ -27,11 +27,11 @@ SBReVerboseLookaroundAssertion >> assertionType [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> assertionType: symbolOrString [
+SBReVerboseLookaroundAssertion >> assertionType: aSymbolOrString [
 
-	assertionType object: ((symbolOrString isKindOf: Symbol)
-		ifFalse: [self assertionTypes at: symbolOrString ifAbsent: self assertionTypes values first]
-		ifTrue: [symbolOrString])
+	assertionType object: ((aSymbolOrString isKindOf: Symbol)
+		ifFalse: [self assertionTypes at: aSymbolOrString ifAbsent: self assertionTypes values first]
+		ifTrue: [aSymbolOrString])
 ]
 
 { #category : #'as yet unclassified' }
@@ -64,7 +64,8 @@ SBReVerboseLookaroundAssertion >> initialize [
 	self
 		addMorphBack: (assertionType := SBComboBox new
 			values: self assertionTypes values;
-			labels: self assertionTypesDisplayStrings);
+			labels: self assertionTypesDisplayStrings;
+			placeholderText: 'select assertion type...');
 		addMorphBack: (SBTSUnknown new
 			factory: self factory;
 			template: (self factory getTemplate: 'pattern'))
@@ -79,16 +80,20 @@ SBReVerboseLookaroundAssertion >> pattern [
 { #category : #'as yet unclassified' }
 SBReVerboseLookaroundAssertion >> pattern: aBlock [
 
-	(self submorphs at: 2) replaceBy: aBlock
+	(self submorphs at: 2) replaceBy: aBlock buildCopy
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseLookaroundAssertion >> sourceString [
 
-	^ '(?',
-		(self assertionTypes keyAtValue: self assertionType),
-		self pattern sourceString,
-		')'
+	^ self assertionType notNil
+		ifTrue: [
+			'(?',
+			(self assertionTypes keyAtValue: self assertionType),
+			self pattern sourceString,
+			')']
+		ifFalse: [''] 
+	
 ]
 
 { #category : #'as yet unclassified' }

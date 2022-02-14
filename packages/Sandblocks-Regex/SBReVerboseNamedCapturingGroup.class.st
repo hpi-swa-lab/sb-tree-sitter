@@ -15,14 +15,14 @@ SBReVerboseNamedCapturingGroup class >> matchRegex: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'group')
 		value: (self new pattern: (aDictionary at: 'pattern');
-						name: ((aDictionary at: 'name') submorphs first))
+						name: ((aDictionary at: 'name') submorphs first contents))
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseNamedCapturingGroup class >> newFor: aBlock as: aTextBlock [
+SBReVerboseNamedCapturingGroup class >> newFor: aBlock as: aString [
 
 	^ self new
-		name: aTextBlock;
+		name: aString;
 		pattern: aBlock
 ]
 
@@ -35,19 +35,19 @@ SBReVerboseNamedCapturingGroup >> initialize [
 		addMorphBack: (SBInlineBlockLabel new label: 'Capture '; factory: self factory);
 		addMorphBack: (SBTSUnknown new factory: self factory; template: (self factory getTemplate: 'pattern'));
 		addMorphBack: (SBInlineBlockLabel new label: ' as '; factory: self factory);
-		addMorphBack: (SBInlineBlockText new factory: self factory)
+		addMorphBack: (SBRegex build: 'group_name')
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseNamedCapturingGroup >> name [
 
-	^ self submorphs at: 4
+	^ (self submorphs at: 4) contents
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseNamedCapturingGroup >> name: aTextBlock [
+SBReVerboseNamedCapturingGroup >> name: aString [
 
-	(self submorphs at: 4) replaceBy: aTextBlock
+	(self submorphs at: 4) contents: aString
 ]
 
 { #category : #'as yet unclassified' }
@@ -59,7 +59,7 @@ SBReVerboseNamedCapturingGroup >> pattern [
 { #category : #'as yet unclassified' }
 SBReVerboseNamedCapturingGroup >> pattern: aBlock [
 
-	(self submorphs at: 2) replaceBy: aBlock
+	(self submorphs at: 2) replaceBy: aBlock buildCopy
 ]
 
 { #category : #'as yet unclassified' }
@@ -68,7 +68,8 @@ SBReVerboseNamedCapturingGroup >> sourceString [
 	^ '(?<',
 		self name contents,
 		'>',
-		self pattern sourceString
+		self pattern sourceString,
+		')'
 ]
 
 { #category : #'as yet unclassified' }

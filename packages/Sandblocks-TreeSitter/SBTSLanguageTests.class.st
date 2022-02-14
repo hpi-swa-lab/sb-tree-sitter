@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSLanguageTests >> expectedFailures [
 
-	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude #testVerilogAliases #testApplyPyFilePathReplacement)
+	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude)
 ]
 
 { #category : #'testing - parse' }
@@ -106,13 +106,13 @@ SBTSLanguageTests >> testJavascriptNestedMemberExpression [
 SBTSLanguageTests >> testJavascriptTemplateString [
 
 	| source |
-	source := '`ab`'.
+	source := '`ab`;'.
 	self assert: source equals: (SBJavascript parse: source) sourceString.
 	
-	source := '`ab${a}`'.
+	source := '`ab${a}`;'.
 	self assert: source equals: (SBJavascript parse: source) sourceString.
 	
-	source := '`ab${a}def${c}`'.
+	source := '`ab${a}def${c}`;'.
 	self assert: source equals: (SBJavascript parse: source) sourceString
 ]
 
@@ -120,6 +120,10 @@ SBTSLanguageTests >> testJavascriptTemplateString [
 SBTSLanguageTests >> testJavascriptToString [
 
 	| source |
+	source := 'a;
+b;'.
+	self assert: source equals: (SBJavascript parse: source) sourceString.
+	
 	source := '<h2>Hi</h2>'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
@@ -130,8 +134,8 @@ SBTSLanguageTests >> testJavascriptToString [
 	source := 'class Car extends React.Component
 {example={};
 render()
-{a
-return<h2>Hi</h2>}}'.
+{a;
+return<h2>Hi</h2>;}}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
 	source := 'a(b,c)'.
@@ -281,7 +285,6 @@ SBTSLanguageTests >> testPythonInsertLambdaParameter [
 	
 	e performForSelection: #moveCursorRight.
 	e performForSelection: #moveCursorRight.
-	e performForSelection: #moveCursorRight.
 	e handle: (self keyboardEvent: $a).
 	
 	self assert: 'a' equals: module access children first parameters children first contents
@@ -360,13 +363,4 @@ SBTSLanguageTests >> testRegexResumeInput [
 SBTSLanguageTests >> testSyntaxError [
 
 	self should: [SBPython parse: '"abc"('] raise: SBTSSyntaxError
-]
-
-{ #category : #'testing - parse' }
-SBTSLanguageTests >> testVerilogAliases [
-
-	SBVerilog parse: 'module rmem_respfifo #(parameter integer WIDTH = 550) (
-    input              clock
-) ;
-endmodule'
 ]

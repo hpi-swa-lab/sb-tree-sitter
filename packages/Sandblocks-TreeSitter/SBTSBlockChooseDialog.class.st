@@ -5,16 +5,18 @@ Class {
 		'query',
 		'currentBlocks',
 		'currentValues',
-		'exploreBlock'
+		'exploreBlock',
+		'successBlock'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
 
 { #category : #'as yet unclassified' }
-SBTSBlockChooseDialog >> do: aBlock query: aString [
+SBTSBlockChooseDialog >> do: aBlock query: aString onSuccess: anotherBlock [
 
 	query := aString.
 	exploreBlock := aBlock.
+	successBlock := anotherBlock.
 	self update.
 	
 	currentValues ifEmpty: [^ nil].
@@ -22,7 +24,9 @@ SBTSBlockChooseDialog >> do: aBlock query: aString [
 		(ProvideAnswerNotification signal: nil) ifNotNil: [:answer |
 			(answer = #cancel or: [answer isNil]) ifTrue: [^ nil].
 			^ currentValues at: answer].
-		self getUserResponseAtHand]
+		self getUserResponseAtHand.
+		"we had an odd race condition where an event would be dispatched to the editor while the popup was still open. the successBlock was the hotfix for that, if it has already been used then it's set to nil."
+		successBlock ifNotNil: [result ifNotNil: [successBlock value: result]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -53,7 +57,10 @@ SBTSBlockChooseDialog >> update [
 	currentValues := currentBlocks.
 	
 	currentValues size = 1
-		ifTrue: [self closeDialog: currentValues first]
+		ifTrue: [
+			successBlock value: currentValues first.
+			successBlock := nil.
+			self closeDialog: currentValues first]
 		ifFalse: [self updateBlocks]
 ]
 

@@ -55,6 +55,12 @@ SBInlineBlockSymbol >> buildWithFields: aStream alternatives: aDictionary [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockSymbol >> canLikelyContainType: aString [
+
+	^ self compatibleWithType: aString
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> candidatesForWrappingOn: aStream [
 
 	(factory isSuperType: self type) ifTrue: [aStream nextPut: self].
@@ -164,7 +170,10 @@ SBInlineBlockSymbol >> inline [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> insertCommandRequest: aMorph near: aBlock before: aBoolean [
 
-	^ self repeaterChild ifNotNil: [:c | c insertCommandRequest: aMorph near: aBlock before: aBoolean]
+	| reference |
+	reference := aBlock owner.
+	[reference repeaterChild isNil and: [reference ~= self]] whileTrue: [reference := reference owner].
+	^ reference repeaterChild ifNotNil: [:c | c insertCommandRequest: aMorph near: aBlock before: aBoolean]
 ]
 
 { #category : #'as yet unclassified' }
@@ -255,12 +264,6 @@ SBInlineBlockSymbol >> layoutCommands [
 	^ SBAlgebraCommand container
 		morph: self;
 		data: {self firstSubmorph layoutCommands}
-]
-
-{ #category : #'as yet unclassified' }
-SBInlineBlockSymbol >> newEmptyChildNear: aBlock before: aBoolean [
-
-	^ self repeaterChild ifNotNil: [:r | r newEmptyChildNear: aBlock before: aBoolean]
 ]
 
 { #category : #'as yet unclassified' }

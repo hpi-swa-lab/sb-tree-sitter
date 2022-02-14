@@ -80,6 +80,7 @@ SBTSNodeBase >> compatibleWithType: aSymbol [
 { #category : #hierarchy }
 SBTSNodeBase >> containingSymbol [
 
+	self owner ifNil: [^ nil].
 	^ self owner isTSNode ifTrue: [self owner containingSymbol] ifFalse: [nil]
 ]
 
@@ -95,6 +96,22 @@ SBTSNodeBase >> currentTextMorph [
 
 	self submorphsDo: [:m | (m isTSNode and: [m inline]) ifTrue: [m currentTextMorph ifNotNil: [:t | ^ t]]].
 	^ nil
+]
+
+{ #category : #initialization }
+SBTSNodeBase >> ensureLayout [
+
+	self layoutPolicy ifNil: [
+		self
+			hResizing: #shrinkWrap;
+			vResizing: #shrinkWrap;
+			layoutPolicy: SBAlgebraLayout new;
+			listDirection: #leftToRight;
+			color: Color transparent;
+			cellGap: 2;
+			layoutInset: 0;
+			cellPositioning: #center;
+			extent: 0 @ 0]
 ]
 
 { #category : #accessing }
@@ -127,7 +144,7 @@ SBTSNodeBase >> firstVisibleType [
 	^ (self type notNil and: [self inline not])
 		ifTrue: [self type]
 		ifFalse: [
-			(self hasSubmorphs and: [self firstSubmorph isInlineBlock])
+			(self hasSubmorphs and: [self firstSubmorph isTSNode])
 				ifTrue: [self firstSubmorph firstVisibleType]
 				ifFalse: [nil]]
 ]
@@ -177,9 +194,27 @@ SBTSNodeBase >> isStatementContainer [
 ]
 
 { #category : #testing }
+SBTSNodeBase >> isTSLabel [
+
+	^ false
+]
+
+{ #category : #testing }
 SBTSNodeBase >> isTSNode [
 
 	^ true
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isTSRepeat [
+
+	^ false
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isTSSeq [
+
+	^ false
 ]
 
 { #category : #testing }
@@ -188,10 +223,24 @@ SBTSNodeBase >> isTSSymbol [
 	^ false
 ]
 
+{ #category : #accessing }
+SBTSNodeBase >> language [
+
+	^ self factory name
+]
+
 { #category : #hierarchy }
 SBTSNodeBase >> lastChild [
 
 	^ self lastSubmorph
+]
+
+{ #category : #layout }
+SBTSNodeBase >> layoutCommands [
+
+	^ SBAlgebraCommand container
+		morph: self;
+		data: {self firstSubmorph layoutCommands}
 ]
 
 { #category : #copying }
@@ -201,6 +250,7 @@ SBTSNodeBase >> makeConcrete [
 	
 	^ self basicCopy
 		isConcrete: true;
+		ensureLayout;
 		yourself
 ]
 
@@ -256,12 +306,12 @@ SBTSNodeBase >> printElementsSeparated: aCollection on: aStream indent: aNumber 
 			element writeSourceOn: stream indent: ((self factory indentMatch: element)
 				ifTrue: [aNumber + 1]
 				ifFalse: [aNumber])].
-		(self isKindOf: SBTSNodeRepeat)
+		self isTSRepeat
 			ifTrue: [
 				first ifFalse: [aStream nextPutAll: delimiter].
-				((index > 1 and: [(self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [self containingSymbol parentSandblock isInlineBlock or: [first not]]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
+				((index > 1 and: [(self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element) or: [(self containingSymbol ifNotNil: #isStatementContainer ifNil: [false]) and: [(self containingSymbol parentSandblock satisfies: #(#notNil #isTSNode)) or: [first not]]]]) and: [string notEmpty]) ifTrue: [aStream crtab: aNumber]]
 			ifFalse: [
-				((self isKindOf: SBTSNodeSeq) and: [index > 1 and: [self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element]])
+				(self isTSSeq and: [index > 1 and: [self factory hardLineBreakMatchBetween: (aCollection at: index - 1) and: element]])
 					ifTrue: [
 						aStream crtab: ((self factory indentMatch: element)
 							ifTrue: [aNumber + 1]

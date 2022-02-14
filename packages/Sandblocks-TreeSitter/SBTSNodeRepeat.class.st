@@ -27,6 +27,26 @@ SBTSNodeRepeat >> element [
 	^ element
 ]
 
+{ #category : #testing }
+SBTSNodeRepeat >> isTSRepeat [
+
+	^ true
+]
+
+{ #category : #layout }
+SBTSNodeRepeat >> layoutCommands [
+
+	^ SBAlgebraCommand container
+		morph: self;
+		data: (Array streamContents: [:stream |
+			self submorphs withIndexDo: [:morph :index |
+				stream nextPut: morph layoutCommands.
+				index ~= self submorphCount ifTrue: [
+					stream nextPut: (((self factory hardLineBreakMatcher value: morph) or: [self containingSymbol isStatementContainer])
+						ifTrue: [SBAlgebraCommand hardLine withGap: true]
+						ifFalse: [SBAlgebraCommand softLineOrGap withGap: true])]]])
+]
+
 { #category : #accessing }
 SBTSNodeRepeat >> maxChildren [
 

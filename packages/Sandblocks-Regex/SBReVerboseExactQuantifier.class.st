@@ -1,6 +1,6 @@
 Class {
 	#name : #SBReVerboseExactQuantifier,
-	#superclass : #SBReVerboseBlock,
+	#superclass : #SBReVerboseQuantifier,
 	#instVars : [
 		'number'
 	],
@@ -8,41 +8,64 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBReVerboseExactQuantifier class >> isRange: aDictionary [
+
+	^ ((aDictionary at: 'count_quantifier') childrenForQuery
+		select: [:each | each type = 'decimal_digits']) size > 1
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseExactQuantifier class >> isZero: aDictionary [
+
+	^ (aDictionary at: 'value') contents asNumber = 0
+]
+
+{ #category : #'as yet unclassified' }
 SBReVerboseExactQuantifier class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(count_quantifier
 	(decimal_digits) @value
+	"?"? @lazy
 ) @count_quantifier'>
 
-	((aDictionary at: 'count_quantifier') childrenForQuery
-		select: [:each | each type = 'decimal_digits']) size > 1
-		ifTrue: [^ nil].
+	"Don't replace if the quantify is 0. {0} is used in the encoding of a comment. The comment would not be replaced because the quantifier was replaced first."
+	((self isZero: aDictionary) or: [self isRange: aDictionary]) ifTrue: [^ nil].
 
 	^ aBlock
 		value: (aDictionary at: 'count_quantifier')
 		value: (self new
-			number: (aDictionary at: 'value') contents asNumber)
+			number: (aDictionary at: 'value') contents asNumber;
+			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> initialize [
+SBReVerboseExactQuantifier >> buildOn: aSBRow [
 
-	super initialize.
-	
+	aSBRow
+		addMorphBack: (SBInlineBlockLabel new
+			label: 'exactly:';
+			factory: self factory);
+		addMorphBack: (number := SBReNumberInput new
+			hint: 'number';
+			minimum: 0)
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseExactQuantifier >> buildSelf [
+
 	self
 		addMorphBack: (SBInlineBlockLabel new
 			label: 'exactly: ';
 			factory: self factory);
-		addMorphBack: (number := SBInlineBlockText new
-			regexString: '[0-9]+';
+		addMorphBack: (number := SBReNumberInput new
 			hint: 'number';
-			factory: self factory)
+			minimum: 0)
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseExactQuantifier >> number [
 
-	^ number contents ifEmpty: [0] ifNotEmpty: [:value | value asNumber]
+	^ number value ifNil: [0]
 ]
 
 { #category : #'as yet unclassified' }
@@ -52,9 +75,15 @@ SBReVerboseExactQuantifier >> number: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> sourceString [
+SBReVerboseExactQuantifier >> quantifierString [
 
 	^ '{',
 		self number asString,
 		'}'
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseExactQuantifier >> type [
+
+	^ 'count_quantifier'
 ]

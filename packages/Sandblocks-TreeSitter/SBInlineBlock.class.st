@@ -172,6 +172,12 @@ SBInlineBlock >> buildWithFields: aStream alternatives: aDictionary [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> canLikelyContainType: aString [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> candidatesForWrappingOn: aStream [
 
 	(self hasSubmorphs and: [self firstSubmorph isInlineBlock]) ifTrue: [self firstSubmorph candidatesForWrappingOn: aStream]
@@ -284,13 +290,19 @@ SBInlineBlock >> compatibleWithType: aTypeString [
 			ifNil: [self type = aTypeString]]
 ]
 
+{ #category : #hierarchy }
+SBInlineBlock >> containingInlineBlock [
+
+	
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> containingRepeat [
 
 	^ self owner isInlineBlock ifTrue: [self owner containingRepeat] ifFalse: [nil]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBInlineBlock >> containingSandblock [
 
 	^ self inline ifTrue: [self owner ifNotNil: #containingSandblock] ifFalse: [self]
@@ -299,7 +311,7 @@ SBInlineBlock >> containingSandblock [
 { #category : #hierarchy }
 SBInlineBlock >> containingSymbol [
 
-	^ self owner isInlineBlock ifTrue: [self owner containingSymbol] ifFalse: [nil]
+	^ self owner ifNotNil: [:o | o containingInlineBlock ifNotNil: [:b | b containingSymbol]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -313,7 +325,6 @@ SBInlineBlock >> containsEqual: aBlock [
 SBInlineBlock >> convertedFor: anInterfaceCollection do: aBlock [
 
 	anInterfaceCollection first = #isInlineBlock ifTrue: [
-		SBToggledCode comment: '' active: 0 do: {[self halt]}.
 		^ (SBTSRuleExplore new
 			explore: anInterfaceCollection last
 				withNested: self
@@ -352,9 +363,9 @@ SBInlineBlock >> deleteCommandFor: aBlock [
 
 	aBlock owner isInlineBlock ifFalse: [^ nil].
 	
-	^ aBlock deleteTarget
-		ifNotNil: [:target | SBDeleteCommand new target: target]
-		ifNil: [
+	^ ((aBlock isInlineBlock or: [aBlock isUnknown]) and: [aBlock deleteTarget notNil])
+		ifTrue: [SBDeleteCommand new target: aBlock deleteTarget]
+		ifFalse: [
 			aBlock newNullBlock ifNotNil: [:nullBlock |
 				SBReplaceCommand new
 					target: aBlock;
@@ -673,6 +684,24 @@ SBInlineBlock >> isStatementContainer [
 ]
 
 { #category : #testing }
+SBInlineBlock >> isTSLabel [
+
+	^ false
+]
+
+{ #category : #testing }
+SBInlineBlock >> isTSRepeat [
+
+	^ false
+]
+
+{ #category : #testing }
+SBInlineBlock >> isTSSeq [
+
+	^ false
+]
+
+{ #category : #testing }
 SBInlineBlock >> isTSSymbol [
 
 	^ false
@@ -713,7 +742,7 @@ SBInlineBlock >> labelDifferenceOf: aMorph do: aBlock [
 { #category : #accessing }
 SBInlineBlock >> language [
 
-	^ self factory name
+	^ self factory ifNotNil: [:f | f name]
 ]
 
 { #category : #'as yet unclassified' }
@@ -789,9 +818,10 @@ SBInlineBlock >> name: aString [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> newEmptyChildNear: aBlock before: aBoolean [
 
-	self flag: #todo.
-	" if we have multiple repeating elements, get the one near aBlock "
-	^ self repeaterChild ifNotNil: [:c | c element instantiate]
+	| reference |
+	reference := aBlock owner containingInlineBlock.
+	[reference repeaterChild isNil and: [reference ~= self]] whileTrue: [reference := reference owner containingInlineBlock].
+	^ reference repeaterChild ifNotNil: [:c | c element instantiate]
 ]
 
 { #category : #'as yet unclassified' }
@@ -825,11 +855,51 @@ SBInlineBlock >> numberOfElements [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
+SBInlineBlock >> objectInterfaceForDrop: aBlock near: anotherBlock at: aSymbol [
+
+	| reference |
 	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
  this and does special handling. other handlers will get blocked by the false"
+	anotherBlock
+		ifNotNil: [
+			"walk up the chain from the child so we grab the closest repeaterChild"
+			reference := anotherBlock owner.
+			[reference isInlineBlock not or: [(reference repeaterChildFor: aBlock) isNil and: [reference ~= self]]] whileTrue: [reference := reference owner]]
+		ifNil: [reference := anotherBlock].
+	
+	^ (reference isNil or: [(reference repeaterChildFor: aBlock) isNil])
+		ifTrue: [SBInterfaces never]
+		ifFalse: [
+			{
+				#isInlineBlock.
+				[:o | false].
+				anotherBlock = #replace
+					ifTrue: [self]
+					ifFalse: [(reference repeaterChildFor: aBlock) element]}]
+]
 
-	^ {#isInlineBlock. [:o | false]. aSymbol = #replace ifTrue: [self] ifFalse: [self repeaterChild element]}
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
+
+	| reference |
+	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
+ this and does special handling. other handlers will get blocked by the false"
+	aBlock
+		ifNotNil: [
+			"walk up the chain from the child so we grab the closest repeaterChild"
+			reference := aBlock owner.
+			[reference isInlineBlock not or: [reference repeaterChild isNil and: [reference ~= self]]] whileTrue: [reference := reference owner]]
+		ifNil: [reference := aBlock].
+	
+	^ (reference isNil or: [reference repeaterChild isNil])
+		ifTrue: [SBInterfaces never]
+		ifFalse: [
+			{
+				#isInlineBlock.
+				[:o | false].
+				aBlock = #replace
+					ifTrue: [self]
+					ifFalse: [reference repeaterChild element]}]
 ]
 
 { #category : #hierarchy }
@@ -841,6 +911,15 @@ SBInlineBlock >> orOwnerUpTo: aBlock satisfying: aCondBlock [
 		(aCondBlock value: p) ifTrue: [^ p].
 		p := p owner].
 	^ nil
+]
+
+{ #category : #hierarchy }
+SBInlineBlock >> ownerInlineBlock [
+
+	self owner ifNil: [^ nil].
+	^ self owner isInlineBlock
+		ifTrue: [self owner]
+		ifFalse: [self owner ownerInlineBlock]
 ]
 
 { #category : #accessing }
@@ -931,6 +1010,7 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber
 			lastMatchedWordRule := suffixMatchesWordRule value: string.
 			lastString := string.
 			aStream nextPutAll: string].
+		self factory terminatorFor: element on: aStream.
 		first := false]
 ]
 
@@ -1031,6 +1111,19 @@ SBInlineBlock >> repeaterChild [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> repeaterChildFor: aBlock [
+
+	^ self repeaterChildThat: [:r | r element canLikelyContainType: aBlock type]
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> repeaterChildThat: aBlock [
+
+	self submorphsDo: [:m | (m isSandblock not and: [m isInlineBlock]) ifTrue: [(m repeaterChildThat: aBlock) ifNotNil: [:c | ^ c]]].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 
 	Clipboard clipboardText: self sourceString.
@@ -1077,14 +1170,16 @@ SBInlineBlock >> toplevel [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> tryCastType: aString ifNone: aBlock [
 
-	| alternatives selected |
+	| alternatives |
 	" accept only changes that do not contain a nested copy of myself; this is to enable casts from e.g.
 integer -> float with higher priority.
 
 If none match, we proceed with the more complicated way of querying up the owner hierarchy to
 find variation points. "
 	alternatives := self ownerThatIsA: SBInlineBlockChoice.
-	selected := SBTSBlockChooseDialog new
+	alternatives ifNil: [^ aBlock value].
+	
+	SBTSBlockChooseDialog new
 		do: [:query | | results |
 			results := SBTSRuleExplore deduplicateResults: (SBTSRuleExplore new
 				maxRecursionDepth: 1;
@@ -1094,44 +1189,59 @@ find variation points. "
 					allBlocksDetect: [:block | block hasSameStructureAs: self]
 					ifFound: [:b | true]
 					ifNone: [false]]]
-		query: aString.
-	
-	selected ifNil: [^ aBlock value].
-	
-	self sandblockEditor do: (SBReplaceCommand new
-		target: self;
-		replacer: selected)
+		query: aString
+		onSuccess: [:selected |
+			^ self sandblockEditor do: (SBReplaceCommand new
+				target: self;
+				replacer: selected)].
+		aBlock value
 ]
 
 { #category : #'as yet unclassified' }
 SBInlineBlock >> tryInsertInputAdjacent: aString [
 
-	| insert |
-	insert := (self owner ownerThatIsA: SBInlineBlockRepeat) containingSandblock.
-	insert ifNotNil: [ | command |
-		command := insert insertEmptyCommandRequestNear: self containingSandblock before: false.
-		command ifNotNil: [
-			self sandblockEditor do: command.
-			insert inputContainedUnknown.
-			self sandblockEditor selection keyStroke: (SBTest keyboardEvent: aString first)]]
+	self orOwnerUpTo: self owner containingSandblock satisfying: [:insert | | command repeater |
+		repeater := insert repeaterChildThat: [:repeat |
+			(SBTSRuleExplore new
+				explore: repeat element
+					withNested: nil
+					nestedBefore: false
+					for: aString
+					startSymbol: repeat element type;
+				deduplicate) notEmpty].
+		repeater
+			ifNotNil: [
+				command := repeater insertEmptyCommandRequestNear: self containingSandblock before: false.
+				command
+					ifNotNil: [
+						self sandblockEditor do: command.
+						command morph inputContainedUnknown.
+						self sandblockEditor selection keyStroke: (SBTest keyboardEvent: aString first).
+						true]
+					ifNil: [false]]
+			ifNil: [false]]
 ]
 
 { #category : #'as yet unclassified' }
 SBInlineBlock >> tryInterpretInput: aString before: aBoolean [
 
-	| result |
-	result := SBTSBlockChooseDialog new
+	SBTSBlockChooseDialog new
 		do: [:query | self choicesForInput: query before: aBoolean]
-		query: aString.
-	result ifNil: [^ self tryInsertInputAdjacent: aString].
+		query: aString
+		onSuccess: [:result |
+			self sandblockEditor do: (SBReplaceCommand new
+				target: (result valueOfProperty: #rootBlock);
+				replacer: result).
+			result removeProperty: #rootBlock.
+			SBToggledCode comment: '' active: 1 do: {
+				[result lastDeepChild startInputAtEnd].
+				[
+					result firstBlock
+						select;
+						inputContainedUnknown]}.
+			^ self].
 	
-	self sandblockEditor do: (SBReplaceCommand new
-		target: (result valueOfProperty: #rootBlock);
-		replacer: result).
-	result removeProperty: #rootBlock.
-	result firstBlock
-		select;
-		inputContainedUnknown
+	self tryInsertInputAdjacent: aString
 ]
 
 { #category : #accessing }

@@ -29,7 +29,6 @@ SBTSFileParser >> next [
 SBTSFileParser >> nodeForCursor: aCursor [
 
 	aCursor isNamed ifFalse: [^ aCursor text].
-	
 	^ aCursor currentDo: [:type :node :template | | fields matches |
 		fields := Array streamContents: [:s |
 			aCursor gotoFirstChild ifTrue: [ | current |
@@ -45,6 +44,7 @@ SBTSFileParser >> nodeForCursor: aCursor [
 		stream := (fields ifEmpty: [aCursor text ifEmpty: [#()] ifNotEmpty: [{aCursor text}]]) readStream.
 		matches := template takeNodesFrom: self.
 		self assert: matches ~= #noMatch description: ('could not construct `{1}`' format: {type}).
+		matches := matches select: [:match | match parser atEnd].
 		self assert: matches size = 1.
 		node addChild: matches first]
 ]

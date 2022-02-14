@@ -1,6 +1,6 @@
 Class {
 	#name : #SBReVerboseQuantifierRange,
-	#superclass : #SBReVerboseBlock,
+	#superclass : #SBReVerboseQuantifier,
 	#instVars : [
 		'minimum',
 		'maximum'
@@ -14,67 +14,97 @@ SBReVerboseQuantifierRange class >> matchRegex: aDictionary do: aBlock [
 '(count_quantifier
 	(decimal_digits) @minimum
 	(decimal_digits) @maximum
+	"?"? @lazy
 ) @count_quantifier'>
 
 	^ aBlock
 		value: (aDictionary at: 'count_quantifier')
 		value: (self new
 			minimum: (aDictionary at: 'minimum') contents asNumber;
-			maximum: (aDictionary at: 'maximum') contents asNumber)
+			maximum: (aDictionary at: 'maximum') contents asNumber;
+			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> initialize [
+SBReVerboseQuantifierRange >> buildOn: aSBRow [
 
-	super initialize.
+	aSBRow
+		addMorphBack: (SBInlineBlockLabel new
+			label: 'at least:';
+			factory: self factory);
+		addMorphBack: (minimum := SBReNumberInput new
+			hint: 'min';
+			minimum: 0;
+			onChange: [:value |
+				maximum minimum: value]);
+		addMorphBack: (SBInlineBlockLabel new
+			label: 'at most:';
+			factory: self factory);
+		addMorphBack: (maximum := SBReNumberInput new
+			hint: 'max';
+			minimum: 0;
+			onChange: [:value |
+				minimum maximum: value])
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseQuantifierRange >> buildSelf [
 	
 	self
 		addMorphBack: (SBInlineBlockLabel new
 			label: 'at least: ';
 			factory: self factory);
-		addMorphBack: (minimum := SBInlineBlockText new
-			regexString: '[0-9]+';
+		addMorphBack: (minimum := SBReNumberInput new
 			hint: 'minimum';
-			factory: self factory);
+			minimum: 0;
+			onChange: [:value |
+				maximum minimum: value]);
 		addMorphBack: (SBInlineBlockLabel new
 			label: 'at most: ';
 			factory: self factory);
-		addMorphBack: (maximum := SBInlineBlockText new
-			regexString: '[0-9]+';
+		addMorphBack: (maximum := SBReNumberInput new
 			hint: 'maximum';
-			factory: self factory)
+			minimum: 0;
+			onChange: [:value |
+				minimum maximum: value])
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseQuantifierRange >> maximum [
 
-	^ maximum contents ifEmpty: [0] ifNotEmpty: [:value | value asNumber]
+	^ maximum value ifNil: [0]
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseQuantifierRange >> maximum: aNumber [
 
-	maximum contents: aNumber asString
+	maximum value: aNumber
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseQuantifierRange >> minimum [
 
-	^ minimum contents ifEmpty: [0] ifNotEmpty: [:value | value asNumber]
+	^ minimum value ifNil: [0]
 ]
 
 { #category : #'as yet unclassified' }
 SBReVerboseQuantifierRange >> minimum: aNumber [
 
-	minimum contents: aNumber asString
+	minimum value: aNumber
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> sourceString [
+SBReVerboseQuantifierRange >> quantifierString [
 
 	^ '{',
 		self minimum asString,
 		',',
 		self maximum asString,
 		'}'
+]
+
+{ #category : #'as yet unclassified' }
+SBReVerboseQuantifierRange >> type [
+
+	^ 'count_quantifier'
 ]
