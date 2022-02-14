@@ -135,7 +135,7 @@ b;'.
 {example={};
 render()
 {a;
-return<h2>Hi</h2>;}}'.
+return<h2>Hi</h2>}}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
 	source := 'a(b,c)'.
@@ -148,7 +148,12 @@ return<h2>Hi</h2>;}}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
 	source := '<h2 style="color:red"></a>'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString
+	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	
+	source := 'if(a)
+{}else
+{}'.
+	self assert: source equals: (SBJavascript parse: source) sourceString
 ]
 
 { #category : #'testing - printing' }

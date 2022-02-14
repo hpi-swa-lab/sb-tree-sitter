@@ -6839,5 +6839,5 @@ SBJavascript >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 { #category : #'as yet unclassified' }
 SBJavascript >> terminatorFor: anElement on: aStream [
 
-	anElement type = 'statement' ifTrue: [aStream nextPut: $;]
+	(anElement type = 'statement' and: [anElement firstSubmorph firstSubmorph type = 'expression_statement']) ifTrue: [aStream nextPut: $;]
 ]
