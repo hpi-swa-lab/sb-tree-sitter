@@ -291,9 +291,9 @@ SBInlineBlock >> compatibleWithType: aTypeString [
 ]
 
 { #category : #hierarchy }
-SBInlineBlock >> containingInlineblock [
+SBInlineBlock >> containingInlineBlock [
 
-	^ self
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -311,7 +311,7 @@ SBInlineBlock >> containingSandblock [
 { #category : #hierarchy }
 SBInlineBlock >> containingSymbol [
 
-	^ self owner isInlineBlock ifTrue: [self owner containingSymbol] ifFalse: [nil]
+	^ self owner ifNotNil: [:o | o containingInlineBlock ifNotNil: [:b | b containingSymbol]]
 ]
 
 { #category : #'as yet unclassified' }

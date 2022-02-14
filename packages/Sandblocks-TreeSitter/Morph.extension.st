@@ -3,7 +3,7 @@ Extension { #name : #Morph }
 { #category : #'*Sandblocks-TreeSitter' }
 Morph >> containingInlineBlock [
 
-	^ self owner ifNotNil: [:o | o containingInlineblock]
+	^ self owner ifNotNil: [:o | o containingInlineBlock]
 ]
 
 { #category : #'*Sandblocks-TreeSitter' }
