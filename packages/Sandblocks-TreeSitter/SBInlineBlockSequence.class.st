@@ -57,7 +57,7 @@ SBInlineBlockSequence >> buildWithFields: aStream alternatives: aDictionary [
 { #category : #'as yet unclassified' }
 SBInlineBlockSequence >> canLikelyContainType: aString [
 
-	^ self elements anySatisfy: [:e | e canLikelyContainType: aString]
+	^ self elements notEmpty and: [self elements first canLikelyContainType: aString]
 ]
 
 { #category : #'as yet unclassified' }
