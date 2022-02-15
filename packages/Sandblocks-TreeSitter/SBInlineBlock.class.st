@@ -891,10 +891,8 @@ SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
 		ifFalse: [
 			{
 				#isInlineBlock.
-				[:o | false].
-				aBlock = #replace
-					ifTrue: [self]
-					ifFalse: [reference repeaterChild element]}]
+				SBInterfaces never.
+				aBlock = #replace ifTrue: [self] ifFalse: [reference repeaterChild element]}]
 ]
 
 { #category : #hierarchy }
@@ -1116,6 +1114,14 @@ SBInlineBlock >> repeaterChildThat: aBlock [
 
 	self submorphsDo: [:m | (m isSandblock not and: [m isInlineBlock]) ifTrue: [(m repeaterChildThat: aBlock) ifNotNil: [:c | ^ c]]].
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> satisfies: aCollection [
+
+	^ (aCollection first = #isInlineBlock and: [aCollection second = SBInterfaces never])
+		ifTrue: [true]
+		ifFalse: [super satisfies: aCollection]
 ]
 
 { #category : #'as yet unclassified' }
