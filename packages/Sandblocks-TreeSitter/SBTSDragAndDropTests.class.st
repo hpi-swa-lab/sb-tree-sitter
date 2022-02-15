@@ -59,11 +59,13 @@ SBTSDragAndDropTests >> testRegexInsertInPattern [
 	module := SBRegex parse: 'ab'.
 	editor := self editorFor: module.
 	
+	module := module childSandblocks first.
+	
 	self class
 		dropAt: module childSandblocks first positionInWorld + (0 @ module childSandblocks last height)
-		with: (SBRegex parse: 'x') childSandblocks last
+		with: (SBRegex parse: 'x') childSandblocks last childSandblocks last
 		in: editor.
-	self assert: 3 equals: module firstSubmorph firstSubmorph firstSubmorph submorphCount.
+	self assert: 3 equals: module firstSubmorph submorphCount.
 	self assert: 'axb' equals: module sourceString
 ]
 
@@ -74,9 +76,11 @@ SBTSDragAndDropTests >> testRegexQuantifierCanInsert [
 	module := SBRegex parse: 'ab'.
 	editor := self editorFor: module.
 	
+	module := module childSandblocks first.
+	
 	self class
 		dropAt: module childSandblocks first positionInWorld + (0 @ module childSandblocks first height)
-		with: (SBRegex parse: 'x+') childSandblocks last
+		with: (SBRegex parse: 'x+') childSandblocks last childSandblocks last
 		in: editor.
 	self assert: 'a+b' equals: module sourceString
 ]
@@ -88,9 +92,11 @@ SBTSDragAndDropTests >> testRegexQuantifierCanInsertLater [
 	module := SBRegex parse: 'a+b'.
 	editor := self editorFor: module.
 	
+	module := module childSandblocks first.
+	
 	self class
 		dropAt: module childSandblocks first positionInWorld + (0 @ module childSandblocks first height)
-		with: (SBRegex parse: 'x+') childSandblocks last
+		with: (SBRegex parse: 'x+') childSandblocks last childSandblocks last
 		in: editor.
 	self assert: 'a+b+' equals: module sourceString
 ]
