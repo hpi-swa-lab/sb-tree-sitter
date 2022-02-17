@@ -16,6 +16,7 @@ SBJsRequestToolHeaderTextBubble >> collectHeaders [
 	resp := client httpGet: 'https://www.iana.org/assignments/message-headers/message-headers.xml'.
 	AllHeaders add: 'Remove header'.
 	AllHeaders add: 'Authorization'.
+	AllHeaders add: 'Accept'.
 	
 	xmlDoc := XMLDOMParser parseDocumentFrom: resp content readStream useNamespaces: true.
 	tmpIndex := 1.
@@ -23,7 +24,7 @@ SBJsRequestToolHeaderTextBubble >> collectHeaders [
 	((xmlDoc elements at: 3) elements at: 3) elementsDo: [:currentElement |
 		tmpIndex := tmpIndex + 1.
 		tmpIndex > 7 ifTrue: [AllHeaders add: ((currentElement elementsAndContents at: 1) elementsAndContents at: 1) asString]].
-	^ AllHeaders
+	^ AllHeaders sort.
 ]
 
 { #category : #'as yet unclassified' }
@@ -52,5 +53,5 @@ SBJsRequestToolHeaderTextBubble >> promptChangeValue [
 
 { #category : #'as yet unclassified' }
 SBJsRequestToolHeaderTextBubble >> values [
-	^ AllHeaders ifNil: [self collectHeaders].
+	^ AllHeaders ifNil: [self collectHeaders]
 ]

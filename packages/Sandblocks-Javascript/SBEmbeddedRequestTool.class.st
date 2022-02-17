@@ -250,18 +250,17 @@ SBEmbeddedRequestTool >> promptAddPayload [
 { #category : #'as yet unclassified' }
 SBEmbeddedRequestTool >> send [
 	"Delegates to the correct request implementation."
-	| paramsString tmpUrl |
+	| paramsString |
 	
 	self updatePayloadInObjectInstance.
 	paramsString := self collectParamsString.
-	tmpUrl := url.
-	(tmpUrl startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, tmpUrl].
-	
 
-	method = #get ifTrue: [self performGetRequest: tmpUrl asString, paramsString].
+	(url startsWith: 'http://') ifFalse: [url := baseUrl, url].
+
+	method = #get ifTrue: [self performGetRequest: url asString, paramsString].
 	method = #post ifTrue: [
 		isRawData 
-			ifTrue: [self performPostRequest: data url: tmpUrl asString, paramsString]
+			ifTrue: [self performPostRequest: data url: url asString, paramsString]
 			ifFalse: ["TODO: collect fields and perform request"]
 	
 	"TODO: implement other methods"]

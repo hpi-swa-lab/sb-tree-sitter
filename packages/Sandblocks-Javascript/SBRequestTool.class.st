@@ -63,7 +63,7 @@ SBRequestTool >> addExampleSection [
 		[ | map |
 			self addMorphBack: (SBRow new
 				cellGap: cellGapConstant;
-				addMorphBack: (SBStringMorph new contents: #examples);
+				addMorphBack: (SBStringMorph new contents: 'Examples');
 				addMorphBack: (SBRow new cellGap: cellGapConstant)).
 				
 			method = #post ifTrue: [exampleMorph := self submorphs eighth].
@@ -455,7 +455,7 @@ SBRequestTool >> send [
 	| paramsString |
 	self updatePayloadInObjectInstance.
 	paramsString := self collectParamsString.
-
+	
 	method = #get ifTrue: [self performGetRequest: url asString, paramsString].
 	method = #post ifTrue: [
 		isRawData 
