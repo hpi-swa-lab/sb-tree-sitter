@@ -11,6 +11,7 @@ Class {
 SBConsoleLogReporter class >> matchJs: aDictionary do: aBlock [
 	<lang: #javascript match: '(call_expression (member_expression object: (identifier) ="console" property: (identifier) ="log") (arguments (_) @expression)) @log' sample: 'console.log("HI")'>
 
+	true ifTrue: [^ nil].
 	^ aBlock value: (aDictionary at: 'log') value: (self new expression: (aDictionary at: 'expression'))
 ]
 
