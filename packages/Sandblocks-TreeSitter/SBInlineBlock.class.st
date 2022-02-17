@@ -198,6 +198,14 @@ SBInlineBlock >> changeToUnknown [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlock >> childOrNil [
+
+	^ (self hasSubmorphs and: [self firstSubmorph isInlineBlock])
+		ifTrue: [self firstSubmorph]
+		ifFalse: [nil]
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlock >> childSymbolsDo: aBlock includeInlined: aBoolean [
 
 	self submorphsDo: [:morph |
