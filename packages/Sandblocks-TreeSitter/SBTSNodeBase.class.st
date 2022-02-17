@@ -56,6 +56,14 @@ SBTSNodeBase >> child [
 ]
 
 { #category : #hierarchy }
+SBTSNodeBase >> childOrNil [
+
+	^ (self hasSubmorphs and: [self firstSubmorph isTSNode])
+		ifTrue: [self firstSubmorph]
+		ifFalse: [nil]
+]
+
+{ #category : #hierarchy }
 SBTSNodeBase >> childSymbolsDo: aBlock includeInlined: aBoolean [
 
 	self submorphsDo: [:morph |
