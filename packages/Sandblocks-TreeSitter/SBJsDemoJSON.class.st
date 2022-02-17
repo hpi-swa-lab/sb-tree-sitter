@@ -8,6 +8,7 @@ Class {
 SBJsDemoJSON class >> matchJs: aDictionary do: aBlock [
 	<lang: #javascript match: '(pair key: (identifier) ="headers" (object) @headers)' sample: '{headers: {"A": "b", "d-a": "asd", C: "d"}}'>
 
+	true ifTrue: [^ nil].
 	^ aBlock
 		value: (aDictionary at: 'headers')
 		value: (self new pairs: (aDictionary at: 'headers') access children)

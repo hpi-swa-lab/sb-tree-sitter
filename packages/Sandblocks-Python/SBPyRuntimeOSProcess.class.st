@@ -72,7 +72,7 @@ SBPyRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBPyRuntimeOSProcess >> evaluateModuleAsync: aString in: aPath args: aCollection cancel: aBlock [
+SBPyRuntimeOSProcess >> evaluateModuleAsync: aString in: aPath args: aCollection cancel: aBlock pause: anotherBlock [
 
 	| python ret env |
 	python := self class defaultPythonPath ifNil: [^ nil].
@@ -89,7 +89,8 @@ SBPyRuntimeOSProcess >> evaluateModuleAsync: aString in: aPath args: aCollection
 				env: {'SQ_WATCH' -> port}
 				in: aPath
 				stdin: nil
-				cancel: aBlock) wait]] fork.
+				cancel: aBlock
+				pause: anotherBlock) wait]] fork.
 	^ ret
 ]
 

@@ -20,7 +20,7 @@ SBTSLanguageRuntime class >> checkedCmd: aProgramPathString arguments: aCollecti
 ]
 
 { #category : #'os process' }
-SBTSLanguageRuntime class >> cmd: aProgramPathString arguments: aCollection env: aDictionary in: aWorkingDirString stdin: aString cancel: aBlock [
+SBTSLanguageRuntime class >> cmd: aProgramPathString arguments: aCollection env: aDictionary in: aWorkingDirString stdin: aString cancel: aBlock pause: anotherBlock [
 
 	| inputPipe outputPipe errorPipe process stderrPromise stdoutPromise processPromise |
 	inputPipe := aString ifNotNil: [OSPipe blockingPipe].
@@ -36,6 +36,7 @@ SBTSLanguageRuntime class >> cmd: aProgramPathString arguments: aCollection env:
 			errorPipe writer}
 		workingDir: aWorkingDirString.
 	aBlock value: [process sigterm].
+	anotherBlock value: [:p | p ifTrue: [process sigstop] ifFalse: [process sigcont]].
 	outputPipe writer close.
 	errorPipe writer close.
 	inputPipe ifNotNil: [

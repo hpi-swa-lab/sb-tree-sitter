@@ -6795,6 +6795,7 @@ SBJavascript >> hardLineBreakMatch: aBlock [
 { #category : #'as yet unclassified' }
 SBJavascript >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 
+	(anotherBlock childOrNil ifNotNil: #type) = 'else_clause' ifTrue: [^ true].
 	^ #('statement_block' 'class_body') includes: anotherBlock firstVisibleType
 ]
 
