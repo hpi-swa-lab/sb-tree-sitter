@@ -20,6 +20,16 @@ SBGrammarLanguage class >> build: aRuleName [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> canParse: aString [
+
+	^ [
+		self parse: aString.
+		true]
+		on: SBTSSyntaxError
+		do: [false]
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> defaultRuntimeClass [
 
 	^ nil

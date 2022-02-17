@@ -856,26 +856,12 @@ SBInlineBlock >> numberOfElements [
 
 { #category : #'as yet unclassified' }
 SBInlineBlock >> objectInterfaceForDrop: aBlock near: anotherBlock at: aSymbol [
-
-	| reference |
 	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
  this and does special handling. other handlers will get blocked by the false"
-	anotherBlock
-		ifNotNil: [
-			"walk up the chain from the child so we grab the closest repeaterChild"
-			reference := anotherBlock owner.
-			[reference isInlineBlock not or: [(reference repeaterChildFor: aBlock) isNil and: [reference ~= self]]] whileTrue: [reference := reference owner]]
-		ifNil: [reference := anotherBlock].
-	
-	^ (reference isNil or: [(reference repeaterChildFor: aBlock) isNil])
-		ifTrue: [SBInterfaces never]
-		ifFalse: [
-			{
-				#isInlineBlock.
-				[:o | false].
-				anotherBlock = #replace
-					ifTrue: [self]
-					ifFalse: [(reference repeaterChildFor: aBlock) element]}]
+
+	^ (self repeaterChildFor: aBlock near: anotherBlock)
+		ifNil: [SBInterfaces never]
+		ifNotNil: [:repeater | {#isInlineBlock. [:o | false]. anotherBlock = #replace ifTrue: [self] ifFalse: [repeater element]}]
 ]
 
 { #category : #'as yet unclassified' }
@@ -896,10 +882,8 @@ SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
 		ifFalse: [
 			{
 				#isInlineBlock.
-				[:o | false].
-				aBlock = #replace
-					ifTrue: [self]
-					ifFalse: [reference repeaterChild element]}]
+				SBInterfaces never.
+				aSymbol = #replace ifTrue: [self] ifFalse: [reference repeaterChild element]}]
 ]
 
 { #category : #hierarchy }
@@ -1103,24 +1087,49 @@ SBInlineBlock >> removedMorph: aMorph [
 	self extent: 0 @ 0
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBInlineBlock >> repeaterChild [
 
 	self submorphsDo: [:m | (m isSandblock not and: [m isInlineBlock]) ifTrue: [m repeaterChild ifNotNil: [:c | ^ c]]].
 	^ nil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBInlineBlock >> repeaterChildFor: aBlock [
 
-	^ self repeaterChildThat: [:r | r element canLikelyContainType: aBlock type]
+	| type |
+	type := aBlock firstVisibleType.
+	^ self repeaterChildThat: [:r | r element canLikelyContainType: type]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
+SBInlineBlock >> repeaterChildFor: aBlock near: anotherBlock [
+
+	| reference repeater |
+	"walk up the chain from the child so we grab the closest repeaterChild"
+	repeater := nil.
+	reference := anotherBlock ifNotNil: [anotherBlock owner] ifNil: [self].
+	[ | candidate |
+		(reference isInlineBlock and: [(candidate := reference repeaterChildFor: aBlock) notNil and: [self factory validDropDestination: candidate]])
+			ifTrue: [repeater := candidate]] doWhileTrue: [
+		repeater isNil and: [" arrived at top "
+		reference ~= self and: [(reference := reference owner) notNil]]].
+	^ repeater
+]
+
+{ #category : #hierarchy }
 SBInlineBlock >> repeaterChildThat: aBlock [
 
 	self submorphsDo: [:m | (m isSandblock not and: [m isInlineBlock]) ifTrue: [(m repeaterChildThat: aBlock) ifNotNil: [:c | ^ c]]].
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBInlineBlock >> satisfies: aCollection [
+
+	^ (aCollection first = #isInlineBlock and: [aCollection second = SBInterfaces never])
+		ifTrue: [true]
+		ifFalse: [super satisfies: aCollection]
 ]
 
 { #category : #'as yet unclassified' }

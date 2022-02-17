@@ -57,7 +57,7 @@ SBInlineBlockSymbol >> buildWithFields: aStream alternatives: aDictionary [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> canLikelyContainType: aString [
 
-	^ self compatibleWithType: aString
+	^ self factory type: aString compatibleWith: self type
 ]
 
 { #category : #'as yet unclassified' }
@@ -170,10 +170,7 @@ SBInlineBlockSymbol >> inline [
 { #category : #'as yet unclassified' }
 SBInlineBlockSymbol >> insertCommandRequest: aMorph near: aBlock before: aBoolean [
 
-	| reference |
-	reference := aBlock owner.
-	[reference repeaterChild isNil and: [reference ~= self]] whileTrue: [reference := reference owner].
-	^ reference repeaterChild ifNotNil: [:c | c insertCommandRequest: aMorph near: aBlock before: aBoolean]
+	^ (self repeaterChildFor: aMorph near: aBlock) ifNotNil: [:repeater | (repeater = self ifTrue: [super] ifFalse: [repeater]) insertCommandRequest: aMorph near: aBlock before: aBoolean]
 ]
 
 { #category : #'as yet unclassified' }

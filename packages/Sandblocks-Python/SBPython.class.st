@@ -5121,6 +5121,12 @@ SBPython class >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython class >> parseAsKeywordArgumentAndReplace: aString [
+
+	^ (self parse: ('a({1})' format: {aString})) childSandblocks first childSandblocks second childSandblocks first
+]
+
+{ #category : #'as yet unclassified' }
 SBPython class >> rootRuleName [
 
 	^ 'module'
@@ -5253,4 +5259,10 @@ SBPython >> preprocessGrammar [
 SBPython >> separatorRule [
 
 	^ ((self buildRegexString: (grammar rules at: grammar word)), '|\d') asRegex
+]
+
+{ #category : #'as yet unclassified' }
+SBPython >> validDropDestination: aBlock [
+
+	^ aBlock element type ~= 'expression'
 ]

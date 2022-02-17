@@ -1297,9 +1297,11 @@ SBMetaBlockFactory >> type: aRuleName compatibleWith: anotherRuleName [
 		(template isKindOf: SBInlineBlockChoice) and: [template alternatives anySatisfy: [:t |
 				(t isKindOf: SBInlineBlockSymbol)
 					ifTrue: [self type: aRuleName compatibleWith: t type]
-					ifFalse: [(t isKindOf: SBInlineBlockChoice)
-							ifTrue: [t alternatives anySatisfy: [:a | (a isKindOf: SBInlineBlockSymbol) and: [self type: aRuleName compatibleWith: a type]]]
-							ifFalse: [false]]]]]
+					ifFalse: [
+						t class caseOf: {
+							[SBInlineBlockChoice] -> [t alternatives anySatisfy: [:a | (a isKindOf: SBInlineBlockSymbol) and: [self type: aRuleName compatibleWith: a type]]].
+							[SBInlineBlockRepeat] -> [(t element isKindOf: SBInlineBlockSymbol) and: [self type: aRuleName compatibleWith: t element type]]
+						} otherwise: [false]]]]]
 ]
 
 { #category : #helper }
@@ -1319,6 +1321,12 @@ SBMetaBlockFactory >> unwrapSingleChoices: anObject [
 	
 	anObject content ifNotNil: [:c | self unwrapSingleChoices: c].
 	anObject members ifNotNil: [anObject members do: [:m | self unwrapSingleChoices: m]]
+]
+
+{ #category : #testing }
+SBMetaBlockFactory >> validDropDestination: aBlock [
+
+	^ true
 ]
 
 { #category : #accessing }

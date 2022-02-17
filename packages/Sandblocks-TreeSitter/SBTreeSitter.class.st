@@ -385,7 +385,7 @@ SBTreeSitter >> python [
 SBTreeSitter >> regex [
 
 	<apicall: SBTSLanguage* tree_sitter_regex () module: 'tree-sitter-regex'>
-	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-regex' name: 'regex' context: thisContext
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-regex' name: 'regex' context: thisContext branch: '3041aa3472d16fd94c6a9e15b741dbfecd9b714e'
 ]
 
 { #category : #'ffi languages' }

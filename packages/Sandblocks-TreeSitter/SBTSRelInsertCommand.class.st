@@ -15,9 +15,13 @@ SBTSRelInsertCommand >> buildSuggestions: aClosure [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSRelInsertCommand >> canInsert: aBlock [
+SBTSRelInsertCommand >> canInsert: aBlock do: aClosure [
 
-	^ aBlock isTSSymbol and: [(element isKindOf: SBInlineBlockChoice) and: [element alternatives anySatisfy: [:alt | alt isTSSymbol and: [alt compatibleWithType: aBlock type]]]]
+	^ (SBTSRuleExplore new
+		explore: element withNested: aBlock nestedBefore: false for: '' startSymbol: nil;
+		deduplicate)
+		ifNotEmpty: [:choices | aClosure value: choices first]
+		ifEmpty: [false]
 ]
 
 { #category : #'as yet unclassified' }
