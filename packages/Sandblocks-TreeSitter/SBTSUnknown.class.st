@@ -20,6 +20,12 @@ SBTSUnknown >> buildCopy [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknown >> childOrNil [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknown >> childrenForQueryDo: aBlock [
 
 	
