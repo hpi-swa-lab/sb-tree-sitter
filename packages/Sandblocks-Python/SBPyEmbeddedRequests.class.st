@@ -67,8 +67,8 @@ SBPyEmbeddedRequests class >> matchPython: aDictionary do: aBlock [
     ) @call'>
 
 	| meth url body header arguments |
-	arguments := ( aDictionary at: 'arguments').
-	(self validate:  ( aDictionary at: 'requests')) ifFalse: [^nil].
+	arguments := aDictionary at: 'arguments'.
+	(self validate: (aDictionary at: 'requests')) ifFalse: [^ nil].
 	
 	meth := self extractMethod: (aDictionary at: 'method').
 	url := self extractUrl: arguments.
@@ -78,10 +78,9 @@ SBPyEmbeddedRequests class >> matchPython: aDictionary do: aBlock [
 	meth
 		caseOf: {
 			['post'] -> [
-				^ aBlock value: (aDictionary at: 'call') 
-					value:(SBPyEmbeddedRequestsPost new
-						factory: SBJavascript new;
-						url: url headers: header data: body)].
+				^ aBlock value: (aDictionary at: 'call') value: (SBPyEmbeddedRequestsPost new
+					factory: SBJavascript new;
+					url: url headers: header data: body)].
 			['get'] -> [
 				^ aBlock value: (aDictionary at: 'call') value: (SBPyEmbeddedRequestsGet new
 					factory: SBJavascript new;

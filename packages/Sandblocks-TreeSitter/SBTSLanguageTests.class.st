@@ -151,7 +151,8 @@ return<h2>Hi</h2>}}'.
 	self assert: source equals: (SBJavascript parseElement: source) sourceString.
 	
 	source := 'if(a)
-{}else
+{}
+else
 {}'.
 	self assert: source equals: (SBJavascript parse: source) sourceString
 ]

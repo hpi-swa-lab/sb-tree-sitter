@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSParseFileTest >> expectedFailures [
 
-	^ #()
+	^ #(#testParseMemberExpression)
 ]
 
 { #category : #tests }
@@ -54,6 +54,13 @@ SBTSParseFileTest >> testParseBinaryExpression [
 SBTSParseFileTest >> testParseEmptyModule [
 
 	SBTSFileParser new parse: '' language: SBJavascript instance
+]
+
+{ #category : #tests }
+SBTSParseFileTest >> testParseMemberExpression [
+
+	" this will produce two valid trees choice($.expression, $.primary_expression)) "
+	SBTSFileParser new parse: 'a.b' language: SBJavascript instance
 ]
 
 { #category : #tests }
