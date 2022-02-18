@@ -21,7 +21,8 @@ Class {
 		'containersOfPromotedInlineSymbols',
 		'softLineBreakMatcher',
 		'nodesCache',
-		'aliasOccurrences'
+		'aliasOccurrences',
+		'expressionTypes'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -627,6 +628,18 @@ SBMetaBlockFactory >> delimitedRules [
 SBMetaBlockFactory >> escapeStringForRegex: aString [
 
 	^ aString copyWithRegex: '[.*+?^${}()|\[\]\\]' matchesTranslatedUsing: [:m | '\', m]
+]
+
+{ #category : #accessing }
+SBMetaBlockFactory >> expressionTypes [
+
+	^ expressionTypes ifNil: [#()]
+]
+
+{ #category : #configuration }
+SBMetaBlockFactory >> expressionTypes: aCollection [
+
+	expressionTypes := aCollection
 ]
 
 { #category : #accessing }

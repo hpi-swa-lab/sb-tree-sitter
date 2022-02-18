@@ -11,6 +11,12 @@ SBJavascript class >> defaultRuntimeClass [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript class >> expressionTypes [
+
+	^ #('expression')
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript class >> fileSuffix [
 
 	^ 'js'

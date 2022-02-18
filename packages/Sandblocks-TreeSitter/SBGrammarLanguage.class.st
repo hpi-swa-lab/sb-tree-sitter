@@ -36,6 +36,12 @@ SBGrammarLanguage class >> defaultRuntimeClass [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> expressionTypes [
+
+	^ #()
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> file: aFilenameString [
 
 	^ SBTSFile new filepath: aFilenameString language: self
@@ -175,6 +181,7 @@ SBGrammarLanguage >> initialize [
 	self wordRule: grammar word.
 	self rootRuleName: self class rootRuleName.
 	self statementContainerTypes: self class statementContainerTypes.
+	self expressionTypes: self class expressionTypes.
 	
 	self preprocessGrammar.
 	self cleanGrammar.

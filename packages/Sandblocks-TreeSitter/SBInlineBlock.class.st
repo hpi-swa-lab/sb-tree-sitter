@@ -637,13 +637,13 @@ SBInlineBlock >> instantiate [
 	^ instance
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBInlineBlock >> isArtefact [
 
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBInlineBlock >> isBlockBody [
 
 	^ self isStatementContainer
@@ -661,13 +661,19 @@ SBInlineBlock >> isBuilt: aBoolean [
 	built := aBoolean
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
+SBInlineBlock >> isExpression [
+
+	^ self factory expressionTypes includes: self type
+]
+
+{ #category : #testing }
 SBInlineBlock >> isInlineBlock [
 
 	^ true
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBInlineBlock >> isSandblock [
 
 	^ self inline not
@@ -679,13 +685,13 @@ SBInlineBlock >> isSkippedFor: anExplore [
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBInlineBlock >> isStatement [
 
 	^ self parentSandblock isInlineBlock and: [self parentSandblock isStatementContainer]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBInlineBlock >> isStatementContainer [
 
 	^ false
@@ -1322,9 +1328,11 @@ SBInlineBlock >> wrapWithWatch [
 
 	self isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self replacer: self expression buildCopy)].
 	self parentSandblock isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self parentSandblock replacer: self buildCopy)].
-	self sandblockEditor do: (SBReplaceCommand new
-		target: self
-		replacer: (SBTSWatch newEmpty expression: self buildCopy))
+	
+	(self ownerSatisfying: [:o | o isInlineBlock and: [o isExpression]]) ifNotNil: [:expr |
+		self sandblockEditor do: (SBReplaceCommand new
+			target: expr
+			replacer: (SBTSWatch newEmpty expression: expr buildCopy))]
 ]
 
 { #category : #'as yet unclassified' }

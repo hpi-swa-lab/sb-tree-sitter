@@ -11,6 +11,12 @@ SBPython class >> defaultRuntimeClass [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython class >> expressionTypes [
+
+	^ #('expression')
+]
+
+{ #category : #'as yet unclassified' }
 SBPython class >> fileSuffix [
 
 	^ 'py'
