@@ -57,6 +57,12 @@ SBTSParseFileTest >> testParseEmptyModule [
 ]
 
 { #category : #tests }
+SBTSParseFileTest >> testParseMemberExpression [
+
+	SBTSFileParser new parse: 'a.b' language: SBJavascript instance
+]
+
+{ #category : #tests }
 SBTSParseFileTest >> testParsePythonFormatString [
 
 	| string |

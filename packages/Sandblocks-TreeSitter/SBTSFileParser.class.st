@@ -46,7 +46,14 @@ SBTSFileParser >> nodeForCursor: aCursor [
 		self assert: matches ~= #noMatch description: ('could not construct `{1}`' format: {type}).
 		matches := matches select: [:match | match parser atEnd].
 		self assert: matches size = 1.
-		node addChild: matches first]
+		node addChild: matches first.
+		type ~= aCursor type
+			ifTrue: [
+				(SBTSNodeAlias new
+					factory: node factory;
+					alias: aCursor type;
+					makeConcrete) addChild: node]
+			ifFalse: [node]]
 ]
 
 { #category : #'as yet unclassified' }
