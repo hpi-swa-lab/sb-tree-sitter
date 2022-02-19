@@ -1,5 +1,5 @@
 "
-Parent of all classes that are responsible for showing data points in matplotlib, e.g. plots, scatterplots, histograms.
+Classes that are responsible for showing data points in matplotlib, e.g. plots, scatterplots, histograms.
 "
 Class {
 	#name : #SBPyPltPlots,

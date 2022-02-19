@@ -13,7 +13,7 @@ SBPyPltDrawstyle class >> matchPython: aDictionary do: aBlock [
 	
 	^ aBlock
 		value: (aDictionary at: 'argument')
-		value: (self new factory: (aDictionary at: 'argument') factory;
+		value: (self new factory: (aDictionary at: 'argument') factory; prefix:  'drawstyle=';
 			createReplacementWithSelectedLabel: (aDictionary at: 'value') contents
 			)
 ]
@@ -27,11 +27,6 @@ SBPyPltDrawstyle >> items [
 			{'steps-mid'. SBPyPltImage drawstyleMid}.
 			{'steps-post'. SBPyPltImage drawstylePost}.
 		}
-]
-
-{ #category : #'initialize-release' }
-SBPyPltDrawstyle >> prefix [
-	^ 'drawstyle='
 ]
 
 { #category : #'initialize-release' }

@@ -5127,12 +5127,6 @@ SBPython class >> language [
 ]
 
 { #category : #'as yet unclassified' }
-SBPython class >> parseAsKeywordArgumentAndReplace: aString [
-
-	^ (self parse: ('a({1})' format: {aString})) childSandblocks first childSandblocks second childSandblocks first
-]
-
-{ #category : #'as yet unclassified' }
 SBPython class >> rootRuleName [
 
 	^ 'module'

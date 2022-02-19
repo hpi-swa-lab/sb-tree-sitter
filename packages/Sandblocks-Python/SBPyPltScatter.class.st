@@ -25,19 +25,25 @@ SBPyPltScatter class >> match: aDictionary do: aBlock [
 
 { #category : #'initialize-release' }
 SBPyPltScatter >> createReplacementOfArgs: aSBTSFieldAccessor [
-
+		
 	self addMorphBack: (SBRow new
+		addMorphBack: (AlignmentMorph newColumn 
+			color: Color transparent; 
+			hResizing: #shrinkWrap;
+			addMorphBack: (AlignmentMorph newSpacer: Color transparent);
 			addMorphBack: (SBStringMorph new contents: 'scatter:');
-			addMorphBack: aSBTSFieldAccessor;
 			addMorphBack: (SBPyPltImage scatterPlot);
-			cellGap: 4
-		).
+			addMorphBack: (AlignmentMorph newSpacer: Color transparent)
+		);
+		addMorphBack: aSBTSFieldAccessor;
+		cellGap: 4
+	)
 ]
 
 { #category : #'initialize-release' }
 SBPyPltScatter >> palettes [
 
-	^ super palettes,{SBPyPltPaletteScatter}
+	^ {SBPyPltPaletteScatter}, super palettes
 ]
 
 { #category : #'as yet unclassified' }

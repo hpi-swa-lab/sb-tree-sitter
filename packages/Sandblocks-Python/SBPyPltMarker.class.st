@@ -14,7 +14,7 @@ SBPyPltMarker class >> matchPython: aDictionary do: aBlock [
 	
 	^ aBlock
 		value: (aDictionary at: 'argument')
-		value: (self new factory: (aDictionary at: 'argument') factory;
+		value: (self new factory: (aDictionary at: 'argument') factory; prefix: 'marker=';
 			createReplacementWithSelectedLabel: (aDictionary at: 'value') contents
 			)
 ]
@@ -30,11 +30,6 @@ SBPyPltMarker >> items [
 		{'1'. SBPyPltImage triDown}.
 		{'|'. SBPyPltImage vline}.
 	}
-]
-
-{ #category : #'initialize-release' }
-SBPyPltMarker >> prefix [
-	^'marker='
 ]
 
 { #category : #'initialize-release' }

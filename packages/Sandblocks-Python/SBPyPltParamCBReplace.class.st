@@ -4,26 +4,29 @@ Base class of all keyword argument replacements that use a SBPyPltComboBox repla
 Class {
 	#name : #SBPyPltParamCBReplace,
 	#superclass : #SBInlineBlockReplace,
+	#instVars : [
+		'prefix'
+	],
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #'initialize-release' }
 SBPyPltParamCBReplace >> createReplacementWithSelectedLabel: aString [
 
-	| itemsMorph selectedItem |
+	| itemsMorphs selectedItem |
 	
-	itemsMorph := self items collect: [:pair |
+	itemsMorphs := self items collect: [:pair |
 				SBRow new
 					cellGap: 8;
 					addMorphBack: (SBStringMorph new contents: pair first);
 					addMorphBack: pair second
 				].
 	
-	selectedItem := (itemsMorph select: [:i | i submorphs first contents = aString]) ifEmpty: [aString] ifNotEmpty: [:aCollection | aCollection first].
+	selectedItem := (itemsMorphs select: [:i | i submorphs first contents = aString]) ifEmpty: [aString] ifNotEmpty: [:aCollection | aCollection first].
 
 	self
 		addMorphBack:  (SBPyPltComboBox new 
-				values: itemsMorph; prefix: self prefix; object: selectedItem; tooltips: self tooltips)
+				values: itemsMorphs; prefix: self prefix; object: selectedItem; tooltips: self tooltips)
 ]
 
 { #category : #'initialize-release' }
@@ -43,7 +46,12 @@ For example, marker= is used in ax.plot and ax.scatter"
 { #category : #'initialize-release' }
 SBPyPltParamCBReplace >> prefix [
 "the keyword argument name in python, e.g. 'marker='"
-	^ self subclassResponsibility
+	^ prefix
+]
+
+{ #category : #'initialize-release' }
+SBPyPltParamCBReplace >> prefix: aString [
+	prefix := aString
 ]
 
 { #category : #'initialize-release' }

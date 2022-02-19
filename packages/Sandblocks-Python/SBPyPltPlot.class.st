@@ -27,19 +27,25 @@ SBPyPltPlot class >> match: aDictionary do: aBlock [
 
 { #category : #'initialize-release' }
 SBPyPltPlot >> createReplacementOfArgs: aSBTSFieldAccessor [
-
+		
 	self addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: 'line plot:');
-			addMorphBack: aSBTSFieldAccessor;
+		addMorphBack: (AlignmentMorph newColumn 
+			color: Color transparent; 
+			hResizing: #shrinkWrap; 
+			addMorphBack: (AlignmentMorph newSpacer: Color transparent);
+			addMorphBack: (SBStringMorph new contents: 'line:');
 			addMorphBack: (SBPyPltImage linePlot);
-			cellGap: 4
-		).
+			addMorphBack: (AlignmentMorph newSpacer: Color transparent)
+		 );
+		addMorphBack: aSBTSFieldAccessor;
+		cellGap: 4
+	)
 ]
 
 { #category : #'initialize-release' }
 SBPyPltPlot >> palettes [
 
-	^ super palettes,{SBPyPltPalettePlot}
+	^ {SBPyPltPalettePlot}, super palettes
 ]
 
 { #category : #'as yet unclassified' }
@@ -54,9 +60,9 @@ SBPyPltPlot >> suggestions [
 	action := [:block :item |
         "insert just after the PyPltPlot block"
 		self sandblockEditor do: (SBInsertCommand new
-			container: (self ownerThatIsA: SBInlineBlockRepeat);
+			container: (self childSandblocks first repeaterChild);
 			morph: item preview;
-			index: self submorphIndex + 1)].
+			index: 1)].
 	^ {
 		(SBSuggestionItem selector: 'axes' label: 'attribute')
 			preview: (SBPyPltDashes new

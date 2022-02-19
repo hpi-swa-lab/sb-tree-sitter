@@ -30,11 +30,11 @@ SBPyPltPalettePlotExtended class >> buildOn: aBuilder [
 
 	aBuilder content addMorphBack: (StringMorph new contents:   'How to draw the end caps if the line is is_dashed.' ).	
 	aBuilder addBlock: 'How to draw the end caps if the line is is_dashed.' as:
-		(SBPyPltDashCapStyle new factory: SBPython instance; createReplacement: 'butt').
+		(SBPyPltCapStyle new factory: SBPython instance; createReplacement: 'butt').
 		
 	aBuilder content addMorphBack: (StringMorph new contents:   'How to join segments of the line if it is_dashed.').
 	aBuilder addBlock: 'How to join segments of the line if it is_dashed.' as:
-		(SBPyPltDashJoinStyle new factory: SBPython instance; createReplacement: 'round').
+		(SBPython parseKeywordArgument: 'dash_joinstyle="round"').
 		
 	aBuilder content addMorphBack: (StringMorph new contents:  'Set the dash sequence.
 The dash sequence is a sequence of floats of even length describing the length of dashes and spaces in points.
@@ -53,7 +53,7 @@ The drawstyle determines how the points are connected.' as:
 	"den"
 	aBuilder content addMorphBack: (StringMorph new contents:  'Set the linestyle of the line.' ).
 	aBuilder addBlock: 'Set the linestyle of the line.' as:
-		(SBPython parseAsKeywordArgumentAndReplace: 'linestyle="-"').
+		(SBPython parseKeywordArgument: 'linestyle="-"').
 		
 	aBuilder content addMorphBack: (StringMorph new contents:   'Set the line width in points.').
 	aBuilder addBlock: 'Set the line width in points.' as:

@@ -39,13 +39,9 @@ SBPyPltSetScale class >> matchPython: aDictionary do: aBlock [
 SBPyPltSetScale >> createReplacement: aLabel forAxis: aString [
 	| selection |
 	selection := (self items select: [:i | i submorphs first contents = aLabel]) ifEmpty: [aLabel] ifNotEmpty: [:aCollection | aCollection first].
-
-	self addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: (aString,' axis scale:'));
-			addMorphBack: (SBPyPltComboBox new 
-				values: self items; tooltips: self tooltips; object: selection);
-			cellGap: 4
-		)
+	
+	self addMorphBack: (SBPyPltComboBox new 
+				values: self items; tooltips: self tooltips; object: selection; prefix: (aString,' axis scale:'))
 ]
 
 { #category : #'initialize-release' }

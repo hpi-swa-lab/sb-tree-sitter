@@ -70,8 +70,8 @@ SBPyPltDashes >> createReplacementFromSequence: aCollection [
 	
 	self initRowsFromSequence: aCollection.
 	
-	button := SBTextBubble new prefix: 'dashes='; contents: self sequence; when: #selected send: #openPopup to: self.
-	self addMorphBack: (SBButton new widget: button shortcut: nil do: [self openPopup]).
+	button := SBTextBubble new prefix: 'dashes='; contents: self sequence; when: #doubleClicked send: #openPopup to: self.
+	self addMorphBack:  button.
 ]
 
 { #category : #'insert/delete' }
@@ -201,7 +201,7 @@ SBPyPltDashes >> updateReplacementBtn [
 SBPyPltDashes >> writeSourceOn: aStream [
 
 	| prefix |
-	prefix := self firstSubmorph firstSubmorph prefix.
+	prefix := self firstSubmorph prefix.
 	
 	aStream nextPutAll: (prefix,self sequence).
 ]

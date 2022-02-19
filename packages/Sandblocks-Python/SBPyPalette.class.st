@@ -8,6 +8,14 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBPyPalette class >> asSubSectionText: aString [
+	^ SBMultilineOwnTextMorph new
+			contents: (aString asText addAttribute: (TextFontChange fontNumber: 1));
+			maxWidth: 150;
+			yourself
+]
+
+{ #category : #'as yet unclassified' }
 SBPyPalette class >> buildOn: aBuilder [
 
 	aBuilder addSectionHeader: 'Python'.

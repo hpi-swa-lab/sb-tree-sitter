@@ -24,6 +24,11 @@ SBPyPltShowPlots class >> matchPython: aDictionary do: aBlock [
 		value: (self new factory: (aDictionary at: 'show') factory; createReplacement)
 ]
 
+{ #category : #'as yet unclassified' }
+SBPyPltShowPlots >> artefactSaved: anArtefact [
+	anArtefact = self containingArtefact ifTrue: [self updateImage].
+]
+
 { #category : #'initialize-release' }
 SBPyPltShowPlots >> createReplacement [
 
@@ -71,15 +76,25 @@ SBPyPltShowPlots >> type [
 { #category : #updating }
 SBPyPltShowPlots >> updateImage [
 
-	image := (Form fromBinaryStream: (Base64MimeConverter mimeDecodeToBytes: (SBPython instance runtime evaluate: self getModuleSource) readStream)) asMorph.
+	[
+	
+		image := (Form fromBinaryStream: (Base64MimeConverter mimeDecodeToBytes: (SBPython instance runtime evaluate: self getModuleSource) readStream)) asMorph.
 
-	self firstSubmorph removeMorph: (self firstSubmorph lastSubmorph).
-	self firstSubmorph addMorphBack: image.
+		self firstSubmorph removeMorph: (self firstSubmorph lastSubmorph).
+		self firstSubmorph addMorphBack: image.
+		
+	] on: Error do: [ :err |
+		self firstSubmorph removeMorph: (self firstSubmorph lastSubmorph).
+		self firstSubmorph addMorphBack: (SBMultilineOwnTextMorph new
+			contents: err description;
+			maxWidth: 400;
+			yourself)
+	]
 ]
 
 { #category : #'initialize-release' }
 SBPyPltShowPlots >> writeSourceOn: aStream [
-"unlike other replacements, the underlying python code prints the image to stdout, so it can be parsed as a Form"
+"python code prints the image to stdout, so it can be parsed as a Form"
 
 	aStream nextPutAll: '
 bytes = io.BytesIO()
