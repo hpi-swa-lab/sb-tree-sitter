@@ -1195,6 +1195,16 @@ SBMetaBlockFactory >> shouldBlockInline: aTypeString [
 	^ (self isSuperType: aTypeString) or: [blockInline includes: aTypeString]
 ]
 
+{ #category : #testing }
+SBMetaBlockFactory >> shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor [
+
+	| parentType type |
+	^ (self delimitedRules
+		at: parentType
+		ifPresent: [:delims | delims includes: aTypeString]
+		ifAbsent: [false]) or: [self extras includes: type]
+]
+
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> simplifyList: anObject [
 	" make a*? to a* "

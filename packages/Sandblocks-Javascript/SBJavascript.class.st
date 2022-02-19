@@ -6835,6 +6835,12 @@ SBJavascript >> preprocessGrammar [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript >> shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor [
+
+	^ (super shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor) or: [aTypeString = 'jsx_text' and: [aCursor text allSatisfy: [:c | c isSeparator]]]
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 
 	(aBlock isTSLabel and: [aBlock contents = ':']) ifTrue: [^ true].

@@ -431,7 +431,7 @@ SBInlineBlock >> evaluateExpression [
 	<action>
 
 	| result |
-	result := self evaluate.
+	result := self evaluatePrint.
 	self sandblockEditor isSingleArtefactView ifTrue: [^ result explore].
 	result convertedFor: SBInterfaces topLevel doWithChooser: [:morph |
 		self sandblockEditor openMorphInView: morph.
@@ -439,6 +439,20 @@ SBInlineBlock >> evaluateExpression [
 		self sandblockEditor connectFrom: self to: morph.
 		morph].
 	^ result
+]
+
+{ #category : #'action helpers' }
+SBInlineBlock >> evaluatePrint [
+
+	| ret watch |
+	ret := nil.
+	watch := SBTSWatch newEmpty
+		expression: self buildCopy;
+		when: #reportedValue evaluate: [:value | ret := value].
+	self factory runtime evaluate: watch sourceString.
+	"watches are fired on the UI thread rather than synchronously, so we make sure they had a chance"
+	World doOneCycle.
+	^ ret
 ]
 
 { #category : #geometry }
