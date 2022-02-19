@@ -1198,11 +1198,10 @@ SBMetaBlockFactory >> shouldBlockInline: aTypeString [
 { #category : #testing }
 SBMetaBlockFactory >> shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor [
 
-	| parentType type |
 	^ (self delimitedRules
-		at: parentType
+		at: aParentTypeString
 		ifPresent: [:delims | delims includes: aTypeString]
-		ifAbsent: [false]) or: [self extras includes: type]
+		ifAbsent: [false]) or: [self extras includes: aTypeString]
 ]
 
 { #category : #'grammar clean' }
