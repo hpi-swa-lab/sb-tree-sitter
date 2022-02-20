@@ -75,7 +75,7 @@ SBPyRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 SBPyRuntimeOSProcess >> evaluateModuleAsync: aString in: aPath args: aCollection cancel: aBlock pause: anotherBlock [
 
 	| python ret env |
-	python := self class defaultPythonPath ifNil: [^ nil].
+	python := self interpreter ifNil: [^ nil].
 	
 	env := SBExecutionEnvironment value.
 	
@@ -95,11 +95,21 @@ SBPyRuntimeOSProcess >> evaluateModuleAsync: aString in: aPath args: aCollection
 ]
 
 { #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess >> interpreter [
+
+	^ self class defaultPythonPath
+]
+
+{ #category : #'as yet unclassified' }
 SBPyRuntimeOSProcess >> prettyPrint: aString [
 
 	| printer args |
 	args := #().
 	printer := nil.
+	printer ifNil: [
+		(self which: 'black') ifNotNil: [:path |
+			printer := path.
+			args := #('-q' '-')]].
 	printer ifNil: [(self which: 'yapf3') ifNotNil: [:path | printer := path]].
 	printer ifNil: [(self which: 'yapf') ifNotNil: [:path | printer := path]].
 	printer ifNil: [

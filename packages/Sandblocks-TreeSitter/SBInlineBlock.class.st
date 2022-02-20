@@ -847,7 +847,7 @@ SBInlineBlock >> name: aString [
 SBInlineBlock >> newEmptyChildNear: aBlock before: aBoolean [
 
 	| reference |
-	reference := aBlock owner containingInlineBlock.
+	reference := aBlock ifNil: [self] ifNotNil: [aBlock owner containingInlineBlock].
 	[reference repeaterChild isNil and: [reference ~= self]] whileTrue: [reference := reference owner containingInlineBlock].
 	^ reference repeaterChild ifNotNil: [:c | c element instantiate]
 ]
@@ -1000,7 +1000,11 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber
 				ifPresent: [:delim | delim first]
 				ifAbsent: ['']]
 		ifNil: [''].
-	suffixMatchesWordRule := [:string | (factory notNil and: [factory separatorRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory separatorRule matchesStream: (string readStream position: start - 1)]]].
+	suffixMatchesWordRule := [:string |
+		(factory ifNotNil: #separatorRule)
+			ifNotNil: [:rule | "FIXME: looking at only 3 chars is a heuristic that may fail"
+			(1 to: (3 min: string size)) anySatisfy: [:start | rule matchesStream: (string readStream position: string size - start)]]
+			ifNil: [false]].
 	
 	aCollection withIndexDo: [:element :index | | string |
 		string := String streamContents: [:stream |
@@ -1341,7 +1345,10 @@ SBInlineBlock >> wrapWithWatch [
 	<action>
 
 	self isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self replacer: self expression buildCopy)].
-	self parentSandblock isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self parentSandblock replacer: self buildCopy)].
+	self parentSandblock isWatch ifTrue: [
+		^ self sandblockEditor do: (SBReplaceCommand new
+			target: self parentSandblock
+			replacer: self parentSandblock expression buildCopy)].
 	
 	(self ownerSatisfying: [:o | o isInlineBlock and: [o isExpression]]) ifNotNil: [:expr |
 		self sandblockEditor do: (SBReplaceCommand new

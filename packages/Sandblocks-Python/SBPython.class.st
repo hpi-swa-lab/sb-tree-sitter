@@ -1,6 +1,9 @@
 Class {
 	#name : #SBPython,
 	#superclass : #SBGrammarLanguage,
+	#instVars : [
+		'separatorRule'
+	],
 	#category : #'Sandblocks-Python'
 }
 
@@ -13,7 +16,7 @@ SBPython class >> defaultRuntimeClass [
 { #category : #'as yet unclassified' }
 SBPython class >> expressionTypes [
 
-	^ #('expression')
+	^ #('expression' 'primary_expression')
 ]
 
 { #category : #'as yet unclassified' }
@@ -5127,6 +5130,18 @@ SBPython class >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython class >> parseAsKeywordArgumentAndReplace: aString [
+
+	^ (self parse: ('a({1})' format: {aString})) childSandblocks first childSandblocks second childSandblocks first applyReplacements
+]
+
+{ #category : #'as yet unclassified' }
+SBPython class >> parseKeywordArgument: aString [
+
+	^ (self parse: ('a({1})' format: {aString})) childSandblocks first childSandblocks second childSandblocks first
+]
+
+{ #category : #'as yet unclassified' }
 SBPython class >> rootRuleName [
 
 	^ 'module'
@@ -5182,8 +5197,8 @@ SBPython >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 	(aBlock isTSRepeat and: [aBlock hasSubmorphs and: [aBlock submorphs first type = 'decorator']]) ifTrue: [^ true].
 	aBlock type = 'decorator' ifTrue: [^ true].
 	
-	((aBlock isTSLabel and: [aBlock label = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair']]) ifTrue: [^ true].
-	^ #('else_clause') includes: anotherBlock firstVisibleType
+	((aBlock isTSLabel and: [aBlock label = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice']]]) ifTrue: [^ true].
+	^ #('else_clause' 'elif_clause') includes: anotherBlock firstVisibleType
 ]
 
 { #category : #'as yet unclassified' }
@@ -5258,7 +5273,16 @@ SBPython >> preprocessGrammar [
 { #category : #'as yet unclassified' }
 SBPython >> separatorRule [
 
-	^ ((self buildRegexString: (grammar rules at: grammar word)), '|\d') asRegex
+	^ separatorRule ifNil: [separatorRule := ((self buildRegexString: (grammar rules at: grammar word)), '|\d+') asRegex]
+]
+
+{ #category : #'as yet unclassified' }
+SBPython >> softLineBreakMatchBetween: aBlock and: anotherBlock [
+
+	(aBlock isTSLabel and: [aBlock contents = 'or' or: [aBlock contents = 'and']]) ifTrue: [^ true].
+	(anotherBlock isTSLabel and: [anotherBlock contents = '.']) ifTrue: [^ true].
+	(aBlock parentSandblock ifNotNil: #type) = 'list_comprehension' ifTrue: [^ true].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
