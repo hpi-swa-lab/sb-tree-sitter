@@ -50,6 +50,13 @@ SBMetaGrammarHandler >> textContentsForCopy [
 ]
 
 { #category : #'as yet unclassified' }
+SBMetaGrammarHandler >> wrapWithWatch [
+	<action>
+
+	^ self block wrapWithWatch
+]
+
+{ #category : #'as yet unclassified' }
 SBMetaGrammarHandler >> writeSourceOn: aStream for: aBlock [
 
 	aBlock writeMetaSourceOn: aStream
