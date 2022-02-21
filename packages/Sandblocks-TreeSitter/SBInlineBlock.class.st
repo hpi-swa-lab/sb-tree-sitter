@@ -197,6 +197,17 @@ SBInlineBlock >> changeToUnknown [
 		new startInputAtEnd]
 ]
 
+{ #category : #'action helpers' }
+SBInlineBlock >> changeToUnknownInPlace [
+
+	| unknown |
+	unknown := owner buildCopy
+		removeAllMorphs;
+		buildDefault.
+	self replaceBy: unknown.
+	^ unknown
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> childOrNil [
 

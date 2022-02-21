@@ -38,6 +38,12 @@ SBTSUnknown >> contents: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknown >> copyBlock [
+
+	^ self buildCopy
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknown >> cursorPositionsDo: aBlock [
 
 	aBlock value: (SBCursorSelect new block: self).
@@ -230,7 +236,7 @@ SBTSUnknown >> template [
 { #category : #'as yet unclassified' }
 SBTSUnknown >> template: aBlock [
 
-	self hint: aBlock value hint.
+	self hint ifNil: [self hint: aBlock value hint].
 	template := aBlock
 ]
 
