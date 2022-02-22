@@ -1,6 +1,6 @@
 Class {
-	#name : #SBReVerboseCharacterClass,
-	#superclass : #SBReVerboseBlock,
+	#name : #SBReCharacterClass,
+	#superclass : #SBReBlock,
 	#instVars : [
 		'number'
 	],
@@ -11,7 +11,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClass class >> matchRegex: aDictionary do: aBlock [
+SBReCharacterClass class >> matchRegex: aDictionary do: aBlock [
 "	<lang: #regex match:
 '(character_class
 	""^""? @negated
@@ -34,14 +34,13 @@ SBReVerboseCharacterClass class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClass >> initialize [
+SBReCharacterClass >> initialize [
 
 	super initialize.
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClass >> sourceString [
+SBReCharacterClass >> sourceString [
 
-	^ '[',
-		']'
+	^ '[]'
 ]

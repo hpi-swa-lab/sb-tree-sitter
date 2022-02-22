@@ -1,6 +1,6 @@
 Class {
-	#name : #SBReVerboseCharacterClassEscape,
-	#superclass : #SBReVerboseBlock,
+	#name : #SBReCharacterClassEscape,
+	#superclass : #SBReBlock,
 	#instVars : [
 		'characterClass'
 	],
@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClassEscape class >> matchRegex: aDictionary do: aBlock [
+SBReCharacterClassEscape class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(character_class_escape) @class'>
 
@@ -19,13 +19,13 @@ SBReVerboseCharacterClassEscape class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClassEscape >> characterClass [
+SBReCharacterClassEscape >> characterClass [
 
 	^ characterClass object
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClassEscape >> characterClass: aSymbolOrString [
+SBReCharacterClassEscape >> characterClass: aSymbolOrString [
 
 	characterClass object: ((aSymbolOrString isKindOf: Symbol)
 		ifFalse: [self characterClasses at: aSymbolOrString ifAbsent: self characterClasses values first]
@@ -33,44 +33,50 @@ SBReVerboseCharacterClassEscape >> characterClass: aSymbolOrString [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClassEscape >> characterClasses [
+SBReCharacterClassEscape >> characterClasses [
 
-	^ Dictionary newFrom: {
+	^ OrderedDictionary newFrom: {
 		'\d' -> #digit.
+		'\D' -> #not_digit.
 		'\s' -> #whitespace.
+		'S' -> #not_whitespace.
 		'\w' -> #word_character.
+		'\W' -> #not_word_character.
 	}
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClassEscape >> characterClassesDisplayStrings [
+SBReCharacterClassEscape >> characterClassesDisplayStrings [
 
-	^ Dictionary newFrom: {
-		#digit -> 'digit'.
-		#whitespace ->'whitespace'.
-		#word_character -> 'word character'.
+	^ {
+		'digit'.
+		'not a digit'.
+		'whitespace'.
+		'not a whitespace'.
+		'word character'.
+		'not a word character'.
 	}
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClassEscape >> initialize [
+SBReCharacterClassEscape >> initialize [
 
 	super initialize.
 	
-	self addMorphBack: (characterClass := SBComboBox new
+	self addMorphBack: (characterClass := SBReComboBox new
 		values: self characterClasses values;
-		labels: self characterClassesDisplayStrings values;
+		labels: self characterClassesDisplayStrings;
 		placeholderText: 'select class...')
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClassEscape >> sourceString [
+SBReCharacterClassEscape >> sourceString [
 
-	^ '.'
+	^ self characterClasses keyAtValue: self characterClass ifAbsent: ''
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseCharacterClassEscape >> type [
+SBReCharacterClassEscape >> type [
 
 	^ 'character_class_escape'
 ]

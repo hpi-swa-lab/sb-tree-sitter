@@ -6806,6 +6806,12 @@ SBJavascript >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript >> highlightFor: aBlock [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript >> postConfigure [
 
 	blockInline remove: 'statement_block'.

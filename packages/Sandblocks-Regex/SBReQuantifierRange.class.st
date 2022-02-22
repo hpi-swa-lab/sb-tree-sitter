@@ -1,6 +1,6 @@
 Class {
-	#name : #SBReVerboseQuantifierRange,
-	#superclass : #SBReVerboseQuantifier,
+	#name : #SBReQuantifierRange,
+	#superclass : #SBReQuantifier,
 	#instVars : [
 		'minimum',
 		'maximum'
@@ -9,7 +9,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange class >> matchRegex: aDictionary do: aBlock [
+SBReQuantifierRange class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(count_quantifier
 	(decimal_digits) @minimum
@@ -26,7 +26,7 @@ SBReVerboseQuantifierRange class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> buildOn: aSBRow [
+SBReQuantifierRange >> buildOn: aSBRow [
 
 	aSBRow
 		addMorphBack: (SBInlineBlockLabel new
@@ -48,7 +48,7 @@ SBReVerboseQuantifierRange >> buildOn: aSBRow [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> buildSelf [
+SBReQuantifierRange >> buildSelf [
 	
 	self
 		addMorphBack: (SBInlineBlockLabel new
@@ -70,31 +70,31 @@ SBReVerboseQuantifierRange >> buildSelf [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> maximum [
+SBReQuantifierRange >> maximum [
 
 	^ maximum value ifNil: [0]
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> maximum: aNumber [
+SBReQuantifierRange >> maximum: aNumber [
 
 	maximum value: aNumber
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> minimum [
+SBReQuantifierRange >> minimum [
 
 	^ minimum value ifNil: [0]
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> minimum: aNumber [
+SBReQuantifierRange >> minimum: aNumber [
 
 	minimum value: aNumber
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> quantifierString [
+SBReQuantifierRange >> quantifierString [
 
 	^ '{',
 		self minimum asString,
@@ -104,7 +104,7 @@ SBReVerboseQuantifierRange >> quantifierString [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifierRange >> type [
+SBReQuantifierRange >> type [
 
 	^ 'count_quantifier'
 ]

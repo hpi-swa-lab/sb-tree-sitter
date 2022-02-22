@@ -27,7 +27,7 @@ SBReNumberInput >> contents: aString [
 
 	aString asNumber negative
 		ifTrue: [self contents: 0 asString]
-		ifFalse: [super contents: aString]
+		ifFalse: [super contents: aString asInteger asString]
 ]
 
 { #category : #'as yet unclassified' }

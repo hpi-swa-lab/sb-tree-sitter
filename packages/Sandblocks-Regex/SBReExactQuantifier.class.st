@@ -1,6 +1,6 @@
 Class {
-	#name : #SBReVerboseExactQuantifier,
-	#superclass : #SBReVerboseQuantifier,
+	#name : #SBReExactQuantifier,
+	#superclass : #SBReQuantifier,
 	#instVars : [
 		'number'
 	],
@@ -8,20 +8,20 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier class >> isRange: aDictionary [
+SBReExactQuantifier class >> isRange: aDictionary [
 
 	^ ((aDictionary at: 'count_quantifier') childrenForQuery
 		select: [:each | each type = 'decimal_digits']) size > 1
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier class >> isZero: aDictionary [
+SBReExactQuantifier class >> isZero: aDictionary [
 
 	^ (aDictionary at: 'value') contents asNumber = 0
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier class >> matchRegex: aDictionary do: aBlock [
+SBReExactQuantifier class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(count_quantifier
 	(decimal_digits) @value
@@ -39,7 +39,7 @@ SBReVerboseExactQuantifier class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> buildOn: aSBRow [
+SBReExactQuantifier >> buildOn: aSBRow [
 
 	aSBRow
 		addMorphBack: (SBInlineBlockLabel new
@@ -51,7 +51,7 @@ SBReVerboseExactQuantifier >> buildOn: aSBRow [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> buildSelf [
+SBReExactQuantifier >> buildSelf [
 
 	self
 		addMorphBack: (SBInlineBlockLabel new
@@ -63,19 +63,19 @@ SBReVerboseExactQuantifier >> buildSelf [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> number [
+SBReExactQuantifier >> number [
 
 	^ number value ifNil: [0]
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> number: aNumber [
+SBReExactQuantifier >> number: aNumber [
 
 	number contents: aNumber asString
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> quantifierString [
+SBReExactQuantifier >> quantifierString [
 
 	^ '{',
 		self number asString,
@@ -83,7 +83,7 @@ SBReVerboseExactQuantifier >> quantifierString [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseExactQuantifier >> type [
+SBReExactQuantifier >> type [
 
 	^ 'count_quantifier'
 ]

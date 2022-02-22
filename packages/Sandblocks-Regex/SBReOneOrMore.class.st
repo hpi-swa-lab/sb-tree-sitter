@@ -1,11 +1,11 @@
 Class {
-	#name : #SBReVerboseOneOrMore,
-	#superclass : #SBReVerboseQuantifier,
+	#name : #SBReOneOrMore,
+	#superclass : #SBReQuantifier,
 	#category : #'Sandblocks-Regex'
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseOneOrMore class >> matchRegex: aDictionary do: aBlock [
+SBReOneOrMore class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:'
 (one_or_more
 	"?"? @lazy
@@ -18,25 +18,27 @@ SBReVerboseOneOrMore class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseOneOrMore >> buildOn: aSBRow [
+SBReOneOrMore >> buildOn: aSBRow [
 
-	aSBRow addMorphBack: (SBInlineBlockLabel new label: 'at least one time'; factory: self factory)
+	aSBRow addMorphBack: (SBInlineBlockLabel new
+		label: 'at least one time';
+		factory: self factory)
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseOneOrMore >> buildSelf [
+SBReOneOrMore >> buildSelf [
 
 	self addMorphBack: (SBInlineBlockLabel new label: 'at least one time'; factory: self factory)
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseOneOrMore >> quantifierString [
+SBReOneOrMore >> quantifierString [
 
 	^ '+'
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseOneOrMore >> type [
+SBReOneOrMore >> type [
 
 	^ 'one_or_more'
 ]
