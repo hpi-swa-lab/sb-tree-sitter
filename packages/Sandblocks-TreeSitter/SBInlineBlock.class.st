@@ -358,6 +358,7 @@ SBInlineBlock >> containsEqual: aBlock [
 SBInlineBlock >> convertedFor: anInterfaceCollection do: aBlock [
 
 	anInterfaceCollection first = #isInlineBlock ifTrue: [
+		self factory name = anInterfaceCollection last factory name ifFalse: [^ super convertedFor: anInterfaceCollection do: aBlock].
 		^ (SBTSRuleExplore new
 			explore: anInterfaceCollection last
 				withNested: self
