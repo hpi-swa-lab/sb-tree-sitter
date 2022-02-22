@@ -122,7 +122,7 @@ SBTSDragAndDropTests >> testRegexReplaceUnknown [
 	module := SBRegex parse: '1'.
 	editor := self editorFor: module.
 	
-	module lastDeepChild parentSandblock addBlock: SBReVerboseComment new.
+	module lastDeepChild parentSandblock addBlock: SBReComment new.
 	unknown := module nextBlockThat: #isUnknown.
 	unknown ensureLayouted.
 	
