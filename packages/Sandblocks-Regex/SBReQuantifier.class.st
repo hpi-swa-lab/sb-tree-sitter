@@ -1,6 +1,6 @@
 Class {
-	#name : #SBReVerboseQuantifier,
-	#superclass : #SBReVerboseBlock,
+	#name : #SBReQuantifier,
+	#superclass : #SBReBlock,
 	#instVars : [
 		'lazy'
 	],
@@ -8,18 +8,18 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> buildConcrete [
+SBReQuantifier >> buildConcrete [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> buildConcreteOn: aSBRow [
+SBReQuantifier >> buildConcreteOn: aSBRow [
 
 	self buildOn: aSBRow.
 	^ aSBRow
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> buildLazyToggleOn: aSBRow [
+SBReQuantifier >> buildLazyToggleOn: aSBRow [
 
 	^ aSBRow
 		addMorphBack: (lazy := SBCheckbox new
@@ -27,18 +27,19 @@ SBReVerboseQuantifier >> buildLazyToggleOn: aSBRow [
 			canDrag: false);
 		addMorphBack: (SBInlineBlockLabel new
 			label: 'lazy';
-			factory: self factory);
+			factory: self factory;
+			canDrag: false);
 		yourself
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> buildOn: aSBRow [
+SBReQuantifier >> buildOn: aSBRow [
 
 	^ self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> initialize [
+SBReQuantifier >> initialize [
 
 	super initialize.
 
@@ -50,19 +51,19 @@ SBReVerboseQuantifier >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> lazy [
+SBReQuantifier >> lazy [
 
 	^ lazy value
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> lazy: aBoolean [
+SBReQuantifier >> lazy: aBoolean [
 
 	lazy changeValue: aBoolean
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> lazySourceString [
+SBReQuantifier >> lazySourceString [
 
 	^ self lazy
 		ifTrue: ['?']
@@ -70,13 +71,13 @@ SBReVerboseQuantifier >> lazySourceString [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> quantifierString [
+SBReQuantifier >> quantifierString [
 
 	^ self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseQuantifier >> sourceString [
+SBReQuantifier >> sourceString [
 
 	^ self quantifierString , self lazySourceString
 ]

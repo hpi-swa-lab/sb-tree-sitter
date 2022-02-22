@@ -1,40 +1,40 @@
 Class {
-	#name : #SBReVerboseBlock,
+	#name : #SBReBlock,
 	#superclass : #SBInlineBlockReplace,
 	#category : #'Sandblocks-Regex'
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseBlock class >> factory [
+SBReBlock class >> factory [
 
-	^ SBRegex instance
+	^ SBRegex
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseBlock class >> type [
+SBReBlock class >> type [
 
 	^ nil
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseBlock >> initialize [
+SBReBlock >> initialize [
 
 	super initialize.
 	
 	self
-		factory: self class factory;
+		factory: self class factory instance;
 		vResizing: #shrinkWrap;
 		hResizing: #shrinkWrap
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseBlock >> sourceString [
+SBReBlock >> sourceString [
 
 	self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseBlock >> writeSourceOn: aStream [
+SBReBlock >> writeSourceOn: aStream [
 
 	aStream nextPutAll: self sourceString
 ]

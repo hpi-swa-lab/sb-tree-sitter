@@ -1,11 +1,11 @@
 Class {
-	#name : #SBReVerboseZeroOrMore,
-	#superclass : #SBReVerboseQuantifier,
+	#name : #SBReZeroOrMore,
+	#superclass : #SBReQuantifier,
 	#category : #'Sandblocks-Regex'
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseZeroOrMore class >> matchRegex: aDictionary do: aBlock [
+SBReZeroOrMore class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(zero_or_more
 	"?"? @lazy
@@ -18,25 +18,25 @@ SBReVerboseZeroOrMore class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseZeroOrMore >> buildOn: aSBRow [
+SBReZeroOrMore >> buildOn: aSBRow [
 
 	aSBRow addMorphBack: (SBInlineBlockLabel new label: 'zero or more times'; factory: self factory)
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseZeroOrMore >> buildSelf [
+SBReZeroOrMore >> buildSelf [
 
 	self addMorphBack: (SBInlineBlockLabel new label: 'zero or more times'; factory: self factory)
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseZeroOrMore >> quantifierString [
+SBReZeroOrMore >> quantifierString [
 
 	^ '*'
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseZeroOrMore >> type [
+SBReZeroOrMore >> type [
 
 	^ 'zero_or_more'
 ]

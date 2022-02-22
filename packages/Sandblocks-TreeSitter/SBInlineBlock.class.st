@@ -310,7 +310,7 @@ SBInlineBlock >> collapseBlock [
 SBInlineBlock >> color [
 
 	self containingSymbol ifNotNil: [ :aSymbol |
-		self factory highlightFor: aSymbol do: [ :color | color ifNotNil: [ :c | ^ c muchLighter ] ] ].
+		(self factory highlightFor: aSymbol) ifNotNil: [:color | ^ color]].
 	^ super color
 ]
 

@@ -1,6 +1,6 @@
 Class {
-	#name : #SBReVerboseLookaroundAssertion,
-	#superclass : #SBReVerboseBlock,
+	#name : #SBReLookaroundAssertion,
+	#superclass : #SBRePatternWrapper,
 	#instVars : [
 		'assertionType'
 	],
@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion class >> matchRegex: aDictionary do: aBlock [
+SBReLookaroundAssertion class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(lookahead_assertion
 	(pattern) @pattern
@@ -21,13 +21,13 @@ SBReVerboseLookaroundAssertion class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> assertionType [
+SBReLookaroundAssertion >> assertionType [
 
 	^ assertionType object
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> assertionType: aSymbolOrString [
+SBReLookaroundAssertion >> assertionType: aSymbolOrString [
 
 	assertionType object: ((aSymbolOrString isKindOf: Symbol)
 		ifFalse: [self assertionTypes at: aSymbolOrString ifAbsent: self assertionTypes values first]
@@ -35,9 +35,9 @@ SBReVerboseLookaroundAssertion >> assertionType: aSymbolOrString [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> assertionTypes [
+SBReLookaroundAssertion >> assertionTypes [
 
-	^ Dictionary newFrom: {
+	^ OrderedDictionary newFrom: {
 		'=' -> #positive_lookahead.
 		'!' -> #negative_lookahead.
 		'<=' -> #positive_lookbehind.
@@ -46,7 +46,7 @@ SBReVerboseLookaroundAssertion >> assertionTypes [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> assertionTypesDisplayStrings [
+SBReLookaroundAssertion >> assertionTypesDisplayStrings [
 
 	^ {
 		'followed by'.
@@ -57,47 +57,32 @@ SBReVerboseLookaroundAssertion >> assertionTypesDisplayStrings [
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> initialize [
+SBReLookaroundAssertion >> initialize [
 
 	super initialize.
 	
 	self
-		addMorphBack: (assertionType := SBComboBox new
+		addMorphBack: (assertionType := SBReComboBox new
 			values: self assertionTypes values;
 			labels: self assertionTypesDisplayStrings;
 			placeholderText: 'select assertion type...');
-		addMorphBack: (SBTSUnknown new
-			factory: self factory;
-			template: (self factory getTemplate: 'pattern'))
+		addMorphBack: self pattern
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> pattern [
-
-	^ self submorphs at: 2
-]
-
-{ #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> pattern: aBlock [
-
-	(self submorphs at: 2) replaceBy: aBlock buildCopy
-]
-
-{ #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> sourceString [
+SBReLookaroundAssertion >> sourceString [
 
 	^ self assertionType notNil
-		ifTrue: [
-			'(?',
-			(self assertionTypes keyAtValue: self assertionType),
-			self pattern sourceString,
-			')']
-		ifFalse: [''] 
+		ifTrue: ['(?{1}{2})'
+			format: {
+				self assertionTypes keyAtValue: self assertionType .
+				self pattern sourceString}]
+		ifFalse: ['']
 	
 ]
 
 { #category : #'as yet unclassified' }
-SBReVerboseLookaroundAssertion >> type [
+SBReLookaroundAssertion >> type [
 
 	^ 'lookahead_assertion'
 ]
