@@ -292,6 +292,20 @@ SBInlineBlock >> click: anEvent [
 	self inline ifFalse: [super click: anEvent]
 ]
 
+{ #category : #actions }
+SBInlineBlock >> collapseBlock [
+	<action>
+
+	| collapsed command |
+	collapsed := SBTSCollapsed new.
+	command := SBWrapCommand new
+		outer: collapsed;
+		inner: self;
+		wrap: [:collapse :block | collapse block: block factory: block factory];
+		selectAfter: collapsed.
+	self sandblockEditor ifNotNil: [:e | e do: command] ifNil: [command do]
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> color [
 
