@@ -59,6 +59,12 @@ SBTSCollapsed >> uncollapseBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCollapsed >> writeSourceOn: aStream [
+
+	self writeSourceOn: aStream indent: 0
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCollapsed >> writeSourceOn: aStream indent: aNumber [
 
 	block writeSourceOn: aStream indent: aNumber
