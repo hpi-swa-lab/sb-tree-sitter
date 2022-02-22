@@ -236,7 +236,7 @@ SBTSUnknown >> template [
 { #category : #'as yet unclassified' }
 SBTSUnknown >> template: aBlock [
 
-	self hint ifNil: [self hint: aBlock value hint].
+	self hint ifEmpty: [self hint: aBlock value hint].
 	template := aBlock
 ]
 
