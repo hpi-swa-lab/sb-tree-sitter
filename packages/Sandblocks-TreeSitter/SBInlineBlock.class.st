@@ -360,7 +360,7 @@ SBInlineBlock >> convertedFor: anInterfaceCollection do: aBlock [
 	anInterfaceCollection first = #isInlineBlock ifTrue: [
 		self factory name = anInterfaceCollection last factory name ifFalse: [^ super convertedFor: anInterfaceCollection do: aBlock].
 		^ (SBTSRuleExplore new
-			explore: anInterfaceCollection last
+			explore: (anInterfaceCollection last isUnknown ifTrue: [anInterfaceCollection last template] ifFalse: [anInterfaceCollection last])
 				withNested: self
 				nestedBefore: false
 				for: ''
@@ -915,13 +915,15 @@ SBInlineBlock >> objectInterfaceForDrop: aBlock near: anotherBlock at: aSymbol [
 
 	^ (self repeaterChildFor: aBlock near: anotherBlock)
 		ifNil: [SBInterfaces never]
-		ifNotNil: [:repeater | {#isInlineBlock. [:o | false]. anotherBlock = #replace ifTrue: [self] ifFalse: [repeater element]}]
+		ifNotNil: [:repeater | {#isInlineBlock. SBInterfaces never. anotherBlock = #replace ifTrue: [self] ifFalse: [repeater element]}]
 ]
 
 { #category : #'as yet unclassified' }
 SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
 
 	| reference |
+	(aSymbol = #replace and: [aBlock notNil and: [aBlock isInlineBlock or: [aBlock isUnknown]]]) ifTrue: [^ {#isInlineBlock. SBInterfaces never. aBlock}].
+	
 	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
  this and does special handling. other handlers will get blocked by the false"
 	aBlock

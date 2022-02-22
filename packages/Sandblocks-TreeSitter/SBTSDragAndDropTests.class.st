@@ -114,3 +114,18 @@ SBTSDragAndDropTests >> testRegexQuantifierCantReplace [
 		in: editor.
 	self assert: 'ab' equals: module sourceString
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSDragAndDropTests >> testRegexReplaceUnknown [
+
+	| module editor unknown |
+	module := SBRegex parse: '1'.
+	editor := self editorFor: module.
+	
+	module lastDeepChild parentSandblock addBlock: SBReVerboseComment new.
+	unknown := module nextBlockThat: #isUnknown.
+	unknown ensureLayouted.
+	
+	self class dropAt: unknown positionInWorld + (1 @ 1) with: (SBRegex parseElement: '2') in: editor.
+	self assert: (module sourceString includes: $2)
+]
