@@ -785,6 +785,12 @@ SBMetaBlockFactory >> hasHighlight [
 	^ highlightQuery notNil
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> highlightFor: aSBBlock [
+
+	^ nil
+]
+
 { #category : #helper }
 SBMetaBlockFactory >> highlightFor: aSBBlock do: aBlock [
 ]
