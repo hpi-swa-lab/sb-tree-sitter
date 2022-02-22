@@ -306,6 +306,12 @@ SBInlineBlock >> collapseBlock [
 	self sandblockEditor ifNotNil: [:e | e do: command] ifNil: [command do]
 ]
 
+{ #category : #actions }
+SBInlineBlock >> collapsedContent [
+
+	^ self type
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> color [
 

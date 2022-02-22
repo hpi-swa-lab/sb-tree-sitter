@@ -16,9 +16,15 @@ SBTSCollapsed >> block: aBlock factory: aFactory [
 	self removeAllMorphs.
 	self addMorphBack: (SBStringMorph new contents: '...').
 	self addMorphBack: (SBStringMorph new
-		contents: aBlock type;
+		contents: aBlock collapsedContent;
 		opacity: 0.7;
 		italic)
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCollapsed >> color [
+
+	^ block color
 ]
 
 { #category : #'as yet unclassified' }
