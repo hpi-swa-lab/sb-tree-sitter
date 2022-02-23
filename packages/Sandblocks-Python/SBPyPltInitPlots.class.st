@@ -30,7 +30,14 @@ SBPyPltInitPlots class >> matchPython: aDictionary do: aBlock [
 { #category : #'initialize-release' }
 SBPyPltInitPlots >> createReplacement [
 
-	self addMorphBack: (SBStringMorph new contents: 'Matplotlib context').
+	self addMorphBack: (SBColumn new cellGap: 2;
+			addMorphBack: (SBStringMorph new contents: 'Matplotlib context:');
+			addMorphBack: (SBRow new cellGap: 4;
+				addMorphBack: (SBPython parseElement: 'fig');
+				addMorphBack: (SBPython parseElement: 'ax')
+			)
+		)
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -46,13 +53,13 @@ SBPyPltInitPlots >> type [
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPltInitPlots >> writeSourceOn: aStream [
+SBPyPltInitPlots >> writeSourceOn: aStream indent: aNumber [
 
-	aStream nextPutAll: '
+	aStream nextPutAll: ('
 import matplotlib.pyplot as plt
 import io
 import base64
 import sys
 
-fig, ax = plt.subplots()'.
+fig, ax = plt.subplots()' lines joinSeparatedBy: (String cr, (String new: aNumber withAll: Character tab))).
 ]

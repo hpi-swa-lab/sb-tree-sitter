@@ -19,7 +19,6 @@ SBPyPltAlpha class >> matchPython: aDictionary do: aBlock [
 
 { #category : #'initialize-release' }
 SBPyPltAlpha >> createReplacement: aNumber [
-"aNumber must be in the range [0-1]"
 
-	self addMorphBack: (SBPyNumberWithPrefix new prefix: 'alpha='; contents: aNumber; rangeFrom: 0 to: 1)
+	self addMorphBack: (SBPyNumberWithPrefix new prefix: 'alpha='; rangeFrom: 0.0 to: 1.0; floatSteps; contents: aNumber)
 ]

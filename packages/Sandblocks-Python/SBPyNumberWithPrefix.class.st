@@ -1,23 +1,22 @@
 "
-A hard copy of SbStNumberWithPrefix to change the context to Python.
+Number input block with extensions for specifying the range and the number type
 "
 Class {
 	#name : #SBPyNumberWithPrefix,
 	#superclass : #SBStNumberWithPrefix,
 	#instVars : [
-		'isPyPltPlotParam',
 		'rangeMin',
-		'rangeMax'
+		'rangeMax',
+		'floatSteps'
 	],
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #flagging }
 SBPyNumberWithPrefix >> contents: aString [
-"This is called whenever the content of this object has changed."
+"called whenever the content of this object has changed."
 
 	| aValidNumber |
-	
 	rangeMin ifNil: [
 		aString ifNil: [super contents: '0'] ifNotNil: [super contents: aString asInteger asString].
 		^ self.
@@ -28,7 +27,23 @@ SBPyNumberWithPrefix >> contents: aString [
 
 	aString
 		ifNil: [super contents: '0']
-		ifNotNil: [super contents: aValidNumber asInteger asString].
+		ifNotNil: [super contents: (floatSteps 
+			ifTrue: [aValidNumber asString from: 1 to: (aValidNumber asString size min: 4)] 
+			ifFalse: [aValidNumber asInteger asString])].
+]
+
+{ #category : #testing }
+SBPyNumberWithPrefix >> floatSteps [
+"does range support floating steps?"
+	floatSteps := true.
+]
+
+{ #category : #'initialize-release' }
+SBPyNumberWithPrefix >> initialize [
+
+	super initialize.
+	
+	floatSteps := false.
 ]
 
 { #category : #flagging }
@@ -41,6 +56,21 @@ SBPyNumberWithPrefix >> isSmalltalk [
 SBPyNumberWithPrefix >> language [
 
 	^ #python
+]
+
+{ #category : #testing }
+SBPyNumberWithPrefix >> mouseMove: anEvent [
+
+	| delta |
+	isDown ifTrue: [
+		delta := floatSteps 
+				ifTrue: [(anEvent position - lastMousePosition) x * 0.01] 
+				ifFalse: [(anEvent position - lastMousePosition) x].
+		self flag: #todo.
+		"preserve formatting like base"
+		self contents: (self parsedContents + delta) asString.
+		lastMousePosition := anEvent position.
+		self batchedChangeStep]
 ]
 
 { #category : #accessing }

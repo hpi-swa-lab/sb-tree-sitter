@@ -13,7 +13,6 @@ SBPyPltPaletteEntry class >> buildOn: aBuilder [
 	aBuilder addHeader: 'Matplotlib'.
 	aBuilder addSectionHeader: 'Matplotlib Init'.	
 	aBuilder addBlock: 'Enter matplotlib context' as: (SBPyPltInitPlots new factory: (SBPython instance); createReplacement).
-	aBuilder addBlock: 'Enter matplotlib context' as: (SBPyPltSnippetOpener new factory: (SBPython instance); replace).
 	aBuilder addBlock: 'Show figure' as: (SBPyPltShowPlots new factory: (SBPython instance); createReplacement).
 ]
 

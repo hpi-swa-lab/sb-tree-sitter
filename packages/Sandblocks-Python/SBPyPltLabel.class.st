@@ -14,9 +14,7 @@ SBPyPltLabel class >> matchPython: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'argument')
 		value: (self new factory: (aDictionary at: 'argument') factory;
-			createReplacement: (aDictionary at: 'value') contents;
-			source: (aDictionary at: 'argument') sourceString
-			)
+			createReplacement: (aDictionary at: 'value') contents)
 ]
 
 { #category : #'initialize-release' }

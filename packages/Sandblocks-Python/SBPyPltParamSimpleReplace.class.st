@@ -22,7 +22,7 @@ SBPyPltParamSimpleReplace >> type [
 SBPyPltParamSimpleReplace >> writeSourceOn: aStream [
 
 	| isAllDigits |
-	isAllDigits := self firstSubmorph contents isAllDigits.
+	isAllDigits := [self firstSubmorph contents asNumber isNumber] on: NumberParserError do: [false].
 	
 	isAllDigits 
 		ifTrue: [aStream nextPutAll: (self firstSubmorph prefix, self firstSubmorph contents)] 

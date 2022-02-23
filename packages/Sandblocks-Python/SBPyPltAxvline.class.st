@@ -1,21 +1,18 @@
-"
-I am the class representing the matplotlib plot function
-"
 Class {
-	#name : #SBPyPltPlot,
+	#name : #SBPyPltAxvline,
 	#superclass : #SBPyPltPlots,
 	#category : #'Sandblocks-Python'
 }
 
 { #category : #'as yet unclassified' }
-SBPyPltPlot class >> match: aDictionary do: aBlock [
+SBPyPltAxvline class >> match: aDictionary do: aBlock [
 	<lang: #python match: '(call
         	function: (attribute
             	object: (identifier) ="ax" @ax
-                attribute: (identifier) ="plot" @plot
+                attribute: (identifier) ="axvline" @plot
             )
         	arguments: (argument_list)
-        ) @call' sample: 'ax.plot(Y)'>
+        ) @call' sample: 'ax.axvline(Y)'>
 	
 	^ aBlock
 		value: (aDictionary at: 'call')
@@ -25,16 +22,16 @@ SBPyPltPlot class >> match: aDictionary do: aBlock [
 		
 ]
 
-{ #category : #'initialize-release' }
-SBPyPltPlot >> createReplacementOfArgs: aSBTSFieldAccessor [
+{ #category : #'as yet unclassified' }
+SBPyPltAxvline >> createReplacementOfArgs: aSBTSFieldAccessor [
 		
 	self addMorphBack: (SBRow new
 		addMorphBack: (AlignmentMorph newColumn 
 			color: Color transparent; 
 			hResizing: #shrinkWrap; 
 			addMorphBack: (AlignmentMorph newSpacer: Color transparent);
-			addMorphBack: (SBStringMorph new contents: 'line plot:');
-			addMorphBack: (SBPyPltImage linePlot);
+			addMorphBack: (SBStringMorph new contents: 'vertical line:');
+			addMorphBack: (SBPyPltImage axvline);
 			addMorphBack: (AlignmentMorph newSpacer: Color transparent)
 		 );
 		addMorphBack: aSBTSFieldAccessor;
@@ -42,15 +39,15 @@ SBPyPltPlot >> createReplacementOfArgs: aSBTSFieldAccessor [
 	)
 ]
 
-{ #category : #'initialize-release' }
-SBPyPltPlot >> palettes [
+{ #category : #'as yet unclassified' }
+SBPyPltAxvline >> palettes [
 
-	^ {SBPyPltPalettePlot}, super palettes
+	^ {SBPyPltPaletteAxvline}, super palettes
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPltPlot >> writeSourceOn: aStream [
+SBPyPltAxvline >> writeSourceOn: aStream [
 
-	aStream nextPutAll: 'ax.plot'.
+	aStream nextPutAll: 'ax.axvline'.
 	(self firstSubmorph submorphs asOrderedCollection at: 2) writeSourceOn: aStream.
 ]

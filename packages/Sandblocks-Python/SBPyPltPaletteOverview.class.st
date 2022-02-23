@@ -41,7 +41,7 @@ SBPyPltPaletteOverview class >> buildOnPlots: aBuilder [
 	aBuilder content addMorphBack: (self asSubSectionText: 'Plot y versus x as lines and/or markers.').
 			
 	aBuilder addBlock: 'Create plot with evenly spaced x axis' as: (SBPython parseAndReplace: 'ax.plot(Y)').
-	aBuilder addBlock: 'Create plots' as: (SBPython parseAndReplace: 'ax.plot(Y, X)').
+	aBuilder addBlock: 'Create plots' as: (SBPython parseAndReplace: 'ax.plot(X, Y)').
 	
 	aBuilder content addMorphBack: (self asSubSectionText: 'A scatter plot of y vs. x with varying marker size and/or color.').
 	aBuilder addBlock: 'Create scatter plot with x,y points' as: (SBPython parseAndReplace: 'ax.scatter(X, Y)').
@@ -51,6 +51,9 @@ SBPyPltPaletteOverview class >> buildOnPlots: aBuilder [
 	manyArgumentsScatter childSandblocks first childSandblocks first childSandblocks last balloonText: 'doesnt work'.
 	
 	aBuilder addBlock: 'Create scatter plot with specified sizes and colors' as: manyArgumentsScatter.
+	
+	aBuilder addMorphBack: (self asSubSectionText: 'Draw a vertical line between [ymin, ymax]').
+	aBuilder addBlock: 'Draw a vertical line' as: (SBPython parseAndReplace: 'ax.axvline(x, ymin=0, ymax=1)').
 ]
 
 { #category : #'as yet unclassified' }
