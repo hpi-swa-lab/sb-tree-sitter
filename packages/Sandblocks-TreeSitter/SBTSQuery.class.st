@@ -23,7 +23,7 @@ SBTSQuery >> executeAgainst: aBlock capturesDo: aClosure [
 	| ret target |
 	target := aBlock.
 	captures := Dictionary new.
-	
+
 	ret := false.
 	expressions do: [:expression |
 		(expression evaluateAgainst: aBlock captures: captures)

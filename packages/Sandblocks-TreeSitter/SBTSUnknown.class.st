@@ -114,7 +114,7 @@ SBTSUnknown >> hint [
 { #category : #'as yet unclassified' }
 SBTSUnknown >> hint: aString [
 
-	self label: aString
+	self currentTextMorph placeholderText: aString
 ]
 
 { #category : #'as yet unclassified' }

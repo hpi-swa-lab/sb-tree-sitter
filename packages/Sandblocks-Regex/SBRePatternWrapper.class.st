@@ -33,6 +33,7 @@ SBRePatternWrapper >> pattern: aBlock [
 
 { #category : #'as yet unclassified' }
 SBRePatternWrapper >> replaceWithWrapped [
+	<action>
 
 	self sandblockEditor do: (SBReplaceCommand new
 		target: self

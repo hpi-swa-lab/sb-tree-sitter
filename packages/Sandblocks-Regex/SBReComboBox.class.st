@@ -9,3 +9,9 @@ SBReComboBox >> colored [
 
 	^ false
 ]
+
+{ #category : #'as yet unclassified' }
+SBReComboBox >> firstVisibleType [
+
+	^ nil
+]

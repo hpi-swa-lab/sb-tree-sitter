@@ -39,7 +39,7 @@ SBReAnnotation class >> matchRegex: aDictionary do: aBlock [
 	sample: '(?:(?annotation){0}(?:pattern))'>
 
 	| annotation class |
-	
+
 	annotation := (aDictionary at: 'annotation') sourceString.
 	class := (self annotationClass: annotation) ifNil: [^ nil].
 

@@ -53,7 +53,7 @@ SBTSFile >> artefactChanged: aMethodBlock [
 	aMethodBlock = self ifTrue: [ | changed |
 		"FIXME: this heuristic will be wrong for changes that affect more than the selection.
 		It also doesn't improve performance when changes happen on the toplevel"
-		changed := (self sandblockEditor selection hasOwner: self) ifTrue: [self sandblockEditor selection] ifFalse: [self root].
+		changed := (self sandblockEditor selection ifNotNil: [:selection | selection hasOwner: self] ifNil: [false]) ifTrue: [self sandblockEditor selection] ifFalse: [self root].
 		changed isInlineBlock ifTrue: [changed updateAllHighlights]]
 ]
 

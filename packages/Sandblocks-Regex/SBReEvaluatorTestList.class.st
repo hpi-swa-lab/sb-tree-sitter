@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBReEvaluatorTestList >> addExample: aString [
 
-	self addMorphBack: (SBTextBubble multiLine contents: aString)
+	self addMorphBack: (SBReEvaluatorTest new contents: aString)
 ]
 
 { #category : #'as yet unclassified' }
@@ -57,4 +57,10 @@ SBReEvaluatorTestList >> pattern [
 SBReEvaluatorTestList >> patternChanged [
 
 	self submorphsDo: [:each | each patternChanged]
+]
+
+{ #category : #'as yet unclassified' }
+SBReEvaluatorTestList >> removeAllExamples [
+
+	self removeAllMorphs
 ]

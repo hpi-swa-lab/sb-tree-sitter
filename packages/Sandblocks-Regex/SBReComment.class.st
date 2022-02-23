@@ -20,6 +20,12 @@ SBReComment >> annotation: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBReComment >> collapsedContent [
+
+	^ self annotation
+]
+
+{ #category : #'as yet unclassified' }
 SBReComment >> color [
 
 	^ Color lightGray

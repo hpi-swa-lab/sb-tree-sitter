@@ -16,6 +16,7 @@ SBReEvaluator >> annotation [
 { #category : #'as yet unclassified' }
 SBReEvaluator >> annotation: aString [
 
+	self examples removeAllExamples.
 	(aString splitBy: ',') do: [:each | self examples addExample: each base64Decoded]
 ]
 
