@@ -12,10 +12,10 @@ SBPyPltPaletteScatter class >> buildOn: aBuilder [
 	aBuilder addSectionHeader: 'Scatter Parameter'.
 	
 	aBuilder addBlock: 'Set the alpha value used for blending - not supported on all backends.' as: 
-		(SBPyPltAlpha new factory: SBPython instance; createReplacement: '0.5').
+		(SBPython parseKeywordArgument: 'alpha=0.5').
 		
 	aBuilder addBlock: 'Set a label that will be displayed in the legend.' as:
-		(SBPyPltLabel new factory: SBPython instance; createReplacement: 'obj').
+		(SBPython parseKeywordArgument: 'label="category 1"').
 		
 	aBuilder addBlock: 'A Colormap instance or registered colormap name. cmap is only used if c is an array of floats.' as:
 		(SBPython parseKeywordArgument: 'cmap=colormap').
@@ -30,7 +30,7 @@ SBPyPltPaletteScatter class >> buildOn: aBuilder [
 		(SBPython parseKeywordArgument: 'linestyle="-"').
 		
 	aBuilder addBlock: 'Set the line width in points.' as:
-		(SBPyPltLinewidth new factory: SBPython instance; createReplacement: '2.0').
+		(SBPython parseKeywordArgument: 'linewidth=2.0').
 			
 	
 	aBuilder addSubSectionHeader: 'Marker'.
@@ -46,7 +46,7 @@ SBPyPltPaletteScatter class >> buildOn: aBuilder [
 		
 	aBuilder addBlock: 'If given, the following parameters also accept a string s, which is interpreted as data[s] (unless this raises an exception):
 x, y, s, linewidths, edgecolors, c, facecolor, facecolors, color.' as:
-		(SBPyPltData new factory: SBPython instance; createReplacement: 'X').
+		(SBPython parseKeywordArgument: 'data=obj').
 		
 	aBuilder addBlock: 'Set whether to use antialiased rendering.' as:
 		(SBPython parseKeywordArgument: 'antialiased=True').

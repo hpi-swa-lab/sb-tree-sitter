@@ -9,8 +9,6 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBPyPltPaletteOverview class >> buildOn: aBuilder [
-	SBPyPltPaletteEntry buildOn: aBuilder.
-
 	self buildOnPlots: aBuilder.
 	self buildOnAxisCustomization: aBuilder.
 	
@@ -48,4 +46,9 @@ SBPyPltPaletteOverview class >> buildOnPlots: aBuilder [
 	
 	aBuilder addMorphBack: (self asSubSectionText: 'Draw a vertical line between [ymin, ymax]').
 	aBuilder addBlock: 'Draw a vertical line' as: (SBPython parseAndReplace: 'ax.axvline(x, ymin=0, ymax=1)').
+]
+
+{ #category : #'as yet unclassified' }
+SBPyPltPaletteOverview class >> language [
+	^ #python
 ]

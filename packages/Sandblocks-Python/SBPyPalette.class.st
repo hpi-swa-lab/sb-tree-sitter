@@ -55,7 +55,6 @@ For example, (5, 2, 1, 2) describes a sequence of 5 point and 1 point dashes sep
 The drawstyle determines how the points are connected.' as:
 		(SBPython parseKeywordArgument: 'drawstyle="steps"').
 		
-	"den"
 	aBuilder addBlock: 'Set the linestyle of the line.' as:
 		(SBPython parseKeywordArgument: 'linestyle="-"').
 		
