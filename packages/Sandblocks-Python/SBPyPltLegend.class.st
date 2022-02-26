@@ -1,5 +1,5 @@
 "
-Shows the legend. The legend entries are the labels of the individual plots.
+Shows the legend. The legend entries are the labels of the individual plots, set by SBPyPltLabel.
 "
 Class {
 	#name : #SBPyPltLegend,

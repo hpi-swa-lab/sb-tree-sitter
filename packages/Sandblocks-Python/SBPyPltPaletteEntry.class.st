@@ -18,10 +18,5 @@ SBPyPltPaletteEntry class >> buildOn: aBuilder [
 
 { #category : #'as yet unclassified' }
 SBPyPltPaletteEntry class >> language [
-"show in all contexts.
-
-NOTE: this is turned off for now because we want SBPyPltPaletteOverview visible in all python contexts, not just the this palette.
-"
-
-	"^ #python"
+	^ #python
 ]

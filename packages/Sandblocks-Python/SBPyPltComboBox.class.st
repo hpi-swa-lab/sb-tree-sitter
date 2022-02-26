@@ -1,5 +1,5 @@
 "
-Changes parent such that the selection is based on a row, not a string. This enables the use of complex morphs in the dialog.
+Combo box based on SBRows as items.
 "
 Class {
 	#name : #SBPyPltComboBox,
@@ -12,6 +12,21 @@ Class {
 	],
 	#category : #'Sandblocks-Python'
 }
+
+{ #category : #defaults }
+SBPyPltComboBox class >> find: aString inItemDefinitions: aCollection fallback: aBlock [
+	^ aCollection detect: [:i | i submorphs first contents = aString]
+		ifFound: [:i | i]
+		ifNone: [ aBlock value: aCollection ].
+]
+
+{ #category : #defaults }
+SBPyPltComboBox class >> itemDefinitionsToMorphs: aCollection [
+"returns a collection of morphs given aCollection like {{label. image. tooltip}...}"
+	^ aCollection collect: [:triplet | SBRow new cellGap: 8;
+				addMorphBack: (SBStringMorph new contents: triplet first);
+				addMorphBack: triplet second].
+]
 
 { #category : #'as yet unclassified' }
 SBPyPltComboBox >> chooseMorphs: aCollection [
@@ -39,16 +54,18 @@ SBPyPltComboBox >> click: anEvent [
 
 { #category : #'as yet unclassified' }
 SBPyPltComboBox >> contents [
+	(self object class ~= SBRow) ifTrue: [^ self object].
 	^ self object firstSubmorph contents
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPltComboBox >> display: anObject [
-"shows image of row iff image is small enough, else shows string"
+SBPyPltComboBox >> display [
+"returns morph to display"
 
-	 (self isSmallImage: anObject) ifTrue: [^ anObject submorphs second form scaledIntoFormOfSize: 30@30].
+	(object class ~= SBRow) ifTrue: [^object].
+	 (self hasObjectSmallImage) ifTrue: [^ object submorphs second form scaledIntoFormOfSize: 30@30].
 	
-	^ anObject submorphs first contents
+	^ object submorphs first contents
 ]
 
 { #category : #'as yet unclassified' }
@@ -70,6 +87,19 @@ SBPyPltComboBox >> handlesMouseDown: evt [
 ]
 
 { #category : #'as yet unclassified' }
+SBPyPltComboBox >> hasObjectSmallImage [
+"determines whether to show string or image in selection"
+
+	| isImage isSmallImage |
+	
+	(object class ~= SBRow) ifTrue: [^ false].
+	
+	isImage := object submorphs second class = ImageMorph.
+	isSmallImage := isImage and: [object submorphs second form extent y < 35].
+	^ isSmallImage
+]
+
+{ #category : #'as yet unclassified' }
 SBPyPltComboBox >> icons: aCollection [
 
 	icons := aCollection
@@ -82,17 +112,6 @@ SBPyPltComboBox >> initialize [
 	
 	self addMorphBack: (SBStringMorph new opacity: 0.7).
 	self addMorphBack: (SBStringMorph new).
-]
-
-{ #category : #'as yet unclassified' }
-SBPyPltComboBox >> isSmallImage: anObject [
-"determines whether to show string or image in selection"
-
-	| isImage isSmallImage |
-	
-	isImage := anObject submorphs second class = ImageMorph.
-	isSmallImage := isImage and: anObject submorphs second form extent y < 35.
-	^ isSmallImage
 ]
 
 { #category : #'as yet unclassified' }
@@ -114,9 +133,9 @@ SBPyPltComboBox >> object: anObject [
 	
 	self removeMorph: self lastSubmorph.
 	
-	(self isSmallImage: object) 
-		ifTrue: [self addMorphBack: (ImageMorph new image: (self display: anObject))] 
-		ifFalse: [self addMorphBack: (SBStringMorph new contents: (self display: anObject))].
+	(self hasObjectSmallImage) 
+		ifTrue: [self addMorphBack: (ImageMorph new image: self display)] 
+		ifFalse: [self addMorphBack: (SBTextBubble new contents: self display)].
 	
 	icons ifNotNil: [ | index icon |
 		index := values indexOf: object.

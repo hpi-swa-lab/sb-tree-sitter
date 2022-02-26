@@ -10,6 +10,5 @@ Class {
 { #category : #'as yet unclassified' }
 SBPyPltPalettePlot class >> buildOn: aBuilder [
 	aBuilder addSectionHeader: 'Plot Parameter'.
-	
 	self buildOnLine2d: aBuilder.
 ]

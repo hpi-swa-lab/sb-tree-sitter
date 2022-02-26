@@ -1,5 +1,5 @@
 "
-A class containing all images used for matplotlib.
+All images used for matplotlib.
 "
 Class {
 	#name : #SBPyPltImage,

@@ -1,5 +1,5 @@
 "
-Base class for all python palettes. Palettes are referenced by the 'palettes' selector. See the sandblocks documentation for more details. 
+Base class for all python palettes. Palettes are referenced by the static 'palettes' selector.
 "
 Class {
 	#name : #SBPyPalette,
@@ -30,13 +30,13 @@ SBPyPalette class >> buildOnLine2d: aBuilder [
 "Palette for matplotlib Line2D properties, which are used e.g. by the args of SBPyPalettePlot (ax.plot()), SBPyPaletteAxvline (ax.axvline())"
 
 	aBuilder addBlock: 'Set the alpha value used for blending - not supported on all backends.' as: 
-		(SBPyPltAlpha new factory: SBPython instance; createReplacement: '0.5').
+		(SBPython parseKeywordArgument: 'alpha=0.5').
 		
 	aBuilder addBlock: 'Set the color.' as:
-		(SBPyPltColor new factory: SBPython instance; createReplacement: 'blue').
+		(SBPython parseKeywordArgument: 'color="blue"').
 		
 	aBuilder addBlock: 'Set a label that will be displayed in the legend.' as:
-		(SBPyPltLabel new factory: SBPython instance; createReplacement: 'obj').
+		(SBPython parseKeywordArgument: 'label="shown in legend"').
 
 	aBuilder addSubSectionHeader: 'Line-specific'.
 	
@@ -59,8 +59,7 @@ The drawstyle determines how the points are connected.' as:
 	aBuilder addBlock: 'Set the linestyle of the line.' as:
 		(SBPython parseKeywordArgument: 'linestyle="-"').
 		
-	aBuilder addBlock: 'Set the line width in points.' as:
-		(SBPyPltLinewidth new factory: SBPython instance; createReplacement: '2').
+	aBuilder addBlock: 'Set the line width in points.' as: (SBPython parseKeywordArgument: 'linewidth=2').
 	
 	aBuilder addBlock: 'How to draw the end caps if the line is solid (not is_dashed).' as:
 		(SBPython parseKeywordArgument: 'solid_capstyle="butt"').
@@ -81,7 +80,7 @@ The drawstyle determines how the points are connected.' as:
 	).
 	
 	aBuilder addBlock: 'Set the line marker.' as:
-		(SBPython parseKeywordArgument: 'marker="o"').
+		(SBPython parseKeywordArgument: 'marker="red"').
 		
 	aBuilder addBlock: 'Set the marker edge color.' as:
 		(SBPython parseKeywordArgument: 'markeredgecolor="red"').
@@ -125,15 +124,13 @@ If zooming in on a plot when using float arguments then the actual data points t
 	
 	aBuilder addSubSectionHeader: 'Misc'.
 		
-	aBuilder addBlock: '(2, N) array or two 1D arrays.' as:
-		(SBPyPltData new factory: SBPython instance; createReplacement: 'X').
+	aBuilder addBlock: '(2, N) array or two 1D arrays.' as: (SBPython parseKeywordArgument: 'data=obj').
 		
 	aBuilder addBlock: 'Set the Figure instance the artist belongs to. A figure is the top level container for all the plot elements.
 The Figure instance supports callbacks through a callbacks attribute which is a CallbackRegistry instance. The events you can connect to are "dpi_changed", and the callback will be called with func(fig) where fig is the Figure instance.' as:
 		(SBPython parseKeywordArgument: 'figure=plt.figure()').
 		
-	aBuilder addBlock: 'Set the (group) id for the artist.' as:
-		(SBPyPltGid new factory: SBPython instance; createReplacement: 'group1').
+	aBuilder addBlock: 'Set the (group) id for the artist.' as: (SBPython parseKeywordArgument: 'gid="group1"').
 		
 	aBuilder addBlock: 'Set if artist is to be included in layout calculations, E.g. Constrained Layout Guide, Figure.tight_layout(), and fig.savefig(fname, bbox_inches="tight").' as:
 		(SBPython parseKeywordArgument: 'in_layout=False').
@@ -190,13 +187,13 @@ Snapping is currently only supported by the Agg and MacOSX backends.' as:
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPalette class >> collapseWithSignature: aString [
-"returns block that collapses the first statement of the applied module and returns the module"
-	^ [:module |
-		module access children first collapseBlock.
-		module access children first submorphs first contents: 'def'.
-		module access children first submorphs second contents: aString.
-		module]
+SBPyPalette class >> collapse: aSBInlineBlock withSignature: aString [
+"collapses the first statement of aSBInlineBlock and returns aSBInlineBlock"
+	aSBInlineBlock access children first collapseBlock.
+	aSBInlineBlock access children first submorphs first contents: 'def'.
+	aSBInlineBlock access children first submorphs second contents: aString.
+	^ aSBInlineBlock
+
 ]
 
 { #category : #'as yet unclassified' }

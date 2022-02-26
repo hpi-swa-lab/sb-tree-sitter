@@ -1,3 +1,6 @@
+"
+Replacement for ax.axvline
+"
 Class {
 	#name : #SBPyPltAxvline,
 	#superclass : #SBPyPltPlots,
@@ -17,9 +20,7 @@ SBPyPltAxvline class >> match: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'call')
 		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacementOfArgs: (aDictionary at: 'call') access arguments)
-			
-		
+			createReplacementOfArgs: (aDictionary at: 'call') access arguments buildCopy)
 ]
 
 { #category : #'as yet unclassified' }
@@ -49,5 +50,5 @@ SBPyPltAxvline >> palettes [
 SBPyPltAxvline >> writeSourceOn: aStream [
 
 	aStream nextPutAll: 'ax.axvline'.
-	(self firstSubmorph submorphs asOrderedCollection at: 2) writeSourceOn: aStream.
+	(self firstSubmorph submorphs asOrderedCollection second) writeSourceOn: aStream.
 ]

@@ -1,5 +1,5 @@
 "
-I am the class representing the matplotlib scatter
+Replacement for ax.scatter
 "
 Class {
 	#name : #SBPyPltScatter,
@@ -20,7 +20,7 @@ SBPyPltScatter class >> match: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'call')
 		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacementOfArgs: (aDictionary at: 'call') access arguments)
+			createReplacementOfArgs: (aDictionary at: 'call') access arguments buildCopy)
 ]
 
 { #category : #'initialize-release' }
@@ -50,5 +50,5 @@ SBPyPltScatter >> palettes [
 SBPyPltScatter >> writeSourceOn: aStream [
 
 	aStream nextPutAll: 'ax.scatter'.
-	(self firstSubmorph submorphs asOrderedCollection at: 2) writeSourceOn: aStream.
+	(self firstSubmorph submorphs second) writeSourceOn: aStream.
 ]

@@ -22,25 +22,23 @@ SBPyPltSetLabel class >> matchPython: aDictionary do: aBlock [
 	| functionName axis |
 	functionName := (aDictionary at: 'setLabel') contents.
 	
-	((functionName = 'set_xlabel') or: (functionName = 'set_ylabel')) ifFalse: [^ nil].
+	((functionName = 'set_xlabel') or: [functionName = 'set_ylabel']) ifFalse: [^ nil].
 	
-	axis := functionName = 'set_xlabel' ifTrue: 'x' ifFalse: 'y'.
+	axis := functionName = 'set_xlabel' ifTrue: ['x'] ifFalse: ['y'].
 	
 	^ aBlock
 		value: (aDictionary at: 'call')
 		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacement: (aDictionary at: 'param') contents
-			forAxis: axis
-			)
+			createReplacementWithLabel: (aDictionary at: 'param') contents axis: axis)
 ]
 
 { #category : #'initialize-release' }
-SBPyPltSetLabel >> createReplacement: aLabel forAxis: aString [
+SBPyPltSetLabel >> createReplacementWithLabel: aString axis: anotherString [
 	
 	self
 		addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: (aString, ' axis label:'));
-			addMorphBack: (SBTextBubble new contents: aLabel);
+			addMorphBack: (SBStringMorph new contents: (anotherString, ' axis label:'));
+			addMorphBack: (SBTextBubble new contents: aString);
 			cellGap: 4
 		)
 ]
@@ -50,7 +48,7 @@ SBPyPltSetLabel >> writeSourceOn: aStream [
 
 	| xy label |
 	xy := self firstSubmorph firstSubmorph contents first asString.
-	label := (self firstSubmorph submorphs at: 2) contents.
+	label := (self firstSubmorph submorphs second) contents.
 	
 	aStream nextPutAll: ('ax.set_',xy,'label("',label,'")').
 ]

@@ -1,5 +1,5 @@
 "
-This replacements shows the image. It renders the whole AST and adds python code to write the output image to stdout.
+This replacements shows the image by executing its enclosing module.
 "
 Class {
 	#name : #SBPyPltShowPlots,
@@ -37,23 +37,6 @@ SBPyPltShowPlots >> createReplacement [
 		addMorphBack: (image asMorph)).
 ]
 
-{ #category : #'accessing - extension' }
-SBPyPltShowPlots >> getModuleSource [
-"traverses AST upwards until the whole module is included. Then parse python source"
-
-	| aStream closestCommonAncestor |
-	
-	aStream := ReadWriteStream on: String new.
-	
-	closestCommonAncestor := self.
-	[ closestCommonAncestor type ~= 'module' ] whileTrue: [
-		closestCommonAncestor := closestCommonAncestor owner.
-	].
-	
-	closestCommonAncestor writeSourceOn: aStream.
-	^ aStream contents
-]
-
 { #category : #'initialize-release' }
 SBPyPltShowPlots >> initialize [
 
@@ -75,16 +58,13 @@ SBPyPltShowPlots >> type [
 
 { #category : #updating }
 SBPyPltShowPlots >> updateImage [
-
 	[
-	
-		image := (Form fromBinaryStream: (Base64MimeConverter mimeDecodeToBytes: (SBPython instance runtime evaluate: self getModuleSource) readStream)) asMorph.
-
+		image := (Form fromBinaryStream: (Base64MimeConverter mimeDecodeToBytes: self toplevel evaluate readStream)) asMorph.
 		self firstSubmorph removeMorph: (self firstSubmorph lastSubmorph).
 		self firstSubmorph addMorphBack: image.
 		
-	] on: Error do: [ :err |
-		self firstSubmorph removeMorph: (self firstSubmorph lastSubmorph).
+	] on: Error do: [ :err | "print error code"
+		self firstSubmorph submorphs removeLast.
 		self firstSubmorph addMorphBack: (SBMultilineOwnTextMorph new
 			contents: err description;
 			maxWidth: 400;
