@@ -64,9 +64,9 @@ SBPyPltShowPlots >> updateImage [
 		self firstSubmorph addMorphBack: image.
 		
 	] on: Error do: [ :err | "print error code"
-		self firstSubmorph submorphs removeLast.
+		self firstSubmorph removeMorph: (self firstSubmorph submorphs last).
 		self firstSubmorph addMorphBack: (SBMultilineOwnTextMorph new
-			contents: err description;
+			contents: err contents;
 			maxWidth: 400;
 			yourself)
 	]
