@@ -9,6 +9,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBPyPltPaletteOverview class >> buildOn: aBuilder [
+	SBPyPltPaletteEntry buildOn: aBuilder.
+
 	self buildOnPlots: aBuilder.
 	self buildOnAxisCustomization: aBuilder.
 	

@@ -10,7 +10,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBPyPltAxis >> palettes [
 
-	^ {SBPyPltPaletteEntry. SBPyPltPaletteOverview}
+	^ {SBPyPltPaletteOverview}
 ]
 
 { #category : #'as yet unclassified' }
