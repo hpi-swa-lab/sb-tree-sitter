@@ -48,7 +48,7 @@ SBPyPltSetLim >> createReplacementRangeFrom: minString to: maxString forAxis: aS
 		).
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltSetLim >> writeSourceOn: aStream [
 
 	| xy minArg maxArg |

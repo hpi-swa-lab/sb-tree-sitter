@@ -43,7 +43,7 @@ SBPyPltSetLabel >> createReplacementWithLabel: aString axis: anotherString [
 		)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltSetLabel >> writeSourceOn: aStream [
 
 	| xy label |

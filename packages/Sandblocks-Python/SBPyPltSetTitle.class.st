@@ -37,7 +37,7 @@ SBPyPltSetTitle >> createReplacement: aLabel [
 		)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltSetTitle >> writeSourceOn: aStream [
 
 	| label |

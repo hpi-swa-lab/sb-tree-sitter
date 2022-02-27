@@ -28,7 +28,7 @@ SBPyPltComboBox class >> itemDefinitionsToMorphs: aCollection [
 				addMorphBack: triplet second].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SBPyPltComboBox >> chooseMorphs: aCollection [
 
 	| dialog |
@@ -46,19 +46,19 @@ SBPyPltComboBox >> chooseMorphs: aCollection [
 	^ dialog getUserResponseAtHand
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 SBPyPltComboBox >> click: anEvent [
 
 	self containingSandblock select
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBPyPltComboBox >> contents [
 	(self object class ~= SBRow) ifTrue: [^ self object].
 	^ self object firstSubmorph contents
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBPyPltComboBox >> display [
 "returns morph to display"
 
@@ -68,7 +68,7 @@ SBPyPltComboBox >> display [
 	^ object submorphs first contents
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 SBPyPltComboBox >> doubleClick: evt [
 
 	| choice |
@@ -80,13 +80,13 @@ SBPyPltComboBox >> doubleClick: evt [
 			value: choice)]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBPyPltComboBox >> handlesMouseDown: evt [
 
 	^ true
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBPyPltComboBox >> hasObjectSmallImage [
 "determines whether to show string or image in selection"
 
@@ -99,13 +99,13 @@ SBPyPltComboBox >> hasObjectSmallImage [
 	^ isSmallImage
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBPyPltComboBox >> icons: aCollection [
 
 	icons := aCollection
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBPyPltComboBox >> initialize [
 
 	super initialize.
@@ -114,19 +114,19 @@ SBPyPltComboBox >> initialize [
 	self addMorphBack: (SBStringMorph new).
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 SBPyPltComboBox >> mouseDown: evt [
 
 	evt hand waitForClicksOrDrag: self event: evt
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBPyPltComboBox >> object [
 
 	^ object
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBPyPltComboBox >> object: anObject [
 
 	object := anObject.
@@ -145,19 +145,19 @@ SBPyPltComboBox >> object: anObject [
 		self addMorphBack: icon]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBPyPltComboBox >> prefix: aString [
 
 	self firstSubmorph contents: aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBPyPltComboBox >> tooltips: aCollection [
 
 	tooltips := aCollection
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBPyPltComboBox >> values: aCollection [
 
 	values := aCollection

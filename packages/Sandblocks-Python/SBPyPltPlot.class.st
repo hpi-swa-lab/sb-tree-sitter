@@ -48,7 +48,7 @@ SBPyPltPlot >> palettes [
 	^ {SBPyPltPalettePlot}, super palettes
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltPlot >> writeSourceOn: aStream [
 
 	aStream nextPutAll: 'ax.plot'.

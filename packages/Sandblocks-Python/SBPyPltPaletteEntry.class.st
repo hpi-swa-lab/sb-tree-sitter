@@ -18,6 +18,6 @@ SBPyPltPaletteEntry class >> buildOn: aBuilder [
 
 { #category : #'as yet unclassified' }
 SBPyPltPaletteEntry class >> language [
-"skipped for now because SBPyPltPaletteOverview is shown instead and includes self buildOn:. This is done so the matplotlib overview is visible between two matplotliblib calls, too."
+"skipped for now because SBPyPltPaletteOverview is shown instead and includes self buildOn:. This is done so the matplotlib overview is visible between two matplotlib calls, too."
 	"^ #python"
 ]

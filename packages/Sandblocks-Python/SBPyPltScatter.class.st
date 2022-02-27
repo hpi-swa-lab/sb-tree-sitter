@@ -46,7 +46,7 @@ SBPyPltScatter >> palettes [
 	^ {SBPyPltPaletteScatter}, super palettes
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltScatter >> writeSourceOn: aStream [
 
 	aStream nextPutAll: 'ax.scatter'.

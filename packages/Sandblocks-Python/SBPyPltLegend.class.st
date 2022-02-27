@@ -26,7 +26,7 @@ SBPyPltLegend >> createReplacement [
 	self addMorphBack: (SBStringMorph new contents: 'Show legend').
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltLegend >> writeSourceOn: aStream [
 
 	aStream nextPutAll: 'ax.legend()'.

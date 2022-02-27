@@ -117,24 +117,24 @@ SBPyPltParamSimpleReplace class >> matchYmin: aDictionary do: aBlock [
 			createReplacementOfInputBlock: (SBPyNumberWithPrefix new prefix: 'ymin='; rangeFrom: 0.0 to: 1.0; floatSteps; contents: (aDictionary at: 'value') contents))
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBPyPltParamSimpleReplace >> createReplacementOfInputBlock: anInputBlock [
 "anInputBlock is any single input block that has a prefix, e.g. SBPyNumberWithPrefix, SBTextBubble"
 	self addMorphBack: anInputBlock.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltParamSimpleReplace >> palettes [
 "keyword args have no palettes because they can be shown in different contexts."
 	^ {}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltParamSimpleReplace >> type [
 	^ 'keyword_argument'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltParamSimpleReplace >> writeSourceOn: aStream [
 
 	| isAllDigits |

@@ -40,19 +40,19 @@ SBPyPltInitPlots >> createReplacement [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltInitPlots >> palettes [
 
 	^ {SBPyPltPaletteOverview}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltInitPlots >> type [
 
 	^ 'assignment'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltInitPlots >> writeSourceOn: aStream indent: aNumber [
 
 	aStream nextPutAll: ('

@@ -7,13 +7,13 @@ Class {
 	#category : #'Sandblocks-Python'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltAxis >> palettes [
 
 	^ {SBPyPltPaletteOverview}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltAxis >> type [
 	^ 'call'
 ]

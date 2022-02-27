@@ -23,7 +23,7 @@ SBPyPltAxvline class >> match: aDictionary do: aBlock [
 			createReplacementOfArgs: (aDictionary at: 'call') access arguments buildCopy)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBPyPltAxvline >> createReplacementOfArgs: aSBTSFieldAccessor [
 		
 	self addMorphBack: (SBRow new
@@ -40,13 +40,13 @@ SBPyPltAxvline >> createReplacementOfArgs: aSBTSFieldAccessor [
 	)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltAxvline >> palettes [
 
 	^ {SBPyPltPaletteAxvline}, super palettes
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltAxvline >> writeSourceOn: aStream [
 
 	aStream nextPutAll: 'ax.axvline'.

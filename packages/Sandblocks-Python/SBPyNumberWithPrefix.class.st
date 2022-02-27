@@ -34,7 +34,7 @@ SBPyNumberWithPrefix >> contents: aString [
 
 { #category : #testing }
 SBPyNumberWithPrefix >> floatSteps [
-"does range support floating steps?"
+"by default, only integer values are supported"
 	floatSteps := true.
 ]
 

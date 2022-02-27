@@ -16,76 +16,10 @@ SBPyPltPaletteLine2d class >> buildOn: aBuilder [
 		
 	aBuilder addBlock: 'Set a label that will be displayed in the legend.' as:
 		(SBPython parseKeywordArgument: 'label="shown in legend"').
-
-	aBuilder addSubSectionHeader: 'Line-specific'.
 	
-	aBuilder addBlock: 'How to draw the end caps if the line is is_dashed.' as:
-		(SBPython parseKeywordArgument: 'dash_capstyle="butt"').
-		
-	aBuilder addBlock: 'How to join segments of the line if it is_dashed.' as:
-		(SBPython parseKeywordArgument: 'dash_joinstyle="round"').
-		
-	aBuilder addBlock: 'Set the dash sequence.
-The dash sequence is a sequence of floats of even length describing the length of dashes and spaces in points.
-For example, (5, 2, 1, 2) describes a sequence of 5 point and 1 point dashes separated by 2 point spaces.' as:
-		(SBPyPltDashes new factory: SBPython instance; createReplacementFromSequence: {'3'. '1'}).
-		
-	aBuilder addBlock: 'Set the drawstyle of the plot.
-The drawstyle determines how the points are connected.' as:
-		(SBPython parseKeywordArgument: 'drawstyle="steps"').
-		
-	aBuilder addBlock: 'Set the linestyle of the line.' as:
-		(SBPython parseKeywordArgument: 'linestyle="-"').
-		
-	aBuilder addBlock: 'Set the line width in points.' as: (SBPython parseKeywordArgument: 'linewidth=2').
+	self buildOnLineSpecific: aBuilder.
 	
-	aBuilder addBlock: 'How to draw the end caps if the line is solid (not is_dashed).' as:
-		(SBPython parseKeywordArgument: 'solid_capstyle="butt"').
-		
-	aBuilder addBlock: 'How to join segments if the line is solid.' as:
-		(SBPython parseKeywordArgument: 'solid_joinstyle="round"').
-	
-	
-	
-	aBuilder addSubSectionHeader: 'Marker'.
-	aBuilder content addMorphBack: (SBRow new
-		addMorphBack: (SBMultilineOwnTextMorph new
-			contents: ( 'Customize the markers for the data points.' asText 
-				addAttribute: (TextFontChange fontNumber: 1));
-			maxWidth: 90;
-			yourself);
-		addMorphBack: ((SBPyPltImage markersExplanation form scaledIntoFormOfSize: 60@60) asMorph)
-	).
-	
-	aBuilder addBlock: 'Set the line marker.' as:
-		(SBPython parseKeywordArgument: 'marker="red"').
-		
-	aBuilder addBlock: 'Set the marker edge color.' as:
-		(SBPython parseKeywordArgument: 'markeredgecolor="red"').
-		
-	aBuilder addBlock: 'Set the marker edge width in points.' as:
-		(SBPython parseKeywordArgument: 'markeredgewidth=1.5').
-		
-	aBuilder addBlock: 'Set the marker edge width in points.' as:
-		(SBPython parseKeywordArgument: 'markerfacecolor="green"').
-		
-	aBuilder addBlock: 'Set the alternate marker face color.' as:
-		(SBPython parseKeywordArgument: 'markerfacecoloralt="yellow"').
-		
-	aBuilder addBlock: 'Set the marker size in points.' as:
-		(SBPython parseKeywordArgument: 'markersize=2').
-		
-	aBuilder addBlock: 'Set the marker fill style.' as:
-		(SBPython parseKeywordArgument: 'fillstyle="full"').
-
-	aBuilder addBlock: 'Set the markevery property to subsample the plot when using markers. Note: Setting markevery will still only draw markers at actual data points. While the float argument form aims for uniform visual spacing, it has to coerce from the ideal spacing to the nearest available data point. Depending on the number and distribution of data points, the result may still not look evenly spaced.
-
-When using a start offset to specify the first marker, the offset will be from the first data point which may be different from the first the visible data point if the plot is zoomed in.
-
-If zooming in on a plot when using float arguments then the actual data points that have markers will change because the distance between markers is always determined from the display-coordinates axes-bounding-box-diagonal regardless of the actual axes data limits.' as:
-		(SBPython parseKeywordArgument: 'markevery=5').
-		
-	
+	self buildOnMarker: aBuilder.
 	
 	aBuilder addSubSectionHeader: 'Clipping'.
 	
@@ -162,4 +96,78 @@ Snapping is currently only supported by the Agg and MacOSX backends.' as:
 		
 	aBuilder addBlock: 'Set the zorder for the artist. Artists with lower zorder values are drawn first.' as:
 		(SBPython parseKeywordArgument: 'zorder=99').
+]
+
+{ #category : #'as yet unclassified' }
+SBPyPltPaletteLine2d class >> buildOnLineSpecific: aBuilder [
+
+	aBuilder addSubSectionHeader: 'Line-specific'.
+	
+	aBuilder addBlock: 'How to draw the end caps if the line is is_dashed.' as:
+		(SBPython parseKeywordArgument: 'dash_capstyle="butt"').
+		
+	aBuilder addBlock: 'How to join segments of the line if it is_dashed.' as:
+		(SBPython parseKeywordArgument: 'dash_joinstyle="round"').
+		
+	aBuilder addBlock: 'Set the dash sequence.
+The dash sequence is a sequence of floats of even length describing the length of dashes and spaces in points.
+For example, (5, 2, 1, 2) describes a sequence of 5 point and 1 point dashes separated by 2 point spaces.' as:
+		(SBPyPltDashes new factory: SBPython instance; createReplacementFromSequence: {'3'. '1'}).
+		
+	aBuilder addBlock: 'Set the drawstyle of the plot.
+The drawstyle determines how the points are connected.' as:
+		(SBPython parseKeywordArgument: 'drawstyle="steps"').
+		
+	aBuilder addBlock: 'Set the linestyle of the line.' as:
+		(SBPython parseKeywordArgument: 'linestyle="-"').
+		
+	aBuilder addBlock: 'Set the line width in points.' as: (SBPython parseKeywordArgument: 'linewidth=2').
+	
+	aBuilder addBlock: 'How to draw the end caps if the line is solid (not is_dashed).' as:
+		(SBPython parseKeywordArgument: 'solid_capstyle="butt"').
+		
+	aBuilder addBlock: 'How to join segments if the line is solid.' as:
+		(SBPython parseKeywordArgument: 'solid_joinstyle="round"').
+]
+
+{ #category : #'as yet unclassified' }
+SBPyPltPaletteLine2d class >> buildOnMarker: aBuilder [
+
+	aBuilder addSubSectionHeader: 'Marker'.
+	aBuilder content addMorphBack: (SBRow new
+		addMorphBack: (SBMultilineOwnTextMorph new
+			contents: ( 'Customize the markers for the data points.' asText 
+				addAttribute: (TextFontChange fontNumber: 1));
+			maxWidth: 90;
+			yourself);
+		addMorphBack: ((SBPyPltImage markersExplanation form scaledIntoFormOfSize: 60@60) asMorph)
+	).
+	
+	aBuilder addBlock: 'Set the line marker.' as:
+		(SBPython parseKeywordArgument: 'marker="red"').
+		
+	aBuilder addBlock: 'Set the marker edge color.' as:
+		(SBPython parseKeywordArgument: 'markeredgecolor="red"').
+		
+	aBuilder addBlock: 'Set the marker edge width in points.' as:
+		(SBPython parseKeywordArgument: 'markeredgewidth=1.5').
+		
+	aBuilder addBlock: 'Set the marker edge width in points.' as:
+		(SBPython parseKeywordArgument: 'markerfacecolor="green"').
+		
+	aBuilder addBlock: 'Set the alternate marker face color.' as:
+		(SBPython parseKeywordArgument: 'markerfacecoloralt="yellow"').
+		
+	aBuilder addBlock: 'Set the marker size in points.' as:
+		(SBPython parseKeywordArgument: 'markersize=2').
+		
+	aBuilder addBlock: 'Set the marker fill style.' as:
+		(SBPython parseKeywordArgument: 'fillstyle="full"').
+
+	aBuilder addBlock: 'Set the markevery property to subsample the plot when using markers. Note: Setting markevery will still only draw markers at actual data points. While the float argument form aims for uniform visual spacing, it has to coerce from the ideal spacing to the nearest available data point. Depending on the number and distribution of data points, the result may still not look evenly spaced.
+
+When using a start offset to specify the first marker, the offset will be from the first data point which may be different from the first the visible data point if the plot is zoomed in.
+
+If zooming in on a plot when using float arguments then the actual data points that have markers will change because the distance between markers is always determined from the display-coordinates axes-bounding-box-diagonal regardless of the actual axes data limits.' as:
+		(SBPython parseKeywordArgument: 'markevery=5').
 ]

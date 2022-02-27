@@ -24,7 +24,7 @@ SBPyPltShowPlots class >> matchPython: aDictionary do: aBlock [
 		value: (self new factory: (aDictionary at: 'show') factory; createReplacement)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 SBPyPltShowPlots >> artefactSaved: anArtefact [
 	anArtefact = self containingArtefact ifTrue: [self updateImage].
 ]
@@ -44,13 +44,13 @@ SBPyPltShowPlots >> initialize [
 	image := '' asMorph.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltShowPlots >> palettes [
 
 	^ {SBPyPltPaletteOverview}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltShowPlots >> type [
 
 	^ 'call'
@@ -72,7 +72,7 @@ SBPyPltShowPlots >> updateImage [
 	]
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #copying }
 SBPyPltShowPlots >> writeSourceOn: aStream [
 "python code prints the image to stdout, so it can be parsed as a Form"
 

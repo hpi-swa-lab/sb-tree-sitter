@@ -49,12 +49,12 @@ SBPyPltParamCBReplace >> prefix: aString [
 	prefix := aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltParamCBReplace >> type [
 	^ 'keyword_argument'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltParamCBReplace >> writeSourceOn: aStream [
 
 	aStream nextPutAll: (self prefix, '"', self firstSubmorph contents, '"')

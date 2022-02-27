@@ -55,7 +55,7 @@ SBPyPltSetScale >> itemDefinitions [
 Since the values close to zero tend toward infinity, there is a need to have a range around zero that is linear. The parameter linthresh allows the user to specify the size of this range (-linthresh, linthresh).'}}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltSetScale >> writeSourceOn: aStream [
 
 	| xy label |
