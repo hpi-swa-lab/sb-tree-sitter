@@ -1,5 +1,5 @@
 "
-Replaces get routes in express.js applications.
+Replaces GET routes in ExpressJS applications.
 "
 Class {
 	#name : #SBJsEmbeddedExpressGet,
@@ -7,13 +7,13 @@ Class {
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBJsEmbeddedExpressGet >> url: aString headers: aHeaders data: aData [
 	"Constructs a lean designed SBJsFetch object"
 	self url: aString method: #get headers: aHeaders data: aData
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBJsEmbeddedExpressGet >> writeSourceOn: aStream [ 
 	"Transforms into JS source code"
 	

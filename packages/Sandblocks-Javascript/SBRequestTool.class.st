@@ -1,5 +1,5 @@
 "
-Base class which can be used standalone to perform HTTP requests.
+Standalone Request Tool. This appears in the JS Palette and can be placed via Drag & Drop next to the source code to perform requests. It allows to build requests via a UI. Headers, Parameter, and Body can be added and the HTTP method can be switched. 
 "
 Class {
 	#name : #SBRequestTool,
@@ -27,11 +27,13 @@ Class {
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBRequestTool >> addBodySection: aBody [
-"Add the UI component for a body"
+
 	| key |
+	"Add the UI component for a body"
 	aBody ifNotNil: [
+		"isRawData is explained in the Setter of the variable itself"
 		isRawData
 			ifFalse: [
 				bodyMorph
@@ -41,7 +43,7 @@ SBRequestTool >> addBodySection: aBody [
 						cellGap: cellGapConstant;
 						addMorphBack: (SBRow new
 							cellGap: 0;
-							addMorphBack: (SBJsRequestToolFieldTextBubble new
+							addMorphBack: (SBRequestToolFieldTextBubble new
 								cellGap: 0;
 								placeholderText: 'key');
 							addMorphBack: (SBTextBubble new
@@ -50,36 +52,35 @@ SBRequestTool >> addBodySection: aBody [
 			ifTrue: [
 				bodyMorph
 					addMorphBack: (SBStringMorph new contents: 'Body');
-					addMorphBack: (SBJsRequestToolBodyTextBubble new contents: aBody)].
+					addMorphBack: (SBRequestToolBodyTextBubble new contents: aBody)].
 		
 		key := url, method asString.
 		Examples at: key ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBRequestTool >> addExampleSection [
 	"Add the UI component for displaying the examples."
-	SBToggledCode comment: '' active: 1 do: {
-		[ | map |
-			self addMorphBack: (SBRow new
-				cellGap: cellGapConstant;
-				addMorphBack: (SBStringMorph new contents: 'Examples');
-				addMorphBack: (SBRow new cellGap: cellGapConstant)).
-				
-			method = #post ifTrue: [exampleMorph := self submorphs eighth].
-			method = #get ifTrue: [exampleMorph := self submorphs seventh].
-			map := Examples at: url, method asString ifAbsent: [].
-			map ifNotNil: [ map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]].
-		}
+
+	[ | map |
+		self addMorphBack: (SBRow new
+			cellGap: cellGapConstant;
+			addMorphBack: (SBStringMorph new contents: 'Examples');
+			addMorphBack: (SBRow new cellGap: cellGapConstant)).
+		
+		method = #post ifTrue: [exampleMorph := self submorphs eighth].
+		method = #get ifTrue: [exampleMorph := self submorphs seventh].
+		map := Examples at: url, method asString ifAbsent: [].
+		map ifNotNil: [map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBRequestTool >> addFieldAction [
 "Add field parameter for post requests with no raw data."
 	self submorphs sixth
 		listDirection: #topToBottom;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsRequestToolFieldTextBubble new
+			addMorphBack: (SBRequestToolFieldTextBubble new
 				placeholderText: 'key');
 			addMorphBack: (SBTextBubble new
 				placeholderText: 'value');
@@ -87,12 +88,12 @@ SBRequestTool >> addFieldAction [
 		cellGap: cellGapConstant.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBRequestTool >> addHeaderAction [
 "Add a new header."
 	headerMorph
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsRequestToolHeaderTextBubble new
+			addMorphBack: (SBRequestToolHeaderTextBubble new
 				placeholderText: 'key');
 			addMorphBack: (SBTextBubble new
 				placeholderText: 'value');
@@ -100,7 +101,7 @@ SBRequestTool >> addHeaderAction [
 		cellGap: cellGapConstant.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBRequestTool >> addHeaderAction: key value: value [
 "Add a new header with a given key and value."
 	| valueTextBubble |
@@ -108,7 +109,7 @@ SBRequestTool >> addHeaderAction: key value: value [
 	
 	headerMorph
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsRequestToolHeaderTextBubble new
+			addMorphBack: (SBRequestToolHeaderTextBubble new
 				contents: key);
 			addMorphBack: valueTextBubble;
 			 cellGap: 0);
@@ -117,13 +118,13 @@ SBRequestTool >> addHeaderAction: key value: value [
 	value = '' ifTrue: [].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBRequestTool >> addParamAction [
 "Add a new parameter"
 	paramMorph
 		submorphs;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsRequestToolParamTextBubble new
+			addMorphBack: (SBRequestToolParamTextBubble new
 				placeholderText: 'key');
 			addMorphBack: (SBTextBubble new
 				placeholderText: 'value');
@@ -132,13 +133,13 @@ SBRequestTool >> addParamAction [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBRequestTool >> addParamAction: key value: value [
 "Add a new parameter with a given key and value."
 	paramMorph
 		submorphs;
 		addMorphBack: (SBRow new
-			addMorphBack: (SBJsRequestToolParamTextBubble new
+			addMorphBack: (SBRequestToolParamTextBubble new
 				contents: key);
 			addMorphBack: (SBTextBubble new
 				contents: value);
@@ -146,7 +147,7 @@ SBRequestTool >> addParamAction: key value: value [
 		cellGap: cellGapConstant.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBRequestTool >> addParamSection: aParams [
 "Add the UI component to display parameters."
 	| s |
@@ -160,14 +161,6 @@ SBRequestTool >> addParamSection: aParams [
 	
 	paramMorph := self submorphs sixth.
 	params keysDo: [:key | self addParamAction: ((params at: key) key) asString  value:  ((params at: key) value) asString].
-	
-	"TODO: revisit"
-	SBToggledCode comment: '' active: 0 do: {
-		[
-			params keysDo: [:key | | k v |
-				k := (params at: key) submorphs first.
-				v := (params at: key) submorphs second.
-				self addParamAction: k contents value: v contents]]}.
 
 	method = #get ifTrue: [
 		s := url, method.
@@ -176,7 +169,7 @@ SBRequestTool >> addParamSection: aParams [
 			e size > 0 ifTrue: [self addExampleSection]]].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBRequestTool >> addRequestToExampleMap: response [
 "Add the response to the example map. Call this after send."
 	| map example |
@@ -186,7 +179,7 @@ SBRequestTool >> addRequestToExampleMap: response [
 	"Create the example"
 	method caseOf: {
 		[#get] -> [
-			example := SBJsRequestToolGetExample new
+			example := SBRequestToolGetExample new
 				icon: SBIcon iconSearch
 				label: response code asString
 				do: [example promptChangeValue].
@@ -196,7 +189,7 @@ SBRequestTool >> addRequestToExampleMap: response [
 				headers: headers deepCopy
 				params: params deepCopy].
 		[#post] -> [
-			example := SBJsRequestToolPostExample new
+			example := SBRequestToolPostExample new
 				icon: SBIcon iconSearch
 				label: response code asString
 				do: [example promptChangeValue].
@@ -221,29 +214,29 @@ SBRequestTool >> addRequestToExampleMap: response [
 		Examples at: url, method asString put: initDict]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> body [
 	^ data
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> body: aBody [
 	data := aBody
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> bodyMorph: aBodyMorph [
 	bodyMorph := aBodyMorph
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBRequestTool >> clearPanel [
 	(1 to: self submorphs size) do: [:n| | morph |
 		morph := self submorphs at: 1.
 		morph abandon].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBRequestTool >> collectParamsString [
 
 	| paramString init |
@@ -263,34 +256,34 @@ SBRequestTool >> collectParamsString [
 	^ paramString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> data: body [
 	data := body.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> examples [
 	^Examples.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> headerMorph [
 	^headerMorph.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> headers [
 	^headers
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> headers: aHeadersMap [
 	headers := aHeadersMap.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBRequestTool >> initCommons [
-	"Setup UI elements which are shared accross different methods."
+	"Setup UI elements which are shared accross different HTTP methods."
 
 	self
 		addMorphBack: (SBRow new
@@ -306,7 +299,7 @@ SBRequestTool >> initCommons [
 		addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
 			addMorphBack: (SBStringMorph new contents: 'Method');
-			addMorphBack: (SBJsRequestToolMethodSelect new object: method));
+			addMorphBack: (SBRequestToolMethodSelect new object: method));
 		addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
 			addMorphBack: (SBStringMorph new contents: 'Headers');
@@ -315,7 +308,7 @@ SBRequestTool >> initCommons [
 				icon: SBIcon iconPlusCircle label: 'Header' do: [self addHeaderAction]));
 		addMorphBack: SBRow new.
 	
-		"Initialize the the morphs centrally for easier acces"
+	"Set the the morphs centrally for easier acces"
 	urlMorph := self submorphs first.
 	methodMorph := self submorphs second submorphs second.
 	headerMorph :=  self submorphs fourth.
@@ -325,7 +318,7 @@ SBRequestTool >> initCommons [
 
 { #category : #'initialize-release' }
 SBRequestTool >> initGet [
-"Initializes a UI for get requests."
+"Initializes the UI for GET requests."
 	self
 		initCommons;
 		addParamSection: nil.
@@ -333,7 +326,7 @@ SBRequestTool >> initGet [
 
 { #category : #'initialize-release' }
 SBRequestTool >> initPost [
-"Initializes a UI for post requests."
+"Initializes the UI for POST requests."
 	self
 		initCommons;
 		addParamSection: nil.
@@ -348,7 +341,7 @@ SBRequestTool >> initPost [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> isRawData: aBoolean [
 "isRawData describes the body of a POST request. 
 If it is true the body can be JSON, Text, HTML, XML, ...
@@ -371,36 +364,31 @@ If isRawData is set to false the body can be e.g. form-data (key value pairs), b
 	isRawData := aBoolean.
 ]
 
-{ #category : #'initialize-release' }
-SBRequestTool >> maxNumberOfExamples [
-	^5.
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> method [
 	^method.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> method: aMethod [
 	method := aMethod.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> params [
 	^params
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> params: aParams [
 	params := aParams.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #request }
 SBRequestTool >> performGetRequest: urlWithParams [
 
 	| resp client response |
-	"Does a get call."
+	"Perform a GET request in Smalltalk"
 	client := WebClient new.
 	resp := client
 		httpGet: urlWithParams
@@ -420,9 +408,9 @@ SBRequestTool >> performGetRequest: urlWithParams [
 	self recreateFromMorphs
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #request }
 SBRequestTool >> performPostRequest: body url: aUrl [
-	"Does a post call."
+	"Perform a POST request in Smalltalk"
 	| resp client response tmpHeaders |
 	client := WebClient new.
 	"Deep copy the headers so that I can set a default for Content-Type"
@@ -450,7 +438,7 @@ SBRequestTool >> performPostRequest: body url: aUrl [
 	self recreateFromMorphs.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBRequestTool >> recreateFromMorphs [
 "Recreate the UI based on the currently filled form"
 
@@ -460,7 +448,7 @@ SBRequestTool >> recreateFromMorphs [
 	method = #post ifTrue: [self initPost]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBRequestTool >> recreateFromVariables: aHeaders params: aParams body: aBody [
 "Recreate the UI based on the given input. Used when recreating for Examples."
 	params := aParams.
@@ -471,7 +459,7 @@ SBRequestTool >> recreateFromVariables: aHeaders params: aParams body: aBody [
 	method = #post ifTrue: [self initPost]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #request }
 SBRequestTool >> send [
 	"Send delegates to the correct method to do the actual request."
 	| paramsString |
@@ -482,18 +470,18 @@ SBRequestTool >> send [
 	method = #post ifTrue: [
 		isRawData 
 			ifTrue: [self performPostRequest: data url: url asString, paramsString]
-			ifFalse: [self flag: #todo "TODO: collect fields and perform request"].
+			ifFalse: [self flag: #todo "Implement this for the case of a POST request with form data as body. (edge case which is not covered in this prototype at the moment)"].
 	
-	self flag: #todo "TODO: implement other methods"]
+	self flag: #todo "implement other methods here"]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRequestTool >> updateBody: body [
 	data := body contents
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #synchronization }
 SBRequestTool >> updateHeaders: aHeadersMorph [
 "Loop through the headers morphs and update the headers map"
 	| key value |
@@ -503,7 +491,7 @@ SBRequestTool >> updateHeaders: aHeadersMorph [
 		(key ~= nil and: [(key ~= '')]) ifTrue: [headers at: key put: value]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #synchronization }
 SBRequestTool >> updateParams: aParamsMorph [
 "Loop through the params morphs and update the param map"
 	| key value |
@@ -513,7 +501,7 @@ SBRequestTool >> updateParams: aParamsMorph [
 		(key ~= nil) & (key ~= '') ifTrue: [params at: (key, value) put: (key -> value)]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #synchronization }
 SBRequestTool >> updatePayloadInObjectInstance [
 "Update the class variables (headers, params, url, body...) based on the current form"
 	self updateHeaders: headerMorph submorphs.
@@ -530,28 +518,28 @@ SBRequestTool >> updatePayloadInObjectInstance [
 SBRequestTool >> url: aString method: aMethod headers: aHeaders data: aData [
 	"Constructs a SBRequestTool"
 
-	"exampleThreshold sets the maximum of examples per request and response code."
+	"maxNumberOfExamples sets the maximum of examples which will be stored per endpoint and response code."
+	"e.g.,  5 examples for http://localhost:8080/user with response code 200"
 	maxNumberOfExamples := 5.
 	url := aString.
 	headers := aHeaders.
 	data := aData.
 	method := aMethod.
 	cellGapConstant := 3.
-	"isRawData indicates if body in POST is of type raw. TODO: might be improved"
+	"isRawData is explained in the Setter of the variable itself"
 	isRawData := true.
 	Examples ifNil: [Examples := Dictionary new].
+	"Use the next line delete the existing examples."
 	"Examples := Dictionary new."
 	params := Dictionary new.
 	exploreResponse := true.
 	
-	"Can not use recreateFromVariables:params:body: here because it is overridden in the EmbeddedRequests
-	and uses the sourceMorph there, which is undefined at first construction"
 	method = #get ifTrue: [self initGet].
 	method = #post ifTrue: [self initPost].
 	self flag: #todo. "implement other methods (put, trace, etc.)"
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBRequestTool >> writeSourceOn: aStream [ 
 	self subclassResponsibility.
 ]

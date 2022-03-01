@@ -1,5 +1,5 @@
 "
-Base class to replace in Express.js routes.
+SBJsEmbeddedExpress is a visual replacement for routes in ExpressJS framework. It will replace patterns such a app.get(), app.get() with the UI defined in SBEmbeddedRequestTool.
 "
 Class {
 	#name : #SBJsEmbeddedExpress,
@@ -42,13 +42,13 @@ SBJsEmbeddedExpress class >> matchJs: aDictionary do: aBlock [
 		otherwise: [^ nil]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBJsEmbeddedExpress >> recreateFromMorphs [
 	super recreateFromMorphs.
 	self addMorphBack: sourceMorph
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBJsEmbeddedExpress >> recreateFromVariables: aHeaders params: aParams body: aBody [
 	super recreateFromVariables: aHeaders params: aParams body: aBody.
 	self addMorphBack: sourceMorph

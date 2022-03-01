@@ -1,5 +1,5 @@
 "
-Base class which replaces source code with a tool to perform HTTP requests.
+SBEmbeddedRequestTool is a lean version of the SBRequestTool in terms of UI components. It represents the baseline for all visual abstractions for frameworks which either perform requests or resolve requests such as ExpressJS, JS Fetch API, Python Requests.
 "
 Class {
 	#name : #SBEmbeddedRequestTool,
@@ -33,13 +33,15 @@ SBEmbeddedRequestTool class >> registerShortcuts: aProvider [
 		registerShortcut: $h command do: #toggleHelp.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> addBodySection: aBody [
 
 	| tmpUrl |
+	"Add the UI component for a body"
 	self addMorphBack: SBRow new.
 	bodyMorph := self submorphs fourth.
 	aBody ifNotNil: [
+		"isRawData is explained in the Setter of the variable itself"
 		isRawData
 			ifFalse: [
 				bodyMorph
@@ -49,7 +51,7 @@ SBEmbeddedRequestTool >> addBodySection: aBody [
 						cellGap: cellGapConstant;
 						addMorphBack: (SBRow new
 							cellGap: 0;
-							addMorphBack: (SBJsRequestToolFieldTextBubble new
+							addMorphBack: (SBRequestToolFieldTextBubble new
 								cellGap: 0;
 								placeholderText: 'key');
 							addMorphBack: (SBTextBubble new
@@ -58,69 +60,65 @@ SBEmbeddedRequestTool >> addBodySection: aBody [
 			ifTrue: [
 				bodyMorph
 					addMorphBack: (SBStringMorph new contents: 'Body');
-					addMorphBack: (SBJsRequestToolBodyTextBubble new contents: aBody)].
+					addMorphBack: (SBRequestToolBodyTextBubble new contents: aBody)].
 		
 		
 		].
-"TODO, improve tmpUrl workaround"
+"Future work: improve tmpUrl workaround"
 (url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url] ifTrue: [tmpUrl := url].
 
 Examples at: tmpUrl, method ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> addExampleSection [
-	
-	showExamples ifTrue: [
-		 | map tmpUrl |
+	"Add the UI component for displaying the examples."
+
+	showExamples ifTrue: [ | map tmpUrl |
+		self addMorphBack: (SBRow new
+			cellGap: cellGapConstant;
+			addMorphBack: (SBStringMorph new contents: #examples);
+			addMorphBack: (SBRow new cellGap: cellGapConstant)).
 		
-			self addMorphBack: (SBRow new
-				cellGap: cellGapConstant;
-				addMorphBack: (SBStringMorph new contents: #examples);
-				addMorphBack: (SBRow new cellGap: cellGapConstant)).
-			
-			method caseOf: {
-				[#get] -> [exampleMorph := self submorphs fourth].
-				[#post] -> [exampleMorph := self submorphs sixth]}.
-			
-			"TODO, improve tmpUrl workaround"
-			(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url] ifTrue: [tmpUrl := url].
-			
-			map := Examples at: tmpUrl, method asString ifAbsent: [].
-			map ifNotNil: [ map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
+		method caseOf: {
+			[#get] -> [exampleMorph := self submorphs fourth].
+			[#post] -> [exampleMorph := self submorphs sixth]}.
+		
+		"Future work: improve tmpUrl workaround"
+		(url startsWith: 'http://')
+			ifFalse: [tmpUrl := baseUrl, url]
+			ifTrue: [tmpUrl := url].
+		
+		map := Examples at: tmpUrl, method asString ifAbsent: [].
+		map ifNotNil: [map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> addHeaderAction [
-	(headerMorph submorphs size) = 0 ifTrue: [
-		headerMorph
-			addMorphBack: (SBStringMorph new contents: 'Headers')].
-		
-	super addHeaderAction.
+	"Add a new header."
+
+	headerMorph submorphs size = 0 ifTrue: [headerMorph addMorphBack: (SBStringMorph new contents: 'Headers')].
+	
+	super addHeaderAction
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> addHeaderAction: key value: value [
-
-	(headerMorph submorphs size) = 0 ifTrue: [
-			headerMorph
-				addMorphBack: (SBStringMorph new contents: 'Headers')].
-			
-	super addHeaderAction: key value: value.
+"Add a new header with a given key and value."
+	headerMorph submorphs size = 0 ifTrue: [headerMorph addMorphBack: (SBStringMorph new contents: 'Headers')].
+	
+	super addHeaderAction: key value: value
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> addParamAction [
-
-	(paramMorph submorphs size) = 0 ifTrue: [
-		paramMorph
-			addMorphBack: (SBStringMorph new contents: 'Params')].
-		
-	super addParamAction.
-
+"Add a new parameter"
+	paramMorph submorphs size = 0 ifTrue: [paramMorph addMorphBack: (SBStringMorph new contents: 'Params')].
+	
+	super addParamAction
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> addParamAction: key value: value [
 
 	(paramMorph submorphs size) = 0 ifTrue: [
@@ -130,22 +128,14 @@ SBEmbeddedRequestTool >> addParamAction: key value: value [
 	super addParamAction: key value: value.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> addParamSection: aParams [
 
-	
+	"Add a new parameter with a given key and value."
 	params keysDo: [:key | self addParamAction: ((params at: key) key) asString  value:  ((params at: key) value) asString].
-	
-	"TODO: revisit"
-	SBToggledCode comment: '' active: 0 do: {
-		[
-			params keysDo: [:key | | k v |
-				k := (params at: key) submorphs first.
-				v := (params at: key) submorphs second.
-				self addParamAction: k contents value: v contents]]}.
 
 	method = #get ifTrue: [ | tmpUrl |
-		"TODO, improve tmpUrl workaround"
+		"Future work: improve tmpUrl workaround"
 		tmpUrl := baseUrl, url, method.
 		(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url, method] ifTrue: [tmpUrl := url, method].
 	
@@ -154,13 +144,13 @@ SBEmbeddedRequestTool >> addParamSection: aParams [
 			e size > 0 ifTrue: [self addExampleSection]]].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'colors and color policies' }
 SBEmbeddedRequestTool >> drawnColor [
 
 	^ Color veryVeryLightGray.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> hideExamplesButton [
 	^(SBButton new icon: SBIcon iconEye shortcut: nil do: [
 				showExamples := true.
@@ -168,16 +158,24 @@ SBEmbeddedRequestTool >> hideExamplesButton [
 				self recreateFromMorphs]; balloonText: 'Show Examples')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBEmbeddedRequestTool >> initCommons [
 	"Setup shared UI elements"
+
 	exploreResponse := false.
-	sendButton :=  (SBButton new icon: SBIcon iconPlay shortcut: nil do: [ActiveEvent shiftPressed ifTrue: [self sendAndExploreResponse] ifFalse: [self send].]; balloonText: 'Send Request (Shift + Click to explore response)').
-	"sendButton on: #doubleClick send: #sendAndExploreResponse to: self."
-	addDataButton :=  (SBButton new
-				color: (Color r: 0.0 g: 1 b: 0.0);
-				icon: SBIcon iconPlus shortcut: nil do: [self promptAddPayload]; balloonText: 'Add Data').
-	exampleButton := (showExamples ifTrue: [self showExamplesButton] ifFalse: [self hideExamplesButton]).
+	sendButton := SBButton new
+		icon: SBIcon iconPlay shortcut: nil do: [
+			ActiveEvent shiftPressed
+				ifTrue: [self sendAndExploreResponse]
+				ifFalse: [self send]];
+		balloonText: 'Send Request (Shift + Click to explore response)'.
+	addDataButton := SBButton new
+		color: (Color r: 0.0 g: 1 b: 0.0);
+		icon: SBIcon iconPlus shortcut: nil do: [self promptAddPayload];
+		balloonText: 'Add Data'.
+	exampleButton := showExamples
+		ifTrue: [self showExamplesButton]
+		ifFalse: [self hideExamplesButton].
 	self
 		addMorphBack: (SBRow new
 			changeTableLayout;
@@ -187,15 +185,14 @@ SBEmbeddedRequestTool >> initCommons [
 			addMorphBack: (SBTextBubble new
 				hResizing: #spaceFill;
 				contents: url);
-			addMorphBack:sendButton;
+			addMorphBack: sendButton;
 			addMorphBack: (SBRow new
-			cellGap: cellGapConstant;
-			addMorphBack: addDataButton;
-			addMorphBack: exampleButton));
+				cellGap: cellGapConstant;
+				addMorphBack: addDataButton;
+				addMorphBack: exampleButton));
 		listDirection: #topToBottom;
 		addMorphBack: SBRow new;
 		addMorphBack: SBRow new.
-			
 	
 	"Initialize the the morphs centrally for easier acces"
 	urlMorph := self submorphs first.
@@ -205,7 +202,7 @@ SBEmbeddedRequestTool >> initCommons [
 	headers ifNotNil: [headers keysDo: [:key | self addHeaderAction: key asString value: (headers at: key) asString]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBEmbeddedRequestTool >> initPost [
 	self
 		initCommons;
@@ -219,15 +216,16 @@ SBEmbeddedRequestTool >> initPost [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBEmbeddedRequestTool >> initialize [
 	super initialize.
 	showExamples := false.
 	baseUrl := 'http://localhost:8080'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> promptAddPayload [
+"This will pop-up when the + Button is pressed. Depending on the HTTP method we can add different payload."
 
 	| fetch index |
 	fetch := self owner owner owner.
@@ -247,7 +245,7 @@ SBEmbeddedRequestTool >> promptAddPayload [
 					[2] -> [self addParamAction]}]]}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #request }
 SBEmbeddedRequestTool >> send [
 	"Delegates to the correct request implementation."
 	| paramsString |
@@ -266,7 +264,7 @@ SBEmbeddedRequestTool >> send [
 	"TODO: implement other methods"]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #request }
 SBEmbeddedRequestTool >> sendAndExploreResponse [
 	exploreResponse := true.
 	self send.
@@ -274,7 +272,7 @@ SBEmbeddedRequestTool >> sendAndExploreResponse [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> showExamplesButton [
 	^(SBButton new icon: SBIcon iconEyeSlash shortcut: nil do: [
 				showExamples := false.
@@ -282,22 +280,22 @@ SBEmbeddedRequestTool >> showExamplesButton [
 				self recreateFromMorphs]; balloonText: 'Hide Examples')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBEmbeddedRequestTool >> sourceMorph [
 	^ sourceMorph.
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBEmbeddedRequestTool >> sourceMorph: aSourceMorph [
 	sourceMorph := aSourceMorph.
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'ui-manipulation' }
 SBEmbeddedRequestTool >> toggleHelp [
 	<action>
-	
+	"This will open all tooltips the help the user if he does not know the buttons."
 	| dataPosition examplePosition sendPosition downConstant |
 	downConstant := 10.
 	
@@ -316,11 +314,9 @@ SBEmbeddedRequestTool >> toggleHelp [
 	sendButton showBalloon: sendButton balloonText at: sendPosition.
 	addDataButton showBalloon: addDataButton balloonText at: dataPosition.
 	exampleButton showBalloon: exampleButton balloonText at:  examplePosition.
-	
-     "sendButton deleteBalloon."
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #synchronization }
 SBEmbeddedRequestTool >> updateHeaders: aHeadersMorph [
 
 	| key value index |
@@ -334,7 +330,7 @@ SBEmbeddedRequestTool >> updateHeaders: aHeadersMorph [
 			key ~= nil & (key ~= '') ifTrue: [headers at: key put: value]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #synchronization }
 SBEmbeddedRequestTool >> updateParams: aParamsMorph [
 
 	| key value index |
@@ -348,15 +344,16 @@ SBEmbeddedRequestTool >> updateParams: aParamsMorph [
 			key ~= nil & (key ~= '') ifTrue: [params at: key, value put: key -> value]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBEmbeddedRequestTool >> urlLabel [
+"Label for the embedded UI"
 	method caseOf: {
 	[#post] -> [^ 'POST'].
 	[#get] -> [^ 'GET']}
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBEmbeddedRequestTool >> values [
 	method caseOf: {
 	[#post] -> [^ #(Header Param Body)].

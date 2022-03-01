@@ -1,11 +1,14 @@
+"
+SBButton which stores information for a GET request so that it can be recreated out of the button.
+"
 Class {
-	#name : #SBJsRequestToolGetExample,
-	#superclass : #SBJsRequestToolExample,
+	#name : #SBRequestToolGetExample,
+	#superclass : #SBRequestToolExample,
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolGetExample >> code: aCode url: aUrl headers: aHeaders params: aParams [
+{ #category : #'initialize-release' }
+SBRequestToolGetExample >> code: aCode url: aUrl headers: aHeaders params: aParams [
 
 	| msg |
 	method := #get.
@@ -19,14 +22,14 @@ SBJsRequestToolGetExample >> code: aCode url: aUrl headers: aHeaders params: aPa
 	self balloonText: msg
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolGetExample >> initialize [
+{ #category : #'initialize-release' }
+SBRequestToolGetExample >> initialize [
 	super initialize.
 	method := #get.
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolGetExample >> promptChangeValue [
+{ #category : #'initialize-release' }
+SBRequestToolGetExample >> promptChangeValue [
 	| examples fetch index |
 	fetch := (self owner owner owner).
 	examples :=  ((fetch examples at: (url, method)) at: code).

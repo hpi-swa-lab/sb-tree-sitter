@@ -1,5 +1,5 @@
 "
-Base class to replace calls from Pythons requests package.
+SBPyEmbeddedRequests is a visual replacement for the Python requests package. It will replace patterns such as requests.post(url, json=>{}, ...) with the UI defined in SBEmbeddedRequestTool.
 "
 Class {
 	#name : #SBPyEmbeddedRequests,
@@ -91,4 +91,12 @@ SBPyEmbeddedRequests class >> matchPython: aDictionary do: aBlock [
 { #category : #'as yet unclassified' }
 SBPyEmbeddedRequests class >> validate: requests [
 	^requests contents = 'requests'.  
+]
+
+{ #category : #'initialize-release' }
+SBPyEmbeddedRequests >> headersToWritableString [
+	|headerString|
+	headerString := (headers associations collect: [:a | '"{1}":"{2}"' format: {a key. a value}]) joinSeparatedBy: ','.
+	headerString ifNotEmpty: [^ ', headers={', headerString, '}'].
+	^String empty.
 ]

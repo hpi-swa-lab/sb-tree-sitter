@@ -1,25 +1,28 @@
+"
+Subclass of Combobox which is used to switch between HTTP methods.
+"
 Class {
-	#name : #SBJsRequestToolMethodSelect,
+	#name : #SBRequestToolMethodSelect,
 	#superclass : #SBComboBox,
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolMethodSelect >> display: anObject [
+{ #category : #'initialize-release' }
+SBRequestToolMethodSelect >> display: anObject [
 
 	^ anObject asString asUppercase
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolMethodSelect >> initialize [
+{ #category : #'initialize-release' }
+SBRequestToolMethodSelect >> initialize [
 
 	super initialize.
 	
 	self layoutInset: (SBEdgeInsets left: 2 right: 2 top: 1 bottom: 2)
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolMethodSelect >> promptChangeValue [
+{ #category : #'initialize-release' }
+SBRequestToolMethodSelect >> promptChangeValue [
 
 	| index |
 	index := UIManager default chooseFrom: self values.
@@ -32,8 +35,8 @@ SBJsRequestToolMethodSelect >> promptChangeValue [
 		self owner owner recreateFromMorphs]
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolMethodSelect >> values [
+{ #category : #accessing }
+SBRequestToolMethodSelect >> values [
 
 	^ #(#get #put #post #delete #patch #head #options #trace #connect)
 ]

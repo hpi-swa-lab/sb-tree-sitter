@@ -1,16 +1,19 @@
+"
+Replaces POST request from the JS Fetch API.
+"
 Class {
 	#name : #SBJsEmbeddedFetchPost,
 	#superclass : #SBJsEmbeddedFetch,
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBJsEmbeddedFetchPost >> url: aString headers: aHeaders data: aData [
 	"Constructs a lean designed SBJsFetch object"
 	self url: aString method: #post headers: aHeaders data: aData
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBJsEmbeddedFetchPost >> writeSourceOn: aStream [ 
 	"Transforms into JS source code"
 	aStream nextPutAll: 'fetch('''.

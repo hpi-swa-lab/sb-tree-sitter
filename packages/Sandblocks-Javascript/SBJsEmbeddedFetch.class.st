@@ -1,5 +1,5 @@
 "
-Base class to replace calls from JavaScript fetch API.
+SBJsEmbeddedFetch is a visual replacement for the JS Fetch API. It will replace patterns such a fetch(url, {}) with the UI defined in SBEmbeddedRequestTool.
 "
 Class {
 	#name : #SBJsEmbeddedFetch,

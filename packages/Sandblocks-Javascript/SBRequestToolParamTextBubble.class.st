@@ -1,16 +1,19 @@
+"
+Text field for the parameters in HTTP requests.
+"
 Class {
-	#name : #SBJsRequestToolParamTextBubble,
-	#superclass : #SBJsRequestToolTextBubble,
+	#name : #SBRequestToolParamTextBubble,
+	#superclass : #SBRequestToolTextBubble,
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolParamTextBubble >> initialize [
+{ #category : #initialization }
+SBRequestToolParamTextBubble >> initialize [
 	super initialize.
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolParamTextBubble >> promptChangeValue [
+{ #category : #'event handling' }
+SBRequestToolParamTextBubble >> promptChangeValue [
 
 	| index key fetch paramsCopy |
 	index := UIManager default chooseFrom: self values.
@@ -25,8 +28,8 @@ SBJsRequestToolParamTextBubble >> promptChangeValue [
 			fetch recreateFromMorphs]].
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolParamTextBubble >> values [
+{ #category : #accessing }
+SBRequestToolParamTextBubble >> values [
 
 	^ #('Remove param')
 ]

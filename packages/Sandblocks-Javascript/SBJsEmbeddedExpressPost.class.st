@@ -1,5 +1,5 @@
 "
-Replaces post routes in express.js applications.
+Replaces POST routes in ExpressJS applications.
 "
 Class {
 	#name : #SBJsEmbeddedExpressPost,
@@ -7,14 +7,14 @@ Class {
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBJsEmbeddedExpressPost >> url: aString headers: aHeaders data: aData [
 	"Constructs a lean designed SBJsFetch object"
 	aData ifNil: [self url: aString method: #post headers: aHeaders data: '{}'].
 	aData ifNotNil: [self url: aString method: #post headers: aHeaders data: aData].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBJsEmbeddedExpressPost >> writeSourceOn: aStream [ 
 	"Transforms into JS source code"
 	

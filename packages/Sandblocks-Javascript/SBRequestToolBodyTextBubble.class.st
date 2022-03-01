@@ -1,14 +1,17 @@
+"
+Text field for the body in HTTP Post requests. The type of the body can be changed on double click.
+"
 Class {
-	#name : #SBJsRequestToolBodyTextBubble,
-	#superclass : #SBJsRequestToolTextBubble,
+	#name : #SBRequestToolBodyTextBubble,
+	#superclass : #SBRequestToolTextBubble,
 	#instVars : [
 		'dict'
 	],
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolBodyTextBubble >> initMap [
+{ #category : #initialization }
+SBRequestToolBodyTextBubble >> initMap [
 
 	| map |
 	map := Dictionary new.
@@ -22,14 +25,14 @@ SBJsRequestToolBodyTextBubble >> initMap [
 	^ map
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolBodyTextBubble >> initialize [
+{ #category : #initialization }
+SBRequestToolBodyTextBubble >> initialize [
 	super initialize.
 	dict := self initMap.
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolBodyTextBubble >> promptChangeValue [
+{ #category : #'event handling' }
+SBRequestToolBodyTextBubble >> promptChangeValue [
 
 	| index key values placeholderTxt contentType |
 	index := UIManager default chooseFrom: self values.
@@ -52,14 +55,14 @@ SBJsRequestToolBodyTextBubble >> promptChangeValue [
 				owner owner recreateFromMorphs]]
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolBodyTextBubble >> values [
+{ #category : #accessing }
+SBRequestToolBodyTextBubble >> values [
 
 	^ #('Raw-JSON' 'Raw-Text' 'Raw-HTML' 'Raw-JavaScript' 'Raw-XML' 'form-data' 'Remove Body')
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolBodyTextBubble >> valuesForKey: key [
+{ #category : #accessing }
+SBRequestToolBodyTextBubble >> valuesForKey: key [
 "Returns for the given key an array of 2 elements. First is the placeholder text and second the content-type value"
 	^dict at: key.
 ]

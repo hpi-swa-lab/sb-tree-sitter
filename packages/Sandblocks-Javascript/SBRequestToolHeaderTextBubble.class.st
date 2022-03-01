@@ -1,14 +1,17 @@
+"
+Text field for the headers in HTTP requests. Initially the headers will be collected from a central definition. Internet connection required to access definition from https://www.iana.org/assignments/message-headers/message-headers.xml
+"
 Class {
-	#name : #SBJsRequestToolHeaderTextBubble,
-	#superclass : #SBJsRequestToolTextBubble,
+	#name : #SBRequestToolHeaderTextBubble,
+	#superclass : #SBRequestToolTextBubble,
 	#classVars : [
 		'AllHeaders'
 	],
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolHeaderTextBubble >> collectHeaders [
+{ #category : #initialization }
+SBRequestToolHeaderTextBubble >> collectHeaders [
 
 	| client resp tmpIndex xmlDoc |
 	AllHeaders := OrderedCollection new.
@@ -20,20 +23,19 @@ SBJsRequestToolHeaderTextBubble >> collectHeaders [
 	
 	xmlDoc := XMLDOMParser parseDocumentFrom: resp content readStream useNamespaces: true.
 	tmpIndex := 1.
-	"TODO: improve how to scan this XML response, make it safe"
 	((xmlDoc elements at: 3) elements at: 3) elementsDo: [:currentElement |
 		tmpIndex := tmpIndex + 1.
 		tmpIndex > 7 ifTrue: [AllHeaders add: ((currentElement elementsAndContents at: 1) elementsAndContents at: 1) asString]].
 	^ AllHeaders sort.
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolHeaderTextBubble >> initialize [
+{ #category : #initialization }
+SBRequestToolHeaderTextBubble >> initialize [
 	super initialize.
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolHeaderTextBubble >> promptChangeValue [
+{ #category : #'event handling' }
+SBRequestToolHeaderTextBubble >> promptChangeValue [
 
 	| index key headersCopy fetch |
 	index := UIManager default chooseFrom: self values.
@@ -51,7 +53,7 @@ SBJsRequestToolHeaderTextBubble >> promptChangeValue [
 		
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolHeaderTextBubble >> values [
+{ #category : #accessing }
+SBRequestToolHeaderTextBubble >> values [
 	^ AllHeaders ifNil: [self collectHeaders]
 ]

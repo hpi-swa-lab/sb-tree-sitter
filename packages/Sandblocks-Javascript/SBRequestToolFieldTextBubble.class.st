@@ -1,16 +1,19 @@
+"
+TextBubble subclass for the special case if the body type is form data a.k.a. fields.
+"
 Class {
-	#name : #SBJsRequestToolFieldTextBubble,
-	#superclass : #SBJsRequestToolBodyTextBubble,
+	#name : #SBRequestToolFieldTextBubble,
+	#superclass : #SBRequestToolBodyTextBubble,
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolFieldTextBubble >> initialize [
+{ #category : #initialization }
+SBRequestToolFieldTextBubble >> initialize [
 	super initialize.
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolFieldTextBubble >> promptChangeValue [
+{ #category : #'event handling' }
+SBRequestToolFieldTextBubble >> promptChangeValue [
 
 	| index key values placeholderTxt contentType |
 	index := UIManager default chooseFrom: self values.
@@ -32,8 +35,8 @@ SBJsRequestToolFieldTextBubble >> promptChangeValue [
 				owner owner owner recreateFromMorphs]]
 ]
 
-{ #category : #'as yet unclassified' }
-SBJsRequestToolFieldTextBubble >> values [
+{ #category : #accessing }
+SBRequestToolFieldTextBubble >> values [
 
 	^ super values.
 ]

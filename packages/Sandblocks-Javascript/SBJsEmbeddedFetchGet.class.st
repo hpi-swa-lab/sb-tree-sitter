@@ -1,16 +1,19 @@
+"
+Replaces GET request from the JS Fetch API.
+"
 Class {
 	#name : #SBJsEmbeddedFetchGet,
 	#superclass : #SBJsEmbeddedFetch,
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBJsEmbeddedFetchGet >> url: aString headers: aHeaders data: aData [
 	"Constructs a lean designed SBJsFetch object"
 	self url: aString method: #get headers: aHeaders data: aData
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'initialize-release' }
 SBJsEmbeddedFetchGet >> writeSourceOn: aStream [ 
 	"Transforms into JS source code"
 	aStream nextPutAll: 'fetch("'.
