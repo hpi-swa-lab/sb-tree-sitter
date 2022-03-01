@@ -1,22 +1,21 @@
+"
+SBReBlock is the superclass for all custom replacements for regular expressions in Sandblocks.
+
+It just contains some utility for the subclasses.
+"
 Class {
 	#name : #SBReBlock,
 	#superclass : #SBInlineBlockReplace,
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReBlock class >> factory [
 
 	^ SBRegex
 ]
 
-{ #category : #'as yet unclassified' }
-SBReBlock class >> type [
-
-	^ nil
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SBReBlock >> initialize [
 
 	super initialize.
@@ -27,13 +26,13 @@ SBReBlock >> initialize [
 		hResizing: #shrinkWrap
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReBlock >> sourceString [
 
 	self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReBlock >> writeSourceOn: aStream [
 
 	aStream nextPutAll: self sourceString

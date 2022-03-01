@@ -1,28 +1,31 @@
+"
+A SBReEvaluatorTestList is a container for SBReEvaluatorTest instances.
+"
 Class {
 	#name : #SBReEvaluatorTestList,
 	#superclass : #SBBlock,
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReEvaluatorTestList >> addExample: aString [
 
 	self addMorphBack: (SBReEvaluatorTest new contents: aString)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReEvaluatorTestList >> contents [
 
 	^ self submorphs collect: [:each | each contents]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'testing hierarchy' }
 SBReEvaluatorTestList >> fixedNumberOfChildren [
 
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SBReEvaluatorTestList >> initialize [
 
 	super initialize.
@@ -35,31 +38,31 @@ SBReEvaluatorTestList >> initialize [
 	self addMorphBack: (SBReEvaluatorTest new)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'insert/delete' }
 SBReEvaluatorTestList >> newEmptyChildNear: aBlock before: aBoolean [
 
 	^ SBReEvaluatorTest new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'object interface' }
 SBReEvaluatorTestList >> objectInterfaceNear: aBlock at: aSymbol [
 
 	^ {[:o | o isKindOf: SBReEvaluatorTest]}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReEvaluatorTestList >> pattern [
 
 	^ (self ownerThatIsA: SBReEvaluator) ifNotNil: [:owner | owner pattern sourceString]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #updating }
 SBReEvaluatorTestList >> patternChanged [
 
 	self submorphsDo: [:each | each patternChanged]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #updating }
 SBReEvaluatorTestList >> removeAllExamples [
 
 	self removeAllMorphs

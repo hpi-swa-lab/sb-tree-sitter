@@ -1,11 +1,28 @@
+"
+A SBReAnnotation is a replacement that can persist an annotation in the source code of the regex.
+
+An annotation always refers to a sub-pattern of the regex and is a non-capturing group (see SBRePatternWrapper).
+
+The annotation is persisted in the following form:
+
+	(?(?:marker annotation){0}(?:pattern))
+
+For example:
+
+	(?:(?:SBReComment:aGV4YWRlY2ltYWwgbnVtYmVy){0}(?:0x[0-9a-f]))
+	
+where marker = 'SBReComment:', annotation = 'aGV4YWRlY2ltYWwgbnVtYmVy' and pattern = '0x[0-9a-f]'.
+
+'marker' identifies the concrete type of annotation and 'annotation' is the concrete annotation. The annotation needs to be encoded in a way that it does not represent invalid syntax. For now, this used base64 encoding. The marker and annotation are ignored using the '{0}'. After that, the pattern the annotation is associated with, is also included in a non-capturing group. Non-capturing groups are used to not add any additional groups that show up in the match result.
+"
 Class {
 	#name : #SBReAnnotation,
 	#superclass : #SBRePatternWrapper,
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
-SBReAnnotation class >> annotationClass: aString [
+{ #category : #helpers }
+SBReAnnotation class >> classForAnnotation: aString [
 
 	| class |
 
@@ -14,13 +31,13 @@ SBReAnnotation class >> annotationClass: aString [
 	^ class size = 1 ifTrue: [class first] ifFalse: [nil]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReAnnotation class >> marker [
 
 	^ self asString, ':'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #matchers }
 SBReAnnotation class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(non_capturing_group
@@ -41,7 +58,7 @@ SBReAnnotation class >> matchRegex: aDictionary do: aBlock [
 	| annotation class |
 
 	annotation := (aDictionary at: 'annotation') sourceString.
-	class := (self annotationClass: annotation) ifNil: [^ nil].
+	class := (self classForAnnotation: annotation) ifNil: [^ nil].
 
 	^ aBlock
 		value: (aDictionary at: 'block')
@@ -50,31 +67,31 @@ SBReAnnotation class >> matchRegex: aDictionary do: aBlock [
 			encodedAnnotation: annotation)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReAnnotation >> annotation [
 
 	self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReAnnotation >> annotation: aString [
 
 	self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReAnnotation >> encodedAnnotation [
 
 	^ self class marker, self annotation base64Encoded
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReAnnotation >> encodedAnnotation: aString [
 
 	self annotation: (aString from: self class marker size + 1) base64Decoded
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReAnnotation >> sourceString [
 
 	^ '(?:(?:{1})\{0\}(?:{2}))'

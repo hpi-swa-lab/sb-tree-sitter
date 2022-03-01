@@ -1,3 +1,6 @@
+"
+A SBReComment is an inline comment in a regex.
+"
 Class {
 	#name : #SBReComment,
 	#superclass : #SBReAnnotation,
@@ -7,37 +10,43 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReComment >> annotation [
 
 	^ comment contents
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReComment >> annotation: aString [
 
 	comment contents: aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReComment >> collapsedContent [
 
 	^ self annotation
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReComment >> color [
 
 	^ Color lightGray
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SBReComment >> initialize [
 
 	super initialize.
 	
 	self
 		addMorphBack: self pattern;
-		addMorphBack: (comment := SBTextBubble multiLine
-			placeholderText: 'comment')
+		addMorphBack: (SBColumn new
+			addMorphBack: (comment := SBTextBubble multiLine
+				placeholderText: 'comment');
+			addMorphBack: (SBButton new
+				balloonText: 'collapse';
+				icon: SBIcon iconMinus
+				shortcut: nil
+				do: [self collapseBlock]))
 ]

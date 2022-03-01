@@ -1,3 +1,6 @@
+"
+A SBReLookaroundAssertion replaces a lookaround assertions and offers the four types of lookaround assertions in a dropdown menu with their proper names. This way, a user does not need to remember the exact syntax for each type of assertion.
+"
 Class {
 	#name : #SBReLookaroundAssertion,
 	#superclass : #SBRePatternWrapper,
@@ -7,7 +10,7 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #matchers }
 SBReLookaroundAssertion class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(lookahead_assertion
@@ -17,71 +20,57 @@ SBReLookaroundAssertion class >> matchRegex: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'assertion')
 		value: (self new pattern: (aDictionary at: 'pattern');
-						assertionType: (aDictionary at: 'assertion') submorphs first submorphs second submorphs first contents)
+						selectAssertionType: (aDictionary at: 'assertion') submorphs first submorphs second submorphs first contents)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReLookaroundAssertion >> assertionType [
 
-	^ assertionType object
+	^ assertionType
 ]
 
-{ #category : #'as yet unclassified' }
-SBReLookaroundAssertion >> assertionType: aSymbolOrString [
-
-	assertionType object: ((aSymbolOrString isKindOf: Symbol)
-		ifFalse: [self assertionTypes at: aSymbolOrString ifAbsent: self assertionTypes values first]
-		ifTrue: [aSymbolOrString])
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReLookaroundAssertion >> assertionTypes [
 
-	^ OrderedDictionary newFrom: {
-		'=' -> #positive_lookahead.
-		'!' -> #negative_lookahead.
-		'<=' -> #positive_lookbehind.
-		'<!' -> #negative_lookbehind.
-	}
-]
-
-{ #category : #'as yet unclassified' }
-SBReLookaroundAssertion >> assertionTypesDisplayStrings [
-
 	^ {
-		'followed by'.
-		'not followed by'.
-		'preceeded by'.
-		'not preceded by'.
+		'=' -> 'followed by'.
+		'!' -> 'not followed by'.
+		'<=' -> 'preceded by'.
+		'<!' -> 'not preceded by'.
 	}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SBReLookaroundAssertion >> initialize [
 
 	super initialize.
 	
 	self
-		addMorphBack: (assertionType := SBReComboBox new
-			values: self assertionTypes values;
-			labels: self assertionTypesDisplayStrings;
-			placeholderText: 'select assertion type...');
+		addMorphBack: (assertionType := SBReSyntaxSelect new
+			placeholderText: 'select assertion type...';
+			values: self assertionTypes);
 		addMorphBack: self pattern
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SBReLookaroundAssertion >> selectAssertionType: aString [
+
+	self assertionType syntax: aString
+]
+
+{ #category : #printing }
 SBReLookaroundAssertion >> sourceString [
 
-	^ self assertionType notNil
-		ifTrue: ['(?{1}{2})'
+	^ self assertionType syntax
+		ifNotNil: ['(?{1}{2})'
 			format: {
-				self assertionTypes keyAtValue: self assertionType .
+				self assertionType syntax.
 				self pattern sourceString}]
-		ifFalse: ['']
+		ifNil: ['']
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReLookaroundAssertion >> type [
 
 	^ 'lookahead_assertion'

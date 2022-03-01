@@ -1,3 +1,6 @@
+"
+A SBReExactQuantifier replaces the {n} quantifier. This is a subset of the {n[,[m]]} syntax for regular expressions and only covers an exact number. For a range, see SBReQuantifierRange.
+"
 Class {
 	#name : #SBReExactQuantifier,
 	#superclass : #SBReQuantifier,
@@ -7,20 +10,20 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBReExactQuantifier class >> isRange: aDictionary [
 
 	^ ((aDictionary at: 'count_quantifier') childrenForQuery
 		select: [:each | each type = 'decimal_digits']) size > 1
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 SBReExactQuantifier class >> isZero: aDictionary [
 
 	^ (aDictionary at: 'value') contents asNumber = 0
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #matchers }
 SBReExactQuantifier class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(count_quantifier
@@ -38,43 +41,30 @@ SBReExactQuantifier class >> matchRegex: aDictionary do: aBlock [
 			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
-{ #category : #'as yet unclassified' }
-SBReExactQuantifier >> buildOn: aSBRow [
+{ #category : #initialization }
+SBReExactQuantifier >> buildOn: aMorph [
 
-	aSBRow
-		addMorphBack: (SBInlineBlockLabel new
-			label: 'exactly:';
-			factory: self factory);
+	aMorph
+		addMorphBack: (SBStringMorph new
+			contents: 'exactly:');
 		addMorphBack: (number := SBReNumberInput new
 			hint: 'number';
 			minimum: 0)
 ]
 
-{ #category : #'as yet unclassified' }
-SBReExactQuantifier >> buildSelf [
-
-	self
-		addMorphBack: (SBInlineBlockLabel new
-			label: 'exactly: ';
-			factory: self factory);
-		addMorphBack: (number := SBReNumberInput new
-			hint: 'number';
-			minimum: 0)
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReExactQuantifier >> number [
 
 	^ number value ifNil: [0]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReExactQuantifier >> number: aNumber [
 
 	number contents: aNumber asString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReExactQuantifier >> quantifierString [
 
 	^ '{',
@@ -82,7 +72,7 @@ SBReExactQuantifier >> quantifierString [
 		'}'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReExactQuantifier >> type [
 
 	^ 'count_quantifier'

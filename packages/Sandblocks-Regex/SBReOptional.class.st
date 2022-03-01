@@ -1,10 +1,13 @@
+"
+A SBReOneOrMore replaces the ? quantifier.
+"
 Class {
 	#name : #SBReOptional,
 	#superclass : #SBReQuantifier,
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #matchers }
 SBReOptional class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(optional
@@ -18,25 +21,19 @@ SBReOptional class >> matchRegex: aDictionary do: aBlock [
 			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
-{ #category : #'as yet unclassified' }
-SBReOptional >> buildOn: aSBRow [
+{ #category : #initialization }
+SBReOptional >> buildOn: aMorph [
 
-	aSBRow addMorphBack: (SBInlineBlockLabel new label: 'optional'; factory: self factory)
+	aMorph addMorphBack: (SBStringMorph new contents: 'optional')
 ]
 
-{ #category : #'as yet unclassified' }
-SBReOptional >> buildSelf [
-
-	self addMorphBack: (SBInlineBlockLabel new label: 'optional'; factory: self factory)
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReOptional >> quantifierString [
 
 	^ '?'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReOptional >> type [
 
 	^ 'optional'
