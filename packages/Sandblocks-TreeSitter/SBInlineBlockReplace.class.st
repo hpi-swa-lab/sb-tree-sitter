@@ -77,6 +77,26 @@ SBInlineBlockReplace >> printTitleOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
+SBInlineBlockReplace >> showCode [
+	<action>
+
+	| path current statement new |
+	statement := self containingStatement ifNil: [self parentSandblock].
+	path := Array streamContents: [:stream |
+		current := self.
+		[current ~= statement] whileTrue: [
+			stream nextPut: current childIndex.
+			current := current parentSandblock.
+			self
+				assert: (current isKindOf: SBInlineBlockReplace) not
+				description: 'nested replacements currently not supported']].
+	new := self factory class parseElement: statement sourceString.
+	path do: [:index | new := new childSandblocks at: index].
+	
+	self sandblockEditor do: (SBReplaceCommand new target: self replacer: new)
+]
+
+{ #category : #'as yet unclassified' }
 SBInlineBlockReplace >> writeSourceOn: aStream [
 
 	^ self subclassResponsibility

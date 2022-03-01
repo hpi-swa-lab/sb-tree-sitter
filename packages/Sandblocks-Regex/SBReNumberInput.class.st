@@ -1,3 +1,6 @@
+"
+SBReNumberInput modifies the SBStNumber and adds minimum and maximum and on change callback functionality.
+"
 Class {
 	#name : #SBReNumberInput,
 	#superclass : #SBStNumber,
@@ -9,95 +12,95 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 SBReNumberInput >> acceptInputEvent: anEvent [
 
 	anEvent keyCharacter isDigit
 		ifTrue: [super acceptInputEvent: anEvent]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> canDrag [
 
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> contents: aString [
 
 	aString asNumber negative
 		ifTrue: [self contents: 0 asString]
-		ifFalse: [super contents: aString]
+		ifFalse: [super contents: aString asInteger asString]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #updating }
 SBReNumberInput >> contentsChanged [
 
 	"super contentsChanged."
 	self onChange ifNotNil: [:c | c value: self value]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> hint [
 
 	^ self currentTextMorph placeholderText
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> hint: aString [
 
 	self currentTextMorph placeholderText: aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBReNumberInput >> isSmalltalk [
 
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> language [
 
 	^ #regex
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> maximum [
 
 	^ maximum
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> maximum: aNumber [
 
 	maximum := aNumber
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> minimum [
 
 	^ minimum
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> minimum: aNumber [
 
 	minimum := aNumber
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> onChange [
 
 	^ onChange
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReNumberInput >> onChange: aBlock [
 
 	onChange := aBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBReNumberInput >> valid [
 
 	^ super valid

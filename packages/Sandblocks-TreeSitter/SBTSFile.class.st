@@ -50,7 +50,11 @@ SBTSFile class >> languageForPath: aString [
 { #category : #'as yet unclassified' }
 SBTSFile >> artefactChanged: aMethodBlock [
 
-	aMethodBlock = self ifTrue: [self root updateAllHighlights]
+	aMethodBlock = self ifTrue: [ | changed |
+		"FIXME: this heuristic will be wrong for changes that affect more than the selection.
+		It also doesn't improve performance when changes happen on the toplevel"
+		changed := (self sandblockEditor selection ifNotNil: [:selection | selection hasOwner: self] ifNil: [false]) ifTrue: [self sandblockEditor selection] ifFalse: [self root].
+		changed isInlineBlock ifTrue: [changed updateAllHighlights]]
 ]
 
 { #category : #'as yet unclassified' }

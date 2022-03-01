@@ -18,8 +18,8 @@ Class {
 		'bodyMorph',
 		'methodMorph',
 		'exampleMorph',
-		'exampleThreshold',
-		'exploreResponse'
+		'exploreResponse',
+		'maxNumberOfExamples'
 	],
 	#classVars : [
 		'Examples'
@@ -211,7 +211,7 @@ SBRequestTool >> addRequestToExampleMap: response [
 	map ifNotNil: [ | examplesForUrl |
 		examplesForUrl := Examples at: url, method asString.
 		examplesForUrl at: response code ifAbsentPut: [OrderedCollection new].
-		(examplesForUrl at: response code) size < exampleThreshold ifFalse: [(examplesForUrl at: response code) removeLast].
+		(examplesForUrl at: response code) size < maxNumberOfExamples ifFalse: [(examplesForUrl at: response code) removeLast].
 		(examplesForUrl at: response code) add: example beforeIndex: 1].
 	map ifNil: [ | initDict initColl |
 		initDict := Dictionary new.
@@ -350,37 +350,57 @@ SBRequestTool >> initPost [
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> isRawData: aBoolean [
+"isRawData describes the body of a POST request. 
+If it is true the body can be JSON, Text, HTML, XML, ...
+If isRawData is set to false the body can be e.g. form-data (key value pairs), binary, GraphQL, etc..."
+
+"Example CURL POST with no raw data:"
+"curl --location --request POST 'http://localhost:8080/user' \
+--header 'Content-Type: application/json' \
+--form 'key='value'"
+
+"Example CURL POST with raw data:"
+"curl --location --request POST 'http://localhost:8080/user' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    'id': 1,
+    'username': 'Theo'
+}'"
+
+
 	isRawData := aBoolean.
+]
+
+{ #category : #'initialize-release' }
+SBRequestTool >> maxNumberOfExamples [
+	^5.
 ]
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> method [
-"Get the method of the class instance"
 	^method.
 ]
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> method: aMethod [
-"Set the method of the class instance"
 	method := aMethod.
 ]
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> params [
-"Get the params map of the class instance"
 	^params
 ]
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> params: aParams [
-"Set the params map of the class instance"
 	params := aParams.
 ]
 
 { #category : #'as yet unclassified' }
 SBRequestTool >> performGetRequest: urlWithParams [
-	"Does a get call."
+
 	| resp client response |
+	"Does a get call."
 	client := WebClient new.
 	resp := client
 		httpGet: urlWithParams
@@ -390,13 +410,14 @@ SBRequestTool >> performGetRequest: urlWithParams [
 	
 	self addRequestToExampleMap: resp.
 	
-	"Only works for JSON responses"
-	exploreResponse ifTrue: [(Json readFrom: (response readStream)) explore].
+	[exploreResponse ifTrue: [(Json readFrom: response readStream) explore]]
+		on: Error
+		do: [(Json readFrom: '{"Error":"Only JSON response can be explored. Check your Transcript to see the response."}' readStream) explore].
 	
 	Transcript
 		show: response asString;
 		cr.
-	self recreateFromMorphs.
+	self recreateFromMorphs
 ]
 
 { #category : #'as yet unclassified' }
@@ -418,8 +439,9 @@ SBRequestTool >> performPostRequest: body url: aUrl [
 	
 	self addRequestToExampleMap: resp.
 	
-	"Only works for JSON responses"
-	exploreResponse ifTrue: [(Json readFrom: (response readStream)) explore].
+	[exploreResponse ifTrue: [(Json readFrom: response readStream) explore]]
+		on: Error
+		do: [(Json readFrom: '{"Error":"Only JSON response can be explored. Check your Transcript to see the response."}' readStream) explore].
 	
 	Transcript
 		show: response asString;
@@ -460,9 +482,9 @@ SBRequestTool >> send [
 	method = #post ifTrue: [
 		isRawData 
 			ifTrue: [self performPostRequest: data url: url asString, paramsString]
-			ifFalse: ["TODO: collect fields and perform request"]
+			ifFalse: [self flag: #todo "TODO: collect fields and perform request"].
 	
-	"TODO: implement other methods"]
+	self flag: #todo "TODO: implement other methods"]
 ]
 
 { #category : #'as yet unclassified' }
@@ -478,7 +500,7 @@ SBRequestTool >> updateHeaders: aHeadersMorph [
 	aHeadersMorph do: [: header |
 		key := header submorphs first contents.
 		value := header submorphs second contents.
-		key ~= nil & (key ~= '') ifTrue: [headers at: key put: value]]
+		(key ~= nil and: [(key ~= '')]) ifTrue: [headers at: key put: value]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -509,12 +531,12 @@ SBRequestTool >> url: aString method: aMethod headers: aHeaders data: aData [
 	"Constructs a SBRequestTool"
 
 	"exampleThreshold sets the maximum of examples per request and response code."
-	exampleThreshold := 5.
+	maxNumberOfExamples := 5.
 	url := aString.
-	method := aMethod.
 	headers := aHeaders.
-	cellGapConstant := 3.
 	data := aData.
+	method := aMethod.
+	cellGapConstant := 3.
 	"isRawData indicates if body in POST is of type raw. TODO: might be improved"
 	isRawData := true.
 	Examples ifNil: [Examples := Dictionary new].
@@ -522,24 +544,11 @@ SBRequestTool >> url: aString method: aMethod headers: aHeaders data: aData [
 	params := Dictionary new.
 	exploreResponse := true.
 	
-	aMethod = #post ifTrue: [self initPost].
-	aMethod = #get ifTrue: [self initGet]
-	"TODO: implement other methods (put, trace, delete...)"
-]
-
-{ #category : #'initialize-release' }
-SBRequestTool >> url: aString options: aSBInlineBlockSymbol [ 
-	self
-		listDirection: #topToBottom;
-		addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: 'URL: ');
-			addMorphBack: (SBTextBubble new contents: aString));
-		addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: 'Params ');
-			addMorphBack: (SBStringMorph new contents: aSBInlineBlockSymbol sourceString));
-		addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: 'Header ');
-			addMorphBack: (SBTextBubble new contents: aSBInlineBlockSymbol sourceString))
+	"Can not use recreateFromVariables:params:body: here because it is overridden in the EmbeddedRequests
+	and uses the sourceMorph there, which is undefined at first construction"
+	method = #get ifTrue: [self initGet].
+	method = #post ifTrue: [self initPost].
+	self flag: #todo. "implement other methods (put, trace, etc.)"
 ]
 
 { #category : #'as yet unclassified' }

@@ -10,34 +10,24 @@ SBPyPltMarker class >> matchPython: aDictionary do: aBlock [
 				name: (identifier) ="marker"
     				value: (string) @value
 			) @argument
-	' sample: 'marker="o"'>
+	' sample: 'ax.plot(marker="o")'>
 	
 	^ aBlock
 		value: (aDictionary at: 'argument')
-		value: (self new factory: (aDictionary at: 'argument') factory;
+		value: (self new factory: (aDictionary at: 'argument') factory; prefix: 'marker=';
 			createReplacementWithSelectedLabel: (aDictionary at: 'value') contents
 			)
 ]
 
 { #category : #'initialize-release' }
-SBPyPltMarker >> items [
+SBPyPltMarker >> itemDefinitions [
 	^ {
-		{'.'. SBPyPltImage point}.
-		{'o'. SBPyPltImage circle}.
-		{'^'. SBPyPltImage triangleUp}.
-		{'s'. SBPyPltImage square}.
-		{'+'. SBPyPltImage plus}.
-		{'1'. SBPyPltImage triDown}.
-		{'|'. SBPyPltImage vline}.
+		{'.'. SBPyPltImage point. 'point'}.
+		{'o'. SBPyPltImage circle. 'circle'}.
+		{'^'. SBPyPltImage triangleUp. 'triangleUp'}.
+		{'s'. SBPyPltImage square.  'square'}.
+		{'+'. SBPyPltImage plus. 'plus'}.
+		{'1'. SBPyPltImage triDown. 'tri_down'}.
+		{'|'. SBPyPltImage vline. 'vline'}.
 	}
-]
-
-{ #category : #'initialize-release' }
-SBPyPltMarker >> prefix [
-	^'marker='
-]
-
-{ #category : #'initialize-release' }
-SBPyPltMarker >> tooltips [
-	^ {'point'. 'circle'. 'triangleUp'. 'square'. 'plus'. 'tri_down'. 'vline'}
 ]

@@ -38,6 +38,12 @@ SBTSUnknown >> contents: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknown >> copyBlock [
+
+	^ self buildCopy
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknown >> cursorPositionsDo: aBlock [
 
 	aBlock value: (SBCursorSelect new block: self).
@@ -108,7 +114,7 @@ SBTSUnknown >> hint [
 { #category : #'as yet unclassified' }
 SBTSUnknown >> hint: aString [
 
-	self label: aString
+	self currentTextMorph placeholderText: aString
 ]
 
 { #category : #'as yet unclassified' }
@@ -149,6 +155,12 @@ SBTSUnknown >> isTSRepeat [
 
 { #category : #testing }
 SBTSUnknown >> isTSSeq [
+
+	^ false
+]
+
+{ #category : #testing }
+SBTSUnknown >> isTSSymbol [
 
 	^ false
 ]
@@ -230,7 +242,7 @@ SBTSUnknown >> template [
 { #category : #'as yet unclassified' }
 SBTSUnknown >> template: aBlock [
 
-	self hint: aBlock value hint.
+	self hint ifEmpty: [self hint: aBlock value hint].
 	template := aBlock
 ]
 

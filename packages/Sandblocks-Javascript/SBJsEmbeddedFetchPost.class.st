@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBJsEmbeddedFetchPost >> url: aString headers: aHeaders data: aData [
 	"Constructs a lean designed SBJsFetch object"
-	super url: aString method: #post headers: aHeaders data: aData
+	self url: aString method: #post headers: aHeaders data: aData
 ]
 
 { #category : #'as yet unclassified' }

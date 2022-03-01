@@ -208,13 +208,10 @@ SBTSCursor >> restoreTo: aCursor [
 SBTSCursor >> shouldSkipParsedNode: aNode [
 
 	| parentType type |
-	parentType := library nodeType: (library nodeParent: aNode).
 	type := library nodeType: aNode.
+	parentType := library nodeType: (library nodeParent: aNode).
 	
-	^ (factory delimitedRules
-		at: parentType
-		ifPresent: [:delims | delims includes: self type]
-		ifAbsent: [false]) or: [factory extras includes: type]
+	^ factory shouldSkipParsing: type in: parentType cursor: self
 ]
 
 { #category : #'as yet unclassified' }

@@ -11,6 +11,12 @@ SBJavascript class >> defaultRuntimeClass [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript class >> expressionTypes [
+
+	^ #('expression')
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript class >> fileSuffix [
 
 	^ 'js'
@@ -6800,6 +6806,12 @@ SBJavascript >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript >> highlightFor: aBlock [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript >> postConfigure [
 
 	blockInline remove: 'statement_block'.
@@ -6826,6 +6838,12 @@ SBJavascript >> preprocessGrammar [
 	self grammar externals: (self grammar externals copyWithout: (self grammar externals detect: [:e | e name = '_template_chars'])).
 	self grammar at: 'inline' put: self grammar inline, {'_ternary_qmark'}.
 	self grammar rules statement members: (self grammar rules statement members reject: [:m | m name = 'labeled_statement'])
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript >> shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor [
+
+	^ (super shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor) or: [aTypeString = 'jsx_text' and: [aCursor text allSatisfy: [:c | c isSeparator]]]
 ]
 
 { #category : #'as yet unclassified' }

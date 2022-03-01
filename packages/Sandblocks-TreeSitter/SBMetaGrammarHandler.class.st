@@ -36,7 +36,10 @@ SBMetaGrammarHandler >> newNullBlock [
 { #category : #'as yet unclassified' }
 SBMetaGrammarHandler >> startOverrideInput: anEvent in: anEditor [
 
-	self block tryInterpretInput: anEvent keyCharacter asString before: false
+	anEditor mode = #input ifTrue: [self block tryInterpretInput: anEvent keyCharacter asString before: false].
+	anEditor mode = #command ifTrue: [
+		anEditor selection changeToUnknown.
+		anEditor mode = #input ifTrue: [anEditor selection keyStroke: anEvent]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -44,6 +47,13 @@ SBMetaGrammarHandler >> textContentsForCopy [
 	"invoking the pretty printer here is rather expensive (e.g. when deleting multiple stmts, so just use the regular sourceString"
 
 	^ self block sourceString
+]
+
+{ #category : #'as yet unclassified' }
+SBMetaGrammarHandler >> wrapWithWatch [
+	<action>
+
+	^ self block wrapWithWatch
 ]
 
 { #category : #'as yet unclassified' }

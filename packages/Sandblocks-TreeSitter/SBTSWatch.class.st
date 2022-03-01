@@ -184,6 +184,14 @@ SBTSWatch >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSWatch >> intoWorld: aWorld [
+
+	| editor |
+	editor := self sandblockEditor.
+	(editor respondsTo: #examples) ifTrue: [editor examples registerWatch: self]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSWatch >> isWatch [
 
 	^ true

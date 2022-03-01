@@ -23,58 +23,39 @@ SBPyPltSetScale class >> matchPython: aDictionary do: aBlock [
 	| functionName axis |
 	functionName := (aDictionary at: 'setScale') contents.
 	
-	((functionName = 'set_xscale') or: (functionName = 'set_yscale')) ifFalse: [^ nil].
+	((functionName = 'set_xscale') or: [(functionName = 'set_yscale')]) ifFalse: [^ nil].
 	
-	axis := functionName = 'set_xscale' ifTrue: 'x' ifFalse: 'y'.
+	axis := functionName = 'set_xscale' ifTrue: ['x'] ifFalse: ['y'].
 	
 	^ aBlock
 		value: (aDictionary at: 'call')
 		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacement: (aDictionary at: 'param') contents
-			forAxis: axis
-			)
+			createReplacementWithLabel: (aDictionary at: 'param') contents axis: axis)
 ]
 
 { #category : #'initialize-release' }
-SBPyPltSetScale >> createReplacement: aLabel forAxis: aString [
-	| selection |
-	selection := (self items select: [:i | i submorphs first contents = aLabel]) ifEmpty: [aLabel] ifNotEmpty: [:aCollection | aCollection first].
+SBPyPltSetScale >> createReplacementWithLabel: aString axis: anotherString [
+	| itemMorphs selectedItem tooltips |
+	itemMorphs := SBPyPltComboBox itemDefinitionsToMorphs: self itemDefinitions.
+	selectedItem := SBPyPltComboBox find: aString inItemDefinitions: itemMorphs fallback: #first.
+	tooltips := self itemDefinitions collect: #third. 
 
-	self addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: (aString,' axis scale:'));
-			addMorphBack: (SBPyPltComboBox new 
-				values: self items; tooltips: self tooltips; object: selection);
-			cellGap: 4
-		)
+	self addMorphBack:  (SBPyPltComboBox new values: itemMorphs; prefix: (anotherString, ' axis scale:'); 
+			object: selectedItem; tooltips: tooltips)
 ]
 
 { #category : #'initialize-release' }
-SBPyPltSetScale >> items [
+SBPyPltSetScale >> itemDefinitions [
 "These items are shown in a SBComboBox"
 
-	^ {{'linear'. SBPyPltImage linearScale}.
-		{'log'. SBPyPltImage logScale}.
-		{'symlog'. SBPyPltImage symlogScale}} collect: [:pair |
-				SBRow new
-					cellGap: 8;
-					addMorphBack: (SBStringMorph new contents: pair first);
-					addMorphBack: pair second
-				].
+	^ {{'linear'. SBPyPltImage linearScale. 'The default linear scale.'}.
+		{'log'. SBPyPltImage logScale. 'A standard logarithmic scale. Care is taken to only plot positive values.'}.
+		{'symlog'. SBPyPltImage symlogScale. 'The symmetrical logarithmic scale is logarithmic in both the positive and negative directions from the origin.
+
+Since the values close to zero tend toward infinity, there is a need to have a range around zero that is linear. The parameter linthresh allows the user to specify the size of this range (-linthresh, linthresh).'}}
 ]
 
-{ #category : #'initialize-release' }
-SBPyPltSetScale >> tooltips [
-
-	^ {
-		'The default linear scale.'.
-		'A standard logarithmic scale. Care is taken to only plot positive values.'.
-		'The symmetrical logarithmic scale is logarithmic in both the positive and negative directions from the origin.
-
-Since the values close to zero tend toward infinity, there is a need to have a range around zero that is linear. The parameter linthresh allows the user to specify the size of this range (-linthresh, linthresh).'
-	}
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltSetScale >> writeSourceOn: aStream [
 
 	| xy label |

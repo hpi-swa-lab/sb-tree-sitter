@@ -15,7 +15,14 @@ SBJsEmbeddedFetch class >> extractBody: aBody [
 
 { #category : #'as yet unclassified' }
 SBJsEmbeddedFetch class >> extractHeaders: aHeaders [
-	^aHeaders pairs.
+	| map |
+	map := Dictionary new.
+	(1 to: aHeaders childSandblocks size) do: [:n| | key value |
+		key := (aHeaders childSandblocks at: n) childSandblocks first childSandblocks first contents.
+		value := (aHeaders childSandblocks at: n) childSandblocks second childSandblocks first contents.
+		map at: key put: value].
+	^map
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -64,8 +71,5 @@ SBJsEmbeddedFetch class >> matchJs: aDictionary do: aBlock [
 
 { #category : #'as yet unclassified' }
 SBJsEmbeddedFetch >> headersToWritableString [
-	| txt |
-	txt := ''.
-	headers keysDo: [:key| txt := txt, '''', key asString, '''',  ':','''', (headers at: key) asString, '''', ','].
-	^txt copyFrom: 1 to: (txt size) - 1
+	^ (headers associations collect: [:a | '"{1}":"{2}"' format: {a key. a value}]) joinSeparatedBy: ','.
 ]

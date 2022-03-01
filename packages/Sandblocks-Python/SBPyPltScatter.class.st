@@ -1,5 +1,5 @@
 "
-I am the class representing the matplotlib scatter
+Replacement for ax.scatter
 "
 Class {
 	#name : #SBPyPltScatter,
@@ -20,29 +20,35 @@ SBPyPltScatter class >> match: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'call')
 		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacementOfArgs: (aDictionary at: 'call') access arguments)
+			createReplacementOfArgs: (aDictionary at: 'call') access arguments buildCopy)
 ]
 
 { #category : #'initialize-release' }
 SBPyPltScatter >> createReplacementOfArgs: aSBTSFieldAccessor [
-
+		
 	self addMorphBack: (SBRow new
+		addMorphBack: (AlignmentMorph newColumn 
+			color: Color transparent; 
+			hResizing: #shrinkWrap;
+			addMorphBack: (AlignmentMorph newSpacer: Color transparent);
 			addMorphBack: (SBStringMorph new contents: 'scatter:');
-			addMorphBack: aSBTSFieldAccessor;
 			addMorphBack: (SBPyPltImage scatterPlot);
-			cellGap: 4
-		).
+			addMorphBack: (AlignmentMorph newSpacer: Color transparent)
+		);
+		addMorphBack: aSBTSFieldAccessor;
+		cellGap: 4
+	)
 ]
 
 { #category : #'initialize-release' }
 SBPyPltScatter >> palettes [
 
-	^ super palettes,{SBPyPltPaletteScatter}
+	^ {SBPyPltPaletteScatter}, super palettes
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltScatter >> writeSourceOn: aStream [
 
 	aStream nextPutAll: 'ax.scatter'.
-	(self firstSubmorph submorphs asOrderedCollection at: 2) writeSourceOn: aStream.
+	(self firstSubmorph submorphs second) writeSourceOn: aStream.
 ]

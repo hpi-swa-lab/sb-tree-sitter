@@ -10,8 +10,8 @@ Class {
 { #category : #'as yet unclassified' }
 SBJsEmbeddedExpressPost >> url: aString headers: aHeaders data: aData [
 	"Constructs a lean designed SBJsFetch object"
-	aData ifNil: [super url: aString method: #post headers: aHeaders data: '{}'].
-	aData ifNotNil: [super url: aString method: #post headers: aHeaders data: aData].
+	aData ifNil: [self url: aString method: #post headers: aHeaders data: '{}'].
+	aData ifNotNil: [self url: aString method: #post headers: aHeaders data: aData].
 ]
 
 { #category : #'as yet unclassified' }

@@ -212,7 +212,7 @@ SBTSLanguageTests >> testPythonBinaryOperator [
 SBTSLanguageTests >> testPythonComprehension [
 
 	| source |
-	source := '(0 for i in range)'.
+	source := '(123 for i in range)'.
 	self assert: source equals: (SBPython parse: source) sourceString
 ]
 
@@ -251,6 +251,21 @@ SBTSLanguageTests >> testPythonFoundDelimiters [
 	| lang |
 	lang := SBPython rebuild.
 	{'argument_list' -> {','}. 'parameters' -> {','}. 'tuple_pattern' -> {','}. 'list' -> {','}} do: [:pair | self assert: (lang delimitedRules includesAssociation: pair)]
+]
+
+{ #category : #'testing - printing' }
+SBTSLanguageTests >> testPythonIf [
+
+	| source |
+	source := 'if a:
+	b
+elif c:
+	d
+elif f:
+	g
+else:
+	e'.
+	self assert: source equals: (SBPython parse: source) sourceString
 ]
 
 { #category : #'testing - parse' }

@@ -16,7 +16,12 @@ SBTSLanguageRuntime class >> available [
 { #category : #'os process' }
 SBTSLanguageRuntime class >> checkedCmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString [
 
-	^ (self cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString cancel: [:b | ]) wait value: [:status :stdout :stderr | status = 0 ifTrue: [stdout] ifFalse: [self error: stderr]]
+	^ (self cmd: aProgramPathString arguments: aCollection env: aDictionary stdin: aString cancel: [:b | ]) wait value: [:status :stdout :stderr |
+		status = 0 ifTrue: [stdout] ifFalse: [
+			SBTSForeignError new
+				contents: stderr;
+				source: aProgramPathString;
+				signal]]
 ]
 
 { #category : #'os process' }

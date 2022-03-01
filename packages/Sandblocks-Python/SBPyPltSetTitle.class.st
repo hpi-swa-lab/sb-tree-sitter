@@ -1,3 +1,6 @@
+"
+Sets the title of the axes.
+"
 Class {
 	#name : #SBPyPltSetTitle,
 	#superclass : #SBPyPltAxis,
@@ -34,11 +37,11 @@ SBPyPltSetTitle >> createReplacement: aLabel [
 		)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltSetTitle >> writeSourceOn: aStream [
 
 	| label |
-	label := (self firstSubmorph submorphs at: 2) contents.
+	label := (self firstSubmorph submorphs second) contents.
 	
 	aStream nextPutAll: ('ax.set_title("',label,'")').
 ]

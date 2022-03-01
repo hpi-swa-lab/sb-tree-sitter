@@ -21,7 +21,8 @@ Class {
 		'containersOfPromotedInlineSymbols',
 		'softLineBreakMatcher',
 		'nodesCache',
-		'aliasOccurrences'
+		'aliasOccurrences',
+		'expressionTypes'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -630,6 +631,18 @@ SBMetaBlockFactory >> escapeStringForRegex: aString [
 ]
 
 { #category : #accessing }
+SBMetaBlockFactory >> expressionTypes [
+
+	^ expressionTypes ifNil: [#()]
+]
+
+{ #category : #configuration }
+SBMetaBlockFactory >> expressionTypes: aCollection [
+
+	expressionTypes := aCollection
+]
+
+{ #category : #accessing }
 SBMetaBlockFactory >> extras [
 
 	^ extras
@@ -770,6 +783,12 @@ SBMetaBlockFactory >> hardLineBreakMatcher: aBlock [
 SBMetaBlockFactory >> hasHighlight [
 
 	^ highlightQuery notNil
+]
+
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> highlightFor: aSBBlock [
+
+	^ nil
 ]
 
 { #category : #helper }
@@ -1180,6 +1199,15 @@ SBMetaBlockFactory >> separatorRule [
 SBMetaBlockFactory >> shouldBlockInline: aTypeString [
 
 	^ (self isSuperType: aTypeString) or: [blockInline includes: aTypeString]
+]
+
+{ #category : #testing }
+SBMetaBlockFactory >> shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor [
+
+	^ (self delimitedRules
+		at: aParentTypeString
+		ifPresent: [:delims | delims includes: aTypeString]
+		ifAbsent: [false]) or: [self extras includes: aTypeString]
 ]
 
 { #category : #'grammar clean' }

@@ -1,5 +1,5 @@
 "
-Base class for all customizations of matplotlib axes. The axis must have been initialized with SBPyPltInitPlots before.
+Base class for alll calls on axes grouped under ""Axis labels, title, and legend"", https://matplotlib.org/stable/api/axes_api.html#axis-labels-title-and-legend. The axes must have been initialized with SBPyPltInitPlots before.
 "
 Class {
 	#name : #SBPyPltAxis,
@@ -7,13 +7,13 @@ Class {
 	#category : #'Sandblocks-Python'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltAxis >> palettes [
 
 	^ {SBPyPltPaletteOverview}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltAxis >> type [
 	^ 'call'
 ]

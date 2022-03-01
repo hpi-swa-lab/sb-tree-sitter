@@ -197,6 +197,17 @@ SBInlineBlock >> changeToUnknown [
 		new startInputAtEnd]
 ]
 
+{ #category : #'action helpers' }
+SBInlineBlock >> changeToUnknownInPlace [
+
+	| unknown |
+	unknown := owner buildCopy
+		removeAllMorphs;
+		buildDefault.
+	self replaceBy: unknown.
+	^ unknown
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> childOrNil [
 
@@ -281,11 +292,31 @@ SBInlineBlock >> click: anEvent [
 	self inline ifFalse: [super click: anEvent]
 ]
 
+{ #category : #actions }
+SBInlineBlock >> collapseBlock [
+	<action>
+
+	| collapsed command |
+	collapsed := SBTSCollapsed new.
+	command := SBWrapCommand new
+		outer: collapsed;
+		inner: self;
+		wrap: [:collapse :block | collapse block: block factory: block factory];
+		selectAfter: collapsed.
+	self sandblockEditor ifNotNil: [:e | e do: command] ifNil: [command do]
+]
+
+{ #category : #actions }
+SBInlineBlock >> collapsedContent [
+
+	^ self type
+]
+
 { #category : #'as yet unclassified' }
 SBInlineBlock >> color [
 
 	self containingSymbol ifNotNil: [ :aSymbol |
-		self factory highlightFor: aSymbol do: [ :color | color ifNotNil: [ :c | ^ c muchLighter ] ] ].
+		(self factory highlightFor: aSymbol) ifNotNil: [:color | ^ color]].
 	^ super color
 ]
 
@@ -333,8 +364,9 @@ SBInlineBlock >> containsEqual: aBlock [
 SBInlineBlock >> convertedFor: anInterfaceCollection do: aBlock [
 
 	anInterfaceCollection first = #isInlineBlock ifTrue: [
+		self factory name = anInterfaceCollection last factory name ifFalse: [^ super convertedFor: anInterfaceCollection do: aBlock].
 		^ (SBTSRuleExplore new
-			explore: anInterfaceCollection last
+			explore: (anInterfaceCollection last isUnknown ifTrue: [anInterfaceCollection last template] ifFalse: [anInterfaceCollection last])
 				withNested: self
 				nestedBefore: false
 				for: ''
@@ -431,7 +463,7 @@ SBInlineBlock >> evaluateExpression [
 	<action>
 
 	| result |
-	result := self evaluate.
+	result := self evaluatePrint.
 	self sandblockEditor isSingleArtefactView ifTrue: [^ result explore].
 	result convertedFor: SBInterfaces topLevel doWithChooser: [:morph |
 		self sandblockEditor openMorphInView: morph.
@@ -439,6 +471,20 @@ SBInlineBlock >> evaluateExpression [
 		self sandblockEditor connectFrom: self to: morph.
 		morph].
 	^ result
+]
+
+{ #category : #'action helpers' }
+SBInlineBlock >> evaluatePrint [
+
+	| ret watch |
+	ret := nil.
+	watch := SBTSWatch newEmpty
+		expression: self buildCopy;
+		when: #reportedValue evaluate: [:value | ret := value].
+	self factory runtime evaluate: watch sourceString.
+	"watches are fired on the UI thread rather than synchronously, so we make sure they had a chance"
+	World doOneCycle.
+	^ ret
 ]
 
 { #category : #geometry }
@@ -637,13 +683,13 @@ SBInlineBlock >> instantiate [
 	^ instance
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBInlineBlock >> isArtefact [
 
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBInlineBlock >> isBlockBody [
 
 	^ self isStatementContainer
@@ -661,13 +707,19 @@ SBInlineBlock >> isBuilt: aBoolean [
 	built := aBoolean
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
+SBInlineBlock >> isExpression [
+
+	^ self factory expressionTypes includes: self type
+]
+
+{ #category : #testing }
 SBInlineBlock >> isInlineBlock [
 
 	^ true
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBInlineBlock >> isSandblock [
 
 	^ self inline not
@@ -679,13 +731,13 @@ SBInlineBlock >> isSkippedFor: anExplore [
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBInlineBlock >> isStatement [
 
 	^ self parentSandblock isInlineBlock and: [self parentSandblock isStatementContainer]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBInlineBlock >> isStatementContainer [
 
 	^ false
@@ -827,7 +879,7 @@ SBInlineBlock >> name: aString [
 SBInlineBlock >> newEmptyChildNear: aBlock before: aBoolean [
 
 	| reference |
-	reference := aBlock owner containingInlineBlock.
+	reference := aBlock ifNil: [self] ifNotNil: [aBlock owner containingInlineBlock].
 	[reference repeaterChild isNil and: [reference ~= self]] whileTrue: [reference := reference owner containingInlineBlock].
 	^ reference repeaterChild ifNotNil: [:c | c element instantiate]
 ]
@@ -869,13 +921,15 @@ SBInlineBlock >> objectInterfaceForDrop: aBlock near: anotherBlock at: aSymbol [
 
 	^ (self repeaterChildFor: aBlock near: anotherBlock)
 		ifNil: [SBInterfaces never]
-		ifNotNil: [:repeater | {#isInlineBlock. [:o | false]. anotherBlock = #replace ifTrue: [self] ifFalse: [repeater element]}]
+		ifNotNil: [:repeater | {#isInlineBlock. SBInterfaces never. anotherBlock = #replace ifTrue: [self] ifFalse: [repeater element]}]
 ]
 
 { #category : #'as yet unclassified' }
 SBInlineBlock >> objectInterfaceNear: aBlock at: aSymbol [
 
 	| reference |
+	(aSymbol = #replace and: [aBlock notNil and: [aBlock isInlineBlock or: [aBlock isUnknown]]]) ifTrue: [^ {#isInlineBlock. SBInterfaces never. aBlock}].
+	
 	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
  this and does special handling. other handlers will get blocked by the false"
 	aBlock
@@ -980,7 +1034,11 @@ SBInlineBlock >> printElementsSeparated: aCollection on: aStream indent: aNumber
 				ifPresent: [:delim | delim first]
 				ifAbsent: ['']]
 		ifNil: [''].
-	suffixMatchesWordRule := [:string | (factory notNil and: [factory separatorRule notNil]) and: [(1 to: string size) anySatisfy: [:start | factory separatorRule matchesStream: (string readStream position: start - 1)]]].
+	suffixMatchesWordRule := [:string |
+		(factory ifNotNil: #separatorRule)
+			ifNotNil: [:rule | "FIXME: looking at only 3 chars is a heuristic that may fail"
+			(1 to: (3 min: string size)) anySatisfy: [:start | rule matchesStream: (string readStream position: string size - start)]]
+			ifNil: [false]].
 	
 	aCollection withIndexDo: [:element :index | | string |
 		string := String streamContents: [:stream |
@@ -1321,10 +1379,15 @@ SBInlineBlock >> wrapWithWatch [
 	<action>
 
 	self isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self replacer: self expression buildCopy)].
-	self parentSandblock isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self parentSandblock replacer: self buildCopy)].
-	self sandblockEditor do: (SBReplaceCommand new
-		target: self
-		replacer: (SBTSWatch newEmpty expression: self buildCopy))
+	self parentSandblock isWatch ifTrue: [
+		^ self sandblockEditor do: (SBReplaceCommand new
+			target: self parentSandblock
+			replacer: self parentSandblock expression buildCopy)].
+	
+	(self ownerSatisfying: [:o | o isInlineBlock and: [o isExpression]]) ifNotNil: [:expr |
+		self sandblockEditor do: (SBReplaceCommand new
+			target: expr
+			replacer: (SBTSWatch newEmpty expression: expr buildCopy))]
 ]
 
 { #category : #'as yet unclassified' }

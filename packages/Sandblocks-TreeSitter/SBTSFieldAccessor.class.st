@@ -30,3 +30,9 @@ SBTSFieldAccessor >> element: aBlock [
 
 	element := aBlock
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSFieldAccessor >> firstChild [
+
+	^ self children first
+]

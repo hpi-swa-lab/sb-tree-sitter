@@ -1,10 +1,15 @@
+"
+A SBRePalette is a palette for regular expressions.
+
+It contains custom replacements and a list of all elements of the grammar.
+"
 Class {
 	#name : #SBRePalette,
 	#superclass : #SBTSPalette,
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #building }
 SBRePalette class >> addAllOf: aCollection to: aBuilder [
 
 		aCollection do: [:block |
@@ -28,103 +33,137 @@ SBRePalette class >> addRule: aString to: aBuilder [
 	aBuilder addBlock: aString as: block
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #categories }
 SBRePalette class >> assertions [
 
 	^ {
-		[SBReVerboseLookaroundAssertion new].
-		[SBInlineBlockSymbol new
-			type: 'start_assertion'
-			factory: self factory instance
-			block: (self factory build: 'start_assertion')].
-		[SBInlineBlockSymbol new
-			type: 'end_assertion'
-			factory: self factory instance
-			block: (self factory build: 'end_assertion')].
+		[SBReLookaroundAssertion new].
+		[SBReSimpleReplacement startAssertion].
+		[SBReSimpleReplacement endAssertion].
 	}
 ]
 
-{ #category : #'as yet unclassified' }
-SBRePalette class >> buildOn: aBuilder [
+{ #category : #building }
+SBRePalette class >> buildAllRulesOn: aBuilder [
 
 	aBuilder
-		addHeader: 'Regex';
-		addSectionHeader: 'Quantifier';
-		addText: 'Specifiy how many times an element may repeat.'.
-	self addAllOf: self quantifier to: aBuilder.
-	aBuilder addSectionHeader: 'Groups'.
-	self addAllOf: self groups to: aBuilder.
-	aBuilder addSectionHeader: 'Assertions'.
-	aBuilder addText: 'Specify conditions without actually matching anything.'.
-	self addAllOf: self assertions to: aBuilder.
-	
-	aBuilder addSectionHeader: 'Everything'.
-	
+		addSectionHeader: 'Everything';
+		addText: 'All rules in their original form without replacements.'.
 	self addAllRules: self rules to: aBuilder
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #building }
+SBRePalette class >> buildAssertionsOn: aBuilder [
+
+	aBuilder
+		addSectionHeader: 'Assertions';
+		addText: 'specify conditions but do not actually consume any characters.'.
+	self addAllOf: self assertions to: aBuilder
+]
+
+{ #category : #building }
+SBRePalette class >> buildCharacterClassesOn: aBuilder [
+
+	aBuilder
+		addSectionHeader: 'Character classes';
+		addText: 'match one of many possible characters.'.
+	self addAllOf: self characterClasses to: aBuilder
+]
+
+{ #category : #building }
+SBRePalette class >> buildGroupsOn: aBuilder [
+
+	aBuilder
+		addSectionHeader: 'Groups';
+		addText: 'capture parts of a pattern.'.
+	self addAllOf: self groups to: aBuilder
+]
+
+{ #category : #building }
+SBRePalette class >> buildOn: aBuilder [
+
+	aBuilder addHeader: 'Regex'.
+	self
+		buildToolsOn: aBuilder;
+		buildCharacterClassesOn: aBuilder;
+		buildGroupsOn: aBuilder;
+		buildQuantifierOn: aBuilder;
+		buildAssertionsOn: aBuilder;
+		buildAllRulesOn: aBuilder
+]
+
+{ #category : #building }
+SBRePalette class >> buildQuantifierOn: aBuilder [
+
+	aBuilder
+		addSectionHeader: 'Quantifier';
+		addText: 'specify how many times an element may repeat.'.
+	self addAllOf: self quantifier to: aBuilder
+]
+
+{ #category : #building }
+SBRePalette class >> buildToolsOn: aBuilder [
+
+	aBuilder addSectionHeader: 'Tools'.
+	self addAllOf: self tools to: aBuilder
+]
+
+{ #category : #categories }
+SBRePalette class >> characterClasses [
+
+	^ {
+		[SBReSimpleReplacement anyCharacter].
+		[SBReCharacterClassEscape new].
+	}
+]
+
+{ #category : #properties }
 SBRePalette class >> factory [
 
 	^ SBRegex
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #categories }
 SBRePalette class >> groups [
 
 	^ {
-		[SBReVerboseNamedCapturingGroup new].
+		[SBReNamedCapturingGroup new].
 		[SBInlineBlockSymbol new
 			type: 'anonymous_capturing_group'
 			factory: self factory instance
 			block: (self factory build: 'anonymous_capturing_group')].
-		[SBReVerboseComment new].
 	}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #properties }
 SBRePalette class >> language [
 
 	^ self factory language
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #categories }
 SBRePalette class >> quantifier [
 
 	^ {
-		[SBReVerboseOptional new].
-		[SBReVerboseZeroOrMore new].
-		[SBReVerboseOneOrMore new].
-		[SBReVerboseExactQuantifier new].
-		[SBReVerboseQuantifierRange new].
+		[SBReOptional new].
+		[SBReZeroOrMore new].
+		[SBReOneOrMore new].
+		[SBReExactQuantifier new].
+		[SBReQuantifierRange new].
 	}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #categories }
 SBRePalette class >> rules [
 	
 	^ self factory grammarJsonObject rules keys
-	"^ {
-	'disjunction'.
+]
 
-	'optional'.
-	'zero_or_more'.
-	'one_or_more'.
+{ #category : #categories }
+SBRePalette class >> tools [
 
-	'start_assertion'.
-	'end_assertion'.
-	'boundary_assertion'.
-	'non_boundary_assertion'.
-	'lookahead_assertion'.
-
-	'anonymous_capturing_group'.
-	'named_capturing_group'.
-	'non_capturing_group'.
-	
-	'backreference_escape'.
-
-	'any_character'.
-	'character_class'.
-
-	'count_quantifier'.}"
+	^ {
+		[SBReComment new].
+		[SBReEvaluator new].
+	}
 ]

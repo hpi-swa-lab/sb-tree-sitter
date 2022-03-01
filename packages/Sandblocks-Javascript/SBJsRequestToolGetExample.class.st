@@ -14,7 +14,7 @@ SBJsRequestToolGetExample >> code: aCode url: aUrl headers: aHeaders params: aPa
 	headerMap := aHeaders.
 	params := (aParams).
 	
-	msg := ('Code: ', code, '\URL: ', url, '\Method: ', method asString asUppercase, '\Headers: ', self headersToString, '\Params: ', self paramsToString) withCRs.
+	msg := ('Code: {1}\URL: {2}...' format: {code. url}) withCRs.
 	
 	self balloonText: msg
 ]

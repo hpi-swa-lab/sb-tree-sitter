@@ -24,18 +24,6 @@ SBJsPalette class >> buildOn: aBuilder [
 			method: #get
 			headers: (Dictionary newFrom: {'Content-Type' -> 'text/html'})
 			data: '{"key" : "value"}').
-			
-	aBuilder addBlock: 'Small GET' as: (SBJsEmbeddedExpressGet new
-		factory: SBJavascript new;
-			url: 'http://localhost:8080/user'
-			headers: (Dictionary newFrom: {'Content-Type' -> 'text/plain'})
-			data: nil).
-			
-	aBuilder addBlock: 'Small POST' as: (SBJsEmbeddedExpressPost new
-		factory: SBJavascript new;
-			url: 'http://localhost:8080/example'
-			headers: (Dictionary newFrom: {'Content-Type' -> 'text/plain'})
-			data: '{"key" : "value"}').
 ]
 
 { #category : #'as yet unclassified' }
