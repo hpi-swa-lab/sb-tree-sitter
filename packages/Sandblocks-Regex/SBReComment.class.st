@@ -1,5 +1,9 @@
 "
 A SBReComment is an inline comment in a regex.
+
+It enables users to add inline explanations of the intent of a pattern.
+
+You can use the Ctrl+M shortcut to wrap the currently selected block with an evaluator.
 "
 Class {
 	#name : #SBReComment,

@@ -1,6 +1,10 @@
 "
 SBRegex is the Treesitter language for regular expressions (regex).
 
+The SBReBlock class and its subclasses implements verbose replacements for elements of the regex syntax to make regular expressions more easy to read, write and understand. See the comment on that class for more information regarding the design considerations behind the verbose blocks and the structure of the code.
+
+The SBRePalette is a custom palette with the purpose to make the verbose replacements available to the user as well as making all elements of the syntax discoverable.
+
 The Treesitter-Regex grammar does not correspond to a well-known regex dialect. There it the lack of backreferences by number, the \k syntax for named backreferences, the lack of {n,} and {,n} quantifiers and so on. Apart from the \k named backreference, this regex dialect seems to be a subset of JavaScript's regex dialct.
 "
 Class {
@@ -762,8 +766,8 @@ SBRegex >> highlightFor: aBlock [
 			['class_range'] -> [Color green].
 
 			"escapes"
-			['control_escape'] -> [Color blue].
-			['control_letter_escape'] -> [Color blue].
+			['control_escape'] -> [Color magenta].
+			['control_letter_escape'] -> [Color magenta].
 		
 			"assertions"
 			['start_assertion'] -> [Color blue].

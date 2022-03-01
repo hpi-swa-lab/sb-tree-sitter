@@ -1,5 +1,5 @@
 "
-A SBReEvaluatorTestList is a container for SBReEvaluatorTest instances.
+A SBReEvaluatorTestList is a container for SBReEvaluatorTest instances. It's purpose is to allow insertion of new and remolad of old SBReEvaluatorTest instances using the normal Sandblocks editing functions.
 "
 Class {
 	#name : #SBReEvaluatorTestList,

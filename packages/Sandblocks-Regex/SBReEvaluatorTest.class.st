@@ -26,7 +26,8 @@ SBReEvaluatorTest >> color [
 { #category : #accessing }
 SBReEvaluatorTest >> color: aColor [
 
-	color := aColor
+	color := aColor.
+	self changed
 ]
 
 { #category : #accessing }
@@ -53,7 +54,11 @@ SBReEvaluatorTest >> initialize [
 	super initialize.
 	
 	self
-		addMorphBack: (SBTextBubble multiLine placeholderText: 'string');
+		addMorphBack: (SBTextBubble multiLine
+			placeholderText: 'string';
+			when: #contentsChanged
+			send: #changed
+			to: self);
 		hResizing: #shrinkWrap;
 		vResizing: #shrinkWrap;
 		changeTableLayout

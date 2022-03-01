@@ -1,5 +1,9 @@
 "
 A SBReEvaluator is a block that allows to evaluate a sub-expression of a regex against multiple test strings and see the result. See SBReEvaluatorTest.
+
+If the updateOnChange method returns true, the test cases are automatically updated when the regex changes. You might want to disable this if you are having performance issues.
+
+You can use the Ctrl+N shortcut to wrap the currently selected block with an evaluator.
 "
 Class {
 	#name : #SBReEvaluator,
@@ -21,6 +25,13 @@ SBReEvaluator >> annotation: aString [
 
 	self examples removeAllExamples.
 	(aString splitBy: ',') do: [:each | self examples addExample: each base64Decoded]
+]
+
+{ #category : #updating }
+SBReEvaluator >> artefactChanged: aBlock [
+
+	(aBlock = self containingArtefact and: [self updateOnChange])
+		ifTrue: [self execute]
 ]
 
 { #category : #accessing }
@@ -49,20 +60,13 @@ SBReEvaluator >> initialize [
 	
 	self
 		addMorphBack: self pattern;
-		addMorphBack: (SBColumn new
-			addMorphBack: (SBRow new
-				addMorphBack: (SBButton new
-					balloonText: 'execute';
-					icon: SBIcon iconPlay
-					shortcut: nil
-					do: [self execute]);
-				addMorphBack: (SBButton new
-					balloonText: 'remove';
-					icon: SBIcon iconRemove
-					shortcut: nil
-					do: [self replaceWithWrapped])
-			);
-			addMorphBack: (examples := SBReEvaluatorTestList new))
+		addMorphBack: (examples := SBReEvaluatorTestList new)
+]
+
+{ #category : #accessing }
+SBReEvaluator >> isArtefact [
+
+	^ true
 ]
 
 { #category : #updating }
@@ -70,4 +74,10 @@ SBReEvaluator >> patternChanged [
 
 	self updateAllHighlights.
 	self execute
+]
+
+{ #category : #accessing }
+SBReEvaluator >> updateOnChange [
+
+	^ true
 ]

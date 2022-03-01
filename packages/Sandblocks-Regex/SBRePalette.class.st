@@ -1,7 +1,7 @@
 "
-A SBRePalette is a palette for regular expressions.
+A SBRePalette is a palette for regular expressions. The goal is to enable a user to discover all syntax elements of regular expressions easily and in the editor.
 
-It contains custom replacements and a list of all elements of the grammar.
+It contains custom replacements grouped by type and a list of all elements of the grammar.
 "
 Class {
 	#name : #SBRePalette,

@@ -1,5 +1,10 @@
 "
 A SBReLookaroundAssertion replaces a lookaround assertions and offers the four types of lookaround assertions in a dropdown menu with their proper names. This way, a user does not need to remember the exact syntax for each type of assertion.
+
+TODO:
+There seems to be a bug with parsing lookbehind assertions:
+
+	SBRegex parse: '(?<=1)'
 "
 Class {
 	#name : #SBReLookaroundAssertion,
