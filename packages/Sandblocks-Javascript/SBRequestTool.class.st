@@ -61,8 +61,7 @@ SBRequestTool >> addBodySection: aBody [
 { #category : #'ui-manipulation' }
 SBRequestTool >> addExampleSection [
 	"Add the UI component for displaying the examples."
-
-	[ | map |
+	| map |
 		self addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
 			addMorphBack: (SBStringMorph new contents: 'Examples');
@@ -71,7 +70,7 @@ SBRequestTool >> addExampleSection [
 		method = #post ifTrue: [exampleMorph := self submorphs eighth].
 		method = #get ifTrue: [exampleMorph := self submorphs seventh].
 		map := Examples at: url, method asString ifAbsent: [].
-		map ifNotNil: [map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
+		map ifNotNil: [map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]].
 ]
 
 { #category : #'ui-manipulation' }
@@ -441,7 +440,6 @@ SBRequestTool >> performPostRequest: body url: aUrl [
 { #category : #'initialize-release' }
 SBRequestTool >> recreateFromMorphs [
 "Recreate the UI based on the currently filled form"
-
 	self updatePayloadInObjectInstance.
 	self clearPanel.
 	method = #get ifTrue: [self initGet].

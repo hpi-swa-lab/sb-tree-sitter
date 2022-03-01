@@ -77,7 +77,7 @@ SBEmbeddedRequestTool >> addExampleSection [
 	showExamples ifTrue: [ | map tmpUrl |
 		self addMorphBack: (SBRow new
 			cellGap: cellGapConstant;
-			addMorphBack: (SBStringMorph new contents: #examples);
+			addMorphBack: (SBStringMorph new contents: 'Examples');
 			addMorphBack: (SBRow new cellGap: cellGapConstant)).
 		
 		method caseOf: {
