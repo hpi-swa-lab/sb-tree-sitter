@@ -9,7 +9,12 @@ Class {
 
 { #category : #axis }
 SBPyPltImage class >> axisExplanation1 [
-"image showing circles on a part of a plot on the title and  the legend"
+"image showing circles on the title and legend of a plot
+
+src: https://matplotlib.org/stable/_images/anatomy.png
+
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 285@75
@@ -20,6 +25,10 @@ SBPyPltImage class >> axisExplanation1 [
 
 { #category : #axis }
 SBPyPltImage class >> axisExplanation2 [
+"src: https://matplotlib.org/cheatsheets/_images/cheatsheets-1.png
+
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 107@51
@@ -40,6 +49,9 @@ SBPyPltImage class >> axvline [
 
 { #category : #line2d }
 SBPyPltImage class >> capStyleButt [
+"src: https://matplotlib.org/stable/gallery/lines_bars_and_markers/capstyle.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 30@30
@@ -50,6 +62,9 @@ SBPyPltImage class >> capStyleButt [
 
 { #category : #line2d }
 SBPyPltImage class >> capStyleProjecting [
+"src: https://matplotlib.org/stable/gallery/lines_bars_and_markers/capstyle.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 30@30
@@ -60,6 +75,9 @@ SBPyPltImage class >> capStyleProjecting [
 
 { #category : #line2d }
 SBPyPltImage class >> capStyleRound [
+"src: https://matplotlib.org/stable/gallery/lines_bars_and_markers/capstyle.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 30@30
@@ -70,6 +88,9 @@ SBPyPltImage class >> capStyleRound [
 
 { #category : #markers }
 SBPyPltImage class >> circle [
+"src: https://matplotlib.org/stable/api/markers_api.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 30@30
@@ -80,6 +101,9 @@ SBPyPltImage class >> circle [
 
 { #category : #line2d }
 SBPyPltImage class >> drawstyleDefault [
+"src: https://matplotlib.org/stable/gallery/lines_bars_and_markers/step_demo.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 60@64
@@ -90,6 +114,9 @@ SBPyPltImage class >> drawstyleDefault [
 
 { #category : #line2d }
 SBPyPltImage class >> drawstyleMid [
+"src: https://matplotlib.org/stable/gallery/lines_bars_and_markers/step_demo.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 60@64
@@ -100,6 +127,9 @@ SBPyPltImage class >> drawstyleMid [
 
 { #category : #line2d }
 SBPyPltImage class >> drawstylePost [
+"src: https://matplotlib.org/stable/gallery/lines_bars_and_markers/step_demo.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 60@64
@@ -110,6 +140,9 @@ SBPyPltImage class >> drawstylePost [
 
 { #category : #line2d }
 SBPyPltImage class >> drawstylePre [
+"src: https://matplotlib.org/stable/gallery/lines_bars_and_markers/step_demo.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 60@64
@@ -120,6 +153,30 @@ SBPyPltImage class >> drawstylePre [
 
 { #category : #plots }
 SBPyPltImage class >> histogram [
+"src: https://matplotlib.org/cheatsheets/_images/cheatsheets-1.png
+
+Copyright (c) 2020, Nicolas P. Rougier
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"
 
 	^ (Form
 	extent: 45@45
@@ -130,6 +187,9 @@ SBPyPltImage class >> histogram [
 
 { #category : #line2d }
 SBPyPltImage class >> joinStyleBevel [
+"src: https://matplotlib.org/3.5.0/gallery/lines_bars_and_markers/joinstyle.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 30@30
@@ -140,6 +200,9 @@ SBPyPltImage class >> joinStyleBevel [
 
 { #category : #line2d }
 SBPyPltImage class >> joinStyleMiter [
+"src: https://matplotlib.org/3.5.0/gallery/lines_bars_and_markers/joinstyle.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 30@30
@@ -150,6 +213,9 @@ SBPyPltImage class >> joinStyleMiter [
 
 { #category : #line2d }
 SBPyPltImage class >> joinStyleRound [
+"src: https://matplotlib.org/3.5.0/gallery/lines_bars_and_markers/joinstyle.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 30@30
@@ -160,6 +226,30 @@ SBPyPltImage class >> joinStyleRound [
 
 { #category : #plots }
 SBPyPltImage class >> linePlot [
+"src: https://matplotlib.org/cheatsheets/_images/cheatsheets-1.png
+
+Copyright (c) 2020, Nicolas P. Rougier
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"
 
 	^((Form
 	extent: 45@45
@@ -193,6 +283,10 @@ SBPyPltImage class >> logScale [
 
 { #category : #markers }
 SBPyPltImage class >> markersExplanation [
+"src: https://matplotlib.org/stable/_images/anatomy.png
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
+
 	^ (Form
 	extent: 62@57
 	depth: 32
@@ -202,6 +296,9 @@ SBPyPltImage class >> markersExplanation [
 
 { #category : #markers }
 SBPyPltImage class >> plus [
+"src: https://matplotlib.org/stable/api/markers_api.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^(Form
 	extent: 30@30
@@ -212,6 +309,9 @@ SBPyPltImage class >> plus [
 
 { #category : #markers }
 SBPyPltImage class >> point [
+"src: https://matplotlib.org/stable/api/markers_api.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 30@30
@@ -222,6 +322,30 @@ SBPyPltImage class >> point [
 
 { #category : #plots }
 SBPyPltImage class >> scatterPlot [
+"src: https://matplotlib.org/cheatsheets/_images/cheatsheets-1.png
+
+Copyright (c) 2020, Nicolas P. Rougier
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"
 
 	^ ((Form
 	extent: 45@45
@@ -232,7 +356,11 @@ SBPyPltImage class >> scatterPlot [
 
 { #category : #snippet }
 SBPyPltImage class >> snippetFilledArea [
-"src https://matplotlib.org/stable/gallery/lines_bars_and_markers/fill_between_alpha.html#sphx-glr-gallery-lines-bars-and-markers-fill-between-alpha-py"
+"src: https://matplotlib.org/stable/gallery/lines_bars_and_markers/fill_between_alpha.html#sphx-glr-gallery-lines-bars-and-markers-fill-between-alpha-py
+
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
+
 	^ (Form
 	extent: 150@204
 	depth: 32
@@ -242,7 +370,11 @@ SBPyPltImage class >> snippetFilledArea [
 
 { #category : #snippet }
 SBPyPltImage class >> snippetScatter [
-"src https://matplotlib.org/stable/gallery/lines_bars_and_markers/scatter_with_legend.html"
+"src: https://matplotlib.org/stable/gallery/lines_bars_and_markers/scatter_with_legend.html
+
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
+
 	^(Form
 	extent: 274@148
 	depth: 32
@@ -252,7 +384,10 @@ SBPyPltImage class >> snippetScatter [
 
 { #category : #snippet }
 SBPyPltImage class >> snippetStackedBarChart [
-"src https://matplotlib.org/stable/gallery/lines_bars_and_markers/bar_stacked.html#sphx-glr-gallery-lines-bars-and-markers-bar-stacked-py"
+"src: https://matplotlib.org/stable/gallery/lines_bars_and_markers/bar_stacked.html#sphx-glr-gallery-lines-bars-and-markers-bar-stacked-py
+
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 150@115
@@ -263,6 +398,9 @@ SBPyPltImage class >> snippetStackedBarChart [
 
 { #category : #markers }
 SBPyPltImage class >> square [
+"src: https://matplotlib.org/stable/api/markers_api.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 30@30
@@ -284,6 +422,9 @@ SBPyPltImage class >> symlogScale [
 
 { #category : #markers }
 SBPyPltImage class >> triDown [
+"src: https://matplotlib.org/stable/api/markers_api.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^ (Form
 	extent: 30@30
@@ -294,6 +435,9 @@ SBPyPltImage class >> triDown [
 
 { #category : #markers }
 SBPyPltImage class >> triangleUp [
+"src: https://matplotlib.org/stable/api/markers_api.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^(Form
 	extent: 30@30
@@ -304,6 +448,9 @@ SBPyPltImage class >> triangleUp [
 
 { #category : #markers }
 SBPyPltImage class >> vline [
+"src: https://matplotlib.org/stable/api/markers_api.html
+Copyright (c)
+2012- Matplotlib Development Team; All Rights Reserved"
 
 	^(Form
 	extent: 30@30
