@@ -1,5 +1,5 @@
 "
-Standalone Request Tool. This appears in the JS Palette and can be placed via Drag & Drop next to the source code to perform requests. It allows to build requests via a UI. Headers, Parameter, and Body can be added and the HTTP method can be switched. 
+Standalone Request Tool. This appears in the JS Palette and can be placed via Drag & Drop next to the source code to perform requests. It allows to build requests via a UI. Headers, Parameter, and Body can be added and the HTTP method can be switched. Entrypoint for the implementation is at SBRequestTool >> url: aString method: aMethod headers: aHeaders data: aData
 "
 Class {
 	#name : #SBRequestTool,
