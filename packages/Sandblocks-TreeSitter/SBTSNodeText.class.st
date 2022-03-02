@@ -41,14 +41,6 @@ SBTSNodeText >> currentTextMorph [
 	^ self firstSubmorph
 ]
 
-{ #category : #initialization }
-SBTSNodeText >> initialize [
-
-	super initialize.
-	
-	self addMorphBack: SBStringMorph new
-]
-
 { #category : #accessing }
 SBTSNodeText >> maxChildren [
 
@@ -79,7 +71,14 @@ SBTSNodeText >> regexString [
 SBTSNodeText >> regexString: aString [
 
 	regexString := aString.
-	regex := aString asRegex
+	regex := aString asRegex.
+	
+	self addMorphBack: (((regex matches: String cr)
+		ifTrue: [SBMultilineOwnTextMorph new maxWidth: 500]
+		ifFalse: [SBOwnTextMorph new])
+		contents: '';
+		vResizing: #shrinkWrap;
+		yourself)
 ]
 
 { #category : #parsing }

@@ -86,7 +86,7 @@ SBInlineBlockText >> currentTextMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockText >> cursorPositionsDo: aBlock [
+SBInlineBlockText >> cursorPositionsDo: aBlock shallow: aBoolean [
 
 	self inline not ifTrue: [aBlock value: (SBCursorSelect new block: self)].
 	

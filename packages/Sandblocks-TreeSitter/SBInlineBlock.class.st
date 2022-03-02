@@ -394,10 +394,10 @@ SBInlineBlock >> currentTextMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlock >> cursorPositionsDo: aBlock [
+SBInlineBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 
 	self inline not ifTrue: [aBlock value: (SBCursorSelect new block: self)].
-	self submorphsDo: [:m | m cursorPositionsDo: aBlock]
+	self submorphsDo: [:morph | (morph isSandblock not or: [aBoolean not]) ifTrue: [morph cursorPositionsDo: aBlock shallow: aBoolean]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -920,6 +920,8 @@ SBInlineBlock >> numberOfElements [
 SBInlineBlock >> objectInterfaceForDrop: aBlock near: anotherBlock at: aSymbol [
 	" we are abusing the protocol here: our overwritten convertedFor:do: recognizes
  this and does special handling. other handlers will get blocked by the false"
+
+	aBlock isInlineBlock ifFalse: [^ SBInterfaces never].
 
 	^ (self repeaterChildFor: aBlock near: anotherBlock)
 		ifNil: [SBInterfaces never]

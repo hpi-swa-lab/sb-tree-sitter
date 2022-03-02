@@ -36,11 +36,14 @@ SBTSNodeBase >> allSuperTypesDo: aBlock [
 { #category : #copying }
 SBTSNodeBase >> basicCopy [
 
-	^ self class new
+	| copy |
+	copy := self class new
 		field: field;
 		factory: factory;
 		parser: parser;
-		isConcrete: isConcrete
+		isConcrete: isConcrete.
+	self isConcrete ifTrue: [copy ensureLayout].
+	^ copy
 ]
 
 { #category : #accessing }
@@ -85,6 +88,12 @@ SBTSNodeBase >> compatibleWithType: aSymbol [
 	^ factory type: self type compatibleWith: aSymbol
 ]
 
+{ #category : #'inlining support' }
+SBTSNodeBase >> containingSandblock [
+
+	^ self inline ifTrue: [self owner ifNotNil: #containingSandblock] ifFalse: [self]
+]
+
 { #category : #hierarchy }
 SBTSNodeBase >> containingSymbol [
 
@@ -97,6 +106,12 @@ SBTSNodeBase >> copy [
 
 	self assert: self isConcrete.
 	^ self basicCopy addAllMorphs: (self submorphs collect: [:s | s copy])
+]
+
+{ #category : #copying }
+SBTSNodeBase >> copyBlock [
+
+	^ self copy
 ]
 
 { #category : #accessing }
@@ -157,6 +172,18 @@ SBTSNodeBase >> firstVisibleType [
 				ifFalse: [nil]]
 ]
 
+{ #category : #'inlining support' }
+SBTSNodeBase >> handlesMouseDown: anEvent [
+
+	^ self inline not
+]
+
+{ #category : #'inlining support' }
+SBTSNodeBase >> handlesMouseOver: anEvent [
+
+	^ self inline not
+]
+
 { #category : #initialization }
 SBTSNodeBase >> initialize [
 
@@ -165,7 +192,7 @@ SBTSNodeBase >> initialize [
 	isConcrete := false
 ]
 
-{ #category : #testing }
+{ #category : #'inlining support' }
 SBTSNodeBase >> inline [
 
 	^ true
@@ -183,7 +210,7 @@ SBTSNodeBase >> isConcrete: aBoolean [
 	isConcrete := aBoolean
 ]
 
-{ #category : #testing }
+{ #category : #'inlining support' }
 SBTSNodeBase >> isSandblock [
 
 	^ self inline not
@@ -249,6 +276,12 @@ SBTSNodeBase >> layoutCommands [
 	^ SBAlgebraCommand container
 		morph: self;
 		data: {self firstSubmorph layoutCommands}
+]
+
+{ #category : #'inlining support' }
+SBTSNodeBase >> layoutInset [
+
+	^ self inline ifTrue: [0] ifFalse: [super layoutInset]
 ]
 
 { #category : #copying }

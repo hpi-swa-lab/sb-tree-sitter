@@ -1,9 +1,6 @@
 Class {
 	#name : #SBTSNodeLabel,
 	#superclass : #SBTSNodeBase,
-	#instVars : [
-		'label'
-	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
@@ -38,6 +35,14 @@ SBTSNodeLabel >> copy [
 	^ self basicCopy
 ]
 
+{ #category : #'initialize-release' }
+SBTSNodeLabel >> initialize [
+
+	super initialize.
+	
+	self addMorphBack: SBStringMorph new
+]
+
 { #category : #testing }
 SBTSNodeLabel >> isTSLabel [
 
@@ -47,13 +52,13 @@ SBTSNodeLabel >> isTSLabel [
 { #category : #accessing }
 SBTSNodeLabel >> label [
 
-	^ label
+	^ self firstSubmorph contents
 ]
 
 { #category : #accessing }
 SBTSNodeLabel >> label: aString [
 
-	label := aString
+	self firstSubmorph contents: aString
 ]
 
 { #category : #accessing }

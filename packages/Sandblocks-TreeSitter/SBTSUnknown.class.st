@@ -44,7 +44,7 @@ SBTSUnknown >> copyBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSUnknown >> cursorPositionsDo: aBlock [
+SBTSUnknown >> cursorPositionsDo: aBlock shallow: aBoolean [
 
 	aBlock value: (SBCursorSelect new block: self).
 	self startInputCommand ifNotNil: [:command |

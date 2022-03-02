@@ -83,7 +83,7 @@ SBInlineBlockRepeat >> containingRepeat [
 ]
 
 { #category : #'as yet unclassified' }
-SBInlineBlockRepeat >> cursorPositionsDo: aBlock [
+SBInlineBlockRepeat >> cursorPositionsDo: aBlock shallow: aBoolean [
 
 	| buildInsert |
 	buildInsert := [:adjacent :before |
@@ -100,7 +100,7 @@ SBInlineBlockRepeat >> cursorPositionsDo: aBlock [
 	(multiple or: [self hasSubmorphs not]) ifTrue: [buildInsert value: nil value: true].
 	self submorphsDo: [:morph |
 		multiple ifTrue: [buildInsert value: morph value: true].
-		morph cursorPositionsDo: aBlock.
+		(morph isSandblock not or: [aBoolean not]) ifTrue: [morph cursorPositionsDo: aBlock shallow: aBoolean].
 		multiple ifTrue: [buildInsert value: morph value: false]].
 	(multiple or: [self hasSubmorphs not]) ifTrue: [buildInsert value: nil value: false]
 ]
