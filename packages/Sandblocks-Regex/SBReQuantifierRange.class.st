@@ -1,3 +1,8 @@
+"
+A SBReExactQuantifier replaces the {n,m} quantifier. This is a subset of the {n[,[m]]} syntax for regular expressions and only covers an range. For a an exact number, see SBReQuantifierRange or use {n,n}.
+
+The {n,} and {,n} variations are currently not supported by the regex grammar.
+"
 Class {
 	#name : #SBReQuantifierRange,
 	#superclass : #SBReQuantifier,
@@ -8,7 +13,7 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #matchers }
 SBReQuantifierRange class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(count_quantifier
@@ -25,21 +30,19 @@ SBReQuantifierRange class >> matchRegex: aDictionary do: aBlock [
 			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
-{ #category : #'as yet unclassified' }
-SBReQuantifierRange >> buildOn: aSBRow [
+{ #category : #initialization }
+SBReQuantifierRange >> buildOn: aMorph [
 
-	aSBRow
-		addMorphBack: (SBInlineBlockLabel new
-			label: 'at least:';
-			factory: self factory);
+	aMorph
+		addMorphBack: (SBStringMorph new
+			contents: 'at least:');
 		addMorphBack: (minimum := SBReNumberInput new
 			hint: 'min';
 			minimum: 0;
 			onChange: [:value |
 				maximum minimum: value]);
-		addMorphBack: (SBInlineBlockLabel new
-			label: 'at most:';
-			factory: self factory);
+		addMorphBack: (SBStringMorph new
+			contents: 'at most:');
 		addMorphBack: (maximum := SBReNumberInput new
 			hint: 'max';
 			minimum: 0;
@@ -47,53 +50,31 @@ SBReQuantifierRange >> buildOn: aSBRow [
 				minimum maximum: value])
 ]
 
-{ #category : #'as yet unclassified' }
-SBReQuantifierRange >> buildSelf [
-	
-	self
-		addMorphBack: (SBInlineBlockLabel new
-			label: 'at least: ';
-			factory: self factory);
-		addMorphBack: (minimum := SBReNumberInput new
-			hint: 'minimum';
-			minimum: 0;
-			onChange: [:value |
-				maximum minimum: value]);
-		addMorphBack: (SBInlineBlockLabel new
-			label: 'at most: ';
-			factory: self factory);
-		addMorphBack: (maximum := SBReNumberInput new
-			hint: 'maximum';
-			minimum: 0;
-			onChange: [:value |
-				minimum maximum: value])
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReQuantifierRange >> maximum [
 
 	^ maximum value ifNil: [0]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReQuantifierRange >> maximum: aNumber [
 
 	maximum value: aNumber
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReQuantifierRange >> minimum [
 
 	^ minimum value ifNil: [0]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReQuantifierRange >> minimum: aNumber [
 
 	minimum value: aNumber
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReQuantifierRange >> quantifierString [
 
 	^ '{',
@@ -103,7 +84,7 @@ SBReQuantifierRange >> quantifierString [
 		'}'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReQuantifierRange >> type [
 
 	^ 'count_quantifier'

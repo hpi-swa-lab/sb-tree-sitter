@@ -17,8 +17,7 @@ SBPyPltDashes class >> matchPython: aDictionary do: aBlock [
 	<lang: #python match: '(keyword_argument
 	name: (identifier) ="dashes"
       value: (tuple) @value
-) @argument' sample: 'dashes=(3,2,1,1)'>
-" add alternation"
+) @argument' sample: 'ax.plot(dashes=(3,2,1,1))'>
 
 	| integers |
 	integers := ((aDictionary at: 'value') childSandblocks collect: [:each | each contents]) asOrderedCollection.
@@ -34,33 +33,25 @@ SBPyPltDashes class >> matchPython: aDictionary do: aBlock [
 
 { #category : #'insert/delete' }
 SBPyPltDashes >> addRow [
-
 	self addRowWithDashLength: '2' spaceRight: '1'.
 	self update.
 ]
 
 { #category : #'insert/delete' }
-SBPyPltDashes >> addRowWithDashLength: aString1 spaceRight: aString2 [
+SBPyPltDashes >> addRowWithDashLength: aLengthString spaceRight: aSpaceString [
 
-	| row |
+	| row indexAddRowBtn |
 	row := SBRow new
-				addMorphBack: (SBPyNumberWithPrefix new prefix: 'dash length'; contents: aString1; rangeFrom: 0 to: 100;
-					when: #edited send: #update to: self);
-				addMorphBack: (SBPyNumberWithPrefix new prefix: 'space right:'; contents: aString2; rangeFrom: 0 to: 100;
-					when: #edited send: #update to: self).
+				changeTableLayout; hResizing: #spaceFill; cellGap: 2;
+				addMorphBack: (SBPyNumberWithPrefix new prefix: 'dash length'; contents: aLengthString; 
+					rangeFrom: 0 to: 100; when: #edited send: #update to: self);
+				addMorphBack: (SBPyNumberWithPrefix new prefix: 'space right:'; contents: aSpaceString; 
+					rangeFrom: 0 to: 100; when: #edited send: #update to: self).
 	
-	row addMorphBack:
-					(IconicButton new
-						color: Color red muchLighter;
-						borderColor: Color red;
-						labelGraphic: MenuIcons smallDeleteIcon;
-						target: self;
-						actionSelector: #delete:;
-						arguments: {row};
-						yourself
-					).
+	row addMorphBack: (SBButton new icon: (SBIcon iconRemove) shortcut: nil do: [self delete: row]).
 	
-	dialogBody addMorph: row atIndex: (dialogBody submorphCount - 1).
+	indexAddRowBtn := image ifNil: [dialogBody submorphCount] ifNotNil: [dialogBody submorphCount - 1].
+	dialogBody addMorph: row atIndex: indexAddRowBtn.
 ]
 
 { #category : #'initialize-release' }
@@ -96,8 +87,8 @@ For example, (5, 2, 1, 2) describes a sequence of 5 point and 1 point dashes sep
 SBPyPltDashes >> initRowsFromSequence: aCollection [
 "aCollection is a collection of stringified integers"
 
-	(1 to: aCollection size by: 2) do: [ :anInt |
-			self addRowWithDashLength: (aCollection at: anInt) spaceRight: (aCollection at: (anInt + 1))
+	aCollection pairsDo: [:length :space | 
+			self addRowWithDashLength: length spaceRight: space
 		].
 	
 	self update.
@@ -109,12 +100,9 @@ SBPyPltDashes >> initialize [
 	super initialize.
 	
 	dialogBody := (SBColumn new 
-			addMorphBack: (TextMorph new contents: (self info); hResizing: #rigid; width: 200; centered; margins: 2);
-			addMorphBack: (SBButton new
-				icon: SBIcon iconPlus label: 'Add' do: [self addRow]
-			);
-			addMorphBack: (image ifNil: ['' asMorph] ifNotNil: image)
-		).
+			addMorphBack: (TextMorph new contents: self info; hResizing: #rigid; width: 200; centered; margins: 2);
+			addMorphBack: (SBButton new icon: SBIcon iconPlus label: 'Add' do: [self addRow])).
+	image ifNotNil: [dialogBody addMorphBack: image].
 	popup := SBPopup new addMorphBack: dialogBody.
 ]
 
@@ -123,7 +111,7 @@ SBPyPltDashes >> openPopup [
 	| firstTimeOpened |
 	popup showBelow: self closeOnDeselect: true.
 	
-	firstTimeOpened := popup firstSubmorph lastSubmorph class = StringMorph.
+	firstTimeOpened := image isNil.
 	firstTimeOpened ifTrue: [self update].
 ]
 
@@ -137,7 +125,7 @@ SBPyPltDashes >> sequence [
 	(seqValues size = 0) ifTrue: [^ '' ].
 	(seqValues size = 1) ifTrue: [^ (seqValues at: 1)].
 	
-	^'(',((2 to: seqValues size) inject: (seqValues at: 1) into: [:acc :i | acc,', ',(seqValues at: i)]),')'
+	^ '(', (seqValues joinSeparatedBy: ', '), ')'
 ]
 
 { #category : #accessing }
@@ -147,7 +135,7 @@ SBPyPltDashes >> sequenceValues [
 	^ (dialogBody submorphs 
 		select: [:each | each class = SBRow] 
 		thenCollect: [:aRow | {(aRow submorphs at: 1) textContents.  (aRow submorphs at: 2) textContents}])
-		gather: [:aCollection | aCollection].
+		flatten.
 ]
 
 { #category : #updating }
@@ -156,11 +144,19 @@ SBPyPltDashes >> update [
 
 	super update.
 	self updateImage.
-	self updateReplacementBtn.
+	self updateButton.
+]
+
+{ #category : #updating }
+SBPyPltDashes >> updateButton [
+
+	self hasSubmorphs ifFalse: [^nil].
+	self firstSubmorph firstSubmorph contents: self sequence.
 ]
 
 { #category : #updating }
 SBPyPltDashes >> updateImage [
+	image ifNotNil: #delete.
 	image := (Form fromBinaryStream: (Base64MimeConverter mimeDecodeToBytes: (SBPython instance runtime evaluate: '
 import matplotlib.pyplot as plt
 import io
@@ -185,16 +181,7 @@ bytes.seek(0)
 sys.stdout.buffer.write(base64.b64encode(bytes.read()))
 bytes.close()
 ') readStream)) asMorph.
-
-	dialogBody removeMorph: (dialogBody submorphs last).
 	dialogBody addMorphBack: image.
-]
-
-{ #category : #updating }
-SBPyPltDashes >> updateReplacementBtn [
-
-	(self submorphs size = 0) ifTrue: [^nil].
-	self firstSubmorph firstSubmorph contents: self sequence.
 ]
 
 { #category : #copying }
@@ -203,5 +190,5 @@ SBPyPltDashes >> writeSourceOn: aStream [
 	| prefix |
 	prefix := self firstSubmorph prefix.
 	
-	aStream nextPutAll: (prefix,self sequence).
+	aStream nextPutAll: (prefix, self sequence).
 ]

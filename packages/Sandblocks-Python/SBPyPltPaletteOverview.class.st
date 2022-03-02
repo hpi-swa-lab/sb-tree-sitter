@@ -1,5 +1,5 @@
 "
-Palette showing basic matplotlib plots (plot, hist, scatter) and axis customizations.
+Palette showing matplotlib plots and other axes calls.
 "
 Class {
 	#name : #SBPyPltPaletteOverview,
@@ -9,9 +9,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBPyPltPaletteOverview class >> buildOn: aBuilder [
-	
 	SBPyPltPaletteEntry buildOn: aBuilder.
-	
+
 	self buildOnPlots: aBuilder.
 	self buildOnAxisCustomization: aBuilder.
 	
@@ -20,7 +19,7 @@ SBPyPltPaletteOverview class >> buildOn: aBuilder [
 
 { #category : #'as yet unclassified' }
 SBPyPltPaletteOverview class >> buildOnAxisCustomization: aBuilder [
-	aBuilder addSectionHeader: 'Axes Customization'.
+	aBuilder addSectionHeader: 'Axis Customization'.
 	aBuilder content addMorphBack: (self asSubSectionText: 'Customize the appearance of the axes. Axes is the area enclosed by its x- and y-axis (and possibly z-axis).').
 	
 	aBuilder addBlock: 'Add title to plot' as: (SBPython parseAndReplace: 'ax.set_title("plot title")').
@@ -36,7 +35,6 @@ SBPyPltPaletteOverview class >> buildOnAxisCustomization: aBuilder [
 { #category : #'as yet unclassified' }
 SBPyPltPaletteOverview class >> buildOnPlots: aBuilder [
 
-	| manyArgumentsScatter |
 	aBuilder addSectionHeader: 'Plots'.
 	aBuilder content addMorphBack: (self asSubSectionText: 'Plot y versus x as lines and/or markers.').
 			
@@ -46,11 +44,7 @@ SBPyPltPaletteOverview class >> buildOnPlots: aBuilder [
 	aBuilder content addMorphBack: (self asSubSectionText: 'A scatter plot of y vs. x with varying marker size and/or color.').
 	aBuilder addBlock: 'Create scatter plot with x,y points' as: (SBPython parseAndReplace: 'ax.scatter(X, Y)').
 	aBuilder addBlock: 'Create scatter plot with specified sizes' as: (SBPython parseAndReplace: 'ax.scatter(X, Y, sizes)').
-	manyArgumentsScatter := (SBPython parseAndReplace: 'ax.scatter(X, Y, sizes, colors)').
-	"access last colors argument"
-	manyArgumentsScatter childSandblocks first childSandblocks first childSandblocks last balloonText: 'doesnt work'.
-	
-	aBuilder addBlock: 'Create scatter plot with specified sizes and colors' as: manyArgumentsScatter.
+	aBuilder addBlock: 'Create scatter plot with specified sizes and colors' as: (SBPython parseAndReplace: 'ax.scatter(X, Y, sizes, colors)').
 	
 	aBuilder addMorphBack: (self asSubSectionText: 'Draw a vertical line between [ymin, ymax]').
 	aBuilder addBlock: 'Draw a vertical line' as: (SBPython parseAndReplace: 'ax.axvline(x, ymin=0, ymax=1)').
@@ -58,6 +52,5 @@ SBPyPltPaletteOverview class >> buildOnPlots: aBuilder [
 
 { #category : #'as yet unclassified' }
 SBPyPltPaletteOverview class >> language [
-
 	^ #python
 ]

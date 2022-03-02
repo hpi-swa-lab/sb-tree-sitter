@@ -1,3 +1,10 @@
+"
+A SBReCharacterClassEscape replaces a character class escape.
+
+Character class escapes represent a set of multiple acceptable characters, for example \d for all digits (0 to 9) or \s for all whitespaces.
+
+To help the user, this is a selection that allows selecting the type of character class by a descriptive name instead of by syntax.
+"
 Class {
 	#name : #SBReCharacterClassEscape,
 	#superclass : #SBReBlock,
@@ -7,75 +14,58 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #matchers }
 SBReCharacterClassEscape class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:
 '(character_class_escape) @class'>
 
 	^ aBlock 
 		value: (aDictionary at: 'class')
-		value: (self new
-			characterClass: (aDictionary at: 'class') contents)
+		value: (self new selectCharacterClass: (aDictionary at: 'class') contents)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReCharacterClassEscape >> characterClass [
 
-	^ characterClass object
+	^ characterClass
 ]
 
-{ #category : #'as yet unclassified' }
-SBReCharacterClassEscape >> characterClass: aSymbolOrString [
-
-	characterClass object: ((aSymbolOrString isKindOf: Symbol)
-		ifFalse: [self characterClasses at: aSymbolOrString ifAbsent: self characterClasses values first]
-		ifTrue: [aSymbolOrString])
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReCharacterClassEscape >> characterClasses [
 
-	^ OrderedDictionary newFrom: {
-		'\d' -> #digit.
-		'\D' -> #not_digit.
-		'\s' -> #whitespace.
-		'S' -> #not_whitespace.
-		'\w' -> #word_character.
-		'\W' -> #not_word_character.
-	}
-]
-
-{ #category : #'as yet unclassified' }
-SBReCharacterClassEscape >> characterClassesDisplayStrings [
-
 	^ {
-		'digit'.
-		'not a digit'.
-		'whitespace'.
-		'not a whitespace'.
-		'word character'.
-		'not a word character'.
+		'\d' -> 'digit'.
+		'\D' -> 'not a digit'.
+		'\s' -> 'whitespace character'.
+		'\S' -> 'not a whitespace character'.
+		'\w' -> 'word character'.
+		'\W' -> 'not a word character'.
 	}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SBReCharacterClassEscape >> initialize [
 
 	super initialize.
 	
-	self addMorphBack: (characterClass := SBReComboBox new
-		values: self characterClasses values;
-		labels: self characterClassesDisplayStrings;
-		placeholderText: 'select class...')
+	self addMorphBack: (characterClass := SBReSyntaxSelect new
+		placeholderText: 'select character class';
+		values: self characterClasses)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SBReCharacterClassEscape >> selectCharacterClass: aString [
+
+	self characterClass syntax: aString
+]
+
+{ #category : #printing }
 SBReCharacterClassEscape >> sourceString [
 
-	^ self characterClasses keyAtValue: self characterClass ifAbsent: ''
+	^ self characterClass syntax ifNil: ['']
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReCharacterClassEscape >> type [
 
 	^ 'character_class_escape'

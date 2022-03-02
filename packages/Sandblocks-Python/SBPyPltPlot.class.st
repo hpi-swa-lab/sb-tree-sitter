@@ -1,5 +1,5 @@
 "
-I am the class representing the matplotlib plot function
+Replacement for ax.plot
 "
 Class {
 	#name : #SBPyPltPlot,
@@ -20,7 +20,7 @@ SBPyPltPlot class >> match: aDictionary do: aBlock [
 	^ aBlock
 		value: (aDictionary at: 'call')
 		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacementOfArgs: (aDictionary at: 'call') access arguments)
+			createReplacementOfArgs: (aDictionary at: 'call') access arguments buildCopy)
 			
 		
 ]
@@ -48,9 +48,9 @@ SBPyPltPlot >> palettes [
 	^ {SBPyPltPalettePlot}, super palettes
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltPlot >> writeSourceOn: aStream [
 
 	aStream nextPutAll: 'ax.plot'.
-	(self firstSubmorph submorphs asOrderedCollection at: 2) writeSourceOn: aStream.
+	(self firstSubmorph submorphs second) writeSourceOn: aStream.
 ]

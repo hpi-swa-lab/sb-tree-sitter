@@ -18,10 +18,6 @@ SBPyPltPaletteEntry class >> buildOn: aBuilder [
 
 { #category : #'as yet unclassified' }
 SBPyPltPaletteEntry class >> language [
-"show in all contexts.
-
-NOTE: this is turned off for now because we want SBPyPltPaletteOverview visible in all python contexts, not just the this palette.
-"
-
+"skipped for now because SBPyPltPaletteOverview is shown instead and includes self buildOn:. This is done so the matplotlib overview is visible between two matplotlib calls, too."
 	"^ #python"
 ]

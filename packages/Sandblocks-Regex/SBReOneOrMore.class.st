@@ -1,10 +1,13 @@
+"
+A SBReOneOrMore replaces the + quantifier.
+"
 Class {
 	#name : #SBReOneOrMore,
 	#superclass : #SBReQuantifier,
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #matchers }
 SBReOneOrMore class >> matchRegex: aDictionary do: aBlock [
 	<lang: #regex match:'
 (one_or_more
@@ -17,27 +20,20 @@ SBReOneOrMore class >> matchRegex: aDictionary do: aBlock [
 			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
-{ #category : #'as yet unclassified' }
-SBReOneOrMore >> buildOn: aSBRow [
+{ #category : #initialization }
+SBReOneOrMore >> buildOn: aMorph [
 
-	aSBRow addMorphBack: (SBInlineBlockLabel new
-		label: 'at least one time';
-		factory: self factory)
+	aMorph addMorphBack: (SBStringMorph new
+		contents: 'at least one time')
 ]
 
-{ #category : #'as yet unclassified' }
-SBReOneOrMore >> buildSelf [
-
-	self addMorphBack: (SBInlineBlockLabel new label: 'at least one time'; factory: self factory)
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReOneOrMore >> quantifierString [
 
 	^ '+'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReOneOrMore >> type [
 
 	^ 'one_or_more'

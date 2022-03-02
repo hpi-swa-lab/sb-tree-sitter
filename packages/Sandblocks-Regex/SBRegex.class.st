@@ -1,10 +1,19 @@
+"
+SBRegex is the Treesitter language for regular expressions (regex).
+
+The SBReBlock class and its subclasses implements verbose replacements for elements of the regex syntax to make regular expressions more easy to read, write and understand. See the comment on that class for more information regarding the design considerations behind the verbose blocks and the structure of the code.
+
+The SBRePalette is a custom palette with the purpose to make the verbose replacements available to the user as well as making all elements of the syntax discoverable.
+
+The Treesitter-Regex grammar does not correspond to a well-known regex dialect. There it the lack of backreferences by number, the \k syntax for named backreferences, the lack of {n,} and {,n} quantifiers and so on. Apart from the \k named backreference, this regex dialect seems to be a subset of JavaScript's regex dialct.
+"
 Class {
 	#name : #SBRegex,
 	#superclass : #SBGrammarLanguage,
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRegex class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-regex/blob/master/grammar.js "
 
@@ -692,7 +701,7 @@ SBRegex class >> grammarJson [
 '
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRegex class >> highlightQuery [
 	" https://github.com/tree-sitter/tree-sitter-regex/blob/master/queries/highlights.scm "
 
@@ -728,68 +737,67 @@ SBRegex class >> highlightQuery [
 '
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRegex class >> language [
 
 	^ #regex
 ]
 
-{ #category : #'as yet unclassified' }
-SBRegex class >> palettesFor: aBlock [
-
-	^ {SBRePalette}
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRegex class >> rootRuleName [
 
 	^ 'pattern'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBRegex class >> statementContainerTypes [
 
 	^ #()
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #palette }
 SBRegex >> highlightFor: aBlock [
 
 	^ (aBlock type caseOf: {
+			"things that can be one of many other things"
 			['character_class'] -> [Color green].
-			['any_character'] -> [Color green].	
-			['control_escape'] -> [Color blue].
-			['control_letter_escape'] -> [Color blue].
+			['any_character'] -> [Color green].
 			['character_class_escape'] -> [Color green].
+			['class_range'] -> [Color green].
+
+			"escapes"
+			['control_escape'] -> [Color magenta].
+			['control_letter_escape'] -> [Color magenta].
+		
+			"assertions"
 			['start_assertion'] -> [Color blue].
 			['end_assertion'] -> [Color blue].
+			['lookahead_assertion'] -> [Color blue].
+
+			"quantifier"
 			['count_quantifier'] -> [Color red].
-			['anonymous_capturing_group'] -> [Color orange].
-			['named_capturing_group'] -> [Color orange].
-			['non_capturing_group'] -> [Color orange].
-			['class_range'] -> [Color green].
 			['zero_or_more'] -> [Color red].
 			['optional'] -> [Color red].
 			['one_or_more'] -> [Color red].
 			['count_quantifier'] -> [Color red].
-			['lookahead_assertion'] -> [Color blue]}
-		otherwise: [nil]) ifNotNil: [:color | ^ color muchLighter]
+
+			"groups"
+			['anonymous_capturing_group'] -> [Color orange].
+			['named_capturing_group'] -> [Color orange].
+			['non_capturing_group'] -> [Color orange]
+		}
+		otherwise: [nil]) ifNotNil: [:color | color muchLighter]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #palette }
 SBRegex >> palettesFor: aBlock [
 
 	^ {SBRePalette}
 ]
 
-{ #category : #'as yet unclassified' }
-SBRegex >> postConfigure [
-
-	"self blockInline: {'term'. 'pattern'}"
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #grammar }
 SBRegex >> preprocessGrammar [
+
 
 	self grammar rules keysAndValuesDo: [:name :rule | rule at: #name put: name].
 	(self grammar rules at: #lookahead_assertion) members second  at: #name put: 'type'

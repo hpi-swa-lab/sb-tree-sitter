@@ -24,7 +24,7 @@ SBPyPltPaletteSnippets class >> buildOn: aBuilder [
 		addMorphBack: (SBButton new active: false; label: 'histogram' shortcut: nil do: [])
 	).
 
-	aBuilder addSubSectionHeader: 'Scatter with legend using a labelled numpy dataset'.
+	aBuilder addSubSectionHeader: 'Scatter with legend and numpy'.
 	aBuilder content addMorphBack: ((SBPyPltImage snippetScatter form scaledIntoFormOfSize: 160@100) asMorph).
 
 	aBuilder addBlock: 'Create a scatter plot with a legend using a labelled numpy dataset' as:( (SBPython parseAndReplace: '
@@ -35,7 +35,7 @@ def scatter(ax, data: np.ndarray):
 	for label in labels:
 		ax.scatter(data[data[:, 2] == label, 0], data[data[:, 2] == label, 1], 1, label=label)
 	ax.legend()
-') in: (self collapseWithSignature: 'scatter(ax, data)')).
+') in: [:module | self collapse: module withSignature: 'scatter(ax, data)']).
 	
 	aBuilder addMorphBack: self divider.
 	
@@ -49,7 +49,7 @@ def fillbetween(ax, x, y, y_min):
 	ax.set_ylabel("price")
 	for label in ax.get_yticklabels():
 		label.set_visible(False)
-') in: (self collapseWithSignature: 'fillbetween(ax, x, y, y_min)')).
+') in: [:module | self collapse: module withSignature: 'fillbetween(ax, x, y, y_min)']).
 	aBuilder addMorphBack: self divider.
 	
 	aBuilder addSubSectionHeader: 'Stacked bar chart'.
@@ -64,7 +64,7 @@ def barchart(ax, y1, y2, xlabels, width):
 	ax.legend()
 
 	plt.show()
-') in: (self collapseWithSignature: 'barchart(ax, y1, y2, xlabels, bar_width)')).
+') in:  [:module | self collapse: module withSignature: 'barchart(ax, y1, y2, xlabels, bar_width)']).
 	
 
 ]

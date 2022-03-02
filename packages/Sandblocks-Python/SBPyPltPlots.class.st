@@ -1,5 +1,5 @@
 "
-Classes that are responsible for showing data points in matplotlib, e.g. plots, scatterplots, histograms.
+Base class for all axes calls that are responsible for showing data points in matplotlib, e.g. plots, scatterplots, histograms. For the full list, see https://matplotlib.org/stable/api/axes_api.html#subplots
 "
 Class {
 	#name : #SBPyPltPlots,
@@ -7,18 +7,12 @@ Class {
 	#category : #'Sandblocks-Python'
 }
 
-{ #category : #'as yet unclassified' }
-SBPyPltPlots >> isAxes [
-	
-	^ true
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltPlots >> palettes [
 	^ {SBPyPltPaletteOverview}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltPlots >> type [
 
 	^ 'call'

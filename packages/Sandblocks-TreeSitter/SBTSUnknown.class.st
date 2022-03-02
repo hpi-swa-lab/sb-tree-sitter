@@ -159,6 +159,12 @@ SBTSUnknown >> isTSSeq [
 	^ false
 ]
 
+{ #category : #testing }
+SBTSUnknown >> isTSSymbol [
+
+	^ false
+]
+
 { #category : #'as yet unclassified' }
 SBTSUnknown >> isTemplate [
 

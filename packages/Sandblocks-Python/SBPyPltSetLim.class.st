@@ -23,9 +23,9 @@ SBPyPltSetLim class >> matchPython: aDictionary do: aBlock [
 	| functionName axis |
 	functionName := (aDictionary at: 'setLim') contents.
 	
-	((functionName = 'set_xlim') or: (functionName = 'set_ylim')) ifFalse: [^ nil].
+	((functionName = 'set_xlim') or: [functionName = 'set_ylim']) ifFalse: [^ nil].
 	
-	axis := functionName = 'set_xlim' ifTrue: 'x' ifFalse: 'y'.
+	axis := functionName = 'set_xlim' ifTrue: ['x'] ifFalse: ['y'].
 	
 	^ aBlock
 		value: (aDictionary at: 'call')
@@ -48,12 +48,12 @@ SBPyPltSetLim >> createReplacementRangeFrom: minString to: maxString forAxis: aS
 		).
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltSetLim >> writeSourceOn: aStream [
 
 	| xy minArg maxArg |
 	xy := self firstSubmorph firstSubmorph contents first asString.
-	minArg := (self firstSubmorph submorphs at: 2) contents.
+	minArg := (self firstSubmorph submorphs second) contents.
 	maxArg := (self firstSubmorph submorphs at: 4) contents.
 	
 	aStream nextPutAll: ('ax.set_',xy,'lim(',minArg,', ',maxArg,')').

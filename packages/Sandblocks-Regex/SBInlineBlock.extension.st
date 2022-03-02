@@ -12,7 +12,7 @@ SBInlineBlock >> wrapWithComment [
 ]
 
 { #category : #'*Sandblocks-Regex' }
-SBInlineBlock >> wrapWithExecutor [
+SBInlineBlock >> wrapWithEvaluator [
 	<action>
 
 	self language = #regex ifTrue: [

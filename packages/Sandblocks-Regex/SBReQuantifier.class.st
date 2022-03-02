@@ -1,3 +1,8 @@
+"
+A SBReQuantifier replaces quantifier (*,+,?,{n,m}). Quantifer specify the number of times a preceding element may repeat.
+
+For each quantifier, there is also a lazy variation (achieved by appending a ? to the original quantifier) that causes the quantifier to be lazy instead of greedy. A greedy quantifier consumes as much of the preceding element as possible, while the lazy variant matches as few as possible. The lazy option can be enabled using a checkbox.
+"
 Class {
 	#name : #SBReQuantifier,
 	#superclass : #SBReBlock,
@@ -7,38 +12,32 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #'as yet unclassified' }
-SBReQuantifier >> buildConcrete [
+{ #category : #initialization }
+SBReQuantifier >> buildConcreteOn: aMorph [
+
+	self buildOn: aMorph.
+	^ aMorph
 ]
 
-{ #category : #'as yet unclassified' }
-SBReQuantifier >> buildConcreteOn: aSBRow [
+{ #category : #initialization }
+SBReQuantifier >> buildLazyToggleOn: aMorph [
 
-	self buildOn: aSBRow.
-	^ aSBRow
-]
-
-{ #category : #'as yet unclassified' }
-SBReQuantifier >> buildLazyToggleOn: aSBRow [
-
-	^ aSBRow
+	^ aMorph
 		addMorphBack: (lazy := SBCheckbox new
 			value: false;
 			canDrag: false);
-		addMorphBack: (SBInlineBlockLabel new
-			label: 'lazy';
-			factory: self factory;
-			canDrag: false);
+		addMorphBack: (SBStringMorph new
+			contents: 'lazy');
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
-SBReQuantifier >> buildOn: aSBRow [
+{ #category : #initialization }
+SBReQuantifier >> buildOn: aMorph [
 
 	^ self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SBReQuantifier >> initialize [
 
 	super initialize.
@@ -50,19 +49,19 @@ SBReQuantifier >> initialize [
 		listDirection: #topToBottom
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReQuantifier >> lazy [
 
 	^ lazy value
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReQuantifier >> lazy: aBoolean [
 
 	lazy changeValue: aBoolean
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReQuantifier >> lazySourceString [
 
 	^ self lazy
@@ -70,13 +69,13 @@ SBReQuantifier >> lazySourceString [
 		ifFalse: ['']
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReQuantifier >> quantifierString [
 
 	^ self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReQuantifier >> sourceString [
 
 	^ self quantifierString , self lazySourceString

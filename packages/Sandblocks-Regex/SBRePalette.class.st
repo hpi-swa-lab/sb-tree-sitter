@@ -1,3 +1,8 @@
+"
+A SBRePalette is a palette for regular expressions. The goal is to enable a user to discover all syntax elements of regular expressions easily and in the editor.
+
+It contains custom replacements grouped by type and a list of all elements of the grammar.
+"
 Class {
 	#name : #SBRePalette,
 	#superclass : #SBTSPalette,
@@ -107,12 +112,12 @@ SBRePalette class >> buildToolsOn: aBuilder [
 SBRePalette class >> characterClasses [
 
 	^ {
-		[SBReVerboseSimpleReplacement anyCharacter].
+		[SBReSimpleReplacement anyCharacter].
 		[SBReCharacterClassEscape new].
 	}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #properties }
 SBRePalette class >> factory [
 
 	^ SBRegex
@@ -130,7 +135,7 @@ SBRePalette class >> groups [
 	}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #properties }
 SBRePalette class >> language [
 
 	^ self factory language

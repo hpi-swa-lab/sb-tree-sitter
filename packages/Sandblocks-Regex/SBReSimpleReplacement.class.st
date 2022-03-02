@@ -1,3 +1,10 @@
+"
+A SBReSimpleReplacement replaces any block with a simple textual description to make the syntax more readable.
+
+To replace a aBlock with a aString, use the replace: aBlock with: aString method.
+
+Predefined replacements and the corresponding replacement rules are available on the class side.
+"
 Class {
 	#name : #SBReSimpleReplacement,
 	#superclass : #SBReBlock,
@@ -24,7 +31,7 @@ SBReSimpleReplacement class >> endAssertion [
 	^ self type: 'end_assertion' as: 'end'
 ]
 
-{ #category : #replacing }
+{ #category : #matchers }
 SBReSimpleReplacement class >> matchRegexAnyCharacter: aDictionary do: aBlock [
 	<lang: #regex match:
 '(any_character) @any'>
@@ -34,7 +41,7 @@ SBReSimpleReplacement class >> matchRegexAnyCharacter: aDictionary do: aBlock [
 		value: self anyCharacter
 ]
 
-{ #category : #replacing }
+{ #category : #matchers }
 SBReSimpleReplacement class >> matchRegexEndAssertion: aDictionary do: aBlock [
 	<lang: #regex match:
 '(end_assertion) @end'>
@@ -44,7 +51,7 @@ SBReSimpleReplacement class >> matchRegexEndAssertion: aDictionary do: aBlock [
 		value: self endAssertion
 ]
 
-{ #category : #replacing }
+{ #category : #matchers }
 SBReSimpleReplacement class >> matchRegexStartAssertion: aDictionary do: aBlock [
 	<lang: #regex match:
 '(start_assertion) @start'>
@@ -71,7 +78,7 @@ SBReSimpleReplacement class >> type: aTypeString as: aString [
 		with: aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SBReSimpleReplacement >> initialize [
 
 	super initialize.
@@ -80,20 +87,20 @@ SBReSimpleReplacement >> initialize [
 		factory: self factory)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SBReSimpleReplacement >> replace: aBlock with: aString [
 
 	block := aBlock buildCopy.
 	label label: aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBReSimpleReplacement >> sourceString [
 
 	^ block sourceString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBReSimpleReplacement >> type [
 
 	^ block type

@@ -7,18 +7,18 @@ Class {
 	#category : #'Sandblocks-Python'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltParamCustomReplace >> palettes [
 
 	^{}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #classification }
 SBPyPltParamCustomReplace >> type [
 	^ 'keyword_argument'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #copying }
 SBPyPltParamCustomReplace >> writeSourceOn: aStream [
 	self subclassResponsibility
 ]

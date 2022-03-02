@@ -18,9 +18,7 @@ SBInlineBlock class >> registerShortcuts: aProvider [
 	aProvider
 		registerShortcut: Character space do: #promptMetaTransform;
 		registerShortcut: Character space shift do: #promptMetaTransform;
-		registerShortcut: $r command do: #applyReplacements;
-		registerShortcut: $M command do: #wrapWithComment;
-		registerShortcut: $N command do: #wrapWithExecutor
+		registerShortcut: $r command do: #applyReplacements
 ]
 
 { #category : #'as yet unclassified' }

@@ -1,5 +1,5 @@
 "
-Number input block with extensions for specifying the range and the number type
+Number input block with extensions for specifying range and number type
 "
 Class {
 	#name : #SBPyNumberWithPrefix,
@@ -34,7 +34,7 @@ SBPyNumberWithPrefix >> contents: aString [
 
 { #category : #testing }
 SBPyNumberWithPrefix >> floatSteps [
-"does range support floating steps?"
+"by default, only integer values are supported"
 	floatSteps := true.
 ]
 
@@ -102,7 +102,7 @@ SBPyNumberWithPrefix >> rangeMin [
 
 { #category : #flagging }
 SBPyNumberWithPrefix >> stopEditing: aCommand [
-"this is called after the number has changed"
+"called after the number has changed"
 	super stopEditing: aCommand.
 	self triggerEvent: #edited
 ]
