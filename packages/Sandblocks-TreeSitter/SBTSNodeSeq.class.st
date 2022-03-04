@@ -13,10 +13,22 @@ SBTSNodeSeq >> basicCopy [
 	^ super basicCopy elements: self elements
 ]
 
+{ #category : #build }
+SBTSNodeSeq >> build [
+
+	^ self children gather: [:child | child build]
+]
+
 { #category : #query }
 SBTSNodeSeq >> childrenForQueryDo: aBlock [
 
 	self submorphsDo: [:m | m childrenForQueryDo: aBlock]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeSeq >> cursorPositionsDo: aBlock shallow: aBoolean blocks: aCollection [
+
+	self elements do: [:child | child cursorPositionsDo: aBlock shallow: aBoolean blocks: aCollection]
 ]
 
 { #category : #accessing }
@@ -28,7 +40,9 @@ SBTSNodeSeq >> elements [
 { #category : #accessing }
 SBTSNodeSeq >> elements: aCollection [
 
-	elements := aCollection
+	elements := aCollection.
+	
+	aCollection do: [:elem | elem parent: self]
 ]
 
 { #category : #testing }
@@ -77,7 +91,7 @@ SBTSNodeSeq >> resultsFor: aParser [
 	
 	^ (Array streamContents: [:stream | | reportResultsBlock |
 		reportResultsBlock := [:seq :isLast | | newResults |
-			newResults := (self elements at: seq submorphCount + 1) resultsFor: (seq hasSubmorphs ifTrue: [seq lastChild parser] ifFalse: [aParser]) copy.
+			newResults := (self elements at: seq children size + 1) resultsFor: (seq children ifNotEmpty: [seq lastChild parser] ifEmpty: [aParser]) copy.
 			newResults = #noMatch ifFalse: [
 				isLast ifTrue: [stream nextPutAll: (newResults collect: [:r | seq copy addChild: r])] ifFalse: [
 					newResults do: [:result | | candidate |
@@ -90,7 +104,7 @@ SBTSNodeSeq >> resultsFor: aParser [
 		
 		[queue notEmpty] whileTrue: [ | seq isLast |
 			seq := queue removeFirst.
-			isLast := seq submorphCount = (self elements size - 1).
+			isLast := seq children size = (self elements size - 1).
 			
 			reportResultsBlock value: seq value: isLast]]) ifEmpty: [#noMatch]
 ]
@@ -103,11 +117,11 @@ SBTSNodeSeq >> takeNodesFrom: aParser [
 	^ (Array streamContents: [:stream |
 		[queue notEmpty] whileTrue: [ | seq results |
 			seq := queue removeFirst.
-			results := (self elements at: seq submorphCount + 1) takeNodesFrom: (seq hasSubmorphs ifTrue: [seq lastChild parser] ifFalse: [aParser]) copy.
+			results := (self elements at: seq children size + 1) takeNodesFrom: (seq children ifNotEmpty: [seq lastChild parser] ifEmpty: [aParser]) copy.
 			results = #noMatch ifFalse: [
 				results do: [:res | | candidate |
 					candidate := seq copy addChild: res.
-					candidate submorphCount = self elements size
+					candidate children size = self elements size
 						ifTrue: [stream nextPut: candidate]
 						ifFalse: [queue add: candidate]]]]]) ifEmpty: [#noMatch]
 ]

@@ -1,6 +1,9 @@
 Class {
 	#name : #SBTSNodeLabel,
 	#superclass : #SBTSNodeBase,
+	#instVars : [
+		'label'
+	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
@@ -8,6 +11,12 @@ Class {
 SBTSNodeLabel >> basicCopy [
 
 	^ super basicCopy label: self label
+]
+
+{ #category : #build }
+SBTSNodeLabel >> build [
+
+	^ {SBStringMorph new contents: self label}
 ]
 
 { #category : #query }
@@ -35,12 +44,16 @@ SBTSNodeLabel >> copy [
 	^ self basicCopy
 ]
 
+{ #category : #copying }
+SBTSNodeLabel >> cursorPositionsDo: aBlock shallow: aBoolean blocks: aCollection [
+
+	
+]
+
 { #category : #'initialize-release' }
 SBTSNodeLabel >> initialize [
 
-	super initialize.
-	
-	self addMorphBack: SBStringMorph new
+	super initialize
 ]
 
 { #category : #testing }
@@ -52,13 +65,13 @@ SBTSNodeLabel >> isTSLabel [
 { #category : #accessing }
 SBTSNodeLabel >> label [
 
-	^ self firstSubmorph contents
+	^ label
 ]
 
 { #category : #accessing }
 SBTSNodeLabel >> label: aString [
 
-	self firstSubmorph contents: aString
+	label := aString
 ]
 
 { #category : #accessing }

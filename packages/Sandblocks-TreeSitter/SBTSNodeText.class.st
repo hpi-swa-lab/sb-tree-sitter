@@ -16,6 +16,12 @@ SBTSNodeText >> basicCopy [
 		contents: self contents
 ]
 
+{ #category : #build }
+SBTSNodeText >> build [
+
+	^ {SBMultilineOwnTextMorph new contents: self contents}
+]
+
 { #category : #query }
 SBTSNodeText >> childrenForQuery [
 

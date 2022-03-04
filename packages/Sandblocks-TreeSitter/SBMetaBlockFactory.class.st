@@ -756,6 +756,13 @@ SBMetaBlockFactory >> grammarHandler [
 ]
 
 { #category : #'configuration helpers' }
+SBMetaBlockFactory >> hardLineBreakBetween: aBlock and: anotherBlock [
+
+	aBlock parentSandblock isBlockBody ifTrue: [^ true].
+	^ false
+]
+
+{ #category : #'configuration helpers' }
 SBMetaBlockFactory >> hardLineBreakMatch: aBlock [
 
 	^ hardLineBreakMatcher ifNotNil: [:b | b value: aBlock] ifNil: [false]
@@ -1221,6 +1228,13 @@ SBMetaBlockFactory >> simplifyList: anObject [
 	
 	anObject content ifNotNil: [:c | self simplifyList: c].
 	anObject members ifNotNil: [anObject members do: [:m | self simplifyList: m]]
+]
+
+{ #category : #'configuration helpers' }
+SBMetaBlockFactory >> softLineBreakBetween: aBlock and: anotherBlock [
+
+	(aBlock isTSBlock and: [(aBlock slot ownerSatisfying: #isTSRepeat) notNil]) ifTrue: [^ true].
+	^ false
 ]
 
 { #category : #'configuration helpers' }

@@ -5192,7 +5192,21 @@ SBPython >> getModuleForSymbol: aString in: aModule [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> hardLineBreakBetween: aBlock and: anotherBlock [
+	"match for TSBlock"
+
+	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	
+	aBlock type = 'decorator' ifTrue: [^ true].
+	
+	((aBlock isStringMorph and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice']]]) ifTrue: [^ true].
+	
+	^ #('else_clause' 'elif_clause') includes: anotherBlock type
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
+	"match for InlineBlocks"
 
 	(aBlock isTSRepeat and: [aBlock hasSubmorphs and: [aBlock submorphs first type = 'decorator']]) ifTrue: [^ true].
 	aBlock type = 'decorator' ifTrue: [^ true].
@@ -5277,7 +5291,20 @@ SBPython >> separatorRule [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> softLineBreakBetween: aBlock and: anotherBlock [
+	"for TSBlock"
+
+	(super softLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	
+	(aBlock isStringMorph and: [aBlock contents = 'or' or: [aBlock contents = 'and']]) ifTrue: [^ true].
+	(anotherBlock isStringMorph and: [anotherBlock contents = '.']) ifTrue: [^ true].
+	(aBlock parentSandblock ifNotNil: #type) = 'list_comprehension' ifTrue: [^ true].
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> softLineBreakMatchBetween: aBlock and: anotherBlock [
+	"for SBInlineBlock"
 
 	(aBlock isTSLabel and: [aBlock contents = 'or' or: [aBlock contents = 'and']]) ifTrue: [^ true].
 	(anotherBlock isTSLabel and: [anotherBlock contents = '.']) ifTrue: [^ true].

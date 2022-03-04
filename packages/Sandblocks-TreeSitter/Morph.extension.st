@@ -7,6 +7,12 @@ Morph >> containingInlineBlock [
 ]
 
 { #category : #'*Sandblocks-TreeSitter' }
+Morph >> isTSBlock [
+
+	^ false
+]
+
+{ #category : #'*Sandblocks-TreeSitter' }
 Morph >> isTSNode [
 
 	^ false

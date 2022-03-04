@@ -58,23 +58,25 @@ SBPyPltShowPlots >> type [
 
 { #category : #updating }
 SBPyPltShowPlots >> updateImage [
-	[
-		image := (Form fromBinaryStream: (Base64MimeConverter mimeDecodeToBytes: self toplevel evaluate readStream)) asMorph.
-		self firstSubmorph removeMorph: (self firstSubmorph lastSubmorph).
-		self firstSubmorph addMorphBack: image.
-		
-	] on: Error do: [ :err | "print error code"
-		self firstSubmorph removeMorph: (self firstSubmorph submorphs last).
-		self firstSubmorph addMorphBack: (SBMultilineOwnTextMorph new
-			contents: err contents;
-			maxWidth: 400;
-			yourself)
-	]
+
+	[ | form |
+		form := (Form fromBinaryStream: (Base64MimeConverter mimeDecodeToBytes: self toplevel evaluate readStream)) trimBordersOfColor: Color white.
+		image := form asMorph.
+		self firstSubmorph removeMorph: self firstSubmorph lastSubmorph.
+		self firstSubmorph addMorphBack: image]
+		on: Error
+		do: [:err |
+			"print error code"
+			self firstSubmorph removeMorph: self firstSubmorph submorphs last.
+			self firstSubmorph addMorphBack: (SBMultilineOwnTextMorph new
+				contents: err contents;
+				maxWidth: 400;
+				yourself)]
 ]
 
 { #category : #copying }
 SBPyPltShowPlots >> writeSourceOn: aStream [
-"python code prints the image to stdout, so it can be parsed as a Form"
+	"python code prints the image to stdout, so it can be parsed as a Form"
 
 	aStream nextPutAll: '
 bytes = io.BytesIO()
@@ -82,5 +84,5 @@ plt.savefig(bytes, format="png")
 bytes.seek(0)
 sys.stdout.buffer.write(base64.b64encode(bytes.read()))
 bytes.close()
-'.
+'
 ]

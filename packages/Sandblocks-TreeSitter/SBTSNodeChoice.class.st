@@ -16,13 +16,20 @@ SBTSNodeChoice >> alternatives [
 { #category : #accessing }
 SBTSNodeChoice >> alternatives: aCollection [
 
-	alternatives := aCollection
+	alternatives := aCollection.
+	alternatives do: [:alt | alt parent: self]
 ]
 
 { #category : #copying }
 SBTSNodeChoice >> basicCopy [
 
 	^ super basicCopy alternatives: self alternatives
+]
+
+{ #category : #build }
+SBTSNodeChoice >> build [
+
+	^ self child build
 ]
 
 { #category : #query }
@@ -35,7 +42,7 @@ SBTSNodeChoice >> childrenForQueryDo: aBlock [
 SBTSNodeChoice >> printOn: aStream [
 
 	aStream nextPut: $(.
-	self hasSubmorphs ifTrue: [
+	self children ifNotEmpty: [
 		aStream nextPut: $<.
 		self firstSubmorph printOn: aStream.
 		aStream nextPut: $>].

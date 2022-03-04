@@ -5,7 +5,10 @@ Class {
 		'field',
 		'factory',
 		'parser',
-		'isConcrete'
+		'isConcrete',
+		'slot',
+		'parent',
+		'children'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -17,13 +20,20 @@ SBTSNodeBase >> access [
 ]
 
 { #category : #hierarchy }
+SBTSNodeBase >> addAllChildren: aCollection [
+
+	aCollection do: [:c | self addChild: c]
+]
+
+{ #category : #hierarchy }
 SBTSNodeBase >> addChild: aNode [
 
 	self assert: self isConcrete.
 	self assert: aNode isConcrete.
-	self assert: self submorphCount + 1 <= self maxChildren.
+	self assert: self children size + 1 <= self maxChildren.
 	
-	self addMorphBack: aNode.
+	aNode parent: self.
+	children add: aNode.
 	parser := aNode parser
 ]
 
@@ -38,6 +48,7 @@ SBTSNodeBase >> basicCopy [
 
 	| copy |
 	copy := self class new
+		slot: slot;
 		field: field;
 		factory: factory;
 		parser: parser;
@@ -52,18 +63,17 @@ SBTSNodeBase >> basicField [
 	^ field
 ]
 
-{ #category : #hierarchy }
-SBTSNodeBase >> child [
+{ #category : #build }
+SBTSNodeBase >> build [
 
-	^ self firstSubmorph
+	^ self subclassResponsibility
 ]
 
 { #category : #hierarchy }
-SBTSNodeBase >> childOrNil [
+SBTSNodeBase >> child [
 
-	^ (self hasSubmorphs and: [self firstSubmorph isTSNode])
-		ifTrue: [self firstSubmorph]
-		ifFalse: [nil]
+	self assert: self children size = 1.
+	^ self children first
 ]
 
 { #category : #hierarchy }
@@ -74,6 +84,12 @@ SBTSNodeBase >> childSymbolsDo: aBlock includeInlined: aBoolean [
 			(morph isTSSymbol and: [aBoolean or: [morph inline not]])
 				ifTrue: [aBlock value: morph]
 				ifFalse: [morph childSymbolsDo: aBlock includeInlined: aBoolean]]]
+]
+
+{ #category : #hierarchy }
+SBTSNodeBase >> children [
+
+	^ children
 ]
 
 { #category : #query }
@@ -105,7 +121,7 @@ SBTSNodeBase >> containingSymbol [
 SBTSNodeBase >> copy [
 
 	self assert: self isConcrete.
-	^ self basicCopy addAllMorphs: (self submorphs collect: [:s | s copy])
+	^ self basicCopy addAllChildren: (self children collect: [:s | s copy])
 ]
 
 { #category : #copying }
@@ -119,6 +135,12 @@ SBTSNodeBase >> currentTextMorph [
 
 	self submorphsDo: [:m | (m isTSNode and: [m inline]) ifTrue: [m currentTextMorph ifNotNil: [:t | ^ t]]].
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> cursorPositionsDo: aBlock shallow: aBoolean blocks: aCollection [
+
+	^ self subclassResponsibility
 ]
 
 { #category : #initialization }
@@ -161,17 +183,6 @@ SBTSNodeBase >> field: aString [
 	field := aString
 ]
 
-{ #category : #hierarchy }
-SBTSNodeBase >> firstVisibleType [
-
-	^ (self type notNil and: [self inline not])
-		ifTrue: [self type]
-		ifFalse: [
-			(self hasSubmorphs and: [self firstSubmorph isTSNode])
-				ifTrue: [self firstSubmorph firstVisibleType]
-				ifFalse: [nil]]
-]
-
 { #category : #'inlining support' }
 SBTSNodeBase >> handlesMouseDown: anEvent [
 
@@ -189,7 +200,8 @@ SBTSNodeBase >> initialize [
 
 	super initialize.
 	
-	isConcrete := false
+	isConcrete := false.
+	children := OrderedCollection new
 ]
 
 { #category : #'inlining support' }
@@ -267,7 +279,7 @@ SBTSNodeBase >> language [
 { #category : #hierarchy }
 SBTSNodeBase >> lastChild [
 
-	^ self lastSubmorph
+	^ self children last
 ]
 
 { #category : #layout }
@@ -290,6 +302,7 @@ SBTSNodeBase >> makeConcrete [
 	self assert: self isConcrete not.
 	
 	^ self basicCopy
+		slot: self;
 		isConcrete: true;
 		ensureLayout;
 		yourself
@@ -313,6 +326,19 @@ SBTSNodeBase >> matchesQuery: aString [
 SBTSNodeBase >> maxChildren [
 
 	^ 1
+]
+
+{ #category : #accessing }
+SBTSNodeBase >> parent [
+
+	^ parent
+]
+
+{ #category : #accessing }
+SBTSNodeBase >> parent: aNode [
+
+	self assert: self isConcrete = aNode isConcrete.
+	parent := aNode
 ]
 
 { #category : #accessing }
@@ -404,6 +430,19 @@ SBTSNodeBase >> printSExprOn: aStream depth: aNumber short: aBoolean [
 SBTSNodeBase >> resultsFor: aParser [
 
 	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+SBTSNodeBase >> slot [
+
+	^ slot
+]
+
+{ #category : #accessing }
+SBTSNodeBase >> slot: anObject [
+
+	self assert: (slot isNil or: [slot isConcrete not]).
+	slot := anObject
 ]
 
 { #category : #statements }

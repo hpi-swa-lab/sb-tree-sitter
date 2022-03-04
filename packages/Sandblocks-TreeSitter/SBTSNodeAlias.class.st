@@ -28,6 +28,12 @@ SBTSNodeAlias >> basicCopy [
 		alias: self alias
 ]
 
+{ #category : #build }
+SBTSNodeAlias >> build [
+
+	^ self child build
+]
+
 { #category : #query }
 SBTSNodeAlias >> childrenForQueryDo: aBlock [
 
@@ -43,7 +49,8 @@ SBTSNodeAlias >> element [
 { #category : #accessing }
 SBTSNodeAlias >> element: anElement [
 
-	element := anElement
+	element := anElement.
+	anElement parent: self
 ]
 
 { #category : #printing }

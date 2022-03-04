@@ -20,10 +20,33 @@ SBTSNodeSymbol >> basicCopy [
 	^ super basicCopy type: self type factory: factory
 ]
 
+{ #category : #testing }
+SBTSNodeSymbol >> blockInlined [
+
+	^ factory shouldBlockInline: self type
+]
+
 { #category : #accessing }
 SBTSNodeSymbol >> bodyTemplate [
 
 	^ self factory bodyNodeForRule: self type
+]
+
+{ #category : #build }
+SBTSNodeSymbol >> build [
+
+	^ (self isSuperType or: [false and: [self blockInlined]])
+		ifTrue: [
+			self children gather: [:child |
+				child build
+					do: [:res | res isTSBlock ifTrue: [res slot: self slot]];
+					yourself]]
+		ifFalse: [
+			self assert: self slot notNil.
+			{
+				SBTSBlock new
+					slot: self slot;
+					addAllMorphs: (self children gather: [:child | child build])}]
 ]
 
 { #category : #query }

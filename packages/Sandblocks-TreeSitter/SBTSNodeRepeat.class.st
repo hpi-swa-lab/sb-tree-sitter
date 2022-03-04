@@ -15,10 +15,39 @@ SBTSNodeRepeat >> basicCopy [
 	^ super basicCopy multiple: self multiple required: self required element: self element
 ]
 
+{ #category : #build }
+SBTSNodeRepeat >> build [
+
+	^ self children gather: [:child | child build]
+]
+
 { #category : #query }
 SBTSNodeRepeat >> childrenForQueryDo: aBlock [
 
 	self submorphsDo: [:m | m childrenForQueryDo: aBlock]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeRepeat >> cursorPositionsDo: aBlock shallow: aBoolean blocks: aCollection [
+
+	| buildInsert elements |
+	buildInsert := [:adjacent :before |
+		aBlock value: (SBCursorInsert new
+			command: (SBTSRelInsertCommand new
+				near: adjacent before: before in: self morph: element;
+				buildSuggestions: [:cmd | self factory suggestionsForInsert: cmd]);
+			before: before;
+			adjacent: adjacent;
+			container: self)].
+	
+	elements := aCollection select: [:block | block isTSBlock and: [block slot parent = self]].
+	self halt.
+	(multiple or: [elements isEmpty]) ifTrue: [buildInsert value: nil value: true].
+	elements do: [:block |
+		multiple ifTrue: [buildInsert value: block value: true].
+		block cursorPositionsDo: aBlock.
+		multiple ifTrue: [buildInsert value: block value: false]].
+	(multiple or: [elements isEmpty]) ifTrue: [buildInsert value: nil value: false]
 ]
 
 { #category : #accessing }
@@ -64,7 +93,9 @@ SBTSNodeRepeat >> multiple: aBoolean required: anotherBoolean element: aMorph [
 
 	multiple := aBoolean.
 	required := anotherBoolean.
-	element := aMorph
+	element := aMorph.
+	
+	element parent: self
 ]
 
 { #category : #printing }
@@ -99,9 +130,9 @@ SBTSNodeRepeat >> takeNodesFrom: aParser [
 	^ (Array streamContents: [:stream |
 		[queue notEmpty] whileTrue: [ | repeating results parserCopy currentPosition |
 			repeating := queue removeFirst.
-			parserCopy := (repeating hasSubmorphs
-				ifTrue: [repeating lastChild parser]
-				ifFalse: [aParser]) copy.
+			parserCopy := (repeating children
+				ifNotEmpty: [repeating lastChild parser]
+				ifEmpty: [aParser]) copy.
 			currentPosition := parserCopy position.
 			results := self element takeNodesFrom: parserCopy.
 			results ~= #noMatch ifTrue: [

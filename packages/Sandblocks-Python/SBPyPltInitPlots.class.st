@@ -61,5 +61,7 @@ import io
 import base64
 import sys
 
-fig, ax = plt.subplots()' lines joinSeparatedBy: (String cr, (String new: aNumber withAll: Character tab))).
+fig, ax = plt.subplots()
+fig.set_dpi(60)
+fig.set_size_inches(3, 3)' lines joinSeparatedBy: String cr, (String new: aNumber withAll: Character tab))
 ]
