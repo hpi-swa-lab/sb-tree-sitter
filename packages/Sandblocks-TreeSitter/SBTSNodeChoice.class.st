@@ -66,7 +66,7 @@ SBTSNodeChoice >> resultsFor: aParser [
 		self alternatives do: [:alt | | parserCopy results |
 			parserCopy := aParser copy.
 			results := alt resultsFor: parserCopy.
-			results = #noMatch ifFalse: [results do: [:result | stream nextPut: (self makeConcrete addChild: result)]]]]) ifEmpty: [#noMatch]
+			results = #noMatch ifFalse: [results do: [:result | stream nextPut: result]]]]) ifEmpty: [#noMatch]
 ]
 
 { #category : #parsing }

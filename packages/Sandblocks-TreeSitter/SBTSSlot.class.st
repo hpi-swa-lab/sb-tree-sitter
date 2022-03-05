@@ -10,6 +10,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSSlot >> addNode: aNode [
 
+	self assert: (aNode isKindOf: SBTSNodeBase).
 	nodes add: aNode
 ]
 
@@ -62,6 +63,18 @@ SBTSSlot >> initialize [
 SBTSSlot >> lastNode [
 
 	^ nodes last
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> mergeWith: aSlot [
+
+	nodes addAll: aSlot nodes
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> nodes [
+
+	^ nodes
 ]
 
 { #category : #'as yet unclassified' }

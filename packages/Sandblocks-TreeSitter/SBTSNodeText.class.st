@@ -125,9 +125,9 @@ SBTSNodeText >> resultsFor: aParser [
 	^ (self regex matchesStreamPrefix: aParser stream)
 		ifTrue: [
 			{
-				self makeConcrete
-					contents: (aParser stream originalContents copyFrom: start + 1 to: aParser position);
-					parser: aParser copy}]
+				aParser copy addBlock: (SBTSTextMorph new
+					slot: (SBTSSlot new addNode: self);
+					contents: (aParser stream originalContents copyFrom: start + 1 to: aParser position))}]
 		ifFalse: [
 			aParser stream position: start.
 			#noMatch]

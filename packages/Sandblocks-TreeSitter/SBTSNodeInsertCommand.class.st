@@ -60,7 +60,7 @@ SBTSNodeInsertCommand >> element: aNode container: aBlock index: aNumber [
 { #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> hasSamePositionAs: aCommand [
 
-	^ aCommand class ~= SBCombinedCommand and: [self container = aCommand container and: [self insertIndex = aCommand insertIndex]]
+	^ aCommand class ~= SBCombinedCommand and: [self container = aCommand container and: [self insertIndex = aCommand insertIndex and: [element = aCommand element]]]
 ]
 
 { #category : #'as yet unclassified' }

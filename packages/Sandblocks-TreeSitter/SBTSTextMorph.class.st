@@ -8,6 +8,14 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> copyBlock [
+
+	^ self class new
+		contents: self contents;
+		slot: self slot
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> slot [
 
 	^ slot
@@ -16,6 +24,6 @@ SBTSTextMorph >> slot [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> slot: aSlot [
 
-	self assert: aSlot class = SBTSSlot.
+	self assert: (aSlot class = SBTSSlot or: [aSlot isNil]).
 	slot := aSlot
 ]

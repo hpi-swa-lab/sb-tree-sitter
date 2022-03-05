@@ -46,7 +46,8 @@ SBTSNodeRepeat >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollect
 			container: aBlock)].
 	
 	hasElements := false.
-	multiple ifTrue: [buildInsert value: (self firstInsertIndexIn: aBlock) value: false].
+	multiple ifTrue: [
+		buildInsert value: (self firstInsertIndexIn: aBlock) value: false].
 	aCollection doWithIndex: [:block :index |
 		(block slot includesParent: self) ifTrue: [
 			hasElements := true.
@@ -135,8 +136,8 @@ SBTSNodeRepeat >> resultsFor: aParser [
 
 	| results |
 	results := self element resultsFor: aParser.
-	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{self makeConcrete parser: aParser}]].
-	^ results collect: [:result | self makeConcrete addChild: result]
+	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{aParser copy}]].
+	^ results
 ]
 
 { #category : #parsing }

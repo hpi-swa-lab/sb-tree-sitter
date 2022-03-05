@@ -50,12 +50,14 @@ SBTSParseInputTest >> statement: aTypeString with: aContentsString [
 SBTSParseInputTest >> testCreateAmbiguousIdentifier [
 
 	| results |
-	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: 't'.
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'primary')
+		given: 't'.
 	
 	self assert: 3 equals: results size.
 	self
 		assert: #('identifier' 'true' 'thisContext') asSet
-		equals: (results collect: [:choice | choice child child type] as: Set)
+		equals: (results collect: [:choice | choice type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -66,7 +68,7 @@ SBTSParseInputTest >> testCreateArray [
 		optionsForTemplate: (self nodeForRule: 'primary')
 		given: '{'.
 	self assert: 1 equals: results size.
-	self assert: 'dynamic_array' equals: results first child child type
+	self assert: 'dynamic_array' equals: results first type
 ]
 
 { #category : #'tests - create' }
@@ -95,7 +97,9 @@ SBTSParseInputTest >> testCreateArraySimple [
 		given: '{'.
 	self assert: 1 equals: results size.
 	
-	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '{'.
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'primary')
+		given: '{'.
 	self assert: 1 equals: results size
 ]
 
@@ -103,7 +107,9 @@ SBTSParseInputTest >> testCreateArraySimple [
 SBTSParseInputTest >> testCreateByteArrayAndNumber [
 
 	| results |
-	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'byte_array') given: '#[1'.
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'byte_array')
+		given: '#[1'.
 	self assert: 1 equals: results size
 ]
 
@@ -111,28 +117,32 @@ SBTSParseInputTest >> testCreateByteArrayAndNumber [
 SBTSParseInputTest >> testCreateNumber [
 
 	| results |
-	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '1'.
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'primary')
+		given: '1'.
 	self assert: 1 equals: results size.
-	self assert: 'number' equals: results first child child type
+	self assert: 'number' equals: results first type
 ]
 
 { #category : #'tests - create' }
 SBTSParseInputTest >> testCreateTrue [
 
 	| results |
-	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: 'true'.
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'primary')
+		given: 'true'.
 	
 	self assert: 2 equals: results size.
-	self
-		assert: #('identifier' 'true') asSet
-		equals: (results collect: [:choice | choice child child type] as: Set)
+	self assert: #('identifier' 'true') asSet equals: (results collect: #type as: Set)
 ]
 
 { #category : #'tests - create' }
 SBTSParseInputTest >> testDenyNumber [
 
 	| results |
-	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '1a'.
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'primary')
+		given: '1a'.
 	self assert: 0 equals: results size
 ]
 

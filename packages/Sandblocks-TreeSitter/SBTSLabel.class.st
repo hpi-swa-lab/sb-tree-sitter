@@ -8,6 +8,14 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> copyBlock [
+
+	^ self class new
+		contents: self contents;
+		slot: self slot
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> slot [
 
 	^ slot

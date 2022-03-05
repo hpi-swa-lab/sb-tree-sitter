@@ -5,10 +5,17 @@ Class {
 		'previousAlternatives',
 		'stream',
 		'memoizations',
-		'visitedSupertypes'
+		'visitedSupertypes',
+		'blocks'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
+
+{ #category : #blocks }
+SBTSInputParser >> addBlock: aBlock [
+
+	blocks add: aBlock
+]
 
 { #category : #stream }
 SBTSInputParser >> atEnd [
@@ -16,12 +23,29 @@ SBTSInputParser >> atEnd [
 	^ stream atEnd
 ]
 
+{ #category : #blocks }
+SBTSInputParser >> blocks [
+
+	^ blocks
+]
+
 { #category : #'initialize-release' }
 SBTSInputParser >> initialize [
 
 	super initialize.
 	
-	visitedSupertypes := Set new
+	visitedSupertypes := Set new.
+	blocks := OrderedCollection new
+]
+
+{ #category : #blocks }
+SBTSInputParser >> makeRootBlock: aBlock [
+
+	aBlock slot firstNode isSuperType
+		ifTrue: [
+			self assert: blocks size = 1.
+			blocks first slot mergeWith: aBlock slot]
+		ifFalse: [blocks := OrderedCollection with: (aBlock addAllMorphs: blocks)]
 ]
 
 { #category : #memo }
@@ -63,7 +87,7 @@ SBTSInputParser >> optionsFor: aNode given: aString before: aBoolean [
 	
 	results := aNode root makeTemplate resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
-	^ results select: [:result | result parser atEnd]
+	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser root]
 ]
 
 { #category : #query }
@@ -72,9 +96,10 @@ SBTSInputParser >> optionsForTemplate: aNode given: aString [
 	| results |
 	stream := aString readStream.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
+	
 	results := aNode resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
-	^ results select: [:result | result parser atEnd]
+	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks first]
 ]
 
 { #category : #stream }
@@ -102,7 +127,8 @@ SBTSInputParser >> postCopy [
 	stream := (ReadStream on: stream contents)
 		position: stream position;
 		yourself.
-	visitedSupertypes := visitedSupertypes copy
+	visitedSupertypes := visitedSupertypes copy.
+	blocks := blocks collect: [:block | block copyBlock]
 ]
 
 { #category : #stream }

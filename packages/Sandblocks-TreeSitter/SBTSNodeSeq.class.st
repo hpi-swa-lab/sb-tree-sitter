@@ -97,23 +97,22 @@ SBTSNodeSeq >> resultsFor: aParser [
 	queue := OrderedCollection new.
 	
 	^ (Array streamContents: [:stream | | reportResultsBlock |
-		reportResultsBlock := [:seq :isLast | | newResults |
-			newResults := (self elements at: seq children size + 1) resultsFor: (seq children ifNotEmpty: [seq lastChild parser] ifEmpty: [aParser]) copy.
+		reportResultsBlock := [:parser :index | | newResults |
+			newResults := (self elements at: index) resultsFor: parser copy.
 			newResults = #noMatch ifFalse: [
-				isLast ifTrue: [stream nextPutAll: (newResults collect: [:r | seq copy addChild: r])] ifFalse: [
-					newResults do: [:result | | candidate |
-						candidate := seq copy addChild: result.
-						result parser atEnd
+				index = self elements size ifTrue: [stream nextPutAll: newResults] ifFalse: [
+					newResults do: [:candidate |
+						candidate atEnd
 							ifTrue: [stream nextPut: candidate]
-							ifFalse: [queue add: candidate]]]]].
+							ifFalse: [queue add: {candidate. index}]]]]].
 		
-		reportResultsBlock value: self makeConcrete value: self elements size = 1.
+		reportResultsBlock value: aParser value: 1.
 		
-		[queue notEmpty] whileTrue: [ | seq isLast |
-			seq := queue removeFirst.
-			isLast := seq children size = (self elements size - 1).
-			
-			reportResultsBlock value: seq value: isLast]]) ifEmpty: [#noMatch]
+		[queue notEmpty] whileTrue: [ | pair index parser |
+			pair := queue removeFirst.
+			parser := pair first.
+			index := pair second + 1.
+			reportResultsBlock value: parser value: index]]) ifEmpty: [#noMatch]
 ]
 
 { #category : #parsing }

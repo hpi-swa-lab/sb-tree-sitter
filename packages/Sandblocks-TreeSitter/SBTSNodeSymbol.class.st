@@ -10,7 +10,8 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSNodeSymbol >> allChildrenDo: aBlock [
 
-	aBlock value: self
+	aBlock value: self.
+	self isSuperType ifTrue: [self bodyTemplate allChildrenDo: aBlock]
 ]
 
 { #category : #hierarchy }
@@ -156,7 +157,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 			results := self bodyTemplate resultsFor: aParser.
 			results = #noMatch
 				ifTrue: [#noMatch]
-				ifFalse: [results collect: [:result | self makeConcrete addChild: result]]]
+				ifFalse: [results collect: [:result | result makeRootBlock: (SBTSBlock new slot: (SBTSSlot new addNode: self))]]]
 ]
 
 { #category : #parsing }

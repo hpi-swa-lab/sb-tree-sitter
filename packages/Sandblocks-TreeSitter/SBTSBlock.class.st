@@ -8,6 +8,14 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> copyBlock [
+
+	^ self class new
+		addAllMorphs: (self submorphs collect: [:s | s copyBlock]);
+		slot: self slot
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> currentTextMorph [
 
 	self submorphsDo: [:m | (m isKindOf: SBOwnTextMorph) ifTrue: [^ m]].
@@ -78,9 +86,11 @@ SBTSBlock >> keyStroke: anEvent [
 
 	super keyStroke: anEvent.
 	
-	self valid ifFalse: [
-		self halt.
-		self contents]
+	self valid ifFalse: [ | results |
+		results := SBTSInputParser new
+			optionsForTemplate: self slot firstNode
+			given: self contents.
+		results size = 1 ifTrue: [self replaceBy: results first]]
 ]
 
 { #category : #'as yet unclassified' }

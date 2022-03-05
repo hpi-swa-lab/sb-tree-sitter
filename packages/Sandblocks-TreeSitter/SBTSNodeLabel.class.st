@@ -112,7 +112,10 @@ SBTSNodeLabel >> resultsFor: aParser [
 		labelStream next = aParser next ifFalse: [
 			aParser position: oldPosition.
 			^ #noMatch]].
-	^ {self makeConcrete parser: aParser copy}
+	^ {
+		aParser copy addBlock: (SBTSLabel new
+			contents: self label;
+			slot: (SBTSSlot new addNode: self))}
 ]
 
 { #category : #parsing }
