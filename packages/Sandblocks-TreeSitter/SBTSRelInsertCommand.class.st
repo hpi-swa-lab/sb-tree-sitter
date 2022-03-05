@@ -66,7 +66,7 @@ SBTSRelInsertCommand >> suggestions [
 { #category : #'as yet unclassified' }
 SBTSRelInsertCommand >> title [
 
-	^ 'insert ', element title
+	^ 'insert ', element printString
 ]
 
 { #category : #'as yet unclassified' }

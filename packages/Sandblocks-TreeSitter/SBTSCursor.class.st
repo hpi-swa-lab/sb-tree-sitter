@@ -31,7 +31,7 @@ SBTSCursor >> currentDo: aBlock [
 	template := self factory bodyNodeForRule: type ifAbsent: [
 		node := self resolveAlias: self type in: self parentType with: self factory aliasOccurrences.
 		node unpackAlias].
-	^ aBlock value: type value: node makeConcrete value: ((template isKindOf: SBTSNodeAlias)
+	^ aBlock value: type value: SBTSBlock new value: ((template isKindOf: SBTSNodeAlias)
 		ifTrue: [template element]
 		ifFalse: [template])
 ]

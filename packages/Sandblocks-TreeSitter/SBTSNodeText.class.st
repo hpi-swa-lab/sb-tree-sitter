@@ -8,6 +8,12 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #'as yet unclassified' }
+SBTSNodeText >> allChildrenDo: aBlock [
+
+	aBlock value: self
+]
+
 { #category : #copying }
 SBTSNodeText >> basicCopy [
 
@@ -16,10 +22,18 @@ SBTSNodeText >> basicCopy [
 		contents: self contents
 ]
 
-{ #category : #build }
-SBTSNodeText >> build [
+{ #category : #'as yet unclassified' }
+SBTSNodeText >> buildEmpty [
 
-	^ {SBMultilineOwnTextMorph new contents: self contents}
+	^ {self buildMorphWith: '' slot: (SBTSSlot new addNode: self)}
+]
+
+{ #category : #build }
+SBTSNodeText >> buildMorphWith: aString slot: aSlot [
+
+	^ SBTSTextMorph new
+		contents: aString;
+		slot: aSlot
 ]
 
 { #category : #query }
@@ -45,6 +59,19 @@ SBTSNodeText >> copy [
 SBTSNodeText >> currentTextMorph [
 
 	^ self firstSubmorph
+]
+
+{ #category : #printing }
+SBTSNodeText >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+
+	aCollection
+		detect: [:block | block isTextMorph and: [block slot includesParent: self]]
+		ifFound: [:b |
+			b containingSandblock startInputCommand ifNotNil: [:command |
+				aClosure value: (SBCursorText new
+					block: b containingSandblock;
+					currentCommand: command)]]
+		ifNone: []
 ]
 
 { #category : #accessing }
@@ -109,20 +136,11 @@ SBTSNodeText >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeText >> takeNodesFrom: aParser [
 
-	(aParser atEnd or: [aParser peek isString not]) ifTrue: [
-		^ (regex matches: '')
-			ifTrue: [
-				{
-					self makeConcrete
-						contents: '';
-						parser: aParser copy}]
-			ifFalse: [#noMatch]].
+	(aParser atEnd or: [aParser peek isString not]) ifTrue: [^ (regex matches: '') ifTrue: [{aParser copy}] ifFalse: [#noMatch]].
 	^ (self regex matches: aParser peek)
 		ifTrue: [
-			{
-				self makeConcrete
-					contents: aParser next;
-					parser: aParser copy}]
+			aParser next.
+			{aParser copy addSlot: self}]
 		ifFalse: [#noMatch]
 ]
 

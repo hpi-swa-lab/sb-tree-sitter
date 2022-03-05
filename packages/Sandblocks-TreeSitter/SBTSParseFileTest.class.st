@@ -10,6 +10,19 @@ SBTSParseFileTest >> expectedFailures [
 	^ #(#testParseMemberExpression)
 ]
 
+{ #category : #'tests - unit' }
+SBTSParseFileTest >> testChoice [
+
+	| factory parser rule |
+	factory := SBTSTestLanguage new.
+	rule := SBTSNodeSeq new elements: {
+		SBTSNodeChoice new alternatives: {SBTSNodeSymbol new type: 'id' factory: factory. SBTSNodeSymbol new type: 'other' factory: factory}.
+		SBTSNodeSymbol new type: 'id' factory: factory}.
+	parser := (rule takeNodesFrom: (SBTSFileParser new stream: {SBTSNodeSymbol new type: 'other' factory: factory. SBTSNodeSymbol new type: 'id' factory: factory} readStream)) first.
+	self assert: rule elements first alternatives second equals: parser slots first lastNode.
+	self assert: rule elements second equals: parser slots second lastNode
+]
+
 { #category : #tests }
 SBTSParseFileTest >> testJavascriptImport [
 
@@ -42,6 +55,40 @@ SBTSParseFileTest >> testJavascriptTemplateString [
 		equals: (SBTSFileParser new parse: source language: SBJavascript instance) sourceString
 ]
 
+{ #category : #'tests - unit' }
+SBTSParseFileTest >> testLabel [
+
+	| factory parser rule |
+	factory := SBTSTestLanguage new.
+	rule := SBTSNodeSeq new elements: {SBTSNodeLabel new label: 'abc'}.
+	parser := (rule takeNodesFrom: (SBTSFileParser new stream: {'abc'} readStream)) first.
+	self assert: rule elements first equals: parser slots first lastNode
+]
+
+{ #category : #'tests - unit' }
+SBTSParseFileTest >> testParse [
+
+	| factory moduleRule cursor block |
+	factory := SBTSTestLanguage new.
+	factory
+		add: 'module' rule: (moduleRule := SBTSNodeSeq new
+			elements: {SBTSNodeSymbol new type: 'id' factory: factory. SBTSNodeSymbol new type: 'id' factory: factory};
+			factory: factory);
+		add: 'id' rule: (SBTSNodeText new
+			regexString: '[a-z]+';
+			factory: factory).
+	cursor := SBTSTestCursor new
+		factory: factory;
+		tree: {'module'. ''. true. {{'id'. 'ab'. true}. {'id'. 'cd'. true}}}.
+	block := SBTSFileParser new nodeForCursor: cursor.
+	
+	self assert: block childSandblocks first isTSBlock.
+	self assert: moduleRule elements first equals: block childSandblocks first slot lastNode.
+	self assert: 'ab' equals: block childSandblocks first contents.
+	self assert: moduleRule elements second equals: block childSandblocks second slot lastNode.
+	self assert: 'cd' equals: block childSandblocks second contents
+]
+
 { #category : #tests }
 SBTSParseFileTest >> testParseBinaryExpression [
 
@@ -54,6 +101,18 @@ SBTSParseFileTest >> testParseBinaryExpression [
 SBTSParseFileTest >> testParseEmptyModule [
 
 	SBTSFileParser new parse: '' language: SBJavascript instance
+]
+
+{ #category : #'tests - unit' }
+SBTSParseFileTest >> testParseJS [
+
+	| block |
+	block := SBTSFileParser new parse: 'a' language: SBJavascript rebuild.
+	
+	self assert: block childSandblocks first isTSBlock.
+	self
+		assert: (SBJavascript instance bodyNodeForRule: 'program') elements second element
+		equals: block childSandblocks first slot lastNode
 ]
 
 { #category : #tests }
@@ -134,4 +193,40 @@ b'.
 	self
 		assert: source
 		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
+]
+
+{ #category : #'tests - unit' }
+SBTSParseFileTest >> testRepeat [
+
+	| factory parser rule |
+	factory := SBTSTestLanguage new.
+	rule := SBTSNodeRepeat new
+		multiple: true
+		required: true
+		element: (SBTSNodeLabel new label: 'abc').
+	parser := ((rule takeNodesFrom: (SBTSFileParser new stream: {'abc'. 'abc'. 'abc'} readStream)) select: #atEnd) first.
+	self assert: rule element equals: parser slots first lastNode.
+	self assert: rule element equals: parser slots second lastNode.
+	self assert: rule element equals: parser slots third lastNode
+]
+
+{ #category : #'tests - unit' }
+SBTSParseFileTest >> testSeq [
+
+	| factory parser rule |
+	factory := SBTSTestLanguage new.
+	rule := SBTSNodeSeq new elements: {SBTSNodeSymbol new type: 'id' factory: factory. SBTSNodeSymbol new type: 'id' factory: factory}.
+	parser := (rule takeNodesFrom: (SBTSFileParser new stream: {SBTSNodeSymbol new type: 'id' factory: factory. SBTSNodeSymbol new type: 'id' factory: factory} readStream)) first.
+	self assert: rule elements first equals: parser slots first lastNode.
+	self assert: rule elements second equals: parser slots second lastNode
+]
+
+{ #category : #'tests - unit' }
+SBTSParseFileTest >> testText [
+
+	| factory parser rule |
+	factory := SBTSTestLanguage new.
+	rule := SBTSNodeSeq new elements: {SBTSNodeText new regexString: 'abc'}.
+	parser := (rule takeNodesFrom: (SBTSFileParser new stream: {'abc'} readStream)) first.
+	self assert: rule elements first equals: parser slots first lastNode
 ]

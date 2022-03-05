@@ -62,7 +62,9 @@ SBTSParseInputTest >> testCreateAmbiguousIdentifier [
 SBTSParseInputTest >> testCreateArray [
 
 	| results |
-	results := SBTSInputParser new optionsForTemplate: (self nodeForRule: 'primary') given: '{'.
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'primary')
+		given: '{'.
 	self assert: 1 equals: results size.
 	self assert: 'dynamic_array' equals: results first child child type
 ]

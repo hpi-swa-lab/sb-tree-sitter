@@ -7,6 +7,12 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #'as yet unclassified' }
+SBTSNodeSymbol >> allChildrenDo: aBlock [
+
+	aBlock value: self
+]
+
 { #category : #hierarchy }
 SBTSNodeSymbol >> allSuperTypesDo: aBlock [
 
@@ -32,21 +38,16 @@ SBTSNodeSymbol >> bodyTemplate [
 	^ self factory bodyNodeForRule: self type
 ]
 
-{ #category : #build }
-SBTSNodeSymbol >> build [
+{ #category : #'as yet unclassified' }
+SBTSNodeSymbol >> buildEmpty [
 
-	^ (self isSuperType or: [false and: [self blockInlined]])
-		ifTrue: [
-			self children gather: [:child |
-				child build
-					do: [:res | res isTSBlock ifTrue: [res slot: self slot]];
-					yourself]]
-		ifFalse: [
-			self assert: self slot notNil.
-			{
-				SBTSBlock new
-					slot: self slot;
-					addAllMorphs: (self children gather: [:child | child build])}]
+	^ {SBTSUnknownBlock new slot: (SBTSSlot new addNode: self)}
+]
+
+{ #category : #build }
+SBTSNodeSymbol >> buildMorphWith: aBlock slot: aSlot [
+
+	^ aBlock slot: aSlot
 ]
 
 { #category : #query }
@@ -69,6 +70,17 @@ SBTSNodeSymbol >> contents [
 	^ (self factory ifNotNil: [:f | f containsPromotedInlineSymbol: self type] ifNil: [false])
 		ifTrue: [String streamContents: [:stream | self childSandblocksDo: [:child | child contents ifNotNil: [:content | stream nextPutAll: content]]]]
 		ifFalse: [super contents]
+]
+
+{ #category : #printing }
+SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+
+	aCollection
+		detect: [:block | block isTSBlock and: [block slot includesParent: self]]
+		ifFound: [:b |
+			aClosure value: (SBCursorSelect new block: b).
+			aBoolean ifFalse: [b cursorPositionsDo: aClosure shallow: aBoolean]]
+		ifNone: []
 ]
 
 { #category : #testing }
@@ -152,15 +164,15 @@ SBTSNodeSymbol >> takeNodesFrom: aParser [
 
 	(self isSuperType or: [factory promotedInlineSymbols includes: self type]) ifTrue: [ | results |
 		results := self bodyTemplate takeNodesFrom: aParser.
-		^ results = #noMatch
-			ifTrue: [#noMatch]
-			ifFalse: [results collect: [:r | self makeConcrete addChild: r]]].
+		^ results = #noMatch ifTrue: [#noMatch] ifFalse: [
+			results collect: [:parser | | res |
+				res := parser copy.
+				res currentSlot addNode: self.
+				res]]].
 	
 	(aParser atEnd not and: [aParser peek isString not and: [aParser peek compatibleWithType: self type]]) ifTrue: [
-		^ {
-			aParser next copy
-				parser: aParser copy;
-				field: field}].
+		aParser next.
+		^ {aParser copy addSlot: self}].
 	
 	^ #noMatch
 ]

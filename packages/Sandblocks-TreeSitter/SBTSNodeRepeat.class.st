@@ -9,16 +9,23 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #'as yet unclassified' }
+SBTSNodeRepeat >> allChildrenDo: aBlock [
+
+	aBlock value: self.
+	self element allChildrenDo: aBlock
+]
+
 { #category : #copying }
 SBTSNodeRepeat >> basicCopy [
 
 	^ super basicCopy multiple: self multiple required: self required element: self element
 ]
 
-{ #category : #build }
-SBTSNodeRepeat >> build [
+{ #category : #'as yet unclassified' }
+SBTSNodeRepeat >> buildEmpty [
 
-	^ self children gather: [:child | child build]
+	^ self required ifTrue: [self element buildEmpty] ifFalse: [{}]
 ]
 
 { #category : #query }
@@ -28,32 +35,42 @@ SBTSNodeRepeat >> childrenForQueryDo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSNodeRepeat >> cursorPositionsDo: aBlock shallow: aBoolean blocks: aCollection [
+SBTSNodeRepeat >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 
-	| buildInsert elements |
-	buildInsert := [:adjacent :before |
-		aBlock value: (SBCursorInsert new
-			command: (SBTSRelInsertCommand new
-				near: adjacent before: before in: self morph: element;
-				buildSuggestions: [:cmd | self factory suggestionsForInsert: cmd]);
+	| buildInsert hasElements |
+	buildInsert := [:index :before |
+		aClosure value: (SBCursorInsert new
+			command: (SBTSNodeInsertCommand new element: element container: aBlock index: index);
 			before: before;
-			adjacent: adjacent;
-			container: self)].
+			adjacent: nil;
+			container: aBlock)].
 	
-	elements := aCollection select: [:block | block isTSBlock and: [block slot parent = self]].
-	self halt.
-	(multiple or: [elements isEmpty]) ifTrue: [buildInsert value: nil value: true].
-	elements do: [:block |
-		multiple ifTrue: [buildInsert value: block value: true].
-		block cursorPositionsDo: aBlock.
-		multiple ifTrue: [buildInsert value: block value: false]].
-	(multiple or: [elements isEmpty]) ifTrue: [buildInsert value: nil value: false]
+	hasElements := false.
+	multiple ifTrue: [buildInsert value: (self firstInsertIndexIn: aBlock) value: false].
+	aCollection doWithIndex: [:block :index |
+		(block slot includesParent: self) ifTrue: [
+			hasElements := true.
+			block cursorPositionsDo: aClosure.
+			multiple ifTrue: [buildInsert value: index + 1 value: true]]].
+	(multiple not and: [hasElements not]) ifTrue: [buildInsert value: (self firstInsertIndexIn: aBlock) value: true]
 ]
 
 { #category : #accessing }
 SBTSNodeRepeat >> element [
 
 	^ element
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeRepeat >> firstInsertIndexIn: aParent [
+
+	| stream seen |
+	seen := false.
+	stream := aParent submorphs readStream.
+	aParent slot firstNode bodyTemplate allChildrenDo: [:child |
+		(seen not and: [stream atEnd not and: [child = stream peek slot firstNode]]) ifTrue: [stream next].
+		child = element ifTrue: [^ stream position + 1]].
+	^ 1
 ]
 
 { #category : #testing }
@@ -126,23 +143,21 @@ SBTSNodeRepeat >> resultsFor: aParser [
 SBTSNodeRepeat >> takeNodesFrom: aParser [
 
 	| queue |
-	queue := OrderedCollection with: self makeConcrete.
+	queue := OrderedCollection with: {aParser. 0}.
 	^ (Array streamContents: [:stream |
-		[queue notEmpty] whileTrue: [ | repeating results parserCopy currentPosition |
-			repeating := queue removeFirst.
-			parserCopy := (repeating children
-				ifNotEmpty: [repeating lastChild parser]
-				ifEmpty: [aParser]) copy.
-			currentPosition := parserCopy position.
-			results := self element takeNodesFrom: parserCopy.
+		[queue notEmpty] whileTrue: [ | pair results parser currentPosition index |
+			pair := queue removeFirst.
+			parser := pair first copy.
+			index := pair second + 1.
+			currentPosition := parser position.
+			results := self element takeNodesFrom: parser.
 			results ~= #noMatch ifTrue: [
-				results do: [:res | | candidate |
+				results do: [:candidate |
 					"to fix troubles with infinitely repeating matches, we only accept results
 if they advanced the parser."
-					res parser position > currentPosition ifTrue: [
-						candidate := repeating copy addChild: res.
+					candidate position > currentPosition ifTrue: [
 						stream nextPut: candidate.
-						queue add: candidate]]]]]) ifEmpty: [self required ifTrue: [#noMatch] ifFalse: [{self makeConcrete parser: aParser copy}]]
+						queue add: {candidate. index}]]]]]) ifEmpty: [self required ifTrue: [#noMatch] ifFalse: [{aParser copy}]]
 ]
 
 { #category : #printing }

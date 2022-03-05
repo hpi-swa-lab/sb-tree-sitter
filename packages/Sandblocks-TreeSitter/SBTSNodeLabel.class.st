@@ -7,16 +7,30 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #accessing }
+SBTSNodeLabel >> allChildrenDo: aBlock [
+
+	aBlock value: self
+]
+
 { #category : #copying }
 SBTSNodeLabel >> basicCopy [
 
 	^ super basicCopy label: self label
 ]
 
-{ #category : #build }
-SBTSNodeLabel >> build [
+{ #category : #'as yet unclassified' }
+SBTSNodeLabel >> buildEmpty [
 
-	^ {SBStringMorph new contents: self label}
+	^ {self buildMorphWith: nil slot: (SBTSSlot new addNode: self)}
+]
+
+{ #category : #build }
+SBTSNodeLabel >> buildMorphWith: aString slot: aSlot [
+
+	^ SBTSLabel new
+		contents: self label;
+		slot: aSlot
 ]
 
 { #category : #query }
@@ -45,7 +59,7 @@ SBTSNodeLabel >> copy [
 ]
 
 { #category : #copying }
-SBTSNodeLabel >> cursorPositionsDo: aBlock shallow: aBoolean blocks: aCollection [
+SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 
 	
 ]
@@ -84,7 +98,7 @@ SBTSNodeLabel >> maxChildren [
 SBTSNodeLabel >> printOn: aStream [
 
 	aStream nextPut: $".
-	aStream nextPutAll: self label.
+	aStream nextPutAll: (self label ifNil: ['']).
 	aStream nextPut: $"
 ]
 
@@ -107,7 +121,7 @@ SBTSNodeLabel >> takeNodesFrom: aParser [
 	^ (aParser atEnd not and: [aParser peek = self label])
 		ifTrue: [
 			aParser next.
-			{self makeConcrete parser: aParser copy}]
+			{aParser copy addSlot: self}]
 		ifFalse: [#noMatch]
 ]
 

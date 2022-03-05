@@ -2,10 +2,17 @@ Class {
 	#name : #SBTSFileParser,
 	#superclass : #Object,
 	#instVars : [
-		'stream'
+		'stream',
+		'slots'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> addSlot: aNode [
+
+	slots add: (SBTSSlot new addNode: aNode)
+]
 
 { #category : #stream }
 SBTSFileParser >> atEnd [
@@ -19,6 +26,20 @@ SBTSFileParser >> contentsSize [
 	^ stream originalContents size
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> currentSlot [
+
+	^ slots last
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> initialize [
+
+	super initialize.
+	
+	slots := OrderedCollection new
+]
+
 { #category : #stream }
 SBTSFileParser >> next [
 
@@ -29,7 +50,7 @@ SBTSFileParser >> next [
 SBTSFileParser >> nodeForCursor: aCursor [
 
 	aCursor isNamed ifFalse: [^ aCursor text].
-	^ aCursor currentDo: [:type :node :template | | fields matches |
+	^ aCursor currentDo: [:type :block :template | | fields matches blocks |
 		fields := Array streamContents: [:s |
 			aCursor gotoFirstChild ifTrue: [ | current |
 				current := aCursor node.
@@ -41,19 +62,27 @@ SBTSFileParser >> nodeForCursor: aCursor [
 						current := aCursor node].
 					atEnd].
 				aCursor gotoParent]].
-		stream := (fields ifEmpty: [aCursor text ifEmpty: [#()] ifNotEmpty: [{aCursor text}]]) readStream.
+		blocks := fields ifEmpty: [aCursor text ifEmpty: [#()] ifNotEmpty: [{aCursor text}]].
+		stream := (blocks collect: [:b | b isString ifTrue: [b] ifFalse: [b slot firstNode]]) readStream.
+		slots := OrderedCollection new.
 		matches := template takeNodesFrom: self.
 		self assert: matches ~= #noMatch description: ('could not construct `{1}`' format: {type}).
-		matches := matches select: [:match | match parser atEnd].
+		matches := matches select: [:match | match atEnd].
 		self assert: matches size = 1.
-		node addChild: matches first.
-		type ~= aCursor type
-			ifTrue: [
-				(SBTSNodeAlias new
-					factory: node factory;
-					alias: aCursor type;
-					makeConcrete) addChild: node]
-			ifFalse: [node]]
+		
+		SBToggledCode comment: '' active: 0 do: {
+			[
+				type ~= aCursor type
+					ifTrue: [
+						(SBTSNodeAlias new
+							factory: block factory;
+							alias: aCursor type;
+							makeConcrete) addChild: block]
+					ifFalse: [block]]}.
+		block
+			slot: (SBTSSlot new addNode: (SBTSNodeSymbol new type: type factory: template factory));
+			addAllMorphs: (blocks with: matches first slots collect: [:subBlock :slot | slot buildMorphWith: subBlock]);
+			yourself]
 ]
 
 { #category : #'as yet unclassified' }
@@ -83,5 +112,24 @@ SBTSFileParser >> postCopy [
 	super postCopy.
 	stream := (ReadStream on: stream contents)
 		position: stream position;
-		yourself
+		yourself.
+	slots := slots copy
+]
+
+{ #category : #accessing }
+SBTSFileParser >> slots [
+
+	^ slots
+]
+
+{ #category : #accessing }
+SBTSFileParser >> stream [
+
+	^ stream
+]
+
+{ #category : #accessing }
+SBTSFileParser >> stream: aStream [
+
+	stream := aStream
 ]

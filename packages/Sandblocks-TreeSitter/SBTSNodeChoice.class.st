@@ -8,6 +8,13 @@ Class {
 }
 
 { #category : #accessing }
+SBTSNodeChoice >> allChildrenDo: aBlock [
+
+	aBlock value: self.
+	self alternatives do: [:alt | alt allChildrenDo: aBlock]
+]
+
+{ #category : #accessing }
 SBTSNodeChoice >> alternatives [
 
 	^ alternatives
@@ -26,16 +33,16 @@ SBTSNodeChoice >> basicCopy [
 	^ super basicCopy alternatives: self alternatives
 ]
 
-{ #category : #build }
-SBTSNodeChoice >> build [
-
-	^ self child build
-]
-
 { #category : #query }
 SBTSNodeChoice >> childrenForQueryDo: aBlock [
 
 	self firstSubmorph childrenForQueryDo: aBlock
+]
+
+{ #category : #printing }
+SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+
+	self alternatives do: [:child | child cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]
 ]
 
 { #category : #printing }
@@ -69,7 +76,7 @@ SBTSNodeChoice >> takeNodesFrom: aParser [
 		self alternatives do: [:alt | | parserCopy results |
 			parserCopy := aParser copy.
 			results := alt takeNodesFrom: parserCopy.
-			results = #noMatch ifFalse: [results do: [:result | stream nextPut: (self makeConcrete addChild: result)]]]]) ifEmpty: [#noMatch]
+			results = #noMatch ifFalse: [results do: [:result | stream nextPut: result]]]]) ifEmpty: [#noMatch]
 ]
 
 { #category : #printing }

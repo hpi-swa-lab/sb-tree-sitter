@@ -20,6 +20,13 @@ SBTSNodeAlias >> alias: aString [
 	alias := aString asSymbol
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeAlias >> allChildrenDo: aBlock [
+
+	aBlock value: self.
+	self element allChildrenDo: aBlock
+]
+
 { #category : #copying }
 SBTSNodeAlias >> basicCopy [
 
@@ -28,16 +35,22 @@ SBTSNodeAlias >> basicCopy [
 		alias: self alias
 ]
 
-{ #category : #build }
-SBTSNodeAlias >> build [
+{ #category : #'as yet unclassified' }
+SBTSNodeAlias >> buildEmpty [
 
-	^ self child build
+	^ self element buildEmpty
 ]
 
 { #category : #query }
 SBTSNodeAlias >> childrenForQueryDo: aBlock [
 
 	self firstSubmorph childrenForQueryDo: aBlock
+]
+
+{ #category : #parsing }
+SBTSNodeAlias >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+
+	self element cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock
 ]
 
 { #category : #accessing }
@@ -82,10 +95,8 @@ SBTSNodeAlias >> takeNodesFrom: aParser [
 				[(aParser peek isKindOf: self class) and: [aParser peek alias = self alias]].
 				[aParser peek type = self alias or: [(aParser peek isKindOf: self class) and: [aParser peek alias = self alias]]]}]])
 		ifTrue: [
-			{
-				self makeConcrete
-					addChild: aParser next copy;
-					parser: aParser copy}]
+			aParser next.
+			{aParser copy addSlot: self}]
 		ifFalse: [#noMatch]
 ]
 

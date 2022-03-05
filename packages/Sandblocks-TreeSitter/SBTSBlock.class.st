@@ -17,14 +17,36 @@ SBTSBlock >> currentTextMorph [
 { #category : #'as yet unclassified' }
 SBTSBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 
-	false ifTrue: [^ super cursorPositionsDo: aBlock shallow: aBoolean].
-	self template cursorPositionsDo: aBlock shallow: aBoolean blocks: self submorphs
+	aBlock value: (SBCursorSelect new block: self).
+	self template cursorPositionsDo: aBlock shallow: aBoolean blocks: self submorphs parent: self
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> deleteCommandFor: aBlock [
+
+	self flag: #todo.
+	"if we have a sequence of blocks we need to make sure to delete all of them and not just the selection. The naive approach below, however, always deletes all elements in the repeat."
+	^ SBToggledCode comment: '' active: 1 do: {
+		[
+			aBlock slot includesRepeat
+				ifTrue: [SBDeleteCommand new target: aBlock]
+				ifFalse: [nil]].
+		[ | repeatElement |
+			repeatElement := aBlock slot parentThat: [:p | p parent ifNotNil: #isTSRepeat ifNil: [false]].
+			repeatElement ifNotNil: [SBCombinedCommand newWith: ((self submorphs select: [:s | s slot includesParent: repeatElement]) collect: [:m | SBDeleteCommand new target: m])]]}
 ]
 
 { #category : #'as yet unclassified' }
 SBTSBlock >> factory [
 
 	^ self slot factory
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> fixedNumberOfChildren [
+
+	self cursorPositionsDo: [:c | (c isKindOf: SBCursorInsert) ifTrue: [^ false]] shallow: true.
+	^ true
 ]
 
 { #category : #'as yet unclassified' }
@@ -52,6 +74,16 @@ SBTSBlock >> isTSBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> keyStroke: anEvent [
+
+	super keyStroke: anEvent.
+	
+	self valid ifFalse: [
+		self halt.
+		self contents]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> layoutCommands [
 
 	^ SBAlgebraCommand container
@@ -68,7 +100,7 @@ SBTSBlock >> layoutCommands [
 { #category : #'as yet unclassified' }
 SBTSBlock >> printOn: aStream [
 
-	self slot ifNotNil: [slot printOn: aStream]
+	self slot ifNotNil: [slot firstNode printOn: aStream]
 ]
 
 { #category : #'as yet unclassified' }
@@ -78,9 +110,10 @@ SBTSBlock >> slot [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSBlock >> slot: aString [
+SBTSBlock >> slot: aSlot [
 
-	slot := aString
+	self assert: (aSlot isKindOf: SBTSSlot).
+	slot := aSlot
 ]
 
 { #category : #'as yet unclassified' }
@@ -93,4 +126,11 @@ SBTSBlock >> template [
 SBTSBlock >> type [
 
 	^ self slot type
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> writeSourceOn: aStream [
+
+	self flag: #todo.
+	aStream
 ]

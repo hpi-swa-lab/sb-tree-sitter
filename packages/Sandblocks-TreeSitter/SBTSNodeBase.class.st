@@ -37,10 +37,24 @@ SBTSNodeBase >> addChild: aNode [
 	parser := aNode parser
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> allChildrenDo: aBlock [
+
+	^ self subclassResponsibility
+]
+
 { #category : #hierarchy }
 SBTSNodeBase >> allSuperTypesDo: aBlock [
 
 	self owner ifNotNil: [:o | o allSuperTypesDo: aBlock]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> andParentsDo: aBlock [
+
+	| current |
+	current := self.
+	[aBlock value: current] doWhileTrue: [(current := current parent) notNil]
 ]
 
 { #category : #copying }
@@ -63,8 +77,8 @@ SBTSNodeBase >> basicField [
 	^ field
 ]
 
-{ #category : #build }
-SBTSNodeBase >> build [
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> buildEmpty [
 
 	^ self subclassResponsibility
 ]
@@ -138,7 +152,7 @@ SBTSNodeBase >> currentTextMorph [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSNodeBase >> cursorPositionsDo: aBlock shallow: aBoolean blocks: aCollection [
+SBTSNodeBase >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 
 	^ self subclassResponsibility
 ]
@@ -430,6 +444,13 @@ SBTSNodeBase >> printSExprOn: aStream depth: aNumber short: aBoolean [
 SBTSNodeBase >> resultsFor: aParser [
 
 	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> selfOrParentsInclude: aNode [
+
+	self andParentsDo: [:p | p = aNode ifTrue: [^ true]].
+	^ false
 ]
 
 { #category : #accessing }

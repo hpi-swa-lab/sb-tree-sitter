@@ -7,16 +7,23 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #'as yet unclassified' }
+SBTSNodeSeq >> allChildrenDo: aBlock [
+
+	aBlock value: self.
+	self elements do: [:el | el allChildrenDo: aBlock]
+]
+
 { #category : #copying }
 SBTSNodeSeq >> basicCopy [
 
 	^ super basicCopy elements: self elements
 ]
 
-{ #category : #build }
-SBTSNodeSeq >> build [
+{ #category : #'as yet unclassified' }
+SBTSNodeSeq >> buildEmpty [
 
-	^ self children gather: [:child | child build]
+	^ self elements gather: [:element | element buildEmpty]
 ]
 
 { #category : #query }
@@ -26,9 +33,9 @@ SBTSNodeSeq >> childrenForQueryDo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSNodeSeq >> cursorPositionsDo: aBlock shallow: aBoolean blocks: aCollection [
+SBTSNodeSeq >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 
-	self elements do: [:child | child cursorPositionsDo: aBlock shallow: aBoolean blocks: aCollection]
+	self elements do: [:child | child cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]
 ]
 
 { #category : #accessing }
@@ -113,17 +120,18 @@ SBTSNodeSeq >> resultsFor: aParser [
 SBTSNodeSeq >> takeNodesFrom: aParser [
 
 	| queue |
-	queue := OrderedCollection with: self makeConcrete.
+	queue := OrderedCollection with: {aParser. 0}.
 	^ (Array streamContents: [:stream |
-		[queue notEmpty] whileTrue: [ | seq results |
-			seq := queue removeFirst.
-			results := (self elements at: seq children size + 1) takeNodesFrom: (seq children ifNotEmpty: [seq lastChild parser] ifEmpty: [aParser]) copy.
+		[queue notEmpty] whileTrue: [ | pair parser results index |
+			pair := queue removeFirst.
+			parser := pair first copy.
+			index := pair second + 1.
+			results := (self elements at: index) takeNodesFrom: parser.
 			results = #noMatch ifFalse: [
-				results do: [:res | | candidate |
-					candidate := seq copy addChild: res.
-					candidate children size = self elements size
+				results do: [:candidate |
+					index = self elements size
 						ifTrue: [stream nextPut: candidate]
-						ifFalse: [queue add: candidate]]]]]) ifEmpty: [#noMatch]
+						ifFalse: [queue add: {candidate. index}]]]]]) ifEmpty: [#noMatch]
 ]
 
 { #category : #printing }
