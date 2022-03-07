@@ -46,7 +46,7 @@ SBTSNodeBase >> allChildrenDo: aBlock [
 { #category : #hierarchy }
 SBTSNodeBase >> allSuperTypesDo: aBlock [
 
-	self owner ifNotNil: [:o | o allSuperTypesDo: aBlock]
+	self parent ifNotNil: [:o | o allSuperTypesDo: aBlock]
 ]
 
 { #category : #'as yet unclassified' }

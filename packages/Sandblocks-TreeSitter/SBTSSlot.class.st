@@ -15,6 +15,12 @@ SBTSSlot >> addNode: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> allSuperTypesDo: aBlock [
+
+	nodes do: [:node | node allSuperTypesDo: aBlock]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> buildMorphWith: anObject [
 
 	| morph |

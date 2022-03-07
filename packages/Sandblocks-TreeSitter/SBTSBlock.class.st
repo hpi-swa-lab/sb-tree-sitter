@@ -86,11 +86,10 @@ SBTSBlock >> keyStroke: anEvent [
 
 	super keyStroke: anEvent.
 	
-	self valid ifFalse: [ | results |
-		results := SBTSInputParser new
-			optionsForTemplate: self slot firstNode
-			given: self contents.
-		results size = 1 ifTrue: [self replaceBy: results first]]
+	self valid ifFalse: [
+		self flag: #todo.
+		"pass the entire newly invalid string"
+		self tryTransitionAfterInput: anEvent keyCharacter asString]
 ]
 
 { #category : #'as yet unclassified' }
@@ -133,9 +132,25 @@ SBTSBlock >> template [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> tryTransitionAfterInput: aString [
+
+	SBTSInputParser new optionsFor: self given: aString before: false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> type [
 
 	^ self slot type
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> valid [
+
+	self flag: #todo.
+	" cache valid "
+	^ self currentTextMorph
+		ifNotNil: [:t | t slot firstNode validFor: t contents]
+		ifNil: [true]
 ]
 
 { #category : #'as yet unclassified' }

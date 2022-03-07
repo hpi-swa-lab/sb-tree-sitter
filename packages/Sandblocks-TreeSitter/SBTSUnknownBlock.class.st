@@ -28,6 +28,26 @@ SBTSUnknownBlock >> isUnknown [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknownBlock >> printOn: aStream [
+
+	aStream nextPutAll: 'unknown '.
+	super printOn: aStream
+]
+
+{ #category : #'as yet unclassified' }
+SBTSUnknownBlock >> tryTransitionAfterInput: aString [
+
+	| results |
+	self flag: #todo.
+	" use aString once we pass the correct one"
+	
+	results := SBTSInputParser new
+		optionsForTemplate: self slot lastNode
+		given: self contents.
+	results size = 1 ifTrue: [self sandblockEditor do: (SBReplaceCommand new target: self replacer: results first)]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknownBlock >> valid [
 
 	^ false

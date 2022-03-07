@@ -104,6 +104,18 @@ SBTSParseInputTest >> testCreateArraySimple [
 ]
 
 { #category : #'tests - create' }
+SBTSParseInputTest >> testCreateAssignment [
+
+	| results |
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'statement')
+		given: 'abc:'.
+	self assert: 1 equals: results size.
+	self assert: 'assignment' equals: results first childSandblocks first type.
+	self assert: 3 equals: results first childSandblocks first submorphs size
+]
+
+{ #category : #'tests - create' }
 SBTSParseInputTest >> testCreateByteArrayAndNumber [
 
 	| results |
@@ -111,6 +123,19 @@ SBTSParseInputTest >> testCreateByteArrayAndNumber [
 		optionsForTemplate: (self nodeForRule: 'byte_array')
 		given: '#[1'.
 	self assert: 1 equals: results size
+]
+
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testCreateIdentifierFromStatement [
+
+	| results |
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'statement')
+		given: 'abc'.
+	self assert: 2 equals: results size.
+	self
+		assert: (Set withAll: {'identifier'. 'assignment'})
+		equals: (results collect: [:r | r childSandblocks first type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -122,6 +147,17 @@ SBTSParseInputTest >> testCreateNumber [
 		given: '1'.
 	self assert: 1 equals: results size.
 	self assert: 'number' equals: results first type
+]
+
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testCreateNumberFromStatement [
+
+	| results |
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'statement')
+		given: '1'.
+	self assert: 1 equals: results size.
+	self assert: 'number' equals: results first childSandblocks first type
 ]
 
 { #category : #'tests - create' }

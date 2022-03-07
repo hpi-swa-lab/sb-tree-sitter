@@ -144,6 +144,12 @@ SBTSNodeText >> takeNodesFrom: aParser [
 		ifFalse: [#noMatch]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeText >> validFor: aString [
+
+	^ regex matches: aString
+]
+
 { #category : #printing }
 SBTSNodeText >> writeSourceOn: aStream indent: aNumber [
 

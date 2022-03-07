@@ -151,7 +151,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 					result := blocks collect: [:b | b copy].
 					aParser peek = (Character value: 0) ifTrue: [
 						aParser next.
-						result first parser: aParser].
+						aParser blocks: result first blocks].
 					result]]
 		ifAbsentPut: [ | results |
 			results := self bodyTemplate resultsFor: aParser.

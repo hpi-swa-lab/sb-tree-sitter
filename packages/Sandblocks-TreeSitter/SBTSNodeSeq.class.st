@@ -103,7 +103,12 @@ SBTSNodeSeq >> resultsFor: aParser [
 				index = self elements size ifTrue: [stream nextPutAll: newResults] ifFalse: [
 					newResults do: [:candidate |
 						candidate atEnd
-							ifTrue: [stream nextPut: candidate]
+							ifTrue: [
+								self elements
+									from: index + 1
+									to: self elements size
+									do: [:node | candidate addAllBlocks: node buildEmpty].
+								stream nextPut: candidate]
 							ifFalse: [queue add: {candidate. index}]]]]].
 		
 		reportResultsBlock value: aParser value: 1.

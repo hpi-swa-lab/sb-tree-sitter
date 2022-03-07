@@ -2,7 +2,6 @@ Class {
 	#name : #SBTSInputParser,
 	#superclass : #Object,
 	#instVars : [
-		'previousAlternatives',
 		'stream',
 		'memoizations',
 		'visitedSupertypes',
@@ -10,6 +9,12 @@ Class {
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
+
+{ #category : #blocks }
+SBTSInputParser >> addAllBlocks: aCollection [
+
+	aCollection do: [:b | self addBlock: b]
+]
 
 { #category : #blocks }
 SBTSInputParser >> addBlock: aBlock [
@@ -27,6 +32,12 @@ SBTSInputParser >> atEnd [
 SBTSInputParser >> blocks [
 
 	^ blocks
+]
+
+{ #category : #blocks }
+SBTSInputParser >> blocks: aCollection [
+
+	blocks := aCollection
 ]
 
 { #category : #'initialize-release' }
@@ -58,9 +69,17 @@ SBTSInputParser >> memoizationFor: aString ifPresent: aSuccessBlock ifAbsentPut:
 		^ aBlock value].
 	
 	dict := memoizations at: stream position + 1.
-	^ dict at: aString ifPresent: aSuccessBlock ifAbsent: [
-		dict at: aString put: #recur.
-		dict at: aString put: aBlock value]
+	^ dict
+		at: aString
+		ifPresent: [:results | aSuccessBlock value: (results = #noMatch ifTrue: [results] ifFalse: [results collect: [:p | p copy]])]
+		ifAbsent: [ | results |
+			dict at: aString put: #recur.
+			results := aBlock value.
+			dict at: aString put: (results = #noMatch ifTrue: [results] ifFalse: [
+				results collect: [:p |
+					self assert: (p isKindOf: SBTSInputParser).
+					p copy]]).
+			results]
 ]
 
 { #category : #stream }
@@ -70,7 +89,7 @@ SBTSInputParser >> next [
 ]
 
 { #category : #query }
-SBTSInputParser >> optionsFor: aNode given: aString before: aBoolean [
+SBTSInputParser >> optionsFor: aTSBlock given: aString before: aBoolean [
 
 	| results |
 	stream := (aBoolean
@@ -78,14 +97,15 @@ SBTSInputParser >> optionsFor: aNode given: aString before: aBoolean [
 		ifFalse: [(Character value: 0) asString, aString]) readStream.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
 	
-	aNode allSuperTypesDo: [:typeNode |
-		"if our nested element (char0) is at the start, we would immediately abort expanding instead of recursing. instead, allow one level of recursion for each type node that is above our nested element."
-		aBoolean ifFalse: [visitedSupertypes add: typeNode type].
+	aTSBlock slot allSuperTypesDo: [:typeNode | "if our nested element (char0) is at the start, we would immediately abort expanding instead of recursing. instead, allow one level of recursion for each type node that is above our nested element."
+	aBoolean ifFalse: [visitedSupertypes add: typeNode type]].
+	aTSBlock slot allSuperTypesDo: [:typeNode | | parser |
+		parser := self copy addBlock: aTSBlock copyBlock.
 		aBoolean
-			ifTrue: [memoizations last at: typeNode type put: {typeNode}]
-			ifFalse: [memoizations first at: typeNode type put: {typeNode}]].
+			ifTrue: [memoizations last at: typeNode type put: {parser}]
+			ifFalse: [memoizations first at: typeNode type put: {parser}]].
 	
-	results := aNode root makeTemplate resultsFor: self.
+	results := aTSBlock slot lastNode resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
 	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser root]
 ]
