@@ -84,17 +84,16 @@ SBTSBlock >> isTSBlock [
 { #category : #'as yet unclassified' }
 SBTSBlock >> keyStroke: anEvent [
 
-	| previousContents |
+	| previousContents isAtStart |
 	previousContents := self contents.
+	isAtStart := self currentTextMorph cursor = 1.
 	super keyStroke: anEvent.
 	
 	self valid ifFalse: [
 		self contents: previousContents.
 		self flag: #todo.
 		"pass the entire newly invalid string"
-		self
-			tryTransitionAfterInput: anEvent keyCharacter asString
-			before: self currentTextMorph cursor = 2]
+		self tryTransitionAfterInput: anEvent keyCharacter asString before: isAtStart]
 ]
 
 { #category : #'as yet unclassified' }

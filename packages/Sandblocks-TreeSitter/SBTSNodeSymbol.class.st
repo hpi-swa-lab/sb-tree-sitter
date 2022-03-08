@@ -175,7 +175,7 @@ because the stored, nested parser does not have a valid stream "
 								result blocks last slot addNode: self.
 								result]
 							ifFalse: [
-								result blocks: (currentBlocks
+								result blocks: (currentBlocks copy
 									add: (SBTSBlock new
 										slot: (SBTSSlot new addNode: self);
 										addAllMorphs: result blocks);

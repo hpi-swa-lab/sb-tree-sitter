@@ -42,7 +42,7 @@ SBTSUnknownBlock >> tryTransitionAfterInput: aString before: aBoolean [
 	" use aString once we pass the correct one"
 	results := SBTSInputParser new
 		optionsForTemplate: self slot lastNode
-		given: self contents.
+		given: aString.
 	results size = 1 ifTrue: [self sandblockEditor do: (SBReplaceCommand new target: self replacer: results first)]
 ]
 
@@ -50,4 +50,10 @@ SBTSUnknownBlock >> tryTransitionAfterInput: aString before: aBoolean [
 SBTSUnknownBlock >> valid [
 
 	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSUnknownBlock >> wantsInput [
+
+	^ true
 ]
