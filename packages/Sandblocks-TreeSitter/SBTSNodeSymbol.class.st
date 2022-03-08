@@ -149,15 +149,37 @@ SBTSNodeSymbol >> resultsFor: aParser [
 				ifTrue: [#noMatch]
 				ifFalse: [ | result |
 					result := blocks collect: [:b | b copy].
-					aParser peek = (Character value: 0) ifTrue: [
-						aParser next.
-						aParser blocks: result first blocks].
-					result]]
-		ifAbsentPut: [ | results |
+					aParser peek = (Character value: 0)
+						ifTrue: [
+							" if we consumed a nested block, use the input parser and copy all relevant state
+because the stored, nested parser does not have a valid stream "
+							result first blocks do: [:block | block slot replaceLast: self].
+							aParser blocks: aParser blocks, result first blocks.
+							aParser next.
+							{aParser}]
+						ifFalse: [result]]]
+		ifAbsentPut: [ | results currentBlocks |
+			currentBlocks := aParser blocks.
+			aParser blocks: OrderedCollection new.
+			
 			results := self bodyTemplate resultsFor: aParser.
 			results = #noMatch
-				ifTrue: [#noMatch]
-				ifFalse: [results collect: [:result | result makeRootBlock: (SBTSBlock new slot: (SBTSSlot new addNode: self))]]]
+				ifTrue: [
+					aParser blocks: currentBlocks.
+					#noMatch]
+				ifFalse: [
+					results collect: [:result |
+						self isSuperType
+							ifTrue: [
+								result blocks: currentBlocks copy, result blocks.
+								result blocks last slot addNode: self.
+								result]
+							ifFalse: [
+								result blocks: (currentBlocks
+									add: (SBTSBlock new
+										slot: (SBTSSlot new addNode: self);
+										addAllMorphs: result blocks);
+									yourself)]]]]
 ]
 
 { #category : #parsing }

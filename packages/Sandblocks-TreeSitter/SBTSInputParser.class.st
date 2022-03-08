@@ -49,16 +49,6 @@ SBTSInputParser >> initialize [
 	blocks := OrderedCollection new
 ]
 
-{ #category : #blocks }
-SBTSInputParser >> makeRootBlock: aBlock [
-
-	aBlock slot firstNode isSuperType
-		ifTrue: [
-			self assert: blocks size = 1.
-			blocks first slot mergeWith: aBlock slot]
-		ifFalse: [blocks := OrderedCollection with: (aBlock addAllMorphs: blocks)]
-]
-
 { #category : #memo }
 SBTSInputParser >> memoizationFor: aString ifPresent: aSuccessBlock ifAbsentPut: aBlock [
 
@@ -107,7 +97,7 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aBoolean [
 	
 	results := aTSBlock slot lastNode resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
-	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser root]
+	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks first]
 ]
 
 { #category : #query }

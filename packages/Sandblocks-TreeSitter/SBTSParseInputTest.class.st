@@ -186,36 +186,32 @@ SBTSParseInputTest >> testDenyNumber [
 SBTSParseInputTest >> testWrapArray [
 
 	| stmt results |
-	stmt := self statement: 'number' with: '123'.
-	results := SBTSInputParser new
-		optionsFor: stmt child child child child child child
-		given: '{'
-		before: true.
+	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second childSandblocks first.
+	results := SBTSInputParser new optionsFor: stmt given: '{' before: true.
 	self assert: 1 equals: results size.
-	self assert: 'dynamic_array' equals: results first child child child child child child type
+	self assert: 'dynamic_array' equals: results first type.
+	self assert: 3 equals: results first submorphCount
 ]
 
 { #category : #'tests - wrap' }
 SBTSParseInputTest >> testWrapBinaryExpression [
 
 	| stmt results |
-	stmt := self statement: 'number' with: '123'.
-	results := SBTSInputParser new
-		optionsFor: stmt child child child child child child
-		given: '+'
-		before: false.
-	self assert: 1 equals: results size
+	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second childSandblocks first.
+	results := SBTSInputParser new optionsFor: stmt given: '+' before: false.
+	self assert: 1 equals: results size.
+	self assert: 3 equals: results first childSandblocks size.
+	self
+		assert: (SBTSSmalltalk instance bodyNodeForRule: 'binary_message')
+		equals: results first childSandblocks first slot lastNode parent
 ]
 
 { #category : #'tests - wrap' }
 SBTSParseInputTest >> testWrapBlock [
 
 	| stmt results |
-	stmt := self statement: 'number' with: '123'.
-	results := SBTSInputParser new
-		optionsFor: stmt child child child child child child
-		given: '['
-		before: true.
+	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second childSandblocks first.
+	results := SBTSInputParser new optionsFor: stmt given: '[' before: true.
 	self assert: 1 equals: results size
 ]
 
@@ -223,10 +219,7 @@ SBTSParseInputTest >> testWrapBlock [
 SBTSParseInputTest >> testWrapByteArray [
 
 	| stmt results |
-	stmt := self statement: 'identifier' with: 'abc'.
-	results := SBTSInputParser new
-		optionsFor: stmt child child child child child child
-		given: '#['
-		before: true.
-	self assert: #() equals: results
+	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second childSandblocks first.
+	results := SBTSInputParser new optionsFor: stmt given: '#[' before: true.
+	self assert: 'byte_array' equals: results first type
 ]

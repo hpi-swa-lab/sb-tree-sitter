@@ -91,12 +91,25 @@ SBTSSlot >> parentThat: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> postCopy [
+
+	nodes := nodes copy
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> printOn: aStream [
 
 	aStream nextPutAll: self className.
 	aStream nextPut: $(.
 	nodes do: [:node | node printOn: aStream] separatedBy: [aStream nextPut: $,].
 	aStream nextPut: $)
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> replaceLast: aNode [
+
+	nodes removeLast.
+	nodes add: aNode
 ]
 
 { #category : #'as yet unclassified' }

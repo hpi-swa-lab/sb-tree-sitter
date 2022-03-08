@@ -35,12 +35,11 @@ SBTSUnknownBlock >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSUnknownBlock >> tryTransitionAfterInput: aString [
+SBTSUnknownBlock >> tryTransitionAfterInput: aString before: aBoolean [
 
 	| results |
 	self flag: #todo.
 	" use aString once we pass the correct one"
-	
 	results := SBTSInputParser new
 		optionsForTemplate: self slot lastNode
 		given: self contents.

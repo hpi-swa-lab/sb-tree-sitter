@@ -12,7 +12,7 @@ SBTSBlock >> copyBlock [
 
 	^ self class new
 		addAllMorphs: (self submorphs collect: [:s | s copyBlock]);
-		slot: self slot
+		slot: self slot copy
 ]
 
 { #category : #'as yet unclassified' }
@@ -84,12 +84,17 @@ SBTSBlock >> isTSBlock [
 { #category : #'as yet unclassified' }
 SBTSBlock >> keyStroke: anEvent [
 
+	| previousContents |
+	previousContents := self contents.
 	super keyStroke: anEvent.
 	
 	self valid ifFalse: [
+		self contents: previousContents.
 		self flag: #todo.
 		"pass the entire newly invalid string"
-		self tryTransitionAfterInput: anEvent keyCharacter asString]
+		self
+			tryTransitionAfterInput: anEvent keyCharacter asString
+			before: self currentTextMorph cursor = 2]
 ]
 
 { #category : #'as yet unclassified' }
@@ -132,9 +137,11 @@ SBTSBlock >> template [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSBlock >> tryTransitionAfterInput: aString [
+SBTSBlock >> tryTransitionAfterInput: aString before: aBoolean [
 
-	SBTSInputParser new optionsFor: self given: aString before: false
+	| options |
+	options := SBTSInputParser new optionsFor: self given: aString before: aBoolean.
+	options size = 1 ifTrue: [self sandblockEditor do: (SBReplaceCommand new target: self replacer: options first)]
 ]
 
 { #category : #'as yet unclassified' }
