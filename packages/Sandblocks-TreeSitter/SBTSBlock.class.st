@@ -125,7 +125,8 @@ SBTSBlock >> initialize [
 	
 	self
 		layoutPolicy: SBAlgebraLayout new;
-		layoutInset: 8;
+		layoutInset: 0;
+		cellGap: 2;
 		hResizing: #shrinkWrap;
 		vResizing: #shrinkWrap
 ]
@@ -184,7 +185,10 @@ SBTSBlock >> layoutCommands [
 				stream nextPut: a layoutCommands.
 				(self factory hardLineBreakBetween: a and: b)
 					ifTrue: [stream nextPut: SBAlgebraCommand hardLine]
-					ifFalse: [(self factory softLineBreakBetween: a and: b) ifTrue: [stream nextPut: SBAlgebraCommand softLine]]].
+					ifFalse: [
+						(self factory softLineBreakBetween: a and: b)
+							ifTrue: [stream nextPut: SBAlgebraCommand softLine]
+							ifFalse: [stream nextPut: SBAlgebraCommand gap]]].
 			self hasSubmorphs ifTrue: [stream nextPut: self lastSubmorph layoutCommands]])
 ]
 
@@ -336,6 +340,8 @@ SBTSBlock >> writeSourceOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSBlock >> writeSourceOn: aStream indent: aNumber [
 
+	self hasSubmorphs ifFalse: [^ self].
+	
 	(self factory indentMatch: self) ifTrue: [aStream tab: aNumber].
 	self submorphs overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber).

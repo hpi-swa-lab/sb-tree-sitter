@@ -87,6 +87,13 @@ SBTSNodeBase >> hasParent: aNode [
 	^ false
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> hasParentThat: aBlock [
+
+	self andParentsDo: [:p | (aBlock value: p) ifTrue: [^ true]].
+	^ false
+]
+
 { #category : #testing }
 SBTSNodeBase >> isTSLabel [
 
@@ -97,6 +104,12 @@ SBTSNodeBase >> isTSLabel [
 SBTSNodeBase >> isTSNode [
 
 	^ true
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isTSOptional [
+
+	^ false
 ]
 
 { #category : #testing }

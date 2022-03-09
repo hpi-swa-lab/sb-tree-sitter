@@ -12,10 +12,22 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> applyChoice: aBlock [
 
+	| editor nested found |
 	self dismiss.
 	
-	target sandblockEditor do: (SBReplaceCommand new target: target replacer: aBlock).
-	aBlock sandblockEditor selection currentTextMorph ifNotNil: [:t | t moveCursorTo: 99999999999]
+	editor := target sandblockEditor.
+	editor do: (SBReplaceCommand new target: target replacer: aBlock).
+	
+	nested := nil.
+	found := false.
+	aBlock allMorphsDo: [:m | (nested isNil and: [m type = target type]) ifTrue: [nested := m]].
+	
+	aBlock cursorPositionsDo: [:position |
+		(found and: [position block ~= nested and: [position isInsert or: [position isText]]]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none].
+		position block = nested ifTrue: [found := true]].
+	
+	"didn't find the nested block again, choose the very first"
+	aBlock cursorPositionsDo: [:position | ((position isInsert and: [(position command element hasParentThat: #isTSOptional) not]) or: [position isText]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none]]
 ]
 
 { #category : #'as yet unclassified' }

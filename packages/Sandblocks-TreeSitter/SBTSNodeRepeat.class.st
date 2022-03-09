@@ -16,12 +16,6 @@ SBTSNodeRepeat >> allChildrenDo: aBlock [
 	self element allChildrenDo: aBlock
 ]
 
-{ #category : #copying }
-SBTSNodeRepeat >> basicCopy [
-
-	^ super basicCopy multiple: self multiple required: self required element: self element
-]
-
 { #category : #'as yet unclassified' }
 SBTSNodeRepeat >> buildEmpty [
 
@@ -72,6 +66,12 @@ SBTSNodeRepeat >> firstInsertIndexIn: aParent [
 		(seen not and: [stream atEnd not and: [child = stream peek slot firstNode]]) ifTrue: [stream next].
 		child = element ifTrue: [^ stream position + 1]].
 	^ 1
+]
+
+{ #category : #testing }
+SBTSNodeRepeat >> isTSOptional [
+
+	^ self required not and: [self multiple not]
 ]
 
 { #category : #testing }
