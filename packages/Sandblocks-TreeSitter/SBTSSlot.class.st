@@ -162,7 +162,10 @@ SBTSSlot >> separatorBetween: aBlock and: anotherBlock indent: aNumber [
 		^ String streamContents: [:s |
 			s cr.
 			aNumber timesRepeat: [s tab]]].
-	(aBlock sourceString last isAlphaNumeric and: [anotherBlock sourceString first isAlphaNumeric]) ifTrue: [^ ' '].
+	((aBlock sourceString ifNotEmpty: [:s | s last isAlphaNumeric] ifEmpty: [false]) and: [
+		anotherBlock sourceString
+			ifNotEmpty: [:s | s first isAlphaNumeric]
+			ifEmpty: [false]]) ifTrue: [^ ' '].
 	^ ''
 ]
 

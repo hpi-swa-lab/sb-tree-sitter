@@ -2,10 +2,17 @@ Class {
 	#name : #SBTSBlock,
 	#superclass : #SBBlock,
 	#instVars : [
-		'slot'
+		'slot',
+		'highlight'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> actionProviders [
+
+	^ {self grammarHandler}, super actionProviders
+]
 
 { #category : #'inline block compat' }
 SBTSBlock >> alias [
@@ -83,6 +90,24 @@ SBTSBlock >> fixedNumberOfChildren [
 
 	self cursorPositionsDo: [:c | (c isKindOf: SBCursorInsert) ifTrue: [^ false]] shallow: true.
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> grammarHandler [
+
+	^ SBGrammarHandler new
+]
+
+{ #category : #highlight }
+SBTSBlock >> highlight [
+
+	^ highlight ifNil: [self updateAllHighlights]
+]
+
+{ #category : #highlight }
+SBTSBlock >> highlight: aString [
+
+	highlight := aString
 ]
 
 { #category : #'as yet unclassified' }
@@ -180,6 +205,35 @@ SBTSBlock >> newEmptyChildNear: aBlock before: aBoolean [
 	^ nil
 ]
 
+{ #category : #highlight }
+SBTSBlock >> ownerWithColor [
+
+	^ self highlight = #'_sb_none'
+		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
+		ifFalse: [self]
+]
+
+{ #category : #highlight }
+SBTSBlock >> preferredColorIn: aColorPolicy [
+
+	^ self highlight
+		caseOf: {
+			['keyword'] -> [aColorPolicy keyword].
+			['function'] -> [aColorPolicy identifier].
+			['comment'] -> [aColorPolicy defaultLight].
+			['variable'] -> [aColorPolicy identifier].
+			['type'] -> [aColorPolicy keyword].
+			['number'] -> [aColorPolicy literal].
+			['string'] -> [aColorPolicy literal].
+			['escape'] -> [aColorPolicy literal].
+			['punctuation.bracket'] -> [aColorPolicy builtIn].
+			['constant.builtin'] -> [aColorPolicy builtIn].
+			['operator'] -> [aColorPolicy identifier].
+			['property'] -> [aColorPolicy identifier].
+			['important'] -> [aColorPolicy important]}
+		otherwise: [aColorPolicy default]
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> printOn: aStream [
 
@@ -222,6 +276,12 @@ SBTSBlock >> slot: aSlot [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> statements [
+
+	^ self isBlockBody ifTrue: [self childSandblocks] ifFalse: [#()]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> template [
 
 	^ self factory bodyNodeForRule: self type
@@ -237,6 +297,24 @@ SBTSBlock >> tryTransitionAfterInput: aString before: aBoolean [
 SBTSBlock >> type [
 
 	^ self slot type
+]
+
+{ #category : #highlight }
+SBTSBlock >> updateAllHighlights [
+
+	self factory hasHighlight ifFalse: [^ self].
+	self allMorphsDo: [:m |
+		m isTSBlock ifTrue: [
+			m highlight: #'_sb_none'.
+			m updateHighlight]]
+]
+
+{ #category : #highlight }
+SBTSBlock >> updateHighlight [
+
+	self factory highlightQuery
+		executeAgainst: self
+		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | (block highlight isNil or: [block highlight = #'_sb_none']) ifTrue: [block highlight: id]]]
 ]
 
 { #category : #'as yet unclassified' }

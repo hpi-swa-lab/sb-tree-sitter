@@ -63,6 +63,12 @@ SBTSLabel >> sourceString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> wrapOffscreen: anEditor [
+
+	
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> writeSourceOn: aStream indent: aNumber [
 
 	aStream nextPutAll: self contents

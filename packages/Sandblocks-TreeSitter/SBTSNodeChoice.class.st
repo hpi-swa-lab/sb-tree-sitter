@@ -47,8 +47,15 @@ SBTSNodeChoice >> childrenForQueryDo: aBlock [
 
 { #category : #printing }
 SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+	"check if there is an unknown for this choice"
 
-	self alternatives do: [:child | child cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]
+	aCollection
+		detect: [:block | block isTSBlock and: [block isUnknown and: [block slot includesParent: self]]]
+		ifFound: [:b |
+			aClosure value: (SBCursorSelect new block: b).
+			aBoolean ifFalse: [b cursorPositionsDo: aClosure shallow: aBoolean]]
+		ifNone: ["otherwise just descend"
+		self alternatives do: [:child | child cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]]
 ]
 
 { #category : #printing }

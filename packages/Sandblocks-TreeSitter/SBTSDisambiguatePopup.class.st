@@ -14,7 +14,8 @@ SBTSDisambiguatePopup >> applyChoice: aBlock [
 
 	self dismiss.
 	
-	target sandblockEditor do: (SBReplaceCommand new target: target replacer: aBlock)
+	target sandblockEditor do: (SBReplaceCommand new target: target replacer: aBlock).
+	aBlock sandblockEditor selection currentTextMorph ifNotNil: [:t | t moveCursorTo: 99999999999]
 ]
 
 { #category : #'as yet unclassified' }
@@ -69,6 +70,7 @@ SBTSDisambiguatePopup >> suggestions [
 		(SBSuggestionItem selector: choice type label: 'b')
 			preview: (choice
 					width: 400;
+					wrapOffscreen: target sandblockEditor;
 					imageForm)
 				previewOnly: true;
 			completionAction: [:item | self applyChoice: choice]]
@@ -77,6 +79,7 @@ SBTSDisambiguatePopup >> suggestions [
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> updateChoices [
 
-	choices := transitionsDo value: self contents.
-	choices size = 1 ifTrue: [^ self applyChoice: choices first]
+	self contents ifEmpty: [self dismiss] ifNotEmpty: [
+		choices := transitionsDo value: self contents.
+		choices size = 1 ifTrue: [^ self applyChoice: choices first]]
 ]

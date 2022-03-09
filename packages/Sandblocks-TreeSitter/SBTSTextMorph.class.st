@@ -24,6 +24,12 @@ SBTSTextMorph >> copyBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> factory [
+
+	^ (self slot ifNil: [self parentSandblock slot]) factory
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> field [
 
 	^ self slot field
@@ -40,7 +46,7 @@ SBTSTextMorph >> isTSSymbol [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> language [
 
-	^ self slot factory name
+	^ self factory name
 ]
 
 { #category : #'as yet unclassified' }
@@ -60,6 +66,12 @@ SBTSTextMorph >> slot: aSlot [
 SBTSTextMorph >> sourceString [
 
 	^ self contents
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> wrapOffscreen: anEditor [
+
+	
 ]
 
 { #category : #'as yet unclassified' }

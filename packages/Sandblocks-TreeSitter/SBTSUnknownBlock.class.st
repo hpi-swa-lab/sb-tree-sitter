@@ -35,6 +35,13 @@ SBTSUnknownBlock >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknownBlock >> slot: aSlot [
+
+	super slot: aSlot.
+	self firstSubmorph slot: aSlot
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknownBlock >> tryTransitionAfterInput: aString before: aBoolean [
 
 	^ SBTSInputParser new optionsForTemplate: self slot lastNode given: aString
