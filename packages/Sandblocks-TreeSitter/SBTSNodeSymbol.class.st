@@ -45,12 +45,6 @@ SBTSNodeSymbol >> buildEmpty [
 	^ {SBTSUnknownBlock new slot: (SBTSSlot new addNode: self)}
 ]
 
-{ #category : #build }
-SBTSNodeSymbol >> buildMorphWith: aBlock slot: aSlot [
-
-	^ aBlock slot: aSlot
-]
-
 { #category : #query }
 SBTSNodeSymbol >> childrenForQueryDo: aBlock [
 

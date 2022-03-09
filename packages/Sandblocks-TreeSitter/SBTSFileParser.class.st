@@ -50,7 +50,7 @@ SBTSFileParser >> next [
 SBTSFileParser >> nodeForCursor: aCursor [
 
 	aCursor isNamed ifFalse: [^ aCursor text].
-	^ aCursor currentDo: [:type :block :template | | fields matches blocks |
+	^ aCursor currentDo: [:type :template :isAlias | | fields matches blocks |
 		fields := Array streamContents: [:s |
 			aCursor gotoFirstChild ifTrue: [ | current |
 				current := aCursor node.
@@ -70,17 +70,17 @@ SBTSFileParser >> nodeForCursor: aCursor [
 		matches := matches select: [:match | match atEnd].
 		self assert: matches size = 1.
 		
-		SBToggledCode comment: '' active: 0 do: {
-			[
-				type ~= aCursor type
-					ifTrue: [
-						(SBTSNodeAlias new
-							factory: block factory;
-							alias: aCursor type;
-							makeConcrete) addChild: block]
-					ifFalse: [block]]}.
-		block
-			slot: (SBTSSlot new addNode: (SBTSNodeSymbol new type: type factory: template factory));
+		SBTSBlock new
+			slot: (SBTSSlot new addNode: (SBToggledCode comment: '' active: 1 do: {
+				[
+					isAlias
+						ifTrue: [
+							SBTSNodeAlias new
+								factory: template factory;
+								alias: aCursor type;
+								element: (SBTSNodeSymbol new type: type factory: template factory)]
+						ifFalse: [SBTSNodeSymbol new type: type factory: template factory]].
+				[SBTSNodeSymbol new type: type factory: template factory]}));
 			addAllMorphs: (blocks with: matches first slots collect: [:subBlock :slot | slot buildMorphWith: subBlock]);
 			yourself]
 ]

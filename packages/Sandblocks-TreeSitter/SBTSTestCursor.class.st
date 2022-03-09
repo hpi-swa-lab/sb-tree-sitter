@@ -16,7 +16,7 @@ SBTSTestCursor >> currentDo: aBlock [
 	| template |
 	template := factory bodyNodeForRule: self currentPair first.
 	self assert: template factory notNil.
-	^ aBlock value: self currentPair first value: SBTSBlock new value: template
+	^ aBlock value: self currentPair first value: template value: false
 ]
 
 { #category : #'as yet unclassified' }

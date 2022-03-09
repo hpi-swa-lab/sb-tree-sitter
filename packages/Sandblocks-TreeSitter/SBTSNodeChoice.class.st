@@ -33,6 +33,12 @@ SBTSNodeChoice >> basicCopy [
 	^ super basicCopy alternatives: self alternatives
 ]
 
+{ #category : #printing }
+SBTSNodeChoice >> buildEmpty [
+
+	^ {SBTSUnknownBlock new slot: (SBTSSlot new addNode: self)}
+]
+
 { #category : #query }
 SBTSNodeChoice >> childrenForQueryDo: aBlock [
 
@@ -49,10 +55,6 @@ SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollect
 SBTSNodeChoice >> printOn: aStream [
 
 	aStream nextPut: $(.
-	self children ifNotEmpty: [
-		aStream nextPut: $<.
-		self firstSubmorph printOn: aStream.
-		aStream nextPut: $>].
 	self alternatives
 		do: [:alt | aStream print: alt]
 		separatedBy: [aStream nextPutAll: ' | '].

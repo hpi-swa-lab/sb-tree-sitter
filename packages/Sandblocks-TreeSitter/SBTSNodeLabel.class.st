@@ -45,29 +45,10 @@ SBTSNodeLabel >> childrenForQueryDo: aBlock [
 	aBlock value: self
 ]
 
-{ #category : #accessing }
-SBTSNodeLabel >> contents [
-
-	^ self label
-]
-
-{ #category : #copying }
-SBTSNodeLabel >> copy [
-
-	self assert: self isConcrete.
-	^ self basicCopy
-]
-
 { #category : #copying }
 SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 
 	
-]
-
-{ #category : #'initialize-release' }
-SBTSNodeLabel >> initialize [
-
-	super initialize
 ]
 
 { #category : #testing }

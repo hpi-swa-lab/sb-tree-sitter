@@ -15,6 +15,12 @@ SBTSSlot >> addNode: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> allChildrenDo: aBlock [
+
+	nodes reverseDo: [:node | node root allChildrenDo: aBlock]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> allSuperTypesDo: aBlock [
 
 	nodes do: [:node | node allSuperTypesDo: aBlock]
@@ -29,9 +35,39 @@ SBTSSlot >> buildMorphWith: anObject [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> compatibleWithType: aTypeString [
+
+	self allSuperTypesDo: [:type | type type = aTypeString ifTrue: [^ true]].
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> delimiterBetween: aBlock and: anotherBlock [
+
+	self factory delimitedRules
+		at: self firstNode type
+		ifPresent: [:delimiter | self firstNode bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [(aBlock slot lastNode hasParent: node element) and: [anotherBlock slot lastNode hasParent: node element]]) ifTrue: [^ delimiter first]]].
+	^ ''
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> delimiterIn: aBlock [
+
+	(self factory delimitedRules at: aBlock type) ifNotNil: [:delimiter | aBlock slot firstNode bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [self lastNode hasParent: node element]) ifTrue: [^ delimiter first]]].
+	^ ''
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> factory [
 
 	^ self lastNode factory
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> field [
+
+	self allSuperTypesDo: [:type | type field ifNotNil: [:field | ^ field]].
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -113,7 +149,25 @@ SBTSSlot >> replaceLast: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> separatorBetween: aBlock and: anotherBlock indent: aNumber [
+
+	(self delimiterBetween: aBlock and: anotherBlock) ifNotEmpty: [:delimiter | ^ delimiter].
+	(self factory hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [
+		^ String streamContents: [:s |
+			s cr.
+			aNumber timesRepeat: [s tab]]].
+	(aBlock sourceString last isAlphaNumeric and: [anotherBlock sourceString first isAlphaNumeric]) ifTrue: [^ ' '].
+	^ ''
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> type [
 
 	^ self firstNode type
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> writeSourceOn: aStream with: aCollection [
+
+	nodes last
 ]

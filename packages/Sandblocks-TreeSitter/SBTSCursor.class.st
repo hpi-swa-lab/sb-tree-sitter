@@ -25,15 +25,20 @@ SBTSCursor >> createRestorePoint [
 { #category : #'as yet unclassified' }
 SBTSCursor >> currentDo: aBlock [
 
-	| type node template |
+	| type template isAlias |
 	type := self unaliasedType.
-	node := SBTSNodeSymbol new type: type factory: self factory.
+	isAlias := type ~= self type.
+	
 	template := self factory bodyNodeForRule: type ifAbsent: [
-		node := self resolveAlias: self type in: self parentType with: self factory aliasOccurrences.
-		node unpackAlias].
-	^ aBlock value: type value: SBTSBlock new value: ((template isKindOf: SBTSNodeAlias)
-		ifTrue: [template element]
-		ifFalse: [template])
+		isAlias := true.
+		self resolveAlias: self type in: self parentType with: self factory aliasOccurrences
+		"node unpackAlias"].
+	^ aBlock
+		value: type
+		value: ((template isKindOf: SBTSNodeAlias)
+			ifTrue: [template unpackAlias]
+			ifFalse: [template])
+		value: isAlias
 ]
 
 { #category : #'as yet unclassified' }
@@ -235,7 +240,7 @@ SBTSCursor >> type [
 { #category : #'as yet unclassified' }
 SBTSCursor >> unaliasedType [
 
-	| index n |
+	| index n type |
 	n := self node.
 	" here things get real tricky: tree-sitter subtrees (id) can have a compact representation that is directly in the struct or point to a larger structure.	
 	 below are the excerpts from the structs that are relevant. let's hope they never change -.-
@@ -260,9 +265,13 @@ SBTSCursor >> unaliasedType [
 	  TSSymbol symbol;              	2
 	"
 	index := (n id ignore bitAt: 1) ~= 0 ifTrue: [n id symbol] ifFalse: [(n id getHandle pointerAt: 1) getHandle uint16At: 41].
-	^ index = 0
+	type := index = 0
 		ifTrue: [library nodeType: n]
-		ifFalse: [library language symbolNames at: index + 1]
+		ifFalse: [library language symbolNames at: index + 1].
+	
+	" does the entry actually exist? apparently aliases can be reused as proper symbol names as part of the symbolNames table. (_import_export_specifier in JS) "
+	"factory bodyNodeForRule: type ifAbsent: [^ library nodeType: n]."
+	^ type
 ]
 
 { #category : #'as yet unclassified' }

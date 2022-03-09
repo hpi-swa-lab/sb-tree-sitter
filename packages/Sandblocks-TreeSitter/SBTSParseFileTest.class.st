@@ -23,21 +23,28 @@ SBTSParseFileTest >> testChoice [
 	self assert: rule elements second equals: parser slots second lastNode
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testJavascriptImport [
 
-	| block |
-	block := SBTSFileParser new
-		parse: 'import {A} from ''a'''
-		language: SBJavascript instance.
-	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (identifier)))))').
-	block := SBTSFileParser new
-		parse: 'import {A as B} from ''a'''
-		language: SBJavascript instance.
-	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (identifier) (identifier)))))')
+	| block source |
+	source := 'import{A}from''a'''.
+	block := SBTSFileParser new parse: source language: SBJavascript instance.
+	self assert: source equals: block sourceString.
+	source := 'import{A as B}from''a'''.
+	block := SBTSFileParser new parse: source language: SBJavascript instance.
+	self assert: source equals: block sourceString
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testJavascriptString [
+
+	| sourceString parsed |
+	sourceString := '"a"'.
+	parsed := SBTSFileParser new parse: sourceString language: SBJavascript instance.
+	self assert: sourceString equals: parsed sourceString
+]
+
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testJavascriptTemplateString [
 
 	| source |
@@ -89,15 +96,15 @@ SBTSParseFileTest >> testParse [
 	self assert: 'cd' equals: block childSandblocks second contents
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testParseBinaryExpression [
 
 	| module |
 	module := SBTSFileParser new parse: '2+2' language: SBJavascript instance.
-	self assert: 'binary_expression' equals: module childSandblocks first type
+	self assert: 'binary_expression' equals: module childSandblocks first childSandblocks first type
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testParseEmptyModule [
 
 	SBTSFileParser new parse: '' language: SBJavascript instance
@@ -115,43 +122,47 @@ SBTSParseFileTest >> testParseJS [
 		equals: block childSandblocks first slot lastNode
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testParseMemberExpression [
-
 	" this will produce two valid trees choice($.expression, $.primary_expression)) "
+
 	SBTSFileParser new parse: 'a.b' language: SBJavascript instance
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testParsePythonFormatString [
 
-	| string |
-	string := (SBTSFileParser new parse: '"abc"' language: SBPython instance) access children first.
-	self assert: 'abc' equals: string contents.
-	string := (SBTSFileParser new parse: 'f"abc"' language: SBPython instance) access children first.
-	self assert: 'abc' equals: string contents.
-	string := (SBTSFileParser new
-		parse: 'f"abc{var1}def{var2}ghi"'
-		language: SBPython instance) access children first.
-	self assert: 'abcdefghi' equals: string contents
+	| source |
+	source := '"abc"'.
+	self
+		assert: source
+		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString.
+	source := 'f"abc"'.
+	self
+		assert: source
+		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString.
+	source := 'f"abc{var1}def{var2}ghi"'.
+	self
+		assert: source
+		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testParseRegexClassCharacter [
 
 	SBTSFileParser new parse: '[-]' language: SBRegex instance.
 	SBTSFileParser new parse: '[a]' language: SBRegex instance
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testParseStatement [
 
 	| module |
 	module := SBTSFileParser new parse: '2' language: SBJavascript instance.
-	self assert: 'number' equals: module childSandblocks first type
+	self assert: 'number' equals: module childSandblocks first childSandblocks first type
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testPythonComprehension [
 
 	| source |
@@ -161,7 +172,7 @@ SBTSParseFileTest >> testPythonComprehension [
 		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testPythonDecorators [
 
 	| source |
@@ -174,7 +185,34 @@ def a():
 		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testPythonIdentifiers [
+
+	| source |
+	source := 'global a'.
+	self
+		assert: source
+		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testPythonIf [
+
+	| source |
+	source := 'if a:
+	b
+elif c:
+	d
+elif f:
+	g
+else:
+	e'.
+	self
+		assert: source
+		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
+]
+
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testPythonImport [
 
 	| block |
@@ -184,7 +222,17 @@ SBTSParseFileTest >> testPythonImport [
 	self assert: (block matchesQuery: '(module (import_statement (aliased_import (dotted_name (identifier)) alias: (identifier))))')
 ]
 
-{ #category : #tests }
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testPythonList [
+
+	| source |
+	source := '[a,b,c]'.
+	self
+		assert: source
+		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
+]
+
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testPythonStatements [
 
 	| source |
@@ -219,6 +267,14 @@ SBTSParseFileTest >> testSeq [
 	parser := (rule takeNodesFrom: (SBTSFileParser new stream: {SBTSNodeSymbol new type: 'id' factory: factory. SBTSNodeSymbol new type: 'id' factory: factory} readStream)) first.
 	self assert: rule elements first equals: parser slots first lastNode.
 	self assert: rule elements second equals: parser slots second lastNode
+]
+
+{ #category : #'tests - print' }
+SBTSParseFileTest >> testStBinaryOp [
+
+	| op |
+	op := SBTSFileParser new parse: 'a 1+2' language: SBTSSmalltalk instance.
+	self assert: '1+2' equals: op childSandblocks second sourceString
 ]
 
 { #category : #'tests - unit' }

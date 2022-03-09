@@ -27,24 +27,10 @@ SBTSNodeAlias >> allChildrenDo: aBlock [
 	self element allChildrenDo: aBlock
 ]
 
-{ #category : #copying }
-SBTSNodeAlias >> basicCopy [
-
-	^ super basicCopy
-		element: self element;
-		alias: self alias
-]
-
 { #category : #'as yet unclassified' }
 SBTSNodeAlias >> buildEmpty [
 
 	^ self element buildEmpty
-]
-
-{ #category : #query }
-SBTSNodeAlias >> childrenForQueryDo: aBlock [
-
-	self firstSubmorph childrenForQueryDo: aBlock
 ]
 
 { #category : #parsing }
@@ -79,11 +65,7 @@ SBTSNodeAlias >> printOn: aStream [
 { #category : #parsing }
 SBTSNodeAlias >> resultsFor: aParser [
 
-	| results |
-	results := self element resultsFor: aParser.
-	^ results = #noMatch
-		ifTrue: [#noMatch]
-		ifFalse: [results collect: [:child | self makeConcrete addChild: child]]
+	^ self element resultsFor: aParser
 ]
 
 { #category : #parsing }
@@ -106,10 +88,4 @@ SBTSNodeAlias >> unpackAlias [
 	^ self element isTSSymbol
 		ifTrue: [self element bodyTemplate]
 		ifFalse: [self element]
-]
-
-{ #category : #printing }
-SBTSNodeAlias >> writeSourceOn: aStream indent: aNumber [
-
-	self firstSubmorph writeSourceOn: aStream indent: aNumber
 ]

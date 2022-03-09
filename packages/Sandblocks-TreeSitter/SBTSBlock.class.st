@@ -7,6 +7,28 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #'inline block compat' }
+SBTSBlock >> alias [
+	"remove, compat to inlineblocks"
+
+	self flag: #todo.
+	^ nil
+]
+
+{ #category : #'inline block compat' }
+SBTSBlock >> childrenForQuery [
+	"remove, compat with inlineblocks"
+
+	self flag: #todo.
+	^ self submorphs
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> compatibleWithType: aString [
+
+	^ self slot compatibleWithType: aString
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> copyBlock [
 
@@ -51,10 +73,24 @@ SBTSBlock >> factory [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> field [
+
+	^ self slot field
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> fixedNumberOfChildren [
 
 	self cursorPositionsDo: [:c | (c isKindOf: SBCursorInsert) ifTrue: [^ false]] shallow: true.
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> indentFor: aBlock current: aNumber [
+
+	^ (self factory indentMatch: aBlock)
+		ifTrue: [aNumber + 1]
+		ifFalse: [aNumber]
 ]
 
 { #category : #'as yet unclassified' }
@@ -72,7 +108,7 @@ SBTSBlock >> initialize [
 { #category : #testing }
 SBTSBlock >> isBlockBody [
 
-	^ self factory isStatementContainer: self type
+	^ self slot factory isStatementContainer: self type
 ]
 
 { #category : #testing }
@@ -97,6 +133,12 @@ SBTSBlock >> keyStroke: anEvent [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> language [
+
+	^ self slot factory name
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> layoutCommands [
 
 	^ SBAlgebraCommand container
@@ -111,9 +153,37 @@ SBTSBlock >> layoutCommands [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> matchesQuery: aString [
+
+	^ SBTSQuery new execute: aString against: self capturesDo: [:b | ]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> printOn: aStream [
 
 	self slot ifNotNil: [slot firstNode printOn: aStream]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> printTree [
+
+	^ String streamContents: [:stream | self printTreeOn: stream indent: 0]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> printTreeOn: aStream indent: aNumber [
+
+	| any |
+	aStream nextPut: $(.
+	aStream nextPutAll: self type.
+	any := false.
+	self submorphsDo: [:m |
+		m isTSBlock ifTrue: [
+			any := true.
+			aStream crtab: aNumber + 1.
+			m printTreeOn: aStream indent: aNumber + 1]].
+	any ifTrue: [aStream crtab: aNumber].
+	aStream nextPut: $)
 ]
 
 { #category : #'as yet unclassified' }
@@ -162,6 +232,17 @@ SBTSBlock >> valid [
 { #category : #'as yet unclassified' }
 SBTSBlock >> writeSourceOn: aStream [
 
-	self flag: #todo.
-	aStream
+	self writeSourceOn: aStream indent: 0
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> writeSourceOn: aStream indent: aNumber [
+
+	(self factory indentMatch: self) ifTrue: [aStream tab: aNumber].
+	self submorphs overlappingPairsDo: [:first :second |
+		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber).
+		aStream nextPutAll: (self slot separatorBetween: first and: second indent: aNumber)].
+	self lastSubmorph
+		writeSourceOn: aStream
+		indent: (self indentFor: self lastSubmorph current: aNumber)
 ]
