@@ -37,13 +37,7 @@ SBTSUnknownBlock >> printOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSUnknownBlock >> tryTransitionAfterInput: aString before: aBoolean [
 
-	| results |
-	self flag: #todo.
-	" use aString once we pass the correct one"
-	results := SBTSInputParser new
-		optionsForTemplate: self slot lastNode
-		given: aString.
-	results size = 1 ifTrue: [self sandblockEditor do: (SBReplaceCommand new target: self replacer: results first)]
+	^ SBTSInputParser new optionsForTemplate: self slot lastNode given: aString
 ]
 
 { #category : #'as yet unclassified' }

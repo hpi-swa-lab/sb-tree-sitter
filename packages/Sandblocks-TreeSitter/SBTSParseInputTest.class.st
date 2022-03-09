@@ -13,14 +13,6 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 	^ symbol makeConcrete addChild: symbol bodyTemplate makeConcrete
 ]
 
-{ #category : #failures }
-SBTSParseInputTest >> expectedFailures [
-
-	^ SBToggledCode comment: '' active: 1 do: {
-		[#()].
-		[#(#testWrapBlock #testWrapBinaryExpression #testWrapArray #testDenyNumber #testCreateTrue #testCreateNumber #testCreateByteArrayAndNumber #testCreateArraySimple #testCreateArrayAndIdentifier #testCreateArray #testCreateAmbiguousIdentifier)]}
-]
-
 { #category : #helper }
 SBTSParseInputTest >> nodeForRule: aString [
 

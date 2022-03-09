@@ -105,6 +105,16 @@ SBTSBlock >> initialize [
 		vResizing: #shrinkWrap
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> insertCommandRequest: aMorph near: aBlock before: aBoolean [
+
+	aBlock ifNil: [^ nil].
+	
+	aBlock slot repeater ifNotNil: [:repeater | ^ SBRelInsertCommand new near: aBlock before: aBoolean in: self morph: aMorph].
+	
+	^ nil
+]
+
 { #category : #testing }
 SBTSBlock >> isBlockBody [
 
@@ -127,9 +137,10 @@ SBTSBlock >> keyStroke: anEvent [
 	
 	self valid ifFalse: [
 		self contents: previousContents.
-		self flag: #todo.
-		"pass the entire newly invalid string"
-		self tryTransitionAfterInput: anEvent keyCharacter asString before: isAtStart]
+		SBTSDisambiguatePopup new
+			for: self
+			input: anEvent keyCharacter asString
+			transitionsDo: [:string | self tryTransitionAfterInput: string before: isAtStart]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -156,6 +167,17 @@ SBTSBlock >> layoutCommands [
 SBTSBlock >> matchesQuery: aString [
 
 	^ SBTSQuery new execute: aString against: self capturesDo: [:b | ]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> newEmptyChildNear: aBlock before: aBoolean [
+
+	aBlock ifNil: [^ nil].
+	aBlock slot repeater ifNotNil: [:repeater |
+		self flag: #todo.
+		"can return multiple"
+		^ repeater element buildEmpty first].
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -208,9 +230,7 @@ SBTSBlock >> template [
 { #category : #'as yet unclassified' }
 SBTSBlock >> tryTransitionAfterInput: aString before: aBoolean [
 
-	| options |
-	options := SBTSInputParser new optionsFor: self given: aString before: aBoolean.
-	options size = 1 ifTrue: [self sandblockEditor do: (SBReplaceCommand new target: self replacer: options first)]
+	^ SBTSInputParser new optionsFor: self given: aString before: aBoolean
 ]
 
 { #category : #'as yet unclassified' }

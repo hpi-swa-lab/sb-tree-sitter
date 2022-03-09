@@ -142,6 +142,12 @@ SBTSSlot >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> repeater [
+
+	^ self parentThat: [:p | p isTSRepeat]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> replaceLast: aNode [
 
 	nodes removeLast.
