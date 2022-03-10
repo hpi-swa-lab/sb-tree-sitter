@@ -42,6 +42,20 @@ SBTSUnknownBlock >> slot: aSlot [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknownBlock >> suggestAlways [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSUnknownBlock >> suggestions [
+
+	^ (self slot firstNode isTSChoice and: [self slot firstNode alternatives allSatisfy: #isTSLabel])
+		ifTrue: [self slot firstNode alternatives collect: [:alt | SBTSBlockSuggestion new block: alt buildEmpty first in: self sandblockEditor]]
+		ifFalse: [#()]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknownBlock >> tryTransitionAfterInput: aString before: aBoolean [
 
 	^ SBTSInputParser new optionsForTemplate: self slot lastNode given: aString

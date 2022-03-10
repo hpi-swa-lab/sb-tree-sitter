@@ -79,13 +79,9 @@ SBTSDisambiguatePopup >> suggestAlways [
 SBTSDisambiguatePopup >> suggestions [
 
 	^ choices collect: [:choice |
-		(SBSuggestionItem selector: choice type label: 'b')
-			preview: (choice
-					width: 400;
-					wrapOffscreen: target sandblockEditor;
-					imageForm)
-				previewOnly: true;
-			completionAction: [:item | self applyChoice: choice]]
+		SBTSBlockSuggestion new
+			block: choice in: target sandblockEditor;
+			target: target]
 ]
 
 { #category : #'as yet unclassified' }

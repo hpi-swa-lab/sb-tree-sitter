@@ -52,6 +52,12 @@ SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollect
 		self alternatives do: [:child | child cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeChoice >> isTSChoice [
+
+	^ true
+]
+
 { #category : #printing }
 SBTSNodeChoice >> printOn: aStream [
 

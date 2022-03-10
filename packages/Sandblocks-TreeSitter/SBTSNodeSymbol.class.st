@@ -61,6 +61,8 @@ SBTSNodeSymbol >> printOn: aStream [
 { #category : #parsing }
 SBTSNodeSymbol >> resultsFor: aParser [
 
+	(self factory inputTransitionBlackList includes: self type) ifTrue: [^ #noMatch].
+	
 	^ aParser
 		memoizationFor: self type
 		ifPresent: [:results |

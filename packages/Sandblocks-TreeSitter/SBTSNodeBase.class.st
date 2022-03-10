@@ -118,6 +118,12 @@ SBTSNodeBase >> isSuperType [
 ]
 
 { #category : #testing }
+SBTSNodeBase >> isTSChoice [
+
+	^ false
+]
+
+{ #category : #testing }
 SBTSNodeBase >> isTSLabel [
 
 	^ false

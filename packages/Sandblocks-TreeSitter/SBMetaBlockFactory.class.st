@@ -872,6 +872,13 @@ SBMetaBlockFactory >> inlinedRules [
 	^ (self grammar ifNotNil: [:g | g at: 'inline']) ifNil: [#()]
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> inputTransitionBlackList [
+	"return a list of types that should not be considered during transitions, e.g. the typical C comma operator that just chains multiple expressions and thus yields mostly noise"
+
+	^ #()
+]
+
 { #category : #templates }
 SBMetaBlockFactory >> instantiateTemplate: aString [
 

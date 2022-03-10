@@ -255,7 +255,7 @@ SBTSBlock >> printTreeOn: aStream indent: aNumber [
 
 	| any |
 	aStream nextPut: $(.
-	aStream nextPutAll: self type.
+	self printOn: aStream.
 	any := false.
 	self submorphsDo: [:m |
 		m isTSBlock ifTrue: [

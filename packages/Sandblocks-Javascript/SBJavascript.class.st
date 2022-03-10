@@ -6812,6 +6812,13 @@ SBJavascript >> highlightFor: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript >> inputTransitionBlackList [
+	"return a list of types that should not be considered during transitions, e.g. the typical C comma operator that just chains multiple expressions and thus yields mostly noise"
+
+	^ #(#'sequence_expression')
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript >> postConfigure [
 
 	blockInline remove: 'statement_block'.
