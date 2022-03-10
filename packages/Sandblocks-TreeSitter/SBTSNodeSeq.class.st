@@ -26,12 +26,6 @@ SBTSNodeSeq >> buildEmpty [
 	^ self elements gather: [:element | element buildEmpty]
 ]
 
-{ #category : #query }
-SBTSNodeSeq >> childrenForQueryDo: aBlock [
-
-	self submorphsDo: [:m | m childrenForQueryDo: aBlock]
-]
-
 { #category : #'as yet unclassified' }
 SBTSNodeSeq >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 

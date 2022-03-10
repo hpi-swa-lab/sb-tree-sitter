@@ -22,12 +22,6 @@ SBTSNodeRepeat >> buildEmpty [
 	^ self required ifTrue: [self element buildEmpty] ifFalse: [{}]
 ]
 
-{ #category : #query }
-SBTSNodeRepeat >> childrenForQueryDo: aBlock [
-
-	self submorphsDo: [:m | m childrenForQueryDo: aBlock]
-]
-
 { #category : #'as yet unclassified' }
 SBTSNodeRepeat >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 
@@ -78,20 +72,6 @@ SBTSNodeRepeat >> isTSOptional [
 SBTSNodeRepeat >> isTSRepeat [
 
 	^ true
-]
-
-{ #category : #layout }
-SBTSNodeRepeat >> layoutCommands [
-
-	^ SBAlgebraCommand container
-		morph: self;
-		data: (Array streamContents: [:stream |
-			self submorphs withIndexDo: [:morph :index |
-				stream nextPut: morph layoutCommands.
-				index ~= self submorphCount ifTrue: [
-					stream nextPut: (((self factory hardLineBreakMatcher value: morph) or: [self containingSymbol isStatementContainer])
-						ifTrue: [SBAlgebraCommand hardLine withGap: true]
-						ifFalse: [SBAlgebraCommand softLineOrGap withGap: true])]]])
 ]
 
 { #category : #accessing }

@@ -7,7 +7,7 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBTSNodeSymbol >> allChildrenDo: aBlock [
 
 	aBlock value: self.
@@ -21,47 +21,19 @@ SBTSNodeSymbol >> allSuperTypesDo: aBlock [
 	super allSuperTypesDo: aBlock
 ]
 
-{ #category : #testing }
-SBTSNodeSymbol >> blockInlined [
-
-	^ factory shouldBlockInline: self type
-]
-
 { #category : #accessing }
 SBTSNodeSymbol >> bodyTemplate [
 
 	^ self factory bodyNodeForRule: self type
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 SBTSNodeSymbol >> buildEmpty [
 
 	^ {SBTSUnknownBlock new slot: (SBTSSlot new addNode: self)}
 ]
 
-{ #category : #query }
-SBTSNodeSymbol >> childrenForQueryDo: aBlock [
-
-	self isSuperType
-		ifTrue: [self firstSubmorph childrenForQueryDo: aBlock]
-		ifFalse: [aBlock value: self]
-]
-
 { #category : #hierarchy }
-SBTSNodeSymbol >> containingSymbol [
-
-	
-]
-
-{ #category : #accessing }
-SBTSNodeSymbol >> contents [
-
-	^ (self factory ifNotNil: [:f | f containsPromotedInlineSymbol: self type] ifNil: [false])
-		ifTrue: [String streamContents: [:stream | self childSandblocksDo: [:child | child contents ifNotNil: [:content | stream nextPutAll: content]]]]
-		ifFalse: [super contents]
-]
-
-{ #category : #printing }
 SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 
 	aCollection
@@ -73,15 +45,9 @@ SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollect
 ]
 
 { #category : #testing }
-SBTSNodeSymbol >> inline [
+SBTSNodeSymbol >> isInlined [
 
-	^ factory isNil or: [factory shouldBlockInline: self type]
-]
-
-{ #category : #statements }
-SBTSNodeSymbol >> isStatementContainer [
-
-	^ factory isStatementContainer: self type
+	^ self isSuperType or: [factory shouldBlockInline: self type]
 ]
 
 { #category : #testing }
@@ -100,30 +66,6 @@ SBTSNodeSymbol >> isTSSymbol [
 SBTSNodeSymbol >> printOn: aStream [
 
 	aStream nextPutAll: type
-]
-
-{ #category : #printing }
-SBTSNodeSymbol >> printSExprOn: aStream depth: aNumber short: aBoolean [
-
-	| any |
-	(aBoolean and: [self inline]) ifTrue: [^ super printSExprOn: aStream depth: aNumber short: aBoolean].
-	(self field notNil and: [self inline not]) ifTrue: [
-		aStream
-			nextPutAll: self field;
-			nextPutAll: ': '].
-	aStream nextPutAll: '('.
-	self inline ifTrue: [aStream nextPutAll: '['].
-	aStream nextPutAll: self type.
-	self inline ifTrue: [aStream nextPutAll: ']'].
-	any := false.
-	self
-		childSymbolsDo: [:morph |
-			any ifFalse: [any := true].
-			aStream crtab: aNumber + 1.
-			morph printSExprOn: aStream depth: aNumber + 1 short: aBoolean]
-		includeInlined: aBoolean not.
-	any ifTrue: [aStream crtab: aNumber].
-	aStream nextPutAll: ')'
 ]
 
 { #category : #parsing }
@@ -198,10 +140,4 @@ SBTSNodeSymbol >> type: aString factory: aFactory [
 
 	type := aString asSymbol.
 	factory := aFactory
-]
-
-{ #category : #printing }
-SBTSNodeSymbol >> writeSourceOn: aStream indent: aNumber [
-
-	self firstSubmorph writeSourceOn: aStream indent: aNumber
 ]

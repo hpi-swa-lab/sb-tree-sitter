@@ -39,12 +39,6 @@ SBTSNodeChoice >> buildEmpty [
 	^ {SBTSUnknownBlock new slot: (SBTSSlot new addNode: self)}
 ]
 
-{ #category : #query }
-SBTSNodeChoice >> childrenForQueryDo: aBlock [
-
-	self firstSubmorph childrenForQueryDo: aBlock
-]
-
 { #category : #printing }
 SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 	"check if there is an unknown for this choice"
