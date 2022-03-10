@@ -11,7 +11,7 @@ Class {
 SBTSNodeSymbol >> allChildrenDo: aBlock [
 
 	aBlock value: self.
-	self isSuperType ifTrue: [self bodyTemplate allChildrenDo: aBlock]
+	self isInlined ifTrue: [self bodyTemplate allChildrenDo: aBlock]
 ]
 
 { #category : #hierarchy }
@@ -36,24 +36,14 @@ SBTSNodeSymbol >> buildEmpty [
 { #category : #hierarchy }
 SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 
+	self isBlockInlined ifTrue: [^ self bodyTemplate cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock].
+	
 	aCollection
 		detect: [:block | block isTSBlock and: [block slot includesParent: self]]
 		ifFound: [:b |
 			aClosure value: (SBCursorSelect new block: b).
 			aBoolean ifFalse: [b cursorPositionsDo: aClosure shallow: aBoolean]]
 		ifNone: []
-]
-
-{ #category : #testing }
-SBTSNodeSymbol >> isInlined [
-
-	^ self isSuperType or: [factory shouldBlockInline: self type]
-]
-
-{ #category : #testing }
-SBTSNodeSymbol >> isSuperType [
-
-	^ factory isSuperType: self type
 ]
 
 { #category : #testing }
@@ -98,7 +88,7 @@ because the stored, nested parser does not have a valid stream "
 					#noMatch]
 				ifFalse: [
 					results collect: [:result |
-						self isSuperType
+						self isInlined
 							ifTrue: [
 								result blocks: currentBlocks copy, result blocks.
 								result blocks last slot addNode: self.

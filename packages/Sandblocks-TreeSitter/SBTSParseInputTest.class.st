@@ -103,8 +103,8 @@ SBTSParseInputTest >> testCreateAssignment [
 		optionsForTemplate: (self nodeForRule: 'statement')
 		given: 'abc:'.
 	self assert: 1 equals: results size.
-	self assert: 'assignment' equals: results first childSandblocks first type.
-	self assert: 3 equals: results first childSandblocks first submorphs size
+	self assert: 'assignment' equals: results first type.
+	self assert: 3 equals: results first submorphs size
 ]
 
 { #category : #'tests - create' }
@@ -139,7 +139,7 @@ SBTSParseInputTest >> testCreateIdentifierFromStatement [
 	self assert: 2 equals: results size.
 	self
 		assert: (Set withAll: {'identifier'. 'assignment'})
-		equals: (results collect: [:r | r childSandblocks first type] as: Set)
+		equals: (results collect: [:r | r type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -161,7 +161,7 @@ SBTSParseInputTest >> testCreateNumberFromStatement [
 		optionsForTemplate: (self nodeForRule: 'statement')
 		given: '1'.
 	self assert: 1 equals: results size.
-	self assert: 'number' equals: results first childSandblocks first type
+	self assert: 'number' equals: results first type
 ]
 
 { #category : #'tests - create' }
@@ -190,7 +190,7 @@ SBTSParseInputTest >> testDenyNumber [
 SBTSParseInputTest >> testWrapArray [
 
 	| stmt results |
-	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second childSandblocks first.
+	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
 	results := SBTSInputParser new optionsFor: stmt given: '{' before: true.
 	self assert: 1 equals: results size.
 	self assert: 'dynamic_array' equals: results first type.
@@ -201,7 +201,7 @@ SBTSParseInputTest >> testWrapArray [
 SBTSParseInputTest >> testWrapBinaryExpression [
 
 	| stmt results |
-	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second childSandblocks first.
+	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
 	results := SBTSInputParser new optionsFor: stmt given: '+' before: false.
 	self assert: 1 equals: results size.
 	self assert: 3 equals: results first childSandblocks size.
@@ -214,7 +214,7 @@ SBTSParseInputTest >> testWrapBinaryExpression [
 SBTSParseInputTest >> testWrapBlock [
 
 	| stmt results |
-	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second childSandblocks first.
+	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
 	results := SBTSInputParser new optionsFor: stmt given: '[' before: true.
 	self assert: 1 equals: results size
 ]
@@ -223,7 +223,7 @@ SBTSParseInputTest >> testWrapBlock [
 SBTSParseInputTest >> testWrapByteArray [
 
 	| stmt results |
-	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second childSandblocks first.
+	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
 	results := SBTSInputParser new optionsFor: stmt given: '#[' before: true.
 	self assert: 'byte_array' equals: results first type
 ]

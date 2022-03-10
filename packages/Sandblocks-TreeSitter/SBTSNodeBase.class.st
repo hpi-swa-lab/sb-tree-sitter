@@ -41,6 +41,11 @@ SBTSNodeBase >> buildMorphWith: aBlock slot: aSlot [
 	(self factory promotedInlineSymbols includes: self type) ifTrue: [
 		self assert: aBlock isString.
 		^ SBTSTextMorph new contents: aBlock].
+	
+	(self factory isBlockInlined: aBlock type) ifTrue: [
+		aBlock submorphs do: [:m | m slot addNode: self].
+		^ aBlock submorphs].
+	
 	^ aBlock slot: aSlot
 ]
 
@@ -92,6 +97,24 @@ SBTSNodeBase >> hasParentThat: aBlock [
 
 	self andParentsDo: [:p | (aBlock value: p) ifTrue: [^ true]].
 	^ false
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isBlockInlined [
+
+	^ factory isBlockInlined: self type
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isInlined [
+
+	^ self isSuperType or: [self isBlockInlined]
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isSuperType [
+
+	^ factory isSuperType: self type
 ]
 
 { #category : #testing }

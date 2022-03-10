@@ -890,6 +890,12 @@ SBMetaBlockFactory >> instantiateToplevel: aString [
 ]
 
 { #category : #'configuration helpers' }
+SBMetaBlockFactory >> isBlockInlined: aTypeString [
+
+	^ blockInline includes: aTypeString
+]
+
+{ #category : #'configuration helpers' }
 SBMetaBlockFactory >> isStatementContainer: aString [
 
 	^ statementContainerTypes includes: aString

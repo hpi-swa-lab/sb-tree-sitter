@@ -101,7 +101,7 @@ SBTSParseFileTest >> testParseBinaryExpression [
 
 	| module |
 	module := SBTSFileParser new parse: '2+2' language: SBJavascript instance.
-	self assert: 'binary_expression' equals: module childSandblocks first childSandblocks first type
+	self assert: 'binary_expression' equals: module childSandblocks first type
 ]
 
 { #category : #'tests - languages' }
@@ -159,7 +159,7 @@ SBTSParseFileTest >> testParseStatement [
 
 	| module |
 	module := SBTSFileParser new parse: '2' language: SBJavascript instance.
-	self assert: 'number' equals: module childSandblocks first childSandblocks first type
+	self assert: 'number' equals: module childSandblocks first type
 ]
 
 { #category : #'tests - languages' }

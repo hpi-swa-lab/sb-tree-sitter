@@ -18,9 +18,9 @@ SBTSBlockTest >> testTypingArray [
 	
 	self
 		assert: 'array'
-		equals: module childSandblocks first childSandblocks first childSandblocks first type.
+		equals: module childSandblocks first childSandblocks first type.
 	self
-		assert: module childSandblocks first childSandblocks first childSandblocks last
+		assert: module childSandblocks first childSandblocks last
 		equals: editor selection.
 	self assert: #insert equals: editor cursor mode
 ]
@@ -31,13 +31,13 @@ SBTSBlockTest >> testTypingBinary [
 	| module editor |
 	module := SBTSFileParser new parse: '2' language: SBJavascript instance.
 	editor := self editorFor: module.
-	module childSandblocks first childSandblocks first startInputAtEnd.
+	module childSandblocks first startInputAtEnd.
 	editor handle: (SBTest keyboardEvent: $+).
 	editor handle: (SBTest keyboardEvent: $1).
 	
-	self assert: 'binary_expression' equals: module childSandblocks first childSandblocks first type.
+	self assert: 'binary_expression' equals: module childSandblocks first type.
 	self
-		assert: module childSandblocks first childSandblocks first childSandblocks last
+		assert: module childSandblocks first childSandblocks last
 		equals: editor selection.
 	self assert: 2 equals: editor selection currentTextMorph cursor
 ]
@@ -55,9 +55,7 @@ SBTSBlockTest >> testTypingClosure [
 	editor handle: (SBTest keyboardEvent: Character arrowDown).
 	editor handle: (SBTest keyboardEvent: Character cr).
 	
-	self
-		assert: 'arrow_function'
-		equals: module childSandblocks first childSandblocks first childSandblocks first type.
-	self assert: 'formal_parameters' equals: editor selection type.
+	self assert: 'arrow_function' equals: module childSandblocks first childSandblocks first type.
+	self assert: 'pattern' equals: editor cursor cursorPosition command element alternatives first type.
 	self assert: #insert equals: editor cursor mode
 ]

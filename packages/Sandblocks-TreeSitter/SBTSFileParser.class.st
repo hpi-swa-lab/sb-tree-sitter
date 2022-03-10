@@ -71,17 +71,14 @@ SBTSFileParser >> nodeForCursor: aCursor [
 		self assert: matches size = 1.
 		
 		SBTSBlock new
-			slot: (SBTSSlot new addNode: (SBToggledCode comment: '' active: 1 do: {
-				[
-					isAlias
-						ifTrue: [
-							SBTSNodeAlias new
-								factory: template factory;
-								alias: aCursor type;
-								element: (SBTSNodeSymbol new type: type factory: template factory)]
-						ifFalse: [SBTSNodeSymbol new type: type factory: template factory]].
-				[SBTSNodeSymbol new type: type factory: template factory]}));
-			addAllMorphs: (blocks with: matches first slots collect: [:subBlock :slot | slot buildMorphWith: subBlock]);
+			slot: (SBTSSlot new addNode: (isAlias
+				ifTrue: [
+					SBTSNodeAlias new
+						factory: template factory;
+						alias: aCursor type;
+						element: (SBTSNodeSymbol new type: type factory: template factory)]
+				ifFalse: [SBTSNodeSymbol new type: type factory: template factory]));
+			addAllMorphs: (blocks with: matches first slots collect: [:subBlock :slot | slot buildMorphWith: subBlock]) flatten;
 			yourself]
 ]
 
