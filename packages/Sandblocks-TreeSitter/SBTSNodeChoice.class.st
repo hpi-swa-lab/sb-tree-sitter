@@ -27,12 +27,6 @@ SBTSNodeChoice >> alternatives: aCollection [
 	alternatives do: [:alt | alt parent: self]
 ]
 
-{ #category : #copying }
-SBTSNodeChoice >> basicCopy [
-
-	^ super basicCopy alternatives: self alternatives
-]
-
 { #category : #printing }
 SBTSNodeChoice >> buildEmpty [
 
@@ -52,7 +46,7 @@ SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollect
 		self alternatives do: [:child | child cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBTSNodeChoice >> isTSChoice [
 
 	^ true

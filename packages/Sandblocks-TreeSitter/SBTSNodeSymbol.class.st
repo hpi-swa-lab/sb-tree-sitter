@@ -30,7 +30,9 @@ SBTSNodeSymbol >> bodyTemplate [
 { #category : #parsing }
 SBTSNodeSymbol >> buildEmpty [
 
-	^ {SBTSUnknownBlock new slot: (SBTSSlot new addNode: self)}
+	^ self isBlockInlined
+		ifTrue: [self bodyTemplate buildEmpty]
+		ifFalse: [{SBTSUnknownBlock new slot: (SBTSSlot new addNode: self)}]
 ]
 
 { #category : #hierarchy }

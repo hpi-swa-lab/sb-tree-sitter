@@ -11,13 +11,13 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSBlockSuggestion >> block: aBlock in: anEditor [
 
+	self selector: aBlock printString label: 'block'.
 	self
 		preview: (aBlock
 			width: 400;
 			wrapOffscreen: anEditor;
 			imageForm)
-		previewOnly: true.
-	self selector: aBlock printString label: 'block'.
+		previewOnly: false.
 	block := aBlock
 ]
 
