@@ -21,12 +21,6 @@ SBTSNodeSymbol >> allSuperTypesDo: aBlock [
 	super allSuperTypesDo: aBlock
 ]
 
-{ #category : #copying }
-SBTSNodeSymbol >> basicCopy [
-
-	^ super basicCopy type: self type factory: factory
-]
-
 { #category : #testing }
 SBTSNodeSymbol >> blockInlined [
 
@@ -137,21 +131,20 @@ SBTSNodeSymbol >> resultsFor: aParser [
 
 	^ aParser
 		memoizationFor: self type
-		ifPresent: [:blocks |
+		ifPresent: [:results |
 			" we may not actually ever want left-recursion, because these blocks will be composed of a wrapper block and a basic block, and we always want to choose the basic block and offer the user to expand the basic block to the more complicated construct. "
-			(blocks = #recur or: [blocks = #noMatch])
+			(results = #recur or: [results = #noMatch])
 				ifTrue: [#noMatch]
-				ifFalse: [ | result |
-					result := blocks collect: [:b | b copy].
+				ifFalse: [
+					results do: [:r | r blocks first slot replaceLast: self].
 					aParser peek = (Character value: 0)
 						ifTrue: [
 							" if we consumed a nested block, use the input parser and copy all relevant state
 because the stored, nested parser does not have a valid stream "
-							result first blocks do: [:block | block slot replaceLast: self].
-							aParser blocks: aParser blocks, result first blocks.
+							aParser blocks: aParser blocks, results first blocks.
 							aParser next.
 							{aParser}]
-						ifFalse: [result]]]
+						ifFalse: [results]]]
 		ifAbsentPut: [ | results currentBlocks |
 			currentBlocks := aParser blocks.
 			aParser blocks: OrderedCollection new.

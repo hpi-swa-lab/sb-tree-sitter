@@ -118,6 +118,18 @@ SBTSParseInputTest >> testCreateByteArrayAndNumber [
 ]
 
 { #category : #'tests - create' }
+SBTSParseInputTest >> testCreateHashBangLine [
+
+	| results |
+	results := SBTSInputParser new
+		optionsForTemplate: (SBTSNodeSymbol new type: 'hash_bang_line' factory: SBJavascript instance)
+		given: '#'.
+	self assert: 1 equals: results size.
+	self assert: 'hash_bang_line' equals: results first type.
+	self assert: '#!' equals: results first contents
+]
+
+{ #category : #'tests - create' }
 SBTSParseInputTest >> testCreateIdentifierFromStatement [
 
 	| results |

@@ -3,7 +3,8 @@ Class {
 	#superclass : #SBTSNodeBase,
 	#instVars : [
 		'regexString',
-		'regex'
+		'regex',
+		'plainPrefix'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -103,27 +104,42 @@ SBTSNodeText >> regexString [
 { #category : #accessing }
 SBTSNodeText >> regexString: aString [
 
+	| link |
+	self example: [SBTSNodeText new] args: [{'ab.'}] label: 'example'.
 	regexString := aString.
-	regex := aString asRegex
+	regex := aString asRegex.
+	
+	"extract all leading elements of the regex that are just plain characters -- used for early feedback during matching"
+	link := regex instVarNamed: #matcher.
+	plainPrefix := String streamContents: [:s |
+		[(link isKindOf: RxmMarker) or: [link isKindOf: RxmSubstring]] whileTrue: [
+			(link isKindOf: RxmSubstring) ifTrue: [s nextPutAll: (link instVarNamed: #sampleStream) contents].
+			link := link next]]
 ]
 
 { #category : #parsing }
 SBTSNodeText >> resultsFor: aParser [
 
-	| start |
+	| start remaining |
 	" word-rule? "
 	self flag: #todo.
 	
 	start := aParser position.
-	^ (self regex matchesStreamPrefix: aParser stream)
-		ifTrue: [
-			{
-				aParser copy addBlock: (SBTSTextMorph new
-					slot: (SBTSSlot new addNode: self);
-					contents: (aParser stream originalContents copyFrom: start + 1 to: aParser position))}]
-		ifFalse: [
-			aParser stream position: start.
-			#noMatch]
+	(self regex matchesStreamPrefix: aParser stream) ifTrue: [
+		^ {
+			aParser copy addBlock: (SBTSTextMorph new
+				slot: (SBTSSlot new addNode: self);
+				contents: (aParser stream originalContents copyFrom: start + 1 to: aParser position))}].
+	
+	remaining := aParser stream upToEnd.
+	(plainPrefix beginsWith: remaining) ifTrue: [
+		^ {
+			aParser copy addBlock: (SBTSTextMorph new
+				slot: (SBTSSlot new addNode: self);
+				contents: plainPrefix)}].
+	
+	aParser stream position: start.
+	^ #noMatch
 ]
 
 { #category : #parsing }
