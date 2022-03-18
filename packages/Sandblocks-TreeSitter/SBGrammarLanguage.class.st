@@ -159,6 +159,34 @@ SBGrammarLanguage class >> toplevel [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> updateFrom: aGithubString branch: aString [
+
+	| path grammarFile highlightsFile |
+	path := self fetchLibrary: aGithubString branch: aString.
+	self compileParserIn: path name: self language.
+	
+	[
+		grammarFile := path / 'src' / 'grammar.json' in: [:file | file exists ifTrue: [FileStream readOnlyFileNamed: file fullName] ifFalse: [nil]].
+		highlightsFile := path / 'queries' / 'highlights.scm' in: [:file | file exists ifTrue: [FileStream readOnlyFileNamed: file fullName] ifFalse: [nil]].
+		
+		self class
+			compile: ('grammarJson
+
+    " https://github.com/{1}/blob/master/src/grammar.json "
+    ^ {2}' format: {self language. grammarFile contents storeString})
+			classified: 'properties'.
+		highlightsFile ifNotNil: [:f |
+			self class
+				compile: ('highlightQuery
+
+    " https://github.com/{1}/blob/master/src/queries/highlights.scm "
+    ^ {2}' format: {self language. f contents storeString})
+				classified: 'properties']] ensure: [
+		grammarFile ifNotNil: #close.
+		highlightsFile ifNotNil: #close]
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage >> configure [
 	" entry point for calling configuration methods on the processed grammar, e.g. blockInline:, or delimitedRules: "
 

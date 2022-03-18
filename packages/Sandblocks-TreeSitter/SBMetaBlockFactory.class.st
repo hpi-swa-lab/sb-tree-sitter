@@ -52,7 +52,9 @@ SBMetaBlockFactory class >> fetchLibrary: aGithubString branch: aString [
 	^ (MCFetchGithubRepository new
 		projectPath: aGithubString
 		projectVersion: aString
-		repoPath: nil) directory
+		repoPath: nil)
+			flushForScriptGet;
+			directory
 ]
 
 { #category : #helper }

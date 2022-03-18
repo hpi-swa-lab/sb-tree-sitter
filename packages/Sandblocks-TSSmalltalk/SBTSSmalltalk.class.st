@@ -4,11 +4,11 @@ Class {
 	#category : #'Sandblocks-TSSmalltalk'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #properties }
 SBTSSmalltalk class >> grammarJson [
-	" https://github.com/PrestonKnopp/tree-sitter-gdscript/blob/master/grammar.js "
 
-	^ '{
+    " https://github.com/smalltalk/blob/master/src/grammar.json "
+    ^ '{
   "name": "smalltalk",
   "word": "keyword",
   "rules": {
@@ -354,27 +354,35 @@ SBTSSmalltalk class >> grammarJson [
           "value": "{"
         },
         {
-          "type": "SEQ",
+          "type": "CHOICE",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "expression"
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "expression"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "."
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "expression"
+                      }
+                    ]
+                  }
+                }
+              ]
             },
             {
-              "type": "REPEAT",
-              "content": {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": "."
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "expression"
-                  }
-                ]
-              }
+              "type": "BLANK"
             }
           ]
         },
@@ -681,14 +689,16 @@ SBTSSmalltalk class >> grammarJson [
 '
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #properties }
 SBTSSmalltalk class >> highlightQuery [
 
-	^ '["this" "self" "true" "false" "thisContext" "super" "nil"] @keyword
+    " https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
+    ^ '["this" "self" "true" "false" "thisContext" "super" "nil"] @keyword
 (number) @number
 (string) @string
 (identifier) @variable
-["^" "[" "]" "{" "}"] @important'
+["^" "[" "]" "{" "}"] @important
+'
 ]
 
 { #category : #'as yet unclassified' }
