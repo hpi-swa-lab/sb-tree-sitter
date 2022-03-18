@@ -160,10 +160,8 @@ SBTSParseInputTest >> testCreateIdentifierFromStatement [
 	results := SBTSInputParser new
 		optionsForTemplate: (self nodeForRule: 'statement')
 		given: 'abc'.
-	self assert: 2 equals: results size.
-	self
-		assert: (Set withAll: {'identifier'. 'assignment'})
-		equals: (results collect: [:r | r type] as: Set)
+	self assert: 1 equals: results size.
+	self assert: 'identifier' equals: results first type
 ]
 
 { #category : #'tests - create' }
