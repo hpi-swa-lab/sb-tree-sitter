@@ -105,15 +105,18 @@ SBTSNodeText >> regexString [
 SBTSNodeText >> regexString: aString [
 
 	| link |
-	self example: [SBTSNodeText new] args: [{'ab.'}] label: 'example'.
+	self example: [SBTSNodeText new] args: [{'ab.'}] label: 'simple'.
+	self example: [SBTSNodeText new] args: [{'\$'}] label: 'special prefix'.
 	regexString := aString.
 	regex := aString asRegex.
-	
 	"extract all leading elements of the regex that are just plain characters -- used for early feedback during matching"
 	link := regex instVarNamed: #matcher.
 	plainPrefix := String streamContents: [:s |
-		[(link isKindOf: RxmMarker) or: [link isKindOf: RxmSubstring]] whileTrue: [
+		[(link isKindOf: RxmMarker) or: [(link isKindOf: RxmSubstring) or: [link isKindOf: RxmPredicate]]] whileTrue: [
 			(link isKindOf: RxmSubstring) ifTrue: [s nextPutAll: (link instVarNamed: #sampleStream) contents].
+			(link isKindOf: RxmPredicate) ifTrue: [ | char |
+				char := (link instVarNamed: #predicate) at: 1.
+				char isCharacter ifTrue: [s nextPut: char]].
 			link := link next]]
 ]
 

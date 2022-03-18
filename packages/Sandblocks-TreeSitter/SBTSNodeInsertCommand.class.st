@@ -72,11 +72,13 @@ SBTSNodeInsertCommand >> isInsert [
 { #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> postDo [
 
-	continueInputString ifNotNil: [
-		SBTSDisambiguatePopup new
-			for: morphs first
-			input: continueInputString
-			before: false]
+	continueInputString
+		ifNotNil: [
+			SBTSDisambiguatePopup new
+				for: morphs first
+				input: continueInputString
+				before: false]
+		ifNil: [container sandblockEditor selection moveCursorToEnd]
 ]
 
 { #category : #'as yet unclassified' }

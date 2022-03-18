@@ -6843,7 +6843,10 @@ SBJavascript >> preprocessGrammar [
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
 	self grammar externals: (self grammar externals copyWithout: (self grammar externals detect: [:e | e name = '_template_chars'])).
 	self grammar at: 'inline' put: self grammar inline, {'_ternary_qmark'}.
-	self grammar rules statement members: (self grammar rules statement members reject: [:m | m name = 'labeled_statement'])
+	self grammar rules statement members: (self grammar rules statement members reject: [:m | m name = 'labeled_statement']).
+	
+	"for some reason the member_expression accepts both primary_expr and expr as options, which lets our parser think that matches are ambiguous"
+	(self grammar rules at: 'member_expression') content members first content: (JsonObject fromAssociations: {'type' -> 'SYMBOL'. 'name' -> 'expression'})
 ]
 
 { #category : #'as yet unclassified' }

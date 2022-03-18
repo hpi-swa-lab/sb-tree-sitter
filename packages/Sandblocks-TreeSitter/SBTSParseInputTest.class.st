@@ -118,6 +118,18 @@ SBTSParseInputTest >> testCreateByteArrayAndNumber [
 ]
 
 { #category : #'tests - create' }
+SBTSParseInputTest >> testCreateCharacter [
+
+	| results |
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'primary')
+		given: '$'.
+	
+	self assert: 1 equals: results size.
+	self assert: #(#character) asSet equals: (results collect: #type as: Set)
+]
+
+{ #category : #'tests - create' }
 SBTSParseInputTest >> testCreateHashBangLine [
 
 	| results |

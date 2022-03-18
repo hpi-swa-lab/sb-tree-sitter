@@ -9,6 +9,14 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSBlock class >> registerShortcuts: aProvider [
+
+	aProvider
+		registerShortcut: Character space do: #promptTransition;
+		registerShortcut: Character space shift do: #promptTransition
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> actionProviders [
 
 	^ {self grammarHandler}, super actionProviders
@@ -264,6 +272,13 @@ SBTSBlock >> printTreeOn: aStream indent: aNumber [
 			m printTreeOn: aStream indent: aNumber + 1]].
 	any ifTrue: [aStream crtab: aNumber].
 	aStream nextPut: $)
+]
+
+{ #category : #actions }
+SBTSBlock >> promptTransition [
+	<action>
+
+	SBTSDisambiguatePopup new for: self input: '' before: ActiveEvent shiftPressed
 ]
 
 { #category : #'as yet unclassified' }

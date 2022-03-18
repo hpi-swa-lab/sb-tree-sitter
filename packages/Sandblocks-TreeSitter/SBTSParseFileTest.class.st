@@ -4,12 +4,6 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #failures }
-SBTSParseFileTest >> expectedFailures [
-
-	^ #(#testParseMemberExpression)
-]
-
 { #category : #'tests - unit' }
 SBTSParseFileTest >> testChoice [
 

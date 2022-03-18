@@ -5,6 +5,20 @@ Class {
 }
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testJsCall [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'a.b' language: SBJavascript instance.
+	editor := self editorAndWorldFor: module.
+	
+	module childSandblocks first select.
+	editor handle: (self keyboardEvent: $ ).
+	editor handle: (self keyboardEvent: $().
+	self assert: 'call_expression' equals: module childSandblocks first type.
+	self assert: #arguments equals: editor selection type
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testSmalltalkBinaryOp [
 
 	| method editor |
@@ -23,12 +37,14 @@ SBTSBlockTest >> testSmalltalkBinaryOp [
 SBTSBlockTest >> testSmalltalkContinueInArray [
 
 	| method editor |
-	method := SBTSFileParser new parse: 'abc {123}' language: SBTSSmalltalk instance.
+	method := SBTSFileParser new parse: 'abc {}' language: SBTSSmalltalk instance.
 	editor := self editorAndWorldFor: method.
 	
-	method childSandblocks second childSandblocks first startInputAtEnd.
-	editor handle: (self keyboardEvent: ${).
-	self assert: #'dynamic_array' equals: method childSandblocks second childSandblocks second type
+	method childSandblocks second startInputAtEnd.
+	editor handle: (self keyboardEvent: $$).
+	self assert: #character equals: method childSandblocks second childSandblocks first type.
+	editor handle: (self keyboardEvent: $a).
+	self assert: '$a' equals: method childSandblocks second childSandblocks first contents
 ]
 
 { #category : #'tests - input transition' }

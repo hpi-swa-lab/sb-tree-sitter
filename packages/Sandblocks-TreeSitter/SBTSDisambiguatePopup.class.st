@@ -23,7 +23,7 @@ SBTSDisambiguatePopup >> applyChoice: aBlock [
 	aBlock allMorphsDo: [:m | (nested isNil and: [m type = target type]) ifTrue: [nested := m]].
 	
 	aBlock cursorPositionsDo: [:position |
-		(found and: [position block ~= nested and: [position isInsert or: [position isText]]]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none].
+		(found and: [(position block ~= nested and: [(position block hasOwner: nested) not]) and: [position isInsert or: [position isText]]]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none].
 		position block = nested ifTrue: [found := true]].
 	
 	"didn't find the nested block again, choose the very first"
@@ -51,9 +51,12 @@ SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean [
 
 	target := aBlock.
 	before := aBoolean.
-	choices := aBlock tryTransitionAfterInput: aString before: aBoolean.
-	choices size = 1 ifTrue: [^ self applyChoice: choices first].
-	choices size = 0 ifTrue: [^ self forwardInputToAdjacent: aString].
+	aString
+		ifNotEmpty: [
+			choices := aBlock tryTransitionAfterInput: aString before: aBoolean.
+			choices size = 1 ifTrue: [^ self applyChoice: choices first].
+			choices size = 0 ifTrue: [^ self forwardInputToAdjacent: aString]]
+		ifEmpty: [choices := #()].
 	
 	self contents: aString.
 	

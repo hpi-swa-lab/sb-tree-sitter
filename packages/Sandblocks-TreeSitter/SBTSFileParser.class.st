@@ -98,6 +98,7 @@ SBTSFileParser >> parseTopLevel: aString language: aFactory [
 	toplevel := self parse: aString language: aFactory.
 	toplevel
 		hResizing: #rigid;
+		layoutInset: 12;
 		attachDecorator: SBResizableDecorator new;
 		attachDecorator: SBForceMoveDecorator newConfigured.
 	^ toplevel
