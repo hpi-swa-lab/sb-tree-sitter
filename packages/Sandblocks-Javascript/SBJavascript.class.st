@@ -6829,8 +6829,6 @@ SBJavascript >> postConfigure [
 SBJavascript >> preprocessGrammar [
 
 	| rulesWithSemicolon |
-	self ignoreExternals: #('_automatic_semicolon').
-	
 	rulesWithSemicolon := ((self grammar rules associations collect: [:pair |
 		self
 			traverse: pair value
@@ -6838,6 +6836,7 @@ SBJavascript >> preprocessGrammar [
 			ifFound: [:obj | pair key -> ';']
 			ifNone: [nil]]) select: #notNil) as: Dictionary.
 	self addDelimitedRules: rulesWithSemicolon.
+	self removeSymbol: '_automatic_semicolon'.
 	
 	self grammar rules
 		at: '_template_chars'

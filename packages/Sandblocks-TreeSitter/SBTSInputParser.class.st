@@ -87,8 +87,10 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aBoolean [
 		ifFalse: [(Character value: 0) asString, aString]) readStream.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
 	
-	aTSBlock slot allSuperTypesDo: [:typeNode | "if our nested element (char0) is at the start, we would immediately abort expanding instead of recursing. instead, allow one level of recursion for each type node that is above our nested element."
-	aBoolean ifFalse: [visitedSupertypes add: typeNode type]].
+	aBoolean ifFalse: [
+		aTSBlock slot allSuperTypesDo: [:typeNode | "if our nested element (char0) is at the start, we would immediately abort expanding instead of recursing. instead, allow one level of recursion for each type node that is above our nested element."
+		aTSBlock slot firstNode ~= typeNode ifTrue: [visitedSupertypes add: typeNode type]]].
+	
 	aTSBlock slot allSuperTypesDo: [:typeNode | | parser |
 		parser := self copy addBlock: aTSBlock copyBlock.
 		aBoolean

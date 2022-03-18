@@ -302,9 +302,9 @@ SBMetaBlockFactory >> autofixExternals [
 					ifNone: []]]].
 	
 	(grammar externals select: [:rule | rule type = 'STRING']) do: [:external |
-		self grammar rules at: external ifAbsent: [
+		self grammar rules at: external value ifAbsent: [
 			self grammar rules
-				at: external
+				at: external value
 				put: (JsonObject fromAssociations: {'type' -> 'STRING'. 'value' -> external value})]].
 	
 	(externals reject: [:external | grammar rules includesKey: external]) ifNotEmpty: [:missing | UIManager default inform: 'Missing declarations for: ', (missing joinSeparatedBy: ', ')]
@@ -1114,7 +1114,7 @@ SBMetaBlockFactory >> removeExternals: anObject [
 
 	anObject content ifNotNil: [:c | self removeExternals: c].
 	anObject members ifNotNil: [
-		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | (member type = 'SYMBOL' and: [(grammar externals anySatisfy: [:external | external name = member name]) and: [((grammar at: #inline) includes: member name) not]]) ifTrue: [stream nextPut: member]]])).
+		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | (member type = 'SYMBOL' and: [(grammar externals anySatisfy: [:external | external name = member name]) and: [((grammar at: #inline) includes: member name) not and: [(grammar rules includesKey: member name) not]]]) ifTrue: [stream nextPut: member]]])).
 		anObject members do: [:m | self removeExternals: m]]
 ]
 
@@ -1152,6 +1152,22 @@ SBMetaBlockFactory >> removeOptionalString: aString in: anObject [
 				copyFrom keysAndValuesDo: [:key :value | anObject at: key put: value]]].
 	anObject content ifNotNil: [:c | self removeOptionalString: aString in: c].
 	anObject members ifNotNil: [:c | c do: [:m | self removeOptionalString: aString in: m]]
+]
+
+{ #category : #'grammar clean' }
+SBMetaBlockFactory >> removeSymbol: aString [
+
+	self grammar externals: (self grammar externals reject: [:ext | ext name = aString]).
+	self grammar rules do: [:rule | self removeSymbol: aString in: rule]
+]
+
+{ #category : #'grammar clean' }
+SBMetaBlockFactory >> removeSymbol: aString in: anObject [
+
+	anObject content ifNotNil: [:c | self removeSymbol: aString in: c].
+	anObject members ifNotNil: [
+		anObject members: (anObject members copyWithoutAll: (Array streamContents: [:stream | anObject members do: [:member | (member type = 'SYMBOL' and: [aString = member name]) ifTrue: [stream nextPut: member]]])).
+		anObject members do: [:m | self removeSymbol: aString in: m]]
 ]
 
 { #category : #helper }

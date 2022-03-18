@@ -187,6 +187,15 @@ SBTSParseInputTest >> testDenyNumber [
 ]
 
 { #category : #'tests - wrap' }
+SBTSParseInputTest >> testIdentifierToAssignment [
+
+	| stmt results |
+	stmt := (SBTSFileParser new parse: 'method abc' language: SBTSSmalltalk instance) childSandblocks second.
+	results := SBTSInputParser new optionsFor: stmt given: ':' before: false.
+	self assert: 1 equals: results size
+]
+
+{ #category : #'tests - wrap' }
 SBTSParseInputTest >> testWrapArray [
 
 	| stmt results |

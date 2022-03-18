@@ -14,6 +14,13 @@ SBTreeSitter class >> moduleName [
 	^ 'tree-sitter'
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> bash [
+
+	<apicall: SBTSLanguage* tree_sitter_bash () module: 'tree-sitter-bash'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-bash' name: 'bash' context: thisContext
+]
+
 { #category : #'as yet unclassified' }
 SBTreeSitter >> buildTreeFrom: aCursor [
 
