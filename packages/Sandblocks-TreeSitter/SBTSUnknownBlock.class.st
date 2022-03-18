@@ -72,3 +72,9 @@ SBTSUnknownBlock >> wantsInput [
 
 	^ true
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSUnknownBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
+
+	aBoolean ifTrue: [aStream nextPut: (Character value: 0)]
+]

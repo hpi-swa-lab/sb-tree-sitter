@@ -75,7 +75,7 @@ SBTSTextMorph >> wrapOffscreen: anEditor [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSTextMorph >> writeSourceOn: aStream indent: aNumber [
+SBTSTextMorph >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
 	aStream nextPutAll: self contents
 ]

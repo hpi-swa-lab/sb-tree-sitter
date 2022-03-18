@@ -17,6 +17,13 @@ SBTSBlock class >> registerShortcuts: aProvider [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> absorbsInput: anEvent [
+
+	(anEvent commandKeyPressed or: [anEvent optionKeyPressed or: [anEvent controlKeyPressed]]) ifTrue: [^ false].
+	^ anEvent keyCharacter isPrintable and: [self currentTextMorph slot firstNode regex matches: anEvent keyCharacter asString]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> actionProviders [
 
 	^ {self grammarHandler}, super actionProviders
@@ -349,19 +356,20 @@ SBTSBlock >> valid [
 { #category : #'as yet unclassified' }
 SBTSBlock >> writeSourceOn: aStream [
 
-	self writeSourceOn: aStream indent: 0
+	self writeSourceOn: aStream indent: 0 forCompare: false
 ]
 
 { #category : #'as yet unclassified' }
-SBTSBlock >> writeSourceOn: aStream indent: aNumber [
+SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
 	self hasSubmorphs ifFalse: [^ self].
 	
 	(self factory indentMatch: self) ifTrue: [aStream tab: aNumber].
 	self submorphs overlappingPairsDo: [:first :second |
-		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber).
+		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.
 		aStream nextPutAll: (self slot separatorBetween: first and: second indent: aNumber)].
 	self lastSubmorph
 		writeSourceOn: aStream
 		indent: (self indentFor: self lastSubmorph current: aNumber)
+		forCompare: aBoolean
 ]

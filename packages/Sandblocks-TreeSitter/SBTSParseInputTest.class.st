@@ -142,6 +142,18 @@ SBTSParseInputTest >> testCreateHashBangLine [
 ]
 
 { #category : #'tests - create' }
+SBTSParseInputTest >> testCreateIdentifier [
+
+	| results |
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'expression')
+		given: 'test'.
+	
+	self assert: 1 equals: results size.
+	self assert: #('identifier') asSet equals: (results collect: [:choice | choice type] as: Set)
+]
+
+{ #category : #'tests - create' }
 SBTSParseInputTest >> testCreateIdentifierFromStatement [
 
 	| results |
@@ -152,6 +164,18 @@ SBTSParseInputTest >> testCreateIdentifierFromStatement [
 	self
 		assert: (Set withAll: {'identifier'. 'assignment'})
 		equals: (results collect: [:r | r type] as: Set)
+]
+
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testCreateJavascriptIdentifier [
+
+	| results |
+	results := SBTSInputParser new
+		optionsForTemplate: (SBTSNodeSymbol new type: 'expression' factory: SBJavascript instance)
+		given: 'test'.
+	
+	self assert: 1 equals: results size.
+	self assert: #('identifier') asSet equals: (results collect: [:choice | choice type] as: Set)
 ]
 
 { #category : #'tests - create' }

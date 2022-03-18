@@ -69,7 +69,7 @@ SBTSLabel >> wrapOffscreen: anEditor [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLabel >> writeSourceOn: aStream indent: aNumber [
+SBTSLabel >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
 	aStream nextPutAll: self contents
 ]
