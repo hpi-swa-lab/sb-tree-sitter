@@ -91,6 +91,18 @@ SBTSFileParser >> parse: aString language: aFactory [
 		self nodeForCursor: (SBTSCursor new library: api cursor: cursor factory: aFactory)]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> parseTopLevel: aString language: aFactory [
+
+	| toplevel |
+	toplevel := self parse: aString language: aFactory.
+	toplevel
+		hResizing: #rigid;
+		attachDecorator: SBResizableDecorator new;
+		attachDecorator: SBForceMoveDecorator newConfigured.
+	^ toplevel
+]
+
 { #category : #stream }
 SBTSFileParser >> peek [
 

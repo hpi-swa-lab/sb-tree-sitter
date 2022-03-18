@@ -3409,5 +3409,5 @@ SBGDScript >> preprocessGrammar [
 	self grammar rules
 		at: '_string_content'
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
-	self ignoreExternals: #('_newline' '_indent' '_dedent')
+	#('_newline' '_indent' '_dedent') do: [:sym | self removeSymbol: sym]
 ]

@@ -166,7 +166,7 @@ SBTSBlock >> keyStroke: anEvent [
 		SBTSDisambiguatePopup new
 			for: self
 			input: anEvent keyCharacter asString
-			transitionsDo: [:string | self tryTransitionAfterInput: string before: isAtStart]]
+			before: isAtStart]
 ]
 
 { #category : #'as yet unclassified' }

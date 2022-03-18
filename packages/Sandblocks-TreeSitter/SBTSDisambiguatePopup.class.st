@@ -3,8 +3,8 @@ Class {
 	#superclass : #SBPopup,
 	#instVars : [
 		'target',
-		'transitionsDo',
-		'choices'
+		'choices',
+		'before'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -47,12 +47,13 @@ SBTSDisambiguatePopup >> dismiss [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSDisambiguatePopup >> for: aBlock input: aString transitionsDo: aClosure [
+SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean [
 
 	target := aBlock.
-	transitionsDo := aClosure.
-	choices := transitionsDo value: aString.
+	before := aBoolean.
+	choices := aBlock tryTransitionAfterInput: aString before: aBoolean.
 	choices size = 1 ifTrue: [^ self applyChoice: choices first].
+	choices size = 0 ifTrue: [^ self forwardInputToAdjacent: aString].
 	
 	self contents: aString.
 	
@@ -62,11 +63,32 @@ SBTSDisambiguatePopup >> for: aBlock input: aString transitionsDo: aClosure [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSDisambiguatePopup >> forwardInputToAdjacent: aString [
+
+	self positionAfterDo: [:position |
+		position isText ifTrue: [^ self class new for: position block input: aString before: false].
+		position isInsert ifTrue: [
+			(position command tryExpandWithInput: aString) ifTrue: [
+				target sandblockEditor do: position command.
+				^ self]]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> initialize [
 
 	super initialize.
 	
 	self addMorphBack: (SBOwnTextMorph new when: #contentsChanged send: #updateChoices to: self)
+]
+
+{ #category : #'as yet unclassified' }
+SBTSDisambiguatePopup >> positionAfterDo: aBlock [
+
+	| foundSelf |
+	foundSelf := false.
+	(target containingArtefact ifNil: [target containingFloat]) cursorPositionsDo: [:position |
+		(foundSelf and: [position isInsert or: [position isText and: [position block isUnknown]]]) ifTrue: [aBlock value: position].
+		(position isText and: [position block = target]) ifTrue: [foundSelf := true]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -88,6 +110,6 @@ SBTSDisambiguatePopup >> suggestions [
 SBTSDisambiguatePopup >> updateChoices [
 
 	self contents ifEmpty: [self dismiss] ifNotEmpty: [
-		choices := transitionsDo value: self contents.
+		choices := target tryTransitionAfterInput: self contents before: before.
 		choices size = 1 ifTrue: [^ self applyChoice: choices first]]
 ]

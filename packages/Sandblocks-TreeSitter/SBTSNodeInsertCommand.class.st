@@ -5,20 +5,11 @@ Class {
 		'container',
 		'element',
 		'morphs',
-		'index'
+		'index',
+		'continueInputString'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
-
-{ #category : #'as yet unclassified' }
-SBTSNodeInsertCommand >> canInsert: aBlock do: aClosure [
-
-	^ (SBTSRuleExplore new
-		explore: element withNested: aBlock nestedBefore: false for: '' startSymbol: nil;
-		deduplicate)
-		ifNotEmpty: [:choices | aClosure value: choices first]
-		ifEmpty: [false]
-]
 
 { #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> container [
@@ -29,10 +20,7 @@ SBTSNodeInsertCommand >> container [
 { #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> continueAfterInsert: aCharacter [
 
-	^ morphs
-		detect: [:m | m isTSBlock]
-		ifFound: [:m | (m sourceString includes: aCharacter) not]
-		ifNone: [false]
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -82,6 +70,16 @@ SBTSNodeInsertCommand >> isInsert [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> postDo [
+
+	continueInputString ifNotNil: [
+		SBTSDisambiguatePopup new
+			for: morphs first
+			input: continueInputString
+			before: false]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> setArtefactFrom [
 
 	^ container
@@ -97,6 +95,16 @@ SBTSNodeInsertCommand >> suggestions [
 SBTSNodeInsertCommand >> title [
 
 	^ 'insert ', element printString
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> tryExpandWithInput: aString [
+
+	| options |
+	options := SBTSInputParser new optionsForTemplate: element given: aString.
+	options size = 1 ifTrue: [morphs := {options first}].
+	options size > 1 ifTrue: [continueInputString := aString].
+	^ options notEmpty
 ]
 
 { #category : #'as yet unclassified' }

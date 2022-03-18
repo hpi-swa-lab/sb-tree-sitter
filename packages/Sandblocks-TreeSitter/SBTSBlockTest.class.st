@@ -4,6 +4,46 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testSmalltalkBinaryOp [
+
+	| method editor |
+	method := SBTSFileParser new parse: 'abc 12' language: SBTSSmalltalk instance.
+	editor := self editorAndWorldFor: method.
+	
+	method childSandblocks second startInputAtEnd.
+	editor handle: (self keyboardEvent: $+).
+	self assert: #'binary_message' equals: method childSandblocks second type.
+	
+	editor handle: (self keyboardEvent: $1).
+	self assert: #number equals: method childSandblocks second childSandblocks last type
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testSmalltalkContinueInArray [
+
+	| method editor |
+	method := SBTSFileParser new parse: 'abc {123}' language: SBTSSmalltalk instance.
+	editor := self editorAndWorldFor: method.
+	
+	method childSandblocks second childSandblocks first startInputAtEnd.
+	editor handle: (self keyboardEvent: ${).
+	self assert: #'dynamic_array' equals: method childSandblocks second childSandblocks second type
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testSmalltalkContinueInArrayAmbiguous [
+
+	| method editor |
+	method := SBTSFileParser new parse: 'abc {123}' language: SBTSSmalltalk instance.
+	editor := self editorAndWorldFor: method.
+	
+	method childSandblocks second childSandblocks first startInputAtEnd.
+	editor handle: (self keyboardEvent: $#).
+	editor handle: (self keyboardEvent: $a).
+	self assert: #symbol equals: method childSandblocks second childSandblocks second type
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testTypingArray [
 

@@ -5281,7 +5281,7 @@ SBPython >> preprocessGrammar [
 	self renameSymbol: '_string_content' to: 'string_content'.
 	
 	(self grammar rules at: '_suite') members: {(self grammar rules at: '_suite') members second}.
-	self ignoreExternals: #('_indent' '_dedent' '_newline' '_string_start' '_string_end')
+	#('_indent' '_dedent' '_newline' '_string_start' '_string_end') do: [:sym | self removeSymbol: sym]
 ]
 
 { #category : #'as yet unclassified' }
