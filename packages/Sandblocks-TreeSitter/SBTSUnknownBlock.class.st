@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSUnknownBlock >> absorbsInput: anEvent [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknownBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 
 	aBlock value: (SBCursorSelect new block: self).
