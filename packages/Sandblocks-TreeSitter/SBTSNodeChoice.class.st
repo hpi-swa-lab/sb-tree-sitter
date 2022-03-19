@@ -48,8 +48,11 @@ SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollect
 		ifFound: [:b |
 			aClosure value: (SBCursorSelect new block: b).
 			aBoolean ifFalse: [b cursorPositionsDo: aClosure shallow: aBoolean]]
-		ifNone: ["otherwise just descend"
-		self alternatives do: [:child | child cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]]
+		ifNone: [
+			"otherwise just descend"
+			self alternatives
+				detect: [:alt | aCollection anySatisfy: [:block | block slot lastNode hasParent: alt]]
+				ifFound: [:alt | alt cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]]
 ]
 
 { #category : #'as yet unclassified' }

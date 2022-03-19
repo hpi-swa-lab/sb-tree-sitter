@@ -18,6 +18,14 @@ SBTSBlockTest >> testJsCall [
 	self assert: #arguments equals: editor selection type
 ]
 
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testSkipsRepeatsInUntakenChoices [
+
+	| module |
+	module := SBTSFileParser new parse: 'a => 123' language: SBJavascript instance.
+	module childSandblocks first cursorPositionsDo: [:pos | self assert: (pos isInsert not or: [pos command element isTSLabel and: [pos command element label = 'async']])]
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testSmalltalkBinaryOp [
 
@@ -58,6 +66,43 @@ SBTSBlockTest >> testSmalltalkContinueInArrayAmbiguous [
 	editor handle: (self keyboardEvent: $#).
 	editor handle: (self keyboardEvent: $a).
 	self assert: #symbol equals: method childSandblocks second childSandblocks second type
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testSmalltalkInsertKeywordPart [
+
+	| module editor |
+	module := SBTSFileParser new
+		parse: 'method a test: 123 abc: 234'
+		language: SBTSSmalltalk instance.
+	editor := self editorAndWorldFor: module.
+	module childSandblocks second startInputAtEnd.
+	editor handle: (self keyboardEvent: Character arrowRight).
+	editor handle: (self keyboardEvent: $a).
+	self assert: 7 equals: module childSandblocks second childSandblocks size
+]
+
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testSmalltalkKeywordMessage [
+
+	| module |
+	module := SBTSFileParser new
+		parse: 'method a test: 123 abc: 234'
+		language: SBTSSmalltalk instance.
+	module childSandblocks second cursorPositionsDo: [:pos | ]
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testSmalltalkUnaryToKeyword [
+
+	| method editor |
+	method := SBTSFileParser new parse: 'abc a unary' language: SBTSSmalltalk instance.
+	editor := self editorAndWorldFor: method.
+	
+	method childSandblocks second childSandblocks second startInputAtEnd.
+	editor handle: (self keyboardEvent: $:).
+	self assert: #'keyword_message' equals: method childSandblocks second type.
+	self assert: #keyword equals: editor selection type
 ]
 
 { #category : #'tests - cursor position' }

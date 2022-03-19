@@ -124,6 +124,33 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aBoolean [
 ]
 
 { #category : #query }
+SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after: anotherCollection [
+
+	| results |
+	stream := ((aCollection collect: [:i | Character value: 0] as: String), (aString, (anotherCollection collect: [:i | Character value: 0] as: String))) readStream.
+	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
+	
+	aCollection ifNotEmpty: [
+		aCollection first slot allSuperTypesDo: [:typeNode | "if our nested element (char0) is at the start, we would immediately abort expanding instead of recursing. instead, allow one level of recursion for each type node that is above our nested element."
+		aCollection first slot firstNode ~= typeNode ifTrue: [visitedSupertypes add: typeNode type]]].
+	
+	aCollection doWithIndex: [:block :index |
+		block slot allSuperTypesDo: [:typeNode |
+			(memoizations at: index)
+				at: typeNode type
+				put: {self copy addBlock: block copyBlock}]].
+	anotherCollection doWithIndex: [:block :index |
+		block slot allSuperTypesDo: [:typeNode |
+			(memoizations at: aCollection size + (aString size + index))
+				at: typeNode type
+				put: {self copy addBlock: block copyBlock}]].
+	
+	results := aTSBlock slot lastNode resultsFor: self.
+	results = #noMatch ifTrue: [^ #()].
+	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks first]
+]
+
+{ #category : #query }
 SBTSInputParser >> optionsForTemplate: aNode given: aString [
 
 	| results |

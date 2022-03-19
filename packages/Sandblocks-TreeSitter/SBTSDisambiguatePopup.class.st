@@ -12,22 +12,10 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> applyChoice: aBlock [
 
-	| editor nested found |
 	self dismiss.
+	target sandblockEditor do: (SBReplaceCommand new target: target replacer: aBlock).
 	
-	editor := target sandblockEditor.
-	editor do: (SBReplaceCommand new target: target replacer: aBlock).
-	
-	nested := nil.
-	found := false.
-	aBlock allMorphsDo: [:m | (nested isNil and: [m type = target type]) ifTrue: [nested := m]].
-	
-	aBlock cursorPositionsDo: [:position |
-		(found and: [(position block ~= nested and: [(position block hasOwner: nested) not]) and: [position isInsert or: [position isText]]]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none].
-		position block = nested ifTrue: [found := true]].
-	
-	"didn't find the nested block again, choose the very first"
-	aBlock cursorPositionsDo: [:position | ((position isInsert and: [(position command element hasParentThat: #isTSOptional) not]) or: [position isText]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none]]
+	self positionCursorFor: aBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -55,7 +43,7 @@ SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean [
 		ifNotEmpty: [
 			choices := aBlock tryTransitionAfterInput: aString before: aBoolean.
 			choices size = 1 ifTrue: [^ self applyChoice: choices first].
-			choices size = 0 ifTrue: [^ self forwardInputToAdjacent: aString]]
+			choices size = 0 ifTrue: [^ (self forwardInputToAdjacent: aString) ifFalse: [self tryReinterpretWith: aString]]]
 		ifEmpty: [choices := #()].
 	
 	self contents: aString.
@@ -69,11 +57,14 @@ SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean [
 SBTSDisambiguatePopup >> forwardInputToAdjacent: aString [
 
 	self positionAfterDo: [:position |
-		position isText ifTrue: [^ self class new for: position block input: aString before: false].
+		position isText ifTrue: [
+			self class new for: position block input: aString before: false.
+			^ true].
 		position isInsert ifTrue: [
 			(position command tryExpandWithInput: aString) ifTrue: [
 				target sandblockEditor do: position command.
-				^ self]]]
+				^ true]]].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -95,6 +86,23 @@ SBTSDisambiguatePopup >> positionAfterDo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSDisambiguatePopup >> positionCursorFor: aBlock [
+
+	| editor found nested |
+	nested := nil.
+	found := false.
+	editor := aBlock sandblockEditor.
+	aBlock allMorphsDo: [:m | (nested isNil and: [m type = target type]) ifTrue: [nested := m]].
+	
+	aBlock cursorPositionsDo: [:position |
+		(found and: [(position block ~= nested and: [(position block hasOwner: nested) not]) and: [position isInsert or: [position isText]]]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none].
+		position block = nested ifTrue: [found := true]].
+	
+	"didn't find the nested block again, choose the very first"
+	aBlock cursorPositionsDo: [:position | ((position isInsert and: [(position command element hasParentThat: #isTSOptional) not]) or: [position isText]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> suggestAlways [
 
 	^ true
@@ -107,6 +115,27 @@ SBTSDisambiguatePopup >> suggestions [
 		SBTSBlockSuggestion new
 			block: choice in: target sandblockEditor;
 			target: target]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSDisambiguatePopup >> tryReinterpretWith: aString [
+
+	| input myIndex choices |
+	input := target contents, aString.
+	myIndex := target submorphIndex.
+	choices := SBTSInputParser new
+		optionsFor: target owner
+		given: input
+		before: (target owner submorphs first: myIndex - 1)
+		after: (target owner submorphs allButFirst: myIndex).
+	^ choices
+		ifNotEmpty: [
+			"multiple choices"
+			self flag: #todo.
+			target sandblockEditor do: (SBReplaceCommand new target: target owner replacer: choices first).
+			self positionCursorFor: (choices first submorphs at: myIndex).
+			true]
+		ifEmpty: [false]
 ]
 
 { #category : #'as yet unclassified' }

@@ -230,6 +230,34 @@ SBTSParseInputTest >> testIdentifierToAssignment [
 ]
 
 { #category : #'tests - wrap' }
+SBTSParseInputTest >> testReinterpretBinaryOp [
+
+	| stmt results |
+	stmt := (SBTSFileParser new parse: 'a + b' language: SBJavascript instance) childSandblocks first.
+	self assert: stmt submorphs second contents = '+'.
+	results := SBTSInputParser new
+		optionsFor: stmt
+		given: '-'
+		before: {stmt childSandblocks first}
+		after: {stmt childSandblocks last}.
+	self assert: 'binary_expression' equals: results first type.
+	self assert: results first submorphs second contents = '-'
+]
+
+{ #category : #'tests - wrap' }
+SBTSParseInputTest >> testReinterpretUnaryToKeyword [
+
+	| message results |
+	message := (SBTSFileParser new parse: 'method b msg' language: SBTSSmalltalk instance) childSandblocks second.
+	results := SBTSInputParser new
+		optionsFor: message
+		given: 'msg:'
+		before: {message childSandblocks first}
+		after: {}.
+	self assert: 'keyword_message' equals: results first type
+]
+
+{ #category : #'tests - wrap' }
 SBTSParseInputTest >> testWrapArray [
 
 	| stmt results |

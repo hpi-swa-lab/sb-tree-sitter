@@ -135,7 +135,12 @@ SBTSNodeText >> resultsFor: aParser [
 				contents: (aParser stream originalContents copyFrom: start + 1 to: aParser position))}].
 	
 	remaining := aParser stream upToEnd.
-	(plainPrefix beginsWith: remaining) ifTrue: [
+	(SBToggledCode comment: '' active: 2 do: {
+		[
+			(regex instVarNamed: #startOptimizer)
+				canStartMatch: remaining first
+				in: nil].
+		[plainPrefix beginsWith: remaining]}) ifTrue: [
 		^ {
 			aParser copy addBlock: (SBTSTextMorph new
 				slot: (SBTSSlot new addNode: self);
