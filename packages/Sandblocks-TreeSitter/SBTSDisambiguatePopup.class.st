@@ -80,7 +80,8 @@ SBTSDisambiguatePopup >> positionAfterDo: aBlock [
 
 	| foundSelf |
 	foundSelf := false.
-	aBlock value: (SBCursorSelect new block: target parentSandblock).
+	target parentSandblock isTSBlock ifTrue: [
+		aBlock value: (SBCursorSelect new block: target parentSandblock)].
 	(target containingArtefact ifNil: [target containingFloat]) cursorPositionsDo: [:position |
 		(foundSelf and: [position isInsert or: [position isText and: [position block isUnknown]]]) ifTrue: [aBlock value: position].
 		(position isText and: [position block = target]) ifTrue: [foundSelf := true]]

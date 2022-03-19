@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> canBeEmpty [
+
+	^ self regex matches: ''
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> childrenForQuery [
 	"remove inline block compat"
 
@@ -57,6 +63,12 @@ SBTSTextMorph >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> regex [
+
+	^ self slot firstNode regex
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> slot [
 
 	^ slot
@@ -84,5 +96,7 @@ SBTSTextMorph >> wrapOffscreen: anEditor [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
-	aStream nextPutAll: self contents
+	aStream nextPutAll: ((aBoolean and: [self contents isEmpty and: [self canBeEmpty not]])
+		ifTrue: [String value: 0]
+		ifFalse: [self contents])
 ]
