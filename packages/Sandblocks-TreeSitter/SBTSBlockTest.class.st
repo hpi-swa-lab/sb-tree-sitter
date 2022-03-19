@@ -18,6 +18,19 @@ SBTSBlockTest >> testJsCall [
 	self assert: #arguments equals: editor selection type
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsMethodCall [
+
+	| module editor |
+	module := SBTSFileParser new parse: '' language: SBJavascript instance.
+	editor := self editorAndWorldFor: module.
+	module startInputAtEnd.
+	editor handle: (self keyboardEvent: Character arrowRight).
+	
+	self type: 'console.log("Hello' in: editor.
+	self assert: 'console.log("Hello")' equals: module sourceString
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testSkipsRepeatsInUntakenChoices [
 

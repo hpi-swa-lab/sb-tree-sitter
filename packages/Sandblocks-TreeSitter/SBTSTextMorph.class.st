@@ -16,6 +16,13 @@ SBTSTextMorph >> childrenForQuery [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> contents: aString [
+
+	super contents: aString.
+	self owner ifNotNil: #clearCache
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> copyBlock [
 
 	^ self class new
