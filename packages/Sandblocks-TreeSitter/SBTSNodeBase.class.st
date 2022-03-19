@@ -85,14 +85,14 @@ SBTSNodeBase >> field: aString [
 	field := aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBTSNodeBase >> hasParent: aNode [
 
 	self andParentsDo: [:p | p = aNode ifTrue: [^ true]].
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 SBTSNodeBase >> hasParentThat: aBlock [
 
 	self andParentsDo: [:p | (aBlock value: p) ifTrue: [^ true]].

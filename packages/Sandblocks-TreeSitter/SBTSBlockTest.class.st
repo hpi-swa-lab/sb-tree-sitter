@@ -85,11 +85,14 @@ SBTSBlockTest >> testSmalltalkInsertKeywordPart [
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testSmalltalkKeywordMessage [
 
-	| module |
+	| module insertCount |
 	module := SBTSFileParser new
 		parse: 'method a test: 123 abc: 234'
 		language: SBTSSmalltalk instance.
-	module childSandblocks second cursorPositionsDo: [:pos | ]
+	
+	insertCount := 0.
+	module childSandblocks second cursorPositionsDo: [:pos | pos isInsert ifTrue: [insertCount := insertCount + 1]].
+	self assert: 3 equals: insertCount
 ]
 
 { #category : #'tests - input transition' }

@@ -2,23 +2,23 @@ Class {
 	#name : #SBTSBlockSuggestion,
 	#superclass : #SBSuggestionItem,
 	#instVars : [
-		'block',
+		'blocks',
 		'target'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
 { #category : #'as yet unclassified' }
-SBTSBlockSuggestion >> block: aBlock in: anEditor [
+SBTSBlockSuggestion >> blocks: aCollection in: anEditor [
 
-	self selector: aBlock printString label: 'block'.
+	self selector: aCollection first printString label: 'block'.
 	self
-		preview: (aBlock
+		preview: (anEditor newSelectionContainer
+			addAllMorphs: aCollection;
 			width: 400;
-			wrapOffscreen: anEditor;
 			imageForm)
 		previewOnly: false.
-	block := aBlock
+	blocks := aCollection
 ]
 
 { #category : #'as yet unclassified' }
@@ -30,11 +30,13 @@ SBTSBlockSuggestion >> target: aBlock [
 { #category : #'as yet unclassified' }
 SBTSBlockSuggestion >> useSuggestionOn: aBlock in: anEditor [
 
-	| nested found |
+	| nested found block |
 	target := target ifNil: [aBlock].
-	anEditor do: (SBReplaceCommand new target: target replacer: block).
+	anEditor do: (SBReplaceMultipleCommand new target: target replacers: blocks).
 	nested := nil.
 	found := false.
+	
+	block := blocks first.
 	block allMorphsDo: [:m | (nested isNil and: [m type = target type]) ifTrue: [nested := m]].
 	block cursorPositionsDo: [:position |
 		(found and: [position block ~= nested and: [position isInsert or: [position isText]]]) ifTrue: [^ anEditor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none].

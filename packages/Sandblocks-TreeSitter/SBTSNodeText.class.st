@@ -81,6 +81,12 @@ SBTSNodeText >> maxChildren [
 	^ 0
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeText >> prefixValidFor: aString [
+
+	^ SBRegexStream tryMatchPrefix: aString regex: regex
+]
+
 { #category : #printing }
 SBTSNodeText >> printOn: aStream [
 
@@ -135,16 +141,14 @@ SBTSNodeText >> resultsFor: aParser [
 				contents: (aParser stream originalContents copyFrom: start + 1 to: aParser position))}].
 	
 	remaining := aParser stream upToEnd.
-	(SBToggledCode comment: '' active: 2 do: {
-		[
-			(regex instVarNamed: #startOptimizer)
-				canStartMatch: remaining first
-				in: nil].
-		[plainPrefix beginsWith: remaining]}) ifTrue: [
+	(SBToggledCode
+		comment: ''
+		active: 1
+		do: {[self prefixValidFor: remaining]. [plainPrefix beginsWith: remaining]}) ifTrue: [
 		^ {
 			aParser copy addBlock: (SBTSTextMorph new
 				slot: (SBTSSlot new addNode: self);
-				contents: plainPrefix)}].
+				contents: remaining)}].
 	
 	aParser stream position: start.
 	^ #noMatch
@@ -161,7 +165,7 @@ SBTSNodeText >> takeNodesFrom: aParser [
 		ifFalse: [#noMatch]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #nil }
 SBTSNodeText >> validFor: aString [
 
 	^ regex matches: aString

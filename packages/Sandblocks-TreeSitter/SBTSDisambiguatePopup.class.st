@@ -10,12 +10,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSDisambiguatePopup >> applyChoice: aBlock [
+SBTSDisambiguatePopup >> applyChoice: aCollectionOfBlocks [
 
 	self dismiss.
-	target sandblockEditor do: (SBReplaceCommand new target: target replacer: aBlock).
+	target sandblockEditor do: (SBReplaceMultipleCommand new target: target replacers: aCollectionOfBlocks).
 	
-	self positionCursorFor: aBlock
+	self positionCursorFor: aCollectionOfBlocks first
 ]
 
 { #category : #'as yet unclassified' }
@@ -113,7 +113,7 @@ SBTSDisambiguatePopup >> suggestions [
 
 	^ choices collect: [:choice |
 		SBTSBlockSuggestion new
-			block: choice in: target sandblockEditor;
+			blocks: choice in: target sandblockEditor;
 			target: target]
 ]
 
@@ -132,8 +132,8 @@ SBTSDisambiguatePopup >> tryReinterpretWith: aString [
 		ifNotEmpty: [
 			"multiple choices"
 			self flag: #todo.
-			target sandblockEditor do: (SBReplaceCommand new target: target owner replacer: choices first).
-			self positionCursorFor: (choices first submorphs at: myIndex).
+			target sandblockEditor do: (SBReplaceMultipleCommand new target: target owner replacers: choices first).
+			self positionCursorFor: (choices first last submorphs at: myIndex).
 			true]
 		ifEmpty: [false]
 ]

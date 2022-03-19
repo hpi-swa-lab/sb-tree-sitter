@@ -77,15 +77,9 @@ SBTSBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 SBTSBlock >> deleteCommandFor: aBlock [
 
 	self flag: #todo.
-	"if we have a sequence of blocks we need to make sure to delete all of them and not just the selection. The naive approach below, however, always deletes all elements in the repeat."
-	^ SBToggledCode comment: '' active: 1 do: {
-		[
-			aBlock slot includesRepeat
-				ifTrue: [SBDeleteCommand new target: aBlock]
-				ifFalse: [nil]].
-		[ | repeatElement |
-			repeatElement := aBlock slot parentThat: [:p | p parent ifNotNil: #isTSRepeat ifNil: [false]].
-			repeatElement ifNotNil: [SBCombinedCommand newWith: ((self submorphs select: [:s | s slot includesParent: repeatElement]) collect: [:m | SBDeleteCommand new target: m])]]}
+	"need to consider required attr of repeater"
+	^ aBlock repeaterGroup ifNotNil: [:group |
+		SBCombinedCommand newWith: (group collect: [:block | SBDeleteCommand new target: block])]
 ]
 
 { #category : #'as yet unclassified' }
@@ -176,7 +170,7 @@ SBTSBlock >> keyStroke: anEvent [
 	isAtStart := self currentTextMorph cursor = 1.
 	super keyStroke: anEvent.
 	
-	self valid ifFalse: [
+	self prefixValid ifFalse: [
 		self contents: previousContents.
 		SBTSDisambiguatePopup new
 			for: self
@@ -254,6 +248,14 @@ SBTSBlock >> preferredColorIn: aColorPolicy [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> prefixValid [
+
+	^ self currentTextMorph
+		ifNotNil: [:t | t slot firstNode prefixValidFor: t contents]
+		ifNil: [true]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> printOn: aStream [
 
 	self slot ifNotNil: [slot firstNode printOn: aStream]
@@ -286,6 +288,22 @@ SBTSBlock >> promptTransition [
 	<action>
 
 	SBTSDisambiguatePopup new for: self input: '' before: ActiveEvent shiftPressed
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> repeaterGroup [
+
+	self slot repeater ifNotNil: [:repeater | | myIndex mySubIndex seq start |
+		myIndex := self submorphIndex.
+		self flag: #todo.
+		" does not consider nested repeats and nested seqs "
+		seq := self slot parentThat: [:p | p isTSSeq and: [p hasParent: repeater]].
+		seq ifNil: [^ {self}].
+		
+		mySubIndex := (self slot parentThat: [:p | p parent = seq]) in: [:c | c parent elements indexOf: c].
+		start := myIndex - mySubIndex + 1.
+		^ self owner submorphs copyFrom: start to: start + seq elements size - 1].
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }

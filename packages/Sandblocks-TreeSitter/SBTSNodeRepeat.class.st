@@ -34,13 +34,12 @@ SBTSNodeRepeat >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollect
 			container: aBlock)].
 	
 	hasElements := false.
-	multiple ifTrue: [
-		buildInsert value: (self firstInsertIndexIn: aBlock) value: false].
+	multiple ifTrue: [buildInsert value: (self firstInsertIndexIn: aBlock) value: false].
 	aCollection doWithIndex: [:block :index |
 		(block slot includesParent: self) ifTrue: [
 			hasElements := true.
 			block cursorPositionsDo: aClosure.
-			multiple ifTrue: [buildInsert value: index + 1 value: true]]].
+			(multiple and: [block repeaterGroup last = block]) ifTrue: [buildInsert value: index + 1 value: true]]].
 	(multiple not and: [hasElements not]) ifTrue: [buildInsert value: (self firstInsertIndexIn: aBlock) value: true]
 ]
 

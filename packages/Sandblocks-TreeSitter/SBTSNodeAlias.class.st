@@ -20,14 +20,14 @@ SBTSNodeAlias >> alias: aString [
 	alias := aString asSymbol
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #blocks }
 SBTSNodeAlias >> allChildrenDo: aBlock [
 
 	aBlock value: self.
 	self element allChildrenDo: aBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #blocks }
 SBTSNodeAlias >> buildEmpty [
 
 	^ self element buildEmpty

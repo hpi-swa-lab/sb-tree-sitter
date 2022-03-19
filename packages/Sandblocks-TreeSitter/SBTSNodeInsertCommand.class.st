@@ -104,7 +104,7 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 
 	| options |
 	options := SBTSInputParser new optionsForTemplate: element given: aString.
-	options size = 1 ifTrue: [morphs := {options first}].
+	options size = 1 ifTrue: [morphs := options first].
 	options size > 1 ifTrue: [continueInputString := aString].
 	^ options notEmpty
 ]

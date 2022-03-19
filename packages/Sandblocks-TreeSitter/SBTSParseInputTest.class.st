@@ -49,7 +49,7 @@ SBTSParseInputTest >> testCreateAmbiguousIdentifier [
 	self assert: 3 equals: results size.
 	self
 		assert: #('identifier' 'true' 'thisContext') asSet
-		equals: (results collect: [:choice | choice type] as: Set)
+		equals: (results collect: [:choice | choice first type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -60,7 +60,7 @@ SBTSParseInputTest >> testCreateArray [
 		optionsForTemplate: (self nodeForRule: 'primary')
 		given: '{'.
 	self assert: 1 equals: results size.
-	self assert: 'dynamic_array' equals: results first type
+	self assert: 'dynamic_array' equals: results first first type
 ]
 
 { #category : #'tests - create' }
@@ -103,8 +103,8 @@ SBTSParseInputTest >> testCreateAssignment [
 		optionsForTemplate: (self nodeForRule: 'statement')
 		given: 'abc:'.
 	self assert: 1 equals: results size.
-	self assert: 'assignment' equals: results first type.
-	self assert: 3 equals: results first submorphs size
+	self assert: 'assignment' equals: results first first type.
+	self assert: 3 equals: results first first submorphs size
 ]
 
 { #category : #'tests - create' }
@@ -126,7 +126,7 @@ SBTSParseInputTest >> testCreateCharacter [
 		given: '$'.
 	
 	self assert: 1 equals: results size.
-	self assert: #(#character) asSet equals: (results collect: #type as: Set)
+	self assert: #(#character) asSet equals: (results collect: [:r | r first type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -137,8 +137,8 @@ SBTSParseInputTest >> testCreateHashBangLine [
 		optionsForTemplate: (SBTSNodeSymbol new type: 'hash_bang_line' factory: SBJavascript instance)
 		given: '#'.
 	self assert: 1 equals: results size.
-	self assert: 'hash_bang_line' equals: results first type.
-	self assert: '#!' equals: results first contents
+	self assert: 'hash_bang_line' equals: results first first type.
+	self assert: '#!' equals: results first first contents
 ]
 
 { #category : #'tests - create' }
@@ -150,7 +150,7 @@ SBTSParseInputTest >> testCreateIdentifier [
 		given: 'test'.
 	
 	self assert: 1 equals: results size.
-	self assert: #('identifier') asSet equals: (results collect: [:choice | choice type] as: Set)
+	self assert: #('identifier') asSet equals: (results collect: [:choice | choice first type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -161,7 +161,7 @@ SBTSParseInputTest >> testCreateIdentifierFromStatement [
 		optionsForTemplate: (self nodeForRule: 'statement')
 		given: 'abc'.
 	self assert: 1 equals: results size.
-	self assert: 'identifier' equals: results first type
+	self assert: 'identifier' equals: results first first type
 ]
 
 { #category : #'tests - create' }
@@ -173,7 +173,7 @@ SBTSParseInputTest >> testCreateJavascriptIdentifier [
 		given: 'test'.
 	
 	self assert: 1 equals: results size.
-	self assert: #('identifier') asSet equals: (results collect: [:choice | choice type] as: Set)
+	self assert: #('identifier') asSet equals: (results collect: [:choice | choice first type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -184,7 +184,7 @@ SBTSParseInputTest >> testCreateNumber [
 		optionsForTemplate: (self nodeForRule: 'primary')
 		given: '1'.
 	self assert: 1 equals: results size.
-	self assert: 'number' equals: results first type
+	self assert: 'number' equals: results first first type
 ]
 
 { #category : #'tests - create' }
@@ -195,7 +195,7 @@ SBTSParseInputTest >> testCreateNumberFromStatement [
 		optionsForTemplate: (self nodeForRule: 'statement')
 		given: '1'.
 	self assert: 1 equals: results size.
-	self assert: 'number' equals: results first type
+	self assert: 'number' equals: results first first type
 ]
 
 { #category : #'tests - create' }
@@ -207,7 +207,7 @@ SBTSParseInputTest >> testCreateTrue [
 		given: 'true'.
 	
 	self assert: 2 equals: results size.
-	self assert: #('identifier' 'true') asSet equals: (results collect: #type as: Set)
+	self assert: #('identifier' 'true') asSet equals: (results collect: [:r | r first type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -240,8 +240,8 @@ SBTSParseInputTest >> testReinterpretBinaryOp [
 		given: '-'
 		before: {stmt childSandblocks first}
 		after: {stmt childSandblocks last}.
-	self assert: 'binary_expression' equals: results first type.
-	self assert: results first submorphs second contents = '-'
+	self assert: 'binary_expression' equals: results first first type.
+	self assert: results first first submorphs second contents = '-'
 ]
 
 { #category : #'tests - wrap' }
@@ -254,7 +254,7 @@ SBTSParseInputTest >> testReinterpretUnaryToKeyword [
 		given: 'msg:'
 		before: {message childSandblocks first}
 		after: {}.
-	self assert: 'keyword_message' equals: results first type
+	self assert: 'keyword_message' equals: results first first type
 ]
 
 { #category : #'tests - wrap' }
@@ -264,8 +264,8 @@ SBTSParseInputTest >> testWrapArray [
 	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
 	results := SBTSInputParser new optionsFor: stmt given: '{' before: true.
 	self assert: 1 equals: results size.
-	self assert: 'dynamic_array' equals: results first type.
-	self assert: 3 equals: results first submorphCount
+	self assert: 'dynamic_array' equals: results first first type.
+	self assert: 3 equals: results first first submorphCount
 ]
 
 { #category : #'tests - wrap' }
@@ -275,10 +275,10 @@ SBTSParseInputTest >> testWrapBinaryExpression [
 	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
 	results := SBTSInputParser new optionsFor: stmt given: '+' before: false.
 	self assert: 1 equals: results size.
-	self assert: 3 equals: results first childSandblocks size.
+	self assert: 3 equals: results first first childSandblocks size.
 	self
 		assert: (SBTSSmalltalk instance bodyNodeForRule: 'binary_message')
-		equals: results first childSandblocks first slot lastNode parent
+		equals: results first first childSandblocks first slot lastNode parent
 ]
 
 { #category : #'tests - wrap' }
@@ -296,5 +296,5 @@ SBTSParseInputTest >> testWrapByteArray [
 	| stmt results |
 	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
 	results := SBTSInputParser new optionsFor: stmt given: '#[' before: true.
-	self assert: 'byte_array' equals: results first type
+	self assert: 'byte_array' equals: results first first type
 ]

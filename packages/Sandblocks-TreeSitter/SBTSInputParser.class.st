@@ -29,13 +29,6 @@ SBTSInputParser >> atEnd [
 ]
 
 { #category : #blocks }
-SBTSInputParser >> block: aBlock contains: anotherBlock [
-
-	aBlock allMorphsDo: [:m | m type = anotherBlock type ifTrue: [^ true]].
-	^ false
-]
-
-{ #category : #blocks }
 SBTSInputParser >> blocks [
 
 	^ blocks
@@ -45,6 +38,17 @@ SBTSInputParser >> blocks [
 SBTSInputParser >> blocks: aCollection [
 
 	blocks := aCollection
+]
+
+{ #category : #blocks }
+SBTSInputParser >> blocks: aCollection contain: anotherCollection [
+
+	| find |
+	find := anotherCollection first isSandblock
+		ifTrue: [anotherCollection first lastDeepChild]
+		ifFalse: [anotherCollection first].
+	aCollection do: [:morph | morph allMorphsDo: [:m | m type = find type ifTrue: [^ true]]].
+	^ false
 ]
 
 { #category : #'initialize-release' }
@@ -90,13 +94,13 @@ SBTSInputParser >> normalizeResults: aCollection [
 
 	| strings |
 	"if we have a simple single-block result, see if some other results we found could be derived from that simple result. Heuristic is that if the source string starts the same as another block and we contain the innermost slot of that prefix, we can derive it"
-	strings := Dictionary new.
+	strings := IdentityDictionary new.
 	aCollection do: [:result |
 		strings
 			at: result
-			put: (String streamContents: [:s | result writeSourceOn: s indent: 0 forCompare: true])].
+			put: (String streamContents: [:s | result do: [:r | r writeSourceOn: s indent: 0 forCompare: true]])].
 	
-	^ aCollection select: [:result | aCollection noneSatisfy: [:other | result ~= other and: [((strings at: result) beginsWith: (strings at: other)) and: [self block: result contains: (other isSandblock ifTrue: [other lastDeepChild] ifFalse: [other])]]]]
+	^ aCollection select: [:result | aCollection noneSatisfy: [:other | result ~~ other and: [((strings at: result) beginsWith: (strings at: other)) and: [self blocks: result contain: other]]]]
 ]
 
 { #category : #query }
@@ -120,7 +124,7 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aBoolean [
 	
 	results := aTSBlock slot lastNode resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
-	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks first]
+	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks]
 ]
 
 { #category : #query }
@@ -147,7 +151,7 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 	
 	results := aTSBlock slot lastNode resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
-	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks first]
+	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks]
 ]
 
 { #category : #query }
@@ -159,7 +163,7 @@ SBTSInputParser >> optionsForTemplate: aNode given: aString [
 	
 	results := aNode resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
-	^ self normalizeResults: ((results select: [:parser | parser atEnd]) collect: [:parser | parser blocks first])
+	^ self normalizeResults: ((results select: [:parser | parser atEnd]) collect: [:parser | parser blocks])
 ]
 
 { #category : #stream }
