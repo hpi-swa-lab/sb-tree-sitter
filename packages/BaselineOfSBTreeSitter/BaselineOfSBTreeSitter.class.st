@@ -48,10 +48,41 @@ BaselineOfSBTreeSitter >> baseline: spec [
 ]
 
 { #category : #baseline }
-BaselineOfSBTreeSitter >> preload: loader package: packageSpec [
+BaselineOfSBTreeSitter >> depSqueakSource: aMCRepository name: aString targetRepository: anotherMCRepository [
+	"taken from https://github.com/LinqLover/SimulationStudio/blob/master/packages/BaselineOfSimulationStudio.package/BaselineOfSimulationStudio.class/instance/depSqueakSource.name.targetRepository..st"
+
+	(aMCRepository isKindOf: MCRepository) ifFalse: [
+		^ self
+			depSqueakSource: (MCRepository in: aMCRepository)
+			name: aString
+			targetRepository: anotherMCRepository].
+	(anotherMCRepository isKindOf: MCRepository) ifFalse: [
+		^ self
+			depSqueakSource: aMCRepository
+			name: aString
+			targetRepository: (MCRepository in: anotherMCRepository)].
 	
-	Installer squeakInbox
-		install: 'Multilingual-ct.259'.
+	^ ('{1} ({2})' format: {aString. aMCRepository description}) -> [ | packageName |
+		packageName := aString, '.mcz'.
+		[Installer new primMerge: packageName from: aMCRepository]
+			on: MCPackageNotFound
+			do: [:ex |
+				(anotherMCRepository notNil
+					and: [ex repository == aMCRepository]
+					and: [ex packageName = packageName]) ifFalse: [ex pass].
+				self notify: ('Preview version {1} has already been integrated' format: {aString})]
+			on: MCMergeResolutionRequest
+			do: [:ex |
+				Smalltalk isHeadless ifFalse: [ex pass].
+				self error: ex description]]
+]
+
+{ #category : #baseline }
+BaselineOfSBTreeSitter >> preload: loader package: packageSpec [
+
+	SBToggledCode comment: '' active: 1 do: {
+		[self depSqueakSource: #inbox name: 'Multilingual-ct.259' targetRepository: #trunk].
+		[Installer squeakInbox install: 'Multilingual-ct.259']}.
 	(Installer url: 'https://tmbe.me/c/Regex-Core-ct.75.mcz') install
 ]
 

@@ -114,9 +114,9 @@ SBTSNodeText >> regexString: aString [
 	plainPrefix := String streamContents: [:s |
 		[(link isKindOf: RxmMarker) or: [(link isKindOf: RxmSubstring) or: [link isKindOf: RxmPredicate]]] whileTrue: [
 			(link isKindOf: RxmSubstring) ifTrue: [s nextPutAll: (link instVarNamed: #sampleStream) contents].
-			(link isKindOf: RxmPredicate) ifTrue: [ | char |
-				char := (link instVarNamed: #predicate) at: 1.
-				char isCharacter ifTrue: [s nextPut: char]].
+			(link isKindOf: RxmPredicate) ifTrue: [ | char predicate |
+				predicate := link instVarNamed: #predicate.
+				predicate basicSize > 0 and: [(char := predicate at: 1) isCharacter ifTrue: [s nextPut: char]]].
 			link := link next]]
 ]
 
