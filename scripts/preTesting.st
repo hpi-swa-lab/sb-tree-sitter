@@ -5,4 +5,5 @@ SBTreeSitter new
 	vhdl;
 	c;
 	smalltalk;
+	bash;
 	parserNew.
