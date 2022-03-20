@@ -56,8 +56,8 @@ SBTSNodeRepeat >> firstInsertIndexIn: aParent [
 	seen := false.
 	stream := aParent submorphs readStream.
 	aParent slot firstNode bodyTemplate allChildrenDo: [:child |
-		(seen not and: [stream atEnd not and: [child = stream peek slot firstNode]]) ifTrue: [stream next].
-		child = element ifTrue: [^ stream position + 1]].
+		child = element ifTrue: [^ stream position + 1].
+		(seen not and: [stream atEnd not and: [child = stream peek slot firstNode]]) ifTrue: [stream next]].
 	^ 1
 ]
 

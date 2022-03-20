@@ -148,7 +148,9 @@ SBTSNodeText >> resultsFor: aParser [
 		^ {
 			aParser copy addBlock: (SBTSTextMorph new
 				slot: (SBTSSlot new addNode: self);
-				contents: remaining)}].
+				contents: (plainPrefix size > remaining size
+					ifTrue: [plainPrefix]
+					ifFalse: [remaining]))}].
 	
 	aParser stream position: start.
 	^ #noMatch

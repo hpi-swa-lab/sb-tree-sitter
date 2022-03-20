@@ -15,7 +15,9 @@ SBTSDisambiguatePopup >> applyChoice: aCollectionOfBlocks [
 	self dismiss.
 	target sandblockEditor do: (SBReplaceMultipleCommand new target: target replacers: aCollectionOfBlocks).
 	
-	self positionCursorFor: aCollectionOfBlocks first
+	self positionCursorFor: aCollectionOfBlocks first.
+	
+	^ true
 ]
 
 { #category : #'as yet unclassified' }
@@ -43,23 +45,26 @@ SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean [
 		ifNotEmpty: [
 			choices := aBlock tryTransitionAfterInput: aString before: aBoolean.
 			choices size = 1 ifTrue: [^ self applyChoice: choices first].
-			choices size = 0 ifTrue: [^ (self forwardInputToAdjacent: aString) ifFalse: [self tryReinterpretWith: aString]]]
+			choices size = 0 ifTrue: [
+				^ (self forwardInputToAdjacent: aString) ifFalse: [
+					target currentTextMorph
+						ifNotNil: [self tryReinterpretWith: aString]
+						ifNil: [false]]]]
 		ifEmpty: [choices := #()].
 	
 	self contents: aString.
 	
 	self showBelow: aBlock closeOnDeselect: true.
 	self moveCursorToEnd.
-	self queueUpdateSuggestionsFocused: true
+	self queueUpdateSuggestionsFocused: true.
+	^ true
 ]
 
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> forwardInputToAdjacent: aString [
 
 	self positionAfterDo: [:position |
-		(position isText or: [position isSelect]) ifTrue: [
-			self class new for: position block input: aString before: false.
-			^ true].
+		(position isText or: [position isSelect]) ifTrue: [(self class new for: position block input: aString before: false) ifTrue: [^ true]].
 		position isInsert ifTrue: [
 			(position command tryExpandWithInput: aString) ifTrue: [
 				target sandblockEditor do: position command.
@@ -80,8 +85,7 @@ SBTSDisambiguatePopup >> positionAfterDo: aBlock [
 
 	| foundSelf |
 	foundSelf := false.
-	target parentSandblock isTSBlock ifTrue: [
-		aBlock value: (SBCursorSelect new block: target parentSandblock)].
+	(target parentSandblock isTSBlock and: [target submorphAfter isNil]) ifTrue: [aBlock value: (SBCursorSelect new block: target parentSandblock)].
 	(target containingArtefact ifNil: [target containingFloat]) cursorPositionsDo: [:position |
 		(foundSelf and: [position isInsert or: [position isText and: [position block isUnknown]]]) ifTrue: [aBlock value: position].
 		(position isText and: [position block = target]) ifTrue: [foundSelf := true]]

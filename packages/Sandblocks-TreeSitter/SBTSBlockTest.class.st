@@ -108,6 +108,21 @@ SBTSBlockTest >> testSmalltalkKeywordMessage [
 	self assert: 3 equals: insertCount
 ]
 
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testSmalltalkTemporariesPositions [
+
+	| module |
+	module := SBTSFileParser new parse: 'abc | a b c |' language: SBTSSmalltalk instance.
+	self
+		assert: #(2 3 4 5)
+		equals: (Array streamContents: [:stream | module childSandblocks second cursorPositionsDo: [:pos | pos isInsert ifTrue: [stream nextPut: pos command index]]]).
+	
+	module := SBTSFileParser new parse: 'abc ||' language: SBTSSmalltalk instance.
+	self
+		assert: #(2)
+		equals: (Array streamContents: [:stream | module childSandblocks second cursorPositionsDo: [:pos | pos isInsert ifTrue: [stream nextPut: pos command index]]])
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testSmalltalkUnaryToKeyword [
 
@@ -118,7 +133,9 @@ SBTSBlockTest >> testSmalltalkUnaryToKeyword [
 	method childSandblocks second childSandblocks second startInputAtEnd.
 	editor handle: (self keyboardEvent: $:).
 	self assert: #'keyword_message' equals: method childSandblocks second type.
-	self assert: #keyword equals: editor selection type
+	self assert: #keyword equals: editor selection type.
+	editor handle: (self keyboardEvent: $4).
+	self assert: #number equals: editor selection type
 ]
 
 { #category : #'tests - cursor position' }
