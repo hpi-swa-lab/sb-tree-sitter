@@ -49,8 +49,12 @@ SBTSUnknownBlock >> printOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSUnknownBlock >> slot: aSlot [
 
+	| label |
 	super slot: aSlot.
-	self firstSubmorph slot: aSlot
+	self firstSubmorph slot: aSlot.
+	
+	label := self slot firstNode printString.
+	self firstSubmorph placeholderText: (label size < 15 ifTrue: [label] ifFalse: [(label first: 12), '...'])
 ]
 
 { #category : #'as yet unclassified' }
@@ -63,7 +67,7 @@ SBTSUnknownBlock >> suggestAlways [
 SBTSUnknownBlock >> suggestions [
 
 	^ (self slot firstNode isTSChoice and: [self slot firstNode alternatives allSatisfy: #isTSLabel])
-		ifTrue: [self slot firstNode alternatives collect: [:alt | SBTSBlockSuggestion new block: alt buildEmpty first in: self sandblockEditor]]
+		ifTrue: [self slot firstNode alternatives collect: [:alt | SBTSBlockSuggestion new blocks: alt buildEmpty in: self sandblockEditor]]
 		ifFalse: [#()]
 ]
 

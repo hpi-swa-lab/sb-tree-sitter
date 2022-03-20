@@ -123,7 +123,7 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aBoolean [
 			ifTrue: [memoizations last at: typeNode type put: {parser}]
 			ifFalse: [memoizations first at: typeNode type put: {parser}]].
 	
-	results := aTSBlock slot lastNode resultsFor: self.
+	results := aTSBlock slot lastNode transitionRoot resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
 	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks]
 ]
@@ -150,7 +150,7 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 				at: typeNode type
 				put: {self copy addBlock: block copyBlock}]].
 	
-	results := aTSBlock slot lastNode resultsFor: self.
+	results := aTSBlock slot lastNode transitionRoot resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
 	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks]
 ]

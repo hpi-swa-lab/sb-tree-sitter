@@ -13,6 +13,12 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 	^ symbol makeConcrete addChild: symbol bodyTemplate makeConcrete
 ]
 
+{ #category : #failures }
+SBTSParseInputTest >> expectedFailures [
+
+	^ #(#testAssignmentPattern)
+]
+
 { #category : #helper }
 SBTSParseInputTest >> nodeForRule: aString [
 
@@ -36,6 +42,21 @@ SBTSParseInputTest >> statement: aTypeString with: aContentsString [
 	primary child addChild: leaf.
 	
 	^ stmt
+]
+
+{ #category : #'tests - wrap' }
+SBTSParseInputTest >> testAssignmentPattern [
+
+	| pattern results |
+	pattern := (SBTSFileParser new
+		parse: 'function(a) {}'
+		language: SBJavascript instance) childSandblocks first childSandblocks first.
+	results := SBTSInputParser new
+		optionsFor: pattern
+		given: '='
+		before: {pattern}
+		after: {}.
+	self assert: 1 equals: results size
 ]
 
 { #category : #'tests - create' }

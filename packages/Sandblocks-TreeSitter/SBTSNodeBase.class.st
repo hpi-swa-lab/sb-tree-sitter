@@ -43,7 +43,7 @@ SBTSNodeBase >> buildMorphWith: aBlock slot: aSlot [
 		^ SBTSTextMorph new contents: aBlock].
 	
 	(self factory isBlockInlined: aBlock type) ifTrue: [
-		aBlock submorphs do: [:m | m slot addNode: self].
+		self noRepeatOrSeq ifTrue: [aBlock submorphs do: [:m | m slot addNode: self]].
 		^ aBlock submorphs].
 	
 	^ aBlock slot: aSlot
@@ -115,6 +115,12 @@ SBTSNodeBase >> isInlined [
 SBTSNodeBase >> isSuperType [
 
 	^ factory isSuperType: self type
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isTSAlias [
+
+	^ false
 ]
 
 { #category : #testing }
@@ -193,6 +199,15 @@ SBTSNodeBase >> root [
 SBTSNodeBase >> takeNodesFrom: aParser [
 
 	^ self subclassResponsibility
+]
+
+{ #category : #hierarchy }
+SBTSNodeBase >> transitionRoot [
+
+	| current |
+	current := self.
+	[current parent notNil and: [current parent isTSChoice]] whileTrue: [current := current parent].
+	^ current
 ]
 
 { #category : #accessing }

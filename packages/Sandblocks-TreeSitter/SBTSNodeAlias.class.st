@@ -52,6 +52,12 @@ SBTSNodeAlias >> element: anElement [
 	anElement parent: self
 ]
 
+{ #category : #testing }
+SBTSNodeAlias >> isTSAlias [
+
+	^ true
+]
+
 { #category : #printing }
 SBTSNodeAlias >> printOn: aStream [
 

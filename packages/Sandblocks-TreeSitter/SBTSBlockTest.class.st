@@ -31,6 +31,24 @@ SBTSBlockTest >> testJsMethodCall [
 	self assert: 'console.log("Hello")' equals: module sourceString
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsPatternToAssignmentPattern [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'function(b) {}' language: SBJavascript instance.
+	editor := self editorAndWorldFor: module.
+	module childSandblocks first childSandblocks first startInputAtEnd.
+	editor handle: (self keyboardEvent: $=).
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character arrowDown).
+	editor handle: (self keyboardEvent: Character arrowDown).
+	editor handle: (self keyboardEvent: Character arrowDown).
+	editor handle: (self keyboardEvent: Character cr).
+	
+	self assert: 'assignment_pattern' equals: module childSandblocks first childSandblocks first type
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testSkipsRepeatsInUntakenChoices [
 

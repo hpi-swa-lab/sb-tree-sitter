@@ -61,6 +61,13 @@ SBTSNodeSymbol >> isTSSymbol [
 	^ true
 ]
 
+{ #category : #testing }
+SBTSNodeSymbol >> noRepeatOrSeq [
+
+	self bodyTemplate allChildrenDo: [:child | (child isTSChoice or: [child isTSSymbol or: [child isTSAlias or: [child isTSLabel]]]) ifFalse: [^ false]].
+	^ true
+]
+
 { #category : #printing }
 SBTSNodeSymbol >> printOn: aStream [
 

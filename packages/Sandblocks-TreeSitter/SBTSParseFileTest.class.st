@@ -56,6 +56,16 @@ SBTSParseFileTest >> testJavascriptTemplateString [
 		equals: (SBTSFileParser new parse: source language: SBJavascript instance) sourceString
 ]
 
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testJsFunctionPatterns [
+
+	| module |
+	module := SBTSFileParser new parse: 'function(b) {}' language: SBJavascript instance.
+	self assert: #(#identifier #pattern) equals: (module childSandblocks first childSandblocks first slot nodes
+		collect: #type
+		as: Array)
+]
+
 { #category : #'tests - unit' }
 SBTSParseFileTest >> testLabel [
 
