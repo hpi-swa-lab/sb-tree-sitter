@@ -14,7 +14,6 @@ SBTSDisambiguatePopup >> applyChoice: aCollectionOfBlocks [
 
 	self dismiss.
 	target sandblockEditor do: (SBReplaceMultipleCommand new target: target replacers: aCollectionOfBlocks).
-	
 	self positionCursorFor: aCollectionOfBlocks first.
 	
 	^ true
@@ -101,7 +100,7 @@ SBTSDisambiguatePopup >> positionCursorFor: aBlock [
 	nested := nil.
 	found := false.
 	editor := aBlock sandblockEditor.
-	aBlock allMorphsDo: [:m | (nested isNil and: [m type = target type]) ifTrue: [nested := m]].
+	aBlock allMorphsDo: [:m | (nested isNil and: [m isTSBlock and: [m sourceString = target sourceString]]) ifTrue: [nested := m]].
 	
 	aBlock cursorPositionsDo: [:position |
 		(found and: [(position block ~= nested and: [(position block hasOwner: nested) not]) and: [position isInsert or: [position isText]]]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none].

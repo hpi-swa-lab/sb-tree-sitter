@@ -15,6 +15,13 @@ SBTSSlot >> addNode: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> addNodeFirst: aNode [
+
+	self assert: (aNode isKindOf: SBTSNodeBase).
+	nodes addFirst: aNode
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> allChildrenDo: aBlock [
 
 	nodes reverseDo: [:node | node root allChildrenDo: aBlock]

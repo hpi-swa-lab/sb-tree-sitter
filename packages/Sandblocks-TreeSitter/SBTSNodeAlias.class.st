@@ -27,10 +27,23 @@ SBTSNodeAlias >> allChildrenDo: aBlock [
 	self element allChildrenDo: aBlock
 ]
 
+{ #category : #accessing }
+SBTSNodeAlias >> bodyTemplate [
+
+	^ self element bodyTemplate
+]
+
 { #category : #blocks }
 SBTSNodeAlias >> buildEmpty [
 
 	^ self element buildEmpty
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeAlias >> buildMorphWith: aBlock slot: aSlot [
+
+	aSlot addNodeFirst: aBlock slot firstNode element.
+	^ super buildMorphWith: aBlock slot: aSlot
 ]
 
 { #category : #parsing }
@@ -71,7 +84,12 @@ SBTSNodeAlias >> printOn: aStream [
 { #category : #parsing }
 SBTSNodeAlias >> resultsFor: aParser [
 
-	^ self element resultsFor: aParser
+	| results |
+	results := self element resultsFor: aParser.
+	results = #noMatch ifTrue: [^ results].
+	^ results collect: [:result |
+		result blocks do: [:b | b slot addNode: self].
+		result]
 ]
 
 { #category : #parsing }

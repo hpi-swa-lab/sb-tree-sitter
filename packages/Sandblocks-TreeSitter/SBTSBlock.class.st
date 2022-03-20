@@ -318,7 +318,7 @@ SBTSBlock >> statements [
 { #category : #'as yet unclassified' }
 SBTSBlock >> template [
 
-	^ self factory bodyNodeForRule: self type
+	^ self slot firstNode bodyTemplate
 ]
 
 { #category : #'as yet unclassified' }

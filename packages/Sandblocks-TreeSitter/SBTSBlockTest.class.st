@@ -31,6 +31,17 @@ SBTSBlockTest >> testJsCall [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testJsExpandObject [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'const a = {id}' language: SBJavascript instance.
+	editor := self editorAndWorldFor: module.
+	module lastDeepChild startInputAtEnd.
+	self type: ':x' in: editor.
+	self assert: 'const a={id:x}' equals: module sourceString
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testJsMethodCall [
 
 	| module editor |
@@ -41,6 +52,19 @@ SBTSBlockTest >> testJsMethodCall [
 	
 	self type: 'console.log("Hello' in: editor.
 	self assert: 'console.log("Hello")' equals: module sourceString
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsNestedMethodCall [
+
+	| module editor |
+	module := SBTSFileParser new
+		parse: 'res.send().status'
+		language: SBJavascript instance.
+	editor := self editorAndWorldFor: module.
+	module lastDeepChild startInputAtEnd.
+	self type: '(x' in: editor.
+	self assert: 'res.send().status(x)' equals: module sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -59,6 +83,17 @@ SBTSBlockTest >> testJsPatternToAssignmentPattern [
 	editor handle: (self keyboardEvent: Character cr).
 	
 	self assert: 'assignment_pattern' equals: module childSandblocks first childSandblocks first type
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsTypeObject [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'const a = {}' language: SBJavascript instance.
+	editor := self editorAndWorldFor: module.
+	module lastDeepChild startInputAtEnd.
+	self type: 'id:x' in: editor.
+	self assert: 'const a={id:x}' equals: module sourceString
 ]
 
 { #category : #'tests - cursor position' }
