@@ -46,7 +46,7 @@ SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean [
 			choices := aBlock tryTransitionAfterInput: aString before: aBoolean.
 			choices size = 1 ifTrue: [^ self applyChoice: choices first].
 			choices size = 0 ifTrue: [
-				^ (self forwardInputToAdjacent: aString) ifFalse: [
+				^ (self forwardInputToAdjacent: aString) ifTrue: [true] ifFalse: [
 					target currentTextMorph
 						ifNotNil: [self tryReinterpretWith: aString]
 						ifNil: [false]]]]
@@ -64,7 +64,10 @@ SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean [
 SBTSDisambiguatePopup >> forwardInputToAdjacent: aString [
 
 	self positionAfterDo: [:position |
-		(position isText or: [position isSelect]) ifTrue: [(self class new for: position block input: aString before: false) ifTrue: [^ true]].
+		(position isText or: [position isSelect]) ifTrue: [
+			(position block tryApplyChange: [:block | block contents: aString] input: aString) ifTrue: [
+				position block sandblockEditor ifNotNil: [position block startInputAtEnd].
+				^ true]].
 		position isInsert ifTrue: [
 			(position command tryExpandWithInput: aString) ifTrue: [
 				target sandblockEditor do: position command.
@@ -87,7 +90,7 @@ SBTSDisambiguatePopup >> positionAfterDo: aBlock [
 	foundSelf := false.
 	(target parentSandblock isTSBlock and: [target submorphAfter isNil]) ifTrue: [aBlock value: (SBCursorSelect new block: target parentSandblock)].
 	(target containingArtefact ifNil: [target containingFloat]) cursorPositionsDo: [:position |
-		(foundSelf and: [position isInsert or: [position isText and: [position block isUnknown]]]) ifTrue: [aBlock value: position].
+		(foundSelf and: [position isInsert or: [position isText and: [position block wantsInput]]]) ifTrue: [aBlock value: position].
 		(position isText and: [position block = target]) ifTrue: [foundSelf := true]]
 ]
 

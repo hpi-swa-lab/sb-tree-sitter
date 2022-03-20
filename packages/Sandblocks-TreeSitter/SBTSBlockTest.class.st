@@ -142,6 +142,20 @@ SBTSBlockTest >> testSmalltalkTemporariesPositions [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testSmalltalkTypeKeywordSignature [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'unary' language: SBTSSmalltalk instance.
+	editor := self editorAndWorldFor: module.
+	module childSandblocks first childSandblocks first startInputAtEnd.
+	editor handle: (self keyboardEvent: $:).
+	editor handle: (self keyboardEvent: $t).
+	editor handle: (self keyboardEvent: $e).
+	self assert: 2 equals: module childSandblocks first childSandblocks size.
+	self assert: 'unary:te' equals: module childSandblocks first sourceString
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testSmalltalkUnaryToKeyword [
 
 	| method editor |

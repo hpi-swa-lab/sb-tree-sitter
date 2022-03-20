@@ -16,7 +16,7 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 { #category : #failures }
 SBTSParseInputTest >> expectedFailures [
 
-	^ #(#testAssignmentPattern)
+	^ #(#testAssignmentPattern #testCreateMemberExpression)
 ]
 
 { #category : #helper }
@@ -195,6 +195,19 @@ SBTSParseInputTest >> testCreateJavascriptIdentifier [
 	
 	self assert: 1 equals: results size.
 	self assert: #('identifier') asSet equals: (results collect: [:choice | choice first type] as: Set)
+]
+
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testCreateMemberExpression [
+
+	| results |
+	self flag: #todo.
+	"will recurse on expression and thus get blocked"
+	results := SBTSInputParser new
+		optionsForTemplate: (SBTSNodeSymbol new type: 'statement' factory: SBJavascript instance)
+		given: 'a.b'.
+	self assert: 1 equals: results size.
+	self assert: 'member_expression' equals: results first first type
 ]
 
 { #category : #'tests - create' }

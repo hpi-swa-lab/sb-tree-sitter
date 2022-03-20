@@ -165,17 +165,7 @@ SBTSBlock >> isTSBlock [
 { #category : #'as yet unclassified' }
 SBTSBlock >> keyStroke: anEvent [
 
-	| previousContents isAtStart |
-	previousContents := self contents.
-	isAtStart := self currentTextMorph cursor = 1.
-	super keyStroke: anEvent.
-	
-	self prefixValid ifFalse: [
-		self contents: previousContents.
-		SBTSDisambiguatePopup new
-			for: self
-			input: anEvent keyCharacter asString
-			before: isAtStart]
+	self tryApplyChange: [:block | super keyStroke: anEvent] input: anEvent keyCharacter asString
 ]
 
 { #category : #'as yet unclassified' }
@@ -332,6 +322,21 @@ SBTSBlock >> template [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> tryApplyChange: aBlock input: aString [
+
+	| previousContents isAtStart |
+	self currentTextMorph ifNil: [^ SBTSDisambiguatePopup new for: self input: aString before: false].
+	
+	previousContents := self contents.
+	isAtStart := self currentTextMorph cursor = 1.
+	aBlock value: self.
+	
+	^ self prefixValid ifTrue: [true] ifFalse: [
+		self contents: previousContents.
+		SBTSDisambiguatePopup new for: self input: aString before: isAtStart]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> tryTransitionAfterInput: aString before: aBoolean [
 
 	^ SBTSInputParser new optionsFor: self given: aString before: aBoolean
@@ -369,6 +374,12 @@ SBTSBlock >> valid [
 	^ self currentTextMorph
 		ifNotNil: [:t | t slot firstNode validFor: t contents]
 		ifNil: [true]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> wantsInput [
+
+	^ self currentTextMorph notNil and: [self contents isEmpty]
 ]
 
 { #category : #'as yet unclassified' }
