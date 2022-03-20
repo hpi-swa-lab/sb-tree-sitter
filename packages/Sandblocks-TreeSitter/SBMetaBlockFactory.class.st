@@ -1264,7 +1264,7 @@ SBMetaBlockFactory >> simplifyList: anObject [
 { #category : #'configuration helpers' }
 SBMetaBlockFactory >> softLineBreakBetween: aBlock and: anotherBlock [
 
-	(aBlock isTSBlock and: [(aBlock slot includesRepeat) notNil]) ifTrue: [^ true].
+	(aBlock slot includesRepeat and: [anotherBlock slot includesRepeat]) ifTrue: [^ true].
 	^ false
 ]
 

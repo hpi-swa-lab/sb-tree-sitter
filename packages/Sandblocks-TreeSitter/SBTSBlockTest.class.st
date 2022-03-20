@@ -5,6 +5,18 @@ Class {
 }
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testBinaryOpOnMemberExpression [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'req.query' language: SBJavascript instance.
+	editor := self editorAndWorldFor: module.
+	module lastDeepChild startInputAtEnd.
+	
+	self type: '==2' in: editor.
+	self assert: 'req.query==2' equals: module sourceString
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testJsCall [
 
 	| module editor |

@@ -66,7 +66,7 @@ SBTSDisambiguatePopup >> forwardInputToAdjacent: aString [
 	self positionAfterDo: [:position |
 		(position isText or: [position isSelect]) ifTrue: [
 			(position block tryApplyChange: [:block | block contents: aString] input: aString) ifTrue: [
-				position block sandblockEditor ifNotNil: [position block startInputAtEnd].
+				(position isText and: [position block sandblockEditor notNil]) ifTrue: [position block startInputAtEnd].
 				^ true]].
 		position isInsert ifTrue: [
 			(position command tryExpandWithInput: aString) ifTrue: [

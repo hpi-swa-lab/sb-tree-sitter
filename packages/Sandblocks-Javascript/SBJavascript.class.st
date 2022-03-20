@@ -6793,6 +6793,14 @@ SBJavascript >> configure [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript >> hardLineBreakBetween: aBlock and: anotherBlock [
+
+	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	anotherBlock type = 'else_clause' ifTrue: [^ true].
+	^ #('statement_block' 'class_body') includes: anotherBlock type
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript >> hardLineBreakMatch: aBlock [
 
 	^ (aBlock submorphAfter ifNotNil: #type) = 'statement_block' or: [(aBlock submorphAfter ifNotNil: #type) = 'class_body']
