@@ -94,6 +94,8 @@ SBTSInputParser >> normalizeResults: aCollection [
 
 	| strings |
 	"if we have a simple single-block result, see if some other results we found could be derived from that simple result. Heuristic is that if the source string starts the same as another block and we contain the innermost slot of that prefix, we can derive it"
+	false ifTrue: [^ aCollection].
+	
 	strings := IdentityDictionary new.
 	
 	aCollection do: [:result |

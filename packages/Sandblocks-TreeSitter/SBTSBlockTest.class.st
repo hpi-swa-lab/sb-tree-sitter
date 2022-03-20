@@ -5,6 +5,17 @@ Class {
 }
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testBashCommand [
+
+	| program editor |
+	program := SBTSFileParser new parse: '' language: SBBash.
+	editor := self editorAndWorldFor: program.
+	
+	program startInputAtEnd.
+	self type: 'ls' in: editor
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testBinaryOpOnMemberExpression [
 
 	| module editor |

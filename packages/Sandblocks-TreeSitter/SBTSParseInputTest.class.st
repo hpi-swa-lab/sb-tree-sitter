@@ -129,6 +129,16 @@ SBTSParseInputTest >> testCreateAssignment [
 ]
 
 { #category : #'tests - create' }
+SBTSParseInputTest >> testCreateBashCommand [
+
+	| results |
+	results := SBTSInputParser new
+		optionsForTemplate: (SBTSNodeSymbol new type: '_statement' factory: SBBash instance)
+		given: 'l'.
+	self assert: (results anySatisfy: [:blocks | blocks first type = 'command'])
+]
+
+{ #category : #'tests - create' }
 SBTSParseInputTest >> testCreateByteArrayAndNumber [
 
 	| results |

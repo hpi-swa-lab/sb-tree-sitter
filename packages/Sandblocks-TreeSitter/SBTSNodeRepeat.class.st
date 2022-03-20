@@ -114,9 +114,10 @@ SBTSNodeRepeat >> required [
 SBTSNodeRepeat >> resultsFor: aParser [
 
 	| results |
-	results := self element resultsFor: aParser.
-	results = #noMatch ifTrue: [^ self required ifTrue: [#noMatch] ifFalse: [{aParser copy}]].
-	^ results
+	results := self element resultsFor: aParser copy.
+	^ self required
+		ifTrue: [results]
+		ifFalse: [{aParser copy}, (results = #noMatch ifTrue: [#()] ifFalse: [results])]
 ]
 
 { #category : #parsing }

@@ -40,11 +40,12 @@ BaselineOfSBTreeSitter >> baseline: spec [
 			package: 'Sandblocks-Json' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-C' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Vhdl' with: [spec requires: #('Sandblocks-TreeSitter')];
-			package: 'Sandblocks-TSSmalltalk' with: [spec requires: #('Sandblocks-TreeSitter')].
+			package: 'Sandblocks-TSSmalltalk' with: [spec requires: #('Sandblocks-TreeSitter')];
+			package: 'Sandblocks-Bash' with: [spec requires: #('Sandblocks-TreeSitter')].
 		
 		spec
 			group: 'default'
-			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Vhdl' 'Sandblocks-TSSmalltalk')]
+			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-TSSmalltalk')]
 ]
 
 { #category : #baseline }

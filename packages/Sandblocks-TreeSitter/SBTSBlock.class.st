@@ -186,7 +186,7 @@ SBTSBlock >> layoutCommands [
 					ifTrue: [stream nextPut: SBAlgebraCommand hardLine]
 					ifFalse: [
 						(self factory softLineBreakBetween: a and: b)
-							ifTrue: [stream nextPut: SBAlgebraCommand softLine]
+							ifTrue: [stream nextPut: SBAlgebraCommand softLineOrGap]
 							ifFalse: [stream nextPut: SBAlgebraCommand gap]]].
 			self hasSubmorphs ifTrue: [stream nextPut: self lastSubmorph layoutCommands]])
 ]
