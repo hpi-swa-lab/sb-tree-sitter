@@ -19,7 +19,7 @@ SBTSNodeLabel >> basicCopy [
 	^ super basicCopy label: self label
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #build }
 SBTSNodeLabel >> buildEmpty [
 
 	^ {self buildMorphWith: nil slot: (SBTSSlot new addNode: self)}
@@ -75,12 +75,24 @@ SBTSNodeLabel >> maxChildren [
 	^ 0
 ]
 
+{ #category : #testing }
+SBTSNodeLabel >> prefixValidFor: aString [
+
+	^ self label beginsWith: aString
+]
+
 { #category : #printing }
 SBTSNodeLabel >> printOn: aStream [
 
 	aStream nextPut: $".
 	aStream nextPutAll: (self label ifNil: ['']).
 	aStream nextPut: $"
+]
+
+{ #category : #accessing }
+SBTSNodeLabel >> regex [
+
+	^ (self factory escapeStringForRegex: self label) asRegex
 ]
 
 { #category : #parsing }
@@ -93,10 +105,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 		labelStream next = aParser next ifFalse: [
 			aParser position: oldPosition.
 			^ #noMatch]].
-	^ {
-		aParser copy addBlock: (SBTSLabel new
-			contents: self label;
-			slot: (SBTSSlot new addNode: self))}
+	^ {aParser copy addBlock: (self buildMorphWith: self label slot: (SBTSSlot new addNode: self))}
 ]
 
 { #category : #parsing }
@@ -107,6 +116,12 @@ SBTSNodeLabel >> takeNodesFrom: aParser [
 			aParser next.
 			{aParser copy addSlot: self}]
 		ifFalse: [#noMatch]
+]
+
+{ #category : #testing }
+SBTSNodeLabel >> validFor: aString [
+
+	^ self label = aString
 ]
 
 { #category : #printing }

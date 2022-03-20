@@ -16,7 +16,7 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 { #category : #failures }
 SBTSParseInputTest >> expectedFailures [
 
-	^ #(#testAssignmentPattern #testCreateMemberExpression)
+	^ #(#testAssignmentPattern #testCreateMemberExpression #testCreateFunction)
 ]
 
 { #category : #helper }
@@ -148,6 +148,22 @@ SBTSParseInputTest >> testCreateCharacter [
 	
 	self assert: 1 equals: results size.
 	self assert: #(#character) asSet equals: (results collect: [:r | r first type] as: Set)
+]
+
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testCreateFunction [
+
+	| results |
+	self flag: #todo.
+	"normalize strips away the generator variants"
+	results := (SBTSInputParser new
+		optionsForTemplate: (SBTSNodeSymbol new type: 'statement' factory: SBJavascript instance)
+		given: 'func')
+		collect: [:b | b first type]
+		as: Set.
+	self
+		assert: #(#identifier #function #'generator_function' #'function_declaration' #'generator_function_declaration') asSet
+		equals: results
 ]
 
 { #category : #'tests - create' }
