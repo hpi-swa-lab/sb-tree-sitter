@@ -4,6 +4,12 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #failures }
+SBTSParseFileTest >> expectedFailures [
+
+	^ #(#testJsParameters)
+]
+
 { #category : #'tests - unit' }
 SBTSParseFileTest >> testChoice [
 
@@ -64,6 +70,18 @@ SBTSParseFileTest >> testJsFunctionPatterns [
 	self assert: #(#identifier #pattern) equals: (module childSandblocks first childSandblocks first slot nodes
 		collect: #type
 		as: Array)
+]
+
+{ #category : #'tests - print' }
+SBTSParseFileTest >> testJsParameters [
+
+	| source |
+	source := 'function a(b,c)
+{
+}'.
+	self
+		assert: source
+		equals: (SBTSFileParser new parse: source language: SBJavascript instance) sourceString
 ]
 
 { #category : #'tests - unit' }

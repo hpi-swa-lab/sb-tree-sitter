@@ -49,7 +49,12 @@ SBTSNodeAlias >> buildMorphWith: aBlock slot: aSlot [
 { #category : #parsing }
 SBTSNodeAlias >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 
-	self element cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock
+	aCollection
+		detect: [:block | block isTSBlock and: [block slot includesParent: self]]
+		ifFound: [:b |
+			aClosure value: (SBCursorSelect new block: b).
+			aBoolean ifFalse: [b cursorPositionsDo: aClosure shallow: aBoolean]]
+		ifNone: [self element cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]
 ]
 
 { #category : #accessing }
