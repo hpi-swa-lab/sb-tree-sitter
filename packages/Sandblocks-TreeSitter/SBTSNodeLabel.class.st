@@ -28,7 +28,7 @@ SBTSNodeLabel >> buildEmpty [
 { #category : #build }
 SBTSNodeLabel >> buildMorphWith: aString slot: aSlot [
 
-	^ SBTSLabel new
+	^ (self isEditable ifTrue: [SBTSTextMorph] ifFalse: [SBTSLabel]) new
 		contents: self label;
 		slot: aSlot
 ]
@@ -48,7 +48,25 @@ SBTSNodeLabel >> childrenForQueryDo: aBlock [
 { #category : #copying }
 SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
 
-	
+	self isEditable ifTrue: [
+		aCollection
+			detect: [:block | block isTextMorph and: [block slot includesParent: self]]
+			ifFound: [:b |
+				b containingSandblock startInputCommand ifNotNil: [:command |
+					aClosure value: (SBCursorText new
+						block: b containingSandblock;
+						currentCommand: command)]]
+			ifNone: []]
+]
+
+{ #category : #testing }
+SBTSNodeLabel >> isEditable [
+	"mark whether this label could be a variation point and should thus be editable"
+
+	^ SBToggledCode
+		comment: ''
+		active: 1
+		do: {[false]. [(#(')' ']' '}' '>') includes: self label) not]}
 ]
 
 { #category : #testing }

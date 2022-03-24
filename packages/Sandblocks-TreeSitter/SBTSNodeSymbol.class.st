@@ -86,7 +86,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 			(results = #recur or: [results = #noMatch])
 				ifTrue: [#noMatch]
 				ifFalse: [
-					results do: [:r | r blocks first slot replaceLast: self].
+					results do: [:r | r blocks last slot replaceLast: self].
 					aParser peek = (Character value: 0)
 						ifTrue: [
 							" if we consumed a nested block, use the input parser and copy all relevant state
@@ -115,7 +115,7 @@ because the stored, nested parser does not have a valid stream "
 								result blocks: (currentBlocks copy
 									add: (SBTSBlock new
 										slot: (SBTSSlot new addNode: self);
-										addAllMorphs: result blocks);
+										addAllMorphs: (result blocks collect: [:b | b copyBlock]));
 									yourself)]]]]
 ]
 

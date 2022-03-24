@@ -162,6 +162,12 @@ SBTSBlock >> isTSBlock [
 	^ true
 ]
 
+{ #category : #testing }
+SBTSBlock >> keepDuringTransform [
+
+	^ true
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> keyStroke: anEvent [
 

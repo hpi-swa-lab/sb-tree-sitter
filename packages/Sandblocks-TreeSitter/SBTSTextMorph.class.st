@@ -57,6 +57,12 @@ SBTSTextMorph >> isTSSymbol [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> keepDuringTransform [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> language [
 
 	^ self factory name
@@ -77,7 +83,7 @@ SBTSTextMorph >> slot [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> slot: aSlot [
 
-	self assert: (aSlot class = SBTSSlot or: [aSlot isNil]).
+	self assert: (aSlot isNil or: [aSlot class = SBTSSlot]).
 	slot := aSlot
 ]
 
@@ -85,6 +91,12 @@ SBTSTextMorph >> slot: aSlot [
 SBTSTextMorph >> sourceString [
 
 	^ self contents
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> submorphIndex [
+
+	^ self owner submorphs indexOf: self
 ]
 
 { #category : #'as yet unclassified' }

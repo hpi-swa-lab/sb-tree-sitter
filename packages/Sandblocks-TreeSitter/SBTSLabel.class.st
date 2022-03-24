@@ -38,6 +38,12 @@ SBTSLabel >> isTSSymbol [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> keepDuringTransform [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> language [
 
 	^ self slot factory name

@@ -40,6 +40,9 @@ SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean [
 
 	target := aBlock.
 	before := aBoolean.
+	
+	target currentTextMorph ifNotNil: [:t | t slot firstNode isTSLabel ifTrue: [^ self tryReinterpretWith: aString from: target currentTextMorph]].
+	
 	aString
 		ifNotEmpty: [
 			choices := aBlock tryTransitionAfterInput: aString before: aBoolean.
@@ -47,7 +50,7 @@ SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean [
 			choices size = 0 ifTrue: [
 				^ (self forwardInputToAdjacent: aString) ifTrue: [true] ifFalse: [
 					target currentTextMorph
-						ifNotNil: [self tryReinterpretWith: aString]
+						ifNotNil: [self tryReinterpretWith: aString from: target]
 						ifNil: [false]]]]
 		ifEmpty: [choices := #()].
 	
@@ -126,21 +129,21 @@ SBTSDisambiguatePopup >> suggestions [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSDisambiguatePopup >> tryReinterpretWith: aString [
+SBTSDisambiguatePopup >> tryReinterpretWith: aString from: aMorph [
 
 	| input myIndex choices |
-	input := target contents, aString.
-	myIndex := target submorphIndex.
+	input := aMorph contents, aString.
+	myIndex := aMorph submorphIndex.
 	choices := SBTSInputParser new
-		optionsFor: target owner
+		optionsFor: aMorph owner
 		given: input
-		before: (target owner submorphs first: myIndex - 1)
-		after: (target owner submorphs allButFirst: myIndex).
+		before: ((aMorph owner submorphs first: myIndex - 1) select: #keepDuringTransform)
+		after: ((aMorph owner submorphs allButFirst: myIndex) select: #keepDuringTransform).
 	^ choices
 		ifNotEmpty: [
 			"multiple choices"
 			self flag: #todo.
-			target sandblockEditor do: (SBReplaceMultipleCommand new target: target owner replacers: choices first).
+			target sandblockEditor do: (SBReplaceMultipleCommand new target: aMorph owner replacers: choices first).
 			self positionCursorFor: (choices first last submorphs at: myIndex).
 			true]
 		ifEmpty: [false]
