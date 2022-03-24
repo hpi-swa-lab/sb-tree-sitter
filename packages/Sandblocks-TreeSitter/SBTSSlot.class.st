@@ -28,6 +28,12 @@ SBTSSlot >> allChildrenDo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> allParentsDo: aBlock [
+
+	nodes do: [:node | node andParentsDo: [:parent | aBlock value: parent]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> allSuperTypesDo: aBlock [
 
 	nodes do: [:node | node allSuperTypesDo: aBlock]
@@ -73,7 +79,7 @@ SBTSSlot >> factory [
 { #category : #'as yet unclassified' }
 SBTSSlot >> field [
 
-	self allSuperTypesDo: [:type | type field ifNotNil: [:field | ^ field]].
+	self allParentsDo: [:type | type field ifNotNil: [:field | ^ field]].
 	^ nil
 ]
 

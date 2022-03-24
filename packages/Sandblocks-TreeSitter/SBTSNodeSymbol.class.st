@@ -64,7 +64,7 @@ SBTSNodeSymbol >> isTSSymbol [
 { #category : #testing }
 SBTSNodeSymbol >> noRepeatOrSeq [
 
-	self bodyTemplate allChildrenDo: [:child | (child isTSChoice or: [child isTSSymbol or: [child isTSAlias or: [child isTSLabel]]]) ifFalse: [^ false]].
+	self bodyTemplate allChildrenDo: [:child | ((child isTSRepeat and: [child element isTSText not]) or: [child isTSSeq]) ifTrue: [^ false]].
 	^ true
 ]
 

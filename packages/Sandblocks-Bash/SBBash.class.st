@@ -2810,5 +2810,6 @@ SBBash >> preprocessGrammar [
 		at: 'regex'
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
 	self removeSymbol: '_concat'.
-	self ignoreExternals: #('heredoc_start' '_simple_heredoc_body' '_heredoc_body_beginning' '_heredoc_body_middle' '_heredoc_body_end')
+	self ignoreExternals: #('heredoc_start' '_simple_heredoc_body' '_heredoc_body_beginning' '_heredoc_body_middle' '_heredoc_body_end').
+	self noteUncapturedText: #('string')
 ]

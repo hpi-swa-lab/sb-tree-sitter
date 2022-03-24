@@ -165,6 +165,12 @@ SBTSNodeBase >> isTSSymbol [
 	^ false
 ]
 
+{ #category : #testing }
+SBTSNodeBase >> isTSText [
+
+	^ false
+]
+
 { #category : #accessing }
 SBTSNodeBase >> language [
 

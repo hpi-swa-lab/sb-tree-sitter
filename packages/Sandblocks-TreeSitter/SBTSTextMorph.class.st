@@ -75,6 +75,24 @@ SBTSTextMorph >> regex [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> repeaterGroup [
+	"copied from SBTSBlock, not sure about the right semantics yet"
+
+	self flag: #todo.
+	
+	self slot repeater ifNotNil: [:repeater | | myIndex mySubIndex seq start |
+		myIndex := self submorphIndex.
+		self flag: #todo.
+		" does not consider nested repeats and nested seqs "
+		seq := self slot parentThat: [:p | p isTSSeq and: [p hasParent: repeater]].
+		seq ifNil: [^ {self}].
+		mySubIndex := (self slot parentThat: [:p | p parent = seq]) in: [:c | c parent elements indexOf: c].
+		start := myIndex - mySubIndex + 1.
+		^ self owner submorphs copyFrom: start to: start + seq elements size - 1].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> slot [
 
 	^ slot

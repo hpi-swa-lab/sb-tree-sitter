@@ -75,6 +75,12 @@ SBTSNodeText >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollectio
 		ifNone: []
 ]
 
+{ #category : #testing }
+SBTSNodeText >> isTSText [
+
+	^ true
+]
+
 { #category : #accessing }
 SBTSNodeText >> maxChildren [
 
@@ -167,7 +173,7 @@ SBTSNodeText >> takeNodesFrom: aParser [
 		ifFalse: [#noMatch]
 ]
 
-{ #category : #nil }
+{ #category : #testing }
 SBTSNodeText >> validFor: aString [
 
 	^ regex matches: aString

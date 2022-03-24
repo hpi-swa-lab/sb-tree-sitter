@@ -72,6 +72,16 @@ SBTSParseFileTest >> testJsFunctionPatterns [
 		as: Array)
 ]
 
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testJsObjectFieldNames [
+
+	| module |
+	module := SBTSFileParser new parse: '{id: 123}' language: SBJavascript.
+	self
+		assert: #('key' 'value')
+		equals: (module childSandblocks first childSandblocks first childSandblocks collect: #field)
+]
+
 { #category : #'tests - print' }
 SBTSParseFileTest >> testJsParameters [
 
@@ -116,6 +126,14 @@ SBTSParseFileTest >> testParse [
 	self assert: 'ab' equals: block childSandblocks first contents.
 	self assert: moduleRule elements second equals: block childSandblocks second slot lastNode.
 	self assert: 'cd' equals: block childSandblocks second contents
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testParseBashCommand [
+
+	| program |
+	program := SBTSFileParser new parse: 'ls' language: SBBash.
+	self assert: (program childSandblocks first childSandblocks first slot includesParentThat: [:p | p type = 'command_name'])
 ]
 
 { #category : #'tests - languages' }

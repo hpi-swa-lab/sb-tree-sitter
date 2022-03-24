@@ -102,6 +102,18 @@ SBTSBlock >> fixedNumberOfChildren [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> get: aFieldNameString [
+
+	| matches |
+	matches := self submorphs select: [:child | child field = aFieldNameString].
+	matches ifNotEmpty: [
+		^ (matches size > 1 and: [matches first slot includesRepeat])
+			ifTrue: [matches]
+			ifFalse: [matches first]].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> grammarHandler [
 
 	^ SBGrammarHandler new
@@ -268,6 +280,9 @@ SBTSBlock >> printTreeOn: aStream indent: aNumber [
 
 	| any |
 	aStream nextPut: $(.
+	self field ifNotNil: [
+		aStream nextPutAll: self field.
+		aStream nextPutAll: ': '].
 	self printOn: aStream.
 	any := false.
 	self submorphsDo: [:m |
