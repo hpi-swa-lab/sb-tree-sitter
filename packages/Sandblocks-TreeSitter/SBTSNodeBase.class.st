@@ -29,6 +29,12 @@ SBTSNodeBase >> andParentsDo: aBlock [
 	[aBlock value: current] doWhileTrue: [(current := current parent) notNil]
 ]
 
+{ #category : #accessing }
+SBTSNodeBase >> bodyTemplate [
+
+	^ self
+]
+
 { #category : #blocks }
 SBTSNodeBase >> buildEmpty [
 
@@ -187,6 +193,13 @@ SBTSNodeBase >> parent [
 SBTSNodeBase >> parent: aNode [
 
 	parent := aNode
+]
+
+{ #category : #hierarchy }
+SBTSNodeBase >> parentThat: aBlock [
+
+	self andParentsDo: [:p | (aBlock value: p) ifTrue: [^ p]].
+	^ nil
 ]
 
 { #category : #parsing }

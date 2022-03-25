@@ -224,6 +224,16 @@ SBTSParseInputTest >> testCreateJavascriptIdentifier [
 ]
 
 { #category : #'tests - create' }
+SBTSParseInputTest >> testCreateKeyword [
+
+	| options |
+	options := SBTSInputParser new
+		optionsForTemplate: (SBTSNodeSymbol new type: 'statement' factory: SBJavascript instance)
+		given: 'const '.
+	self assert: 1 equals: options size
+]
+
+{ #category : #'tests - create' }
 SBTSParseInputTest >> testCreateMemberExpression [
 
 	| results |

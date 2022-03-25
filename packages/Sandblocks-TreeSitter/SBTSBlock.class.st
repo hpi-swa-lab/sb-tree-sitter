@@ -54,9 +54,14 @@ SBTSBlock >> compatibleWithType: aString [
 { #category : #'as yet unclassified' }
 SBTSBlock >> copyBlock [
 
-	^ self class new
+	| copy |
+	copy := self class new
 		addAllMorphs: (self submorphs collect: [:s | s copyBlock]);
-		slot: self slot copy
+		slot: self slot copy.
+	self
+		valueOfProperty: #lastConstructed
+		ifPresentDo: [:val | copy setProperty: #lastConstructed toValue: true].
+	^ copy
 ]
 
 { #category : #'as yet unclassified' }
@@ -331,6 +336,12 @@ SBTSBlock >> slot: aSlot [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> sourceStringForCompare [
+
+	^ String streamContents: [:s | self writeSourceOn: s indent: 0 forCompare: true]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> statements [
 
 	^ self isBlockBody ifTrue: [self childSandblocks] ifFalse: [#()]
@@ -346,15 +357,16 @@ SBTSBlock >> template [
 SBTSBlock >> tryApplyChange: aBlock input: aString [
 
 	| previousContents isAtStart |
-	self currentTextMorph ifNil: [^ SBTSDisambiguatePopup new for: self input: aString before: false].
-	
 	previousContents := self contents.
 	isAtStart := self currentTextMorph cursor = 1.
 	aBlock value: self.
 	
 	^ self prefixValid ifTrue: [true] ifFalse: [
 		self contents: previousContents.
-		SBTSDisambiguatePopup new for: self input: aString before: isAtStart]
+		SBTSDisambiguatePopup new
+			for: (self isUnknown ifTrue: [self] ifFalse: [self currentTextMorph])
+			input: aString
+			before: isAtStart]
 ]
 
 { #category : #'as yet unclassified' }

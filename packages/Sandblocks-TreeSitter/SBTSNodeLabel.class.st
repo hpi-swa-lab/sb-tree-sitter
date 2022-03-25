@@ -28,6 +28,13 @@ SBTSNodeLabel >> buildEmpty [
 { #category : #build }
 SBTSNodeLabel >> buildMorphWith: aString slot: aSlot [
 
+	self needsBlockWrapper ifTrue: [
+		^ SBTSBlock new
+			addMorphBack: (SBTSLabel new
+				contents: self label;
+				slot: aSlot);
+			slot: aSlot].
+	
 	^ (self isEditable ifTrue: [SBTSTextMorph] ifFalse: [SBTSLabel]) new
 		contents: self label;
 		slot: aSlot
@@ -93,6 +100,19 @@ SBTSNodeLabel >> maxChildren [
 	^ 0
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeLabel >> needsBlockWrapper [
+
+	| repeater |
+	"if a label is optional, we cannot address it (e.g., for deleting) unless we wrap a block around it"
+	repeater := self parentThat: #isTSRepeat.
+	repeater ifNil: [^ false].
+	
+	repeater allChildrenDo: [:child | child isTSSymbol ifTrue: [^ false]].
+	
+	^ true
+]
+
 { #category : #testing }
 SBTSNodeLabel >> prefixValidFor: aString [
 
@@ -123,6 +143,10 @@ SBTSNodeLabel >> resultsFor: aParser [
 		labelStream next = aParser next ifFalse: [
 			aParser position: oldPosition.
 			^ #noMatch]].
+	
+	"to support distinguishing between fixed labels such as keywords and text input, we allow users to type a space to end the input and thus force the result to be the fixed label"
+	aParser peek = Character space ifTrue: [aParser next].
+	
 	^ {aParser copy addBlock: (self buildMorphWith: self label slot: (SBTSSlot new addNode: self))}
 ]
 

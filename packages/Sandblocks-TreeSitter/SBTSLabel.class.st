@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> allConnectionsDo: aBlock [
+
+	
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> childrenForQuery [
 	"remove inline block compat"
 
@@ -18,9 +24,14 @@ SBTSLabel >> childrenForQuery [
 { #category : #'as yet unclassified' }
 SBTSLabel >> copyBlock [
 
-	^ self class new
+	| copy |
+	copy := self class new
 		contents: self contents;
-		slot: self slot
+		slot: self slot.
+	self
+		valueOfProperty: #lastConstructed
+		ifPresentDo: [:val | copy setProperty: #lastConstructed toValue: true].
+	^ copy
 ]
 
 { #category : #'as yet unclassified' }
@@ -50,6 +61,12 @@ SBTSLabel >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> repeaterGroup [
+
+	^ {self}
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> slot [
 
 	^ slot
@@ -66,6 +83,12 @@ SBTSLabel >> slot: aSlot [
 SBTSLabel >> sourceString [
 
 	^ self contents
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLabel >> sourceStringForCompare [
+
+	^ String streamContents: [:s | self writeSourceOn: s indent: 0 forCompare: true]
 ]
 
 { #category : #'as yet unclassified' }

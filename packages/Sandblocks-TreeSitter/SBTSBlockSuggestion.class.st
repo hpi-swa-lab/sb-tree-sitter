@@ -3,7 +3,8 @@ Class {
 	#superclass : #SBSuggestionItem,
 	#instVars : [
 		'blocks',
-		'target'
+		'target',
+		'disambiguatePopup'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -11,6 +12,13 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSBlockSuggestion >> blocks: aCollection in: anEditor [
 
+	self blocks: aCollection in: anEditor popup: nil
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlockSuggestion >> blocks: aCollection in: anEditor popup: aPopup [
+
+	disambiguatePopup := aPopup.
 	self selector: aCollection first printString label: 'block'.
 	self
 		preview: (anEditor newSelectionContainer
@@ -22,13 +30,7 @@ SBTSBlockSuggestion >> blocks: aCollection in: anEditor [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSBlockSuggestion >> target: aBlock [
-
-	target := aBlock
-]
-
-{ #category : #'as yet unclassified' }
-SBTSBlockSuggestion >> useSuggestionOn: aBlock in: anEditor [
+SBTSBlockSuggestion >> oldUseSuggestionOn: aBlock in: anEditor [
 
 	| nested found block |
 	target := target ifNil: [aBlock].
@@ -43,4 +45,16 @@ SBTSBlockSuggestion >> useSuggestionOn: aBlock in: anEditor [
 		position block = nested ifTrue: [found := true]].
 	"didn't find the nested block again, choose the very first"
 	^ block cursorPositionsDo: [:position | ((position isInsert and: [(position command element hasParentThat: #isTSOptional) not]) or: [position isText]) ifTrue: [^ anEditor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none]]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlockSuggestion >> target: aBlock [
+
+	target := aBlock
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlockSuggestion >> useSuggestionOn: aBlock in: anEditor [
+
+	disambiguatePopup applyChoice: blocks
 ]

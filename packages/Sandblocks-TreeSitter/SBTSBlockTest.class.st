@@ -79,6 +79,17 @@ SBTSBlockTest >> testJsNestedMethodCall [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testJsNumberToString [
+
+	| module editor |
+	module := SBTSFileParser new parse: '123' language: SBJavascript instance.
+	editor := self editorAndWorldFor: module.
+	module lastDeepChild startInputAtStart.
+	self type: '''' in: editor.
+	self assert: '''123''' equals: module sourceString
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testJsPatternToAssignmentPattern [
 
 	| module editor |
@@ -94,6 +105,19 @@ SBTSBlockTest >> testJsPatternToAssignmentPattern [
 	editor handle: (self keyboardEvent: Character cr).
 	
 	self assert: 'assignment_pattern' equals: module childSandblocks first childSandblocks first type
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsTypeAssignment [
+
+	| module editor |
+	module := SBTSFileParser new parse: '' language: SBJavascript.
+	editor := self editorAndWorldFor: module.
+	
+	module startInputAtEnd.
+	editor handle: (self keyboardEvent: Character arrowRight).
+	self type: 'const a=5' in: editor.
+	self assert: 'const a=5' equals: module childSandblocks first sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -223,7 +247,6 @@ SBTSBlockTest >> testSmalltalkUnaryToKeyword [
 	method childSandblocks second childSandblocks second startInputAtEnd.
 	editor handle: (self keyboardEvent: $:).
 	self assert: #'keyword_message' equals: method childSandblocks second type.
-	self assert: #keyword equals: editor selection type.
 	editor handle: (self keyboardEvent: $4).
 	self assert: #number equals: editor selection type
 ]

@@ -11,15 +11,17 @@ Class {
 }
 
 { #category : #blocks }
-SBTSInputParser >> addAllBlocks: aCollection [
+SBTSInputParser >> addBlock: aBlock [
 
-	aCollection do: [:b | self addBlock: b]
+	blocks add: aBlock.
+	self atEnd ifTrue: [
+		aBlock setProperty: #lastConstructed toValue: true]
 ]
 
 { #category : #blocks }
-SBTSInputParser >> addBlock: aBlock [
+SBTSInputParser >> addEmptyBlocks: aCollection [
 
-	blocks add: aBlock
+	aCollection do: [:b | blocks add: b]
 ]
 
 { #category : #stream }

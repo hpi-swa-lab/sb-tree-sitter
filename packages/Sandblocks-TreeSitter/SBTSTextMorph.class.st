@@ -31,9 +31,20 @@ SBTSTextMorph >> contents: aString [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> copyBlock [
 
-	^ self class new
+	| copy |
+	copy := self class new
 		contents: self contents;
-		slot: self slot
+		slot: self slot.
+	self
+		valueOfProperty: #lastConstructed
+		ifPresentDo: [:val | copy setProperty: #lastConstructed toValue: true].
+	^ copy
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> ensureLayouted [
+
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -53,6 +64,12 @@ SBTSTextMorph >> isTSSymbol [
 	"remove inline block compat"
 
 	self flag: #todo.
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> isUnknown [
+
 	^ false
 ]
 
@@ -109,6 +126,12 @@ SBTSTextMorph >> slot: aSlot [
 SBTSTextMorph >> sourceString [
 
 	^ self contents
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> sourceStringForCompare [
+
+	^ String streamContents: [:s | self writeSourceOn: s indent: 0 forCompare: true]
 ]
 
 { #category : #'as yet unclassified' }

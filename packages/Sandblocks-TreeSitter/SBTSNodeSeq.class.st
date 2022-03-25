@@ -101,7 +101,7 @@ SBTSNodeSeq >> resultsFor: aParser [
 								self elements
 									from: index + 1
 									to: self elements size
-									do: [:node | candidate addAllBlocks: node buildEmpty].
+									do: [:node | candidate addEmptyBlocks: node buildEmpty].
 								stream nextPut: candidate]
 							ifFalse: [queue add: {candidate. index}]]]]].
 		
