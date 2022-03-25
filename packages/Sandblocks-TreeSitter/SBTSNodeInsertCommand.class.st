@@ -78,7 +78,7 @@ SBTSNodeInsertCommand >> postDo [
 				for: morphs first
 				input: continueInputString
 				before: false]
-		ifNil: [container sandblockEditor selection moveCursorToEnd]
+		ifNil: [SBTSDisambiguatePopup new positionCursorIn: morphs]
 ]
 
 { #category : #'as yet unclassified' }

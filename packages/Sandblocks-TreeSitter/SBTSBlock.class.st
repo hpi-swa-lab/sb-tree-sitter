@@ -412,7 +412,11 @@ SBTSBlock >> valid [
 { #category : #'as yet unclassified' }
 SBTSBlock >> wantsInput [
 
-	^ self currentTextMorph notNil and: [self contents isEmpty]
+	(self currentTextMorph notNil and: [self contents isEmpty]) ifTrue: [^ true].
+	
+	(self isBlockBody and: [self hasChildSandblocks not]) ifTrue: [^ true].
+	
+	^ false
 ]
 
 { #category : #'as yet unclassified' }

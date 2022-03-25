@@ -42,6 +42,17 @@ SBTSBlockTest >> testJsCall [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testJsClassField [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'class {}' language: SBJavascript.
+	editor := self editorAndWorldFor: module.
+	module lastDeepChild startInputAtEnd.
+	self type: 'prop' in: editor.
+	self assert: 'prop' equals: module lastDeepChild contents
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testJsExpandObject [
 
 	| module editor |

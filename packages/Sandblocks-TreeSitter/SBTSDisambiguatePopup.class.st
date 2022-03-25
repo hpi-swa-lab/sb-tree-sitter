@@ -16,7 +16,7 @@ SBTSDisambiguatePopup >> applyChoice: aCollectionOfBlocks [
 
 	self dismiss.
 	target sandblockEditor do: (SBReplaceMultipleCommand new target: target replacers: aCollectionOfBlocks).
-	self positionCursorIn: aCollectionOfBlocks first.
+	self positionCursorIn: aCollectionOfBlocks.
 	
 	^ true
 ]
@@ -62,21 +62,6 @@ SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean from: anoth
 ]
 
 { #category : #'as yet unclassified' }
-SBTSDisambiguatePopup >> forwardInputToAdjacent: aString [
-
-	self positionAfterDo: [:position |
-		(position isText or: [position isSelect]) ifTrue: [
-			(position block tryApplyChange: [:block | block contents: aString] input: aString) ifTrue: [
-				(position isText and: [position block sandblockEditor notNil]) ifTrue: [position block startInputAtEnd].
-				^ true]].
-		position isInsert ifTrue: [
-			(position command tryExpandWithInput: aString) ifTrue: [
-				target sandblockEditor do: position command.
-				^ true]]].
-	^ false
-]
-
-{ #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> initialize [
 
 	super initialize.
@@ -117,10 +102,10 @@ SBTSDisambiguatePopup >> positionCursorFor: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSDisambiguatePopup >> positionCursorIn: aBlock [
+SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 
 	| all positionInAll stopIndex |
-	all := Array streamContents: [:s | aBlock allMorphsPreorderDo: [:m | s nextPut: m]].
+	all := Array streamContents: [:s | aCollection do: [:block | block allMorphsPreorderDo: [:m | s nextPut: m]]].
 	stopIndex := all findFirst: [:m | m valueOfProperty: #lastConstructed ifAbsent: [false]].
 	(all at: stopIndex) removeProperty: #lastConstructed.
 	
@@ -129,14 +114,15 @@ SBTSDisambiguatePopup >> positionCursorIn: aBlock [
 			ifTrue: [(all findFirst: [:m | m owner = cursor container]) + (cursor command insertIndex - 1)]
 			ifFalse: [all indexOf: cursor block]].
 	
-	aBlock cursorPositionsDo: [:cursor |
-		(((cursor isInsert and: [(cursor command element hasParentThat: [:p | p isTSRepeat and: [p required or: [p multiple not]]]) not]) or: [cursor isText]) and: [(positionInAll value: cursor) >= stopIndex]) ifTrue: [
-			^ aBlock sandblockEditor cursor
-				cursorPosition: (cursor placeAtEnd: true)
-				explicitMove: false
-				axis: #none]].
+	aCollection do: [:block |
+		block cursorPositionsDo: [:cursor |
+			(((cursor isInsert and: [(cursor command element hasParentThat: [:p | p isTSRepeat and: [p required or: [p multiple not]]]) not]) or: [cursor isText]) and: [(positionInAll value: cursor) >= stopIndex]) ifTrue: [
+				^ block sandblockEditor cursor
+					cursorPosition: (cursor placeAtEnd: true)
+					explicitMove: false
+					axis: #none]]].
 	
-	aBlock startInputAtEnd
+	aCollection last startInputAtEnd
 ]
 
 { #category : #'as yet unclassified' }
