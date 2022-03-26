@@ -4,6 +4,12 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #failures }
+SBTSBlockTest >> expectedFailures [
+
+	^ #(#testJsAmbiguousCall)
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testBashCommand [
 
@@ -35,6 +41,18 @@ SBTSBlockTest >> testCursorPositionsAroundUnknown [
 	self editorFor: module.
 	module childSandblocks first childSandblocks last changeToUnknown.
 	self assert: (Array streamContents: [:stream | module childSandblocks first cursorPositionsDo: [:pos | stream nextPut: pos]]) size >= 7
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsAmbiguousCall [
+
+	| module editor |
+	module := SBTSFileParser new parse: '' language: SBJavascript.
+	editor := self editorFor: module.
+	module startInsertAtEnd.
+	
+	self type: 'a(' in: editor.
+	self assert: 'call_expression' equals: module childSandblocks first type
 ]
 
 { #category : #'tests - input transition' }
