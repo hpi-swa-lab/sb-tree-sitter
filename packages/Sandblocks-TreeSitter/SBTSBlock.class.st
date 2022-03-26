@@ -231,6 +231,24 @@ SBTSBlock >> newEmptyChildNear: aBlock before: aBoolean [
 	^ nil
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> newNullBlock [
+
+	^ SBTSUnknownBlock new slot: (SBTSSlot new addNode: self slot lastNode)
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> objectInterfaceForChild: aBlock [
+
+	^ {SBTSObjectInterface new slot: aBlock slot}
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> objectInterfaceForInsert: aCommand [
+
+	^ {SBTSObjectInterface new slot: (SBTSSlot new addNode: aCommand element)}
+]
+
 { #category : #highlight }
 SBTSBlock >> ownerWithColor [
 

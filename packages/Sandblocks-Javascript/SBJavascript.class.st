@@ -6854,7 +6854,8 @@ SBJavascript >> preprocessGrammar [
 	self grammar rules statement members: (self grammar rules statement members reject: [:m | m name = 'labeled_statement']).
 	
 	"for some reason the member_expression accepts both primary_expr and expr as options, which lets our parser think that matches are ambiguous"
-	(self grammar rules at: 'member_expression') content members first content: (JsonObject fromAssociations: {'type' -> 'SYMBOL'. 'name' -> 'expression'})
+	(self grammar rules at: 'member_expression') content members first content: (JsonObject fromAssociations: {'type' -> 'SYMBOL'. 'name' -> 'expression'}).
+	(self grammar rules at: 'subscript_expression') content members first content: (JsonObject fromAssociations: {'type' -> 'SYMBOL'. 'name' -> 'expression'})
 ]
 
 { #category : #'as yet unclassified' }
