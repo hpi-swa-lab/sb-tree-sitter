@@ -70,10 +70,7 @@ SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollecti
 SBTSNodeLabel >> isEditable [
 	"mark whether this label could be a variation point and should thus be editable"
 
-	^ SBToggledCode
-		comment: ''
-		active: 1
-		do: {[false]. [(#(')' ']' '}' '>') includes: self label) not]}
+	^ SBToggledCode comment: '' active: 1 do: {[false]. [(factory isImmutableLabel: self) not]}
 ]
 
 { #category : #testing }
@@ -139,7 +136,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 	| labelStream oldPosition |
 	labelStream := self label readStream.
 	oldPosition := aParser position.
-	[aParser atEnd or: [labelStream atEnd]] whileFalse: [
+	[aParser atEnd or: [(aParser peek = (Character value: 0) and: [labelStream position > 0]) or: [labelStream atEnd]]] whileFalse: [
 		labelStream next = aParser next ifFalse: [
 			aParser position: oldPosition.
 			^ #noMatch]].

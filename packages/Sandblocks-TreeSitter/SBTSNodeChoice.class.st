@@ -44,7 +44,7 @@ SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollect
 	"check if there is an unknown for this choice"
 
 	aCollection
-		detect: [:block | block isTSBlock and: [block isUnknown and: [block slot includesParent: self]]]
+		detect: [:block | block isTSBlock and: [block isUnknown and: [block slot firstNode = self]]]
 		ifFound: [:b |
 			aClosure value: (SBCursorSelect new block: b).
 			aBoolean ifFalse: [b cursorPositionsDo: aClosure shallow: aBoolean]]

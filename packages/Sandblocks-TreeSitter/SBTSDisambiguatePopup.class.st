@@ -86,24 +86,26 @@ SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 	| all positionInAll stopIndex |
 	all := Array streamContents: [:s | aCollection do: [:block | block allMorphsPreorderDo: [:m | s nextPut: m]]].
 	stopIndex := all findFirst: [:m | m valueOfProperty: #lastConstructed ifAbsent: [false]].
-	(all at: stopIndex) removeProperty: #lastConstructed.
 	
-	(all at: stopIndex) containingSandblock valid ifFalse: [^ (all at: stopIndex) containingSandblock startInputAtEnd].
+	stopIndex > 0 ifTrue: [
+		(all at: stopIndex) removeProperty: #lastConstructed.
+		
+		(all at: stopIndex) containingSandblock valid ifFalse: [^ (all at: stopIndex) containingSandblock startInputAtEnd].
+		
+		positionInAll := [:cursor |
+			cursor isInsert
+				ifTrue: [(all findFirst: [:m | m owner = cursor container]) + (cursor command insertIndex - 1)]
+				ifFalse: [all indexOf: cursor block currentTextMorph]].
+		
+		aCollection do: [:block |
+			block cursorPositionsDo: [:cursor |
+				(((cursor isInsert and: [(cursor command element hasParentThat: [:p | p isTSRepeat and: [p required or: [p multiple not]]]) not]) or: [cursor isText]) and: [(positionInAll value: cursor) > stopIndex]) ifTrue: [
+					^ block sandblockEditor cursor
+						cursorPosition: (cursor placeAtEnd: true)
+						explicitMove: false
+						axis: #none]]]].
 	
-	positionInAll := [:cursor |
-		cursor isInsert
-			ifTrue: [(all findFirst: [:m | m owner = cursor container]) + (cursor command insertIndex - 1)]
-			ifFalse: [all indexOf: cursor block]].
-	
-	aCollection do: [:block |
-		block cursorPositionsDo: [:cursor |
-			(((cursor isInsert and: [(cursor command element hasParentThat: [:p | p isTSRepeat and: [p required or: [p multiple not]]]) not]) or: [cursor isText]) and: [(positionInAll value: cursor) >= stopIndex]) ifTrue: [
-				^ block sandblockEditor cursor
-					cursorPosition: (cursor placeAtEnd: true)
-					explicitMove: false
-					axis: #none]]].
-	
-	aCollection last startInputAtEnd
+	aCollection last lastDeepChild startInputAtEnd
 ]
 
 { #category : #'as yet unclassified' }

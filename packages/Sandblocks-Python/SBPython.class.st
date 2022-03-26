@@ -5222,6 +5222,12 @@ SBPython >> indentMatch: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> isImmutableLabel: aLabelNode [
+
+	^ (super isImmutableLabel: aLabelNode) or: [#(':') includes: aLabelNode label]
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> postConfigure [
 
 	blockInline remove: 'block' ifAbsent: []

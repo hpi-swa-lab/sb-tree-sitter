@@ -300,6 +300,20 @@ SBTSParseInputTest >> testIdentifierToAssignment [
 ]
 
 { #category : #'tests - wrap' }
+SBTSParseInputTest >> testReinterpretAssignment [
+
+	| stmt results |
+	stmt := (SBTSFileParser new parse: 'let a = 5' language: SBJavascript instance) childSandblocks first.
+	self assert: stmt submorphs first contents = 'let'.
+	results := SBTSInputParser new
+		optionsFor: stmt
+		given: 'c'
+		before: {}
+		after: {stmt childSandblocks last}.
+	self assert: 'const' equals: results first first submorphs first contents
+]
+
+{ #category : #'tests - wrap' }
 SBTSParseInputTest >> testReinterpretBinaryOp [
 
 	| stmt results |
@@ -310,8 +324,8 @@ SBTSParseInputTest >> testReinterpretBinaryOp [
 		given: '-'
 		before: {stmt childSandblocks first}
 		after: {stmt childSandblocks last}.
-	self assert: 'binary_expression' equals: results first first type.
-	self assert: results first first submorphs second contents = '-'
+	self assert: #('binary_expression' 'augmented_assignment_expression') asSet equals: (results collect: [:r | r first type] as: Set).
+	self assert: #('-=' '-') asSet equals: (results collect: [:r | r first submorphs second contents] as: Set)
 ]
 
 { #category : #'tests - wrap' }

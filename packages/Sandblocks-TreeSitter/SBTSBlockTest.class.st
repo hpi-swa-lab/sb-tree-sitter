@@ -27,6 +27,16 @@ SBTSBlockTest >> testBinaryOpOnMemberExpression [
 	self assert: 'req.query==2' equals: module sourceString
 ]
 
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testCursorPositionsAroundUnknown [
+
+	| module |
+	module := SBTSFileParser new parse: '2+x' language: SBJavascript instance.
+	self editorFor: module.
+	module childSandblocks first childSandblocks last changeToUnknown.
+	self assert: (Array streamContents: [:stream | module childSandblocks first cursorPositionsDo: [:pos | stream nextPut: pos]]) size >= 7
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsCall [
 
@@ -47,7 +57,7 @@ SBTSBlockTest >> testJsClassField [
 	| module editor |
 	module := SBTSFileParser new parse: 'class {}' language: SBJavascript.
 	editor := self editorAndWorldFor: module.
-	module lastDeepChild startInputAtEnd.
+	module lastDeepChild startInsertAtEnd.
 	self type: 'prop' in: editor.
 	self assert: 'prop' equals: module lastDeepChild contents
 ]
@@ -137,7 +147,7 @@ SBTSBlockTest >> testJsTypeObject [
 	| module editor |
 	module := SBTSFileParser new parse: 'const a = {}' language: SBJavascript instance.
 	editor := self editorAndWorldFor: module.
-	module lastDeepChild startInputAtEnd.
+	module lastDeepChild startInsertAtEnd.
 	self type: 'id:x' in: editor.
 	self assert: 'const a={id:x}' equals: module sourceString
 ]
@@ -268,9 +278,9 @@ SBTSBlockTest >> testSmalltalkUnaryToKeyword [
 SBTSBlockTest >> testTypingArray [
 
 	| module editor |
-	module := SBTSFileParser new parse: '{}' language: SBJavascript instance.
+	module := SBTSFileParser new parse: '' language: SBJavascript instance.
 	editor := self editorAndWorldFor: module.
-	module childSandblocks first startInputAtEnd.
+	module startInsertAtEnd.
 	editor handle: (SBTest keyboardEvent: $[).
 	self tick.
 	self tick.
@@ -278,9 +288,9 @@ SBTSBlockTest >> testTypingArray [
 	
 	self
 		assert: 'array'
-		equals: module childSandblocks first childSandblocks first type.
+		equals: module childSandblocks first type.
 	self
-		assert: module childSandblocks first childSandblocks last
+		assert: module childSandblocks last
 		equals: editor selection.
 	self assert: #insert equals: editor cursor mode
 ]

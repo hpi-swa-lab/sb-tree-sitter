@@ -904,6 +904,12 @@ SBMetaBlockFactory >> isBlockInlined: aTypeString [
 	^ blockInline includes: aTypeString
 ]
 
+{ #category : #testing }
+SBMetaBlockFactory >> isImmutableLabel: aLabelNode [
+
+	^ #(')' ']' '}' '>') includes: aLabelNode label
+]
+
 { #category : #'configuration helpers' }
 SBMetaBlockFactory >> isStatementContainer: aString [
 
