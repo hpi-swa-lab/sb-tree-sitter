@@ -81,33 +81,14 @@ SBTSDisambiguatePopup >> positionAfterDo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSDisambiguatePopup >> positionCursorFor: aBlock [
-
-	| editor found nested |
-	nested := nil.
-	found := false.
-	editor := aBlock sandblockEditor.
-	
-	aBlock allMorphsDo: [:m | (nested isNil and: [m isTSBlock and: [m sourceStringForCompare = sourceString]]) ifTrue: [nested := m]].
-	
-	(nested notNil and: [nested isUnknown]) ifTrue: [^ nested startInput].
-	
-	nested ifNotNil: [
-		aBlock cursorPositionsDo: [:position |
-			(found and: [(position block ~= nested and: [(position block hasOwner: nested) not]) and: [position isInsert or: [position isText]]]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none].
-			position block = nested ifTrue: [found := true]]].
-	
-	"didn't find the nested block again, choose the very first"
-	aBlock cursorPositionsDo: [:position | ((position isInsert and: [(position command element hasParentThat: #isTSOptional) not]) or: [position isText]) ifTrue: [^ editor cursor cursorPosition: (position placeAtEnd: true) explicitMove: false axis: #none]]
-]
-
-{ #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 
 	| all positionInAll stopIndex |
 	all := Array streamContents: [:s | aCollection do: [:block | block allMorphsPreorderDo: [:m | s nextPut: m]]].
 	stopIndex := all findFirst: [:m | m valueOfProperty: #lastConstructed ifAbsent: [false]].
 	(all at: stopIndex) removeProperty: #lastConstructed.
+	
+	(all at: stopIndex) containingSandblock valid ifFalse: [^ (all at: stopIndex) containingSandblock startInputAtEnd].
 	
 	positionInAll := [:cursor |
 		cursor isInsert

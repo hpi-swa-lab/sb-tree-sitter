@@ -203,7 +203,9 @@ SBTSBlockTest >> testSmalltalkInsertKeywordPart [
 	module childSandblocks second startInputAtEnd.
 	editor handle: (self keyboardEvent: Character arrowRight).
 	editor handle: (self keyboardEvent: $a).
-	self assert: 7 equals: module childSandblocks second childSandblocks size
+	editor handle: (self keyboardEvent: $b).
+	self assert: 7 equals: module childSandblocks second childSandblocks size.
+	self assert: 'a test:123 abc:234 ab' equals: module childSandblocks second sourceString
 ]
 
 { #category : #'tests - cursor position' }
