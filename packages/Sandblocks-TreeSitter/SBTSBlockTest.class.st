@@ -40,7 +40,7 @@ SBTSBlockTest >> testCursorPositionsAroundUnknown [
 	module := SBTSFileParser new parse: '2+x' language: SBJavascript instance.
 	self editorFor: module.
 	module childSandblocks first childSandblocks last changeToUnknown.
-	self assert: (Array streamContents: [:stream | module childSandblocks first cursorPositionsDo: [:pos | stream nextPut: pos]]) size >= 7
+	self assert: (Array streamContents: [:stream | module childSandblocks first cursorPositionsDo: [:pos | stream nextPut: pos]]) size >= 5
 ]
 
 { #category : #'tests - input transition' }
@@ -177,7 +177,7 @@ SBTSBlockTest >> testPyDeleteReturnType [
 	program := SBTSFileParser new parse: 'def a() -> int:
 	pass' language: SBPython.
 	self editorFor: program.
-	program childSandblocks first childSandblocks second deleteBlock.
+	program childSandblocks first childSandblocks second select; deleteBlock.
 	self assert: 'def a():
 	pass' equals: program sourceString
 ]

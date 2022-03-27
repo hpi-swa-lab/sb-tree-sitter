@@ -202,6 +202,14 @@ SBTSSlot >> transitionRoot [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> trimNodesTo: aNode [
+
+	| index |
+	index := nodes indexOf: aNode ifAbsent: [self error: 'missing node in slot list'].
+	nodes removeLast: nodes size - index
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> type [
 
 	^ self firstNode type

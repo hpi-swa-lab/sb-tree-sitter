@@ -327,6 +327,24 @@ SBTSParseInputTest >> testReinterpretBinaryOp [
 ]
 
 { #category : #'tests - wrap' }
+SBTSParseInputTest >> testReinterpretBinaryOpNumbers [
+
+	| stmt results |
+	stmt := (SBTSFileParser new parse: '1 + 3' language: SBJavascript instance) childSandblocks first.
+	self assert: stmt submorphs second contents = '+'.
+	results := SBTSInputParser new
+		optionsFor: stmt
+		given: '-'
+		before: {stmt childSandblocks first}
+		after: {stmt childSandblocks last}.
+	self assert: #('binary_expression') asSet equals: (results collect: [:r | r first type] as: Set).
+	self assert: '-' equals: results first first submorphs second contents.
+	self
+		assert: '-'
+		equals: results first first childSandblocks first slot nodes third parent elements second label
+]
+
+{ #category : #'tests - wrap' }
 SBTSParseInputTest >> testReinterpretUnaryToKeyword [
 
 	| message results |
@@ -379,4 +397,19 @@ SBTSParseInputTest >> testWrapByteArray [
 	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
 	results := SBTSInputParser new optionsFor: stmt given: '#[' before: true.
 	self assert: 'byte_array' equals: results first first type
+]
+
+{ #category : #'tests - wrap' }
+SBTSParseInputTest >> testWrapJsBinaryOp [
+
+	| program results |
+	program := SBTSFileParser new parse: '1' language: SBJavascript instance.
+	results := SBTSInputParser new
+		optionsFor: program childSandblocks first
+		given: '+2'
+		before: {program childSandblocks first}
+		after: {}.
+	self
+		assert: results first first childSandblocks second slot nodes size
+		equals: results first first childSandblocks first slot nodes size
 ]

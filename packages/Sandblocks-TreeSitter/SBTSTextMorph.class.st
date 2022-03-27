@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> allConnectionsDo: aBlock [
+
+	
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> canBeEmpty [
 
 	^ self regex matches: ''

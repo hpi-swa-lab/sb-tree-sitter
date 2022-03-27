@@ -145,15 +145,19 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 		aCollection first slot firstNode ~= typeNode ifTrue: [visitedSupertypes add: typeNode type]]].
 	
 	aCollection doWithIndex: [:block :index |
-		block slot allSuperTypesDo: [:typeNode |
+		block slot allSuperTypesDo: [:typeNode | | copy |
+			copy := block copyBlock.
+			copy slot trimNodesTo: typeNode.
 			(memoizations at: index)
 				at: typeNode type
-				put: {self copy addBlock: block copyBlock}]].
+				put: {self copy addBlock: copy}]].
 	anotherCollection doWithIndex: [:block :index |
-		block slot allSuperTypesDo: [:typeNode |
+		block slot allSuperTypesDo: [:typeNode | | copy |
+			copy := block copyBlock.
+			copy slot trimNodesTo: typeNode.
 			(memoizations at: aCollection size + (aString size + index))
 				at: typeNode type
-				put: {self copy addBlock: block copyBlock}]].
+				put: {self copy addBlock: copy}]].
 	
 	results := aTSBlock slot transitionRoot resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].

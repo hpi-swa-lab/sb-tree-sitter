@@ -59,7 +59,6 @@ SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream 
 	
 	(aStream peek isTSBlock and: [aStream peek slot includesParent: self]) ifTrue: [ | block |
 		block := aStream next.
-		aClosure value: (SBCursorSelect new block: block).
 		aBoolean ifFalse: [block cursorPositionsDo: aClosure shallow: aBoolean]]
 ]
 
@@ -116,8 +115,8 @@ because the stored, nested parser does not have a valid stream "
 					results collect: [:result |
 						self isInlined
 							ifTrue: [
-								result blocks: currentBlocks copy, result blocks.
 								result blocks do: [:b | b slot addNode: self].
+								result blocks: currentBlocks copy, result blocks.
 								result]
 							ifFalse: [
 								result blocks: (currentBlocks copy

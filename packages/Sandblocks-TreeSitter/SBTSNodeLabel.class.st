@@ -167,7 +167,7 @@ SBTSNodeLabel >> traverseBlocks: aStream do: aBlock [
 
 	self needsBlockWrapper
 		ifTrue: [(aStream peek isTSBlock and: [aStream peek slot includesParent: self]) ifTrue: [aBlock value: aStream next]]
-		ifFalse: [(aStream peek isStringMorph and: [aStream peek slot includesParent: self]) ifTrue: [aBlock value: aStream next]]
+		ifFalse: [((self isEditable ifTrue: [aStream peek isTextMorph] ifFalse: [aStream peek isStringMorph]) and: [aStream peek slot includesParent: self]) ifTrue: [aBlock value: aStream next]]
 ]
 
 { #category : #testing }
