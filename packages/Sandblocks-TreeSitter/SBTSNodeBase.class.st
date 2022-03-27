@@ -48,8 +48,8 @@ SBTSNodeBase >> buildMorphWith: aBlock slot: aSlot [
 		self assert: aBlock isString.
 		^ SBTSTextMorph new contents: aBlock].
 	
-	(self factory isBlockInlined: aBlock type) ifTrue: [
-		aBlock submorphs do: [:m | aSlot nodes do: [:n | m slot addNode: n]].
+	aBlock slot firstNode isBlockInlined ifTrue: [
+		aBlock slot firstNode isBlockInlinedInParent ifFalse: [aBlock submorphs do: [:m | aSlot nodes do: [:n | m slot addNode: n]]].
 		^ aBlock submorphs].
 	
 	^ aBlock slot: aSlot

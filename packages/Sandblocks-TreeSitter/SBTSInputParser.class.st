@@ -148,9 +148,7 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 		block slot allSuperTypesDo: [:typeNode | | copy |
 			copy := block copyBlock.
 			copy slot trimNodesTo: typeNode.
-			(memoizations at: index)
-				at: typeNode type
-				put: {self copy addBlock: copy}]].
+			(memoizations at: index) at: typeNode type put: {self copy addBlock: copy}]].
 	anotherCollection doWithIndex: [:block :index |
 		block slot allSuperTypesDo: [:typeNode | | copy |
 			copy := block copyBlock.

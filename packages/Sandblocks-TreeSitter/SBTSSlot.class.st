@@ -197,7 +197,9 @@ SBTSSlot >> separatorBetween: aBlock and: anotherBlock indent: aNumber [
 { #category : #'as yet unclassified' }
 SBTSSlot >> transitionRoot [
 
-	self nodes reverseDo: [:node | node isBlockInlined ifFalse: [^ node transitionRoot]].
+	SBToggledCode comment: '' active: 1 do: {
+		[^ self nodes last transitionRoot].
+		[self nodes reverseDo: [:node | node isBlockInlined ifFalse: [^ node transitionRoot]]]}.
 	self assert: false
 ]
 

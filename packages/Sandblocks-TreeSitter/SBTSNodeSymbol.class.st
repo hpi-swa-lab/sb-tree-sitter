@@ -63,6 +63,12 @@ SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream 
 ]
 
 { #category : #testing }
+SBTSNodeSymbol >> isBlockInlinedInParent [
+
+	^ self factory isBlockInlinedInParent: self type
+]
+
+{ #category : #testing }
 SBTSNodeSymbol >> isTSSymbol [
 
 	^ true

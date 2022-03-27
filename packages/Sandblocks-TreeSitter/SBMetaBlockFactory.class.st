@@ -6,6 +6,7 @@ Class {
 		'templateCache',
 		'statementContainerTypes',
 		'blockInline',
+		'blockInlineInParent',
 		'hardLineBreakMatcher',
 		'supertypes',
 		'name',
@@ -316,6 +317,13 @@ SBMetaBlockFactory >> autofixExternals [
 SBMetaBlockFactory >> blockInline: aCollection [
 
 	blockInline := Set newFrom: aCollection
+]
+
+{ #category : #configuration }
+SBMetaBlockFactory >> blockInlineInParent: aCollection [
+
+	blockInline addAll: aCollection.
+	blockInlineInParent addAll: aCollection
 ]
 
 { #category : #helper }
@@ -859,6 +867,7 @@ SBMetaBlockFactory >> initialize [
 	aliases := OrderedCollection new.
 	aliasOccurrences := OrderedCollection new.
 	blockInline := Set new.
+	blockInlineInParent := Set new.
 	statementContainerTypes := {}.
 	promotedInlineSymbols := OrderedCollection new.
 	containersOfPromotedInlineSymbols := OrderedCollection new.
@@ -902,6 +911,12 @@ SBMetaBlockFactory >> instantiateToplevel: aString [
 SBMetaBlockFactory >> isBlockInlined: aTypeString [
 
 	^ blockInline includes: aTypeString
+]
+
+{ #category : #'configuration helpers' }
+SBMetaBlockFactory >> isBlockInlinedInParent: aTypeString [
+
+	^ blockInlineInParent includes: aTypeString
 ]
 
 { #category : #testing }

@@ -393,12 +393,6 @@ SBTSBlock >> tryApplyChange: aBlock input: aString [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSBlock >> tryTransitionAfterInput: aString before: aBoolean [
-
-	^ SBTSInputParser new optionsFor: self given: aString before: aBoolean
-]
-
-{ #category : #'as yet unclassified' }
 SBTSBlock >> type [
 
 	^ self slot type

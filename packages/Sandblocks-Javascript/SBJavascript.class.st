@@ -6788,7 +6788,8 @@ SBJavascript class >> statementContainerTypes [
 { #category : #'as yet unclassified' }
 SBJavascript >> configure [
 
-	self blockInline: #('expression_statement' 'statement_block' 'formal_parameters').
+	self blockInline: #('expression_statement').
+	self blockInlineInParent: #('statement_block' 'formal_parameters').
 	self noteUncapturedText: {'template_string'}
 ]
 

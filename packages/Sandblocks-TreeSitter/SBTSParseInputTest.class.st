@@ -378,7 +378,8 @@ SBTSParseInputTest >> testWrapBinaryExpression [
 	self assert: 3 equals: results first first childSandblocks size.
 	self
 		assert: (SBTSSmalltalk instance bodyNodeForRule: 'binary_message')
-		equals: results first first childSandblocks first slot lastNode parent
+		equals: results first first childSandblocks first slot lastNode parent.
+	self assert: #statement equals: results first first slot lastNode type
 ]
 
 { #category : #'tests - wrap' }

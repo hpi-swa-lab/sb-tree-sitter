@@ -170,6 +170,18 @@ SBTSBlockTest >> testJsTypeObject [
 	self assert: 'const a={id:x}' equals: module sourceString
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testNewStatementAfterTransition [
+
+	| method editor |
+	method := SBTSFileParser new parse: 'abc 123' language: SBTSSmalltalk.
+	editor := self editorFor: method.
+	method lastDeepChild startInputAtEnd.
+	self type: '+3
+12' in: editor.
+	self assert: 3 equals: method childSandblocks size
+]
+
 { #category : #'tests - deleting' }
 SBTSBlockTest >> testPyDeleteReturnType [
 

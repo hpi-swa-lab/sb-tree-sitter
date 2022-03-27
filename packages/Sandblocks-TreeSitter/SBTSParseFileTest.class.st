@@ -65,9 +65,17 @@ SBTSParseFileTest >> testJavascriptTemplateString [
 { #category : #'tests - languages' }
 SBTSParseFileTest >> testJsFunctionPatterns [
 
-	| module |
+	| module editor |
 	module := SBTSFileParser new parse: 'function(b) {}' language: SBJavascript instance.
-	self assert: #(#identifier #pattern #formal_parameters) equals: (module childSandblocks first childSandblocks first slot nodes
+	editor := self editorFor: module.
+	self assert: #(#identifier #pattern) equals: (module childSandblocks first childSandblocks first slot nodes
+		collect: #type
+		as: Array).
+	
+	module childSandblocks first startInsertAtEnd.
+	editor handle: (self keyboardEvent: Character arrowLeft).
+	editor handle: (self keyboardEvent: $x).
+	self assert: #(#identifier #pattern) equals: (module childSandblocks first childSandblocks second slot nodes
 		collect: #type
 		as: Array)
 ]
@@ -275,12 +283,15 @@ SBTSParseFileTest >> testPythonList [
 { #category : #'tests - languages' }
 SBTSParseFileTest >> testPythonStatements [
 
-	| source |
+	| source module |
 	source := 'a
 b'.
+	module := SBTSFileParser new parse: source language: SBPython instance.
+	self assert: source equals: module sourceString.
+	
 	self
-		assert: source
-		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
+		assert: #(#identifier #'primary_expression' #expression #'expression_statement' #'_simple_statement')
+		equals: (module childSandblocks first slot nodes collect: #type as: Array)
 ]
 
 { #category : #'tests - print' }
