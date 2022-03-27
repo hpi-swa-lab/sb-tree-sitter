@@ -27,9 +27,9 @@ SBTSNodeSeq >> buildEmpty [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSNodeSeq >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+SBTSNodeSeq >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
-	self elements do: [:child | child cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]
+	self elements do: [:child | child cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock]
 ]
 
 { #category : #accessing }
@@ -130,6 +130,12 @@ SBTSNodeSeq >> takeNodesFrom: aParser [
 					index = self elements size
 						ifTrue: [stream nextPut: candidate]
 						ifFalse: [queue add: {candidate. index}]]]]]) ifEmpty: [#noMatch]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeSeq >> traverseBlocks: aStream do: aBlock [
+
+	self elements do: [:child | child traverseBlocks: aStream do: aBlock]
 ]
 
 { #category : #printing }

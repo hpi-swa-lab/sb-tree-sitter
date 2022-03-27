@@ -1288,6 +1288,15 @@ SBMetaBlockFactory >> softLineBreakMatcher: aBlock [
 	softLineBreakMatcher := aBlock
 ]
 
+{ #category : #'configuration helpers' }
+SBMetaBlockFactory >> spaceBetween: aBlock and: anotherBlock [
+
+	^ (aBlock sourceString ifNotEmpty: [:s | s last isAlphaNumeric] ifEmpty: [false]) and: [
+		anotherBlock sourceString
+			ifNotEmpty: [:s | s first isAlphaNumeric]
+			ifEmpty: [false]]
+]
+
 { #category : #configuration }
 SBMetaBlockFactory >> statementContainerTypes: aCollection [
 

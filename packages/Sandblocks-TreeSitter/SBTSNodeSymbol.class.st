@@ -35,24 +35,32 @@ SBTSNodeSymbol >> buildEmpty [
 	^ self bodyTemplate isTSChoice
 		ifTrue: [{SBTSUnknownBlock new slot: slot}]
 		ifFalse: [
-			self isBlockInlined ifTrue: [self bodyTemplate buildEmpty] ifFalse: [
-				{
-					SBTSBlock new
-						slot: slot;
-						addAllMorphs: self bodyTemplate buildEmpty}]]
+			self isBlockInlined
+				ifTrue: [ | blocks |
+					blocks := self bodyTemplate buildEmpty.
+					blocks do: [:b | b slot addNode: self].
+					blocks]
+				ifFalse: [
+					{
+						SBTSBlock new
+							slot: slot;
+							addAllMorphs: self bodyTemplate buildEmpty}]]
 ]
 
 { #category : #hierarchy }
-SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
-	self isBlockInlined ifTrue: [^ self bodyTemplate cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock].
+	self isBlockInlined ifTrue: [
+		^ self bodyTemplate
+			cursorPositionsDo: aClosure
+			shallow: aBoolean
+			blocks: aStream
+			parent: aBlock].
 	
-	aCollection
-		detect: [:block | block isTSBlock and: [block slot includesParent: self]]
-		ifFound: [:b |
-			aClosure value: (SBCursorSelect new block: b).
-			aBoolean ifFalse: [b cursorPositionsDo: aClosure shallow: aBoolean]]
-		ifNone: []
+	(aStream peek isTSBlock and: [aStream peek slot includesParent: self]) ifTrue: [ | block |
+		block := aStream next.
+		aClosure value: (SBCursorSelect new block: block).
+		aBoolean ifFalse: [block cursorPositionsDo: aClosure shallow: aBoolean]]
 ]
 
 { #category : #testing }
@@ -109,7 +117,7 @@ because the stored, nested parser does not have a valid stream "
 						self isInlined
 							ifTrue: [
 								result blocks: currentBlocks copy, result blocks.
-								result blocks last slot addNode: self.
+								result blocks do: [:b | b slot addNode: self].
 								result]
 							ifFalse: [
 								result blocks: (currentBlocks copy
@@ -135,6 +143,15 @@ SBTSNodeSymbol >> takeNodesFrom: aParser [
 		^ {aParser copy addSlot: self}].
 	
 	^ #noMatch
+]
+
+{ #category : #hierarchy }
+SBTSNodeSymbol >> traverseBlocks: aStream do: aBlock [
+
+	self isBlockInlined ifTrue: [^ self bodyTemplate traverseBlocks: aStream do: aBlock].
+	^ (aStream peek isTSBlock and: [aStream peek slot includesParent: self]) ifTrue: [ | block |
+		block := aStream next.
+		aBlock value: block]
 ]
 
 { #category : #accessing }

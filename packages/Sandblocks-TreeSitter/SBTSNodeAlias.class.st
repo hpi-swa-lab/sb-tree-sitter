@@ -47,14 +47,14 @@ SBTSNodeAlias >> buildMorphWith: aBlock slot: aSlot [
 ]
 
 { #category : #parsing }
-SBTSNodeAlias >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+SBTSNodeAlias >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
-	aCollection
-		detect: [:block | block isTSBlock and: [block slot includesParent: self]]
-		ifFound: [:b |
-			aClosure value: (SBCursorSelect new block: b).
-			aBoolean ifFalse: [b cursorPositionsDo: aClosure shallow: aBoolean]]
-		ifNone: [self element cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]
+	(aStream peek isTSBlock and: [aStream peek slot includesParent: self])
+		ifTrue: [ | block |
+			block := aStream next.
+			aClosure value: (SBCursorSelect new block: block).
+			aBoolean ifFalse: [block cursorPositionsDo: aClosure shallow: aBoolean]]
+		ifFalse: [self element cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock]
 ]
 
 { #category : #accessing }
@@ -109,6 +109,16 @@ SBTSNodeAlias >> takeNodesFrom: aParser [
 			aParser next.
 			{aParser copy addSlot: self}]
 		ifFalse: [#noMatch]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeAlias >> traverseBlocks: aStream do: aBlock [
+
+	(aStream peek isTSBlock and: [aStream peek slot includesParent: self])
+		ifTrue: [ | block |
+			block := aStream next.
+			aBlock value: block]
+		ifFalse: [self element traverseBlocks: aStream do: aBlock]
 ]
 
 { #category : #accessing }

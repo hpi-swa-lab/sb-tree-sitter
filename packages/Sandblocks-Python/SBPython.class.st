@@ -5287,6 +5287,10 @@ SBPython >> preprocessGrammar [
 	self renameSymbol: '_string_content' to: 'string_content'.
 	
 	(self grammar rules at: '_suite') members: {(self grammar rules at: '_suite') members second}.
+	
+	"the _simple_statements rule poses a challenge because it leads to a expression+* construct that our repeater logic cannot handle well"
+	(self grammar rules at: '_statement') members first name: '_simple_statement'.
+	
 	#('_indent' '_dedent' '_newline' '_string_start' '_string_end') do: [:sym | self removeSymbol: sym]
 ]
 

@@ -9,21 +9,21 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #blocks }
 SBTSNodeRepeat >> allChildrenDo: aBlock [
 
 	aBlock value: self.
 	self element allChildrenDo: aBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #blocks }
 SBTSNodeRepeat >> buildEmpty [
 
 	^ self required ifTrue: [self element buildEmpty] ifFalse: [{}]
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeRepeat >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+{ #category : #hierarchy }
+SBTSNodeRepeat >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
 	| buildInsert hasElements |
 	buildInsert := [:index :before |
@@ -34,13 +34,14 @@ SBTSNodeRepeat >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollect
 			container: aBlock)].
 	
 	hasElements := false.
-	multiple ifTrue: [buildInsert value: (self firstInsertIndexIn: aBlock) value: false].
-	aCollection doWithIndex: [:block :index |
-		(block slot includesParent: self) ifTrue: [
-			hasElements := true.
-			block cursorPositionsDo: aClosure.
-			(multiple and: [block repeaterGroup last = block]) ifTrue: [buildInsert value: index + 1 value: true]]].
-	(multiple not and: [hasElements not]) ifTrue: [buildInsert value: (self firstInsertIndexIn: aBlock) value: true]
+	multiple ifTrue: [buildInsert value: aStream position + 1 value: false].
+	
+	[aStream atEnd not and: [aStream peek slot includesParent: self]] whileTrue: [
+		hasElements := true.
+		element cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock.
+		multiple ifTrue: [buildInsert value: aStream position + 1 value: true]].
+	
+	(multiple not and: [hasElements not]) ifTrue: [buildInsert value: aStream position + 1 value: true]
 ]
 
 { #category : #accessing }
@@ -49,16 +50,17 @@ SBTSNodeRepeat >> element [
 	^ element
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeRepeat >> firstInsertIndexIn: aParent [
+{ #category : #hierarchy }
+SBTSNodeRepeat >> groupsIn: aContainerBlock [
 
-	| stream seen |
-	seen := false.
-	stream := aParent submorphs readStream.
-	aParent slot firstNode bodyTemplate allChildrenDo: [:child |
-		child = element ifTrue: [^ stream position + 1].
-		(seen not and: [stream atEnd not and: [child = stream peek slot firstNode]]) ifTrue: [stream next]].
-	^ 1
+	| candidates |
+	^ Array streamContents: [:stream | | stop |
+		candidates := (aContainerBlock submorphs select: [:m | m slot includesParent: self]) readStream.
+		stop := false.
+		[candidates atEnd not and: [stop not]] whileTrue: [
+			(Array streamContents: [:groupStream | element traverseBlocks: candidates do: [:block | groupStream nextPut: block]])
+				ifNotEmpty: [:group | stream nextPut: group]
+				ifEmpty: [stop := true]]]
 ]
 
 { #category : #testing }
@@ -139,6 +141,12 @@ if they advanced the parser."
 					candidate position > currentPosition ifTrue: [
 						stream nextPut: candidate.
 						queue add: {candidate. index}]]]]]) ifEmpty: [self required ifTrue: [#noMatch] ifFalse: [{aParser copy}]]
+]
+
+{ #category : #hierarchy }
+SBTSNodeRepeat >> traverseBlocks: aStream do: aBlock [
+
+	[aStream atEnd not and: [aStream peek slot includesParent: self]] whileTrue: [element traverseBlocks: aStream do: aBlock]
 ]
 
 { #category : #printing }

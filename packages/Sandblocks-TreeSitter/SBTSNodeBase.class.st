@@ -49,7 +49,7 @@ SBTSNodeBase >> buildMorphWith: aBlock slot: aSlot [
 		^ SBTSTextMorph new contents: aBlock].
 	
 	(self factory isBlockInlined: aBlock type) ifTrue: [
-		self noRepeatOrSeq ifTrue: [aBlock submorphs do: [:m | m slot addNode: self]].
+		aBlock submorphs do: [:m | aSlot nodes do: [:n | m slot addNode: n]].
 		^ aBlock submorphs].
 	
 	^ aBlock slot: aSlot
@@ -62,7 +62,7 @@ SBTSNodeBase >> compatibleWithType: aSymbol [
 ]
 
 { #category : #blocks }
-SBTSNodeBase >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+SBTSNodeBase >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
 	^ self subclassResponsibility
 ]
@@ -227,6 +227,12 @@ SBTSNodeBase >> transitionRoot [
 	current := self.
 	[current parent notNil and: [current parent isTSChoice]] whileTrue: [current := current parent].
 	^ current
+]
+
+{ #category : #hierarchy }
+SBTSNodeBase >> traverseBlocks: aStream do: aBlock [
+
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }

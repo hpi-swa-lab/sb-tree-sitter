@@ -49,7 +49,8 @@ SBTSInputParser >> blocks: aCollection contain: anotherCollection [
 	find := anotherCollection first isSandblock
 		ifTrue: [anotherCollection first lastDeepChild]
 		ifFalse: [anotherCollection first].
-	aCollection do: [:morph | morph allMorphsDo: [:m | m type = find type ifTrue: [^ true]]].
+	find isUnknown ifTrue: [^ false].
+	aCollection do: [:morph | morph allMorphsDo: [:m | (m type = find type and: [m contents = find contents]) ifTrue: [^ true]]].
 	^ false
 ]
 
@@ -127,7 +128,7 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aBoolean [
 			ifTrue: [memoizations last at: typeNode type put: {parser}]
 			ifFalse: [memoizations first at: typeNode type put: {parser}]].
 	
-	results := aTSBlock slot lastNode transitionRoot resultsFor: self.
+	results := aTSBlock slot transitionRoot resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
 	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks]
 ]
@@ -154,7 +155,7 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 				at: typeNode type
 				put: {self copy addBlock: block copyBlock}]].
 	
-	results := aTSBlock slot lastNode transitionRoot resultsFor: self.
+	results := aTSBlock slot transitionRoot resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
 	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks]
 ]

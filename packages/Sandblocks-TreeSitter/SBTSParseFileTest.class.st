@@ -67,7 +67,7 @@ SBTSParseFileTest >> testJsFunctionPatterns [
 
 	| module |
 	module := SBTSFileParser new parse: 'function(b) {}' language: SBJavascript instance.
-	self assert: #(#identifier #pattern) equals: (module childSandblocks first childSandblocks first slot nodes
+	self assert: #(#identifier #pattern #formal_parameters) equals: (module childSandblocks first childSandblocks first slot nodes
 		collect: #type
 		as: Array)
 ]
@@ -281,6 +281,15 @@ b'.
 	self
 		assert: source
 		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
+]
+
+{ #category : #'tests - print' }
+SBTSParseFileTest >> testRegexCharacterClasses [
+
+	| term source |
+	source := '[A-Za-z0-9]'.
+	term := SBTSFileParser new parse: source language: SBRegex.
+	self assert: source equals: term sourceString
 ]
 
 { #category : #'tests - unit' }

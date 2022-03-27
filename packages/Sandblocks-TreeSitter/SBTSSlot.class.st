@@ -121,6 +121,15 @@ SBTSSlot >> lastNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> lastRepeater [
+
+	| repeater |
+	repeater := nil.
+	self allParentsDo: [:p | p isTSRepeat ifTrue: [repeater := p]].
+	^ repeater
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> mergeWith: aSlot [
 
 	nodes addAll: aSlot nodes
@@ -161,6 +170,12 @@ SBTSSlot >> repeater [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> repeatersDo: aBlock [
+
+	self allParentsDo: [:p | p isTSRepeat ifTrue: [aBlock value: p]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> replaceLast: aNode [
 
 	nodes removeLast.
@@ -175,11 +190,15 @@ SBTSSlot >> separatorBetween: aBlock and: anotherBlock indent: aNumber [
 		^ String streamContents: [:s |
 			s cr.
 			aNumber timesRepeat: [s tab]]].
-	((aBlock sourceString ifNotEmpty: [:s | s last isAlphaNumeric] ifEmpty: [false]) and: [
-		anotherBlock sourceString
-			ifNotEmpty: [:s | s first isAlphaNumeric]
-			ifEmpty: [false]]) ifTrue: [^ ' '].
+	(self factory spaceBetween: aBlock and: anotherBlock) ifTrue: [^ String space].
 	^ ''
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> transitionRoot [
+
+	self nodes reverseDo: [:node | node isBlockInlined ifFalse: [^ node transitionRoot]].
+	self assert: false
 ]
 
 { #category : #'as yet unclassified' }

@@ -170,6 +170,76 @@ SBTSBlockTest >> testJsTypeObject [
 	self assert: 'const a={id:x}' equals: module sourceString
 ]
 
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testPyDeleteReturnType [
+
+	| program |
+	program := SBTSFileParser new parse: 'def a() -> int:
+	pass' language: SBPython.
+	self editorFor: program.
+	program childSandblocks first childSandblocks second deleteBlock.
+	self assert: 'def a():
+	pass' equals: program sourceString
+]
+
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testPyDeleteStatement [
+
+	| program |
+	program := SBTSFileParser new parse: 'a' language: SBPython.
+	self editorFor: program.
+	program childSandblocks first select; deleteBlock.
+	self assert: 0 equals: program childSandblocks size
+]
+
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testPyDeleteStatements [
+
+	| program |
+	program := SBTSFileParser new parse: 'a
+b
+c' language: SBPython.
+	self editorFor: program.
+	program childSandblocks second deleteBlock.
+	self assert: 2 equals: program childSandblocks size
+]
+
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testPyIfStatement [
+
+	| program editor |
+	program := SBTSFileParser new parse: '' language: SBPython.
+	editor := self editorAndWorldFor: program.
+	program startInsertAtEnd.
+	self type: 'if' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character arrowDown).
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: 'if_statement' equals: program childSandblocks first type
+]
+
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testRegexDeleteCountQuantifier [
+
+	| term editor |
+	term := SBTSFileParser new parse: '[0]{0}' language: SBRegex.
+	editor := self editorFor: term.
+	term lastDeepChild select deleteBlock.
+	self assert: '[0]' equals: term sourceString
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testRegexEnterClassRanges [
+
+	| term editor |
+	term := SBTSFileParser new parse: 'a' language: SBRegex.
+	editor := self editorFor: term.
+	term startInsertAtEnd.
+	self type: '[A-Za-z]' in: editor.
+	self assert: 'a[A-Za-z]' equals: term sourceString
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testSkipsRepeatsInUntakenChoices [
 

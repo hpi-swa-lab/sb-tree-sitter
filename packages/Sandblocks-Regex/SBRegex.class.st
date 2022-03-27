@@ -802,3 +802,9 @@ SBRegex >> preprocessGrammar [
 	self grammar rules keysAndValuesDo: [:name :rule | rule at: #name put: name].
 	(self grammar rules at: #lookahead_assertion) members second  at: #name put: 'type'
 ]
+
+{ #category : #grammar }
+SBRegex >> spaceBetween: aBlock and: anotherBlock [
+
+	^ false
+]

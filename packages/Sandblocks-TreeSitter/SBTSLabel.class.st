@@ -48,10 +48,16 @@ SBTSLabel >> isTSSymbol [
 	^ false
 ]
 
+{ #category : #nil }
+SBTSLabel >> isUnknown [
+
+	^ false
+]
+
 { #category : #'as yet unclassified' }
 SBTSLabel >> keepDuringTransform [
 
-	^ false
+	^ true
 ]
 
 { #category : #'as yet unclassified' }

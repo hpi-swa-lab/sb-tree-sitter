@@ -63,16 +63,14 @@ SBTSNodeText >> currentTextMorph [
 ]
 
 { #category : #printing }
-SBTSNodeText >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+SBTSNodeText >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
-	aCollection
-		detect: [:block | block isTextMorph and: [block slot includesParent: self]]
-		ifFound: [:b |
-			b containingSandblock startInputCommand ifNotNil: [:command |
-				aClosure value: (SBCursorText new
-					block: b containingSandblock;
-					currentCommand: command)]]
-		ifNone: []
+	(aStream peek isTextMorph and: [aStream peek slot includesParent: self]) ifTrue: [ | block |
+		block := aStream next.
+		block containingSandblock startInputCommand ifNotNil: [:command |
+			aClosure value: (SBCursorText new
+				block: block containingSandblock;
+				currentCommand: command)]]
 ]
 
 { #category : #testing }
@@ -171,6 +169,14 @@ SBTSNodeText >> takeNodesFrom: aParser [
 			aParser next.
 			{aParser copy addSlot: self}]
 		ifFalse: [#noMatch]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeText >> traverseBlocks: aStream do: aBlock [
+
+	(aStream peek isTextMorph and: [aStream peek slot includesParent: self]) ifTrue: [ | block |
+		block := aStream next.
+		aBlock value: block]
 ]
 
 { #category : #testing }

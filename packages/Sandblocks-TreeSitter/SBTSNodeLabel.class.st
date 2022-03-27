@@ -52,18 +52,23 @@ SBTSNodeLabel >> childrenForQueryDo: aBlock [
 	aBlock value: self
 ]
 
-{ #category : #copying }
-SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+{ #category : #hierarchy }
+SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
-	self isEditable ifTrue: [
-		aCollection
-			detect: [:block | block isTextMorph and: [block slot includesParent: self]]
-			ifFound: [:b |
-				b containingSandblock startInputCommand ifNotNil: [:command |
+	self isEditable
+		ifTrue: [
+			(self needsBlockWrapper and: [aStream peek isTSBlock and: [aStream peek slot includesParent: self]]) ifTrue: [aClosure value: (SBCursorSelect new block: aStream next)].
+			
+			(aStream peek isTextMorph and: [aStream peek slot includesParent: self]) ifTrue: [ | block |
+				block := aStream next.
+				block containingSandblock startInputCommand ifNotNil: [:command |
 					aClosure value: (SBCursorText new
-						block: b containingSandblock;
-						currentCommand: command)]]
-			ifNone: []]
+						block: block containingSandblock;
+						currentCommand: command)]]]
+		ifFalse: [
+			self needsBlockWrapper
+				ifTrue: [(aStream peek isTSBlock and: [aStream peek slot includesParent: self]) ifTrue: [aClosure value: (SBCursorSelect new block: aStream next)]]
+				ifFalse: [(aStream peek isStringMorph and: [aStream peek slot includesParent: self]) ifTrue: [aStream next]]]
 ]
 
 { #category : #testing }
@@ -97,7 +102,7 @@ SBTSNodeLabel >> maxChildren [
 	^ 0
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBTSNodeLabel >> needsBlockWrapper [
 
 	| repeater |
@@ -155,6 +160,14 @@ SBTSNodeLabel >> takeNodesFrom: aParser [
 			aParser next.
 			{aParser copy addSlot: self}]
 		ifFalse: [#noMatch]
+]
+
+{ #category : #hierarchy }
+SBTSNodeLabel >> traverseBlocks: aStream do: aBlock [
+
+	self needsBlockWrapper
+		ifTrue: [(aStream peek isTSBlock and: [aStream peek slot includesParent: self]) ifTrue: [aBlock value: aStream next]]
+		ifFalse: [(aStream peek isStringMorph and: [aStream peek slot includesParent: self]) ifTrue: [aBlock value: aStream next]]
 ]
 
 { #category : #testing }

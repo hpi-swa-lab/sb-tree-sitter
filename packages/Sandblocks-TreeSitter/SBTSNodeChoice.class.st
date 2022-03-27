@@ -40,22 +40,21 @@ SBTSNodeChoice >> buildEmpty [
 ]
 
 { #category : #printing }
-SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock [
+SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 	"check if there is an unknown for this choice"
 
-	aCollection
-		detect: [:block | block isTSBlock and: [block isUnknown and: [block slot firstNode = self]]]
-		ifFound: [:b |
-			aClosure value: (SBCursorSelect new block: b).
-			aBoolean ifFalse: [b cursorPositionsDo: aClosure shallow: aBoolean]]
-		ifNone: [
-			"otherwise just descend"
+	(aStream peek isTSBlock and: [aStream peek isUnknown and: [aStream peek slot firstNode = self]])
+		ifTrue: [ | block |
+			block := aStream next.
+			aClosure value: (SBCursorSelect new block: block).
+			aBoolean ifFalse: [block cursorPositionsDo: aClosure shallow: aBoolean]]
+		ifFalse: [
 			self alternatives
-				detect: [:alt | aCollection anySatisfy: [:block | block slot lastNode hasParent: alt]]
-				ifFound: [:alt | alt cursorPositionsDo: aClosure shallow: aBoolean blocks: aCollection parent: aBlock]]
+				detect: [:alt | aStream peek slot includesParent: alt]
+				ifFound: [:alt | alt cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBTSNodeChoice >> isTSChoice [
 
 	^ true
@@ -89,6 +88,19 @@ SBTSNodeChoice >> takeNodesFrom: aParser [
 			parserCopy := aParser copy.
 			results := alt takeNodesFrom: parserCopy.
 			results = #noMatch ifFalse: [results do: [:result | stream nextPut: result]]]]) ifEmpty: [#noMatch]
+]
+
+{ #category : #hierarchy }
+SBTSNodeChoice >> traverseBlocks: aStream do: aBlock [
+
+	(aStream peek isTSBlock and: [aStream peek isUnknown and: [aStream peek slot firstNode = self]])
+		ifTrue: [ | block |
+			block := aStream next.
+			aBlock value: block]
+		ifFalse: [
+			self alternatives
+				detect: [:alt | aStream peek slot includesParent: alt]
+				ifFound: [:alt | alt traverseBlocks: aStream do: aBlock]]
 ]
 
 { #category : #printing }

@@ -16,7 +16,7 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 { #category : #failures }
 SBTSParseInputTest >> expectedFailures [
 
-	^ #(#testAssignmentPattern #testCreateMemberExpression #testCreateFunction)
+	^ #(#testAssignmentPattern #testCreateMemberExpression)
 ]
 
 { #category : #helper }
@@ -164,8 +164,6 @@ SBTSParseInputTest >> testCreateCharacter [
 SBTSParseInputTest >> testCreateFunction [
 
 	| results |
-	self flag: #todo.
-	"normalize strips away the generator variants"
 	results := (SBTSInputParser new
 		optionsForTemplate: (SBTSNodeSymbol new type: 'statement' factory: SBJavascript instance)
 		given: 'func')

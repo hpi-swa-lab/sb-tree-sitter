@@ -77,7 +77,7 @@ SBTSDisambiguatePopup >> positionAfterDo: aBlock [
 	(target parentSandblock isTSBlock and: [target submorphAfter isNil]) ifTrue: [aBlock value: (SBCursorSelect new block: target parentSandblock)].
 	target owner cursorPositionsDo: [:position |
 		(foundSelf and: [position isInsert or: [position isText and: [position block wantsInput]]]) ifTrue: [aBlock value: position].
-		(position isText and: [position block = target]) ifTrue: [foundSelf := true]]
+		(position isText and: [position block = source containingSandblock]) ifTrue: [foundSelf := true]]
 ]
 
 { #category : #'as yet unclassified' }

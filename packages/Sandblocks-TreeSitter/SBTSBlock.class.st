@@ -75,16 +75,21 @@ SBTSBlock >> currentTextMorph [
 SBTSBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 
 	aBlock value: (SBCursorSelect new block: self).
-	self template cursorPositionsDo: aBlock shallow: aBoolean blocks: self submorphs parent: self
+	self template
+		cursorPositionsDo: aBlock
+		shallow: aBoolean
+		blocks: self submorphs readStream
+		parent: self
 ]
 
 { #category : #'as yet unclassified' }
 SBTSBlock >> deleteCommandFor: aBlock [
 
-	self flag: #todo.
-	"need to consider required attr of repeater"
-	^ aBlock repeaterGroup ifNotNil: [:group |
-		SBCombinedCommand newWith: (group collect: [:block | SBDeleteCommand new target: block])]
+	| groups |
+	aBlock slot repeatersDo: [:repeater |
+		groups := repeater groupsIn: self.
+		(repeater required not or: [groups size > 1]) ifTrue: [groups do: [:group | (group includes: aBlock) ifTrue: [^ SBCombinedCommand newWith: (group collect: [:block | SBDeleteCommand new target: block])]]]].
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -162,7 +167,7 @@ SBTSBlock >> insertCommandRequest: aMorph near: aBlock before: aBoolean [
 
 	aBlock ifNil: [^ nil].
 	
-	aBlock slot repeater ifNotNil: [:repeater | ^ SBRelInsertCommand new near: aBlock before: aBoolean in: self morph: aMorph].
+	aBlock slot lastRepeater ifNotNil: [:repeater | ^ SBRelInsertCommand new near: aBlock before: aBoolean in: self morph: aMorph].
 	
 	^ nil
 ]
@@ -224,7 +229,7 @@ SBTSBlock >> matchesQuery: aString [
 SBTSBlock >> newEmptyChildNear: aBlock before: aBoolean [
 
 	aBlock ifNil: [^ nil].
-	aBlock slot repeater ifNotNil: [:repeater |
+	aBlock slot lastRepeater ifNotNil: [:repeater |
 		self flag: #todo.
 		"can return multiple"
 		^ repeater element buildEmpty first].

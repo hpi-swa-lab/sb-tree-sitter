@@ -16,5 +16,5 @@ SBTSObjectInterface >> slot: aSlot [
 { #category : #'as yet unclassified' }
 SBTSObjectInterface >> value: anObject [
 
-	^ anObject isTSBlock and: [anObject slot lastNode = slot lastNode]
+	^ anObject isSandblock and: [anObject isTSBlock and: [anObject slot lastNode = slot lastNode]]
 ]
