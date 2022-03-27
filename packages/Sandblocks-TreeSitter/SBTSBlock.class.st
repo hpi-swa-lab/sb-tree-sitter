@@ -29,6 +29,21 @@ SBTSBlock >> actionProviders [
 	^ {self grammarHandler}, super actionProviders
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> adaptSlot: aConverter [
+	<convert>
+
+	aConverter
+		if: [
+			(aConverter objectInterface first isKindOf: SBTSObjectInterface)
+				ifTrue: [aConverter objectInterface first slot compatibleWithType: slot lastNode type]
+				ifFalse: [false]]
+		do: [ | copy |
+			copy := self copyBlock.
+			copy slot adaptSlotFor: aConverter objectInterface first slot.
+			copy]
+]
+
 { #category : #'inline block compat' }
 SBTSBlock >> alias [
 	"remove, compat to inlineblocks"

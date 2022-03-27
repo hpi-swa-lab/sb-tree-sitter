@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSObjectInterface >> slot [
+
+	^ slot
+]
+
+{ #category : #'as yet unclassified' }
 SBTSObjectInterface >> slot: aSlot [
 
 	slot := aSlot
@@ -16,5 +22,9 @@ SBTSObjectInterface >> slot: aSlot [
 { #category : #'as yet unclassified' }
 SBTSObjectInterface >> value: anObject [
 
-	^ anObject isSandblock and: [anObject isTSBlock and: [anObject slot lastNode = slot lastNode]]
+	^ anObject isSandblock and: [
+		anObject isTSBlock and: [
+			SBToggledCode comment: '' active: 1 do: {
+				[slot lastNode type = anObject slot lastNode type].
+				[slot compatibleWithType: anObject slot lastNode type]}]]
 ]

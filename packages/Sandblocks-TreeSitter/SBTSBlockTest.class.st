@@ -374,6 +374,18 @@ SBTSBlockTest >> testSmalltalkUnaryToKeyword [
 	self assert: #number equals: editor selection type
 ]
 
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testStDeleteAroundExpression [
+
+	| module |
+	module := SBTSFileParser new parse: 'abc a test: 123' language: SBTSSmalltalk.
+	self editorFor: module.
+	module lastDeepChild select.
+	module lastDeepChild deleteAround.
+	self assert: '123' equals: module childSandblocks second sourceString.
+	self assert: 'statement' equals: module childSandblocks second slot lastNode type
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testTypingArray [
 

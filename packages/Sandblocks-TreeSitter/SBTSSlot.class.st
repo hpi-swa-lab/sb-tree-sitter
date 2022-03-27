@@ -8,6 +8,17 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> adaptSlotFor: anotherSlot [
+
+	| index |
+	index := anotherSlot nodes findFirst: [:node | node type = self lastNode type].
+	anotherSlot nodes
+		from: index + 1
+		to: anotherSlot nodes size
+		do: [:node | self addNode: node]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> addNode: aNode [
 
 	self assert: (aNode isKindOf: SBTSNodeBase).
@@ -197,10 +208,7 @@ SBTSSlot >> separatorBetween: aBlock and: anotherBlock indent: aNumber [
 { #category : #'as yet unclassified' }
 SBTSSlot >> transitionRoot [
 
-	SBToggledCode comment: '' active: 1 do: {
-		[^ self nodes last transitionRoot].
-		[self nodes reverseDo: [:node | node isBlockInlined ifFalse: [^ node transitionRoot]]]}.
-	self assert: false
+	^ self nodes last transitionRoot
 ]
 
 { #category : #'as yet unclassified' }
