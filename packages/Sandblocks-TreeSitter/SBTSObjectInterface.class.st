@@ -22,9 +22,5 @@ SBTSObjectInterface >> slot: aSlot [
 { #category : #'as yet unclassified' }
 SBTSObjectInterface >> value: anObject [
 
-	^ anObject isSandblock and: [
-		anObject isTSBlock and: [
-			SBToggledCode comment: '' active: 1 do: {
-				[slot lastNode type = anObject slot lastNode type].
-				[slot compatibleWithType: anObject slot lastNode type]}]]
+	^ anObject isSandblock and: [anObject isTSBlock and: [slot lastNode = anObject slot lastNode]]
 ]

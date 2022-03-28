@@ -72,12 +72,6 @@ SBTSUnknownBlock >> suggestions [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSUnknownBlock >> tryTransitionAfterInput: aString before: aBoolean [
-
-	^ SBTSInputParser new optionsForTemplate: self slot lastNode given: aString
-]
-
-{ #category : #'as yet unclassified' }
 SBTSUnknownBlock >> valid [
 
 	^ false

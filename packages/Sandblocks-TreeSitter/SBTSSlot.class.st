@@ -12,8 +12,9 @@ SBTSSlot >> adaptSlotFor: anotherSlot [
 
 	| index |
 	index := anotherSlot nodes findFirst: [:node | node type = self lastNode type].
+	nodes removeLast.
 	anotherSlot nodes
-		from: index + 1
+		from: index
 		to: anotherSlot nodes size
 		do: [:node | self addNode: node]
 ]
