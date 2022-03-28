@@ -75,7 +75,7 @@ SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream p
 SBTSNodeLabel >> isEditable [
 	"mark whether this label could be a variation point and should thus be editable"
 
-	^ SBToggledCode comment: '' active: 1 do: {[false]. [(factory isImmutableLabel: self) not]}
+	^ SBToggledCode comment: '' active: 2 do: {[false]. [(factory isImmutableLabel: self) not]}
 ]
 
 { #category : #testing }

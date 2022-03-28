@@ -72,8 +72,8 @@ SBTSParseFileTest >> testJsFunctionPatterns [
 		collect: #type
 		as: Array).
 	
-	module childSandblocks first startInsertAtEnd.
-	editor handle: (self keyboardEvent: Character arrowLeft).
+	module childSandblocks first childSandblocks first startInputAtEnd.
+	editor handle: (self keyboardEvent: Character arrowRight).
 	editor handle: (self keyboardEvent: $x).
 	self assert: #(#identifier #pattern) equals: (module childSandblocks first childSandblocks second slot nodes
 		collect: #type

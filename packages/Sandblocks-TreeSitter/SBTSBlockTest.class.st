@@ -43,6 +43,27 @@ SBTSBlockTest >> testCursorPositionsAroundUnknown [
 	self assert: (Array streamContents: [:stream | module childSandblocks first cursorPositionsDo: [:pos | stream nextPut: pos]]) size >= 5
 ]
 
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testDeleteStBinaryOpStatement [
+
+	| method editor |
+	method := SBTSFileParser new parse: 'method a + 9' language: SBTSSmalltalk.
+	editor := self editorFor: method.
+	method lastDeepChild startInputAtEnd.
+	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: method sourceString equals: 'method
+a+'.
+	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: method sourceString equals: 'method
+a'.
+	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: method sourceString equals: 'method'.
+	self assert: 1 equals: method childSandblocks size
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsAmbiguousCall [
 
@@ -67,6 +88,24 @@ SBTSBlockTest >> testJsCall [
 	editor handle: (self keyboardEvent: $().
 	self assert: 'call_expression' equals: module childSandblocks first type.
 	self assert: #arguments equals: editor selection type
+]
+
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testJsChangePlusToMinus [
+
+	| module editor |
+	module := SBTSFileParser new parse: '2+3' language: SBJavascript.
+	editor := self editorAndWorldFor: module.
+	module lastDeepChild startInputAtEnd.
+	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: '2+' equals: module sourceString.
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: '2' equals: module sourceString.
+	editor handle: (self keyboardEvent: $-).
+	self assert: '2-', Character null equals: module sourceStringForCompare.
+	editor handle: (self keyboardEvent: $4).
+	self assert: '2-4' equals: module sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }

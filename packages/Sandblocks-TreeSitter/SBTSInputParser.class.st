@@ -159,7 +159,7 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 	
 	results := aTSBlock slot transitionRoot resultsFor: self.
 	results = #noMatch ifTrue: [^ #()].
-	^ (results select: [:parser | parser atEnd]) collect: [:parser | parser blocks]
+	^ self normalizeResults: ((results select: [:parser | parser atEnd]) collect: [:parser | parser blocks])
 ]
 
 { #category : #query }

@@ -126,7 +126,10 @@ SBTSDisambiguatePopup >> suggestions [
 
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> tryAdjacent [
+	"if we are at the very lowest level, in a textmorph still, dont try adjacent blocks just yet"
 
+	target isTextMorph ifTrue: [^ false].
+	
 	self positionAfterDo: [:position |
 		(position isText and: [position block wantsInput]) ifTrue: [
 			^ SBTSDisambiguatePopup new
@@ -192,6 +195,7 @@ SBTSDisambiguatePopup >> tryReinterpret [
 SBTSDisambiguatePopup >> tryTransition [
 
 	self tryFill ifFalse: [self tryReinterpret ifFalse: [self tryWrap ifFalse: [self tryAdjacent ifFalse: [^ self tryOwner]]]].
+	choices ifNil: [^ false].
 	choices size = 1 ifTrue: [^ self applyChoice: choices first].
 	choices size = 0 ifTrue: [^ true].
 	^ false
