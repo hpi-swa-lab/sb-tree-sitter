@@ -52,8 +52,11 @@ SBTSDisambiguatePopup >> for: aBlock input: aString before: aBoolean from: anoth
 	sourceString := source sourceStringForCompare.
 	self contents: aString.
 	
-	self tryTransition ifTrue: [^ true].
-	(choices isNil or: [choices isEmpty]) ifTrue: [^ false].
+	self contents
+		ifNotEmpty: [
+			self tryTransition ifTrue: [^ true].
+			(choices isNil or: [choices isEmpty]) ifTrue: [^ false]]
+		ifEmpty: [choices := #()].
 	
 	self showBelow: aBlock closeOnDeselect: true.
 	self moveCursorToEnd.

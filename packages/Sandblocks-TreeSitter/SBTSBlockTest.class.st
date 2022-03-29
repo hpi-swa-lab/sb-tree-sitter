@@ -119,6 +119,24 @@ SBTSBlockTest >> testJsClassField [
 	self assert: 'prop' equals: module lastDeepChild contents
 ]
 
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testJsDeleteDeclaration [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'const a = 5' language: SBJavascript.
+	editor := self editorFor: module.
+	module lastDeepChild startInputAtEnd.
+	
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: 'const a=', Character null equals: module sourceStringForCompare.
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: 'const a' equals: module sourceStringForCompare.
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: 'const', Character null equals: module sourceStringForCompare.
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: '' equals: module sourceStringForCompare
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsExpandObject [
 
@@ -255,7 +273,7 @@ c' language: SBPython.
 	self assert: 2 equals: program childSandblocks size
 ]
 
-{ #category : #'tests - deleting' }
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testPyIfStatement [
 
 	| program editor |

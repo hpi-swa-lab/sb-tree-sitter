@@ -101,15 +101,20 @@ SBTSBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 SBTSBlock >> deleteBeforeCursor [
 	<action>
 
+	| editor |
 	self contents ifNotEmpty: [^ super deleteBeforeCursor].
+	editor := self sandblockEditor.
 	
-	self currentTextMorph submorphBefore ifNil: [(self parentSandblock deleteCommandFor: self) ifNotNil: [:c | ^ self sandblockEditor do: c]].
+	self currentTextMorph submorphBefore ifNil: [
+		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
+			editor do: c.
+			editor selection moveCursorToEnd.
+			^ self]].
 	
-	true ifTrue: [^ self reinterpretWithoutEmpty ifFalse: [self parentSandblock reinterpretWithoutEmpty ifFalse: [self sandblockEditor performForSelection: #moveCursorLeft]]].
-	
+	true ifTrue: [^ self reinterpretWithoutEmpty ifFalse: [self parentSandblock reinterpretWithoutEmpty ifFalse: [self parentSandblock parentSandblock reinterpretWithoutEmpty ifFalse: [editor performForSelection: #moveCursorLeft]]]].
 	
 	self currentTextMorph submorphBefore isStringMorph ifTrue: [
-		^ self sandblockEditor do: (SBReplaceCommand new
+		^ editor do: (SBReplaceCommand new
 			target: self
 			replacer: (SBTSUnknownBlock new slot: (SBTSSlot new addNode: self slot lastNode)))].
 	
@@ -366,14 +371,24 @@ SBTSBlock >> promptTransition [
 { #category : #'as yet unclassified' }
 SBTSBlock >> reinterpretWithoutEmpty [
 
-	| remaining options |
-	remaining := self submorphs select: [:m | (m isTSBlock and: [m currentTextMorph isNil or: [m contents notEmpty]]) or: [m contents notEmpty]].
-	remaining ifEmpty: [^ false].
+	| remaining options editor |
+	editor := self sandblockEditor.
+	remaining := self submorphs select: [:m | m sourceString notEmpty].
+	remaining ifEmpty: [
+		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
+			editor do: c.
+			editor selection moveCursorToEnd.
+			^ true].
+		^ false].
 	options := SBTSInputParser new optionsFor: self given: '' before: remaining after: #().
 	(options size = 1 and: [options first first type ~= self type]) ifTrue: [
-		self sandblockEditor do: (SBReplaceMultipleCommand new target: self replacers: options first).
+		editor do: (SBReplaceMultipleCommand new target: self replacers: options first).
 		options first last lastDeepChild startInputAtEnd.
 		^ true].
+	(remaining allSatisfy: [:m | m slot firstNode isTSLabel]) ifTrue: [(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
+			editor do: c.
+			editor selection moveCursorToEnd.
+			^ true]].
 	^ false
 ]
 
