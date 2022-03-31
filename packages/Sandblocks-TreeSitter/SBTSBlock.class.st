@@ -106,19 +106,18 @@ SBTSBlock >> deleteBeforeCursor [
 	editor := self sandblockEditor.
 	
 	self currentTextMorph submorphBefore ifNil: [
-		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
+		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c | | pos |
+			pos := self sandblockEditor cursor positionBefore: c commands first target.
 			editor do: c.
-			editor selection moveCursorToEnd.
+			editor cursor cursorPosition: pos explicitMove: true axis: #x.
 			^ self]].
 	
-	true ifTrue: [^ self reinterpretWithoutEmpty ifFalse: [self parentSandblock reinterpretWithoutEmpty ifFalse: [self parentSandblock parentSandblock reinterpretWithoutEmpty ifFalse: [editor performForSelection: #moveCursorLeft]]]].
-	
-	self currentTextMorph submorphBefore isStringMorph ifTrue: [
-		^ editor do: (SBReplaceCommand new
-			target: self
-			replacer: (SBTSUnknownBlock new slot: (SBTSSlot new addNode: self slot lastNode)))].
-	
-	self halt
+	self reinterpretWithoutEmpty ifFalse: [
+		self parentSandblock reinterpretWithoutEmpty ifFalse: [
+			self parentSandblock parentSandblock reinterpretWithoutEmpty ifFalse: [
+				self childSandblocks size > 0
+					ifTrue: [self changeToUnknown]
+					ifFalse: [editor performForSelection: #moveCursorLeft]]]]
 ]
 
 { #category : #'as yet unclassified' }

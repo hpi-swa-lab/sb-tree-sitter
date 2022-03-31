@@ -137,6 +137,22 @@ SBTSBlockTest >> testJsDeleteDeclaration [
 	self assert: '' equals: module sourceStringForCompare
 ]
 
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testJsDeleteFunction [
+
+	| module editor |
+	module := SBTSFileParser new parse: '1 + function a() {}' language: SBJavascript.
+	editor := self editorFor: module.
+	module childSandblocks first childSandblocks second childSandblocks first startInputAtEnd.
+	2 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: '1+function()
+{
+}' equals: module sourceStringForCompare.
+	self assert: module childSandblocks first childSandblocks second equals: editor selection.
+	'function' size + 1 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: '1+' equals: module sourceString
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsExpandObject [
 
