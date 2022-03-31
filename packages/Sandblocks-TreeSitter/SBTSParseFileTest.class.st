@@ -294,6 +294,15 @@ b'.
 		equals: (module childSandblocks first slot nodes collect: #type as: Array)
 ]
 
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testPythonStringSlot [
+
+	| module |
+	module := SBTSFileParser new parse: '"abc"' language: SBPython instance.
+	"python strings contain a promoted inline symbol and are thus a corner case"
+	self assert: module childSandblocks first submorphs second slot notNil
+]
+
 { #category : #'tests - print' }
 SBTSParseFileTest >> testRegexCharacterClasses [
 
