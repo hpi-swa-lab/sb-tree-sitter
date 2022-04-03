@@ -61,10 +61,9 @@ SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream p
 			
 			(aStream peek isTextMorph and: [aStream peek slot includesParent: self]) ifTrue: [ | block |
 				block := aStream next.
-				block containingSandblock startInputCommand ifNotNil: [:command |
-					aClosure value: (SBCursorText new
-						block: block containingSandblock;
-						currentCommand: command)]]]
+				aClosure value: (SBCursorText new
+					block: block containingSandblock;
+					currentCommand: (SBTextCommand new textMorph: block))]]
 		ifFalse: [
 			self needsBlockWrapper
 				ifTrue: [(aStream peek isTSBlock and: [aStream peek slot includesParent: self]) ifTrue: [aClosure value: (SBCursorSelect new block: aStream next)]]

@@ -101,11 +101,12 @@ SBTSBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 SBTSBlock >> deleteBeforeCursor [
 	<action>
 
-	| editor |
+	| editor textMorph |
+	textMorph := self sandblockEditor currentInputCommand textMorph.
 	self contents ifNotEmpty: [^ super deleteBeforeCursor].
 	editor := self sandblockEditor.
 	
-	self currentTextMorph submorphBefore ifNil: [
+	textMorph submorphBefore ifNil: [
 		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c | | pos |
 			pos := self sandblockEditor cursor positionBefore: c commands first target.
 			editor do: c.
@@ -424,6 +425,12 @@ SBTSBlock >> slot: aSlot [
 SBTSBlock >> sourceStringForCompare [
 
 	^ String streamContents: [:s | self writeSourceOn: s indent: 0 forCompare: true]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> startInputCommandIn: aTextMorph [
+
+	^ SBTextCommand new textMorph: aTextMorph
 ]
 
 { #category : #'as yet unclassified' }
