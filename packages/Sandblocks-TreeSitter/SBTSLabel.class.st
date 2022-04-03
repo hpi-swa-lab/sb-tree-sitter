@@ -57,7 +57,7 @@ SBTSLabel >> isUnknown [
 { #category : #'as yet unclassified' }
 SBTSLabel >> keepDuringTransform [
 
-	^ true
+	^ false
 ]
 
 { #category : #'as yet unclassified' }

@@ -97,7 +97,11 @@ SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 		
 		positionInAll := [:cursor |
 			cursor isInsert
-				ifTrue: [(all findFirst: [:m | m owner = cursor container]) + (cursor command insertIndex - 1)]
+				ifTrue: [ | childIndex |
+					childIndex := all findFirst: [:m | m owner = cursor container].
+					childIndex + (((cursor container submorphs copyFrom: 1 to: cursor command insertIndex - 1) collect: #recursiveSubmorphCount)
+						inject: 0
+						into: [:s :c | s + c]) + 1]
 				ifFalse: [all indexOf: cursor block currentTextMorph]].
 		
 		aCollection do: [:block |

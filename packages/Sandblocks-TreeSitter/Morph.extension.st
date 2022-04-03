@@ -24,3 +24,12 @@ Morph >> isTSNode [
 
 	^ false
 ]
+
+{ #category : #'*Sandblocks-TreeSitter' }
+Morph >> recursiveSubmorphCount [
+
+	| i |
+	i := 0.
+	self allMorphsDo: [:m | i := i + 1].
+	^ i
+]

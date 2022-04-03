@@ -6789,7 +6789,7 @@ SBJavascript class >> statementContainerTypes [
 SBJavascript >> configure [
 
 	self blockInline: #('expression_statement').
-	self blockInlineInParent: #('statement_block' 'formal_parameters').
+	self blockInlineInParent: #('statement_block' 'arguments' 'formal_parameters').
 	self noteUncapturedText: {'template_string'}
 ]
 

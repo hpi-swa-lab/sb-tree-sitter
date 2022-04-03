@@ -86,8 +86,21 @@ SBTSBlockTest >> testJsCall [
 	module childSandblocks first select.
 	editor handle: (self keyboardEvent: $ ).
 	editor handle: (self keyboardEvent: $().
-	self assert: 'call_expression' equals: module childSandblocks first type.
-	self assert: #arguments equals: editor selection type
+	self assert: #call_expression equals: module childSandblocks first type.
+	self assert: #call_expression equals: editor cursor cursorPosition block type.
+	self assert: editor cursor cursorPosition isInsert
+]
+
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testJsCallToSubscript [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'abc(12)' language: SBJavascript.
+	editor := self editorFor: module.
+	module childSandblocks first startInputAtEnd.
+	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: $[).
+	self assert: 'subscript_expression' equals: module childSandblocks first type
 ]
 
 { #category : #'tests - deleting' }
@@ -503,7 +516,7 @@ SBTSBlockTest >> testTypingClosure [
 	| module editor |
 	module := SBTSFileParser new parse: '{}' language: SBJavascript instance.
 	editor := self editorAndWorldFor: module.
-	module childSandblocks first startInputAtEnd.
+	module childSandblocks first startInsertAtEnd.
 	editor handle: (SBTest keyboardEvent: $().
 	self tick.
 	self tick.
