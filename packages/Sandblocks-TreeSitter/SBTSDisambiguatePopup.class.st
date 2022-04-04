@@ -143,7 +143,7 @@ SBTSDisambiguatePopup >> tryAdjacent [
 				for: position block
 				input: self contents
 				before: false
-				from: source].
+				from: position block].
 		position isInsert ifTrue: [
 			(position command tryExpandWithInput: self contents) ifTrue: [
 				target sandblockEditor do: position command.
@@ -199,9 +199,19 @@ SBTSDisambiguatePopup >> tryReinterpret [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSDisambiguatePopup >> trySeparator [
+
+	(target owner slot delimiterBetween: target and: target) ifNotEmpty: [:delimiter |
+		delimiter = self contents ifTrue: [
+			target sandblockEditor do: (target sandblockEditor cursor positionAfter: target) command.
+			^ true]].
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> tryTransition [
 
-	self tryFill ifFalse: [self tryReinterpret ifFalse: [self tryWrap ifFalse: [self tryAdjacent ifFalse: [^ self tryOwner]]]].
+	self tryFill ifFalse: [self tryReinterpret ifFalse: [self trySeparator ifFalse: [self tryWrap ifFalse: [self tryAdjacent ifFalse: [^ self tryOwner]]]]].
 	choices ifNil: [^ false].
 	choices size = 1 ifTrue: [^ self applyChoice: choices first].
 	choices size = 0 ifTrue: [^ true].

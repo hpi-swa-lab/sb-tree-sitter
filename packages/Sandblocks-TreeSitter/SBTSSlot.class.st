@@ -69,9 +69,9 @@ SBTSSlot >> compatibleWithType: aTypeString [
 { #category : #'as yet unclassified' }
 SBTSSlot >> delimiterBetween: aBlock and: anotherBlock [
 
-	self factory delimitedRules
-		at: self firstNode type
-		ifPresent: [:delimiter | self firstNode bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [(aBlock slot lastNode hasParent: node element) and: [anotherBlock slot lastNode hasParent: node element]]) ifTrue: [^ delimiter first]]].
+	(self firstNode delimiterBetween: aBlock and: anotherBlock) ifNotEmpty: [:d | ^ d].
+	self firstNode bodyTemplate allChildrenDo: [:node | node isBlockInlinedInParent ifTrue: [(node delimiterBetween: aBlock and: anotherBlock) ifNotEmpty: [:d | ^ d]]].
+	
 	^ ''
 ]
 

@@ -293,8 +293,9 @@ SBTSParseInputTest >> testIdentifierToAssignment [
 
 	| stmt results |
 	stmt := (SBTSFileParser new parse: 'method abc' language: SBTSSmalltalk instance) childSandblocks second.
-	results := SBTSInputParser new optionsFor: stmt given: ':' before: false.
-	self assert: 1 equals: results size
+	results := SBTSInputParser new optionsFor: stmt given: ':' before: {stmt} after: {}.
+	self assert: 1 equals: results size.
+	self assert: #assignment equals: results first first type
 ]
 
 { #category : #'tests - wrap' }
@@ -362,7 +363,7 @@ SBTSParseInputTest >> testWrapArray [
 
 	| stmt results |
 	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
-	results := SBTSInputParser new optionsFor: stmt given: '{' before: true.
+	results := SBTSInputParser new optionsFor: stmt given: '{' before: {} after: {stmt}.
 	self assert: 1 equals: results size.
 	self assert: 'dynamic_array' equals: results first first type.
 	self assert: 3 equals: results first first submorphCount
@@ -373,7 +374,7 @@ SBTSParseInputTest >> testWrapBinaryExpression [
 
 	| stmt results |
 	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
-	results := SBTSInputParser new optionsFor: stmt given: '+' before: false.
+	results := SBTSInputParser new optionsFor: stmt given: '+' before: {stmt} after: {}.
 	self assert: 1 equals: results size.
 	self assert: 3 equals: results first first childSandblocks size.
 	self
@@ -387,7 +388,7 @@ SBTSParseInputTest >> testWrapBlock [
 
 	| stmt results |
 	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
-	results := SBTSInputParser new optionsFor: stmt given: '[' before: true.
+	results := SBTSInputParser new optionsFor: stmt given: '[' before: {} after: {stmt}.
 	self assert: 1 equals: results size
 ]
 
@@ -396,7 +397,7 @@ SBTSParseInputTest >> testWrapByteArray [
 
 	| stmt results |
 	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
-	results := SBTSInputParser new optionsFor: stmt given: '#[' before: true.
+	results := SBTSInputParser new optionsFor: stmt given: '#[' before: {} after: {stmt}.
 	self assert: 'byte_array' equals: results first first type
 ]
 

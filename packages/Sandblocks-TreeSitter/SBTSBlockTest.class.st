@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJsAmbiguousCall)
+	^ #(#testJsAmbiguousCall #testDeleteInRepeat)
 ]
 
 { #category : #'tests - input transition' }
@@ -44,6 +44,17 @@ SBTSBlockTest >> testCursorPositionsAroundUnknown [
 ]
 
 { #category : #'tests - deleting' }
+SBTSBlockTest >> testDeleteInRepeat [
+
+	| module editor |
+	module := SBTSFileParser new parse: '[1,2]' language: SBJavascript.
+	editor := self editorFor: module.
+	module lastDeepChild startInputAtEnd.
+	6 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: '' equals: module sourceString
+]
+
+{ #category : #'tests - deleting' }
 SBTSBlockTest >> testDeleteStBinaryOpStatement [
 
 	| method editor |
@@ -62,6 +73,22 @@ a'.
 	editor handle: (self keyboardEvent: Character backspace).
 	self assert: method sourceString equals: 'method'.
 	self assert: 1 equals: method childSandblocks size
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testForwardToAdjacentStatement [
+	<timeout: 2>
+
+	| module editor |
+	module := SBTSFileParser new parse: '2;
+() => 3' language: SBJavascript.
+	editor := self editorFor: module.
+	module lastDeepChild changeToUnknown.
+	module childSandblocks first startInputAtEnd.
+	editor handle: (self keyboardEvent: $,).
+	"no change expected, but we had some issues with input forwarding causing infinite loop"
+	self assert: '2
+()=>' equals: module sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -470,6 +497,20 @@ SBTSBlockTest >> testStDeleteAroundExpression [
 	module lastDeepChild deleteAround.
 	self assert: '123' equals: module childSandblocks second sourceString.
 	self assert: 'statement' equals: module childSandblocks second slot lastNode type
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testTypeSeparator [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'function(a) {}' language: SBJavascript.
+	editor := self editorFor: module.
+	module childSandblocks first childSandblocks first startInputAtEnd.
+	editor handle: (self keyboardEvent: $,).
+	editor handle: (self keyboardEvent: $b).
+	self assert: 'function(a,b)
+{
+}' equals: module sourceString
 ]
 
 { #category : #'tests - cursor position' }

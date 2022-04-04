@@ -76,7 +76,7 @@ SBTSFileParser >> nodeForCursor: aCursor [
 					SBTSNodeAlias new
 						factory: template factory;
 						alias: aCursor type;
-						element: (SBTSNodeSymbol new type: type factory: template factory)]
+						element: template]
 				ifFalse: [SBTSNodeSymbol new type: type factory: template factory]));
 			addAllMorphs: (blocks with: matches first slots collect: [:subBlock :slot | slot buildMorphWith: subBlock]) flatten;
 			yourself]

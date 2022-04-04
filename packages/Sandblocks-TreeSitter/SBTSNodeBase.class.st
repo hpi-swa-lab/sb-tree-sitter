@@ -53,7 +53,7 @@ SBTSNodeBase >> buildMorphWith: aBlock slot: aSlot [
 				slot: aSlot)].
 	
 	aBlock slot firstNode isBlockInlined ifTrue: [
-		aBlock slot firstNode isBlockInlinedInParent ifFalse: [aBlock submorphs do: [:m | aSlot nodes do: [:n | m slot addNode: n]]].
+		aBlock submorphs do: [:m | (aBlock slot firstNode isBlockInlinedInParent not or: [m slot includesRepeat not]) ifTrue: [aSlot nodes do: [:n | m slot addNode: n]]].
 		^ aBlock submorphs].
 	
 	^ aBlock slot: aSlot
@@ -69,6 +69,12 @@ SBTSNodeBase >> compatibleWithType: aSymbol [
 SBTSNodeBase >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
 	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> delimiterBetween: aBlock and: anotherBlock [
+
+	^ ''
 ]
 
 { #category : #accessing }
@@ -113,6 +119,12 @@ SBTSNodeBase >> hasParentThat: aBlock [
 SBTSNodeBase >> isBlockInlined [
 
 	^ factory isBlockInlined: self type
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> isBlockInlinedInParent [
+
+	^ false
 ]
 
 { #category : #testing }

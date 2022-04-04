@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSParseFileTest >> expectedFailures [
 
-	^ #(#testJsParameters)
+	^ #()
 ]
 
 { #category : #'tests - unit' }
@@ -69,6 +69,9 @@ SBTSParseFileTest >> testJsFunctionPatterns [
 	module := SBTSFileParser new parse: 'function(b) {}' language: SBJavascript instance.
 	editor := self editorFor: module.
 	self assert: #(#identifier #pattern) equals: (module childSandblocks first childSandblocks first slot nodes
+		collect: #type
+		as: Array).
+	self assert: #(nil #formal_parameters) equals: (module childSandblocks first submorphs second slot nodes
 		collect: #type
 		as: Array).
 	
@@ -168,6 +171,14 @@ SBTSParseFileTest >> testParseJS [
 	self
 		assert: (SBJavascript instance bodyNodeForRule: 'program') elements second element
 		equals: block childSandblocks first slot lastNode
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testParseJsArrowFunc [
+
+	| module |
+	module := SBTSFileParser new parse: '() => 1' language: SBJavascript.
+	self assert: 7 equals: (module childSandblocks first performEnum: #cursorPositionsDo:) size
 ]
 
 { #category : #'tests - languages' }

@@ -66,6 +66,15 @@ SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream 
 		(aBoolean not and: [block isTSBlock]) ifTrue: [block cursorPositionsDo: aClosure shallow: aBoolean]]
 ]
 
+{ #category : #printing }
+SBTSNodeSymbol >> delimiterBetween: aBlock and: anotherBlock [
+
+	self factory delimitedRules
+		at: self type
+		ifPresent: [:delimiter | self bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [(aBlock slot lastNode hasParent: node element) and: [anotherBlock slot lastNode hasParent: node element]]) ifTrue: [^ delimiter first]]].
+	^ ''
+]
+
 { #category : #testing }
 SBTSNodeSymbol >> isBlockInlinedInParent [
 

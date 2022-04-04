@@ -35,9 +35,7 @@ SBTSCursor >> currentDo: aBlock [
 		"node unpackAlias"].
 	^ aBlock
 		value: type
-		value: ((template isKindOf: SBTSNodeAlias)
-			ifTrue: [template unpackAlias]
-			ifFalse: [template])
+		value: (template isTSAlias ifTrue: [template unpackAlias] ifFalse: [template])
 		value: isAlias
 ]
 
