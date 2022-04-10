@@ -162,12 +162,11 @@ SBTSNodeText >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeText >> takeNodesFrom: aParser [
 
-	(aParser atEnd or: [aParser peek isString not]) ifTrue: [^ (regex matches: '') ifTrue: [{aParser copy}] ifFalse: [#noMatch]].
-	^ (self regex matches: aParser peek)
+	^ (aParser atEnd not and: [aParser peek isString and: [self regex matches: aParser peek]])
 		ifTrue: [
 			aParser next.
 			{aParser copy addSlot: self}]
-		ifFalse: [#noMatch]
+		ifFalse: [(regex matches: '') ifTrue: [{aParser copy}] ifFalse: [#noMatch]]
 ]
 
 { #category : #'as yet unclassified' }

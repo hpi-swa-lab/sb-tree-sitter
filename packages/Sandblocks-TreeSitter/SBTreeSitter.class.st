@@ -420,7 +420,9 @@ SBTreeSitter >> smalltalk [
 SBTreeSitter >> textBetween: aNode and: anEndNode [
 	" TODO: will break with UTF-8 "
 
-	^ currentString copyFrom: (self nodeEndByte: aNode) + 1 to: (self nodeStartByte: anEndNode)
+	^ currentString copyFrom: (self nodeEndByte: aNode) + 1 to: (anEndNode
+		ifNil: [self nodeEndByte: (self nodeParent: aNode)]
+		ifNotNil: [self nodeStartByte: anEndNode])
 ]
 
 { #category : #helper }

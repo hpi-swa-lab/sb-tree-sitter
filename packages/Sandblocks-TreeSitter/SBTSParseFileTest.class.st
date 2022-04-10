@@ -349,12 +349,36 @@ SBTSParseFileTest >> testSeq [
 	self assert: rule elements second equals: parser slots second lastNode
 ]
 
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testSmalltalkEmptyString [
+
+	| source |
+	source := 'a
+'''''.
+	self assert: source equals: (SBTSFileParser new parse: source language: SBTSSmalltalk) sourceString
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testSmalltalkString [
+
+	| source |
+	source := 'a
+''abc'''.
+	self assert: source equals: (SBTSFileParser new parse: source language: SBTSSmalltalk) sourceString
+]
+
 { #category : #'tests - print' }
 SBTSParseFileTest >> testStBinaryOp [
 
 	| op |
 	op := SBTSFileParser new parse: 'a 1+2' language: SBTSSmalltalk instance.
 	self assert: '1+2' equals: op childSandblocks second sourceString
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testStSymbol [
+
+	SBTSFileParser new parse: 'a #a' language: SBTSSmalltalk
 ]
 
 { #category : #'tests - unit' }

@@ -183,7 +183,9 @@ SBGrammarLanguage class >> updateFrom: aGithubString branch: aString [
     ^ {2}' format: {self language. f contents storeString})
 				classified: 'properties']] ensure: [
 		grammarFile ifNotNil: #close.
-		highlightsFile ifNotNil: #close]
+		highlightsFile ifNotNil: #close].
+	
+	self rebuild
 ]
 
 { #category : #'as yet unclassified' }

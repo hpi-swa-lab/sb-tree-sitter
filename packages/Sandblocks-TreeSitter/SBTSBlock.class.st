@@ -26,7 +26,7 @@ SBTSBlock >> absorbsInput: anEvent [
 { #category : #'as yet unclassified' }
 SBTSBlock >> actionProviders [
 
-	^ {self grammarHandler}, super actionProviders
+	^ super actionProviders, {self grammarHandler}
 ]
 
 { #category : #'as yet unclassified' }
@@ -52,12 +52,59 @@ SBTSBlock >> alias [
 	^ nil
 ]
 
+{ #category : #replacements }
+SBTSBlock >> allReplacementCandidates [
+
+	^ SBTSReplacementBlock allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class), (Pragma allNamed: #lang:match:sample: in: class) select: [:pragma | pragma arguments first = self factory name]]
+]
+
+{ #category : #replacements }
+SBTSBlock >> applyReplacement [
+
+	| candidates |
+	candidates := self allReplacementCandidates.
+	candidates do: [:pragma | | blockClass |
+		blockClass := pragma methodClass.
+		(blockClass
+			match: self
+			against: (SBTSQuery new prepare: pragma arguments second)
+			buildSelector: pragma selector) ifNotNil: [:cmd |
+			cmd do.
+			^ cmd replacer]].
+	^ nil
+]
+
+{ #category : #actions }
+SBTSBlock >> applyReplacements [
+	<action>
+
+	| candidates |
+	candidates := self allReplacementCandidates.
+	self allBlocksDo: [:block |
+		block isTSBlock ifTrue: [
+			candidates do: [:pragma | | blockClass |
+				blockClass := pragma methodClass.
+				(blockClass
+					match: block
+					against: (SBTSQuery new prepare: pragma arguments second)
+					buildSelector: pragma selector) ifNotNil: [:cmd |
+					self sandblockEditor
+						ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
+						ifNil: [cmd do]]]]]
+]
+
+{ #category : #accessing }
+SBTSBlock >> children [
+
+	^ self submorphs
+]
+
 { #category : #'inline block compat' }
 SBTSBlock >> childrenForQuery [
 	"remove, compat with inlineblocks"
 
 	self flag: #todo.
-	^ self submorphs
+	^ self children
 ]
 
 { #category : #'as yet unclassified' }
@@ -82,7 +129,7 @@ SBTSBlock >> copyBlock [
 { #category : #'as yet unclassified' }
 SBTSBlock >> currentTextMorph [
 
-	self submorphsDo: [:m | (m isKindOf: SBOwnTextMorph) ifTrue: [^ m]].
+	self submorphsDo: [:m | (m isKindOf: SBTSTextMorph) ifTrue: [^ m]].
 	^ nil
 ]
 
@@ -93,7 +140,7 @@ SBTSBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 	self template
 		cursorPositionsDo: aBlock
 		shallow: aBoolean
-		blocks: self submorphs readStream
+		blocks: self children readStream
 		parent: self
 ]
 
@@ -132,6 +179,12 @@ SBTSBlock >> deleteCommandFor: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> evaluate [
+
+	^ self factory runtime evaluate: self sourceString
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> factory [
 
 	^ self slot factory
@@ -154,7 +207,7 @@ SBTSBlock >> fixedNumberOfChildren [
 SBTSBlock >> get: aFieldNameString [
 
 	| matches |
-	matches := self submorphs select: [:child | child field = aFieldNameString].
+	matches := self children select: [:child | child field = aFieldNameString].
 	matches ifNotEmpty: [
 		^ (matches size > 1 and: [matches first slot includesRepeat])
 			ifTrue: [matches]
@@ -218,6 +271,13 @@ SBTSBlock >> isBlockBody [
 ]
 
 { #category : #testing }
+SBTSBlock >> isExpression [
+
+	self slot allSuperTypesDo: [:type | (self factory expressionTypes includes: type type) ifTrue: [^ true]].
+	^ false
+]
+
+{ #category : #testing }
 SBTSBlock >> isTSBlock [
 
 	^ true
@@ -247,7 +307,7 @@ SBTSBlock >> layoutCommands [
 	^ SBAlgebraCommand container
 		morph: self;
 		data: (Array streamContents: [:stream |
-			self submorphs overlappingPairsDo: [:a :b |
+			self children overlappingPairsDo: [:a :b |
 				stream nextPut: a layoutCommands.
 				(self factory hardLineBreakBetween: a and: b)
 					ifTrue: [stream nextPut: SBAlgebraCommand hardLine]
@@ -255,7 +315,7 @@ SBTSBlock >> layoutCommands [
 						(self factory softLineBreakBetween: a and: b)
 							ifTrue: [stream nextPut: SBAlgebraCommand softLineOrGap]
 							ifFalse: [stream nextPut: SBAlgebraCommand gap]]].
-			self hasSubmorphs ifTrue: [stream nextPut: self lastSubmorph layoutCommands]])
+			self children ifNotEmpty: [stream nextPut: self lastSubmorph layoutCommands]])
 ]
 
 { #category : #'as yet unclassified' }
@@ -373,7 +433,7 @@ SBTSBlock >> reinterpretWithoutEmpty [
 
 	| remaining options editor |
 	editor := self sandblockEditor.
-	remaining := self submorphs select: [:m | m sourceString notEmpty].
+	remaining := self children select: [:m | m sourceString notEmpty].
 	remaining ifEmpty: [
 		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
 			editor do: c.
@@ -385,7 +445,8 @@ SBTSBlock >> reinterpretWithoutEmpty [
 		editor do: (SBReplaceMultipleCommand new target: self replacers: options first).
 		options first last lastDeepChild startInputAtEnd.
 		^ true].
-	(remaining allSatisfy: [:m | m slot firstNode isTSLabel]) ifTrue: [(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
+	(remaining allSatisfy: [:m | m slot firstNode isTSLabel]) ifTrue: [
+		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
 			editor do: c.
 			editor selection moveCursorToEnd.
 			^ true]].
@@ -404,7 +465,7 @@ SBTSBlock >> repeaterGroup [
 		
 		mySubIndex := (self slot parentThat: [:p | p parent = seq]) in: [:c | c parent elements indexOf: c].
 		start := myIndex - mySubIndex + 1.
-		^ self owner submorphs copyFrom: start to: start + seq elements size - 1].
+		^ self owner children copyFrom: start to: start + seq elements size - 1].
 	^ nil
 ]
 
@@ -443,6 +504,12 @@ SBTSBlock >> statements [
 SBTSBlock >> template [
 
 	^ self slot firstNode bodyTemplate
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> textMorphs [
+
+	^ self submorphs select: [:t | t isTextMorph]
 ]
 
 { #category : #'as yet unclassified' }
@@ -505,6 +572,19 @@ SBTSBlock >> wantsInput [
 	^ false
 ]
 
+{ #category : #actions }
+SBTSBlock >> wrapWithWatch [
+	<action>
+
+	self isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self replacer: self expression copyBlock)].
+	self parentSandblock isWatch ifTrue: [
+		^ self sandblockEditor do: (SBReplaceCommand new
+			target: self parentSandblock
+			replacer: self parentSandblock expression copyBlock)].
+	
+	(self orOwnerSuchThat: [:o | o isTSBlock and: [o isExpression]]) ifNotNil: [:expr | self sandblockEditor do: (SBReplaceCommand new target: expr replacer: (SBWatch2 newEmptyFor: expr copyBlock))]
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> writeSourceOn: aStream [
 
@@ -514,10 +594,10 @@ SBTSBlock >> writeSourceOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
-	self hasSubmorphs ifFalse: [^ self].
+	self children ifEmpty: [^ self].
 	
 	(self factory indentMatch: self) ifTrue: [aStream tab: aNumber].
-	self submorphs overlappingPairsDo: [:first :second |
+	self children overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.
 		aStream nextPutAll: (self slot separatorBetween: first and: second indent: aNumber)].
 	self lastSubmorph

@@ -56,8 +56,8 @@ SBTSFileParser >> nodeForCursor: aCursor [
 				current := aCursor node.
 				[s nextPut: (self nodeForCursor: aCursor)] doWhileFalse: [ | gap atEnd |
 					atEnd := aCursor gotoNextSibling.
-					(atEnd not and: [aCursor factory noteUncapturedText includes: type]) ifTrue: [
-						gap := aCursor textBetween: current and: aCursor node.
+					(aCursor factory noteUncapturedText includes: type) ifTrue: [
+						gap := aCursor textBetween: current and: (atEnd ifTrue: [nil] ifFalse: [aCursor node]).
 						gap size > 0 ifTrue: [s nextPut: gap].
 						current := aCursor node].
 					atEnd].

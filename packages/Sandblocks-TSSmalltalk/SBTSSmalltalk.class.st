@@ -4,6 +4,12 @@ Class {
 	#category : #'Sandblocks-TSSmalltalk'
 }
 
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk class >> defaultRuntimeClass [
+
+	^ SBStSqueakRuntime
+]
+
 { #category : #properties }
 SBTSSmalltalk class >> grammarJson [
 
@@ -254,7 +260,7 @@ SBTSSmalltalk class >> grammarJson [
     },
     "number": {
       "type": "PATTERN",
-      "value": "([0-9]+r)?[0-9]+"
+      "value": "([0-9]+r)?[0-9]+|[0-9]+\\.[0-9]+"
     },
     "string": {
       "type": "SEQ",
@@ -314,7 +320,7 @@ SBTSSmalltalk class >> grammarJson [
     },
     "identifier": {
       "type": "PATTERN",
-      "value": "[A-Za-z_]+"
+      "value": "[A-Za-z_][A-Za-z0-9_]*"
     },
     "binary_operator": {
       "type": "PATTERN",
@@ -726,6 +732,12 @@ SBTSSmalltalk class >> statementContainerTypes [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSmalltalk >> expressionTypes [
+
+	^ #('expression')
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSmalltalk >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 
 	^ aBlock parentSandblock type = 'method'
@@ -734,5 +746,6 @@ SBTSSmalltalk >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 { #category : #'as yet unclassified' }
 SBTSSmalltalk >> postConfigure [
 
-	self blockInline: #('statement')
+	self blockInline: #('statement').
+	self noteUncapturedText: #('symbol' 'string')
 ]
