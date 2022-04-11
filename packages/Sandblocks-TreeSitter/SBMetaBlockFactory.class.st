@@ -1372,6 +1372,12 @@ SBMetaBlockFactory >> toplevel [
 	^ self instantiateToplevel: self rootRuleName
 ]
 
+{ #category : #configuration }
+SBMetaBlockFactory >> transitionPairs [
+
+	
+]
+
 { #category : #helper }
 SBMetaBlockFactory >> traverse: anObject detect: aBlock ifFound: aSuccessBlock ifNone: aFailBlock [
 

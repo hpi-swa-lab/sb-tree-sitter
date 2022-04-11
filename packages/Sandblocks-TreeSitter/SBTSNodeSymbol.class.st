@@ -51,11 +51,17 @@ SBTSNodeSymbol >> buildEmpty [
 SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
 	self isBlockInlined ifTrue: [
-		^ self bodyTemplate
-			cursorPositionsDo: aClosure
-			shallow: aBoolean
-			blocks: aStream
-			parent: aBlock].
+		^ (aStream peek isTSBlock and: [aStream peek isUnknown and: [aStream peek slot firstNode = self]])
+			ifTrue: [ | block |
+				block := aStream next.
+				aClosure value: (SBCursorSelect new block: block).
+				aBoolean ifFalse: [block cursorPositionsDo: aClosure shallow: aBoolean]]
+			ifFalse: [
+				self bodyTemplate
+					cursorPositionsDo: aClosure
+					shallow: aBoolean
+					blocks: aStream
+					parent: aBlock]].
 	
 	(aStream peek slot includesParent: self) ifTrue: [ | block |
 		block := aStream next.

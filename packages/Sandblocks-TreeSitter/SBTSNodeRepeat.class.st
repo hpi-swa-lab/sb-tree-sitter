@@ -36,10 +36,12 @@ SBTSNodeRepeat >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream 
 	hasElements := false.
 	multiple ifTrue: [buildInsert value: aStream position + 1 value: false].
 	
-	[aStream atEnd not and: [aStream peek slot includesParent: self]] whileTrue: [
+	[aStream atEnd not and: [aStream peek slot includesParent: self]] whileTrue: [ | currentPos |
+		currentPos := aStream position.
 		hasElements := true.
 		element cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock.
-		multiple ifTrue: [buildInsert value: aStream position + 1 value: true]].
+		multiple ifTrue: [buildInsert value: aStream position + 1 value: true].
+		self assert: aStream position > currentPos].
 	
 	(multiple not and: [hasElements not]) ifTrue: [buildInsert value: aStream position + 1 value: true]
 ]

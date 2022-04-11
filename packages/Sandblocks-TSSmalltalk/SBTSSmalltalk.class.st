@@ -744,8 +744,74 @@ SBTSSmalltalk >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSmalltalk >> isImmutableLabel: aLabelNode [
+
+	^ (super isImmutableLabel: aLabelNode) or: [#('|') includes: aLabelNode label]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> lowercaseSuggestionsFor: aBlock [
+
+	^ Array streamContents: [:stream |
+		self
+			scopesIn: aBlock
+			do: [:scope :declarations | declarations do: [:decl | (decl contents sandblockMatch: aBlock contents) ifTrue: [stream nextPut: decl]]]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSmalltalk >> postConfigure [
 
 	self blockInline: #('statement').
 	self noteUncapturedText: #('symbol' 'string')
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> scopesIn: aBlock do: aClosure [
+
+	| current |
+	current := aBlock.
+	[current notNil and: [current isTSBlock]] whileTrue: [
+		current isBlockBody ifTrue: [
+			aClosure value: current value: (Array streamContents: [:stream |
+				current childSandblocks do: [:block |
+					block type = #'block_argument' ifTrue: [stream nextPut: (SBSuggestionItem selector: block contents allButFirst label: 'block arg')].
+					block type = #temporaries ifTrue: [stream nextPutAll: (block childSandblocks collect: [:temp | SBSuggestionItem selector: temp contents label: 'temporary'])].
+					(#(#'binary_selector' #'keyword_selector') includes: block type) ifTrue: [stream nextPutAll: ((block childSandblocks select: [:arg | arg type = #identifier]) collect: [:arg | SBSuggestionItem selector: arg contents label: 'argument'])]]])].
+		current := current parentSandblock]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> suggestionsFor: aBlock [
+
+	^ aBlock type
+		caseOf: {
+			[#identifier] -> [self suggestionsForIdentifier: aBlock]}
+		otherwise: [#()]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> suggestionsForIdentifier: aBlock [
+
+	^ aBlock contents first isUppercase
+		ifTrue: [self uppercaseSuggestionsFor: aBlock]
+		ifFalse: [self lowercaseSuggestionsFor: aBlock]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> transitionPairs [
+
+	^ {#'unary_message' -> #'keyword_message'}
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> uppercaseSuggestionsFor: aBlock [
+
+	self flag: #todo.
+	"pool dict etc"
+	^ Array streamContents: [:stream |
+		Smalltalk globals keysAndValuesDo: [:key :value |
+			(key sandblockMatch: aBlock contents) ifTrue: [
+				stream nextPut: (SBSuggestionItem selector: key label: ((value isBehavior and: [key == value name])
+					ifTrue: ['class']
+					ifFalse: ['global']))]]]
 ]

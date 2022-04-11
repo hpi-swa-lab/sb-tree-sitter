@@ -501,6 +501,12 @@ SBTSBlock >> statements [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> suggestions [
+
+	^ self factory suggestionsFor: self
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> template [
 
 	^ self slot firstNode bodyTemplate

@@ -500,6 +500,18 @@ SBTSBlockTest >> testStDeleteAroundExpression [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testStUnaryMessageSend [
+
+	| method editor |
+	method := SBTSFileParser new parse: 'a test' language: SBTSSmalltalk.
+	editor := self editorAndWorldFor: method.
+	method childSandblocks second startInputAtEnd.
+	self type: ' ' in: editor.
+	self type: 'show' in: editor.
+	self assert: #'unary_message' equals: method childSandblocks second type
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testTypeSeparator [
 
 	| module editor |
