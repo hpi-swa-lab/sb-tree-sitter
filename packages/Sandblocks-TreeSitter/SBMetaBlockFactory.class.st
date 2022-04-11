@@ -1375,7 +1375,7 @@ SBMetaBlockFactory >> toplevel [
 { #category : #configuration }
 SBMetaBlockFactory >> transitionPairs [
 
-	
+	^ #()
 ]
 
 { #category : #helper }

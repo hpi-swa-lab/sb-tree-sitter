@@ -559,6 +559,12 @@ SBTSBlock >> updateHighlight [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> useSuggestion: anItem [
+
+	self tryApplyChange: [:b | b contents: anItem contents] input: anItem contents
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> valid [
 
 	self flag: #todo.
