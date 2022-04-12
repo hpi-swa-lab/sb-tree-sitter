@@ -14,6 +14,15 @@ Morph >> containingInlineBlock [
 ]
 
 { #category : #'*Sandblocks-TreeSitter' }
+Morph >> firstDeepSubmorph [
+
+	| current |
+	current := self.
+	[current submorphs isEmpty] whileFalse: [current := current submorphs first].
+	^ current
+]
+
+{ #category : #'*Sandblocks-TreeSitter' }
 Morph >> isTSBlock [
 
 	^ false

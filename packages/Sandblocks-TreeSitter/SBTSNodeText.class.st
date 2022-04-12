@@ -137,11 +137,16 @@ SBTSNodeText >> resultsFor: aParser [
 	self flag: #todo.
 	
 	start := aParser position.
-	(self regex matchesStreamPrefix: aParser stream) ifTrue: [
+	(self regex matchesStreamPrefix: aParser stream) ifTrue: [ | newParser contents |
+		contents := aParser stream originalContents
+			copyFrom: start + 1
+			to: aParser position.
+		newParser := aParser copy.
+		[newParser peek = $ ] whileTrue: [newParser next].
 		^ {
-			aParser copy addBlock: (SBTSTextMorph new
+			newParser addBlock: (SBTSTextMorph new
 				slot: (SBTSSlot new addNode: self);
-				contents: (aParser stream originalContents copyFrom: start + 1 to: aParser position))}].
+				contents: contents)}].
 	
 	remaining := aParser stream upToEnd.
 	(SBToggledCode

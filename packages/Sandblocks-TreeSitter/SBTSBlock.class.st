@@ -131,7 +131,7 @@ SBTSBlock >> copyBlock [
 
 	| copy |
 	copy := self class new
-		addAllMorphs: (self submorphs collect: [:s | s copyBlock]);
+		addAllMorphs: (self isUnknown ifTrue: [{}] ifFalse: [self submorphs collect: [:s | s copyBlock]]);
 		slot: self slot copy.
 	self
 		valueOfProperty: #lastConstructed
@@ -574,6 +574,7 @@ SBTSBlock >> updateHighlight [
 { #category : #'as yet unclassified' }
 SBTSBlock >> useSuggestion: anItem [
 
+	self contents: ''.
 	self tryApplyChange: [:b | b contents: anItem contents] input: anItem contents
 ]
 

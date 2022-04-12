@@ -272,10 +272,10 @@ SBTSParseInputTest >> testCreateTrue [
 	| results |
 	results := SBTSInputParser new
 		optionsForTemplate: (self nodeForRule: 'primary')
-		given: 'true'.
+		given: 'true '.
 	
-	self assert: 2 equals: results size.
-	self assert: #('identifier' 'true') asSet equals: (results collect: [:r | r first type] as: Set)
+	self assert: 1 equals: results size.
+	self assert: #('true') asSet equals: (results collect: [:r | r first type] as: Set)
 ]
 
 { #category : #'tests - create' }
@@ -414,4 +414,23 @@ SBTSParseInputTest >> testWrapJsBinaryOp [
 	self
 		assert: results first first childSandblocks second slot nodes size
 		equals: results first first childSandblocks first slot nodes size
+]
+
+{ #category : #'tests - wrap' }
+SBTSParseInputTest >> testWrapKeywordMessageWithGaps [
+
+	| stmt results |
+	stmt := (SBTSFileParser new parse: 'method 123' language: SBTSSmalltalk instance) childSandblocks second.
+	results := SBTSInputParser new
+		optionsFor: stmt
+		given: (String streamContents: [:stream |
+			3 timesRepeat: [
+				stream
+					nextPutAll: 'with:';
+					nextPut: (Character value: 1)]])
+		before: {stmt}
+		after: {}.
+	self assert: 1 equals: results size.
+	self assert: 7 equals: results first first childSandblocks size.
+	self assert: 3 equals: (results first first childSandblocks select: #isUnknown) size
 ]

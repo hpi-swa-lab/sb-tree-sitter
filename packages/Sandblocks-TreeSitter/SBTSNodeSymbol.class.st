@@ -120,6 +120,10 @@ SBTSNodeSymbol >> resultsFor: aParser [
 
 	(self factory inputTransitionBlackList includes: self type) ifTrue: [^ #noMatch].
 	
+	aParser peek = (Character value: 1) ifTrue: [
+		aParser next.
+		^ {aParser addEmptyBlocks: self buildEmpty}].
+	
 	^ aParser
 		memoizationFor: self type
 		ifPresent: [:results |

@@ -63,6 +63,19 @@ SBTSBlockTest >> testBinaryOpOnMemberExpression [
 	self assert: 'req.query==2' equals: module sourceString
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlockTest >> testCanTypeOverKeywordSuggestion [
+
+	| module editor |
+	module := SBTSFileParser new parse: '' language: SBPython.
+	editor := self editorAndWorldFor: module.
+	self type: 'ifi' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: 'identifier' equals: module childSandblocks first type
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testCursorPositionsAroundUnknown [
 
@@ -366,10 +379,9 @@ SBTSBlockTest >> testPyIfStatement [
 	program := SBTSFileParser new parse: '' language: SBPython.
 	editor := self editorAndWorldFor: program.
 	program startInsertAtEnd.
-	self type: 'if' in: editor.
+	self type: 'if ' in: editor.
 	self tick.
 	self tick.
-	editor handle: (self keyboardEvent: Character arrowDown).
 	editor handle: (self keyboardEvent: Character cr).
 	self assert: 'if_statement' equals: program childSandblocks first type
 ]
@@ -527,6 +539,23 @@ SBTSBlockTest >> testStDeleteAroundExpression [
 	module lastDeepChild deleteAround.
 	self assert: '123' equals: module childSandblocks second sourceString.
 	self assert: 'statement' equals: module childSandblocks second slot lastNode type
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlockTest >> testStKeywordAutocompletion [
+
+	| method editor |
+	method := SBTSFileParser new parse: 'a id' language: SBTSSmalltalk.
+	editor := self editorAndWorldFor: method.
+	method lastDeepChild startInputAtEnd.
+	self type: ' cucucu' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: #'keyword_message' equals: method childSandblocks second type.
+	self
+		assert: 'cull:cull:cull:'
+		equals: (((method childSandblocks second submorphs select: [:m | m type = #keyword]) collect: #contents) joinSeparatedBy: '')
 ]
 
 { #category : #'tests - input transition' }

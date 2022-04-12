@@ -123,11 +123,22 @@ SBTSNodeRepeat >> required [
 { #category : #parsing }
 SBTSNodeRepeat >> resultsFor: aParser [
 
-	| results |
-	results := self element resultsFor: aParser copy.
-	^ self required
-		ifTrue: [results]
-		ifFalse: [{aParser copy}, (results = #noMatch ifTrue: [#()] ifFalse: [results])]
+	| results candidates queue |
+	candidates := self required
+		ifTrue: [OrderedCollection new]
+		ifFalse: [OrderedCollection with: aParser].
+	queue := OrderedCollection with: aParser.
+	
+	[queue isEmpty] whileFalse: [ | next lastPosition |
+		next := queue removeFirst copy.
+		lastPosition := next position.
+		results := self element resultsFor: next.
+		results = #noMatch ifFalse: [
+			results do: [:result |
+				candidates add: result.
+				(result position > lastPosition and: [result atEnd not]) ifTrue: [queue add: result]]]].
+	
+	^ candidates
 ]
 
 { #category : #parsing }

@@ -137,7 +137,7 @@ SBTSNodeLabel >> regex [
 { #category : #parsing }
 SBTSNodeLabel >> resultsFor: aParser [
 
-	| labelStream oldPosition |
+	| labelStream oldPosition newParser |
 	labelStream := self label readStream.
 	oldPosition := aParser position.
 	[aParser atEnd or: [(aParser peek = (Character value: 0) and: [labelStream position > 0]) or: [labelStream atEnd]]] whileFalse: [
@@ -145,10 +145,9 @@ SBTSNodeLabel >> resultsFor: aParser [
 			aParser position: oldPosition.
 			^ #noMatch]].
 	
-	"to support distinguishing between fixed labels such as keywords and text input, we allow users to type a space to end the input and thus force the result to be the fixed label"
-	aParser peek = Character space ifTrue: [aParser next].
-	
-	^ {aParser copy addBlock: (self buildMorphWith: self label slot: (SBTSSlot new addNode: self))}
+	newParser := aParser copy.
+	[newParser peek = $ ] whileTrue: [newParser next].
+	^ {newParser addBlock: (self buildMorphWith: self label slot: (SBTSSlot new addNode: self))}
 ]
 
 { #category : #parsing }
