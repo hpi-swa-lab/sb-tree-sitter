@@ -16,6 +16,12 @@ SBTSNodeBase >> allChildrenDo: aBlock [
 ]
 
 { #category : #hierarchy }
+SBTSNodeBase >> allSubTypesDo: aBlock parents: aCollection [
+
+	
+]
+
+{ #category : #hierarchy }
 SBTSNodeBase >> allSuperTypesDo: aBlock [
 
 	self parent ifNotNil: [:o | o allSuperTypesDo: aBlock]

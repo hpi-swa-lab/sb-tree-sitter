@@ -27,6 +27,13 @@ SBTSNodeAlias >> allChildrenDo: aBlock [
 	self element allChildrenDo: aBlock
 ]
 
+{ #category : #blocks }
+SBTSNodeAlias >> allSubTypesDo: aBlock parents: aCollection [
+
+	aBlock value: self.
+	self element allSubTypesDo: aBlock parents: aCollection
+]
+
 { #category : #accessing }
 SBTSNodeAlias >> bodyTemplate [
 

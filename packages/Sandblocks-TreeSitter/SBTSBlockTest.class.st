@@ -10,6 +10,36 @@ SBTSBlockTest >> expectedFailures [
 	^ #(#testJsAmbiguousCall #testDeleteInRepeat)
 ]
 
+{ #category : #'tests - adding' }
+SBTSBlockTest >> testAddAdaptsSlotPythonStmt [
+
+	| source target |
+	source := (SBTSFileParser new parse: '2 + 3' language: SBPython) lastDeepChild.
+	target := SBTSFileParser new parse: '4' language: SBPython.
+	target addBlock: source.
+	self
+		assert: target childSandblocks first slot firstNode
+		equals: target childSandblocks second slot firstNode.
+	self
+		assert: target childSandblocks first slot lastNode
+		equals: target childSandblocks second slot lastNode
+]
+
+{ #category : #'tests - adding' }
+SBTSBlockTest >> testAddAdaptsSlotSmalltalkStmt [
+
+	| source target |
+	source := (SBTSFileParser new parse: 'a 2 + 3' language: SBTSSmalltalk) lastDeepChild.
+	target := SBTSFileParser new parse: 'a 4' language: SBTSSmalltalk.
+	target addBlock: source.
+	self
+		assert: target childSandblocks second slot firstNode
+		equals: target childSandblocks third slot firstNode.
+	self
+		assert: target childSandblocks second slot lastNode
+		equals: target childSandblocks third slot lastNode
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testBashCommand [
 

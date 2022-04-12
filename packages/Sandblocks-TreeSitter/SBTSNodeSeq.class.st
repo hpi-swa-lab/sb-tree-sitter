@@ -14,6 +14,12 @@ SBTSNodeSeq >> allChildrenDo: aBlock [
 	self elements do: [:el | el allChildrenDo: aBlock]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeSeq >> allSubTypesDo: aBlock parents: aCollection [
+
+	self elements do: [:element | element allSubTypesDo: aBlock parents: aCollection]
+]
+
 { #category : #copying }
 SBTSNodeSeq >> basicCopy [
 

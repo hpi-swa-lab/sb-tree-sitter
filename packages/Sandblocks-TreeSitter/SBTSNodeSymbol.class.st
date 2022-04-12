@@ -15,6 +15,15 @@ SBTSNodeSymbol >> allChildrenDo: aBlock [
 ]
 
 { #category : #hierarchy }
+SBTSNodeSymbol >> allSubTypesDo: aBlock parents: aCollection [
+
+	| parents |
+	parents := aCollection, {self}.
+	aBlock value: self value: parents.
+	self isInlined ifTrue: [self bodyTemplate allSubTypesDo: aBlock parents: parents]
+]
+
+{ #category : #hierarchy }
 SBTSNodeSymbol >> allSuperTypesDo: aBlock [
 
 	aBlock value: self.

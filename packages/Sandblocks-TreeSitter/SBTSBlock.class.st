@@ -36,12 +36,25 @@ SBTSBlock >> adaptSlot: aConverter [
 	aConverter
 		if: [
 			(aConverter objectInterface first isKindOf: SBTSObjectInterface)
-				ifTrue: [aConverter objectInterface first slot compatibleWithType: slot lastNode type]
+				ifTrue: [self slot copy adaptSlotFor: aConverter objectInterface first slot]
 				ifFalse: [false]]
 		do: [ | copy |
 			copy := self copyBlock.
 			copy slot adaptSlotFor: aConverter objectInterface first slot.
 			copy]
+]
+
+{ #category : #accessing }
+SBTSBlock >> addBlock: aBlock [
+	"use this when adding foreign blocks to self, it will adapt the slot accordingly, if possible"
+
+	self
+		cursorPositionsDo: [:pos |
+			pos isInsert ifTrue: [ | targetSlot |
+				targetSlot := SBTSSlot new addNode: pos command element.
+				(aBlock slot adaptSlotFor: targetSlot) ifTrue: [^ self addMorphBack: aBlock]]]
+		shallow: true.
+	self error: ('no suitable insertion point for a `{1}` in a `{2}` found' format: {aBlock printString. self printString})
 ]
 
 { #category : #'inline block compat' }

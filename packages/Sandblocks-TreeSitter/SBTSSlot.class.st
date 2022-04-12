@@ -12,11 +12,23 @@ SBTSSlot >> adaptSlotFor: anotherSlot [
 
 	| index |
 	index := anotherSlot nodes findFirst: [:node | node type = self lastNode type].
-	nodes removeLast.
-	anotherSlot nodes
-		from: index
-		to: anotherSlot nodes size
-		do: [:node | self addNode: node]
+	index > 0
+		ifTrue: [
+			nodes removeLast.
+			anotherSlot nodes
+				from: index
+				to: anotherSlot nodes size
+				do: [:node | self addNode: node].
+			^ true]
+		ifFalse: [
+			anotherSlot firstNode
+				allSubTypesDo: [:child :parents |
+					child type = self lastNode type ifTrue: [
+						nodes removeLast.
+						parents reverseDo: [:p | self addNode: p].
+						^ true]]
+				parents: {}].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }

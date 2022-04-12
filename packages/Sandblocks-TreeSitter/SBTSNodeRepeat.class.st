@@ -16,6 +16,12 @@ SBTSNodeRepeat >> allChildrenDo: aBlock [
 	self element allChildrenDo: aBlock
 ]
 
+{ #category : #testing }
+SBTSNodeRepeat >> allSubTypesDo: aBlock parents: aCollection [
+
+	self element allSubTypesDo: aBlock parents: aCollection
+]
+
 { #category : #blocks }
 SBTSNodeRepeat >> buildEmpty [
 
