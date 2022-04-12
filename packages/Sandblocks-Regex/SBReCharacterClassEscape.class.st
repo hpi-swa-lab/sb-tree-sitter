@@ -7,7 +7,7 @@ To help the user, this is a selection that allows selecting the type of characte
 "
 Class {
 	#name : #SBReCharacterClassEscape,
-	#superclass : #SBReBlock,
+	#superclass : #SBTSReplacementBlock,
 	#instVars : [
 		'characterClass'
 	],
@@ -22,6 +22,18 @@ SBReCharacterClassEscape class >> matchRegex: aDictionary do: aBlock [
 	^ aBlock 
 		value: (aDictionary at: 'class')
 		value: (self new selectCharacterClass: (aDictionary at: 'class') contents)
+]
+
+{ #category : #accessing }
+SBReCharacterClassEscape >> build [
+	<lang: #regex match: '(character_class_escape) @class'>
+
+	self addMorphBack: (self
+		createBinding: [
+			SBSelect new
+				placeholderText: 'select character class';
+				entries: self characterClasses]
+		object: 'class')
 ]
 
 { #category : #accessing }
@@ -41,16 +53,6 @@ SBReCharacterClassEscape >> characterClasses [
 		'\w' -> 'word character'.
 		'\W' -> 'not a word character'.
 	}
-]
-
-{ #category : #initialization }
-SBReCharacterClassEscape >> initialize [
-
-	super initialize.
-	
-	self addMorphBack: (characterClass := SBReSyntaxSelect new
-		placeholderText: 'select character class';
-		values: self characterClasses)
 ]
 
 { #category : #accessing }

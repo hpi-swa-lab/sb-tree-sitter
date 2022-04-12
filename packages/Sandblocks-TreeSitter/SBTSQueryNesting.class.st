@@ -23,7 +23,7 @@ SBTSQueryNesting >> elements: aCollection [
 SBTSQueryNesting >> evaluateAgainst: aBlock captures: aDictionary [
 
 	| block |
-	block := ((aBlock isTSBlock or: [aBlock isTSSymbol]) and: [self type = '_' or: [(aBlock compatibleWithType: self type) or: [aBlock alias = self type]]])
+	block := (((aBlock isTSBlock or: [aBlock isTextMorph]) or: [aBlock isTSSymbol]) and: [self type = '_' or: [(aBlock compatibleWithType: self type) or: [aBlock alias = self type]]])
 		ifTrue: [aBlock]
 		ifFalse: [nil].
 	

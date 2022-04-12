@@ -386,6 +386,16 @@ SBTSBlockTest >> testPyIfStatement [
 	self assert: 'if_statement' equals: program childSandblocks first type
 ]
 
+{ #category : #'tests - query' }
+SBTSBlockTest >> testQueryBlockInlined [
+
+	| regex |
+	regex := SBTSFileParser new parse: '(?<test>123)' language: SBRegex.
+	self assert: (regex queryRecursiveFirstMatch: '(named_capturing_group
+	(group_name) @name
+)' capturesDo: [:c | ])
+]
+
 { #category : #'tests - deleting' }
 SBTSBlockTest >> testRegexDeleteCountQuantifier [
 

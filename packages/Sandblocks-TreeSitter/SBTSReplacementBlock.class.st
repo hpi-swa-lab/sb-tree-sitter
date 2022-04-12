@@ -73,6 +73,14 @@ SBTSReplacementBlock >> createBinding: aBuilderClosure contents: aNameString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSReplacementBlock >> createBinding: aBuilderClosure object: aNameString [
+
+	^ self
+		createBinding: [:c | aBuilderClosure value object: (c at: aNameString) contents]
+		update: [:c :m | (c at: aNameString) contents: m object]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReplacementBlock >> createBinding: aBuilderClosure update: anUpdateClosure [
 
 	| block |
@@ -108,6 +116,12 @@ SBTSReplacementBlock >> initialize [
 		listDirection: #leftToRight;
 		hResizing: #shrinkWrap;
 		vResizing: #shrinkWrap
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementBlock >> isTSReplacement [
+
+	^ true
 ]
 
 { #category : #'as yet unclassified' }

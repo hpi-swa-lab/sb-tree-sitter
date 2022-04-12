@@ -94,7 +94,7 @@ SBTSBlock >> applyReplacements [
 	| candidates |
 	candidates := self allReplacementCandidates.
 	self allBlocksDo: [:block |
-		block isTSBlock ifTrue: [
+		(block isTSBlock and: [block isTSReplacement not]) ifTrue: [
 			candidates do: [:pragma | | blockClass |
 				blockClass := pragma methodClass.
 				(blockClass
@@ -296,6 +296,12 @@ SBTSBlock >> isTSBlock [
 	^ true
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> isTSReplacement [
+
+	^ false
+]
+
 { #category : #testing }
 SBTSBlock >> keepDuringTransform [
 
@@ -439,6 +445,18 @@ SBTSBlock >> promptTransition [
 	<action>
 
 	SBTSDisambiguatePopup new for: self input: '' before: ActiveEvent shiftPressed
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> queryRecursiveFirstMatch: aString capturesDo: aBlock [
+
+	self allBlocksDo: [:block |
+		block isTSBlock ifTrue: [ | captures |
+			captures := nil.
+			(SBTSQuery new execute: aString against: block capturesDo: [:cap | captures := cap]) ifTrue: [
+				aBlock value: captures.
+				^ true]]].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }

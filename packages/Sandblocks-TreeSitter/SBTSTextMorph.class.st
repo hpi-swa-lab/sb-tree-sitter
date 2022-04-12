@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> alias [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> allConnectionsDo: aBlock [
 
 	
@@ -25,6 +31,12 @@ SBTSTextMorph >> childrenForQuery [
 
 	self flag: #todo.
 	^ #()
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> compatibleWithType: aString [
+
+	^ self slot compatibleWithType: aString
 ]
 
 { #category : #'as yet unclassified' }

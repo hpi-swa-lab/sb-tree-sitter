@@ -13,42 +13,6 @@ In the dropdown, only the value of each association is shown. The syntax method 
 "
 Class {
 	#name : #SBReSyntaxSelect,
-	#superclass : #SBComboBox,
+	#superclass : #SBSelect,
 	#category : #'Sandblocks-Regex'
 }
-
-{ #category : #accessing }
-SBReSyntaxSelect >> colored [
-
-	^ false
-]
-
-{ #category : #accessing }
-SBReSyntaxSelect >> firstVisibleType [
-
-	^ nil
-]
-
-{ #category : #accessing }
-SBReSyntaxSelect >> labels [
-
-	^ self values collect: [:each | each value]
-]
-
-{ #category : #accessing }
-SBReSyntaxSelect >> syntax [
-
-	^ self object ifNotNil: [:object | object key]
-]
-
-{ #category : #accessing }
-SBReSyntaxSelect >> syntax: aString [
-
-	self object: (self values detect: [:each | each key = aString])
-]
-
-{ #category : #accessing }
-SBReSyntaxSelect >> tooltips [
-
-	^ self values collect: [:each | each key]
-]

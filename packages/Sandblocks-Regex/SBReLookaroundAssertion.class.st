@@ -8,10 +8,7 @@ There seems to be a bug with parsing lookbehind assertions:
 "
 Class {
 	#name : #SBReLookaroundAssertion,
-	#superclass : #SBRePatternWrapper,
-	#instVars : [
-		'assertionType'
-	],
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Regex'
 }
 
@@ -29,12 +26,6 @@ SBReLookaroundAssertion class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #accessing }
-SBReLookaroundAssertion >> assertionType [
-
-	^ assertionType
-]
-
-{ #category : #accessing }
 SBReLookaroundAssertion >> assertionTypes [
 
 	^ {
@@ -45,38 +36,18 @@ SBReLookaroundAssertion >> assertionTypes [
 	}
 ]
 
-{ #category : #initialization }
-SBReLookaroundAssertion >> initialize [
-
-	super initialize.
-	
-	self
-		addMorphBack: (assertionType := SBReSyntaxSelect new
-			placeholderText: 'select assertion type...';
-			values: self assertionTypes);
-		addMorphBack: self pattern
-]
-
 { #category : #accessing }
-SBReLookaroundAssertion >> selectAssertionType: aString [
+SBReLookaroundAssertion >> build [
+	<lang: #regex match: '(lookahead_assertion
+	(pattern) @pattern
+) @assertion'>
 
-	self assertionType syntax: aString
-]
-
-{ #category : #printing }
-SBReLookaroundAssertion >> sourceString [
-
-	^ self assertionType syntax
-		ifNotNil: ['(?{1}{2})'
-			format: {
-				self assertionType syntax.
-				self pattern sourceString}]
-		ifNil: ['']
-	
-]
-
-{ #category : #accessing }
-SBReLookaroundAssertion >> type [
-
-	^ 'lookahead_assertion'
+	self addMorphBack: (self
+		createBinding: [:c |
+			SBSelect new
+				placeholderText: 'select assertion type...';
+				entries: self assertionTypes;
+				object: (c at: 'assertion') textMorphs second contents]
+		update: [:c :m | (c at: 'assertion') textMorphs second contents: m object]).
+	self addMorphBack: (self createBindingBlock: 'pattern')
 ]
