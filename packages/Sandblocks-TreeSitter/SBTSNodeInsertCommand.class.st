@@ -70,6 +70,12 @@ SBTSNodeInsertCommand >> isInsert [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> morphs [
+
+	^ morphs
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> postDo [
 
 	continueInputString

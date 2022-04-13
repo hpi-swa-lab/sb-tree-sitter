@@ -5,78 +5,24 @@ For each quantifier, there is also a lazy variation (achieved by appending a ? t
 "
 Class {
 	#name : #SBReQuantifier,
-	#superclass : #SBReBlock,
-	#instVars : [
-		'lazy'
-	],
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Regex'
 }
 
 { #category : #initialization }
-SBReQuantifier >> buildConcreteOn: aMorph [
+SBReQuantifier >> buildLazyToggle [
 
-	self buildOn: aMorph.
-	^ aMorph
-]
-
-{ #category : #initialization }
-SBReQuantifier >> buildLazyToggleOn: aMorph [
-
-	^ aMorph
-		addMorphBack: (lazy := SBCheckbox new
-			value: false;
-			canDrag: false);
-		addMorphBack: (SBStringMorph new
-			contents: 'lazy');
-		yourself
-]
-
-{ #category : #initialization }
-SBReQuantifier >> buildOn: aMorph [
-
-	^ self subclassResponsibility
+	self addMorphBack: (SBRow new
+		addMorphBack: (self createBinding: [SBCheckbox new] optional: 'lazy' insert: [:c | (c at: 'root') lastInsertPosition]);
+		addMorphBack: (SBStringMorph new contents: 'lazy'))
 ]
 
 { #category : #initialization }
 SBReQuantifier >> initialize [
 
 	super initialize.
-
+	
 	self
-		addMorphBack: (self buildConcreteOn: SBRow new);
-		addMorphBack: (self buildLazyToggleOn: SBRow new);
 		changeTableLayout;
 		listDirection: #topToBottom
-]
-
-{ #category : #accessing }
-SBReQuantifier >> lazy [
-
-	^ lazy value
-]
-
-{ #category : #accessing }
-SBReQuantifier >> lazy: aBoolean [
-
-	lazy changeValue: aBoolean
-]
-
-{ #category : #printing }
-SBReQuantifier >> lazySourceString [
-
-	^ self lazy
-		ifTrue: ['?']
-		ifFalse: ['']
-]
-
-{ #category : #printing }
-SBReQuantifier >> quantifierString [
-
-	^ self subclassResponsibility
-]
-
-{ #category : #printing }
-SBReQuantifier >> sourceString [
-
-	^ self quantifierString , self lazySourceString
 ]

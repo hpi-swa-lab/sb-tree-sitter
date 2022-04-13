@@ -21,19 +21,12 @@ SBReZeroOrMore class >> matchRegex: aDictionary do: aBlock [
 ]
 
 { #category : #initialization }
-SBReZeroOrMore >> buildOn: aMorph [
+SBReZeroOrMore >> build [
+	<lang: #regex match: '(zero_or_more
+	"?"? @lazy
+) @zero_or_more'>
 
-	aMorph addMorphBack: (SBStringMorph new contents: 'zero or more times')
-]
-
-{ #category : #printing }
-SBReZeroOrMore >> quantifierString [
-
-	^ '*'
-]
-
-{ #category : #accessing }
-SBReZeroOrMore >> type [
-
-	^ 'zero_or_more'
+	self
+		addMorphBack: (SBStringMorph new contents: 'zero or more times');
+		buildLazyToggle
 ]

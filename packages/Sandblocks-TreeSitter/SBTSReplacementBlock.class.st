@@ -24,11 +24,10 @@ SBTSReplacementBlock class >> match: aBlock against: aTSQuery [
 SBTSReplacementBlock class >> match: aBlock against: aTSQuery buildSelector: aSymbol [
 
 	aTSQuery executeAgainst: aBlock capturesDo: [:captures :success |
-		success ifTrue: [ | block |
-			block := self new
+		success ifTrue: [
+			(self new
 				bindings: captures block: aBlock;
-				perform: aSymbol.
-			^ SBReplaceCommand new target: block root replacer: block]].
+				perform: aSymbol) ifNotNil: [:block | ^ SBReplaceCommand new target: block root replacer: block]]].
 	^ nil
 ]
 
@@ -78,6 +77,25 @@ SBTSReplacementBlock >> createBinding: aBuilderClosure object: aNameString [
 	^ self
 		createBinding: [:c | aBuilderClosure value object: (c at: aNameString) contents]
 		update: [:c :m | (c at: aNameString) contents: m object]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementBlock >> createBinding: aBuilderClosure optional: aString insert: aClosure [
+
+	^ self
+		createBinding: [:c | aBuilderClosure value value: (c at: aString ifPresent: [true] ifAbsent: [false])]
+		update: [:c :m |
+			m value
+				ifTrue: [
+					c at: aString ifAbsent: [ | block |
+						block := ((aClosure value: c) command
+							do;
+							morphs) first.
+						c at: aString put: block]]
+				ifFalse: [
+					c at: aString ifPresent: [:block |
+						block delete.
+						c removeKey: aString]]]
 ]
 
 { #category : #'as yet unclassified' }
