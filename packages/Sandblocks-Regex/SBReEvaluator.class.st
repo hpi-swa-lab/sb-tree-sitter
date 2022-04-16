@@ -7,25 +7,12 @@ You can use the Ctrl+N shortcut to wrap the currently selected block with an eva
 "
 Class {
 	#name : #SBReEvaluator,
-	#superclass : #SBReAnnotation,
+	#superclass : #SBReEncodedReplacement,
 	#instVars : [
 		'examples'
 	],
 	#category : #'Sandblocks-Regex'
 }
-
-{ #category : #accessing }
-SBReEvaluator >> annotation [
-
-	^ (self examples contents collect: [:each | each base64Encoded]) joinSeparatedBy: ','
-]
-
-{ #category : #accessing }
-SBReEvaluator >> annotation: aString [
-
-	self examples removeAllExamples.
-	(aString splitBy: ',') do: [:each | self examples addExample: each base64Decoded]
-]
 
 { #category : #updating }
 SBReEvaluator >> artefactChanged: aBlock [
@@ -34,10 +21,15 @@ SBReEvaluator >> artefactChanged: aBlock [
 		ifTrue: [self execute]
 ]
 
-{ #category : #accessing }
-SBReEvaluator >> color [
+{ #category : #initialization }
+SBReEvaluator >> build [
 
-	^ Color r: 0.794 g: 0.25 b: 0.25
+	self
+		addMorphBack: (self createBindingBlock: 'pattern');
+		addMorphBack: (examples := self
+			createBindingListFor: 'annotation'
+			build: [:list | SBReEvaluatorTestList new examples: list]
+			update: [:c :m | m examples])
 ]
 
 { #category : #accessing }
@@ -53,20 +45,16 @@ SBReEvaluator >> execute [
 	self examples patternChanged
 ]
 
-{ #category : #initialization }
-SBReEvaluator >> initialize [
-
-	super initialize.
-	
-	self
-		addMorphBack: self pattern;
-		addMorphBack: (examples := SBReEvaluatorTestList new)
-]
-
 { #category : #accessing }
 SBReEvaluator >> isArtefact [
 
 	^ true
+]
+
+{ #category : #accessing }
+SBReEvaluator >> pattern [
+
+	^ self firstSubmorph
 ]
 
 { #category : #updating }

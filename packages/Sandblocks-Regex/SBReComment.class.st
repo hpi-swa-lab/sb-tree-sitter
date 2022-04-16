@@ -7,50 +7,33 @@ You can use the Ctrl+M shortcut to wrap the currently selected block with an eva
 "
 Class {
 	#name : #SBReComment,
-	#superclass : #SBReAnnotation,
+	#superclass : #SBReEncodedReplacement,
 	#instVars : [
 		'comment'
 	],
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #accessing }
-SBReComment >> annotation [
+{ #category : #'as yet unclassified' }
+SBReComment >> build [
 
-	^ comment contents
-]
-
-{ #category : #accessing }
-SBReComment >> annotation: aString [
-
-	comment contents: aString
+	self
+		addMorphBack: (self createBindingBlock: 'pattern');
+		addMorphBack: (SBColumn new
+			addMorphBack: (comment := self
+				createBindingFor: 'annotation'
+				build: [:annotation |
+					SBTextBubble multiLine
+						placeholderText: 'comment';
+						contents: annotation]
+				update: [:c :m | m contents]);
+			addMorphBack: (SBButton new
+				balloonText: 'collapse';
+				icon: SBIcon iconMinus shortcut: nil do: [self collapseBlock]))
 ]
 
 { #category : #accessing }
 SBReComment >> collapsedContent [
 
-	^ self annotation
-]
-
-{ #category : #accessing }
-SBReComment >> color [
-
-	^ Color lightGray
-]
-
-{ #category : #initialization }
-SBReComment >> initialize [
-
-	super initialize.
-	
-	self
-		addMorphBack: self pattern;
-		addMorphBack: (SBColumn new
-			addMorphBack: (comment := SBTextBubble multiLine
-				placeholderText: 'comment');
-			addMorphBack: (SBButton new
-				balloonText: 'collapse';
-				icon: SBIcon iconMinus
-				shortcut: nil
-				do: [self collapseBlock]))
+	^ comment contents
 ]

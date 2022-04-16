@@ -29,6 +29,12 @@ Morph >> isTSBlock [
 ]
 
 { #category : #'*Sandblocks-TreeSitter' }
+Morph >> isTSMorph [
+
+	^ false
+]
+
+{ #category : #'*Sandblocks-TreeSitter' }
 Morph >> isTSNode [
 
 	^ false

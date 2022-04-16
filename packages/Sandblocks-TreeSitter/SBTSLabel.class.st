@@ -41,6 +41,12 @@ SBTSLabel >> field [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> isTSMorph [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> isTSSymbol [
 	"remove inline block compat"
 
@@ -48,7 +54,7 @@ SBTSLabel >> isTSSymbol [
 	^ false
 ]
 
-{ #category : #nil }
+{ #category : #'as yet unclassified' }
 SBTSLabel >> isUnknown [
 
 	^ false

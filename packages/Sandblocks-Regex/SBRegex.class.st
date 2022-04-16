@@ -13,6 +13,19 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
+{ #category : #building }
+SBRegex class >> createBindingIn: aBlock for: aString build: aClosure update: anUpdateClosure [
+
+	^ aBlock
+		createBinding: [:c | aClosure value: ((c at: aString) sourceString from: self className size + 2) base64Decoded]
+		update: [:c :m | | new |
+			new := SBTSFileParser new
+				parse: aBlock className, ':', (anUpdateClosure value: c value: m) base64Encoded
+				language: SBRegex.
+			(c at: aString) replaceBy: new.
+			c at: aString put: new]
+]
+
 { #category : #accessing }
 SBRegex class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-regex/blob/master/grammar.js "

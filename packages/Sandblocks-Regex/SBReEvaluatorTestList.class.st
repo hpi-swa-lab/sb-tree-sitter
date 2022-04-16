@@ -14,9 +14,15 @@ SBReEvaluatorTestList >> addExample: aString [
 ]
 
 { #category : #accessing }
-SBReEvaluatorTestList >> contents [
+SBReEvaluatorTestList >> examples [
 
-	^ self submorphs collect: [:each | each contents]
+	^ self submorphs collect: #contents
+]
+
+{ #category : #accessing }
+SBReEvaluatorTestList >> examples: aCollection [
+
+	aCollection do: [:e | self addExample: e]
 ]
 
 { #category : #'testing hierarchy' }

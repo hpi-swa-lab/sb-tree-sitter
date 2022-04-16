@@ -82,8 +82,7 @@ SBTSBlock >> applyReplacement [
 			match: self
 			against: (SBTSQuery new prepare: pragma arguments second)
 			buildSelector: pragma selector) ifNotNil: [:cmd |
-			cmd do.
-			^ cmd replacer]].
+			^ cmd]].
 	^ nil
 ]
 
@@ -296,6 +295,12 @@ SBTSBlock >> isTSBlock [
 	^ true
 ]
 
+{ #category : #testing }
+SBTSBlock >> isTSMorph [
+
+	^ true
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> isTSReplacement [
 
@@ -347,6 +352,7 @@ SBTSBlock >> matchesQuery: aString [
 SBTSBlock >> newEmptyChildNear: aBlock before: aBoolean [
 
 	aBlock ifNil: [^ nil].
+	aBlock isTSMorph ifFalse: [^ nil].
 	aBlock slot lastRepeater ifNotNil: [:repeater |
 		self flag: #todo.
 		"can return multiple"
@@ -445,6 +451,12 @@ SBTSBlock >> promptTransition [
 	<action>
 
 	SBTSDisambiguatePopup new for: self input: '' before: ActiveEvent shiftPressed
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> query: aString capturesDo: aBlock [
+
+	^ SBTSQuery new execute: aString against: self capturesDo: aBlock
 ]
 
 { #category : #'as yet unclassified' }

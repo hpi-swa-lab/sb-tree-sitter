@@ -78,6 +78,12 @@ SBTSTextMorph >> field [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> isTSMorph [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> isTSSymbol [
 	"remove inline block compat"
 

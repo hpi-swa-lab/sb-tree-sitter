@@ -24,10 +24,13 @@ SBTSReplacementBlock class >> match: aBlock against: aTSQuery [
 SBTSReplacementBlock class >> match: aBlock against: aTSQuery buildSelector: aSymbol [
 
 	aTSQuery executeAgainst: aBlock capturesDo: [:captures :success |
-		success ifTrue: [
-			(self new
-				bindings: captures block: aBlock;
-				perform: aSymbol) ifNotNil: [:block | ^ SBReplaceCommand new target: block root replacer: block]]].
+		success ifTrue: [ | block restore |
+			block := self new bindings: captures block: aBlock.
+			restore := SBRestoreCommand new
+				morphs: captures values commonOwner: block root;
+				notePositions;
+				yourself.
+			(block perform: aSymbol) ifNotNil: [^ SBCombinedCommand newWith: {restore. SBReplaceCommand new target: block root replacer: block}]]].
 	^ nil
 ]
 
@@ -110,8 +113,8 @@ SBTSReplacementBlock >> createBinding: aBuilderClosure update: anUpdateClosure [
 { #category : #'as yet unclassified' }
 SBTSReplacementBlock >> createBindingBlock: aNameString [
 
-	^ self createBinding: [:c | (self bindings at: aNameString) copyBlock] update: [:c :m | | block |
-		block := m copyBlock.
+	^ self createBinding: [:c | self bindings at: aNameString] update: [:c :m | | block |
+		block := m.
 		(c at: aNameString) owner ifNotNil: [(c at: aNameString) replaceBy: block].
 		c at: aNameString put: block]
 ]
@@ -119,7 +122,7 @@ SBTSReplacementBlock >> createBindingBlock: aNameString [
 { #category : #'as yet unclassified' }
 SBTSReplacementBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 
-	aBlock value: (SBCursorSelect new block: self)
+	self basicCursorPositionsDo: aBlock shallow: aBoolean
 ]
 
 { #category : #'as yet unclassified' }

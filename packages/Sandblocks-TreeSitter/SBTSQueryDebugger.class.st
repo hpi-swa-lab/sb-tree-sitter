@@ -87,12 +87,12 @@ SBTSQueryDebugger >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 	source contents ifEmpty: [^ true].
 	
 	source detachDecorators: SBErrorDecorator.
-	program := [language object parse: source contents]
+	program := [SBTSFileParser new parse: source contents language: language object]
 		on: SBTSSyntaxError
 		do: [:error |
 			source attachDecorator: (SBErrorDecorator new message: 'syntax invalid').
 			^ false].
-	sourceTree contents: program printSExprShort.
+	sourceTree contents: program printTree.
 	self addMorphBack: program.
 	program hResizing: #spaceFill.
 	
