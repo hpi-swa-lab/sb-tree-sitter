@@ -36,9 +36,21 @@ SBTSLabel >> copyBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> drawnColor [
+
+	^ self containingSandblock drawnColor
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> field [
 
 	^ self slot field
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLabel >> foregroundColor [
+
+	^ self containingSandblock colorPolicy foregroundColorForBlock: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -94,9 +106,21 @@ SBTSLabel >> ownerWithColor [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> preferredColorIn: aColorPolicy [
+
+	^ self slot preferredColorIn: aColorPolicy for: self highlight
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> repeaterGroup [
 
 	^ {self}
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLabel >> shownColor [
+
+	^ self containingSandblock showColor
 ]
 
 { #category : #'as yet unclassified' }

@@ -389,22 +389,7 @@ SBTSBlock >> ownerWithColor [
 { #category : #highlight }
 SBTSBlock >> preferredColorIn: aColorPolicy [
 
-	^ self highlight
-		caseOf: {
-			['keyword'] -> [aColorPolicy keyword].
-			['function'] -> [aColorPolicy identifier].
-			['comment'] -> [aColorPolicy defaultLight].
-			['variable'] -> [aColorPolicy identifier].
-			['type'] -> [aColorPolicy keyword].
-			['number'] -> [aColorPolicy literal].
-			['string'] -> [aColorPolicy literal].
-			['escape'] -> [aColorPolicy literal].
-			['punctuation.bracket'] -> [aColorPolicy builtIn].
-			['constant.builtin'] -> [aColorPolicy builtIn].
-			['operator'] -> [aColorPolicy identifier].
-			['property'] -> [aColorPolicy identifier].
-			['important'] -> [aColorPolicy important]}
-		otherwise: [aColorPolicy default]
+	^ self slot preferredColorIn: aColorPolicy for: self highlight
 ]
 
 { #category : #'as yet unclassified' }

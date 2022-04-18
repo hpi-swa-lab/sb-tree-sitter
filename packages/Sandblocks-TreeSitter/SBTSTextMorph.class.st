@@ -61,6 +61,12 @@ SBTSTextMorph >> copyBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> drawnColor [
+
+	^ self containingSandblock drawnColor
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> ensureLayouted [
 
 	
@@ -76,6 +82,12 @@ SBTSTextMorph >> factory [
 SBTSTextMorph >> field [
 
 	^ self slot field
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> foregroundColor [
+
+	^ self containingSandblock colorPolicy foregroundColorForBlock: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -131,6 +143,12 @@ SBTSTextMorph >> ownerWithColor [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> preferredColorIn: aColorPolicy [
+
+	^ self slot preferredColorIn: aColorPolicy for: self highlight
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> regex [
 
 	^ self slot firstNode regex
@@ -152,6 +170,12 @@ SBTSTextMorph >> repeaterGroup [
 		start := myIndex - mySubIndex + 1.
 		^ self owner submorphs copyFrom: start to: start + seq elements size - 1].
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> shownColor [
+
+	^ self containingSandblock shownColor
 ]
 
 { #category : #'as yet unclassified' }
