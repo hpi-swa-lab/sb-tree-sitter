@@ -178,6 +178,27 @@ SBTSSlot >> postCopy [
 	nodes := nodes copy
 ]
 
+{ #category : #highlight }
+SBTSSlot >> preferredColorIn: aColorPolicy for: aHighlightString [
+
+	^ aHighlightString
+		caseOf: {
+			['keyword'] -> [aColorPolicy keyword].
+			['function'] -> [aColorPolicy identifier].
+			['comment'] -> [aColorPolicy defaultLight].
+			['variable'] -> [aColorPolicy identifier].
+			['type'] -> [aColorPolicy keyword].
+			['number'] -> [aColorPolicy literal].
+			['string'] -> [aColorPolicy literal].
+			['escape'] -> [aColorPolicy literal].
+			['punctuation.bracket'] -> [aColorPolicy builtIn].
+			['constant.builtin'] -> [aColorPolicy builtIn].
+			['operator'] -> [aColorPolicy identifier].
+			['property'] -> [aColorPolicy identifier].
+			['important'] -> [aColorPolicy important]}
+		otherwise: [aColorPolicy default]
+]
+
 { #category : #'as yet unclassified' }
 SBTSSlot >> printOn: aStream [
 
@@ -236,6 +257,24 @@ SBTSSlot >> trimNodesTo: aNode [
 SBTSSlot >> type [
 
 	^ self firstNode type
+]
+
+{ #category : #highlight }
+SBTSSlot >> updateAllHighlightsFor: aBlock [
+
+	self factory hasHighlight ifFalse: [^ self].
+	aBlock allMorphsDo: [:m |
+		m isTSMorph ifTrue: [
+			m highlight: #'_sb_none'.
+			m slot updateHighlightFor: m]]
+]
+
+{ #category : #highlight }
+SBTSSlot >> updateHighlightFor: aBlock [
+
+	self factory highlightQuery
+		executeAgainst: aBlock
+		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | (block highlight isNil or: [block highlight = #'_sb_none']) ifTrue: [block highlight: id]]]
 ]
 
 { #category : #'as yet unclassified' }

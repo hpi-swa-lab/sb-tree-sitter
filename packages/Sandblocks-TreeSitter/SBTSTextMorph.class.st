@@ -2,7 +2,8 @@ Class {
 	#name : #SBTSTextMorph,
 	#superclass : #SBMultilineOwnTextMorph,
 	#instVars : [
-		'slot'
+		'slot',
+		'highlight'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -78,6 +79,18 @@ SBTSTextMorph >> field [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> highlight [
+
+	^ highlight ifNil: [self slot updateAllHighlightsFor: self]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> highlight: aString [
+
+	highlight := aString
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> isTSMorph [
 
 	^ true
@@ -107,6 +120,14 @@ SBTSTextMorph >> keepDuringTransform [
 SBTSTextMorph >> language [
 
 	^ self factory name
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> ownerWithColor [
+
+	^ self highlight = #'_sb_none'
+		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
+		ifFalse: [self]
 ]
 
 { #category : #'as yet unclassified' }

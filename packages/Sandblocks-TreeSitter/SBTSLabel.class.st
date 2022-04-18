@@ -2,7 +2,8 @@ Class {
 	#name : #SBTSLabel,
 	#superclass : #SBStringMorph,
 	#instVars : [
-		'slot'
+		'slot',
+		'highlight'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -41,6 +42,18 @@ SBTSLabel >> field [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> highlight [
+
+	^ highlight ifNil: [self slot updateAllHighlightsFor: self]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLabel >> highlight: aString [
+
+	highlight := aString
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> isTSMorph [
 
 	^ true
@@ -70,6 +83,14 @@ SBTSLabel >> keepDuringTransform [
 SBTSLabel >> language [
 
 	^ self slot factory name
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLabel >> ownerWithColor [
+
+	^ self highlight = #'_sb_none'
+		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
+		ifFalse: [self]
 ]
 
 { #category : #'as yet unclassified' }

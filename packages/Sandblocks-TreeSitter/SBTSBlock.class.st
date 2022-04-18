@@ -586,19 +586,7 @@ SBTSBlock >> type [
 { #category : #highlight }
 SBTSBlock >> updateAllHighlights [
 
-	self factory hasHighlight ifFalse: [^ self].
-	self allMorphsDo: [:m |
-		m isTSBlock ifTrue: [
-			m highlight: #'_sb_none'.
-			m updateHighlight]]
-]
-
-{ #category : #highlight }
-SBTSBlock >> updateHighlight [
-
-	self factory highlightQuery
-		executeAgainst: self
-		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | (block highlight isNil or: [block highlight = #'_sb_none']) ifTrue: [block highlight: id]]]
+	self slot updateAllHighlightsFor: self
 ]
 
 { #category : #'as yet unclassified' }

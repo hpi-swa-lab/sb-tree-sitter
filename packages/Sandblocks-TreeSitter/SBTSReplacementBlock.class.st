@@ -126,6 +126,12 @@ SBTSReplacementBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSReplacementBlock >> foregroundColor [
+
+	^ self root foregroundColor
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReplacementBlock >> initialize [
 
 	super initialize.
@@ -149,6 +155,14 @@ SBTSReplacementBlock >> isTSReplacement [
 SBTSReplacementBlock >> layoutCommands [
 
 	^ SBAlgebraCommand morph data: self
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementBlock >> ownerWithColor [
+
+	^ self root highlight = #'_sb_none'
+		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
+		ifFalse: [self]
 ]
 
 { #category : #'as yet unclassified' }

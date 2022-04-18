@@ -716,38 +716,37 @@ SBRegex class >> grammarJson [
 
 { #category : #accessing }
 SBRegex class >> highlightQuery [
-	" https://github.com/tree-sitter/tree-sitter-regex/blob/master/queries/highlights.scm "
 
-	^ '"(" @punctuation.bracket
-")" @punctuation.bracket
-"(?" @punctuation.bracket
-"(?:" @punctuation.bracket
-"(?<" @punctuation.bracket
-">" @punctuation.bracket
-"[" @punctuation.bracket
-"]" @punctuation.bracket
-"{" @punctuation.bracket
-"}" @punctuation.bracket
+	^ '[
+	(character_class)
+	(any_character)
+	(character_class_escape)
+	(class_range)
+] @keyword
 
-(group_name) @property
+[
+	(control_escape)
+	(control_letter_escape)
+] @escape
 
-(identity_escape) @escape
-(control_letter_escape) @escape
-(character_class_escape) @escape
-(control_escape) @escape
-(start_assertion) @escape
-(end_assertion) @escape
-(boundary_assertion) @escape
-(non_boundary_assertion) @escape
+[
+	(start_assertion)
+	(end_assertion)
+	(lookahead_assertion)
+] @important
 
-"*" @operator
-"+" @operator
-"|" @operator
-"=" @operator
-"<=" @operator
-"!" @operator
-"<!" @operator
-'
+[
+	(anonymous_cpatiruing_group)
+	(named_capturing_group)
+	(non_capturing_group)
+] @variable
+
+[
+	(count_quantifier)
+	(zero_or_more)
+	(optional)
+	(one_or_more)
+] @operator'
 ]
 
 { #category : #accessing }
