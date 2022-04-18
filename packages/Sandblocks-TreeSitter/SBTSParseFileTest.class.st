@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSParseFileTest >> expectedFailures [
 
-	^ #()
+	^ #(#testPythonStringEscaped #testPythonStringEmpty)
 ]
 
 { #category : #'tests - unit' }
@@ -303,6 +303,26 @@ b'.
 	self
 		assert: #(#identifier #'primary_expression' #expression #'expression_statement' #'_simple_statement')
 		equals: (module childSandblocks first slot nodes collect: #type as: Array)
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testPythonStringEmpty [
+
+	| module |
+	module := SBTSFileParser new parse: '""' language: SBPython.
+	self assert: 'string' equals: module childSandblocks first type.
+	self assert: 0 equals: module childSandblocks first childSandblocks size
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testPythonStringEscaped [
+
+	| module |
+	module := SBTSFileParser new parse: '"\""' language: SBPython.
+	self assert: 'string' equals: module childSandblocks first type.
+	
+	module := SBTSFileParser new parse: '"''' language: SBPython.
+	self assert: 'string' equals: module childSandblocks first type
 ]
 
 { #category : #'tests - languages' }

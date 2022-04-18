@@ -40,6 +40,19 @@ SBTSBlockTest >> testAddAdaptsSlotSmalltalkStmt [
 		equals: target childSandblocks third slot lastNode
 ]
 
+{ #category : #'tests - replacements' }
+SBTSBlockTest >> testApplyPyFilePathReplacement [
+
+	| parsed |
+	parsed := SBTSFileParser new
+		parse: 'with open(''data.csv'', newline='''') as csvfile:
+	spamreader = csv.reader(csvfile, delimiter='' '', quotechar=''|'')
+	for row in spamreader:
+		print('', ''.join(row))'
+		language: SBPython.
+	self assert: (parsed childSandblocks first childSandblocks first childSandblocks first childSandblocks second childSandblocks first isKindOf: SBPyFilePath)
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testBashCommand [
 

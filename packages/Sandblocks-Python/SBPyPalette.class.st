@@ -20,9 +20,9 @@ SBPyPalette class >> buildOn: aBuilder [
 
 	aBuilder addSectionHeader: 'Python'.
 	aBuilder addBlock: 'Open' as: (SBPython parse: 'open("")').
-	aBuilder addBlock: 'Path' as: (SBPyFilepath new
+	aBuilder addBlock: 'Path' as: (SBPyFilePath new
 		factory: SBPython new;
-		path: '').
+		path: '')
 ]
 
 { #category : #'as yet unclassified' }

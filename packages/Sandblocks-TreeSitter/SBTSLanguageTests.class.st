@@ -17,19 +17,6 @@ SBTSLanguageTests >> testAliasedRootSymbol [
 	SBJavascript parse: '{headers: "abc"}'
 ]
 
-{ #category : #'testing - interactions' }
-SBTSLanguageTests >> testApplyPyFilePathReplacement [
-
-	| parsed |
-	"there was a change in the python grammar that breaks `as ...`"
-	self flag: #todo.
-	parsed := SBPython parseAndReplace: 'with open(''data.csv'', newline='''') as csvfile:
-	spamreader = csv.reader(csvfile, delimiter='' '', quotechar=''|'')
-	for row in spamreader:
-		print('', ''.join(row))'.
-	self assert: (parsed childSandblocks first childSandblocks first childSandblocks first childSandblocks second childSandblocks first isKindOf: SBPyFilepath)
-]
-
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testCInclude [
 
