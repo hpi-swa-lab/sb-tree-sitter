@@ -42,8 +42,8 @@ BaselineOfSBTreeSitter >> baseline: spec [
 			package: 'Sandblocks-Vhdl' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-TSSmalltalk' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Bash' with: [spec requires: #('Sandblocks-TreeSitter')];
-			package: 'Sandblocks-Matplotlib' with: [spec requires: #('Sandblocks-Matplotlib')];
-			package: 'Sandblocks-RequestsTool' with: [spec requires: #('Sandblocks-RequestsTool')].
+			package: 'Sandblocks-Matplotlib' with: [spec requires: #('Sandblocks-TreeSitter')];
+			package: 'Sandblocks-RequestsTool' with: [spec requires: #('Sandblocks-TreeSitter')].
 		
 		spec
 			group: 'default'
