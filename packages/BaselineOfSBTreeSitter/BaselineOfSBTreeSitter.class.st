@@ -47,7 +47,7 @@ BaselineOfSBTreeSitter >> baseline: spec [
 		
 		spec
 			group: 'default'
-			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-TSSmalltalk')]
+			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-TSSmalltalk' 'Sandblocks-Matplotlib' 'Sandblocks-RequestsTool')]
 ]
 
 { #category : #baseline }
