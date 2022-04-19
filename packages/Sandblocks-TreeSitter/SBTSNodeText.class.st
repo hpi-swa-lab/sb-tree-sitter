@@ -171,7 +171,7 @@ SBTSNodeText >> takeNodesFrom: aParser [
 		ifTrue: [
 			aParser next.
 			{aParser copy addSlot: self}]
-		ifFalse: [(regex matches: '') ifTrue: [{aParser copy}] ifFalse: [#noMatch]]
+		ifFalse: [(self regex matches: '') ifTrue: [{aParser copy}] ifFalse: [#noMatch]]
 ]
 
 { #category : #'as yet unclassified' }

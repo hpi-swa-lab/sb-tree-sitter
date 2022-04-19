@@ -120,7 +120,7 @@ SBTSLabel >> repeaterGroup [
 { #category : #'as yet unclassified' }
 SBTSLabel >> shownColor [
 
-	^ self containingSandblock showColor
+	^ self containingSandblock shownColor
 ]
 
 { #category : #'as yet unclassified' }

@@ -113,10 +113,9 @@ SBTSReplacementBlock >> createBinding: aBuilderClosure update: anUpdateClosure [
 { #category : #'as yet unclassified' }
 SBTSReplacementBlock >> createBindingBlock: aNameString [
 
-	^ self createBinding: [:c | self bindings at: aNameString] update: [:c :m | | block |
-		block := m.
-		(c at: aNameString) owner ifNotNil: [(c at: aNameString) replaceBy: block].
-		c at: aNameString put: block]
+	^ self
+		createBinding: [:c | self bindings at: aNameString]
+		update: [:c :m | self replaceBound: aNameString with: m]
 ]
 
 { #category : #'as yet unclassified' }
@@ -163,6 +162,16 @@ SBTSReplacementBlock >> ownerWithColor [
 	^ self root highlight = #'_sb_none'
 		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
 		ifFalse: [self]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementBlock >> replaceBound: aString with: aBlock [
+
+	self
+		assert: (aBlock slot adaptSlotFor: (bindings at: aString) slot)
+		description: 'adapting block slot'.
+	(bindings at: aString) owner ifNotNil: [(bindings at: aString) replaceBy: aBlock].
+	bindings at: aString put: aBlock
 ]
 
 { #category : #'as yet unclassified' }

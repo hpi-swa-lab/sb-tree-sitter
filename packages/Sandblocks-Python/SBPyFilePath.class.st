@@ -9,12 +9,13 @@ SBPyFilePath >> build [
 	<lang: #python match: '(call
 	(identifier) ="open"
     (argument_list
-    	(string (_) @path) @root))'>
+    	(string (string_content) @path) @root))' sample: 'open(''Hello'')'>
 
 	self addMorphBack: (SBIcon iconFile on: #click send: #choose to: self).
 	
 	self addMorphBack: (self
-		createBinding: [:c | SBOwnTextMorph new contents: (c at: 'path') contents]
+		createBinding: [:c |
+			SBOwnTextMorph new contents: (c at: 'path') contents]
 		update: [:c :m | (c at: 'path') contents: m contents])
 ]
 

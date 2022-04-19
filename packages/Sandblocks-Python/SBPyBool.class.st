@@ -3,7 +3,7 @@ Replaces all python booleans with checkboxes.
 "
 Class {
 	#name : #SBPyBool,
-	#superclass : #SBInlineBlockReplace,
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Python'
 }
 
@@ -17,11 +17,11 @@ SBPyBool class >> matchPython: aDictionary do: aBlock [
 ]
 
 { #category : #'initialize-release' }
-SBPyBool >> replaceWithChecked: aBoolean [ 
-	self addMorphBack: (SBCheckbox new value: aBoolean)
-]
+SBPyBool >> build [
+	<lang: #python match: '[(true) (false)]' sample: 'True'>
 
-{ #category : #'initialize-release' }
-SBPyBool >> writeSourceOn: aStream [
-	self firstSubmorph value ifTrue: [aStream nextPutAll: 'True'] ifFalse: [aStream nextPutAll: 'False'].
+	self addMorphBack: (self createBinding: [:c | SBCheckbox new value: (c at: 'root') type = 'true'] update: [:c :m |
+		self
+			replaceBound: 'root'
+			with: (SBPython parseExpression: (m value ifTrue: ['True'] ifFalse: ['False']))])
 ]

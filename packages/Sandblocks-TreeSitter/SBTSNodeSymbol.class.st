@@ -172,7 +172,8 @@ SBTSNodeSymbol >> takeNodesFrom: aParser [
 		^ results = #noMatch ifTrue: [#noMatch] ifFalse: [
 			results collect: [:parser | | res |
 				res := parser copy.
-				res currentSlot addNode: self.
+				(res currentSlot lastNode hasParent: self bodyTemplate) ifTrue: [
+				res currentSlot addNode: self].
 				res]]].
 	
 	(aParser atEnd not and: [aParser peek isString not and: [aParser peek compatibleWithType: self type]]) ifTrue: [

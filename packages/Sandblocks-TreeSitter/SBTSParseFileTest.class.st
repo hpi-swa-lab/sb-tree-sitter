@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSParseFileTest >> expectedFailures [
 
-	^ #(#testPythonStringEscaped #testPythonStringEmpty)
+	^ #(#testPythonStringEscaped)
 ]
 
 { #category : #'tests - unit' }
@@ -321,7 +321,7 @@ SBTSParseFileTest >> testPythonStringEscaped [
 	module := SBTSFileParser new parse: '"\""' language: SBPython.
 	self assert: 'string' equals: module childSandblocks first type.
 	
-	module := SBTSFileParser new parse: '"''' language: SBPython.
+	module := SBTSFileParser new parse: '"''"' language: SBPython.
 	self assert: 'string' equals: module childSandblocks first type
 ]
 

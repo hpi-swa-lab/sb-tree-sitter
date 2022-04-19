@@ -134,6 +134,17 @@ SBGrammarLanguage class >> parseElement: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> parseExpression: aString [
+
+	| toplevel |
+	toplevel := SBTSFileParser new parse: aString language: self.
+	self
+		assert: toplevel childSandblocks size = 1
+		description: 'More than one child was returned from the parsed expression. Consider using parse: instead.'.
+	^ toplevel childSandblocks first
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> rebuild [
 
 	self invalidate.
