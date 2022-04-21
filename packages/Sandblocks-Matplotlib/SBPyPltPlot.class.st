@@ -3,54 +3,34 @@ Replacement for ax.plot
 "
 Class {
 	#name : #SBPyPltPlot,
-	#superclass : #SBPyPltPlots,
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Matplotlib'
 }
 
-{ #category : #'as yet unclassified' }
-SBPyPltPlot class >> match: aDictionary do: aBlock [
+{ #category : #'initialize-release' }
+SBPyPltPlot >> build [
 	<lang: #python match: '(call
         	function: (attribute
-            	object: (identifier) ="ax" @ax
-                attribute: (identifier) ="plot" @plot
+            	object: (identifier) ="ax"
+                attribute: (identifier) ="plot"
             )
-        	arguments: (argument_list)
-        ) @call' sample: 'ax.plot(Y)'>
-	
-	^ aBlock
-		value: (aDictionary at: 'call')
-		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacementOfArgs: (aDictionary at: 'call') access arguments buildCopy)
-			
-		
-]
+        	arguments: (argument_list) @args
+        )' sample: 'ax.plot(Y)'>
 
-{ #category : #'initialize-release' }
-SBPyPltPlot >> createReplacementOfArgs: aSBTSFieldAccessor [
-		
+	
 	self addMorphBack: (SBRow new
-		addMorphBack: (AlignmentMorph newColumn 
-			color: Color transparent; 
-			hResizing: #shrinkWrap; 
-			addMorphBack: (AlignmentMorph newSpacer: Color transparent);
+		addMorphBack: (SBColumn new
+			hResizing: #shrinkWrap;
+			cellPositioning: #center;
+			layoutInset: 2;
 			addMorphBack: (SBStringMorph new contents: 'line plot:');
-			addMorphBack: (SBPyPltImage linePlot);
-			addMorphBack: (AlignmentMorph newSpacer: Color transparent)
-		 );
-		addMorphBack: aSBTSFieldAccessor;
-		cellGap: 4
-	)
+			addMorphBack: SBPyPltImage linePlot);
+		addMorphBack: (self createBindingBlock: 'args');
+		cellGap: 4)
 ]
 
 { #category : #'initialize-release' }
 SBPyPltPlot >> palettes [
 
-	^ {SBPyPltPalettePlot}, super palettes
-]
-
-{ #category : #copying }
-SBPyPltPlot >> writeSourceOn: aStream [
-
-	aStream nextPutAll: 'ax.plot'.
-	(self firstSubmorph submorphs second) writeSourceOn: aStream.
+	^ {SBPyPltPalettePlot. SBPyPltPaletteOverview}, super palettes
 ]

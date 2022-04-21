@@ -3,7 +3,7 @@ Replacement for ax.scatter
 "
 Class {
 	#name : #SBPyPltScatter,
-	#superclass : #SBPyPltPlots,
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Matplotlib'
 }
 
@@ -24,31 +24,28 @@ SBPyPltScatter class >> match: aDictionary do: aBlock [
 ]
 
 { #category : #'initialize-release' }
-SBPyPltScatter >> createReplacementOfArgs: aSBTSFieldAccessor [
-		
+SBPyPltScatter >> build [
+	<lang: #python match: '(call
+        	function: (attribute
+            	object: (identifier) ="ax"
+                attribute: (identifier) ="scatter"
+            )
+        	arguments: (argument_list) @args
+        )' sample: 'ax.scatter(X, Y)'>
+
 	self addMorphBack: (SBRow new
-		addMorphBack: (AlignmentMorph newColumn 
-			color: Color transparent; 
+		addMorphBack: (SBColumn new
 			hResizing: #shrinkWrap;
-			addMorphBack: (AlignmentMorph newSpacer: Color transparent);
+			cellPositioning: #center;
+			layoutInset: 2;
 			addMorphBack: (SBStringMorph new contents: 'scatter:');
-			addMorphBack: (SBPyPltImage scatterPlot);
-			addMorphBack: (AlignmentMorph newSpacer: Color transparent)
-		);
-		addMorphBack: aSBTSFieldAccessor;
-		cellGap: 4
-	)
+			addMorphBack: SBPyPltImage scatterPlot);
+		addMorphBack: (self createBindingBlock: 'args');
+		cellGap: 4)
 ]
 
 { #category : #'initialize-release' }
 SBPyPltScatter >> palettes [
 
-	^ {SBPyPltPaletteScatter}, super palettes
-]
-
-{ #category : #copying }
-SBPyPltScatter >> writeSourceOn: aStream [
-
-	aStream nextPutAll: 'ax.scatter'.
-	(self firstSubmorph submorphs second) writeSourceOn: aStream.
+	^ {SBPyPltPaletteScatter. SBPyPltPaletteOverview}, super palettes
 ]

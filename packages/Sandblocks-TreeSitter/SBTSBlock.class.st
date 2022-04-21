@@ -92,17 +92,7 @@ SBTSBlock >> applyReplacements [
 
 	| candidates |
 	candidates := self allReplacementCandidates.
-	self allBlocksDo: [:block |
-		(block isTSBlock and: [block isTSReplacement not]) ifTrue: [
-			candidates do: [:pragma | | blockClass |
-				blockClass := pragma methodClass.
-				(blockClass
-					match: block
-					against: (SBTSQuery new prepare: pragma arguments second)
-					buildSelector: pragma selector) ifNotNil: [:cmd |
-					self sandblockEditor
-						ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
-						ifNil: [cmd do]]]]]
+	self allBlocksDo: [:block | (block isTSBlock and: [block isTSReplacement not]) ifTrue: [self tryApplyReplacements: candidates to: block]]
 ]
 
 { #category : #accessing }
@@ -547,6 +537,14 @@ SBTSBlock >> textMorphs [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> toplevel [
+
+	^ (self type = self factory rootRuleName and: [self owner isTSBlock not])
+		ifTrue: [self]
+		ifFalse: [self owner toplevel]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> tryApplyChange: aBlock input: aString [
 
 	| previousContents isAtStart |
@@ -560,6 +558,20 @@ SBTSBlock >> tryApplyChange: aBlock input: aString [
 			for: (self isUnknown ifTrue: [self] ifFalse: [self currentTextMorph])
 			input: aString
 			before: isAtStart]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> tryApplyReplacements: aCollection to: aBlock [
+
+	^ aCollection do: [:pragma | | blockClass |
+		blockClass := pragma methodClass.
+		(blockClass
+			match: aBlock
+			against: (SBTSQuery new prepare: pragma arguments second)
+			buildSelector: pragma selector) ifNotNil: [:cmd |
+			^ self sandblockEditor
+				ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
+				ifNil: [cmd do]]]
 ]
 
 { #category : #'as yet unclassified' }

@@ -3,7 +3,7 @@ Entry point for all matplotlib related content. It imports matplotlib, so it nee
 "
 Class {
 	#name : #SBPyPltInitPlots,
-	#superclass : #SBInlineBlockReplace,
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Matplotlib'
 }
 
@@ -28,35 +28,39 @@ SBPyPltInitPlots class >> matchPython: aDictionary do: aBlock [
 ]
 
 { #category : #'initialize-release' }
-SBPyPltInitPlots >> createReplacement [
+SBPyPltInitPlots >> build [
+	<lang: #python match: '(assignment
+    	left: (pattern_list
+        	(identifier) ="fig" @fig
+            (identifier) ="ax" @ax
+        )
+        right: (call
+        	function: (attribute
+            	(identifier) ="plt"
+                (identifier) ="subplots"
+            )
+        )
+    ) @init' sample: 'fig, ax = plt.subplots()'>
 
-	self addMorphBack: (SBColumn new cellGap: 2;
-			addMorphBack: (SBStringMorph new contents: 'Matplotlib context:');
-			addMorphBack: (SBRow new cellGap: 4;
-				addMorphBack: (SBPython parseElement: 'fig');
-				addMorphBack: (SBPython parseElement: 'ax')
-			)
-		)
-
+	self addMorphBack: (SBColumn new
+		cellGap: 2;
+		addMorphBack: (SBStringMorph new contents: 'Matplotlib context:');
+		addMorphBack: (SBRow new
+			cellGap: 4;
+			addMorphBack: (self createBindingBlock: 'fig');
+			addMorphBack: (self createBindingBlock: 'ax')))
 ]
 
-{ #category : #classification }
+{ #category : #accessing }
 SBPyPltInitPlots >> palettes [
 
 	^ {SBPyPltPaletteOverview}
 ]
 
-{ #category : #classification }
-SBPyPltInitPlots >> type [
-
-	^ 'assignment'
-]
-
-{ #category : #copying }
+{ #category : #printing }
 SBPyPltInitPlots >> writeSourceOn: aStream indent: aNumber [
 
-	aStream nextPutAll: ('
-import matplotlib.pyplot as plt
+	aStream nextPutAll: ('import matplotlib.pyplot as plt
 import io
 import base64
 import sys

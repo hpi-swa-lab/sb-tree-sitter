@@ -114,7 +114,12 @@ SBTSReplacementBlock >> createBinding: aBuilderClosure update: anUpdateClosure [
 SBTSReplacementBlock >> createBindingBlock: aNameString [
 
 	^ self
-		createBinding: [:c | self bindings at: aNameString]
+		createBinding: [:c | | block |
+			block := self bindings at: aNameString.
+			block replaceBy: (Morph new
+				setProperty: #tsReplacementPlaceholder toValue: block;
+				yourself).
+			block]
 		update: [:c :m | self replaceBound: aNameString with: m]
 ]
 
@@ -181,8 +186,20 @@ SBTSReplacementBlock >> root [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSReplacementBlock >> updateDuring: aBlock [
+
+	| restore |
+	restore := OrderedCollection new.
+	self root allMorphsDo: [:m |
+		m valueOfProperty: #tsReplacementPlaceholder ifPresentDo: [:original |
+			m swapWith: original.
+			restore add: m -> original]].
+	updaters do: [:pair | pair value value: bindings value: pair key].
+	aBlock ensure: [restore do: [:pair | pair value swapWith: pair key]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReplacementBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
-	updaters do: [:pair | pair value value: bindings value: pair key].
-	self root writeSourceOn: aStream indent: aNumber forCompare: aBoolean
+	self updateDuring: [self root writeSourceOn: aStream indent: aNumber forCompare: aBoolean]
 ]

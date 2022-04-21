@@ -77,7 +77,7 @@ SBTSBlockTest >> testBinaryOpOnMemberExpression [
 	self assert: 'req.query==2' equals: module sourceString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testCanTypeOverKeywordSuggestion [
 
 	| module editor |
@@ -431,6 +431,25 @@ SBTSBlockTest >> testRegexEnterClassRanges [
 	self assert: 'a[A-Za-z]' equals: term sourceString
 ]
 
+{ #category : #'tests - replacements' }
+SBTSBlockTest >> testReplacementBlockBinding [
+
+	| regex source wrapped editor |
+	source := '(?<test>1)'.
+	regex := SBTSFileParser new parseTopLevel: source language: SBRegex.
+	editor := self editorAndWorldFor: regex.
+	regex applyReplacements.
+	wrapped := regex childSandblocks first childSandblocks first childSandblocks first.
+	
+	self assert: '1' equals: wrapped sourceString.
+	self assert: source equals: regex sourceString.
+	
+	wrapped startInputAtEnd.
+	self type: '2' in: editor.
+	self assert: '12' equals: wrapped sourceString.
+	self assert: '(?<test>12)' equals: regex sourceString
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testSkipsRepeatsInUntakenChoices [
 
@@ -565,7 +584,7 @@ SBTSBlockTest >> testStDeleteAroundExpression [
 	self assert: 'statement' equals: module childSandblocks second slot lastNode type
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testStKeywordAutocompletion [
 
 	| method editor |

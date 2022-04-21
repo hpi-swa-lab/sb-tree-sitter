@@ -332,7 +332,7 @@ SBTSParseFileTest >> testPythonStringEscaped [
 SBTSParseFileTest >> testPythonStringNestedQuotes [
 
 	| module |
-	module := SBTSFileParser new parse: '"''"' language: SBPython rebuild.
+	module := SBTSFileParser new parse: '"''"' language: SBPython.
 	self assert: 'string' equals: module childSandblocks first type
 ]
 

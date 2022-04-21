@@ -3,7 +3,7 @@ This replacements shows the image by executing its enclosing module.
 "
 Class {
 	#name : #SBPyPltShowPlots,
-	#superclass : #SBInlineBlockReplace,
+	#superclass : #SBTSReplacementBlock,
 	#instVars : [
 		'image'
 	],
@@ -30,59 +30,42 @@ SBPyPltShowPlots >> artefactSaved: anArtefact [
 ]
 
 { #category : #'initialize-release' }
-SBPyPltShowPlots >> createReplacement [
+SBPyPltShowPlots >> build [
+	<lang: #python match: '(call
+	function: (attribute
+		(identifier) ="plt"
+        (identifier) ="show"
+    )
+)' sample: 'plt.show()'>
 
-	self addMorphBack: (SBColumn new
-		 addMorphBack: (SBButton new icon: SBIcon iconPlay label: 'show plot' do: [self updateImage]);
-		addMorphBack: (image asMorph)).
-]
-
-{ #category : #'initialize-release' }
-SBPyPltShowPlots >> initialize [
-
-	super initialize.
 	image := '' asMorph.
+	self addMorphBack: (SBColumn new
+		addMorphBack: (SBButton new icon: SBIcon iconPlay label: 'show plot' do: [self updateImage]);
+		addMorphBack: image asMorph)
 ]
 
-{ #category : #classification }
+{ #category : #accessing }
 SBPyPltShowPlots >> palettes [
 
 	^ {SBPyPltPaletteOverview}
 ]
 
-{ #category : #classification }
-SBPyPltShowPlots >> type [
-
-	^ 'call'
-]
-
-{ #category : #updating }
+{ #category : #'event handling' }
 SBPyPltShowPlots >> updateImage [
 
-	[ | form |
-		form := (Form fromBinaryStream: (Base64MimeConverter mimeDecodeToBytes: self toplevel evaluate readStream)) trimBordersOfColor: Color white.
-		image := form asMorph.
-		self firstSubmorph removeMorph: self firstSubmorph lastSubmorph.
-		self firstSubmorph addMorphBack: image]
-		on: Error
-		do: [:err |
-			"print error code"
-			self firstSubmorph removeMorph: self firstSubmorph submorphs last.
-			self firstSubmorph addMorphBack: (SBMultilineOwnTextMorph new
-				contents: err contents;
-				maxWidth: 400;
-				yourself)]
+	| program form |
+	program := self toplevel.
+	form := (Form fromBinaryStream: (Base64MimeConverter mimeDecodeToBytes: ([program evaluate] on: Error do: [:err |
+		^ self firstSubmorph lastSubmorph replaceBy: (SBMultilineOwnTextMorph new
+			contents: err contents;
+			maxWidth: 400;
+			yourself)]) readStream)) trimBordersOfColor: (Color r: 1 g: 1 b: 1).
+	image := form asMorph.
+	self firstSubmorph lastSubmorph replaceBy: image
 ]
 
-{ #category : #copying }
-SBPyPltShowPlots >> writeSourceOn: aStream [
-	"python code prints the image to stdout, so it can be parsed as a Form"
+{ #category : #printing }
+SBPyPltShowPlots >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
-	aStream nextPutAll: '
-bytes = io.BytesIO()
-plt.savefig(bytes, format="png")
-bytes.seek(0)
-sys.stdout.buffer.write(base64.b64encode(bytes.read()))
-bytes.close()
-'
+	aStream nextPutAll: '(lambda b:(fig.set_dpi(60),fig.set_size_inches(3,3),plt.savefig(b, format="png"),b.seek(0),__import__("sys").stdout.buffer.write(__import__("base64").b64encode(b.read())),b.close()))(__import__("io").BytesIO())'
 ]

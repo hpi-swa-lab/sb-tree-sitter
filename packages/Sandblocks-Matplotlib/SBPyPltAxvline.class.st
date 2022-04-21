@@ -3,52 +3,33 @@ Replacement for ax.axvline
 "
 Class {
 	#name : #SBPyPltAxvline,
-	#superclass : #SBPyPltPlots,
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Matplotlib'
 }
 
-{ #category : #'as yet unclassified' }
-SBPyPltAxvline class >> match: aDictionary do: aBlock [
+{ #category : #'initialize-release' }
+SBPyPltAxvline >> build [
 	<lang: #python match: '(call
         	function: (attribute
-            	object: (identifier) ="ax" @ax
-                attribute: (identifier) ="axvline" @plot
+            	object: (identifier) ="ax"
+                attribute: (identifier) ="axvline"
             )
-        	arguments: (argument_list)
-        ) @call' sample: 'ax.axvline(Y)'>
-	
-	^ aBlock
-		value: (aDictionary at: 'call')
-		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacementOfArgs: (aDictionary at: 'call') access arguments buildCopy)
-]
+        	arguments: (argument_list) @args
+        )' sample: 'ax.axvline(Y)'>
 
-{ #category : #'initialize-release' }
-SBPyPltAxvline >> createReplacementOfArgs: aSBTSFieldAccessor [
-		
 	self addMorphBack: (SBRow new
-		addMorphBack: (AlignmentMorph newColumn 
-			color: Color transparent; 
-			hResizing: #shrinkWrap; 
-			addMorphBack: (AlignmentMorph newSpacer: Color transparent);
+		addMorphBack: (SBColumn new
+			hResizing: #shrinkWrap;
+			cellPositioning: #center;
+			layoutInset: 2;
 			addMorphBack: (SBStringMorph new contents: 'vertical line:');
-			addMorphBack: (SBPyPltImage axvline);
-			addMorphBack: (AlignmentMorph newSpacer: Color transparent)
-		 );
-		addMorphBack: aSBTSFieldAccessor;
-		cellGap: 4
-	)
+			addMorphBack: SBPyPltImage axvline);
+		addMorphBack: (self createBindingBlock: 'args');
+		cellGap: 4)
 ]
 
-{ #category : #classification }
+{ #category : #accessing }
 SBPyPltAxvline >> palettes [
 
-	^ {SBPyPltPaletteAxvline}, super palettes
-]
-
-{ #category : #copying }
-SBPyPltAxvline >> writeSourceOn: aStream [
-
-	aStream nextPutAll: 'ax.axvline'.
-	(self firstSubmorph submorphs asOrderedCollection second) writeSourceOn: aStream.
+	^ {SBPyPltPaletteOverview. SBPyPltPaletteOverview}
 ]
