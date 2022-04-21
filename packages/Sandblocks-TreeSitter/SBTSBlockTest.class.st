@@ -50,6 +50,7 @@ SBTSBlockTest >> testApplyPyFilePathReplacement [
 	for row in spamreader:
 		print('', ''.join(row))'
 		language: SBPython.
+	parsed applyReplacements.
 	self assert: (parsed childSandblocks first childSandblocks first childSandblocks first childSandblocks second childSandblocks first isKindOf: SBPyFilePath)
 ]
 

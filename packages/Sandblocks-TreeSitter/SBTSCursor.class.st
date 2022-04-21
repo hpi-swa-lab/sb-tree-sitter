@@ -163,6 +163,11 @@ SBTSCursor >> resolveAlias: aString in: aParentString with: aCollection [
 	candidates := aCollection select: [:alias | alias name = aString and: [alias parentType = aParentString]].
 	candidates size = 1 ifTrue: [^ candidates first object].
 	
+	"if we have not found any candidates, it may be because we are actually an alias inside a supertype such as primary_expression. check for this with this heuristic (that may be a bit wonky due to the inclusion check in the parent-type that does not consider exact position)"
+	candidates ifEmpty: [ | parent |
+		parent := factory bodyNodeForRule: aParentString ifAbsent: [self assert: false].
+		candidates := aCollection select: [:alias | alias name = aString and: [(factory isSuperType: alias parentType) and: [parent includesChild: [:c | c type = alias parentType]]]]].
+	
 	self assert: cursor notNil.
 	" treesitter has an internal table that maps aliases to indices. if the same alias is used
 	twice in the same method, we cannot tell which use we are. We take the assumption

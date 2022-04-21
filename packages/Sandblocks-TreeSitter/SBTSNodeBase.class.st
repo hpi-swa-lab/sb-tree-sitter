@@ -122,6 +122,13 @@ SBTSNodeBase >> hasParentThat: aBlock [
 ]
 
 { #category : #testing }
+SBTSNodeBase >> includesChild: aBlock [
+
+	self allChildrenDo: [:c | (aBlock value: c) ifTrue: [^ true]].
+	^ false
+]
+
+{ #category : #testing }
 SBTSNodeBase >> isBlockInlined [
 
 	^ factory isBlockInlined: self type

@@ -292,6 +292,12 @@ SBTSParseFileTest >> testPythonList [
 ]
 
 { #category : #'tests - languages' }
+SBTSParseFileTest >> testPythonPrint [
+
+	SBTSFileParser new parse: 'print()' language: SBPython
+]
+
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testPythonStatements [
 
 	| source module |
