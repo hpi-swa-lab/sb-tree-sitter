@@ -46,7 +46,7 @@ SBTSLanguageTests >> testJavascriptBlockInline [
 SBTSLanguageTests >> testJavascriptFoundDelimiters [
 
 	| lang |
-	lang := SBJavascript rebuild.
+	lang := SBJavascript instance.
 	{
 		'object' -> {','}.
 		'arguments' -> {','}.
@@ -159,7 +159,7 @@ SBTSLanguageTests >> testJavascriptToStringSemicolons [
 SBTSLanguageTests >> testMultipleDelimiters [
 
 	| block |
-	self assert: (SBJavascript rebuild delimitedRules includesAssociation: 'lexical_declaration' -> {';'. ','}).
+	self assert: (SBJavascript instance delimitedRules includesAssociation: 'lexical_declaration' -> {';'. ','}).
 	block := SBJavascript parse: 'let a;'
 ]
 
@@ -167,7 +167,6 @@ SBTSLanguageTests >> testMultipleDelimiters [
 SBTSLanguageTests >> testParsePythonFormatString [
 
 	| string |
-	SBPython rebuild.
 	SBPython instance grammar rules at: '_newline'.
 	string := SBPython parseElement: '"abc"'.
 	self assert: 'abc' equals: string contents.
@@ -236,7 +235,7 @@ SBTSLanguageTests >> testPythonEmptyModule [
 SBTSLanguageTests >> testPythonFoundDelimiters [
 
 	| lang |
-	lang := SBPython rebuild.
+	lang := SBPython instance.
 	{'argument_list' -> {','}. 'parameters' -> {','}. 'tuple_pattern' -> {','}. 'list' -> {','}} do: [:pair | self assert: (lang delimitedRules includesAssociation: pair)]
 ]
 
@@ -336,7 +335,7 @@ SBTSLanguageTests >> testPythonPatternList [
 
 	| lang |
 	" not sure yet how to handle a,,,b = ... "
-	lang := SBPython rebuild.
+	lang := SBPython instance.
 	lang
 		traverse: (lang grammar rules at: 'pattern_list')
 		do: [:obj | self assert: (obj type ~= 'STRING' or: [obj value ~= ','])].

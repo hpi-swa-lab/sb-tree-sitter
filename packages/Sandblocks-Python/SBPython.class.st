@@ -5230,7 +5230,11 @@ SBPython >> isImmutableLabel: aLabelNode [
 { #category : #'as yet unclassified' }
 SBPython >> postConfigure [
 
-	blockInline remove: 'block' ifAbsent: []
+	blockInline remove: 'block' ifAbsent: [].
+	nodesCache at: 'string_content' put: (SBTSNodeContextSensitiveText new
+		factory: self;
+		validCheck: [:parser :character | character ~= parser slots first firstNode label];
+		regexString: (nodesCache at: 'string_content') regexString)
 ]
 
 { #category : #'as yet unclassified' }
@@ -5280,7 +5284,7 @@ SBPython >> preprocessGrammar [
 	
 	self grammar rules
 		at: '_string_content'
-		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '[^''"]*'}).
+		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
 	self grammar
 		at: 'externals'
 		put: ((self grammar at: 'externals') reject: [:obj | obj name = '_string_content']).

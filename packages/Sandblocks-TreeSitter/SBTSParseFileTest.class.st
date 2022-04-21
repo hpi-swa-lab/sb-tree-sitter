@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSParseFileTest >> expectedFailures [
 
-	^ #(#testPythonStringEscaped)
+	^ #()
 ]
 
 { #category : #'tests - unit' }
@@ -165,7 +165,7 @@ SBTSParseFileTest >> testParseEmptyModule [
 SBTSParseFileTest >> testParseJS [
 
 	| block |
-	block := SBTSFileParser new parse: 'a' language: SBJavascript rebuild.
+	block := SBTSFileParser new parse: 'a' language: SBJavascript.
 	
 	self assert: block childSandblocks first isTSBlock.
 	self
@@ -325,9 +325,14 @@ SBTSParseFileTest >> testPythonStringEscaped [
 
 	| module |
 	module := SBTSFileParser new parse: '"\""' language: SBPython.
-	self assert: 'string' equals: module childSandblocks first type.
-	
-	module := SBTSFileParser new parse: '"''"' language: SBPython.
+	self assert: 'string' equals: module childSandblocks first type
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testPythonStringNestedQuotes [
+
+	| module |
+	module := SBTSFileParser new parse: '"''"' language: SBPython rebuild.
 	self assert: 'string' equals: module childSandblocks first type
 ]
 

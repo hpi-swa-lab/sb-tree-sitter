@@ -37,6 +37,12 @@ SBTSNodeText >> buildMorphWith: aString slot: aSlot [
 		slot: aSlot
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeText >> characterValid: aCharacter in: aParser [
+
+	^ self regex matches: aCharacter
+]
+
 { #category : #query }
 SBTSNodeText >> childrenForQuery [
 
@@ -167,7 +173,7 @@ SBTSNodeText >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeText >> takeNodesFrom: aParser [
 
-	^ (aParser atEnd not and: [aParser peek isString and: [self regex matches: aParser peek]])
+	^ (aParser atEnd not and: [aParser peek isString and: [self characterValid: aParser peek in: aParser]])
 		ifTrue: [
 			aParser next.
 			{aParser copy addSlot: self}]

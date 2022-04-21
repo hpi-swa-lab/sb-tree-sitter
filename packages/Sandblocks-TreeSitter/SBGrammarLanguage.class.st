@@ -241,7 +241,9 @@ SBGrammarLanguage >> postConfigure [
 { #category : #'as yet unclassified' }
 SBGrammarLanguage >> prepareBlocks [
 
-	grammar rules keysAndValuesDo: [:name :r | self getTemplate: name]
+	grammar rules keysAndValuesDo: [:name :r |
+		self getTemplate: name.
+		self bodyNodeForRule: name ifAbsent: []]
 ]
 
 { #category : #'as yet unclassified' }
