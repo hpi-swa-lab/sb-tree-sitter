@@ -124,7 +124,7 @@ SBTSReplacementBlock >> createBindingBlock: aNameString [
 	^ self
 		createBinding: [:c | | block |
 			block := self bindings at: aNameString.
-			block replaceBy: (Morph new
+			block replaceBy: (SBTSReplacementPlaceholder new
 				setProperty: #tsReplacementPlaceholder toValue: block;
 				yourself).
 			block]

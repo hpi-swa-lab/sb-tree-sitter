@@ -9,11 +9,13 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBPyPltPaletteEntry class >> buildOn: aBuilder [
-	
+
 	aBuilder addHeader: 'Matplotlib'.
-	aBuilder addSectionHeader: 'Matplotlib Init'.	
-	aBuilder addBlock: 'Enter matplotlib context' as: (SBPyPltInitPlots new factory: (SBPython instance); createReplacement).
-	aBuilder addBlock: 'Show figure' as: (SBPyPltShowPlots new factory: (SBPython instance); createReplacement).
+	aBuilder addSectionHeader: 'Matplotlib Init'.
+	aBuilder
+		addBlock: 'Enter matplotlib context'
+		as: (SBPython parseExpression: 'fig, ax = plt.subplots()') applyReplacement.
+	aBuilder addBlock: 'Show figure' as: (SBPython parseExpression: 'plt.show()') applyReplacement
 ]
 
 { #category : #'as yet unclassified' }

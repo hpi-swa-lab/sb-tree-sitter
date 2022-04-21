@@ -104,30 +104,30 @@ SBPyPltPaletteLine2d class >> buildOnLineSpecific: aBuilder [
 	aBuilder addSubSectionHeader: 'Line-specific'.
 	
 	aBuilder addBlock: 'How to draw the end caps if the line is is_dashed.' as:
-		(SBPython parseKeywordArgument: 'dash_capstyle="butt"').
+		(SBPython parseKeywordArgument: 'dash_capstyle="butt"') applyReplacement.
 		
 	aBuilder addBlock: 'How to join segments of the line if it is_dashed.' as:
-		(SBPython parseKeywordArgument: 'dash_joinstyle="round"').
+		(SBPython parseKeywordArgument: 'dash_joinstyle="round"') applyReplacement.
 		
 	aBuilder addBlock: 'Set the dash sequence.
 The dash sequence is a sequence of floats of even length describing the length of dashes and spaces in points.
 For example, (5, 2, 1, 2) describes a sequence of 5 point and 1 point dashes separated by 2 point spaces.' as:
-		(SBPyPltDashes new factory: SBPython instance; createReplacementFromSequence: {'3'. '1'}).
+		(SBPython parseKeywordArgument: 'dashes=(3, 1)') applyReplacement.
 		
 	aBuilder addBlock: 'Set the drawstyle of the plot.
 The drawstyle determines how the points are connected.' as:
-		(SBPython parseKeywordArgument: 'drawstyle="steps"').
+		(SBPython parseKeywordArgument: 'drawstyle="steps"') applyReplacement.
 		
 	aBuilder addBlock: 'Set the linestyle of the line.' as:
 		(SBPython parseKeywordArgument: 'linestyle="-"').
 		
-	aBuilder addBlock: 'Set the line width in points.' as: (SBPython parseKeywordArgument: 'linewidth=2').
+	aBuilder addBlock: 'Set the line width in points.' as: (SBPython parseKeywordArgument: 'linewidth=2') applyReplacement.
 	
 	aBuilder addBlock: 'How to draw the end caps if the line is solid (not is_dashed).' as:
-		(SBPython parseKeywordArgument: 'solid_capstyle="butt"').
+		(SBPython parseKeywordArgument: 'solid_capstyle="butt"') applyReplacement.
 		
 	aBuilder addBlock: 'How to join segments if the line is solid.' as:
-		(SBPython parseKeywordArgument: 'solid_joinstyle="round"').
+		(SBPython parseKeywordArgument: 'solid_joinstyle="round"') applyReplacement.
 ]
 
 { #category : #'as yet unclassified' }

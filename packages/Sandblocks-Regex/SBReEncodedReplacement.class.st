@@ -31,7 +31,7 @@ SBReEncodedReplacement class >> newAround: aBlock [
 	aBlock sandblockEditor do: (SBCombinedCommand newWith: {
 		SBReplaceCommand new target: aBlock replacer: regex.
 		SBReplaceCommand new target: regex lastDeepChild replacer: aBlock.
-		regex applyReplacement})
+		regex applyReplacementCommand})
 ]
 
 { #category : #helpers }

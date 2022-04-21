@@ -74,6 +74,12 @@ SBTSBlock >> allReplacementCandidates [
 { #category : #replacements }
 SBTSBlock >> applyReplacement [
 
+	^ self applyReplacementCommand do
+]
+
+{ #category : #replacements }
+SBTSBlock >> applyReplacementCommand [
+
 	| candidates |
 	candidates := self allReplacementCandidates.
 	candidates do: [:pragma | | blockClass |
@@ -81,8 +87,7 @@ SBTSBlock >> applyReplacement [
 		(blockClass
 			match: self
 			against: (SBTSQuery new prepare: pragma arguments second)
-			buildSelector: pragma selector) ifNotNil: [:cmd |
-			^ cmd]].
+			buildSelector: pragma selector) ifNotNil: [:cmd | ^ cmd]].
 	^ nil
 ]
 
@@ -107,6 +112,28 @@ SBTSBlock >> childrenForQuery [
 
 	self flag: #todo.
 	^ self children
+]
+
+{ #category : #actions }
+SBTSBlock >> collapseBlock [
+	<action>
+
+	| collapsed command |
+	collapsed := SBTSCollapsed new.
+	command := SBWrapCommand new
+		selectAfter: collapsed;
+		outer: collapsed;
+		inner: self;
+		wrap: [:collapse :block | collapse block: block];
+		selectAfter: collapsed.
+	self sandblockEditor ifNotNil: [:e | e do: command] ifNil: [command do].
+	^ collapsed
+]
+
+{ #category : #accessing }
+SBTSBlock >> collapsedContent [
+
+	^ self type
 ]
 
 { #category : #'as yet unclassified' }

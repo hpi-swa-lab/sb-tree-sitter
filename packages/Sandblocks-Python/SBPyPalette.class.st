@@ -26,13 +26,13 @@ SBPyPalette class >> buildOn: aBuilder [
 ]
 
 { #category : #'as yet unclassified' }
-SBPyPalette class >> collapse: aSBInlineBlock withSignature: aString [
-"collapses the first statement of aSBInlineBlock and returns aSBInlineBlock"
-	aSBInlineBlock access children first collapseBlock.
-	aSBInlineBlock access children first submorphs first contents: 'def'.
-	aSBInlineBlock access children first submorphs second contents: aString.
-	^ aSBInlineBlock
+SBPyPalette class >> collapse: aBlock withSignature: aString [
 
+	| collapsed |
+	collapsed := aBlock collapseBlock.
+	collapsed firstSubmorph contents: 'def'.
+	collapsed lastSubmorph contents: aString.
+	^ collapsed
 ]
 
 { #category : #'as yet unclassified' }

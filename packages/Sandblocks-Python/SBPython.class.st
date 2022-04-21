@@ -5147,8 +5147,14 @@ SBPython class >> parseExpression: aString [
 
 { #category : #'as yet unclassified' }
 SBPython class >> parseKeywordArgument: aString [
-"encloses aString in a function call, parses and replaces it, then then returns first keyword."
-	^ (self parseAndReplace: ('a({1})' format: {aString})) childSandblocks first childSandblocks second childSandblocks first
+
+	^ (self parseExpression: ('a({1})' format: {aString})) childSandblocks second childSandblocks first
+]
+
+{ #category : #'as yet unclassified' }
+SBPython class >> parseStatement: aString [
+
+	^ super parseExpression: aString
 ]
 
 { #category : #'as yet unclassified' }

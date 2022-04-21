@@ -1,17 +1,19 @@
 Class {
 	#name : #SBTSCollapsed,
-	#superclass : #SBInlineBlockReplace,
+	#superclass : #SBTSReplacementBlock,
 	#instVars : [
 		'block'
 	],
-	#category : #'Sandblocks-TreeSitter'
+	#category : #'Sandblocks-TreeSitter-Replacements'
 }
 
 { #category : #'as yet unclassified' }
-SBTSCollapsed >> block: aBlock factory: aFactory [
+SBTSCollapsed >> block: aBlock [
 
 	block := aBlock.
-	factory := aFactory.
+	
+	bindings := Dictionary newFrom: {'root' -> aBlock}.
+	self slot: aBlock slot.
 	
 	self removeAllMorphs.
 	self addMorphBack: (SBStringMorph new contents: '...').
@@ -62,16 +64,4 @@ SBTSCollapsed >> uncollapseBlock [
 	<action>
 
 	self sandblockEditor do: (SBReplaceCommand new target: self replacer: block)
-]
-
-{ #category : #'as yet unclassified' }
-SBTSCollapsed >> writeSourceOn: aStream [
-
-	self writeSourceOn: aStream indent: 0
-]
-
-{ #category : #'as yet unclassified' }
-SBTSCollapsed >> writeSourceOn: aStream indent: aNumber [
-
-	block writeSourceOn: aStream indent: aNumber
 ]
