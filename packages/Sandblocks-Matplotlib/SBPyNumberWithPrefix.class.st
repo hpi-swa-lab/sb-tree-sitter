@@ -14,22 +14,14 @@ Class {
 
 { #category : #flagging }
 SBPyNumberWithPrefix >> contents: aString [
-"called whenever the content of this object has changed."
 
-	| aValidNumber |
-	rangeMin ifNil: [
-		aString ifNil: [super contents: '0'] ifNotNil: [super contents: aString asInteger asString].
-		^ self.
-	].
-	
-	"aValidNumber is enforced to be in the range"
-	aValidNumber := (aString asNumber min: rangeMax) max: rangeMin.
-
-	aString
-		ifNil: [super contents: '0']
-		ifNotNil: [super contents: (floatSteps 
-			ifTrue: [aValidNumber asString from: 1 to: (aValidNumber asString size min: 4)] 
-			ifFalse: [aValidNumber asInteger asString])].
+	aString ifNil: [super contents: '0'] ifNotNil: [ | valid |
+		valid := rangeMin
+			ifNil: [aString asNumber]
+			ifNotNil: [aString asNumber clampLow: rangeMin high: rangeMax].
+		super contents: (floatSteps
+			ifTrue: [valid asFloat printShowingMaxDecimalPlaces: 3]
+			ifFalse: [valid asInteger asString])]
 ]
 
 { #category : #testing }

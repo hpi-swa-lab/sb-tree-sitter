@@ -3,31 +3,24 @@ Shows the legend. The legend entries are the labels of the individual plots, set
 "
 Class {
 	#name : #SBPyPltLegend,
-	#superclass : #SBPyPltAxis,
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Matplotlib'
 }
 
-{ #category : #'as yet unclassified' }
-SBPyPltLegend class >> matchPython: aDictionary do: aBlock [
+{ #category : #'initialize-release' }
+SBPyPltLegend >> build [
 	<lang: #python match: '(call
         	function: (attribute
             	(identifier) ="ax"
                 (identifier) ="legend"
             )
-        ) @block' sample: 'ax.legend()'>
-	
-	^ aBlock value: (aDictionary at: 'block') value: (self new
-		factory: (aDictionary at: 'block') factory; createReplacement)
+        )' sample: 'ax.legend()'>
+
+	self addMorphBack: (SBStringMorph new contents: 'Show legend')
 ]
 
 { #category : #'initialize-release' }
-SBPyPltLegend >> createReplacement [
+SBPyPltLegend >> palettes [
 
-	self addMorphBack: (SBStringMorph new contents: 'Show legend').
-]
-
-{ #category : #copying }
-SBPyPltLegend >> writeSourceOn: aStream [
-
-	aStream nextPutAll: 'ax.legend()'.
+	^ {SBPyPltPaletteOverview}
 ]

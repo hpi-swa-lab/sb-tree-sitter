@@ -3,16 +3,16 @@ Replacement for ax.set_xlim and ax.set_ylim
 "
 Class {
 	#name : #SBPyPltSetLim,
-	#superclass : #SBPyPltAxis,
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Matplotlib'
 }
 
-{ #category : #'as yet unclassified' }
-SBPyPltSetLim class >> matchPython: aDictionary do: aBlock [
+{ #category : #'initialize-release' }
+SBPyPltSetLim >> build [
 	<lang: #python match: '(call
         	function: (attribute
             	object: (identifier) @ax ="ax"
-                attribute: (identifier) @setLim
+                attribute: [(identifier) ="set_xlim" (identifier) ="set_ylim"] @setLim
             )
         	arguments: (argument_list
 			(integer) @paramFrom
@@ -20,41 +20,22 @@ SBPyPltSetLim class >> matchPython: aDictionary do: aBlock [
 		)
         ) @call' sample: 'ax.set_xlim(0, 5)'>
 
-	| functionName axis |
-	functionName := (aDictionary at: 'setLim') contents.
-	
-	((functionName = 'set_xlim') or: [functionName = 'set_ylim']) ifFalse: [^ nil].
-	
-	axis := functionName = 'set_xlim' ifTrue: ['x'] ifFalse: ['y'].
-	
-	^ aBlock
-		value: (aDictionary at: 'call')
-		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacementRangeFrom: (aDictionary at: 'paramFrom') contents 
-			to: (aDictionary at: 'paramTo') contents 
-			forAxis: axis)
+	self addMorphBack: (SBRow new
+		addMorphBack: (self
+			createBinding: [:c |
+				SBStringMorph new contents: ((c at: 'setLim') contents = 'set_xlim'
+					ifTrue: ['x']
+					ifFalse: ['y']), ' axis limit: [']
+			update: [:c :m | ]);
+		addMorphBack: (self createBinding: [SBStNumberWithPrefix new] contents: 'paramFrom');
+		addMorphBack: (SBStringMorph new contents: ',');
+		addMorphBack: (self createBinding: [SBStNumberWithPrefix new] contents: 'paramTo');
+		addMorphBack: (SBStringMorph new contents: ']');
+		cellGap: 4)
 ]
 
 { #category : #'initialize-release' }
-SBPyPltSetLim >> createReplacementRangeFrom: minString to: maxString forAxis: aString [ 
-	self
-		addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: (aString, ' axis limit: ['));
-			addMorphBack: (SBStNumberWithPrefix new contents: minString);
-			addMorphBack: (SBStringMorph new contents: ',');
-			addMorphBack: (SBStNumberWithPrefix new contents: maxString);
-			addMorphBack: (SBStringMorph new contents: ']');
-			cellGap: 4
-		).
-]
+SBPyPltSetLim >> palettes [
 
-{ #category : #copying }
-SBPyPltSetLim >> writeSourceOn: aStream [
-
-	| xy minArg maxArg |
-	xy := self firstSubmorph firstSubmorph contents first asString.
-	minArg := (self firstSubmorph submorphs second) contents.
-	maxArg := (self firstSubmorph submorphs at: 4) contents.
-	
-	aStream nextPutAll: ('ax.set_',xy,'lim(',minArg,', ',maxArg,')').
+	^ {SBPyPltPaletteOverview}
 ]

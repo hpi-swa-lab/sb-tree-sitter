@@ -10,20 +10,6 @@ Class {
 	#category : #'Sandblocks-Matplotlib'
 }
 
-{ #category : #'as yet unclassified' }
-SBPyPltShowPlots class >> matchPython: aDictionary do: aBlock [
-	<lang: #python match: '(call
-	function: (attribute
-		(identifier) ="plt"
-        (identifier) ="show"
-    )
-) @show' sample: 'plt.show()'>
-	
-	^ aBlock 
-		value: (aDictionary at: 'show') 
-		value: (self new factory: (aDictionary at: 'show') factory; createReplacement)
-]
-
 { #category : #'event handling' }
 SBPyPltShowPlots >> artefactSaved: anArtefact [
 	anArtefact = self containingArtefact ifTrue: [self updateImage].

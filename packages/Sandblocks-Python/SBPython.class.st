@@ -5136,6 +5136,16 @@ SBPython class >> parseAsKeywordArgumentAndReplace: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython class >> parseExpression: aString [
+
+	| expr |
+	expr := super parseExpression: aString.
+	"_statement and _simple_statement are also in the slot if we just simply parse"
+	expr slot nodes removeLast: 2.
+	^ expr
+]
+
+{ #category : #'as yet unclassified' }
 SBPython class >> parseKeywordArgument: aString [
 "encloses aString in a function call, parses and replaces it, then then returns first keyword."
 	^ (self parseAndReplace: ('a({1})' format: {aString})) childSandblocks first childSandblocks second childSandblocks first

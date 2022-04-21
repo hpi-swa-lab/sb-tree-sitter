@@ -3,45 +3,30 @@ Sets the title of the axes.
 "
 Class {
 	#name : #SBPyPltSetTitle,
-	#superclass : #SBPyPltAxis,
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Matplotlib'
 }
 
-{ #category : #'as yet unclassified' }
-SBPyPltSetTitle class >> matchPython: aDictionary do: aBlock [
+{ #category : #'initialize-release' }
+SBPyPltSetTitle >> build [
 	<lang: #python match: '(call
         	function: (attribute
             	object: (identifier) @ax ="ax"
                 attribute: (identifier) @setTitle ="set_title"
             )
         	arguments: (argument_list
-			(string) @param
+			(string (string_content) @param)
 		)
         ) @call' sample: 'ax.set_title("example")'>
-	
-	^ aBlock
-		value: (aDictionary at: 'call')
-		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacement: (aDictionary at: 'param') contents
-			)
+
+	self addMorphBack: (SBRow new
+		addMorphBack: (SBStringMorph new contents: 'title:');
+		addMorphBack: (self createBinding: [SBTextBubble new] contents: 'param');
+		cellGap: 4)
 ]
 
-{ #category : #'initialize-release' }
-SBPyPltSetTitle >> createReplacement: aLabel [
-	
-	self
-		addMorphBack: (SBRow new
-			addMorphBack: (SBStringMorph new contents: ('title:'));
-			addMorphBack: (SBTextBubble new contents: aLabel);
-			cellGap: 4
-		)
-]
+{ #category : #accessing }
+SBPyPltSetTitle >> palettes [
 
-{ #category : #copying }
-SBPyPltSetTitle >> writeSourceOn: aStream [
-
-	| label |
-	label := (self firstSubmorph submorphs second) contents.
-	
-	aStream nextPutAll: ('ax.set_title("',label,'")').
+	^ {SBPyPltPaletteOverview}
 ]

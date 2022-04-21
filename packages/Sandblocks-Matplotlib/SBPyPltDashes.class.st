@@ -3,7 +3,7 @@ A custom replacement for the 'dashes=x' keyword argument. The value of the argum
 "
 Class {
 	#name : #SBPyPltDashes,
-	#superclass : #SBPyPltParamCustomReplace,
+	#superclass : #SBTSReplacementBlock,
 	#instVars : [
 		'image',
 		'dialogBody',
@@ -11,25 +11,6 @@ Class {
 	],
 	#category : #'Sandblocks-Matplotlib'
 }
-
-{ #category : #'as yet unclassified' }
-SBPyPltDashes class >> matchPython: aDictionary do: aBlock [
-	<lang: #python match: '(keyword_argument
-	name: (identifier) ="dashes"
-      value: (tuple) @value
-) @argument' sample: 'ax.plot(dashes=(3,2,1,1))'>
-
-	| integers |
-	integers := ((aDictionary at: 'value') childSandblocks collect: [:each | each contents]) asOrderedCollection.
-	
-	integers size odd ifTrue: [integers add: '0'].
-	
-	^ aBlock
-		value: (aDictionary at: 'argument')
-		value: (self new factory: (aDictionary at: 'argument') factory;
-			createReplacementFromSequence: integers
-			)
-]
 
 { #category : #'insert/delete' }
 SBPyPltDashes >> addRow [
@@ -55,14 +36,24 @@ SBPyPltDashes >> addRowWithDashLength: aLengthString spaceRight: aSpaceString [
 ]
 
 { #category : #'initialize-release' }
-SBPyPltDashes >> createReplacementFromSequence: aCollection [
+SBPyPltDashes >> build [
+	<lang: #python match: '(keyword_argument
+	name: (identifier) ="dashes"
+      value: (tuple) @value @root)' sample: 'ax.plot(dashes=(3,2,1,1))'>
 
-	| button |
+	| integers |
+	integers := ((bindings at: 'value') childSandblocks collect: [:each | each contents]) asOrderedCollection.
+	integers size odd ifTrue: [integers add: '0'].
 	
-	self initRowsFromSequence: aCollection.
+	self initRowsFromSequence: integers.
 	
-	button := SBTextBubble new prefix: 'dashes='; contents: self sequence; when: #doubleClicked send: #openPopup to: self.
-	self addMorphBack:  button.
+	self addMorphBack: (self
+		createBinding: [:c |
+			SBTextBubble new
+				prefix: 'dashes=';
+				contents: self sequence;
+				when: #doubleClicked send: #openPopup to: self]
+		update: [:c :m | self replaceBound: 'value' with: (SBPython parseExpression: self sequence)])
 ]
 
 { #category : #'insert/delete' }
@@ -182,13 +173,4 @@ sys.stdout.buffer.write(base64.b64encode(bytes.read()))
 bytes.close()
 ') readStream)) asMorph.
 	dialogBody addMorphBack: image.
-]
-
-{ #category : #copying }
-SBPyPltDashes >> writeSourceOn: aStream [
-
-	| prefix |
-	prefix := self firstSubmorph prefix.
-	
-	aStream nextPutAll: (prefix, self sequence).
 ]

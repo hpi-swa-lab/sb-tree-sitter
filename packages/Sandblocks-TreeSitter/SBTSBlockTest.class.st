@@ -450,6 +450,20 @@ SBTSBlockTest >> testReplacementBlockBinding [
 	self assert: '(?<test>12)' equals: regex sourceString
 ]
 
+{ #category : #'tests - replacements' }
+SBTSBlockTest >> testReplacementUndo [
+
+	| regex source editor |
+	source := '(?<test>1)'.
+	regex := SBTSFileParser new parseTopLevel: source language: SBRegex.
+	editor := self editorFor: regex.
+	regex applyReplacements.
+	editor undo.
+	self assert: source equals: regex sourceString.
+	editor redo.
+	self assert: source equals: regex sourceString
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testSkipsRepeatsInUntakenChoices [
 

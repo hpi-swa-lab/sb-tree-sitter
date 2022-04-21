@@ -7,22 +7,6 @@ Class {
 	#category : #'Sandblocks-Matplotlib'
 }
 
-{ #category : #'as yet unclassified' }
-SBPyPltScatter class >> match: aDictionary do: aBlock [
-	<lang: #python match: '(call
-        	function: (attribute
-            	object: (identifier) ="ax" @ax
-                attribute: (identifier) ="scatter" @plot
-            )
-        	arguments: (argument_list)
-        ) @call' sample: 'ax.scatter(X, Y)'>
-	
-	^ aBlock
-		value: (aDictionary at: 'call')
-		value: (self new factory: (aDictionary at: 'call') factory;
-			createReplacementOfArgs: (aDictionary at: 'call') access arguments buildCopy)
-]
-
 { #category : #'initialize-release' }
 SBPyPltScatter >> build [
 	<lang: #python match: '(call

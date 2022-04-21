@@ -7,26 +7,6 @@ Class {
 	#category : #'Sandblocks-Matplotlib'
 }
 
-{ #category : #'as yet unclassified' }
-SBPyPltInitPlots class >> matchPython: aDictionary do: aBlock [
-	<lang: #python match: '(assignment
-    	left: (pattern_list
-        	(identifier) ="fig"
-            (identifier) ="ax"
-        )
-        right: (call
-        	function: (attribute
-            	(identifier) ="plt"
-                (identifier) ="subplots"
-            )
-        )
-    ) @init' sample: 'fig, ax = plt.subplots()'>
-	
-	^ aBlock value: (aDictionary at: 'init') value: (self new
-		factory: (aDictionary at: 'init') factory;
-		createReplacement)
-]
-
 { #category : #'initialize-release' }
 SBPyPltInitPlots >> build [
 	<lang: #python match: '(assignment
@@ -55,17 +35,4 @@ SBPyPltInitPlots >> build [
 SBPyPltInitPlots >> palettes [
 
 	^ {SBPyPltPaletteOverview}
-]
-
-{ #category : #printing }
-SBPyPltInitPlots >> writeSourceOn: aStream indent: aNumber [
-
-	aStream nextPutAll: ('import matplotlib.pyplot as plt
-import io
-import base64
-import sys
-
-fig, ax = plt.subplots()
-fig.set_dpi(60)
-fig.set_size_inches(3, 3)' lines joinSeparatedBy: String cr, (String new: aNumber withAll: Character tab))
 ]

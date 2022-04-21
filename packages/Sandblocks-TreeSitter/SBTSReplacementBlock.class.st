@@ -75,6 +75,14 @@ SBTSReplacementBlock >> createBinding: aBuilderClosure contents: aNameString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSReplacementBlock >> createBinding: aBuilderClosure contents: aNameString index: aNumber [
+
+	^ self
+		createBinding: [:c | aBuilderClosure value contents: ((c at: aNameString) textMorphs at: aNumber) contents]
+		update: [:c :m | ((c at: aNameString) textMorphs at: aNumber) contents: m contents]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReplacementBlock >> createBinding: aBuilderClosure object: aNameString [
 
 	^ self
