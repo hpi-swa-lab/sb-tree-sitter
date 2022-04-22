@@ -167,7 +167,7 @@ SBTSNodeText >> resultsFor: aParser [
 					ifFalse: [remaining]))}].
 	
 	aParser stream position: start.
-	^ #noMatch
+	^ {}
 ]
 
 { #category : #parsing }

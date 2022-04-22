@@ -123,7 +123,7 @@ SBTSNodeRepeat >> required [
 { #category : #parsing }
 SBTSNodeRepeat >> resultsFor: aParser [
 
-	| results candidates queue |
+	| candidates queue |
 	candidates := self required
 		ifTrue: [OrderedCollection new]
 		ifFalse: [OrderedCollection with: aParser].
@@ -132,11 +132,9 @@ SBTSNodeRepeat >> resultsFor: aParser [
 	[queue isEmpty] whileFalse: [ | next lastPosition |
 		next := queue removeFirst copy.
 		lastPosition := next position.
-		results := self element resultsFor: next.
-		results = #noMatch ifFalse: [
-			results do: [:result |
-				candidates add: result.
-				(result position > lastPosition and: [result atEnd not]) ifTrue: [queue add: result]]]].
+		(self element resultsFor: next) do: [:result |
+			candidates add: result.
+			(result position > lastPosition and: [result atEnd not]) ifTrue: [queue add: result]]].
 	
 	^ candidates
 ]

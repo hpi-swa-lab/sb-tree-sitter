@@ -96,10 +96,7 @@ SBTSNodeAlias >> printOn: aStream [
 { #category : #parsing }
 SBTSNodeAlias >> resultsFor: aParser [
 
-	| results |
-	results := self element resultsFor: aParser.
-	results = #noMatch ifTrue: [^ results].
-	^ results collect: [:result |
+	^ (self element resultsFor: aParser) collect: [:result |
 		result blocks do: [:b | b slot addNode: self].
 		result]
 ]

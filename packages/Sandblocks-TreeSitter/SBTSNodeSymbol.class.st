@@ -118,7 +118,7 @@ SBTSNodeSymbol >> printOn: aStream [
 { #category : #parsing }
 SBTSNodeSymbol >> resultsFor: aParser [
 
-	(self factory inputTransitionBlackList includes: self type) ifTrue: [^ #noMatch].
+	(self factory inputTransitionBlackList includes: self type) ifTrue: [^ {}].
 	
 	aParser peek = (Character value: 1) ifTrue: [
 		aParser next.
@@ -128,28 +128,26 @@ SBTSNodeSymbol >> resultsFor: aParser [
 		memoizationFor: self type
 		ifPresent: [:results |
 			" we may not actually ever want left-recursion, because these blocks will be composed of a wrapper block and a basic block, and we always want to choose the basic block and offer the user to expand the basic block to the more complicated construct. "
-			(results = #recur or: [results = #noMatch])
-				ifTrue: [#noMatch]
-				ifFalse: [
-					results do: [:r | r blocks last slot replaceLast: self].
-					aParser peek = (Character value: 0)
-						ifTrue: [
-							" if we consumed a nested block, use the input parser and copy all relevant state
+			(results = #recur or: [results isEmpty]) ifTrue: [{}] ifFalse: [
+				results do: [:r | r blocks last slot replaceLast: self].
+				aParser peek = (Character value: 0)
+					ifTrue: [
+						" if we consumed a nested block, use the input parser and copy all relevant state
 because the stored, nested parser does not have a valid stream "
-							aParser blocks: aParser blocks, results first blocks.
-							aParser next.
-							{aParser}]
-						ifFalse: [results]]]
+						aParser blocks: aParser blocks, results first blocks.
+						aParser next.
+						{aParser}]
+					ifFalse: [results]]]
 		ifAbsentPut: [ | results currentBlocks |
 			currentBlocks := aParser blocks.
 			aParser blocks: OrderedCollection new.
 			
 			results := self bodyTemplate resultsFor: aParser.
-			results = #noMatch
-				ifTrue: [
+			results
+				ifEmpty: [
 					aParser blocks: currentBlocks.
-					#noMatch]
-				ifFalse: [
+					{}]
+				ifNotEmpty: [
 					results collect: [:result |
 						self isInlined
 							ifTrue: [

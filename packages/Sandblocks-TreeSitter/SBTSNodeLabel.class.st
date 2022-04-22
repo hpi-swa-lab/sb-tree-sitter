@@ -143,7 +143,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 	[aParser atEnd or: [(aParser peek = (Character value: 0) and: [labelStream position > 0]) or: [labelStream atEnd]]] whileFalse: [
 		labelStream next = aParser next ifFalse: [
 			aParser position: oldPosition.
-			^ #noMatch]].
+			^ {}]].
 	
 	newParser := aParser copy.
 	[newParser peek = $ ] whileTrue: [newParser next].
@@ -157,7 +157,7 @@ SBTSNodeLabel >> takeNodesFrom: aParser [
 		ifTrue: [
 			aParser next.
 			{aParser copy addSlot: self}]
-		ifFalse: [#noMatch]
+		ifFalse: [{}]
 ]
 
 { #category : #hierarchy }

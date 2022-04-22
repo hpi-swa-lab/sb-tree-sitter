@@ -96,11 +96,12 @@ SBTSNodeSeq >> resultsFor: aParser [
 	| queue |
 	queue := OrderedCollection new.
 	
-	^ (Array streamContents: [:stream | | reportResultsBlock |
+	^ Array streamContents: [:stream | | reportResultsBlock |
 		reportResultsBlock := [:parser :index | | newResults |
 			newResults := (self elements at: index) resultsFor: parser copy.
-			newResults = #noMatch ifFalse: [
-				index = self elements size ifTrue: [stream nextPutAll: newResults] ifFalse: [
+			index = self elements size
+				ifTrue: [stream nextPutAll: newResults]
+				ifFalse: [
 					newResults do: [:candidate |
 						candidate atEnd
 							ifTrue: [
@@ -109,7 +110,7 @@ SBTSNodeSeq >> resultsFor: aParser [
 									to: self elements size
 									do: [:node | candidate addEmptyBlocks: node buildEmpty].
 								stream nextPut: candidate]
-							ifFalse: [queue add: {candidate. index}]]]]].
+							ifFalse: [queue add: {candidate. index}]]]].
 		
 		reportResultsBlock value: aParser value: 1.
 		
@@ -117,7 +118,7 @@ SBTSNodeSeq >> resultsFor: aParser [
 			pair := queue removeFirst.
 			parser := pair first.
 			index := pair second + 1.
-			reportResultsBlock value: parser value: index]]) ifEmpty: [#noMatch]
+			reportResultsBlock value: parser value: index]]
 ]
 
 { #category : #parsing }

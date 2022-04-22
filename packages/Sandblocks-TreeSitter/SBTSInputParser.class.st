@@ -75,14 +75,13 @@ SBTSInputParser >> memoizationFor: aString ifPresent: aSuccessBlock ifAbsentPut:
 	dict := memoizations at: stream position + 1.
 	^ dict
 		at: aString
-		ifPresent: [:results | aSuccessBlock value: (results = #noMatch ifTrue: [results] ifFalse: [results collect: [:p | p copy]])]
+		ifPresent: [:results | aSuccessBlock value: (results collect: [:p | p copy])]
 		ifAbsent: [ | results |
 			dict at: aString put: #recur.
 			results := aBlock value.
-			dict at: aString put: (results = #noMatch ifTrue: [results] ifFalse: [
-				results collect: [:p |
-					self assert: (p isKindOf: SBTSInputParser).
-					p copy]]).
+			dict at: aString put: (results collect: [:p |
+				self assert: (p isKindOf: SBTSInputParser).
+				p copy]).
 			results]
 ]
 
@@ -125,7 +124,6 @@ SBTSInputParser >> normalizeResults: aCollection query: aString [
 { #category : #query }
 SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after: anotherCollection [
 
-	| results |
 	stream := ((aCollection collect: [:i | Character value: 0] as: String), (aString, (anotherCollection collect: [:i | Character value: 0] as: String))) readStream.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
 	
@@ -146,24 +144,18 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 				at: typeNode type
 				put: {self copy addBlock: copy}]].
 	
-	results := aTSBlock slot transitionRoot resultsFor: self.
-	results = #noMatch ifTrue: [^ #()].
 	^ self
-		normalizeResults: ((results select: [:parser | parser atEnd]) collect: [:parser | parser blocks])
+		normalizeResults: (((aTSBlock slot transitionRoot resultsFor: self) select: [:parser | parser atEnd]) collect: [:parser | parser blocks])
 		query: aString
 ]
 
 { #category : #query }
 SBTSInputParser >> optionsForTemplate: aNode given: aString [
 
-	| results |
 	stream := aString readStream.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
-	
-	results := aNode resultsFor: self.
-	results = #noMatch ifTrue: [^ #()].
 	^ self
-		normalizeResults: ((results select: [:parser | parser atEnd]) collect: [:parser | parser blocks])
+		normalizeResults: (((aNode resultsFor: self) select: [:parser | parser atEnd]) collect: [:parser | parser blocks])
 		query: aString
 ]
 
