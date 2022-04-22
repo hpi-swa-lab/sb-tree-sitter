@@ -19,17 +19,16 @@ SBReComment >> build [
 
 	self
 		addMorphBack: (self createBindingBlock: 'pattern');
-		addMorphBack: (SBColumn new
-			addMorphBack: (comment := self
-				createBindingFor: 'annotation'
-				build: [:annotation |
-					SBTextBubble multiLine
-						placeholderText: 'comment';
-						contents: annotation]
-				update: [:c :m | m contents]);
-			addMorphBack: (SBButton new
-				balloonText: 'collapse';
-				icon: SBIcon iconMinus shortcut: nil do: [self collapseBlock]))
+		addMorphBack: (comment := self
+			createBindingFor: 'annotation'
+			build: [:annotation |
+				SBTextBubble multiLine
+					placeholderText: 'comment';
+					contents: annotation]
+			update: [:c :m | m contents]);
+		addMorphBack: (SBButton new
+			balloonText: 'collapse';
+			icon: SBIcon iconMinus shortcut: nil do: [self collapseBlock])
 ]
 
 { #category : #accessing }
