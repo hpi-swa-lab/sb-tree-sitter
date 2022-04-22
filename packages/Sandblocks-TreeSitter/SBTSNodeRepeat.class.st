@@ -151,13 +151,12 @@ SBTSNodeRepeat >> takeNodesFrom: aParser [
 			index := pair second + 1.
 			currentPosition := parser position.
 			results := self element takeNodesFrom: parser.
-			results ~= #noMatch ifTrue: [
-				results do: [:candidate |
-					"to fix troubles with infinitely repeating matches, we only accept results
+			results do: [:candidate |
+				"to fix troubles with infinitely repeating matches, we only accept results
 if they advanced the parser."
-					candidate position > currentPosition ifTrue: [
-						stream nextPut: candidate.
-						queue add: {candidate. index}]]]]]) ifEmpty: [self required ifTrue: [#noMatch] ifFalse: [{aParser copy}]]
+				candidate position > currentPosition ifTrue: [
+					stream nextPut: candidate.
+					queue add: {candidate. index}]]]]) ifEmpty: [self required ifTrue: [{}] ifFalse: [{aParser copy}]]
 ]
 
 { #category : #hierarchy }

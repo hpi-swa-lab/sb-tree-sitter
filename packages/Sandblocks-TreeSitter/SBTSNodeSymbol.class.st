@@ -165,19 +165,17 @@ because the stored, nested parser does not have a valid stream "
 { #category : #parsing }
 SBTSNodeSymbol >> takeNodesFrom: aParser [
 
-	(self isSuperType or: [factory promotedInlineSymbols includes: self type]) ifTrue: [ | results |
-		results := self bodyTemplate takeNodesFrom: aParser.
-		^ results = #noMatch ifTrue: [#noMatch] ifFalse: [
-			results collect: [:parser | | res |
-				res := parser copy.
-				(res currentSlot lastNode hasParent: self bodyTemplate) ifTrue: [res currentSlot addNode: self].
-				res]]].
+	(self isSuperType or: [factory promotedInlineSymbols includes: self type]) ifTrue: [
+		^ (self bodyTemplate takeNodesFrom: aParser) collect: [:parser | | res |
+			res := parser copy.
+			(res currentSlot lastNode hasParent: self bodyTemplate) ifTrue: [res currentSlot addNode: self].
+			res]].
 	
 	(aParser atEnd not and: [aParser peek isString not and: [aParser peek compatibleWithType: self type]]) ifTrue: [
 		aParser next.
 		^ {aParser copy addSlot: self}].
 	
-	^ #noMatch
+	^ {}
 ]
 
 { #category : #hierarchy }

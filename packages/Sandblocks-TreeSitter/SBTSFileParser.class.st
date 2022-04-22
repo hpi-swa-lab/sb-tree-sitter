@@ -66,7 +66,7 @@ SBTSFileParser >> nodeForCursor: aCursor [
 		stream := (blocks collect: [:b | b isString ifTrue: [b] ifFalse: [b slot firstNode]]) readStream.
 		slots := OrderedCollection new.
 		matches := template takeNodesFrom: self.
-		self assert: matches ~= #noMatch description: ('could not construct `{1}`' format: {type}).
+		self assert: matches notEmpty description: ('could not construct `{1}`' format: {type}).
 		matches := matches select: [:match | match atEnd].
 		self assert: matches size = 1.
 		

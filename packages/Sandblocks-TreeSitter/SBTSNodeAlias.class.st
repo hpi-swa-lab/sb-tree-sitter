@@ -112,7 +112,7 @@ SBTSNodeAlias >> takeNodesFrom: aParser [
 		ifTrue: [
 			aParser next.
 			{aParser copy addSlot: self}]
-		ifFalse: [#noMatch]
+		ifFalse: [{}]
 ]
 
 { #category : #'as yet unclassified' }

@@ -126,17 +126,16 @@ SBTSNodeSeq >> takeNodesFrom: aParser [
 
 	| queue |
 	queue := OrderedCollection with: {aParser. 0}.
-	^ (Array streamContents: [:stream |
+	^ Array streamContents: [:stream |
 		[queue notEmpty] whileTrue: [ | pair parser results index |
 			pair := queue removeFirst.
 			parser := pair first copy.
 			index := pair second + 1.
 			results := (self elements at: index) takeNodesFrom: parser.
-			results = #noMatch ifFalse: [
-				results do: [:candidate |
-					index = self elements size
-						ifTrue: [stream nextPut: candidate]
-						ifFalse: [queue add: {candidate. index}]]]]]) ifEmpty: [#noMatch]
+			results do: [:candidate |
+				index = self elements size
+					ifTrue: [stream nextPut: candidate]
+					ifFalse: [queue add: {candidate. index}]]]]
 ]
 
 { #category : #'as yet unclassified' }

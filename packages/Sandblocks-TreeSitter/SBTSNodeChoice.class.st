@@ -88,11 +88,11 @@ SBTSNodeChoice >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeChoice >> takeNodesFrom: aParser [
 
-	^ (Array streamContents: [:stream |
+	^ Array streamContents: [:stream |
 		self alternatives do: [:alt | | parserCopy results |
 			parserCopy := aParser copy.
 			results := alt takeNodesFrom: parserCopy.
-			results = #noMatch ifFalse: [results do: [:result | stream nextPut: result]]]]) ifEmpty: [#noMatch]
+			results do: [:result | stream nextPut: result]]]
 ]
 
 { #category : #hierarchy }
