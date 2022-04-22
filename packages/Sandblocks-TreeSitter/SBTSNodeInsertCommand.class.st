@@ -70,6 +70,18 @@ SBTSNodeInsertCommand >> isInsert [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> morph [
+
+	^ morphs first
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> morph: aMorph [
+
+	morphs := {aMorph}
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> morphs [
 
 	^ morphs

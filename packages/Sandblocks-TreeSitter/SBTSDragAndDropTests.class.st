@@ -8,12 +8,12 @@ Class {
 SBTSDragAndDropTests >> testDragInsertPyArgument [
 
 	| module editor |
-	module := SBPython parse: 'call()'.
+	module := SBPython parseToplevel: 'call()'.
 	editor := self editorFor: module.
 	
 	self class
 		dropAt: module childSandblocks last childSandblocks last positionInWorld + (1 @ 1)
-		with: (SBPython parseElement: 'a')
+		with: (SBPython parseExpression: 'a')
 		in: editor.
 	self assert: 'call(a)' equals: module sourceString
 ]
@@ -22,13 +22,13 @@ SBTSDragAndDropTests >> testDragInsertPyArgument [
 SBTSDragAndDropTests >> testDragInsertPyExprAsStmt [
 
 	| module editor |
-	module := SBPython parse: 'a
+	module := SBPython parseToplevel: 'a
 b'.
 	editor := self editorFor: module.
 	
 	self class
 		dropAt: module childSandblocks last positionInWorld - (0 @ 1)
-		with: (SBPython parseElement: 'c')
+		with: (SBPython parseExpression: 'c')
 		in: editor.
 	self assert: 'a
 c
@@ -39,13 +39,13 @@ b' equals: module sourceString
 SBTSDragAndDropTests >> testDragInsertPyStatement [
 
 	| module editor |
-	module := SBPython parse: 'a
+	module := SBPython parseToplevel: 'a
 b'.
 	editor := self editorFor: module.
 	
 	self class
 		dropAt: module childSandblocks last positionInWorld - (0 @ 1)
-		with: (SBPython parseElement: 'c = 4')
+		with: (SBPython parseExpression: 'c = 4')
 		in: editor.
 	self assert: 'a
 c=4
@@ -56,16 +56,15 @@ b' equals: module sourceString
 SBTSDragAndDropTests >> testRegexInsertInPattern [
 
 	| module editor |
-	module := SBRegex parse: 'ab'.
+	module := SBRegex parseToplevel: 'ab'.
 	editor := self editorFor: module.
 	
 	module := module childSandblocks first.
 	
 	self class
-		dropAt: module childSandblocks first positionInWorld + (0 @ module childSandblocks last height)
-		with: (SBRegex parse: 'x') childSandblocks last childSandblocks last
+		dropAt: module childSandblocks first positionInWorld + (1 @ module childSandblocks first height)
+		with: (SBRegex parseExpression: 'x') childSandblocks first
 		in: editor.
-	self assert: 3 equals: module firstSubmorph submorphCount.
 	self assert: 'axb' equals: module sourceString
 ]
 
@@ -73,14 +72,14 @@ SBTSDragAndDropTests >> testRegexInsertInPattern [
 SBTSDragAndDropTests >> testRegexQuantifierCanInsert [
 
 	| module editor |
-	module := SBRegex parse: 'ab'.
+	module := SBRegex parseToplevel: 'ab'.
 	editor := self editorFor: module.
 	
 	module := module childSandblocks first.
 	
 	self class
 		dropAt: module childSandblocks first positionInWorld + (0 @ module childSandblocks first height)
-		with: (SBRegex parse: 'x+') childSandblocks last childSandblocks last
+		with: (SBRegex parseExpression: 'x+') childSandblocks last
 		in: editor.
 	self assert: 'a+b' equals: module sourceString
 ]
@@ -89,14 +88,15 @@ SBTSDragAndDropTests >> testRegexQuantifierCanInsert [
 SBTSDragAndDropTests >> testRegexQuantifierCanInsertLater [
 
 	| module editor |
-	module := SBRegex parse: 'a+b'.
+	module := SBRegex parseToplevel: 'a+b'.
 	editor := self editorFor: module.
 	
 	module := module childSandblocks first.
 	
+	"used to be childSandblocks first --> we were allowing to not choose the closest insert position"
 	self class
-		dropAt: module childSandblocks first positionInWorld + (0 @ module childSandblocks first height)
-		with: (SBRegex parse: 'x+') childSandblocks last childSandblocks last
+		dropAt: module childSandblocks last positionInWorld + (0 @ module childSandblocks first height)
+		with: (SBRegex parseExpression: 'x+') childSandblocks last
 		in: editor.
 	self assert: 'a+b+' equals: module sourceString
 ]
@@ -105,27 +105,12 @@ SBTSDragAndDropTests >> testRegexQuantifierCanInsertLater [
 SBTSDragAndDropTests >> testRegexQuantifierCantReplace [
 
 	| module editor |
-	module := SBRegex parse: 'ab'.
+	module := SBRegex parseToplevel: 'ab'.
 	editor := self editorFor: module.
 	
 	self class
 		dropAt: module childSandblocks last positionInWorld + (1 @ 1)
-		with: (SBRegex parse: 'x+') childSandblocks last
+		with: (SBRegex parseExpression: 'x+')
 		in: editor.
 	self assert: 'ab' equals: module sourceString
-]
-
-{ #category : #'as yet unclassified' }
-SBTSDragAndDropTests >> testRegexReplaceUnknown [
-
-	| module editor unknown |
-	module := SBRegex parse: '1'.
-	editor := self editorFor: module.
-	
-	module lastDeepChild parentSandblock addBlock: SBReComment new.
-	unknown := module nextBlockThat: #isUnknown.
-	unknown ensureLayouted.
-	
-	self class dropAt: unknown positionInWorld + (1 @ 1) with: (SBRegex parseElement: '2') in: editor.
-	self assert: (module sourceString includes: $2)
 ]

@@ -736,7 +736,7 @@ SBRegex class >> highlightQuery [
 ] @important
 
 [
-	(anonymous_cpatiruing_group)
+	(anonymous_capturing_group)
 	(named_capturing_group)
 	(non_capturing_group)
 ] @variable

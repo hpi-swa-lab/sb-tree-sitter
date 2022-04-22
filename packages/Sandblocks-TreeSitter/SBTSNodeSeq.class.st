@@ -17,7 +17,7 @@ SBTSNodeSeq >> allChildrenDo: aBlock [
 { #category : #'as yet unclassified' }
 SBTSNodeSeq >> allSubTypesDo: aBlock parents: aCollection [
 
-	self elements do: [:element | element allSubTypesDo: aBlock parents: aCollection]
+	(self elements viewAllButFirst allSatisfy: [:e | e isTSRepeat and: [e required not]]) ifTrue: [self elements first allSubTypesDo: aBlock parents: aCollection]
 ]
 
 { #category : #copying }

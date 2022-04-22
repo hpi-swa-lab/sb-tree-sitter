@@ -22,5 +22,7 @@ SBTSObjectInterface >> slot: aSlot [
 { #category : #'as yet unclassified' }
 SBTSObjectInterface >> value: anObject [
 
-	^ anObject isSandblock and: [anObject isTSBlock and: [slot lastNode = anObject slot lastNode]]
+	(anObject isSandblock and: [anObject isTSBlock]) ifFalse: [^ false].
+	slot lastNode allSubTypesDo: [:c :p | (c = anObject slot lastNode) ifTrue: [^ true]] parents: {}.
+	^ false
 ]

@@ -10,6 +10,21 @@ SBTSParseFileTest >> expectedFailures [
 	^ #()
 ]
 
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testAdaptRegexNodes [
+
+	| a b |
+	a := SBTSFileParser new parse: 'ab' language: SBRegex.
+	b := SBTSFileParser new parse: 'x' language: SBRegex.
+	
+	self
+		assert: a childSandblocks first childSandblocks first slot firstNode
+		equals: a childSandblocks first childSandblocks second slot firstNode.
+	self
+		assert: a childSandblocks first childSandblocks first slot firstNode
+		equals: b childSandblocks first childSandblocks first slot firstNode
+]
+
 { #category : #'tests - unit' }
 SBTSParseFileTest >> testChoice [
 
@@ -113,6 +128,16 @@ SBTSParseFileTest >> testLabel [
 	rule := SBTSNodeSeq new elements: {SBTSNodeLabel new label: 'abc'}.
 	parser := (rule takeNodesFrom: (SBTSFileParser new stream: {'abc'} readStream)) first.
 	self assert: rule elements first equals: parser slots first lastNode
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testNodesAreShared [
+
+	| a b |
+	a := SBTSFileParser new parse: '2' language: SBPython.
+	b := SBTSFileParser new parse: '2' language: SBPython.
+	
+	self assert: a childSandblocks first slot firstNode equals: b childSandblocks first slot firstNode
 ]
 
 { #category : #'tests - unit' }

@@ -30,7 +30,7 @@ SBTSNodeAlias >> allChildrenDo: aBlock [
 { #category : #blocks }
 SBTSNodeAlias >> allSubTypesDo: aBlock parents: aCollection [
 
-	aBlock value: self.
+	aBlock value: self value: aCollection.
 	self element allSubTypesDo: aBlock parents: aCollection
 ]
 

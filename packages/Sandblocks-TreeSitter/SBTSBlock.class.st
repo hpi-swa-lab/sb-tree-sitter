@@ -351,10 +351,10 @@ SBTSBlock >> layoutCommands [
 			self children overlappingPairsDo: [:a :b |
 				stream nextPut: a layoutCommands.
 				(self factory hardLineBreakBetween: a and: b)
-					ifTrue: [stream nextPut: SBAlgebraCommand hardLine]
+					ifTrue: [stream nextPut: (SBAlgebraCommand hardLine withGap: true)]
 					ifFalse: [
 						(self factory softLineBreakBetween: a and: b)
-							ifTrue: [stream nextPut: SBAlgebraCommand softLineOrGap]
+							ifTrue: [stream nextPut: (SBAlgebraCommand softLineOrGap withGap: true)]
 							ifFalse: [stream nextPut: SBAlgebraCommand gap]]].
 			self children ifNotEmpty: [stream nextPut: self lastSubmorph layoutCommands]])
 ]
@@ -386,7 +386,7 @@ SBTSBlock >> newNullBlock [
 { #category : #'as yet unclassified' }
 SBTSBlock >> objectInterfaceForChild: aBlock [
 
-	^ {SBTSObjectInterface new slot: aBlock slot}
+	^ aBlock isTSBlock ifTrue: [{SBTSObjectInterface new slot: aBlock slot}] ifFalse: [SBInterfaces never]
 ]
 
 { #category : #'as yet unclassified' }

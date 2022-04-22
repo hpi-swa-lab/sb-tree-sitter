@@ -145,6 +145,14 @@ SBGrammarLanguage class >> parseExpression: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> parseToplevel: aString [
+
+	| toplevel |
+	toplevel := SBTSFileParser new parseTopLevel: aString language: self.
+	^ toplevel
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> rebuild [
 
 	self invalidate.

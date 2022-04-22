@@ -269,3 +269,9 @@ SBTSNodeBase >> type [
 
 	^ nil
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> veryDeepCopyWith: deepCopier [
+
+	
+]
