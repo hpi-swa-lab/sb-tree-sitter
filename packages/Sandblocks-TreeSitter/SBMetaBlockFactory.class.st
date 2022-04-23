@@ -428,7 +428,12 @@ SBMetaBlockFactory >> buildNodesFor: anObject [
 			factory: self;
 			yourself].
 	
-	(self unpackTypes includes: anObject type) ifTrue: [^ self buildNodesFor: anObject content].
+	(#('PREC_RIGHT' 'PREC_LEFT' 'PREC_DYNAMIC' 'PREC') includes: anObject type) ifTrue: [
+		^ SBTSNodePrecedence new
+			element: (self buildNodesFor: anObject content);
+			precedence: anObject type;
+			value: (anObject at: 'value');
+			factory: self].
 	
 	(#('STRING') includes: anObject type) ifTrue: [
 		^ SBTSNodeLabel new
