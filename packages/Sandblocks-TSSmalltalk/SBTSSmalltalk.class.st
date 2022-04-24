@@ -697,14 +697,14 @@ SBTSSmalltalk class >> grammarJson [
 
 { #category : #properties }
 SBTSSmalltalk class >> highlightQuery [
+	" https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
 
-    " https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
-    ^ '["this" "self" "true" "false" "thisContext" "super" "nil"] @keyword
+	^ '["this" "self" "true" "false" "thisContext" "super" "nil"] @keyword
 (number) @number
 (string) @string
 (identifier) @variable
-["^" "[" "]" "{" "}"] @important
-'
+(keyword) @variable.part
+["^" "[" "]" "{" "}"] @important'
 ]
 
 { #category : #'as yet unclassified' }

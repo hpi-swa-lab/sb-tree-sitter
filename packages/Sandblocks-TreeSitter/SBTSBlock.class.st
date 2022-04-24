@@ -410,6 +410,12 @@ SBTSBlock >> preferredColorIn: aColorPolicy [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> prefersNoBorder [
+
+	^ self highlight notNil and: [self highlight endsWith: '.part']
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> prefixValid [
 
 	^ self currentTextMorph
