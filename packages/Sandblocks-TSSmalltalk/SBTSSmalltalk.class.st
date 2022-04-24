@@ -737,6 +737,7 @@ SBTSSmalltalk class >> statementContainerTypes [
 SBTSSmalltalk >> addIndent: aBlock [
 
 	(aBlock submorphIndex = 1 and: [aBlock owner type = 'keyword_message']) ifTrue: [^ true].
+	(aBlock contents = '[' and: [aBlock containingSandblock type = 'block']) ifTrue: [^ true].
 	^ false
 ]
 
@@ -753,6 +754,14 @@ SBTSSmalltalk >> declarationsInScope: aScopeBlock do: aClosure [
 SBTSSmalltalk >> expressionTypes [
 
 	^ #('expression')
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> hardLineBreakBetween: aBlock and: anotherBlock [
+
+	aBlock parentSandblock type = 'block' ifTrue: [^ aBlock parentSandblock childSandblocks size > 1 and: [anotherBlock contents ~= ']']].
+	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -781,6 +790,13 @@ SBTSSmalltalk >> postConfigure [
 
 	self blockInline: #('statement').
 	self noteUncapturedText: #('symbol' 'string')
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> removeIndent: aBlock [
+
+	(aBlock contents = ']' and: [aBlock containingSandblock type = 'block']) ifTrue: [^ true].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }

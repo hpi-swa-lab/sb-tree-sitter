@@ -684,14 +684,18 @@ SBTSBlock >> writeSourceOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
+	| parens |
 	self children ifEmpty: [^ self].
 	
+	parens := self parentSandblock notNil and: [self parentSandblock isTSBlock and: [self slot needsParenthesis: self]].
 	(self factory indentMatch: self) ifTrue: [aStream tab: aNumber].
+	parens ifTrue: [aStream nextPut: $(].
 	self children overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.
 		aStream nextPutAll: (self slot separatorBetween: first and: second indent: aNumber)].
 	self lastSubmorph
 		writeSourceOn: aStream
 		indent: (self indentFor: self lastSubmorph current: aNumber)
-		forCompare: aBoolean
+		forCompare: aBoolean.
+	parens ifTrue: [aStream nextPut: $)]
 ]

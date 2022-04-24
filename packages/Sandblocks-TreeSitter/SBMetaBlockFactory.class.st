@@ -222,6 +222,12 @@ SBMetaBlockFactory >> addIndent: aBlock [
 	^ false
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> addParentheses: aBlock [
+
+	^ aBlock compatibleWithType: 'expression'
+]
+
 { #category : #accessing }
 SBMetaBlockFactory >> aliasOccurrences [
 
@@ -1329,9 +1335,11 @@ SBMetaBlockFactory >> softLineBreakMatcher: aBlock [
 { #category : #'configuration helpers' }
 SBMetaBlockFactory >> spaceBetween: aBlock and: anotherBlock [
 
-	^ (aBlock sourceString ifNotEmpty: [:s | s last isAlphaNumeric] ifEmpty: [false]) and: [
+	^ (aBlock sourceString
+		ifNotEmpty: [:s | s last isAlphaNumeric or: [s last = $_]]
+		ifEmpty: [false]) and: [
 		anotherBlock sourceString
-			ifNotEmpty: [:s | s first isAlphaNumeric]
+			ifNotEmpty: [:s | s first isAlphaNumeric or: [s first = $_]]
 			ifEmpty: [false]]
 ]
 

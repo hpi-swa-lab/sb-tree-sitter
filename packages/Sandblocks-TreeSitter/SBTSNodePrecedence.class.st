@@ -23,9 +23,41 @@ SBTSNodePrecedence >> allSubTypesDo: aBlock parents: aCollection [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodePrecedence >> associativity [
+
+	^ precedence caseOf: {
+		['PREC_LEFT'] -> [#left].
+		['PREC_RIGHT'] -> [#right].
+		['PREC_DYNAMIC'] -> [#none].
+		['PREC'] -> [#none]}
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodePrecedence >> buildEmpty [
 
 	^ self element buildEmpty
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodePrecedence >> compareTo: aPrecedence [
+
+	(self value isInteger and: [aPrecedence value isInteger]) ifTrue: [^ (self value - aPrecedence value) sign].
+	
+	self factory grammar precedences do: [:precedences | | sawLeft sawRight |
+		sawLeft := false.
+		sawRight := false.
+		precedences do: [:entry | | matchesLeft matchesRight |
+			matchesLeft := self value = entry value.
+			matchesRight := aPrecedence value = entry value.
+			matchesLeft
+				ifTrue: [
+					sawLeft := true.
+					sawRight ifTrue: [^ -1]]
+				ifFalse: [
+					matchesRight ifTrue: [
+						sawRight := true.
+						sawLeft ifTrue: [^ 1]]]]].
+	^ 0
 ]
 
 { #category : #'as yet unclassified' }
@@ -45,6 +77,12 @@ SBTSNodePrecedence >> element: aNode [
 
 	element := aNode.
 	aNode parent: self
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodePrecedence >> isTSPrecedence [
+
+	^ true
 ]
 
 { #category : #'as yet unclassified' }
@@ -73,6 +111,12 @@ SBTSNodePrecedence >> resultsFor: aParser [
 SBTSNodePrecedence >> takeNodesFrom: aParser [
 
 	^ element takeNodesFrom: aParser
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodePrecedence >> value [
+
+	^ value
 ]
 
 { #category : #'as yet unclassified' }

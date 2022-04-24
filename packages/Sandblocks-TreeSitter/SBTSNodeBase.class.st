@@ -71,6 +71,15 @@ SBTSNodeBase >> compatibleWithType: aSymbol [
 	^ factory type: self type compatibleWith: aSymbol
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> countType: aSymbol [
+
+	| count |
+	count := 0.
+	self allChildrenDo: [:c | c type = aSymbol ifTrue: [count := count + 1]].
+	^ count
+]
+
 { #category : #blocks }
 SBTSNodeBase >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
@@ -178,6 +187,12 @@ SBTSNodeBase >> isTSNode [
 
 { #category : #testing }
 SBTSNodeBase >> isTSOptional [
+
+	^ false
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isTSPrecedence [
 
 	^ false
 ]

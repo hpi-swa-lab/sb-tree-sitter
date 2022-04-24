@@ -141,6 +141,15 @@ SBTSSlot >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> lastCommonAncestorWith: aSlot [
+
+	| candidate |
+	candidate := nil.
+	self allSuperTypesDo: [:type | aSlot includesParentThat: [:p | p type = type type ifTrue: [candidate := p. true] ifFalse: [false]]].
+	^ candidate
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> lastNode [
 
 	^ nodes last
@@ -162,6 +171,25 @@ SBTSSlot >> mergeWith: aSlot [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> needsParenthesis: aBlock [
+
+	| mine parent recursiveType parentSlot cmp |
+	parentSlot := aBlock parentSandblock slot.
+	recursiveType := (self lastCommonAncestorWith: parentSlot) ifNil: [^ false].
+	self flag: #todo.
+	"should only occur if the recursive type is at a border position (e.g. not in parentheses) "
+	((parentSlot firstNode bodyTemplate countType: recursiveType type) > 1 and: [(self firstNode bodyTemplate countType: recursiveType type) > 0]) ifFalse: [^ false].
+	
+	mine := self precedenceAround: aBlock firstSubmorph.
+	parent := parentSlot precedenceAround: aBlock.
+	cmp := mine compareTo: parent.
+	cmp = 0 ifTrue: [
+		(parent associativity = #left and: [aBlock isFirstChild]) ifTrue: [^ false].
+		(parent associativity = #right and: [aBlock isFirstChild not]) ifTrue: [^ false]].
+	^ cmp <= 0
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> nodes [
 
 	^ nodes
@@ -178,6 +206,23 @@ SBTSSlot >> parentThat: aBlock [
 SBTSSlot >> postCopy [
 
 	nodes := nodes copy
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> precedenceAround: aBlock [
+
+	SBToggledCode comment: '' active: 2 do: {
+		[
+			self firstNode bodyTemplate isTSPrecedence ifTrue: [^ self firstNode bodyTemplate].
+			^ SBTSNodePrecedence new
+				precedence: 'PREC';
+				value: 0].
+		[
+			aBlock slot allParentsDo: [:p | p isTSPrecedence ifTrue: [^ p]].
+			^ SBTSNodePrecedence new
+				factory: self factory;
+				precedence: 'PREC';
+				value: 0]}
 ]
 
 { #category : #highlight }
