@@ -5170,6 +5170,12 @@ SBPython class >> statementContainerTypes [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> addIndent: aBlock [
+
+	^ (aBlock submorphAfter ifNotNil: #type) = 'block'
+]
+
+{ #category : #actions }
 SBPython >> browseImplementorsFor: aBlock [
 
 	| identifier method toplevel |
@@ -5199,6 +5205,13 @@ SBPython >> configure [
 	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type' and: [(b parentSandblock ifNotNil: #type) ~= 'pair']]]
 ]
 
+{ #category : #semantics }
+SBPython >> declarationsInScope: aScopeBlock do: aClosure [
+
+	aScopeBlock type = 'block' ifTrue: [aScopeBlock childSandblocksDo: [:stmt | ]].
+	aScopeBlock type = 'function_definition' ifTrue: [aScopeBlock childSandblocksDo: [:block | (block compatibleWithType: 'parameter') ifTrue: [block allBlocksDo: [:b | b type = 'identifier' ifTrue: [aClosure value: (SBTSDeclaration block: b label: 'func arg')]]]]]
+]
+
 { #category : #'as yet unclassified' }
 SBPython >> getModuleForSymbol: aString in: aModule [
 
@@ -5207,7 +5220,7 @@ SBPython >> getModuleForSymbol: aString in: aModule [
 		capturesDo: [:moduleCaptures | ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration helpers' }
 SBPython >> hardLineBreakBetween: aBlock and: anotherBlock [
 	"match for TSBlock"
 
@@ -5220,7 +5233,7 @@ SBPython >> hardLineBreakBetween: aBlock and: anotherBlock [
 	^ #('else_clause' 'elif_clause') includes: anotherBlock type
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration helpers' }
 SBPython >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 	"match for InlineBlocks"
 
@@ -5231,16 +5244,22 @@ SBPython >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 	^ #('else_clause' 'elif_clause') includes: anotherBlock firstVisibleType
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration helpers' }
 SBPython >> indentMatch: aBlock [
 
 	^ aBlock type = 'block'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBPython >> isImmutableLabel: aLabelNode [
 
 	^ (super isImmutableLabel: aLabelNode) or: [#(':') includes: aLabelNode label]
+]
+
+{ #category : #semantics }
+SBPython >> isScope: aBlock [
+
+	^ #('module' 'function_definition' 'block' 'class') includes: aBlock type
 ]
 
 { #category : #'as yet unclassified' }
@@ -5315,12 +5334,18 @@ SBPython >> preprocessGrammar [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython >> removeIndent: aBlock [
+
+	^ (aBlock submorphBefore ifNotNil: #type) = 'block'
+]
+
+{ #category : #'as yet unclassified' }
 SBPython >> separatorRule [
 
 	^ separatorRule ifNil: [separatorRule := ((self buildRegexString: (grammar rules at: grammar word)), '|\d+') asRegex]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration helpers' }
 SBPython >> softLineBreakBetween: aBlock and: anotherBlock [
 	"for TSBlock"
 
@@ -5332,7 +5357,7 @@ SBPython >> softLineBreakBetween: aBlock and: anotherBlock [
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration helpers' }
 SBPython >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 	"for SBInlineBlock"
 
@@ -5342,7 +5367,7 @@ SBPython >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBPython >> validDropDestination: aBlock [
 
 	^ aBlock element type ~= 'expression'
