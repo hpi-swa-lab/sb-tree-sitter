@@ -216,6 +216,12 @@ SBMetaBlockFactory >> addDelimitedRules: aCollection [
 			ifAbsent: [{delimiter}])]
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> addIndent: aBlock [
+
+	^ false
+]
+
 { #category : #accessing }
 SBMetaBlockFactory >> aliasOccurrences [
 
@@ -1156,6 +1162,12 @@ SBMetaBlockFactory >> removeHiddenTerminals: anObject [
 		anObject members do: [:m | self removeHiddenTerminals: m]]
 ]
 
+{ #category : #'as yet unclassified' }
+SBMetaBlockFactory >> removeIndent: aBlock [
+
+	^ false
+]
+
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> removeMarkedDelimiters: anObject rule: aString [
 	" (a delim) -> (a) "
@@ -1291,7 +1303,12 @@ SBMetaBlockFactory >> simplifyList: anObject [
 { #category : #'configuration helpers' }
 SBMetaBlockFactory >> softLineBreakBetween: aBlock and: anotherBlock [
 
-	(aBlock slot includesRepeat and: [anotherBlock slot includesRepeat]) ifTrue: [^ true].
+	| firstRepeater secondRepeater |
+	firstRepeater := aBlock slot repeater.
+	secondRepeater := anotherBlock slot repeater.
+	self flag: #fixme.
+	"what we want to do is check whether they belong to the same repeater but are of different instances of the repeat"
+	(firstRepeater notNil and: [firstRepeater = secondRepeater and: [firstRepeater element isTSSymbol or: [firstRepeater element isTSChoice]]]) ifTrue: [^ true].
 	^ false
 ]
 

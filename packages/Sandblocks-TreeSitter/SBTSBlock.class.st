@@ -350,6 +350,8 @@ SBTSBlock >> layoutCommands [
 		data: (Array streamContents: [:stream |
 			self children overlappingPairsDo: [:a :b |
 				stream nextPut: a layoutCommands.
+				(self factory addIndent: a) ifTrue: [stream nextPut: SBAlgebraCommand addIndent].
+				(self factory removeIndent: b) ifTrue: [stream nextPut: SBAlgebraCommand removeIndent].
 				(self factory hardLineBreakBetween: a and: b)
 					ifTrue: [stream nextPut: (SBAlgebraCommand hardLine withGap: true)]
 					ifFalse: [

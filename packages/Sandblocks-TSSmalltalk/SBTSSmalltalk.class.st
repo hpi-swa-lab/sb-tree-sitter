@@ -703,6 +703,8 @@ SBTSSmalltalk class >> highlightQuery [
 (number) @number
 (string) @string
 (identifier) @variable
+(unary_message (identifier) @variable.part)
+(binary_operator) @variable.part
 (keyword) @variable.part
 ["^" "[" "]" "{" "}"] @important'
 ]
@@ -729,6 +731,13 @@ SBTSSmalltalk class >> rootRuleName [
 SBTSSmalltalk class >> statementContainerTypes [
 
 	^ #('method' 'block')
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> addIndent: aBlock [
+
+	(aBlock submorphIndex = 1 and: [aBlock owner type = 'keyword_message']) ifTrue: [^ true].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -772,6 +781,14 @@ SBTSSmalltalk >> postConfigure [
 
 	self blockInline: #('statement').
 	self noteUncapturedText: #('symbol' 'string')
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> softLineBreakBetween: aBlock and: anotherBlock [
+
+	(super softLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	anotherBlock type = 'keyword' ifTrue: [^ true].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
