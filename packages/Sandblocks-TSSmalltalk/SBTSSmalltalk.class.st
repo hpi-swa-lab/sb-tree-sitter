@@ -732,6 +732,15 @@ SBTSSmalltalk class >> statementContainerTypes [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSmalltalk >> declarationsInScope: aScopeBlock do: aClosure [
+
+	aScopeBlock childSandblocks do: [:block |
+		block type = #'block_argument' ifTrue: [aClosure value: (SBTSDeclaration block: block selector: block contents allButFirst label: 'block arg')].
+		block type = #temporaries ifTrue: [block childSandblocks do: [:temp | aClosure value: (SBTSDeclaration block: temp label: 'temporary')]].
+		(#(#'binary_selector' #'keyword_selector') includes: block type) ifTrue: [(block childSandblocks select: [:arg | arg type = #identifier]) do: [:arg | aClosure value: (SBTSDeclaration block: arg label: 'argument')]]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSmalltalk >> expressionTypes [
 
 	^ #('expression')
@@ -754,7 +763,7 @@ SBTSSmalltalk >> lowercaseSuggestionsFor: aBlock [
 
 	^ Array streamContents: [:stream |
 		self
-			scopesIn: aBlock
+			scopesAround: aBlock
 			do: [:scope :declarations | declarations do: [:decl | (decl contents sandblockMatch: aBlock contents) ifTrue: [stream nextPut: decl]]]]
 ]
 
@@ -763,21 +772,6 @@ SBTSSmalltalk >> postConfigure [
 
 	self blockInline: #('statement').
 	self noteUncapturedText: #('symbol' 'string')
-]
-
-{ #category : #'as yet unclassified' }
-SBTSSmalltalk >> scopesIn: aBlock do: aClosure [
-
-	| current |
-	current := aBlock.
-	[current notNil and: [current isTSBlock]] whileTrue: [
-		current isBlockBody ifTrue: [
-			aClosure value: current value: (Array streamContents: [:stream |
-				current childSandblocks do: [:block |
-					block type = #'block_argument' ifTrue: [stream nextPut: (SBSuggestionItem selector: block contents allButFirst label: 'block arg')].
-					block type = #temporaries ifTrue: [stream nextPutAll: (block childSandblocks collect: [:temp | SBSuggestionItem selector: temp contents label: 'temporary'])].
-					(#(#'binary_selector' #'keyword_selector') includes: block type) ifTrue: [stream nextPutAll: ((block childSandblocks select: [:arg | arg type = #identifier]) collect: [:arg | SBSuggestionItem selector: arg contents label: 'argument'])]]])].
-		current := current parentSandblock]
 ]
 
 { #category : #'as yet unclassified' }

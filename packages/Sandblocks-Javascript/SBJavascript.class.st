@@ -6793,7 +6793,17 @@ SBJavascript >> configure [
 	self noteUncapturedText: {'template_string'}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #semantics }
+SBJavascript >> declarationsInScope: aScopeBlock do: aClosure [
+
+	aScopeBlock type = 'function' ifTrue: [
+		aScopeBlock childSandblocksDo: [:block | ((block compatibleWithType: 'pattern') or: [block compatibleWithType: 'assignment_pattern']) ifTrue: [block allBlocksDo: [:b | b type = 'identifier' ifTrue: [aClosure value: (SBTSDeclaration block: b label: 'func arg')]]]].
+		self declarationsInScope: (aScopeBlock get: 'body') do: aClosure].
+	
+	(aScopeBlock type = 'statement_block' or: [aScopeBlock type = 'program']) ifTrue: [aScopeBlock childSandblocksDo: [:statement | statement type = 'lexical_declaration' ifTrue: [statement childSandblocksDo: [:declarator | aClosure value: (SBTSDeclaration block: (declarator get: 'name') label: 'lexical decl')]]]]
+]
+
+{ #category : #'configuration helpers' }
 SBJavascript >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
@@ -6801,13 +6811,13 @@ SBJavascript >> hardLineBreakBetween: aBlock and: anotherBlock [
 	^ #('statement_block' 'class_body') includes: anotherBlock type
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration helpers' }
 SBJavascript >> hardLineBreakMatch: aBlock [
 
 	^ (aBlock submorphAfter ifNotNil: #type) = 'statement_block' or: [(aBlock submorphAfter ifNotNil: #type) = 'class_body']
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration helpers' }
 SBJavascript >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 
 	(anotherBlock childOrNil ifNotNil: #type) = 'else_clause' ifTrue: [^ true].
@@ -6825,6 +6835,12 @@ SBJavascript >> inputTransitionBlackList [
 	"return a list of types that should not be considered during transitions, e.g. the typical C comma operator that just chains multiple expressions and thus yields mostly noise"
 
 	^ #(#'sequence_expression')
+]
+
+{ #category : #semantics }
+SBJavascript >> isScope: aBlock [
+
+	^ #('function' 'program' 'statement_block') includes: aBlock type
 ]
 
 { #category : #'as yet unclassified' }
@@ -6859,13 +6875,13 @@ SBJavascript >> preprocessGrammar [
 	(self grammar rules at: 'subscript_expression') content members first content: (JsonObject fromAssociations: {'type' -> 'SYMBOL'. 'name' -> 'expression'})
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBJavascript >> shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor [
 
 	^ (super shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor) or: [aTypeString = 'jsx_text' and: [aCursor text allSatisfy: [:c | c isSeparator]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration helpers' }
 SBJavascript >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 
 	(aBlock isTSLabel and: [aBlock contents = ':']) ifTrue: [^ true].

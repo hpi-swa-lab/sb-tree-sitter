@@ -214,6 +214,12 @@ SBGrammarLanguage >> configure [
 	
 ]
 
+{ #category : #semantics }
+SBGrammarLanguage >> declarationsInScope: aScopeBlock do: aClosure [
+
+	
+]
+
 { #category : #'as yet unclassified' }
 SBGrammarLanguage >> initialize [
 
@@ -240,6 +246,18 @@ SBGrammarLanguage >> initialize [
 	self postConfigure
 ]
 
+{ #category : #semantics }
+SBGrammarLanguage >> isIdentifier: aBlock [
+
+	^ aBlock type = 'identifier'
+]
+
+{ #category : #semantics }
+SBGrammarLanguage >> isScope: aBlock [
+
+	^ aBlock isBlockBody
+]
+
 { #category : #'as yet unclassified' }
 SBGrammarLanguage >> postConfigure [
 
@@ -261,10 +279,48 @@ SBGrammarLanguage >> preprocessGrammar [
 	
 ]
 
+{ #category : #semantics }
+SBGrammarLanguage >> resolveDeclaration: aBlock [
+
+	self scopesAround: aBlock do: [:scope :declarations |
+		declarations
+			detect: [:decl | decl contents = aBlock contents]
+			ifFound: [:decl | ^ decl block]].
+	^ nil
+]
+
 { #category : #'as yet unclassified' }
 SBGrammarLanguage >> runtime [
 
 	SBTSActiveRuntime value ifNotNil: [:runtime | runtime class language = self class ifTrue: [^ runtime]].
 	
 	^ self class defaultRuntimeClass ifNotNil: [:cl | cl new factory: self]
+]
+
+{ #category : #semantics }
+SBGrammarLanguage >> scopesAround: aBlock do: aClosure [
+
+	| current |
+	current := aBlock.
+	[current notNil and: [current isTSBlock]] whileTrue: [
+		(self isScope: current) ifTrue: [
+			aClosure
+				value: current
+				value: (Array streamContents: [:stream | self declarationsInScope: current do: [:decl | stream nextPut: decl]])].
+		current := current parentSandblock]
+]
+
+{ #category : #semantics }
+SBGrammarLanguage >> usagesOf: aBlock do: aClosure [
+
+	(self resolveDeclaration: aBlock) ifNotNil: [:declaration | (self usagesOfDeclaration: declaration) do: [:usage | aClosure value: usage]]
+]
+
+{ #category : #semantics }
+SBGrammarLanguage >> usagesOfDeclaration: aDeclaration [
+
+	self
+		scopesAround: aDeclaration
+		do: [:scope :declarations | ^ Array streamContents: [:stream | scope allBlocksDo: [:block | (block isTSBlock and: [(self isIdentifier: block) and: [block contents = aDeclaration contents]]) ifTrue: [stream nextPut: block]]]].
+	^ #()
 ]

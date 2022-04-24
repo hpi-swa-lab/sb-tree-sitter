@@ -640,6 +640,20 @@ SBTSBlock >> wantsInput [
 	^ false
 ]
 
+{ #category : #events }
+SBTSBlock >> wasDeselected [
+
+	super wasDeselected.
+	SBTSListener allSubclassesDo: [:listener | (listener matches: self) ifTrue: [listener wasDeselected: self]]
+]
+
+{ #category : #events }
+SBTSBlock >> wasSelected [
+
+	super wasSelected.
+	SBTSListener allSubclassesDo: [:listener | (listener matches: self) ifTrue: [listener wasSelected: self]]
+]
+
 { #category : #actions }
 SBTSBlock >> wrapWithWatch [
 	<action>
