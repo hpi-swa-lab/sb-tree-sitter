@@ -75,11 +75,19 @@ SBTSInputParser >> memoizationFor: aString ifPresent: aSuccessBlock ifAbsentPut:
 	dict := memoizations at: stream position + 1.
 	^ dict
 		at: aString
-		ifPresent: [:results | aSuccessBlock value: (results collect: [:p | p copy])]
-		ifAbsent: [ | results |
-			dict at: aString put: #recur.
+		ifPresent: [:results |
+			aSuccessBlock value: (results isLeftRecursion
+				ifTrue: [{}]
+				ifFalse: [results parsers collect: [:p | p copy]])]
+		ifAbsent: [ | results entry |
+			entry := SBTSMemoEntry new.
+			dict at: aString put: entry.
+			SBToggledCode
+				comment: ''
+				active: 0
+				do: {[(entry isLeftRecursion and: [entry leftRecursionDetected]) ifTrue: [self halt]]}.
 			results := aBlock value.
-			dict at: aString put: (results collect: [:p |
+			entry parsers: (results collect: [:p |
 				self assert: (p isKindOf: SBTSInputParser).
 				p copy]).
 			results]
@@ -135,14 +143,16 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 		block slot allSuperTypesDo: [:typeNode | | copy |
 			copy := block copyBlock.
 			copy slot trimNodesTo: typeNode.
-			(memoizations at: index) at: typeNode type put: {self copy addBlock: copy}]].
+			(memoizations at: index)
+				at: typeNode type
+				put: (SBTSMemoEntry new parsers: {self copy addBlock: copy})]].
 	anotherCollection doWithIndex: [:block :index |
 		block slot allSuperTypesDo: [:typeNode | | copy |
 			copy := block copyBlock.
 			copy slot trimNodesTo: typeNode.
 			(memoizations at: aCollection size + (aString size + index))
 				at: typeNode type
-				put: {self copy addBlock: copy}]].
+				put: (SBTSMemoEntry new parsers: {self copy addBlock: copy})]].
 	
 	^ self
 		normalizeResults: (((aTSBlock slot transitionRoot resultsFor: self) select: [:parser | parser atEnd]) collect: [:parser | parser blocks])

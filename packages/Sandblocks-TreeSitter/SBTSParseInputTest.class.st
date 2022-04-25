@@ -16,7 +16,7 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 { #category : #failures }
 SBTSParseInputTest >> expectedFailures [
 
-	^ #(#testAssignmentPattern #testCreateMemberExpression)
+	^ #(#testAssignmentPattern #testCreateMemberExpression #testRecursion #testCreateBinaryMessage)
 ]
 
 { #category : #helper }
@@ -136,6 +136,16 @@ SBTSParseInputTest >> testCreateBashCommand [
 		optionsForTemplate: (SBTSNodeSymbol new type: '_statement' factory: SBBash instance)
 		given: 'l'.
 	self assert: (results anySatisfy: [:blocks | blocks first type = 'command'])
+]
+
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testCreateBinaryMessage [
+
+	| results |
+	results := SBTSInputParser new
+		optionsForTemplate: (self nodeForRule: 'expression')
+		given: '2+'.
+	self assert: 1 equals: results size
 ]
 
 { #category : #'tests - create' }
@@ -296,6 +306,26 @@ SBTSParseInputTest >> testIdentifierToAssignment [
 	results := SBTSInputParser new optionsFor: stmt given: ':' before: {stmt} after: {}.
 	self assert: 1 equals: results size.
 	self assert: #assignment equals: results first first type
+]
+
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testRecursion [
+
+	| factory |
+	factory := SBTSTestLanguage new.
+	factory
+		add: 'expr'
+		rule: (SBTSNodeChoice new alternatives: {SBTSNodeSymbol new type: 'plus' factory: factory. SBTSNodeSymbol new type: 'number' factory: factory}).
+	factory add: 'number' rule: (SBTSNodeText new regexString: '[0-9]+').
+	factory add: 'plus' rule: (SBTSNodeSeq new elements: {
+		SBTSNodeSymbol new type: 'expr' factory: factory.
+		(SBTSNodeLabel new label: '+') factory: factory.
+		SBTSNodeSymbol new type: 'expr' factory: factory}).
+	
+	self halt.
+	self assert: 1 equals: (SBTSInputParser new
+		optionsForTemplate: (SBTSNodeSymbol new type: 'expr' factory: factory)
+		given: '1+2') size
 ]
 
 { #category : #'tests - wrap' }
