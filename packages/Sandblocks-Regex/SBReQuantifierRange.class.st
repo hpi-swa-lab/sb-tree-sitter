@@ -13,6 +13,12 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
+{ #category : #matchers }
+SBReQuantifierRange class >> newEmpty [
+
+	^ (SBRegex unknownFor: 'count_quantifier') applyReplacement
+]
+
 { #category : #accessing }
 SBReQuantifierRange >> build [
 	<lang: #regex match: '(count_quantifier

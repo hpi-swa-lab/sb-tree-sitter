@@ -13,16 +13,14 @@ Class {
 }
 
 { #category : #matchers }
-SBReLookaroundAssertion class >> matchRegex: aDictionary do: aBlock [
-	<lang: #regex match:
-'(lookahead_assertion
-	(pattern) @pattern
-) @assertion'>
+SBReLookaroundAssertion class >> newEmpty [
 
-	^ aBlock
-		value: (aDictionary at: 'assertion')
-		value: (self new pattern: (aDictionary at: 'pattern');
-						selectAssertionType: (aDictionary at: 'assertion') submorphs first submorphs second submorphs first contents)
+	^ SBToggledCode comment: '' active: 1 do: {
+		[ | block |
+			block := SBRegex parseExpression: '(?=x)'.
+			block lastDeepChild replaceBy: (SBRegex unknownFor: 'term').
+			block].
+		[(SBRegex unknownFor: 'lookahead_assertion') applyReplacement]}
 ]
 
 { #category : #accessing }

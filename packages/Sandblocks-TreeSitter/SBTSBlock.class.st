@@ -480,9 +480,11 @@ SBTSBlock >> query: aString capturesDo: aBlock [
 { #category : #query }
 SBTSBlock >> queryNode: aString [
 
-	self
-		assert: (self queryRecursiveFirstMatch: aString capturesDo: [:captures | ^ captures anyOne])
-		description: 'query did not match'
+	| element |
+	(self
+		queryRecursiveFirstMatch: aString
+		capturesDo: [:captures :block | element := captures ifEmpty: [block] ifNotEmpty: [captures anyOne]]) ifFalse: [^ self error: 'query did not match'].
+	^ element
 ]
 
 { #category : #query }
@@ -492,7 +494,7 @@ SBTSBlock >> queryRecursiveFirstMatch: aString capturesDo: aBlock [
 		block isTSBlock ifTrue: [ | captures |
 			captures := nil.
 			(SBTSQuery new execute: aString against: block capturesDo: [:cap | captures := cap]) ifTrue: [
-				aBlock value: captures.
+				aBlock cull: captures cull: block.
 				^ true]]].
 	^ false
 ]

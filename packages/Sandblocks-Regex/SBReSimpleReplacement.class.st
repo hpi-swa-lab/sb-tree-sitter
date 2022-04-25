@@ -14,6 +14,24 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
+{ #category : #'as yet unclassified' }
+SBReSimpleReplacement class >> anyCharacter [
+
+	^ (SBRegex unknownFor: 'any_character') applyReplacement
+]
+
+{ #category : #'as yet unclassified' }
+SBReSimpleReplacement class >> endAssertion [
+
+	^ (SBRegex unknownFor: 'end_assertion') applyReplacement
+]
+
+{ #category : #'as yet unclassified' }
+SBReSimpleReplacement class >> startAssertion [
+
+	^ (SBRegex unknownFor: 'start_assertion') applyReplacement
+]
+
 { #category : #initialize }
 SBReSimpleReplacement >> buildAnyCharacter [
 	<lang: #regex match: '(any_character)'>

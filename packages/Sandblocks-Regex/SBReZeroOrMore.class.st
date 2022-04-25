@@ -20,6 +20,12 @@ SBReZeroOrMore class >> matchRegex: aDictionary do: aBlock [
 			lazy: (aDictionary includesKey: 'lazy'))
 ]
 
+{ #category : #matchers }
+SBReZeroOrMore class >> newEmpty [
+
+	^ (SBRegex unknownFor: 'zero_or_more') applyReplacement
+]
+
 { #category : #initialization }
 SBReZeroOrMore >> build [
 	<lang: #regex match: '(zero_or_more

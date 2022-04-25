@@ -37,10 +37,9 @@ SBRePalette class >> addRule: aString to: aBuilder [
 SBRePalette class >> assertions [
 
 	^ {
-		[SBReLookaroundAssertion new].
+		[SBReLookaroundAssertion newEmpty].
 		[SBReSimpleReplacement startAssertion].
-		[SBReSimpleReplacement endAssertion].
-	}
+		[SBReSimpleReplacement endAssertion]}
 ]
 
 { #category : #building }
@@ -111,10 +110,7 @@ SBRePalette class >> buildToolsOn: aBuilder [
 { #category : #categories }
 SBRePalette class >> characterClasses [
 
-	^ {
-		[SBReSimpleReplacement anyCharacter].
-		[SBReCharacterClassEscape new].
-	}
+	^ {[SBReSimpleReplacement anyCharacter]. [SBReCharacterClassEscape newEmpty]}
 ]
 
 { #category : #properties }
@@ -126,13 +122,7 @@ SBRePalette class >> factory [
 { #category : #categories }
 SBRePalette class >> groups [
 
-	^ {
-		[SBReNamedCapturingGroup new].
-		[SBInlineBlockSymbol new
-			type: 'anonymous_capturing_group'
-			factory: self factory instance
-			block: (self factory build: 'anonymous_capturing_group')].
-	}
+	^ {[SBReNamedCapturingGroup newEmpty]. [SBRegex unknownFor: 'anonymous_capturing_group']}
 ]
 
 { #category : #properties }
@@ -145,12 +135,11 @@ SBRePalette class >> language [
 SBRePalette class >> quantifier [
 
 	^ {
-		[SBReOptional new].
-		[SBReZeroOrMore new].
-		[SBReOneOrMore new].
-		[SBReExactQuantifier new].
-		[SBReQuantifierRange new].
-	}
+		[SBReOptional newEmpty].
+		[SBReZeroOrMore newEmpty].
+		[SBReOneOrMore newEmpty].
+		[SBReExactQuantifier newEmpty].
+		[SBReQuantifierRange newEmpty]}
 ]
 
 { #category : #categories }
@@ -163,7 +152,6 @@ SBRePalette class >> rules [
 SBRePalette class >> tools [
 
 	^ {
-		[SBReComment new].
-		[SBReEvaluator new].
-	}
+		[SBReComment newAround: (SBRegex unknownFor: 'term')].
+		[SBReEvaluator newAround: (SBRegex unknownFor: 'term')]}
 ]

@@ -15,13 +15,9 @@ Class {
 }
 
 { #category : #matchers }
-SBReCharacterClassEscape class >> matchRegex: aDictionary do: aBlock [
-	<lang: #regex match:
-'(character_class_escape) @class'>
+SBReCharacterClassEscape class >> newEmpty [
 
-	^ aBlock 
-		value: (aDictionary at: 'class')
-		value: (self new selectCharacterClass: (aDictionary at: 'class') contents)
+	^ (SBRegex parseExpression: '\d') childSandblocks first applyReplacement
 ]
 
 { #category : #accessing }

@@ -696,3 +696,35 @@ SBTSBlockTest >> testTypingClosure [
 	self assert: 'pattern' equals: editor cursor cursorPosition command element alternatives first type.
 	self assert: #insert equals: editor cursor mode
 ]
+
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testVerticalPositions [
+
+	| program editor queue lastPos |
+	program := SBTSFileParser new
+		parse: 'x
+function(arg)
+{
+	first
+	second
+	third
+}
+last'
+		language: SBJavascript.
+	editor := self editorFor: program.
+	
+	program lastDeepChild select.
+	queue := {
+		program queryNode: '(identifier) ="x"'.
+		program queryNode: '(function)'.
+		program queryNode: '(identifier) ="first"'.
+		program queryNode: '(identifier) ="second"'.
+		program queryNode: '(identifier) ="third"'.
+		program queryNode: '(identifier) ="last"'} reversed readStream.
+	lastPos := nil.
+	[queue atEnd] whileFalse: [
+		queue peek = editor selection ifTrue: [queue next].
+		editor cursor moveCursorUp.
+		lastPos = editor cursor cursorPosition ifTrue: [self error: 'reached top without visiting all block'].
+		lastPos := editor cursor cursorPosition]
+]

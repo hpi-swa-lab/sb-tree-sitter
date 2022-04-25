@@ -7,18 +7,10 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #matchers }
-SBReNamedCapturingGroup class >> matchRegex: aDictionary do: aBlock [
-	<lang: #regex match:
-'(named_capturing_group
-	(group_name) @name
-	(pattern) @pattern
-) @group'>
+{ #category : #build }
+SBReNamedCapturingGroup class >> newEmpty [
 
-	^ aBlock
-		value: (aDictionary at: 'group')
-		value: (self new pattern: (aDictionary at: 'pattern');
-						name: ((aDictionary at: 'name') submorphs first contents))
+	^ (SBRegex unknownFor: 'named_capturing_group') applyReplacement
 ]
 
 { #category : #printing }

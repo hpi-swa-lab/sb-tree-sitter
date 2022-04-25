@@ -24,14 +24,14 @@ Class {
 { #category : #helpers }
 SBReEncodedReplacement class >> newAround: aBlock [
 
-	| regex |
+	| regex command |
 	regex := (SBTSFileParser new
 		parse: ('(?:(?:{1}:)\{0\}(?:x))' format: {self name})
 		language: SBRegex) childSandblocks first childSandblocks first.
-	aBlock sandblockEditor do: (SBCombinedCommand newWith: {
-		SBReplaceCommand new target: aBlock replacer: regex.
-		SBReplaceCommand new target: regex lastDeepChild replacer: aBlock.
-		regex applyReplacementCommand})
+	command := SBCombinedCommand newWith: (aBlock owner ifNotNil: {SBReplaceCommand new target: aBlock replacer: regex} ifNil: [{}]), {SBReplaceCommand new target: regex lastDeepChild replacer: aBlock. regex applyReplacementCommand}.
+	^ aBlock sandblockEditor
+		ifNotNil: [aBlock sandblockEditor do: command]
+		ifNil: [command do]
 ]
 
 { #category : #helpers }

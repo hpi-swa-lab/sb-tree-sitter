@@ -16,7 +16,15 @@ SBReExactQuantifier class >> isRange: aDictionary [
 { #category : #tests }
 SBReExactQuantifier class >> isZero: aDictionary [
 
-	^ (aDictionary at: 'value') contents asNumber = 0
+	^ (aDictionary at: 'value') contents
+		ifNotEmpty: [:c | c asNumber = 0]
+		ifEmpty: [false]
+]
+
+{ #category : #matchers }
+SBReExactQuantifier class >> newEmpty [
+
+	^ (SBRegex unknownFor: 'count_quantifier') applyReplacement
 ]
 
 { #category : #initialization }

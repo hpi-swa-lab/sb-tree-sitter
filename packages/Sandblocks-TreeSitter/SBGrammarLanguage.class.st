@@ -178,6 +178,18 @@ SBGrammarLanguage class >> toplevel [
 ]
 
 { #category : #'as yet unclassified' }
+SBGrammarLanguage class >> unknownFor: aSymbol [
+
+	| morphs |
+	morphs := (self instance bodyNodeForRule: aSymbol) buildEmpty.
+	(morphs size = 1 and: [morphs first isUnknown]) ifTrue: [^ morphs anyOne].
+	^ SBTSBlock new
+		slot: (SBTSSlot new addNode: (SBTSNodeSymbol new type: aSymbol factory: self instance));
+		addAllMorphs: morphs;
+		yourself
+]
+
+{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> updateFrom: aGithubString branch: aString [
 
 	| path grammarFile highlightsFile |

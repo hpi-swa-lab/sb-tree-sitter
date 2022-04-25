@@ -7,6 +7,12 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
+{ #category : #matchers }
+SBReOptional class >> newEmpty [
+
+	^ (SBRegex unknownFor: 'optional') applyReplacement
+]
+
 { #category : #initialization }
 SBReOptional >> build [
 	<lang: #regex match: '(optional

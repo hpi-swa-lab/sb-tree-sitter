@@ -30,7 +30,9 @@ SBTSReplacementBlock class >> match: aBlock against: aTSQuery buildSelector: aSy
 				morphs: captures values commonOwner: block root;
 				notePositions;
 				yourself.
-			(block perform: aSymbol) ifNotNil: [:b | ^ SBCombinedCommand newWith: {restore. SBReplaceCommand new target: b root replacer: b}]]].
+			(block perform: aSymbol) ifNotNil: [:b | | replaceCmd |
+				replaceCmd := SBReplaceCommand new target: b root replacer: b.
+				^ SBCombinedCommand newWith: {restore}, (b root owner ifNotNil: [{replaceCmd}] ifNil: [{SBDoItCommand new do: [b]}])]]].
 	^ nil
 ]
 

@@ -28,7 +28,7 @@ SBReNumberInput >> canDrag [
 { #category : #accessing }
 SBReNumberInput >> contents: aString [
 
-	aString asNumber negative
+	(aString isEmpty or: [aString asNumber negative])
 		ifTrue: [self contents: 0 asString]
 		ifFalse: [super contents: aString asInteger asString]
 ]
