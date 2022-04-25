@@ -25,12 +25,7 @@ SBRePalette class >> addAllRules: aCollection to: aBuilder [
 { #category : #private }
 SBRePalette class >> addRule: aString to: aBuilder [
 
-	| block |
-	block := SBInlineBlockSymbol new
-		type: aString
-		factory: self factory instance
-		block: (self factory build: aString).
-	aBuilder addBlock: aString as: block
+	aBuilder addBlock: aString as: (SBRegex unknownFor: aString)
 ]
 
 { #category : #categories }
@@ -144,8 +139,8 @@ SBRePalette class >> quantifier [
 
 { #category : #categories }
 SBRePalette class >> rules [
-	
-	^ self factory grammarJsonObject rules keys
+
+	^ self factory grammarJsonObject rules keys select: [:type | (SBRegex instance bodyNodeForRule: type ifAbsent: [nil]) notNil]
 ]
 
 { #category : #categories }

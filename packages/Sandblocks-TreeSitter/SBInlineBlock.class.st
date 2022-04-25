@@ -363,7 +363,7 @@ SBInlineBlock >> containsEqual: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> convertedFor: anInterfaceCollection do: aBlock [
 
-	anInterfaceCollection first = #isInlineBlock ifTrue: [
+	(anInterfaceCollection notEmpty and: [anInterfaceCollection first = #isInlineBlock]) ifTrue: [
 		self factory name = anInterfaceCollection last factory name ifFalse: [^ super convertedFor: anInterfaceCollection do: aBlock].
 		^ (SBTSRuleExplore new
 			explore: (anInterfaceCollection last isUnknown ifTrue: [anInterfaceCollection last template] ifFalse: [anInterfaceCollection last])
@@ -1195,7 +1195,7 @@ SBInlineBlock >> repeaterChildThat: aBlock [
 { #category : #'as yet unclassified' }
 SBInlineBlock >> satisfies: aCollection [
 
-	^ (aCollection first = #isInlineBlock and: [aCollection second = SBInterfaces never])
+	^ (aCollection notEmpty and: [aCollection first = #isInlineBlock and: [aCollection second = SBInterfaces never]])
 		ifTrue: [true]
 		ifFalse: [super satisfies: aCollection]
 ]
