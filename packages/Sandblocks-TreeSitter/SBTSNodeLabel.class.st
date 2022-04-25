@@ -137,7 +137,7 @@ SBTSNodeLabel >> regex [
 { #category : #parsing }
 SBTSNodeLabel >> resultsFor: aParser [
 
-	| labelStream oldPosition newParser |
+	| labelStream oldPosition |
 	labelStream := self label readStream.
 	oldPosition := aParser position.
 	[aParser atEnd or: [(aParser peek = (Character value: 0) and: [labelStream position > 0]) or: [labelStream atEnd]]] whileFalse: [
@@ -145,9 +145,8 @@ SBTSNodeLabel >> resultsFor: aParser [
 			aParser position: oldPosition.
 			^ {}]].
 	
-	newParser := aParser copy.
-	[newParser peek = $ ] whileTrue: [newParser next].
-	^ {newParser addBlock: (self buildMorphWith: self label slot: (SBTSSlot new addNode: self))}
+	[aParser peek = $ ] whileTrue: [aParser next].
+	^ {aParser addBlock: (self buildMorphWith: self label slot: (SBTSSlot new addNode: self))}
 ]
 
 { #category : #parsing }

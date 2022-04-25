@@ -138,16 +138,15 @@ because the stored, nested parser does not have a valid stream "
 						aParser next.
 						{aParser}]
 					ifFalse: [results]]]
-		ifAbsentPut: [ | results currentBlocks |
+		ifAbsentPut: [ | currentBlocks |
 			currentBlocks := aParser blocks.
 			aParser blocks: OrderedCollection new.
 			
-			results := self bodyTemplate resultsFor: aParser.
-			results
+			(self bodyTemplate resultsFor: aParser)
 				ifEmpty: [
 					aParser blocks: currentBlocks.
 					{}]
-				ifNotEmpty: [
+				ifNotEmpty: [:results |
 					results collect: [:result |
 						self isInlined
 							ifTrue: [
@@ -158,7 +157,7 @@ because the stored, nested parser does not have a valid stream "
 								result blocks: (currentBlocks copy
 									add: (SBTSBlock new
 										slot: (SBTSSlot new addNode: self);
-										addAllMorphs: (result blocks collect: [:b | b copyBlock]));
+										addAllMorphs: result blocks);
 									yourself)]]]]
 ]
 

@@ -98,7 +98,7 @@ SBTSNodeSeq >> resultsFor: aParser [
 	
 	^ Array streamContents: [:stream | | reportResultsBlock |
 		reportResultsBlock := [:parser :index | | newResults |
-			newResults := (self elements at: index) resultsFor: parser copy.
+			newResults := (self elements at: index) resultsFor: parser.
 			index = self elements size
 				ifTrue: [stream nextPutAll: newResults]
 				ifFalse: [

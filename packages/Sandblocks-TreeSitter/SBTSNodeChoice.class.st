@@ -79,10 +79,7 @@ SBTSNodeChoice >> printOn: aStream [
 { #category : #parsing }
 SBTSNodeChoice >> resultsFor: aParser [
 
-	^ Array streamContents: [:stream |
-		self alternatives do: [:alt | | parserCopy |
-			parserCopy := aParser copy.
-			(alt resultsFor: parserCopy) do: [:result | stream nextPut: result]]]
+	^ self alternatives gather: [:alt | alt resultsFor: aParser copy]
 ]
 
 { #category : #parsing }
