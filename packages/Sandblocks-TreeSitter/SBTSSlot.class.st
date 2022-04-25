@@ -174,6 +174,7 @@ SBTSSlot >> mergeWith: aSlot [
 SBTSSlot >> needsParenthesis: aBlock [
 
 	| mine parent recursiveType parentSlot cmp |
+	aBlock parentSandblock isTSBlock ifFalse: [^ false].
 	parentSlot := aBlock parentSandblock slot.
 	recursiveType := (self lastCommonAncestorWith: parentSlot) ifNil: [^ false].
 	self flag: #todo.

@@ -208,6 +208,14 @@ SBTSBlock >> deleteCommandFor: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> drawnColor [
+
+	^ self prefersNoBorder
+		ifTrue: [super drawnColor alpha: 0]
+		ifFalse: [super drawnColor]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> evaluate [
 
 	^ self factory runtime evaluate: self sourceString
@@ -636,6 +644,12 @@ SBTSBlock >> valid [
 	^ self currentTextMorph
 		ifNotNil: [:t | t slot firstNode validFor: t contents]
 		ifNil: [true]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> wantsExtraSpace [
+
+	^ self slot needsParenthesis: self
 ]
 
 { #category : #'as yet unclassified' }

@@ -703,7 +703,7 @@ SBTSSmalltalk class >> highlightQuery [
 (number) @number
 (string) @string
 (identifier) @variable
-(unary_message (identifier) @variable.part)
+(unary_message (_) (identifier) @variable.part)
 (binary_operator) @variable.part
 (keyword) @variable.part
 ["^" "[" "]" "{" "}"] @important'
