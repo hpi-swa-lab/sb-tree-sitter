@@ -140,6 +140,41 @@ SBTSParseFileTest >> testNodesAreShared [
 	self assert: a childSandblocks first slot firstNode equals: b childSandblocks first slot firstNode
 ]
 
+{ #category : #'tests - print parentheses' }
+SBTSParseFileTest >> testParensJsBinaryOp [
+
+	| source module |
+	source := '(3+4)*5'.
+	module := SBTSFileParser new parse: source language: SBJavascript.
+	self editorFor: module.
+	(module queryNode: '(parenthesized_expression (expression) @)') deleteAround.
+	self assert: source equals: module sourceString
+]
+
+{ #category : #'tests - print parentheses' }
+SBTSParseFileTest >> testParensStBinaryOp [
+
+	| source module |
+	source := 'a
+2+(3+4)'.
+	module := SBTSFileParser new parse: source language: SBTSSmalltalk.
+	self editorFor: module.
+	(module queryNode: '(parenthesized_expression (expression) @)') deleteAround.
+	self assert: source equals: module sourceString
+]
+
+{ #category : #'tests - print parentheses' }
+SBTSParseFileTest >> testParensStKeyword [
+
+	| source module |
+	source := 'a
+2 raisedTo:(3 raisedTo:4)'.
+	module := SBTSFileParser new parse: source language: SBTSSmalltalk.
+	self editorFor: module.
+	(module queryNode: '(parenthesized_expression (expression) @)') deleteAround.
+	self assert: source equals: module sourceString
+]
+
 { #category : #'tests - unit' }
 SBTSParseFileTest >> testParse [
 
@@ -263,6 +298,17 @@ SBTSParseFileTest >> testPythonDecorators [
 	source := '@staticmethod
 @abc
 def a():
+	pass'.
+	self
+		assert: source
+		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testPythonFunction [
+
+	| source |
+	source := 'def a(b,c):
 	pass'.
 	self
 		assert: source

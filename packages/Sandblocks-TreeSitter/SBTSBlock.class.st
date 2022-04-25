@@ -369,7 +369,7 @@ SBTSBlock >> layoutCommands [
 			self children ifNotEmpty: [stream nextPut: self lastSubmorph layoutCommands]])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #query }
 SBTSBlock >> matchesQuery: aString [
 
 	^ SBTSQuery new execute: aString against: self capturesDo: [:b | ]
@@ -471,13 +471,21 @@ SBTSBlock >> promptTransition [
 	SBTSDisambiguatePopup new for: self input: '' before: ActiveEvent shiftPressed
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #query }
 SBTSBlock >> query: aString capturesDo: aBlock [
 
 	^ SBTSQuery new execute: aString against: self capturesDo: aBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #query }
+SBTSBlock >> queryNode: aString [
+
+	self
+		assert: (self queryRecursiveFirstMatch: aString capturesDo: [:captures | ^ captures anyOne])
+		description: 'query did not match'
+]
+
+{ #category : #query }
 SBTSBlock >> queryRecursiveFirstMatch: aString capturesDo: aBlock [
 
 	self allBlocksDo: [:block |
