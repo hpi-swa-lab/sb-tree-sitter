@@ -322,7 +322,6 @@ SBTSParseInputTest >> testRecursion [
 		(SBTSNodeLabel new label: '+') factory: factory.
 		SBTSNodeSymbol new type: 'expr' factory: factory}).
 	
-	self halt.
 	self assert: 1 equals: (SBTSInputParser new
 		optionsForTemplate: (SBTSNodeSymbol new type: 'expr' factory: factory)
 		given: '1+2') size

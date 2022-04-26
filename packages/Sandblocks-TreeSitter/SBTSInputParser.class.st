@@ -64,29 +64,32 @@ SBTSInputParser >> initialize [
 ]
 
 { #category : #memo }
-SBTSInputParser >> memoizationFor: aString ifPresent: aSuccessBlock ifAbsentPut: aBlock [
+SBTSInputParser >> memoizationFor: aSymbol ifPresent: aSuccessBlock ifAbsentPut: aBlock [
 
 	| dict |
-	((visitedSupertypes includes: aString) and: [stream peek = (Character value: 0)]) ifTrue: [
-		visitedSupertypes remove: aString.
+	((visitedSupertypes includes: aSymbol type) and: [stream peek = (Character value: 0)]) ifTrue: [
+		visitedSupertypes remove: aSymbol type.
 		"TODO: can we write this back?"
 		^ aBlock value].
 	
 	dict := memoizations at: stream position + 1.
 	^ dict
-		at: aString
+		at: aSymbol type
 		ifPresent: [:results |
 			aSuccessBlock value: (results isLeftRecursion
-				ifTrue: [{}]
+				ifTrue: [
+					results setLeftRecursionDetected.
+					{}]
 				ifFalse: [results parsers collect: [:p | p copy]])]
 		ifAbsent: [ | results entry |
 			entry := SBTSMemoEntry new.
-			dict at: aString put: entry.
-			SBToggledCode
-				comment: ''
-				active: 0
-				do: {[(entry isLeftRecursion and: [entry leftRecursionDetected]) ifTrue: [self halt]]}.
+			dict at: aSymbol type put: entry.
 			results := aBlock value.
+			SBToggledCode comment: '' active: 0 do: {
+				[
+					(entry isLeftRecursion and: [entry leftRecursionDetected and: [results notEmpty]]) ifTrue: [ | recursive |
+						results first stream position: stream position.
+						recursive := aSymbol bodyTemplate resultsFor: results first]]}.
 			entry parsers: (results collect: [:p |
 				self assert: (p isKindOf: SBTSInputParser).
 				p copy]).

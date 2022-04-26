@@ -125,7 +125,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 		^ {aParser addEmptyBlocks: self buildEmpty}].
 	
 	^ aParser
-		memoizationFor: self type
+		memoizationFor: self
 		ifPresent: [:results |
 			" we may not actually ever want left-recursion, because these blocks will be composed of a wrapper block and a basic block, and we always want to choose the basic block and offer the user to expand the basic block to the more complicated construct. "
 			(results = #recur or: [results isEmpty]) ifTrue: [{}] ifFalse: [
