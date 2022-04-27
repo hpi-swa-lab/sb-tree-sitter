@@ -16,7 +16,7 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 { #category : #failures }
 SBTSParseInputTest >> expectedFailures [
 
-	^ #(#testAssignmentPattern #testCreateMemberExpression #testRecursion #testCreateBinaryMessage)
+	^ #(#testAssignmentPattern #testCreateMemberExpression #testDirectRecursion #testIndirectRecursion #testCreateBinaryMessage)
 ]
 
 { #category : #helper }
@@ -298,6 +298,24 @@ SBTSParseInputTest >> testDenyNumber [
 	self assert: 0 equals: results size
 ]
 
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testDirectRecursion [
+
+	| factory |
+	factory := SBTSTestLanguage new.
+	factory add: 'expr' rule: (SBTSNodeChoice new alternatives: {
+		SBTSNodeSeq new elements: {
+			SBTSNodeSymbol new type: 'expr' factory: factory.
+			(SBTSNodeLabel new label: '+') factory: factory.
+			SBTSNodeSymbol new type: 'number' factory: factory}.
+		SBTSNodeSymbol new type: 'number' factory: factory}).
+	factory add: 'number' rule: (SBTSNodeText new regexString: '[0-9]+').
+	
+	self assert: 1 equals: (SBTSInputParser new
+		optionsForTemplate: (SBTSNodeSymbol new type: 'expr' factory: factory)
+		given: '1+2') size
+]
+
 { #category : #'tests - wrap' }
 SBTSParseInputTest >> testIdentifierToAssignment [
 
@@ -309,7 +327,7 @@ SBTSParseInputTest >> testIdentifierToAssignment [
 ]
 
 { #category : #'tests - create' }
-SBTSParseInputTest >> testRecursion [
+SBTSParseInputTest >> testIndirectRecursion [
 
 	| factory |
 	factory := SBTSTestLanguage new.

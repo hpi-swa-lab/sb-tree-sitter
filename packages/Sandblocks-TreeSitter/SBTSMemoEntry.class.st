@@ -42,6 +42,22 @@ SBTSMemoEntry >> parsers: aCollection [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSMemoEntry >> printOn: aStream [
+
+	aStream nextPutAll: self className.
+	self isLeftRecursion
+		ifTrue: [
+			aStream nextPutAll: (self leftRecursionDetected
+				ifTrue: ['(recurDetected)']
+				ifFalse: ['(recurMarker)'])]
+		ifFalse: [
+			aStream
+				nextPut: $(;
+				print: self parsers;
+				nextPut: $)]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSMemoEntry >> setLeftRecursionDetected [
 
 	self assert: self isLeftRecursion.
