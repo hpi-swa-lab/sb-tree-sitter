@@ -53,5 +53,5 @@ SBTSMemoEntry >> printOn: aStream [
 SBTSMemoEntry >> setLeftRecursionDetectedFrom: aSymbol stack: aCollection [
 
 	self assert: self isLeftRecursion.
-	answer head: {aSymbol type. {}. {}}
+	answer head: {aSymbol type. (aCollection reversed copyUpTo: aSymbol type) reversed. {}}
 ]

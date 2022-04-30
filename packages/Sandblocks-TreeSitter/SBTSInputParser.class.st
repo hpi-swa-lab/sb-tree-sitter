@@ -116,8 +116,7 @@ SBTSInputParser >> memoizationFor: aSymbol ifPresent: aSuccessBlock ifAbsentPut:
 					[
 						lr head at: 3 put: lr head second copy.
 						results first stream position: index.
-						recurResults := aSymbol bodyTemplate resultsFor: results first] doWhileTrue: ["todo position advanced"
-					recurResults notEmpty and: [recurResults first stream position <= index]].
+						recurResults := aSymbol bodyTemplate resultsFor: results first] doWhileTrue: [recurResults notEmpty and: [recurResults first stream position <= index]].
 					activeRecursion at: index + 1 put: nil.
 					recurResults]
 				ifFalse: [results]]
