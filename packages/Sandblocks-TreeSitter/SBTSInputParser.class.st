@@ -5,7 +5,9 @@ Class {
 		'stream',
 		'memoizations',
 		'visitedSupertypes',
-		'blocks'
+		'blocks',
+		'symbolStack',
+		'activeRecursion'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -66,7 +68,7 @@ SBTSInputParser >> initialize [
 { #category : #memo }
 SBTSInputParser >> memoizationFor: aSymbol ifPresent: aSuccessBlock ifAbsentPut: aBlock [
 
-	| dict index |
+	| dict index recursion |
 	((visitedSupertypes includes: aSymbol type) and: [stream peek = (Character value: 0)]) ifTrue: [
 		visitedSupertypes remove: aSymbol type.
 		"TODO: can we write this back?"
@@ -74,27 +76,49 @@ SBTSInputParser >> memoizationFor: aSymbol ifPresent: aSuccessBlock ifAbsentPut:
 	
 	index := stream position.
 	dict := memoizations at: index + 1.
+	recursion := activeRecursion at: index + 1.
+	
 	^ dict
 		at: aSymbol type
 		ifPresent: [:results |
 			aSuccessBlock value: (results isLeftRecursion
 				ifTrue: [
-					SBToggledCode comment: '' active: 1 do: {[results setLeftRecursionDetected]}.
+					SBToggledCode
+						comment: ''
+						active: 0
+						do: {[results setLeftRecursionDetectedFrom: aSymbol stack: symbolStack]}.
 					{}]
 				ifFalse: [results parsers collect: [:p | p copy]])]
-		ifAbsent: [ | results entry startGrowingSeed |
-			entry := SBTSMemoEntry new.
+		ifAbsent: [ | results entry startGrowingSeed lr |
+			recursion ifNotNil: [
+				((recursion second includes: aSymbol type) not and: [aSymbol type ~= recursion first]) ifTrue: [^ {}].
+				(recursion third includes: aSymbol type) ifTrue: [
+					recursion third remove: aSymbol type.
+					^ aBlock value]].
+			
+			lr := SBTSRecursion new.
+			entry := SBTSMemoEntry new parsers: lr.
 			dict at: aSymbol type put: entry.
+			symbolStack add: aSymbol type.
 			results := aBlock value.
+			symbolStack removeLast.
+			
 			startGrowingSeed := SBToggledCode
 				comment: ''
-				active: 1
+				active: 2
 				do: {[false]. [entry isLeftRecursion and: [entry leftRecursionDetected and: [results notEmpty]]]}.
 			entry parsers: (results collect: [:p | p copy]).
 			startGrowingSeed
-				ifTrue: [ | recursive |
-					results first stream position: index.
-					recursive := aSymbol bodyTemplate resultsFor: results first]
+				ifTrue: [ | recurResults |
+					lr seed: entry parsers.
+					"grow lr"
+					activeRecursion at: index + 1 put: lr head.
+					[
+						lr head at: 3 put: lr head second copy.
+						results first stream position: index.
+						recurResults := aSymbol bodyTemplate resultsFor: results first] doWhileTrue: ["todo position advanced"
+					recurResults notEmpty].
+					activeRecursion at: index + 1 put: nil]
 				ifFalse: [results]]
 ]
 
@@ -139,6 +163,8 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 
 	stream := ((aCollection collect: [:i | Character value: 0] as: String), (aString, (anotherCollection collect: [:i | Character value: 0] as: String))) readStream.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
+	activeRecursion := Array new: stream originalContents size withAll: nil.
+	symbolStack := OrderedCollection new.
 	
 	aCollection ifNotEmpty: [
 		aCollection first slot allSuperTypesDo: [:typeNode | "if our nested element (char0) is at the start, we would immediately abort expanding instead of recursing. instead, allow one level of recursion for each type node that is above our nested element."
@@ -168,6 +194,8 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 SBTSInputParser >> optionsForTemplate: aNode given: aString [
 
 	stream := aString readStream.
+	activeRecursion := Array new: aString size withAll: nil.
+	symbolStack := OrderedCollection new.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
 	^ self
 		normalizeResults: (((aNode resultsFor: self) select: [:parser | parser atEnd]) collect: [:parser | parser blocks])
@@ -199,6 +227,8 @@ SBTSInputParser >> postCopy [
 	stream := (ReadStream on: stream contents)
 		position: stream position;
 		yourself.
+	symbolStack := symbolStack copy.
+	activeRecursion := activeRecursion collect: [:r | r copy].
 	visitedSupertypes := visitedSupertypes copy.
 	blocks := blocks collect: [:block | block copyBlock]
 ]

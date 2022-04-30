@@ -8,24 +8,16 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSMemoEntry >> initialize [
-
-	super initialize.
-	
-	answer := false
-]
-
-{ #category : #'as yet unclassified' }
 SBTSMemoEntry >> isLeftRecursion [
 
-	^ answer isBoolean
+	^ answer class = SBTSRecursion
 ]
 
 { #category : #'as yet unclassified' }
 SBTSMemoEntry >> leftRecursionDetected [
 
 	self assert: self isLeftRecursion.
-	^ answer
+	^ answer head notNil
 ]
 
 { #category : #'as yet unclassified' }
@@ -58,8 +50,8 @@ SBTSMemoEntry >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSMemoEntry >> setLeftRecursionDetected [
+SBTSMemoEntry >> setLeftRecursionDetectedFrom: aSymbol stack: aCollection [
 
 	self assert: self isLeftRecursion.
-	answer := true
+	answer head: {aSymbol type. {}. {}}
 ]
