@@ -1,7 +1,7 @@
 Class {
 	#name : #SBTSParseInputTest,
 	#superclass : #SBTest,
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Parser'
 }
 
 { #category : #helper }

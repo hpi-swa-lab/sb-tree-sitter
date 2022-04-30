@@ -1,7 +1,7 @@
 Class {
 	#name : #SBTSParseFileTest,
 	#superclass : #SBTest,
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Parser'
 }
 
 { #category : #failures }

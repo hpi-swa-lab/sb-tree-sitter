@@ -5,7 +5,7 @@ Class {
 		'seed',
 		'head'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Parser'
 }
 
 { #category : #'as yet unclassified' }

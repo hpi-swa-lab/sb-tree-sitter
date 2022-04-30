@@ -5,7 +5,7 @@ Class {
 		'stream',
 		'slots'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Parser'
 }
 
 { #category : #'as yet unclassified' }
