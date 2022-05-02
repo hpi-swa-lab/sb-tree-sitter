@@ -433,6 +433,15 @@ SBTSBlock >> prefixValid [
 		ifNil: [true]
 ]
 
+{ #category : #accessing }
+SBTSBlock >> prettySourceString [
+
+	self allBlocksDo: [:b | b valid ifFalse: [^ self sourceString]].
+	^ self factory runtime
+		ifNotNil: [:r | r prettyPrint: self sourceString]
+		ifNil: [self sourceString]
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> printOn: aStream [
 

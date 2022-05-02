@@ -149,6 +149,12 @@ SBTSLabel >> sourceStringForCompare [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> submorphIndex [
+
+	^ self owner submorphs indexOf: self
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> wrapOffscreen: anEditor [
 
 	
