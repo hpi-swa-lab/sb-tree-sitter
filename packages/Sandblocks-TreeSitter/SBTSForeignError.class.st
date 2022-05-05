@@ -25,7 +25,8 @@ SBTSForeignError >> defaultAction [
 
 	Project current uiManager
 		edit: self contents
-		label: ('[Error from: {1}]' format: {self source})
+		label: ('[Error from: {1}]' format: {self source}).
+	^ ''
 ]
 
 { #category : #'as yet unclassified' }

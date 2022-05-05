@@ -56,5 +56,7 @@ SBTSBlockSuggestion >> target: aBlock [
 { #category : #'as yet unclassified' }
 SBTSBlockSuggestion >> useSuggestionOn: aBlock in: anEditor [
 
-	disambiguatePopup applyChoice: blocks
+	disambiguatePopup
+		ifNotNil: [:popup | popup applyChoice: blocks]
+		ifNil: [anEditor do: (SBReplaceMultipleCommand new target: aBlock replacers: blocks)]
 ]

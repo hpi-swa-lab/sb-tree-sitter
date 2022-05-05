@@ -146,6 +146,12 @@ SBTSNodeRepeat >> required [
 	^ required
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeRepeat >> required: aBoolean [
+
+	required := aBoolean
+]
+
 { #category : #parsing }
 SBTSNodeRepeat >> resultsFor: aParser [
 

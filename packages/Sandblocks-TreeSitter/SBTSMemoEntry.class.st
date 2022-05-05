@@ -21,6 +21,13 @@ SBTSMemoEntry >> leftRecursionDetected [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSMemoEntry >> lr [
+
+	self assert: self isLeftRecursion.
+	^ answer
+]
+
+{ #category : #'as yet unclassified' }
 SBTSMemoEntry >> parsers [
 
 	self assert: self isLeftRecursion not.

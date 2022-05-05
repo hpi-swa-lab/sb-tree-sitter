@@ -8,7 +8,7 @@ Class {
 		'delimitedRepeats',
 		'aliasOccurrences'
 	],
-	#category : #'Sandblocks-TreeSitter'
+	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
 { #category : #cleaning }
@@ -49,6 +49,16 @@ SBTSGrammar >> autofixExternals: aGrammar [
 			ifAbsent: [rules at: external value put: (SBTSNodeLabel new label: external value)]].
 	
 	(externals reject: [:external | rules includesKey: external]) ifNotEmpty: [:missing | UIManager default inform: 'Missing declarations for: ', (missing joinSeparatedBy: ', ')]
+]
+
+{ #category : #cleaning }
+SBTSGrammar >> blanksToOptionals: aRule [
+	"(A|_BLANK_) -> A?"
+
+	aRule allChildrenDo: [:node |
+		(node isTSChoice and: [node elements size = 2 and: [node elements second isTSBlank]]) ifTrue: [
+			node replaceBy: node elements second.
+			node elements second required: true]]
 ]
 
 { #category : #accessing }
@@ -104,10 +114,12 @@ SBTSGrammar >> buildNodesFor: anObject [
 			multiple: true required: true element: (self buildNodesFor: anObject content);
 			factory: self].
 	'CHOICE' = anObject type ifTrue: [
-		(anObject members size = 2 and: [anObject members second type = 'BLANK']) ifTrue: [
-			^ SBTSNodeRepeat new
-				multiple: false required: false element: (self buildNodesFor: anObject members first);
-				factory: self].
+		SBToggledCode comment: '' active: 0 do: {
+			[
+				(anObject members size = 2 and: [anObject members second type = 'BLANK']) ifTrue: [
+					^ SBTSNodeRepeat new
+						multiple: false required: false element: (self buildNodesFor: anObject members first);
+						factory: self]]}.
 		^ SBTSNodeChoice new
 			alternatives: (anObject members collect: [:member | self buildNodesFor: member]);
 			factory: self].
@@ -115,6 +127,7 @@ SBTSGrammar >> buildNodesFor: anObject [
 		^ SBTSNodeSeq new
 			factory: self;
 			elements: (anObject members collect: [:member | self buildNodesFor: member])].
+	'BLANK' = anObject type ifTrue: [^ SBTSNodeBlank new].
 	self assert: false
 ]
 
@@ -268,16 +281,15 @@ SBTSGrammar >> mergeOptionalRepeat: anObject [
 				required: false;
 				yourself)].
 		(node isTSRepeat and: [node element isTSChoice and: [node element elements size = 2 and: [node element elements second isTSBlank]]]) ifTrue: [
-			node replaceBy: (node elements first
-				required: false;
-				yourself)]]
+			node element replaceBy: node element elements first.
+			node required: false]]
 ]
 
 { #category : #cleaning }
 SBTSGrammar >> mergeRedundantRepeats: anObject [
 	" (a* | b+)* -> (a | b)* "
 
-	anObject allChildrenDo: [:node | (node isTSRepeat and: [node element isTSChoice]) ifTrue: [node content members do: [:m | m isTSRepeat ifTrue: [m replaceBy: m element]]]]
+	anObject allChildrenDo: [:node | (node isTSRepeat and: [node element isTSChoice]) ifTrue: [node element elements do: [:m | m isTSRepeat ifTrue: [m replaceBy: m element]]]]
 ]
 
 { #category : #cleaning }
@@ -331,6 +343,7 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 		comment: ''
 		active: 1
 		do: {[self rules do: [:rule | self removeHiddenTerminals: rule]]}.
+	SBToggledCode comment: '' active: 1 do: {[self rules do: [:rule | self simplifyList: rule]]}.
 	SBToggledCode comment: '' active: 1 do: {[self rules do: [:rule | self mergeRepeats: rule]]}.
 	SBToggledCode
 		comment: ''
@@ -418,6 +431,13 @@ SBTSGrammar >> removeHiddenTerminals: aRule [
 SBTSGrammar >> rules [
 
 	^ rules
+]
+
+{ #category : #cleaning }
+SBTSGrammar >> simplifyList: anObject [
+	" make a*? to a* "
+
+	anObject allChildrenDo: [:node | (node isTSChoice and: [node elements size = 2 and: [node elements last isTSBlank and: [node elements first isTSRepeat]]]) ifTrue: [node replaceBy: node members first]]
 ]
 
 { #category : #helper }

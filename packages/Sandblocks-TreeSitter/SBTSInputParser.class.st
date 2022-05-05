@@ -56,6 +56,24 @@ SBTSInputParser >> blocks: aCollection contain: anotherCollection [
 	^ false
 ]
 
+{ #category : #memo }
+SBTSInputParser >> growLeftRecursionAt: aNumber head: aHead for: aSymbol [
+
+	| recurResults entry |
+	entry := (memoizations at: aNumber) at: aSymbol type.
+	aHead first = aSymbol type ifFalse: [^ entry lr seed].
+	entry parsers: (entry lr seed collect: [:r | r copy]).
+	
+	activeRecursion at: aNumber put: aHead.
+	recurResults := {self}.
+	[
+		aHead at: 3 put: aHead second copy.
+		stream position: aNumber - 1.
+		recurResults := aSymbol bodyTemplate resultsFor: recurResults first] doWhileTrue: [recurResults notEmpty and: [recurResults first stream position <= (aNumber - 1)]].
+	activeRecursion at: aNumber put: nil.
+	^ recurResults
+]
+
 { #category : #'initialize-release' }
 SBTSInputParser >> initialize [
 
@@ -81,6 +99,10 @@ SBTSInputParser >> memoizationFor: aSymbol ifPresent: aSuccessBlock ifAbsentPut:
 	^ dict
 		at: aSymbol type
 		ifPresent: [:results |
+			recursion ifNotNil: [
+				(recursion third includes: aSymbol type) ifTrue: [
+					recursion third remove: aSymbol type.
+					^ aBlock value]].
 			aSuccessBlock value: (results isLeftRecursion
 				ifTrue: [
 					SBToggledCode
@@ -90,11 +112,7 @@ SBTSInputParser >> memoizationFor: aSymbol ifPresent: aSuccessBlock ifAbsentPut:
 					{}]
 				ifFalse: [results parsers collect: [:p | p copy]])]
 		ifAbsent: [ | results entry startGrowingSeed lr |
-			recursion ifNotNil: [
-				((recursion second includes: aSymbol type) not and: [aSymbol type ~= recursion first]) ifTrue: [^ {}].
-				(recursion third includes: aSymbol type) ifTrue: [
-					recursion third remove: aSymbol type.
-					^ aBlock value]].
+			(recursion notNil and: [(recursion second includes: aSymbol type) not and: [aSymbol type ~= recursion first]]) ifTrue: [^ {}].
 			
 			lr := SBTSRecursion new.
 			entry := SBTSMemoEntry new parsers: lr.
@@ -107,18 +125,10 @@ SBTSInputParser >> memoizationFor: aSymbol ifPresent: aSuccessBlock ifAbsentPut:
 				comment: ''
 				active: 2
 				do: {[false]. [entry isLeftRecursion and: [entry leftRecursionDetected and: [results notEmpty]]]}.
-			entry parsers: (results collect: [:p | p copy]).
 			startGrowingSeed
-				ifTrue: [ | recurResults |
-					lr seed: entry parsers.
-					"grow lr"
-					activeRecursion at: index + 1 put: lr head.
-					[
-						lr head at: 3 put: lr head second copy.
-						results first stream position: index.
-						recurResults := aSymbol bodyTemplate resultsFor: results first] doWhileTrue: [recurResults notEmpty and: [recurResults first stream position <= index]].
-					activeRecursion at: index + 1 put: nil.
-					recurResults]
+				ifTrue: [
+					lr seed: (results collect: [:r | r copy]).
+					results gather: [:r | r growLeftRecursionAt: index + 1 head: lr head for: aSymbol]]
 				ifFalse: [results]]
 ]
 
@@ -227,6 +237,7 @@ SBTSInputParser >> postCopy [
 	stream := (ReadStream on: stream contents)
 		position: stream position;
 		yourself.
+	memoizations := memoizations collect: [:m | m collect: [:entry | entry copy]].
 	symbolStack := symbolStack copy.
 	activeRecursion := activeRecursion collect: [:r | r copy].
 	visitedSupertypes := visitedSupertypes copy.
