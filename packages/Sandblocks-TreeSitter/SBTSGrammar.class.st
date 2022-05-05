@@ -5,31 +5,29 @@ Class {
 		'rules',
 		'supertypes',
 		'inlinedRules',
-		'delimitedRepeats'
+		'delimitedRepeats',
+		'aliasOccurrences'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
 
 { #category : #cleaning }
-SBTSGrammar >> applyInlining: node grammar: aGrammarJson [
+SBTSGrammar >> applyInlining: aRule grammar: aGrammarJson [
 
-	(node isTSSymbol and: [
-		(aGrammarJson inline includes: node name) and: [
-			SBToggledCode
-				comment: ''
-				active: 2
-				do: {[true]. [(aGrammarJson supertypes includes: node name) not]}]]) ifTrue: [ | inline |
-		inline := rules at: node name.
-		node replaceBy: inline copy.
-		node removeAll.
-		inline keysAndValuesDo: [:k :v | node at: k put: v].
-		^ self].
-	(node type = 'SYMBOL' and: [node name first = $_ and: [(aGrammarJson externals noneSatisfy: [:e | e name = node name]) and: [(aGrammarJson supertypes includes: node name) not]]]) ifTrue: [ | inline |
-		inline := aGrammarJson rules at: node name.
-		(self includesNonHiddenParts: inline visited: Set new) ifTrue: [
-			node removeAll.
-			inline keysAndValuesDo: [:key :val | node at: key put: val]].
-		^ self]
+	aRule allChildrenDo: [:node |
+		(node isTSSymbol and: [
+			(aGrammarJson inline includes: node name) and: [
+				SBToggledCode
+					comment: ''
+					active: 2
+					do: {[true]. [(aGrammarJson supertypes includes: node name) not]}]]) ifTrue: [ | inline |
+			inline := rules at: node name.
+			node replaceBy: inline copy.
+			^ self].
+		(node isTSSymbol and: [node type first = $_ and: [(aGrammarJson externals noneSatisfy: [:e | e name = node name]) and: [(aGrammarJson supertypes includes: node name) not]]]) ifTrue: [ | inline |
+			inline := aGrammarJson rules at: node name.
+			(self includesNonHiddenParts: inline visited: Set new) ifTrue: [node replaceBy: inline copy].
+			^ self]]
 ]
 
 { #category : #cleaning }
@@ -168,6 +166,12 @@ SBTSGrammar >> buildRegexString: rule [
 		with: '\:'
 ]
 
+{ #category : #cleaning }
+SBTSGrammar >> checkStructure: anObject [
+
+	anObject allChildrenDo: [:node | self assert: (node isTSChoice not or: [node elements notEmpty])]
+]
+
 { #category : #helper }
 SBTSGrammar >> escapeStringForRegex: aString [
 
@@ -184,7 +188,6 @@ SBTSGrammar >> flattenSeparatedList: anObject [
 				second := obj elements second.
 				second isTSRepeat and: [second element isTSSeq and: [obj elements first hasEqualStructure: obj elements second element elements second]]]]].
 	looksLikeOptionalSep := [:obj | obj isTSChoice and: [obj alternatives second isTSBlank and: [obj alternatives first isTSLabel]]].
-	
 	anObject allChildrenDo: [:node |
 		" seq(seq(rule, repeat(seq(separator, rule))), (separator|blank)) "
 		(node isTSSeq and: [(looksLikeSepList value: node elements first) and: [looksLikeOptionalSep value: node elements second]]) ifTrue: [ | repeater |
@@ -192,16 +195,15 @@ SBTSGrammar >> flattenSeparatedList: anObject [
 				multiple: true
 				required: false
 				element: node elements first elements first.
-			delimitedRepeats at: repeater put: node elements second elements first label.
+			repeater delimiter: node elements second elements first label.
 			node replaceBy: repeater].
-		
 		" seq(rule, repeat(seq(separator, rule))) "
 		(looksLikeSepList value: node) ifTrue: [ | repeater |
 			repeater := SBTSNodeRepeat new
 				multiple: true
 				required: true
-				element: node elements first elements first.
-			delimitedRepeats at: repeater put: node elements second element elements first label.
+				element: node elements second elements first elements second.
+			repeater delimiter: node elements second element elements first label.
 			node replaceBy: repeater]]
 ]
 
@@ -230,6 +232,55 @@ SBTSGrammar >> isSuperType: aSymbol [
 ]
 
 { #category : #cleaning }
+SBTSGrammar >> mergeAdjacentOptions: anObject [
+	" look for (element | element*) and change to element+ "
+
+	anObject allChildrenDo: [:node |
+		node isTSChoice ifTrue: [
+			node elements copy do: [:alt |
+				(alt isTSRepeat and: [alt element isTSSymbol]) ifTrue: [
+					node elements do: [:otherAlt |
+						(otherAlt isTSSymbol and: [alt element type = otherAlt type]) ifTrue: [
+							alt required: true.
+							node elements: (node elements copyWithout: otherAlt)]]]]]]
+]
+
+{ #category : #cleaning }
+SBTSGrammar >> mergeNestedChoices: anObject [
+	" (a | (b | c)) -> (a | b | c) "
+
+	anObject allChildrenDo: [:choice |
+		choice isTSChoice ifTrue: [
+			(choice elements noneSatisfy: #isTSBlank) ifTrue: [
+				choice elements: (Array streamContents: [:stream |
+					choice elements do: [:nested |
+						(nested isTSChoice and: [nested elements noneSatisfy: [:m | m isTSBlank]])
+							ifTrue: [stream nextPutAll: nested elements]
+							ifFalse: [stream nextPut: nested]]])]]]
+]
+
+{ #category : #cleaning }
+SBTSGrammar >> mergeOptionalRepeat: anObject [
+
+	anObject allChildrenDo: [:node |
+		(node isTSChoice and: [node elements size = 2 and: [node elements first isTSRepeat and: [node elements second isTSBlank]]]) ifTrue: [
+			node replaceBy: (node elements first
+				required: false;
+				yourself)].
+		(node isTSRepeat and: [node element isTSChoice and: [node element elements size = 2 and: [node element elements second isTSBlank]]]) ifTrue: [
+			node replaceBy: (node elements first
+				required: false;
+				yourself)]]
+]
+
+{ #category : #cleaning }
+SBTSGrammar >> mergeRedundantRepeats: anObject [
+	" (a* | b+)* -> (a | b)* "
+
+	anObject allChildrenDo: [:node | (node isTSRepeat and: [node element isTSChoice]) ifTrue: [node content members do: [:m | m isTSRepeat ifTrue: [m replaceBy: m element]]]]
+]
+
+{ #category : #cleaning }
 SBTSGrammar >> mergeRepeats: aRule [
 	"AA* -> A+"
 
@@ -241,6 +292,17 @@ SBTSGrammar >> mergeRepeats: aRule [
 				first isTSSymbol and: [second isTSRepeat and: [first type = second element type]]]]) ifTrue: [
 			node replaceBy: node elements second.
 			node elements second required: true]]
+]
+
+{ #category : #cleaning }
+SBTSGrammar >> noteAliases: anObject name: aString [
+
+	anObject allChildrenDo: [:node |
+		node isTSAlias ifTrue: [
+			aliasOccurrences add: (SBTSAlias new
+				name: node value;
+				object: node element copy;
+				parentType: aString)]]
 ]
 
 { #category : #cleaning }
@@ -319,8 +381,18 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[self rules keysAndValuesDo: [:name :rule | self removeHiddenTerminals: rule]]}.
+		do: {[self rules do: [:rule | self removeHiddenTerminals: rule]]}.
 	self rules do: [:rule | self checkStructure: rule]
+]
+
+{ #category : #cleaning }
+SBTSGrammar >> removeDuplicateAlternatives: anObject [
+	" TODO: only removes SYMBOL duplicates "
+
+	anObject allChildrenDo: [:node |
+		(node isTSChoice and: [node elements allSatisfy: #isTSSymbol]) ifTrue: [ | symbols |
+			symbols := node elements collect: #type.
+			symbols size ~= symbols withoutDuplicates size ifTrue: [node elements: node elements withoutDuplicates]]]
 ]
 
 { #category : #cleaning }
