@@ -70,6 +70,18 @@ SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream p
 				ifFalse: [(aStream peek isStringMorph and: [aStream peek slot includesParent: self]) ifTrue: [aStream next]]]
 ]
 
+{ #category : #accessing }
+SBTSNodeLabel >> elements [
+
+	^ #()
+]
+
+{ #category : #testing }
+SBTSNodeLabel >> hasEqualStructure: aNode [
+
+	^ (super hasEqualStructure: aNode) and: [self label = aNode label]
+]
+
 { #category : #testing }
 SBTSNodeLabel >> isEditable [
 	"mark whether this label could be a variation point and should thus be editable"

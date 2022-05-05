@@ -78,6 +78,12 @@ SBTSNodeAlias >> element: anElement [
 ]
 
 { #category : #testing }
+SBTSNodeAlias >> hasEqualStructure: aNode [
+
+	^ (super hasEqualStructure: aNode) and: [aNode alias = self alias]
+]
+
+{ #category : #testing }
 SBTSNodeAlias >> isTSAlias [
 
 	^ true

@@ -78,6 +78,18 @@ SBTSNodeText >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream pa
 			currentCommand: (SBTextCommand new textMorph: block))]
 ]
 
+{ #category : #accessing }
+SBTSNodeText >> elements [
+
+	^ #()
+]
+
+{ #category : #testing }
+SBTSNodeText >> hasEqualStructure: aNode [
+
+	^ (super hasEqualStructure: aNode) and: [aNode regexString = self regexString]
+]
+
 { #category : #testing }
 SBTSNodeText >> isTSText [
 

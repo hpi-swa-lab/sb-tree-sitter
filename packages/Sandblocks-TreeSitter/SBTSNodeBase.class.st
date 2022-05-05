@@ -9,6 +9,13 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #hierarchy }
+SBTSNodeBase >> allChildrenDetect: aBlock ifFound: aSuccessBlock ifNone: aFailBlock [
+
+	self allChildrenDo: [:block | (aBlock value: block) ifTrue: [^ aSuccessBlock value: block]].
+	^ aFailBlock value
+]
+
 { #category : #blocks }
 SBTSNodeBase >> allChildrenDo: aBlock [
 
@@ -86,10 +93,29 @@ SBTSNodeBase >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream pa
 	^ self subclassResponsibility
 ]
 
+{ #category : #hierarchy }
+SBTSNodeBase >> delete [
+
+	self parent elements: (self parent elements reject: [:el | el = self])
+]
+
 { #category : #'as yet unclassified' }
 SBTSNodeBase >> delimiterBetween: aBlock and: anotherBlock [
 
 	^ ''
+]
+
+{ #category : #accessing }
+SBTSNodeBase >> elements [
+
+	^ {self element}
+]
+
+{ #category : #accessing }
+SBTSNodeBase >> elements: aCollection [
+
+	self assert: aCollection size = 1.
+	self element: aCollection anyOne
 ]
 
 { #category : #accessing }
@@ -114,6 +140,17 @@ SBTSNodeBase >> field [
 SBTSNodeBase >> field: aString [
 
 	field := aString
+]
+
+{ #category : #testing }
+SBTSNodeBase >> hasEqualStructure: aNode [
+
+	aNode class = self class ifFalse: [^ false].
+	aNode elements size = self elements size ifFalse: [^ false].
+	aNode elements
+		with: self elements
+		do: [:a :b | (a hasEqualStructure: b) ifFalse: [^ false]].
+	^ true
 ]
 
 { #category : #hierarchy }
@@ -163,6 +200,12 @@ SBTSNodeBase >> isSuperType [
 
 { #category : #testing }
 SBTSNodeBase >> isTSAlias [
+
+	^ false
+]
+
+{ #category : #testing }
+SBTSNodeBase >> isTSBlank [
 
 	^ false
 ]
@@ -244,6 +287,14 @@ SBTSNodeBase >> parentThat: aBlock [
 
 	self andParentsDo: [:p | (aBlock value: p) ifTrue: [^ p]].
 	^ nil
+]
+
+{ #category : #hierarchy }
+SBTSNodeBase >> replaceBy: aNode [
+
+	self parent elements: (self parent elements
+		at: (self parent elements indexOf: self) put: aNode;
+		yourself)
 ]
 
 { #category : #parsing }

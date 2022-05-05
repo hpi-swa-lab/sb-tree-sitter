@@ -80,9 +80,21 @@ SBTSNodePrecedence >> element: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodePrecedence >> hasEqualStructure: aNode [
+
+	(super hasEqualStructure: aNode) and: [aNode precedence = self precedence and: [aNode value = self value]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodePrecedence >> isTSPrecedence [
 
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodePrecedence >> precedence [
+
+	^ precedence
 ]
 
 { #category : #'as yet unclassified' }

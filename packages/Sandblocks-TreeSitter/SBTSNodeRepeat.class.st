@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'multiple',
 		'required',
-		'element'
+		'element',
+		'delimiter'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -53,9 +54,28 @@ SBTSNodeRepeat >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream 
 ]
 
 { #category : #accessing }
+SBTSNodeRepeat >> delimiter [
+
+	^ delimiter
+]
+
+{ #category : #accessing }
+SBTSNodeRepeat >> delimiter: aString [
+
+	delimiter := aString
+]
+
+{ #category : #accessing }
 SBTSNodeRepeat >> element [
 
 	^ element
+]
+
+{ #category : #accessing }
+SBTSNodeRepeat >> element: aNode [
+
+	element := aNode.
+	aNode parent: self
 ]
 
 { #category : #hierarchy }
@@ -69,6 +89,12 @@ SBTSNodeRepeat >> groupsIn: aContainerBlock [
 			(Array streamContents: [:groupStream | element traverseBlocks: candidates do: [:block | groupStream nextPut: block]])
 				ifNotEmpty: [:group | stream nextPut: group]
 				ifEmpty: [stop := true]]]
+]
+
+{ #category : #testing }
+SBTSNodeRepeat >> hasEqualStructure: aNode [
+
+	^ (super hasEqualStructure: aNode) and: [aNode required = self required and: [self multiple = aNode multiple]]
 ]
 
 { #category : #testing }

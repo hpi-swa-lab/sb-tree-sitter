@@ -90,6 +90,18 @@ SBTSNodeSymbol >> delimiterBetween: aBlock and: anotherBlock [
 	^ ''
 ]
 
+{ #category : #accessing }
+SBTSNodeSymbol >> elements [
+
+	^ #()
+]
+
+{ #category : #testing }
+SBTSNodeSymbol >> hasEqualStructure: aNode [
+
+	^ (super hasEqualStructure: aNode) and: [self type = aNode type]
+]
+
 { #category : #testing }
 SBTSNodeSymbol >> isBlockInlinedInParent [
 

@@ -60,6 +60,18 @@ SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream 
 				ifFound: [:alt | alt cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock]]
 ]
 
+{ #category : #accessing }
+SBTSNodeChoice >> elements [
+
+	^ self alternatives
+]
+
+{ #category : #accessing }
+SBTSNodeChoice >> elements: aCollection [
+
+	self alternatives: aCollection
+]
+
 { #category : #testing }
 SBTSNodeChoice >> isTSChoice [
 
