@@ -58,7 +58,7 @@ SBTSInputParser >> blocks: aCollection contain: anotherCollection [
 { #category : #memo }
 SBTSInputParser >> growLeftRecursionAt: aNumber head: aHead for: aSymbol [
 
-	| recurResults entry |
+	| recurResults entry continue |
 	entry := (memoizations at: aNumber) at: aSymbol type.
 	(aHead first ~= aSymbol type or: [self atEnd]) ifTrue: [^ entry lr seed].
 	entry parsers: (entry lr seed collect: [:r | r copy]).
@@ -69,7 +69,12 @@ SBTSInputParser >> growLeftRecursionAt: aNumber head: aHead for: aSymbol [
 		aHead at: 3 put: aHead second copy.
 		stream position: aNumber - 1.
 		blocks := OrderedCollection new.
-		recurResults := aSymbol bodyTemplate resultsFor: recurResults first] doWhileTrue: [recurResults notEmpty and: [recurResults first stream position <= (aNumber - 1)]].
+		recurResults := aSymbol bodyTemplate resultsFor: recurResults first.
+		continue := recurResults notEmpty and: [recurResults first stream position <= (aNumber - 1)].
+		continue ifTrue: [
+			entry parsers: recurResults.
+			"insert the same entry at recurResults stream position+1?"
+			self flag: #todo]] doWhileTrue: [continue].
 	activeRecursion at: aNumber put: nil.
 	^ recurResults
 ]

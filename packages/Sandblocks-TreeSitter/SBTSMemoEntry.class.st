@@ -59,6 +59,10 @@ SBTSMemoEntry >> printOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSMemoEntry >> setLeftRecursionDetectedFrom: aSymbol stack: aCollection [
 
+	| stack |
 	self assert: self isLeftRecursion.
-	answer head: {aSymbol type. (aCollection reversed copyUpTo: aSymbol type) reversed. {}}
+	stack := aCollection reversed copyUpTo: aSymbol type.
+	answer head
+		ifNotNil: [answer head second addAll: stack]
+		ifNil: [answer head: {aSymbol type. stack asSet. {}}]
 ]
