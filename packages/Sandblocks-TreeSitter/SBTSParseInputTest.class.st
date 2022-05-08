@@ -350,7 +350,33 @@ SBTSParseInputTest >> testIndirectRecursion [
 ]
 
 { #category : #'tests - create' }
-SBTSParseInputTest >> testIndirectRecursionDoublyNested [
+SBTSParseInputTest >> testIndirectRecursionMultipleRules [
+
+	| factory results |
+	factory := SBTSTestLanguage new supertypes: #('expr').
+	factory add: 'expr' rule: (SBTSNodeChoice new alternatives: {
+		SBTSNodeSymbol new type: 'plus' factory: factory.
+		SBTSNodeSymbol new type: 'minus' factory: factory.
+		SBTSNodeSymbol new type: 'number' factory: factory}).
+	factory add: 'number' rule: (SBTSNodeText new regexString: '[0-9]+').
+	factory add: 'plus' rule: (SBTSNodeSeq new elements: {
+		SBTSNodeSymbol new type: 'expr' factory: factory.
+		(SBTSNodeLabel new label: '+') factory: factory.
+		SBTSNodeSymbol new type: 'expr' factory: factory}).
+	factory add: 'minus' rule: (SBTSNodeSeq new elements: {
+		SBTSNodeSymbol new type: 'expr' factory: factory.
+		(SBTSNodeLabel new label: '-') factory: factory.
+		SBTSNodeSymbol new type: 'expr' factory: factory}).
+	
+	results := SBTSInputParser new
+		optionsForTemplate: (SBTSNodeSymbol new type: 'expr' factory: factory)
+		given: '1+2'.
+	self assert: 1 equals: results size.
+	self assert: '1+2' equals: results first first sourceString
+]
+
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testIndirectRecursionNested [
 
 	| factory results |
 	factory := SBTSTestLanguage new supertypes: #('expr' 'primary').
@@ -377,23 +403,29 @@ SBTSParseInputTest >> testIndirectRecursionDoublyNested [
 ]
 
 { #category : #'tests - create' }
-SBTSParseInputTest >> testIndirectRecursionMultipleRules [
+SBTSParseInputTest >> testIndirectRecursionSupertype [
 
 	| factory results |
-	factory := SBTSTestLanguage new supertypes: #('expr').
+	factory := SBTSTestLanguage new supertypes: #('expr' 'primary').
 	factory add: 'expr' rule: (SBTSNodeChoice new alternatives: {
-		SBTSNodeSymbol new type: 'plus' factory: factory.
-		SBTSNodeSymbol new type: 'minus' factory: factory.
-		SBTSNodeSymbol new type: 'number' factory: factory}).
+		SBTSNodeSymbol new type: 'primary' factory: factory.
+		SBTSNodeSymbol new type: 'binary_expression' factory: factory}).
+	factory add: 'primary' rule: (SBToggledCode comment: '' active: 1 do: {
+		[SBTSNodeSymbol new type: 'number' factory: factory].
+		[
+			SBTSNodeChoice new alternatives: {
+				SBTSNodeSymbol new type: 'call_expr' factory: factory.
+				SBTSNodeSymbol new type: 'number' factory: factory}]}).
 	factory add: 'number' rule: (SBTSNodeText new regexString: '[0-9]+').
-	factory add: 'plus' rule: (SBTSNodeSeq new elements: {
+	factory add: 'binary_expression' rule: (SBTSNodeSeq new elements: {
 		SBTSNodeSymbol new type: 'expr' factory: factory.
 		(SBTSNodeLabel new label: '+') factory: factory.
 		SBTSNodeSymbol new type: 'expr' factory: factory}).
-	factory add: 'minus' rule: (SBTSNodeSeq new elements: {
-		SBTSNodeSymbol new type: 'expr' factory: factory.
-		(SBTSNodeLabel new label: '-') factory: factory.
-		SBTSNodeSymbol new type: 'expr' factory: factory}).
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			factory add: 'call_expr' rule: (SBTSNodeChoice new alternatives: {
+				SBTSNodeSeq new elements: {SBTSNodeSymbol new type: 'primary' factory: factory. (SBTSNodeLabel new label: '?.') factory: factory}.
+				SBTSNodeSeq new elements: {SBTSNodeSymbol new type: 'expr' factory: factory. (SBTSNodeLabel new label: '()') factory: factory}})]}.
 	
 	results := SBTSInputParser new
 		optionsForTemplate: (SBTSNodeSymbol new type: 'expr' factory: factory)

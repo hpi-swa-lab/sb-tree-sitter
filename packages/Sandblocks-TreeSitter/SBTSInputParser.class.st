@@ -25,6 +25,23 @@ SBTSInputParser >> addEmptyBlocks: aCollection [
 	aCollection do: [:b | blocks add: b]
 ]
 
+{ #category : #memo }
+SBTSInputParser >> answerResultsFor: aSymbol recursion: aRecursion at: aNumber [
+
+	self assert: symbolStack last = aSymbol type.
+	symbolStack removeLast.
+	^ aRecursion head
+		ifNotNil: [:head |
+			head first = aSymbol type
+				ifTrue: [
+					aRecursion seed: {self}.
+					self growLeftRecursionAt: aNumber head: aRecursion head for: aSymbol]
+				ifFalse: [aRecursion seed]]
+		ifNil: [
+			((memoizations at: aNumber) at: aSymbol type) parsers: {self copy}.
+			{self}]
+]
+
 { #category : #stream }
 SBTSInputParser >> atEnd [
 
@@ -69,8 +86,9 @@ SBTSInputParser >> growLeftRecursionAt: aNumber head: aHead for: aSymbol [
 		aHead at: 3 put: aHead second copy.
 		stream position: aNumber - 1.
 		blocks := OrderedCollection new.
-		recurResults := aSymbol bodyTemplate resultsFor: recurResults first.
-		continue := recurResults notEmpty and: [recurResults first stream position <= (aNumber - 1)].
+		self assert: recurResults size <= 1.
+		recurResults := aSymbol bodyTemplate resultsFor: recurResults last.
+		continue := recurResults notEmpty and: [recurResults last stream position <= (aNumber - 1)].
 		continue ifTrue: [
 			entry parsers: recurResults.
 			"insert the same entry at recurResults stream position+1?"
@@ -91,50 +109,26 @@ SBTSInputParser >> initialize [
 { #category : #memo }
 SBTSInputParser >> memoizationFor: aSymbol ifPresent: aSuccessBlock ifAbsentPut: aBlock [
 
-	| dict index recursion |
+	| index |
 	((visitedSupertypes includes: aSymbol type) and: [stream peek = (Character value: 0)]) ifTrue: [
 		visitedSupertypes remove: aSymbol type.
 		"TODO: can we write this back?"
 		^ aBlock value].
 	
 	index := stream position.
-	dict := memoizations at: index + 1.
-	recursion := activeRecursion at: index + 1.
-	
-	^ dict
-		at: aSymbol type
-		ifPresent: [:results |
-			recursion ifNotNil: [
-				(recursion third includes: aSymbol type) ifTrue: [
-					recursion third remove: aSymbol type.
-					^ aBlock value]].
-			aSuccessBlock value: (results isLeftRecursion
-				ifTrue: [
-					SBToggledCode
-						comment: ''
-						active: 1
-						do: {[results setLeftRecursionDetectedFrom: aSymbol stack: symbolStack]}.
-					{}]
-				ifFalse: [results parsers collect: [:p | p copy]])]
-		ifAbsent: [ | results entry startGrowingSeed lr |
-			(recursion notNil and: [(recursion second includes: aSymbol type) not and: [aSymbol type ~= recursion first]]) ifTrue: [^ {}].
-			
+	^ (self recall: aSymbol evalDo: aBlock)
+		ifNil: [ | lr memoEntry |
 			lr := SBTSRecursion new.
-			entry := SBTSMemoEntry new parsers: lr.
-			dict at: aSymbol type put: entry.
+			memoEntry := SBTSMemoEntry new parsers: lr.
+			(memoizations at: index + 1) at: aSymbol type put: memoEntry.
 			symbolStack add: aSymbol type.
-			results := aBlock value.
-			symbolStack removeLast.
-			
-			startGrowingSeed := SBToggledCode
-				comment: ''
-				active: 2
-				do: {[false]. [entry isLeftRecursion and: [entry leftRecursionDetected and: [results notEmpty]]]}.
-			startGrowingSeed
+			aBlock value gather: [:result | result answerResultsFor: aSymbol recursion: lr at: index + 1]]
+		ifNotNil: [:memoEntry |
+			memoEntry isLeftRecursion
 				ifTrue: [
-					lr seed: (results collect: [:r | r copy]).
-					results gather: [:r | r growLeftRecursionAt: index + 1 head: lr head for: aSymbol]]
-				ifFalse: [results]]
+					memoEntry setLeftRecursionDetectedFrom: aSymbol stack: symbolStack.
+					memoEntry lr seed]
+				ifFalse: [memoEntry parsers collect: [:p | p copy]]]
 ]
 
 { #category : #stream }
@@ -243,11 +237,39 @@ SBTSInputParser >> postCopy [
 	stream := (ReadStream on: stream contents)
 		position: stream position;
 		yourself.
-	memoizations := memoizations collect: [:m | m collect: [:entry | entry copy]].
+	SBToggledCode
+		comment: ''
+		active: 0
+		do: {[memoizations := memoizations collect: [:m | m collect: [:entry | entry copy]]]}.
+	SBToggledCode
+		comment: ''
+		active: 0
+		do: {[activeRecursion := activeRecursion collect: [:r | r copy]]}.
 	symbolStack := symbolStack copy.
-	activeRecursion := activeRecursion collect: [:r | r copy].
 	visitedSupertypes := visitedSupertypes copy.
 	blocks := blocks collect: [:block | block copyBlock]
+]
+
+{ #category : #memo }
+SBTSInputParser >> recall: aSymbol evalDo: aBlock [
+
+	| memoEntry recursion |
+	memoEntry := (memoizations at: stream position + 1)
+		at: aSymbol type
+		ifAbsent: [nil].
+	recursion := activeRecursion at: stream position + 1.
+	
+	recursion ifNil: [^ memoEntry].
+	
+	"symbol not involved in current recursion, deny"
+	(memoEntry isNil and: [(recursion second includes: aSymbol type) not and: [aSymbol type ~= recursion first]]) ifTrue: [^ {}].
+	
+	"symbol involved and hasn't been evaluated yet during this iteration"
+	(recursion third includes: aSymbol type) ifTrue: [
+		recursion third remove: aSymbol type.
+		memoEntry parsers: aBlock value].
+	
+	^ memoEntry
 ]
 
 { #category : #stream }

@@ -21,6 +21,14 @@ SBTSRecursion >> head: anObject [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSRecursion >> initialize [
+
+	super initialize.
+	
+	seed := {}
+]
+
+{ #category : #'as yet unclassified' }
 SBTSRecursion >> seed [
 
 	^ seed
