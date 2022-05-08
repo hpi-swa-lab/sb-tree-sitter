@@ -301,7 +301,7 @@ SBTSParseInputTest >> testDenyNumber [
 { #category : #'tests - create' }
 SBTSParseInputTest >> testDirectRecursion [
 
-	| factory |
+	| factory results |
 	factory := SBTSTestLanguage new.
 	factory add: 'expr' rule: (SBTSNodeChoice new alternatives: {
 		SBTSNodeSeq new elements: {
@@ -311,9 +311,11 @@ SBTSParseInputTest >> testDirectRecursion [
 		SBTSNodeSymbol new type: 'number' factory: factory}).
 	factory add: 'number' rule: (SBTSNodeText new regexString: '[0-9]+').
 	
-	self assert: 1 equals: (SBTSInputParser new
+	results := SBTSInputParser new
 		optionsForTemplate: (SBTSNodeSymbol new type: 'expr' factory: factory)
-		given: '1+2') size
+		given: '1+2'.
+	self assert: 1 equals: results size.
+	self assert: {'1'. '+'. '2'} equals: (results first collect: #sourceString as: Array)
 ]
 
 { #category : #'tests - wrap' }
@@ -329,8 +331,8 @@ SBTSParseInputTest >> testIdentifierToAssignment [
 { #category : #'tests - create' }
 SBTSParseInputTest >> testIndirectRecursion [
 
-	| factory |
-	factory := SBTSTestLanguage new.
+	| factory results |
+	factory := SBTSTestLanguage new supertypes: #('expr').
 	factory
 		add: 'expr'
 		rule: (SBTSNodeChoice new alternatives: {SBTSNodeSymbol new type: 'plus' factory: factory. SBTSNodeSymbol new type: 'number' factory: factory}).
@@ -340,9 +342,11 @@ SBTSParseInputTest >> testIndirectRecursion [
 		(SBTSNodeLabel new label: '+') factory: factory.
 		SBTSNodeSymbol new type: 'expr' factory: factory}).
 	
-	self assert: 1 equals: (SBTSInputParser new
+	results := SBTSInputParser new
 		optionsForTemplate: (SBTSNodeSymbol new type: 'expr' factory: factory)
-		given: '1+2') size
+		given: '1+2'.
+	self assert: 1 equals: results size.
+	self assert: '1+2' equals: results first first sourceString
 ]
 
 { #category : #'tests - wrap' }

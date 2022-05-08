@@ -163,13 +163,12 @@ because the stored, nested parser does not have a valid stream "
 						self isInlined
 							ifTrue: [
 								result blocks do: [:b | b slot addNode: self].
-								result blocks: currentBlocks copy, result blocks]
+								result blocks: currentBlocks, result blocks]
 							ifFalse: [
-								result blocks: (currentBlocks copy
-									add: (SBTSBlock new
+								result blocks: currentBlocks, {
+									SBTSBlock new
 										slot: (SBTSSlot new addNode: self);
-										addAllMorphs: result blocks);
-									yourself)]].
+										addAllMorphs: result blocks}]].
 					results]]
 ]
 

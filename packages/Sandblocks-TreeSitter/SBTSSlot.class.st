@@ -37,6 +37,7 @@ SBTSSlot >> adaptSlotFor: anotherSlot [
 SBTSSlot >> addNode: aNode [
 
 	self assert: (aNode isKindOf: SBTSNodeBase).
+	self assert: (nodes isEmpty or: [aNode ~= self lastNode]).
 	nodes add: aNode
 ]
 

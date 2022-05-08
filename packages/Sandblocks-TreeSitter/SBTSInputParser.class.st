@@ -16,8 +16,7 @@ Class {
 SBTSInputParser >> addBlock: aBlock [
 
 	blocks add: aBlock.
-	self atEnd ifTrue: [
-		aBlock setProperty: #lastConstructed toValue: true]
+	self atEnd ifTrue: [aBlock setProperty: #lastConstructed toValue: true]
 ]
 
 { #category : #blocks }
@@ -61,7 +60,7 @@ SBTSInputParser >> growLeftRecursionAt: aNumber head: aHead for: aSymbol [
 
 	| recurResults entry |
 	entry := (memoizations at: aNumber) at: aSymbol type.
-	aHead first = aSymbol type ifFalse: [^ entry lr seed].
+	(aHead first ~= aSymbol type or: [self atEnd]) ifTrue: [^ entry lr seed].
 	entry parsers: (entry lr seed collect: [:r | r copy]).
 	
 	activeRecursion at: aNumber put: aHead.
@@ -69,6 +68,7 @@ SBTSInputParser >> growLeftRecursionAt: aNumber head: aHead for: aSymbol [
 	[
 		aHead at: 3 put: aHead second copy.
 		stream position: aNumber - 1.
+		blocks := OrderedCollection new.
 		recurResults := aSymbol bodyTemplate resultsFor: recurResults first] doWhileTrue: [recurResults notEmpty and: [recurResults first stream position <= (aNumber - 1)]].
 	activeRecursion at: aNumber put: nil.
 	^ recurResults
@@ -107,7 +107,7 @@ SBTSInputParser >> memoizationFor: aSymbol ifPresent: aSuccessBlock ifAbsentPut:
 				ifTrue: [
 					SBToggledCode
 						comment: ''
-						active: 0
+						active: 1
 						do: {[results setLeftRecursionDetectedFrom: aSymbol stack: symbolStack]}.
 					{}]
 				ifFalse: [results parsers collect: [:p | p copy]])]
@@ -141,20 +141,21 @@ SBTSInputParser >> next [
 { #category : #blocks }
 SBTSInputParser >> normalizeResults: aCollection query: aString [
 
-	| strings transitionPairs remaining hasAnyKeywords |
+	| strings transitionPairs remaining hasAnyKeywords unique |
 	"if we have a simple single-block result, see if some other results we found could be derived from that simple result. Heuristic is that if the source string starts the same as another block and we contain the innermost slot of that prefix, we can derive it"
-	aCollection ifEmpty: [^ aCollection].
+	unique := aCollection asIdentitySet.
+	unique ifEmpty: [^ unique].
 	
 	strings := IdentityDictionary new.
 	
-	aCollection do: [:result |
+	unique do: [:result |
 		strings
 			at: result
 			put: (String streamContents: [:s | result do: [:r | r writeSourceOn: s indent: 0 forCompare: true]])].
 	
-	transitionPairs := aCollection first first factory transitionPairs.
+	transitionPairs := unique anyOne first factory transitionPairs.
 	
-	remaining := aCollection select: [:result | aCollection noneSatisfy: [:other | result ~~ other and: [(((strings at: result) beginsWith: (strings at: other)) and: [self blocks: result contain: other]) or: [transitionPairs anySatisfy: [:pair | pair key = other first type and: [pair value = result first type]]]]]].
+	remaining := unique select: [:result | unique noneSatisfy: [:other | result ~~ other and: [(((strings at: result) beginsWith: (strings at: other)) and: [self blocks: result contain: other]) or: [transitionPairs anySatisfy: [:pair | pair key = other first type and: [pair value = result first type]]]]]].
 	
 	hasAnyKeywords := remaining anySatisfy: [:r | | node |
 		node := r first firstDeepSubmorph slot firstNode.
@@ -163,9 +164,9 @@ SBTSInputParser >> normalizeResults: aCollection query: aString [
 			index := aString indexOfSubCollection: node label.
 			index > 0 and: [(aString at: index + node label size ifAbsent: [$x]) = $ ]]].
 	
-	^ hasAnyKeywords
+	^ (hasAnyKeywords
 		ifTrue: [remaining select: [:r | r first firstDeepSubmorph slot firstNode isTSLabel]]
-		ifFalse: [remaining]
+		ifFalse: [remaining]) asArray
 ]
 
 { #category : #query }
