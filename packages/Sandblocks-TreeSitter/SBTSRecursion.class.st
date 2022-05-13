@@ -37,5 +37,6 @@ SBTSRecursion >> seed [
 { #category : #'as yet unclassified' }
 SBTSRecursion >> seed: aCollection [
 
-	seed := aCollection
+	self assert: (aCollection allSatisfy: [:c | c class = SBTSInputParser]).
+	seed := aCollection collect: [:parser | parser copy]
 ]

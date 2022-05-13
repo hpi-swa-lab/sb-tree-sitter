@@ -152,7 +152,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 	| labelStream oldPosition |
 	labelStream := self label readStream.
 	oldPosition := aParser position.
-	[aParser atEnd or: [(aParser peek = (Character value: 0) and: [labelStream position > 0]) or: [labelStream atEnd]]] whileFalse: [
+	[aParser atEnd or: [(aParser peek isMorph and: [labelStream position > 0]) or: [labelStream atEnd]]] whileFalse: [
 		labelStream next = aParser next ifFalse: [
 			aParser position: oldPosition.
 			^ {}]].

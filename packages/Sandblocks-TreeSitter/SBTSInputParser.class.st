@@ -28,7 +28,7 @@ SBTSInputParser >> addEmptyBlocks: aCollection [
 { #category : #memo }
 SBTSInputParser >> answerResultsFor: aSymbol recursion: aRecursion at: aNumber [
 
-	self assert: symbolStack last = aSymbol type.
+	"self assert: symbolStack last = aSymbol type."
 	symbolStack removeLast.
 	^ aRecursion head
 		ifNotNil: [:head |
@@ -36,9 +36,12 @@ SBTSInputParser >> answerResultsFor: aSymbol recursion: aRecursion at: aNumber [
 				ifTrue: [
 					aRecursion seed: {self}.
 					self growLeftRecursionAt: aNumber head: aRecursion head for: aSymbol]
-				ifFalse: [aRecursion seed]]
+				ifFalse: [
+					self assert: aRecursion seed size = 1.
+					self blocks: aRecursion seed.
+					{self}]]
 		ifNil: [
-			((memoizations at: aNumber) at: aSymbol type) parsers: {self copy}.
+			((memoizations at: aNumber) at: aSymbol type) parsers: {self}.
 			{self}]
 ]
 
@@ -57,6 +60,7 @@ SBTSInputParser >> blocks [
 { #category : #blocks }
 SBTSInputParser >> blocks: aCollection [
 
+	self assert: (aCollection allSatisfy: [:m | m isMorph]).
 	blocks := aCollection
 ]
 
@@ -72,27 +76,36 @@ SBTSInputParser >> blocks: aCollection contain: anotherCollection [
 	^ false
 ]
 
+{ #category : #stream }
+SBTSInputParser >> characterModeDuring: aBlock [
+
+	stream characterMode: true.
+	aBlock ensure: [stream characterMode: false]
+]
+
 { #category : #memo }
 SBTSInputParser >> growLeftRecursionAt: aNumber head: aHead for: aSymbol [
 
-	| recurResults entry continue |
+	| recurResults entry queue start |
 	entry := (memoizations at: aNumber) at: aSymbol type.
 	(aHead first ~= aSymbol type or: [self atEnd]) ifTrue: [^ entry lr seed].
-	entry parsers: (entry lr seed collect: [:r | r copy]).
+	"self assert: aSymbol type = entry lr seed last blocks anyOne type."
+	queue := OrderedCollection withAll: entry lr seed.
+	recurResults := OrderedCollection new.
 	
 	activeRecursion at: aNumber put: aHead.
-	recurResults := {self}.
-	[
+	start := self copy position: aNumber - 1.
+	"can maybe drop"
+	
+	[queue notEmpty] whileTrue: [ | current results |
 		aHead at: 3 put: aHead second copy.
-		stream position: aNumber - 1.
-		blocks := OrderedCollection new.
-		self assert: recurResults size <= 1.
-		recurResults := aSymbol bodyTemplate resultsFor: recurResults last.
-		continue := recurResults notEmpty and: [recurResults last stream position <= (aNumber - 1)].
-		continue ifTrue: [
-			entry parsers: recurResults.
-			"insert the same entry at recurResults stream position+1?"
-			self flag: #todo]] doWhileTrue: [continue].
+		current := queue removeFirst.
+		entry parsers: {current}.
+		results := aSymbol resultsNonMemoizedFor: start copy.
+		results := results select: [:result | result stream position > (aNumber - 1)].
+		"check if current is already a valid case"
+		results ifEmpty: [recurResults add: current] ifNotEmpty: [queue addAll: results]].
+	
 	activeRecursion at: aNumber put: nil.
 	^ recurResults
 ]
@@ -107,28 +120,40 @@ SBTSInputParser >> initialize [
 ]
 
 { #category : #memo }
-SBTSInputParser >> memoizationFor: aSymbol ifPresent: aSuccessBlock ifAbsentPut: aBlock [
+SBTSInputParser >> memoizationFor: aSymbol ifAbsentPut: aBlock [
 
 	| index |
-	((visitedSupertypes includes: aSymbol type) and: [stream peek = (Character value: 0)]) ifTrue: [
+	((visitedSupertypes includes: aSymbol type) and: [stream peek isMorph]) ifTrue: [
 		visitedSupertypes remove: aSymbol type.
 		"TODO: can we write this back?"
 		^ aBlock value].
+	
+	(self peek isMorph and: [self peek slot includesParentThat: [:p | p type = aSymbol type]]) ifTrue: [ | block |
+		block := self next copyBlock.
+		block slot trimNodesToTypeOf: aSymbol.
+		self addBlock: block.
+		^ {self}].
 	
 	index := stream position.
 	^ (self recall: aSymbol evalDo: aBlock)
 		ifNil: [ | lr memoEntry |
 			lr := SBTSRecursion new.
-			memoEntry := SBTSMemoEntry new parsers: lr.
+			memoEntry := SBTSMemoEntry new lr: lr.
 			(memoizations at: index + 1) at: aSymbol type put: memoEntry.
 			symbolStack add: aSymbol type.
-			aBlock value gather: [:result | result answerResultsFor: aSymbol recursion: lr at: index + 1]]
+			aBlock value gather: [:result | | a |
+				a := result answerResultsFor: aSymbol recursion: lr at: index + 1.
+				self assert: (a allSatisfy: [:c | c isKindOf: SBTSInputParser]).
+				a]]
 		ifNotNil: [:memoEntry |
-			memoEntry isLeftRecursion
+			(memoEntry isLeftRecursion
 				ifTrue: [
-					memoEntry setLeftRecursionDetectedFrom: aSymbol stack: symbolStack.
+					SBToggledCode
+						comment: ''
+						active: 0
+						do: {[memoEntry setLeftRecursionDetectedFrom: aSymbol stack: symbolStack]}.
 					memoEntry lr seed]
-				ifFalse: [memoEntry parsers collect: [:p | p copy]]]
+				ifFalse: [memoEntry parsers]) collect: [:parser | parser copy updateStateFrom: self symbol: aSymbol]]
 ]
 
 { #category : #stream }
@@ -142,8 +167,8 @@ SBTSInputParser >> normalizeResults: aCollection query: aString [
 
 	| strings transitionPairs remaining hasAnyKeywords unique |
 	"if we have a simple single-block result, see if some other results we found could be derived from that simple result. Heuristic is that if the source string starts the same as another block and we contain the innermost slot of that prefix, we can derive it"
-	unique := aCollection asIdentitySet.
-	unique ifEmpty: [^ unique].
+	unique := aCollection.
+	unique ifEmpty: [^ unique asArray].
 	
 	strings := IdentityDictionary new.
 	
@@ -171,29 +196,35 @@ SBTSInputParser >> normalizeResults: aCollection query: aString [
 { #category : #query }
 SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after: anotherCollection [
 
-	stream := ((aCollection collect: [:i | Character value: 0] as: String), (aString, (anotherCollection collect: [:i | Character value: 0] as: String))) readStream.
+	stream := SBTSBlockStringStream on: aCollection, aString asArray, anotherCollection.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
 	activeRecursion := Array new: stream originalContents size withAll: nil.
 	symbolStack := OrderedCollection new.
 	
-	aCollection ifNotEmpty: [
-		aCollection first slot allSuperTypesDo: [:typeNode | "if our nested element (char0) is at the start, we would immediately abort expanding instead of recursing. instead, allow one level of recursion for each type node that is above our nested element."
-		aCollection first slot firstNode ~= typeNode ifTrue: [visitedSupertypes add: typeNode type]]].
+	SBToggledCode comment: '' active: 1 do: {
+		[
+			aCollection ifNotEmpty: [
+				aCollection first slot allSuperTypesDo: [:typeNode | "if our nested element (char0) is at the start, we would immediately abort expanding instead of recursing. instead, allow one level of recursion for each type node that is above our nested element."
+				aCollection first slot firstNode ~= typeNode ifTrue: [visitedSupertypes add: typeNode type]]]]}.
 	
-	aCollection doWithIndex: [:block :index |
-		block slot allSuperTypesDo: [:typeNode | | copy |
-			copy := block copyBlock.
-			copy slot trimNodesTo: typeNode.
-			(memoizations at: index)
-				at: typeNode type
-				put: (SBTSMemoEntry new parsers: {self copy addBlock: copy})]].
-	anotherCollection doWithIndex: [:block :index |
-		block slot allSuperTypesDo: [:typeNode | | copy |
-			copy := block copyBlock.
-			copy slot trimNodesTo: typeNode.
-			(memoizations at: aCollection size + (aString size + index))
-				at: typeNode type
-				put: (SBTSMemoEntry new parsers: {self copy addBlock: copy})]].
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			aCollection doWithIndex: [:block :index |
+				block slot allSuperTypesDo: [:typeNode | | copy |
+					copy := block copyBlock.
+					copy slot trimNodesTo: typeNode.
+					(memoizations at: index)
+						at: typeNode type
+						put: (SBTSMemoEntry new parsers: {self copy addBlock: copy})]]]}.
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			anotherCollection doWithIndex: [:block :index |
+				block slot allSuperTypesDo: [:typeNode | | copy |
+					copy := block copyBlock.
+					copy slot trimNodesTo: typeNode.
+					(memoizations at: aCollection size + (aString size + index))
+						at: typeNode type
+						put: (SBTSMemoEntry new parsers: {self copy addBlock: copy})]]]}.
 	
 	^ self
 		normalizeResults: (((aTSBlock slot transitionRoot resultsFor: self) select: [:parser | parser atEnd]) collect: [:parser | parser blocks])
@@ -203,7 +234,7 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 { #category : #query }
 SBTSInputParser >> optionsForTemplate: aNode given: aString [
 
-	stream := aString readStream.
+	stream := SBTSBlockStringStream on: aString asArray.
 	activeRecursion := Array new: aString size withAll: nil.
 	symbolStack := OrderedCollection new.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
@@ -234,7 +265,7 @@ SBTSInputParser >> position: aNumber [
 SBTSInputParser >> postCopy [
 
 	super postCopy.
-	stream := (ReadStream on: stream contents)
+	stream := (SBTSBlockStringStream on: stream contents)
 		position: stream position;
 		yourself.
 	SBToggledCode
@@ -262,7 +293,7 @@ SBTSInputParser >> recall: aSymbol evalDo: aBlock [
 	recursion ifNil: [^ memoEntry].
 	
 	"symbol not involved in current recursion, deny"
-	(memoEntry isNil and: [(recursion second includes: aSymbol type) not and: [aSymbol type ~= recursion first]]) ifTrue: [^ {}].
+	(memoEntry isNil and: [(recursion second includes: aSymbol type) not and: [aSymbol type ~= recursion first]]) ifTrue: [^ SBTSMemoEntry new parsers: {}].
 	
 	"symbol involved and hasn't been evaluated yet during this iteration"
 	(recursion third includes: aSymbol type) ifTrue: [
@@ -282,4 +313,17 @@ SBTSInputParser >> remainingSize [
 SBTSInputParser >> stream [
 
 	^ stream
+]
+
+{ #category : #accessing }
+SBTSInputParser >> symbolStack [
+
+	^ symbolStack
+]
+
+{ #category : #memo }
+SBTSInputParser >> updateStateFrom: aParser symbol: aSymbol [
+
+	symbolStack := aParser symbolStack copy.
+	blocks ifNotEmpty: [blocks last slot replaceLast: aSymbol]
 ]

@@ -20,7 +20,7 @@ SBRegexStream class >> tryMatchPrefix: aString regex: aRegex [
 	| s |
 	s := self on: aString.
 	aRegex matchesStream: s.
-	^ s wasSuccess or: [aRegex matches: aString]
+	^ s wasSuccess or: [aRegex matchesStream: ((SBTSBlockStringStream on: aString) characterMode: true)]
 ]
 
 { #category : #'as yet unclassified' }
@@ -32,7 +32,7 @@ SBRegexStream >> next [
 		^ nil].
 	ret := super next.
 	maxReadPosition := maxReadPosition max: self position.
-	^ ret
+	^ ret isMorph ifTrue: [Character value: 0] ifFalse: [ret]
 ]
 
 { #category : #'as yet unclassified' }

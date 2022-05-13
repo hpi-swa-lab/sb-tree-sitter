@@ -16,7 +16,10 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 { #category : #failures }
 SBTSParseInputTest >> expectedFailures [
 
-	^ #(#testAssignmentPattern #testCreateMemberExpression #testDirectRecursion #testIndirectRecursion #testCreateBinaryMessage)
+	^ SBToggledCode
+		comment: ''
+		active: 1
+		do: {[#()]. [#(#testAssignmentPattern #testCreateMemberExpression #testCreateBinaryMessage)]}
 ]
 
 { #category : #helper }
@@ -491,6 +494,7 @@ SBTSParseInputTest >> testReinterpretUnaryToKeyword [
 		given: 'msg:'
 		before: {message childSandblocks first}
 		after: {}.
+	self assert: 1 equals: results size.
 	self assert: 'keyword_message' equals: results first first type
 ]
 
@@ -547,6 +551,7 @@ SBTSParseInputTest >> testWrapJsBinaryOp [
 		given: '+2'
 		before: {program childSandblocks first}
 		after: {}.
+	self assert: 1 equals: results size.
 	self
 		assert: results first first childSandblocks second slot nodes size
 		equals: results first first childSandblocks first slot nodes size

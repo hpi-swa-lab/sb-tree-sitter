@@ -28,6 +28,13 @@ SBTSMemoEntry >> lr [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSMemoEntry >> lr: aRecursion [
+
+	self assert: aRecursion class = SBTSRecursion.
+	answer := aRecursion
+]
+
+{ #category : #'as yet unclassified' }
 SBTSMemoEntry >> parsers [
 
 	self assert: self isLeftRecursion not.
@@ -37,7 +44,8 @@ SBTSMemoEntry >> parsers [
 { #category : #'as yet unclassified' }
 SBTSMemoEntry >> parsers: aCollection [
 
-	answer := aCollection
+	self assert: (aCollection allSatisfy: [:p | p class = SBTSInputParser]).
+	answer := aCollection collect: [:parser | parser copy]
 ]
 
 { #category : #'as yet unclassified' }

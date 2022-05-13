@@ -304,6 +304,15 @@ SBTSSlot >> trimNodesTo: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> trimNodesToTypeOf: aNode [
+
+	| index |
+	index := nodes findFirst: [:node | aNode type = node type].
+	nodes removeLast: nodes size - (index - 1).
+	nodes addLast: aNode
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> type [
 
 	^ self firstNode type

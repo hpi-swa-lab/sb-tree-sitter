@@ -149,6 +149,13 @@ SBTSTextMorph >> preferredColorIn: aColorPolicy [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> printOn: aStream [
+
+	super printOn: aStream.
+	aStream print: contents
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> regex [
 
 	^ self slot firstNode regex

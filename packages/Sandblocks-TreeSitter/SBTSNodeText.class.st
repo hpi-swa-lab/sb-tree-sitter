@@ -150,35 +150,35 @@ SBTSNodeText >> regexString: aString [
 { #category : #parsing }
 SBTSNodeText >> resultsFor: aParser [
 
-	| start remaining |
-	" word-rule? "
-	self flag: #todo.
-	
-	start := aParser position.
-	(self regex matchesStreamPrefix: aParser stream) ifTrue: [ | contents |
-		contents := aParser stream originalContents
-			copyFrom: start + 1
-			to: aParser position.
-		[aParser peek = $ ] whileTrue: [aParser next].
-		^ {
-			aParser addBlock: (SBTSTextMorph new
-				slot: (SBTSSlot new addNode: self);
-				contents: contents)}].
-	
-	remaining := aParser stream upToEnd.
-	(SBToggledCode
-		comment: ''
-		active: 1
-		do: {[self prefixValidFor: remaining]. [plainPrefix beginsWith: remaining]}) ifTrue: [
-		^ {
-			aParser addBlock: (SBTSTextMorph new
-				slot: (SBTSSlot new addNode: self);
-				contents: (plainPrefix size > remaining size
-					ifTrue: [plainPrefix]
-					ifFalse: [remaining]))}].
-	
-	aParser stream position: start.
-	^ {}
+	aParser characterModeDuring: [ | start remaining |
+		" word-rule? "
+		self flag: #todo.
+		
+		start := aParser position.
+		(self regex matchesStreamPrefix: aParser stream) ifTrue: [ | contents |
+			contents := aParser stream originalContents
+				copyFrom: start + 1
+				to: aParser position.
+			[aParser peek = $ ] whileTrue: [aParser next].
+			^ {
+				aParser addBlock: (SBTSTextMorph new
+					slot: (SBTSSlot new addNode: self);
+					contents: (String withAll: contents))}].
+		
+		remaining := aParser stream upToEnd.
+		(SBToggledCode
+			comment: ''
+			active: 1
+			do: {[self prefixValidFor: remaining]. [plainPrefix beginsWith: remaining]}) ifTrue: [
+			^ {
+				aParser addBlock: (SBTSTextMorph new
+					slot: (SBTSSlot new addNode: self);
+					contents: (String withAll: (plainPrefix size > remaining size
+						ifTrue: [plainPrefix]
+						ifFalse: [remaining])))}].
+		
+		aParser stream position: start.
+		^ {}]
 ]
 
 { #category : #parsing }
