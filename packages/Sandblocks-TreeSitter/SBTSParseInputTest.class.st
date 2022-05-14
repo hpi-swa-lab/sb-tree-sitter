@@ -56,7 +56,7 @@ SBTSParseInputTest >> testAssignmentPattern [
 		language: SBJavascript instance) childSandblocks first childSandblocks first.
 	results := SBTSInputParser new
 		optionsFor: pattern
-		given: '='
+		given: '=x'
 		before: {pattern}
 		after: {}.
 	self assert: 1 equals: results size
@@ -318,7 +318,7 @@ SBTSParseInputTest >> testDirectRecursion [
 		optionsForTemplate: (SBTSNodeSymbol new type: 'expr' factory: factory)
 		given: '1+2'.
 	self assert: 1 equals: results size.
-	self assert: {'1'. '+'. '2'} equals: (results first collect: #sourceString as: Array)
+	self assert: '1+2' equals: results first first sourceString
 ]
 
 { #category : #'tests - wrap' }

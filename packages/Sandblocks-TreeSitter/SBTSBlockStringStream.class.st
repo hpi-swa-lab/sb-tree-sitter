@@ -29,3 +29,12 @@ SBTSBlockStringStream >> on: aCollection [
 	super on: aCollection.
 	characterMode := false
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSBlockStringStream >> printOn: stream [
+
+	super printOn: stream.
+	stream nextPut: $(.
+	stream print: self position.
+	stream nextPut: $)
+]

@@ -8,6 +8,16 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSMemoEntry >> getBlocksOrMarkRecursionFrom: aSymbol stack: aCollection [
+
+	^ self isLeftRecursion
+		ifTrue: [
+			self setLeftRecursionDetectedFrom: aSymbol stack: aCollection.
+			{}]
+		ifFalse: [self parsers]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSMemoEntry >> isLeftRecursion [
 
 	^ answer class = SBTSRecursion
@@ -44,7 +54,7 @@ SBTSMemoEntry >> parsers [
 { #category : #'as yet unclassified' }
 SBTSMemoEntry >> parsers: aCollection [
 
-	self assert: (aCollection allSatisfy: [:p | p class = SBTSInputParser]).
+	self assert: (aCollection allSatisfy: [:p | p class = SBTSMemoizedBlocks]).
 	answer := aCollection collect: [:parser | parser copy]
 ]
 
@@ -71,6 +81,11 @@ SBTSMemoEntry >> setLeftRecursionDetectedFrom: aSymbol stack: aCollection [
 	self assert: self isLeftRecursion.
 	stack := aCollection reversed copyUpTo: aSymbol type.
 	answer head
-		ifNotNil: [answer head second addAll: stack]
-		ifNil: [answer head: {aSymbol type. stack asSet. {}}]
+		ifNotNil: [
+			answer addInvolved: stack]
+		ifNil: [
+			answer
+				head: aSymbol type;
+				allowedSymbols: {};
+				involvedSymbols: stack asSet]
 ]

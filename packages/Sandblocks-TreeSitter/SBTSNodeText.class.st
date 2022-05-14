@@ -159,17 +159,19 @@ SBTSNodeText >> resultsFor: aParser [
 			contents := aParser stream originalContents
 				copyFrom: start + 1
 				to: aParser position.
-			[aParser peek = $ ] whileTrue: [aParser next].
-			^ {
-				aParser addBlock: (SBTSTextMorph new
-					slot: (SBTSSlot new addNode: self);
-					contents: (String withAll: contents))}].
+			(contents noneSatisfy: [:c | c isMorph])
+				ifTrue: [
+					[aParser peek = $ ] whileTrue: [aParser next].
+					^ {
+						aParser addBlock: (SBTSTextMorph new
+							slot: (SBTSSlot new addNode: self);
+							contents: (String withAll: contents))}]
+				ifFalse: [aParser stream position: start]].
 		
 		remaining := aParser stream upToEnd.
-		(SBToggledCode
-			comment: ''
-			active: 1
-			do: {[self prefixValidFor: remaining]. [plainPrefix beginsWith: remaining]}) ifTrue: [
+		(SBToggledCode comment: '' active: 1 do: {
+			[(remaining noneSatisfy: [:c | c isMorph]) and: [self prefixValidFor: remaining]].
+			[plainPrefix beginsWith: remaining]}) ifTrue: [
 			^ {
 				aParser addBlock: (SBTSTextMorph new
 					slot: (SBTSSlot new addNode: self);

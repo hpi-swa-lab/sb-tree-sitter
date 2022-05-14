@@ -130,13 +130,48 @@ SBTSNodeSymbol >> printOn: aStream [
 { #category : #parsing }
 SBTSNodeSymbol >> resultsFor: aParser [
 
+	| storedBlocks newBlocks |
 	(self factory inputTransitionBlackList includes: self type) ifTrue: [^ {}].
 	
 	aParser peek = (Character value: 1) ifTrue: [
 		aParser next.
 		^ {aParser addEmptyBlocks: self buildEmpty}].
 	
-	^ aParser memoizationFor: self ifAbsentPut: [self resultsNonMemoizedFor: aParser]
+	storedBlocks := (aParser peek isMorph and: [aParser peek slot includesParentThat: [:p | p type = self type]])
+		ifTrue: [ | block result |
+			result := aParser copy.
+			block := result next copyBlock.
+			block slot trimNodesToTypeOf: self.
+			result addBlock: block.
+			{result}]
+		ifFalse: [{}].
+	newBlocks := (SBToggledCode comment: '' active: 1 do: {
+		["see memoizationFor:ifAbsentPut:, same hack"
+		storedBlocks anySatisfy: [:r | r atEnd]]})
+		ifFalse: [
+			aParser memoizationFor: self ifAbsentPut: [ | currentBlocks results |
+				currentBlocks := aParser blocks.
+				aParser blocks: OrderedCollection new.
+				results := (self bodyTemplate resultsFor: aParser) collect: [:result |
+					SBTSMemoizedBlocks new
+						position: result position;
+						blocks: (self isInlined
+							ifTrue: [
+								result blocks
+									do: [:b | b slot addNode: self];
+									yourself]
+							ifFalse: [
+								{
+									SBTSBlock new
+										slot: (SBTSSlot new addNode: self);
+										addAllMorphs: result blocks;
+										yourself}]);
+						yourself].
+				aParser blocks: currentBlocks.
+				results]]
+		ifTrue: [{}].
+	
+	^ storedBlocks, newBlocks
 ]
 
 { #category : #parsing }

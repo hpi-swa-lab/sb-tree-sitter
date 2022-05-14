@@ -102,8 +102,12 @@ SBTSNodeAlias >> printOn: aStream [
 { #category : #parsing }
 SBTSNodeAlias >> resultsFor: aParser [
 
+	| currentBlocks |
+	currentBlocks := aParser blocks.
+	aParser blocks: OrderedCollection new.
 	^ (self element resultsFor: aParser) collect: [:result |
 		result blocks do: [:b | b slot addNode: self].
+		result blocks: currentBlocks, result blocks.
 		result]
 ]
 

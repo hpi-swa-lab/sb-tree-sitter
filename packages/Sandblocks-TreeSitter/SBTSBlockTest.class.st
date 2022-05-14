@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJsAmbiguousCall #testDeleteInRepeat)
+	^ #(#testDeleteInRepeat #testSmalltalkTypeKeywordSignature)
 ]
 
 { #category : #'tests - adding' }
@@ -659,7 +659,7 @@ SBTSBlockTest >> testTypingArray [
 	self
 		assert: module childSandblocks last
 		equals: editor selection.
-	self assert: #insert equals: editor cursor mode
+	self assert: #input equals: editor cursor mode
 ]
 
 { #category : #'tests - cursor position' }
