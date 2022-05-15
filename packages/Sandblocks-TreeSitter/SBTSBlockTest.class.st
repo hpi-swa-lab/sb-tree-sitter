@@ -216,6 +216,19 @@ SBTSBlockTest >> testJsClassField [
 	self assert: 'prop' equals: module lastDeepChild contents
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsCompleteMemberNested [
+
+	| module editor |
+	module := SBTSFileParser new parse: '' language: SBJavascript.
+	editor := self editorAndWorldFor: module.
+	module startInsertAtEnd.
+	self type: '123' in: editor.
+	editor handle: (self keyboardEvent: Character arrowUp shift: true command: false).
+	self type: ' .xy' in: editor.
+	self assert: '123.xy' equals: module sourceStringForCompare
+]
+
 { #category : #'tests - deleting' }
 SBTSBlockTest >> testJsDeleteDeclaration [
 

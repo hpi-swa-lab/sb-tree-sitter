@@ -6796,7 +6796,7 @@ SBJavascript >> addIndent: aBlock [
 SBJavascript >> configure [
 
 	self blockInline: #('expression_statement').
-	self blockInlineInParent: #('statement_block' 'arguments' 'formal_parameters').
+	self blockInlineInParent: #('arguments' 'formal_parameters').
 	self noteUncapturedText: {'template_string'}
 ]
 
@@ -6853,7 +6853,6 @@ SBJavascript >> isScope: aBlock [
 { #category : #'as yet unclassified' }
 SBJavascript >> postConfigure [
 
-	blockInline remove: 'statement_block'.
 	blockInline remove: 'class_body'
 ]
 

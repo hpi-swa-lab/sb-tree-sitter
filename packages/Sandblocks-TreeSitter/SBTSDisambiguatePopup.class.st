@@ -91,7 +91,7 @@ SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 	stopIndex := all findFirst: [:m | m valueOfProperty: #lastConstructed ifAbsent: [false]].
 	
 	stopIndex > 0 ifTrue: [
-		(all at: stopIndex) removeProperty: #lastConstructed.
+		aCollection do: [:m | m allMorphsDo: [:i | i removeProperty: #lastConstructed]].
 		
 		(all at: stopIndex) containingSandblock valid ifFalse: [^ (all at: stopIndex) containingSandblock startInputAtEnd].
 		
