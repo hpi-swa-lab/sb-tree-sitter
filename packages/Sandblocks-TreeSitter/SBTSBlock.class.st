@@ -223,6 +223,7 @@ SBTSBlock >> drawnColor [
 { #category : #'as yet unclassified' }
 SBTSBlock >> evaluate [
 
+	self containingArtefact ifNotNil: [:a | ^ a evaluate: self].
 	^ self factory runtime evaluate: self sourceString
 ]
 
