@@ -216,7 +216,9 @@ SBGrammarLanguage class >> updateFrom: aGithubString branch: aString [
 		grammarFile ifNotNil: #close.
 		highlightsFile ifNotNil: #close].
 	
-	self rebuild
+	self rebuild.
+	
+	UIManager default notify: 'restart squeak to make sure the shared library is reloaded as well'
 ]
 
 { #category : #'as yet unclassified' }

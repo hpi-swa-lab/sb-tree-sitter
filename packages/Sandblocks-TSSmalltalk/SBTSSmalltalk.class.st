@@ -169,8 +169,12 @@ SBTSSmalltalk class >> grammarJson [
         "type": "SEQ",
         "members": [
           {
-            "type": "SYMBOL",
-            "name": "expression"
+            "type": "FIELD",
+            "name": "receiver",
+            "content": {
+              "type": "SYMBOL",
+              "name": "expression"
+            }
           },
           {
             "type": "SYMBOL",
@@ -186,8 +190,12 @@ SBTSSmalltalk class >> grammarJson [
         "type": "SEQ",
         "members": [
           {
-            "type": "SYMBOL",
-            "name": "expression"
+            "type": "FIELD",
+            "name": "receiver",
+            "content": {
+              "type": "SYMBOL",
+              "name": "expression"
+            }
           },
           {
             "type": "SYMBOL",
@@ -201,14 +209,18 @@ SBTSSmalltalk class >> grammarJson [
       }
     },
     "keyword_message": {
-      "type": "PREC_DYNAMIC",
+      "type": "PREC",
       "value": -1,
       "content": {
         "type": "SEQ",
         "members": [
           {
-            "type": "SYMBOL",
-            "name": "expression"
+            "type": "FIELD",
+            "name": "receiver",
+            "content": {
+              "type": "SYMBOL",
+              "name": "expression"
+            }
           },
           {
             "type": "REPEAT1",
@@ -235,7 +247,7 @@ SBTSSmalltalk class >> grammarJson [
     },
     "assignment": {
       "type": "PREC_LEFT",
-      "value": -2,
+      "value": -10,
       "content": {
         "type": "SEQ",
         "members": [
@@ -252,6 +264,92 @@ SBTSSmalltalk class >> grammarJson [
             "name": "expression"
           }
         ]
+      }
+    },
+    "cascade": {
+      "type": "PREC",
+      "value": -2,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "receiver",
+            "content": {
+              "type": "SYMBOL",
+              "name": "expression"
+            }
+          },
+          {
+            "type": "REPEAT1",
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": ";"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_cascaded_send"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "_cascaded_send": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "cascaded_unary_message"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "cascaded_binary_message"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "cascaded_keyword_message"
+        }
+      ]
+    },
+    "cascaded_unary_message": {
+      "type": "PREC",
+      "value": -2,
+      "content": {
+        "type": "SYMBOL",
+        "name": "identifier"
+      }
+    },
+    "cascaded_binary_message": {
+      "type": "PREC",
+      "value": -3,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "binary_operator"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "expression"
+          }
+        ]
+      }
+    },
+    "cascaded_keyword_message": {
+      "type": "PREC",
+      "value": -4,
+      "content": {
+        "type": "REPEAT1",
+        "content": {
+          "type": "SYMBOL",
+          "name": "keyword_part"
+        }
       }
     },
     "keyword": {
@@ -655,15 +753,43 @@ SBTSSmalltalk class >> grammarJson [
         },
         {
           "type": "SYMBOL",
+          "name": "cascade"
+        },
+        {
+          "type": "SYMBOL",
           "name": "primary"
         }
       ]
+    },
+    "comment": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "\""
+          },
+          {
+            "type": "PATTERN",
+            "value": "[^\"]*"
+          },
+          {
+            "type": "STRING",
+            "value": "\""
+          }
+        ]
+      }
     }
   },
   "extras": [
     {
+      "type": "SYMBOL",
+      "name": "comment"
+    },
+    {
       "type": "PATTERN",
-      "value": "\\s"
+      "value": "[\\s]"
     }
   ],
   "conflicts": [
@@ -697,16 +823,18 @@ SBTSSmalltalk class >> grammarJson [
 
 { #category : #properties }
 SBTSSmalltalk class >> highlightQuery [
-	" https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
 
-	^ '["this" "self" "true" "false" "thisContext" "super" "nil"] @keyword
+    " https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
+    ^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
 (number) @number
 (string) @string
+(symbol) @string
 (identifier) @variable
 (unary_message (_) (identifier) @variable.part)
 (binary_operator) @variable.part
 (keyword) @variable.part
-["^" "[" "]" "{" "}"] @important'
+["^" "[" "]" "{" "}"] @important
+'
 ]
 
 { #category : #'as yet unclassified' }
@@ -738,6 +866,7 @@ SBTSSmalltalk >> addIndent: aBlock [
 
 	(aBlock submorphIndex = 1 and: [aBlock owner type = 'keyword_message']) ifTrue: [^ true].
 	(aBlock contents = '[' and: [aBlock containingSandblock type = 'block']) ifTrue: [^ true].
+	(aBlock contents = ';' and: [aBlock submorphIndex = 2]) ifTrue: [^ true].
 	^ false
 ]
 
@@ -760,6 +889,7 @@ SBTSSmalltalk >> expressionTypes [
 SBTSSmalltalk >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	aBlock parentSandblock type = 'block' ifTrue: [^ aBlock parentSandblock childSandblocks size > 1 and: [anotherBlock contents ~= ']']].
+	aBlock contents = ';' ifTrue: [^ true].
 	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
 	^ false
 ]
@@ -773,7 +903,7 @@ SBTSSmalltalk >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 { #category : #'as yet unclassified' }
 SBTSSmalltalk >> isImmutableLabel: aLabelNode [
 
-	^ (super isImmutableLabel: aLabelNode) or: [#('|') includes: aLabelNode label]
+	^ (super isImmutableLabel: aLabelNode) or: [#('|' '''' ';') includes: aLabelNode label]
 ]
 
 { #category : #'as yet unclassified' }

@@ -42,6 +42,12 @@ SBTSLabel >> drawnColor [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> factory [
+
+	^ self slot factory
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> field [
 
 	^ self slot field

@@ -20,7 +20,12 @@ SBTSBlock class >> registerShortcuts: aProvider [
 SBTSBlock >> absorbsInput: anEvent [
 
 	(anEvent commandKeyPressed or: [anEvent optionKeyPressed or: [anEvent controlKeyPressed]]) ifTrue: [^ false].
-	^ anEvent keyCharacter isPrintable and: [self currentTextMorph slot firstNode regex matches: anEvent keyCharacter asString]
+	^ anEvent keyCharacter isPrintable and: [ | text oldContents |
+		text := self sandblockEditor cursor cursorPosition textMorph.
+		oldContents := text contents.
+		[
+			text keyStroke: anEvent.
+			text slot firstNode regex matches: text contents] ensure: [text contents: oldContents]]
 ]
 
 { #category : #'as yet unclassified' }
