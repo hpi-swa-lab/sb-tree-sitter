@@ -686,7 +686,7 @@ SBTSBlockTest >> testTypingArray [
 	self
 		assert: module childSandblocks last
 		equals: editor selection.
-	self assert: #input equals: editor cursor mode
+	self assert: #insert equals: editor cursor mode
 ]
 
 { #category : #'tests - cursor position' }

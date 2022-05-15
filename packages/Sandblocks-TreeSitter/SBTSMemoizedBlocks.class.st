@@ -12,7 +12,7 @@ Class {
 SBTSMemoizedBlocks >> adapt: aParser for: aSymbol [
 
 	^ aParser copy
-		addBlocks: (self blocksCopied collect: [:b |
+		addEmptyBlocks: (self blocksCopied collect: [:b |
 			aSymbol isBlockInlinedInParent ifFalse: [
 				"we match the memo table by the general symbol; now we replace the matching symbol with the exact symbol that the current context wants"
 				self assert: b slot lastNode type = aSymbol type.

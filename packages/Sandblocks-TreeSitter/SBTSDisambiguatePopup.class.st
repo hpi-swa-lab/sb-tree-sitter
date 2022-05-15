@@ -88,7 +88,7 @@ SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 
 	| all positionInAll stopIndex |
 	all := Array streamContents: [:s | aCollection do: [:block | block allMorphsPreorderDo: [:m | s nextPut: m]]].
-	stopIndex := all findFirst: [:m | m valueOfProperty: #lastConstructed ifAbsent: [false]].
+	stopIndex := all findLast: [:m | m valueOfProperty: #lastConstructed ifAbsent: [false]].
 	
 	stopIndex > 0 ifTrue: [
 		aCollection do: [:m | m allMorphsDo: [:i | i removeProperty: #lastConstructed]].
@@ -98,7 +98,7 @@ SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 		positionInAll := [:cursor |
 			cursor isInsert
 				ifTrue: [ | childIndex |
-					childIndex := all findFirst: [:m | m owner = cursor container].
+					childIndex := all findFirst: [:m | m = cursor container or: [m owner = cursor container]].
 					childIndex + (((cursor container submorphs copyFrom: 1 to: cursor command insertIndex - 1) collect: #recursiveSubmorphCount)
 						inject: 0
 						into: [:s :c | s + c]) + 1]

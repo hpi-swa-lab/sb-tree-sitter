@@ -23,13 +23,14 @@ SBTSInputParser >> addBlock: aBlock [
 SBTSInputParser >> addBlocks: aCollection [
 
 	blocks addAll: aCollection.
-	(self atEnd and: [aCollection notEmpty]) ifTrue: [aCollection last setProperty: #lastConstructed toValue: true]
+	(self atEnd and: [aCollection notEmpty]) ifTrue: [
+		aCollection last setProperty: #lastConstructed toValue: true]
 ]
 
 { #category : #blocks }
 SBTSInputParser >> addEmptyBlocks: aCollection [
 
-	aCollection do: [:b | blocks add: b]
+	blocks addAll: aCollection
 ]
 
 { #category : #stream }
