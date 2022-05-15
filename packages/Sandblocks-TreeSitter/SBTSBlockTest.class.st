@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testDeleteInRepeat #testSmalltalkTypeKeywordSignature)
+	^ #(#testDeleteInRepeat)
 ]
 
 { #category : #'tests - adding' }
@@ -314,6 +314,20 @@ SBTSBlockTest >> testJsPatternToAssignmentPattern [
 	editor handle: (self keyboardEvent: Character cr).
 	
 	self assert: 'assignment_pattern' equals: module childSandblocks first childSandblocks first type
+]
+
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testJsReinterpretIncompleteLabel [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'abc()' language: SBJavascript.
+	editor := self editorFor: module.
+	module childSandblocks first startInsertAtEnd.
+	self type: '..ab' in: editor.
+	self assert: 'spread_element' equals: module childSandblocks first childSandblocks second type.
+	self
+		assert: 'identifier'
+		equals: module childSandblocks first childSandblocks second childSandblocks first type
 ]
 
 { #category : #'tests - input transition' }

@@ -155,6 +155,12 @@ SBTSLabel >> submorphIndex [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> wantsInput [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> wrapOffscreen: anEditor [
 
 	

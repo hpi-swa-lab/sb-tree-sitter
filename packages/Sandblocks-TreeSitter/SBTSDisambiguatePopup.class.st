@@ -155,7 +155,7 @@ SBTSDisambiguatePopup >> tryAdjacent [
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> tryFill [
 
-	target isUnknown ifFalse: [^ false].
+	(target wantsInput not or: [target childSandblocks notEmpty]) ifTrue: [^ false].
 	
 	choices := SBTSInputParser new
 		optionsForTemplate: target slot lastNode

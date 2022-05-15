@@ -423,6 +423,13 @@ SBTreeSitter >> smalltalk [
 	^ SBMetaBlockFactory tryPatchLibrary: 'tom95/tree-sitter-smalltalk' name: 'smalltalk' context: thisContext branch: 'main'
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> supercollider [
+
+	<apicall: SBTSLanguage* tree_sitter_supercollider () module: 'tree-sitter-supercollider'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'madskjeldgaard/tree-sitter-supercollider' name: 'supercollider' context: thisContext branch: 'main'
+]
+
 { #category : #helper }
 SBTreeSitter >> textBetween: aNode and: anEndNode [
 	" TODO: will break with UTF-8 "

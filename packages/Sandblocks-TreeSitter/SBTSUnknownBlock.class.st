@@ -34,6 +34,12 @@ SBTSUnknownBlock >> isUnknown [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknownBlock >> keepDuringTransform [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknownBlock >> prefixValid [
 
 	^ false

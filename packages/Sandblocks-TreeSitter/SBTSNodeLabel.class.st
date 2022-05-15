@@ -157,6 +157,11 @@ SBTSNodeLabel >> resultsFor: aParser [
 			aParser position: oldPosition.
 			^ {}]].
 	
+	SBToggledCode
+		comment: ''
+		active: 0
+		do: {[(labelStream atEnd or: [aParser atEnd]) ifFalse: [^ {}]]}.
+	
 	[aParser peek = $ ] whileTrue: [aParser next].
 	^ {aParser addBlock: (self buildMorphWith: self label slot: (SBTSSlot new addNode: self))}
 ]
