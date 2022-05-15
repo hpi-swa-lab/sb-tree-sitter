@@ -105,6 +105,12 @@ SBTSNodeBase >> delimiterBetween: aBlock and: anotherBlock [
 	^ ''
 ]
 
+{ #category : #hierarchy }
+SBTSNodeBase >> effectiveNode [
+
+	^ self
+]
+
 { #category : #accessing }
 SBTSNodeBase >> elements [
 

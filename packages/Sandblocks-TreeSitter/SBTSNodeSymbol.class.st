@@ -90,6 +90,12 @@ SBTSNodeSymbol >> delimiterBetween: aBlock and: anotherBlock [
 	^ ''
 ]
 
+{ #category : #hierarchy }
+SBTSNodeSymbol >> effectiveNode [
+
+	^ self isBlockInlinedInParent ifTrue: [self bodyTemplate] ifFalse: [self]
+]
+
 { #category : #accessing }
 SBTSNodeSymbol >> elements [
 
@@ -157,9 +163,10 @@ SBTSNodeSymbol >> resultsFor: aParser [
 						position: result position;
 						blocks: (self isInlined
 							ifTrue: [
-								result blocks
-									do: [:b | b slot addNode: self];
-									yourself]
+								self isBlockInlinedInParent ifTrue: [result blocks] ifFalse: [
+									result blocks
+										do: [:b | b slot addNode: self];
+										yourself]]
 							ifFalse: [
 								{
 									SBTSBlock new

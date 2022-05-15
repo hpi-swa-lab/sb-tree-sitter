@@ -56,7 +56,7 @@ SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream 
 			aBoolean ifFalse: [block cursorPositionsDo: aClosure shallow: aBoolean]]
 		ifFalse: [
 			self alternatives
-				detect: [:alt | aStream peek slot includesParent: alt]
+				detect: [:alt | aStream peek slot includesParent: alt effectiveNode]
 				ifFound: [:alt | alt cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock]]
 ]
 
