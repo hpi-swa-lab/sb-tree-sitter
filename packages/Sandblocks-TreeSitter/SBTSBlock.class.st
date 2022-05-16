@@ -555,6 +555,13 @@ SBTSBlock >> repeaterGroup [
 	^ nil
 ]
 
+{ #category : #actions }
+SBTSBlock >> showHelp [
+	<action>
+
+	self factory showHelpFor: self
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> slot [
 

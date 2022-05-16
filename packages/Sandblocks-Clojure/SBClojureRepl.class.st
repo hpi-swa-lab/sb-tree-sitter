@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBClojureRepl class >> open: aString [
+SBClojureRepl class >> openFor: aString [
 
 	^ self new
 		for: aString;
@@ -18,7 +18,7 @@ SBClojureRepl class >> open: aString [
 { #category : #'as yet unclassified' }
 SBClojureRepl >> evaluate: aBlock [
 
-	repl eval: aBlock sourceString
+	(repl eval: aBlock sourceString) explore
 ]
 
 { #category : #'as yet unclassified' }
@@ -68,5 +68,14 @@ SBClojureRepl >> outOfWorld: aWorld [
 
 	super outOfWorld: aWorld.
 	
-	repl terminate
+	repl ifNotNil: #terminate
+]
+
+{ #category : #'as yet unclassified' }
+SBClojureRepl >> showHelpFor: aBlock [
+
+	(repl lookup: aBlock contents) ifNotNil: [:doc |
+		SBDocsPopup new
+			addMorphBack: (SBMultilineOwnTextMorph new contents: (doc asText addAttribute: TextEmphasis italic));
+			showBelow: aBlock closeOnDeselect: true]
 ]

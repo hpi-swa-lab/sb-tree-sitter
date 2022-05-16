@@ -40,6 +40,22 @@ NREPLClient >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+NREPLClient >> lookup: aString [
+
+	| reply |
+	self send: (Dictionary newFrom: {'op' -> 'lookup'. 'sym' -> aString}).
+	reply := BencodeDecoder on: socket receiveData readStream.
+	^ (reply
+		at: 'info'
+		ifPresent: [:info | info isDictionary ifTrue: [info at: 'doc' ifAbsent: [nil]] ifFalse: [nil]]
+		ifAbsent: [nil]) ifNil: [
+		"using odoc from overtone here... should be part of separate runtime"
+		self flag: #fixme.
+		reply := self eval: '(odoc ', (aString, ')').
+		((reply select: [:r | r includesKey: 'out']) collect: [:r | r at: 'out']) joinSeparatedBy: String cr]
+]
+
+{ #category : #'as yet unclassified' }
 NREPLClient >> send: anObject [
 
 	socket sendData: (String streamContents: [:s | anObject bencodeOn: s])
@@ -48,6 +64,6 @@ NREPLClient >> send: anObject [
 { #category : #'as yet unclassified' }
 NREPLClient >> terminate [
 
-	self close.
+	[self close] on: ConnectionTimedOut do: [].
 	socket close
 ]

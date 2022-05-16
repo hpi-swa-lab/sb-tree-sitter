@@ -17,9 +17,7 @@ BencodeDecoder class >> on: aStream [
 				ret].
 			[$i] -> [
 				aStream next.
-				ret := (aStream upTo: $e) asInteger.
-				aStream next.
-				ret].
+				(aStream upTo: $e) asInteger].
 			[$d] -> [ | flattened |
 				aStream next.
 				flattened := Array streamContents: [:stream | [aStream peek ~= $e] whileTrue: [stream nextPut: (self on: aStream)]].

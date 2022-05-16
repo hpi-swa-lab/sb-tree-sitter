@@ -1293,6 +1293,12 @@ SBMetaBlockFactory >> shouldSkipParsing: aTypeString in: aParentTypeString curso
 		ifAbsent: [false]) or: [self extras includes: aTypeString]
 ]
 
+{ #category : #actions }
+SBMetaBlockFactory >> showHelpFor: aBlock [
+
+	
+]
+
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> simplifyList: anObject [
 	" make a*? to a* "

@@ -1734,8 +1734,27 @@ SBClojure class >> rootRuleName [
 ]
 
 { #category : #'as yet unclassified' }
+SBClojure class >> statementContainerTypes [
+
+	^ #('source')
+]
+
+{ #category : #'as yet unclassified' }
 SBClojure >> addIndent: aBlock [
 
-	(aBlock isTextMorph and: [aBlock contents = '(']) ifTrue: [^ true].
+	(aBlock isTextMorph and: [{'('. '{'. '['} includes: aBlock contents]) ifTrue: [^ true].
 	^ super addIndent: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+SBClojure >> showHelpFor: aBlock [
+
+	aBlock containingArtefact showHelpFor: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+SBClojure >> spaceBetween: aBlock and: anotherBlock [
+
+	(anotherBlock contents beginsWith: '''') ifTrue: [^ true].
+	^ super spaceBetween: aBlock and: anotherBlock
 ]
