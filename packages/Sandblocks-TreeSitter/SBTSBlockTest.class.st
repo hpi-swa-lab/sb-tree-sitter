@@ -379,6 +379,23 @@ SBTSBlockTest >> testNewStatementAfterTransition [
 	self assert: 3 equals: method childSandblocks size
 ]
 
+{ #category : #'tests - paste' }
+SBTSBlockTest >> testPasteListIntoLiteral [
+
+	| program editor |
+	program := SBTSFileParser new parse: '5
+(a)' language: SBClojure.
+	editor := self editorFor: program.
+	editor copyBuffer: program childSandblocks first.
+	
+	program childSandblocks second
+		select;
+		pasteReplace.
+	
+	self assert: '5
+5' equals: program sourceString
+]
+
 { #category : #'tests - deleting' }
 SBTSBlockTest >> testPyDeleteReturnType [
 

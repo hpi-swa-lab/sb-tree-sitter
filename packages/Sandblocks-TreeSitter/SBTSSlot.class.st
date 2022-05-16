@@ -12,7 +12,6 @@ SBTSSlot >> adaptSlotFor: anotherSlot [
 
 	| index |
 	(self nodes hasEqualElements: anotherSlot nodes) ifTrue: [^ true].
-	
 	index := anotherSlot nodes findFirst: [:node | node type = self lastNode type].
 	index > 0
 		ifTrue: [
@@ -23,7 +22,7 @@ SBTSSlot >> adaptSlotFor: anotherSlot [
 				do: [:node | self addNode: node].
 			^ true]
 		ifFalse: [
-			anotherSlot firstNode
+			anotherSlot firstNode transitionRoot
 				allSubTypesDo: [:child :parents |
 					child type = self lastNode type ifTrue: [
 						nodes removeLast.

@@ -20,12 +20,16 @@ SBTSBlock class >> registerShortcuts: aProvider [
 SBTSBlock >> absorbsInput: anEvent [
 
 	(anEvent commandKeyPressed or: [anEvent optionKeyPressed or: [anEvent controlKeyPressed]]) ifTrue: [^ false].
-	^ anEvent keyCharacter isPrintable and: [ | text oldContents |
+	^ anEvent keyCharacter isPrintable and: [ | text oldContents oldPosition |
 		text := self sandblockEditor cursor cursorPosition textMorph.
 		oldContents := text contents.
+		oldPosition := text cursor.
 		[
 			text keyStroke: anEvent.
-			text slot firstNode regex matches: text contents] ensure: [text contents: oldContents]]
+			text slot firstNode regex matches: text contents] ensure: [
+			text
+				contents: oldContents;
+				basicCursor: oldPosition]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -397,6 +401,14 @@ SBTSBlock >> newEmptyChildNear: aBlock before: aBoolean [
 SBTSBlock >> newNullBlock [
 
 	^ SBTSUnknownBlock new slot: (SBTSSlot new addNode: self slot lastNode)
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> objectInterface [
+
+	^ self parentSandblock
+		ifNotNil: [:p | p objectInterfaceForChild: self]
+		ifNil: [SBInterfaces block]
 ]
 
 { #category : #'as yet unclassified' }

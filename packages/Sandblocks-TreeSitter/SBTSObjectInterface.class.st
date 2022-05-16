@@ -23,6 +23,6 @@ SBTSObjectInterface >> slot: aSlot [
 SBTSObjectInterface >> value: anObject [
 
 	(anObject isSandblock and: [anObject isTSBlock]) ifFalse: [^ false].
-	slot lastNode allSubTypesDo: [:c :p | (c = anObject slot lastNode) ifTrue: [^ true]] parents: {}.
+	slot lastNode transitionRoot allSubTypesDo: [:c :p | (c = anObject slot lastNode) ifTrue: [^ true]] parents: {}.
 	^ false
 ]

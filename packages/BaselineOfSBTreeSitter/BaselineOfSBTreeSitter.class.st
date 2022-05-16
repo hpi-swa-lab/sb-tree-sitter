@@ -43,11 +43,12 @@ BaselineOfSBTreeSitter >> baseline: spec [
 			package: 'Sandblocks-TSSmalltalk' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Bash' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Matplotlib' with: [spec requires: #('Sandblocks-TreeSitter')];
-			package: 'Sandblocks-RequestsTool' with: [spec requires: #('Sandblocks-TreeSitter')].
+			package: 'Sandblocks-RequestsTool' with: [spec requires: #('Sandblocks-TreeSitter')];
+			package: 'Sandblocks-Clojure' with: [spec requires: #('Sandblocks-TreeSitter')].
 		
 		spec
 			group: 'default'
-			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-TSSmalltalk' 'Sandblocks-Matplotlib' 'Sandblocks-RequestsTool')]
+			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-Clojure' 'Sandblocks-TSSmalltalk' 'Sandblocks-Matplotlib' 'Sandblocks-RequestsTool')]
 ]
 
 { #category : #baseline }
