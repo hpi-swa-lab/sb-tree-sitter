@@ -6,4 +6,5 @@ SBTreeSitter new
 	c;
 	smalltalk;
 	bash;
+	clojure;
 	parserNew.
