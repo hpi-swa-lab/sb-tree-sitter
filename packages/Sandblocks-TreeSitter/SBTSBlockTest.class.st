@@ -90,6 +90,17 @@ SBTSBlockTest >> testCanTypeOverKeywordSuggestion [
 	self assert: 'identifier' equals: module childSandblocks first type
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testClojureSymbol [
+
+	| source editor |
+	source := SBTSFileParser new parse: '' language: SBClojure.
+	editor := self editorAndWorldFor: source.
+	source startInputAtEnd.
+	self type: '''abc' in: editor.
+	self assert: '''abc' equals: source sourceString
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testCursorPositionsAroundUnknown [
 
@@ -382,18 +393,18 @@ SBTSBlockTest >> testNewStatementAfterTransition [
 { #category : #'tests - paste' }
 SBTSBlockTest >> testPasteListIntoLiteral [
 
-	| program editor |
-	program := SBTSFileParser new parse: '5
+	| source editor |
+	source := SBTSFileParser new parse: '5
 (a)' language: SBClojure.
-	editor := self editorFor: program.
-	editor copyBuffer: program childSandblocks first.
+	editor := self editorFor: source.
+	editor copyBuffer: source childSandblocks first.
 	
-	program childSandblocks second
+	source childSandblocks second
 		select;
 		pasteReplace.
 	
 	self assert: '5
-5' equals: program sourceString
+5' equals: source sourceString
 ]
 
 { #category : #'tests - deleting' }

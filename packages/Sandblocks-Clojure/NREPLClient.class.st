@@ -3,7 +3,10 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'socket',
-		'sessionId'
+		'sessionId',
+		'port',
+		'replProcess',
+		'path'
 	],
 	#category : #'Sandblocks-Clojure'
 }
@@ -20,7 +23,16 @@ NREPLClient >> clone [
 { #category : #'as yet unclassified' }
 NREPLClient >> close [
 
-	self send: (Dictionary newFrom: {'op' -> 'close'. 'session' -> sessionId})
+	sessionId ifNotNil: [
+		self send: (Dictionary newFrom: {'op' -> 'close'. 'session' -> sessionId})]
+]
+
+{ #category : #'as yet unclassified' }
+NREPLClient >> connectTo: aNumber [
+
+	socket := Socket newTCP.
+	[socket connectTo: (NetNameResolver addressFromString: '127.0.0.1') port: aNumber] on: ConnectionRefused do: [^ false].
+	^ true
 ]
 
 { #category : #'as yet unclassified' }
@@ -31,12 +43,25 @@ NREPLClient >> eval: aString [
 ]
 
 { #category : #'as yet unclassified' }
-NREPLClient >> initialize [
+NREPLClient >> launchREPLProcess [
 
-	super initialize.
+	| retries |
+	port := (1024 to: 2 ** 16 - 1) atRandom.
 	
-	socket := Socket newTCP.
-	socket connectTo: (NetNameResolver addressFromString: '127.0.0.1') port: (UIManager default request: 'port?') asInteger
+	replProcess := ExternalUnixOSProcess
+		forkAndExec: (SBTSLanguageRuntime which: 'lein')
+		arguments: {'repl'. ':start'. ':port'. port asString}
+		environment: nil
+		descriptors: nil
+		workingDir: path.
+	retries := 500.
+	[
+		(Delay forMilliseconds: 200) wait.
+		(self connectTo: port) ifTrue: [
+			self clone.
+			^ true].
+		retries := retries - 1] doWhileTrue: [retries > 0].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -49,10 +74,14 @@ NREPLClient >> lookup: aString [
 		at: 'info'
 		ifPresent: [:info | info isDictionary ifTrue: [info at: 'doc' ifAbsent: [nil]] ifFalse: [nil]]
 		ifAbsent: [nil]) ifNil: [
-		"using odoc from overtone here... should be part of separate runtime"
-		self flag: #fixme.
-		reply := self eval: '(odoc ', (aString, ')').
+		reply := self eval: '(doc ', (aString, ')').
 		((reply select: [:r | r includesKey: 'out']) collect: [:r | r at: 'out']) joinSeparatedBy: String cr]
+]
+
+{ #category : #'as yet unclassified' }
+NREPLClient >> path: aString [
+
+	path := aString
 ]
 
 { #category : #'as yet unclassified' }
@@ -65,5 +94,6 @@ NREPLClient >> send: anObject [
 NREPLClient >> terminate [
 
 	[self close] on: ConnectionTimedOut do: [].
-	socket close
+	socket ifNotNil: #close.
+	replProcess ifNotNil: #terminate
 ]

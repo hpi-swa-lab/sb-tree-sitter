@@ -1755,6 +1755,8 @@ SBClojure >> showHelpFor: aBlock [
 { #category : #'as yet unclassified' }
 SBClojure >> spaceBetween: aBlock and: anotherBlock [
 
-	(anotherBlock contents beginsWith: '''') ifTrue: [^ true].
+	(SBToggledCode comment: '' active: 2 do: {
+		[true].
+		[aBlock owner type = 'list_lit' and: [aBlock contents ~= '(' and: [anotherBlock contents ~= ')']]]}) ifTrue: [^ true].
 	^ super spaceBetween: aBlock and: anotherBlock
 ]

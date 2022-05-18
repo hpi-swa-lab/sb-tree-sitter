@@ -124,6 +124,18 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 	options := SBTSInputParser new optionsForTemplate: element given: aString.
 	options size = 1 ifTrue: [morphs := options first].
 	options size > 1 ifTrue: [continueInputString := aString].
+	
+	(options isEmpty and: [
+		self container submorphs
+			at: self insertIndex
+			ifPresent: [:c | true]
+			ifAbsent: [false]]) ifTrue: [
+		SBTSDisambiguatePopup new
+			for: (self container submorphs at: self insertIndex)
+			input: aString
+			before: false.
+		^ false].
+	
 	^ options notEmpty
 ]
 

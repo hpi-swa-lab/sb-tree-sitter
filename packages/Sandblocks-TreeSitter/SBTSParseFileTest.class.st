@@ -38,6 +38,14 @@ SBTSParseFileTest >> testChoice [
 	self assert: rule elements second equals: parser slots second lastNode
 ]
 
+{ #category : #'tests - print' }
+SBTSParseFileTest >> testClojureSpaces [
+
+	| source |
+	source := '(+ 3 test =)'.
+	self assert: source equals: (SBTSFileParser new parse: source language: SBClojure) sourceString
+]
+
 { #category : #'tests - languages' }
 SBTSParseFileTest >> testJavascriptImport [
 

@@ -2,23 +2,33 @@ Class {
 	#name : #SBClojureRepl,
 	#superclass : #SBBlock,
 	#instVars : [
-		'repl'
+		'repl',
+		'path'
 	],
 	#category : #'Sandblocks-Clojure'
 }
 
 { #category : #'as yet unclassified' }
-SBClojureRepl class >> openFor: aString [
+SBClojureRepl class >> openFor: aString in: aDirectoryString [
 
 	^ self new
 		for: aString;
+		path: aDirectoryString;
 		open
 ]
 
 { #category : #'as yet unclassified' }
 SBClojureRepl >> evaluate: aBlock [
 
-	(repl eval: aBlock sourceString) explore
+	| replies out |
+	replies := repl eval: aBlock sourceString.
+	out := Dictionary new.
+	out at: 'out' put: ((replies select: [:r | r includesKey: 'out']) joinSeparatedBy: String cr).
+	out at: 'err' put: ((replies select: [:r | r includesKey: 'err']) joinSeparatedBy: String cr).
+	replies
+		detect: [:r | r includesKey: 'value']
+		ifFound: [:reply | out at: 'value' put: (reply at: 'value')].
+	out explore
 ]
 
 { #category : #'as yet unclassified' }
@@ -42,17 +52,18 @@ SBClojureRepl >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
-SBClojureRepl >> intoWorld: aWorld [
-
-	super intoWorld: aWorld.
-	repl := NREPLClient new.
-	repl clone
-]
-
-{ #category : #'as yet unclassified' }
 SBClojureRepl >> isArtefact [
 
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBClojureRepl >> launchREPL [
+	<action>
+
+	(repl := NREPLClient new path: path) launchREPLProcess
+		ifTrue: [UIManager default inform: 'connected']
+		ifFalse: [UIManager default inform: 'could not connect']
 ]
 
 { #category : #'as yet unclassified' }
@@ -69,6 +80,12 @@ SBClojureRepl >> outOfWorld: aWorld [
 	super outOfWorld: aWorld.
 	
 	repl ifNotNil: #terminate
+]
+
+{ #category : #'as yet unclassified' }
+SBClojureRepl >> path: aString [
+
+	path := aString
 ]
 
 { #category : #'as yet unclassified' }
