@@ -675,7 +675,8 @@ SBTSBlockTest >> testStKeywordAutocompletion [
 	self assert: #'keyword_message' equals: method childSandblocks second type.
 	self
 		assert: 'cull:cull:cull:'
-		equals: (((method childSandblocks second submorphs select: [:m | m type = #keyword]) collect: #contents) joinSeparatedBy: '')
+		equals: (((method childSandblocks second submorphs select: [:m | m type = #keyword]) collect: #contents) joinSeparatedBy: '').
+	self assert: editor selection equals: (method allBlocksDetect: #isUnknown)
 ]
 
 { #category : #'tests - input transition' }

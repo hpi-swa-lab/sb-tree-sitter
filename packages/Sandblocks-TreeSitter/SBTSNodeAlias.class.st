@@ -135,12 +135,6 @@ SBTSNodeAlias >> traverseBlocks: aStream do: aBlock [
 		ifFalse: [self element traverseBlocks: aStream do: aBlock]
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSNodeAlias >> type [
-
-	^ self alias
-]
-
 { #category : #accessing }
 SBTSNodeAlias >> unpackAlias [
 

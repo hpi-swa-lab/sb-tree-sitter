@@ -676,8 +676,15 @@ SBTSBlock >> updateAllHighlights [
 { #category : #'as yet unclassified' }
 SBTSBlock >> useSuggestion: anItem [
 
+	| editor |
+	editor := self sandblockEditor.
 	self contents: ''.
-	self tryApplyChange: [:b | b contents: anItem contents] input: anItem contents
+	self tryApplyChange: [:b | b contents: anItem contents] input: anItem contents.
+	" we may autocomplete multiple unknowns, where we all always select the last one. typically, in the autocompletion we actually want the first one though "
+	editor selection parentSandblock
+		allBlocksDetect: [:b | b isUnknown]
+		ifFound: [:b | b startInput]
+		ifNone: []
 ]
 
 { #category : #'as yet unclassified' }

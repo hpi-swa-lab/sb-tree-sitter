@@ -175,14 +175,21 @@ SBTSInputParser >> next [
 { #category : #'as yet unclassified' }
 SBTSInputParser >> normalizeResults2: aCollection query: aString [
 
+	| results transitionPairs |
 	SBToggledCode comment: '' active: 0 do: {[self halt]}.
-	^ (SBToggledCode comment: '' active: 1 do: {
+	results := (SBToggledCode comment: '' active: 1 do: {
 		[(aCollection groupBy: [:candidate | candidate getLastConstructed ifNotNil: [:m | m type ifNil: [m slot firstNode]]]) values collect: [:candidates | (candidates sort: [:a :b | a sortsBefore: b]) last]].
 		[aCollection].
 		[
 			(aCollection anySatisfy: [:candidate | candidate wasIncomplete not])
 				ifTrue: [aCollection select: [:candidate | candidate wasIncomplete not]]
-				ifFalse: [aCollection]]}) collect: [:candidate | candidate blocks]
+				ifFalse: [aCollection]]}) collect: [:candidate | candidate blocks].
+	
+	results ifNotEmpty: [
+	transitionPairs := results anyOne first factory transitionPairs.
+	results := results select: [:blocksA | results noneSatisfy: [:blocksB | transitionPairs anySatisfy: [:pair | pair key = blocksB first type and: [pair value = blocksA first type]]]]].
+	
+	^ results
 ]
 
 { #category : #blocks }
