@@ -161,6 +161,12 @@ SBTSLabel >> submorphIndex [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> type [
+
+	^ self slot type
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> wantsInput [
 
 	^ false

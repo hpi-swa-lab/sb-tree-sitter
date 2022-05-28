@@ -184,6 +184,12 @@ SBTSNodeLabel >> traverseBlocks: aStream do: aBlock [
 		ifFalse: [((self isEditable ifTrue: [aStream peek isTextMorph] ifFalse: [aStream peek isStringMorph]) and: [aStream peek slot includesParent: self]) ifTrue: [aBlock value: aStream next]]
 ]
 
+{ #category : #accessing }
+SBTSNodeLabel >> type [
+
+	^ '"', (self label, '"')
+]
+
 { #category : #testing }
 SBTSNodeLabel >> validFor: aString [
 

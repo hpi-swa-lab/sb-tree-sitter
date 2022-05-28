@@ -145,7 +145,6 @@ a'.
 
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testForwardToAdjacentStatement [
-	<timeout: 2>
 
 	| module editor |
 	module := SBTSFileParser new parse: '2;
@@ -286,6 +285,19 @@ SBTSBlockTest >> testJsExpandObject [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testJsIdAdd [
+
+	| program editor |
+	program := SBTSFileParser new parse: 'a' language: SBJavascript.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self type: '+b' in: editor.
+	self tick.
+	self type: String cr in: editor.
+	self assert: 'a+b' equals: program sourceString
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testJsMethodCall [
 
 	| module editor |
@@ -330,14 +342,10 @@ SBTSBlockTest >> testJsPatternToAssignmentPattern [
 	editor := self editorAndWorldFor: module.
 	module childSandblocks first childSandblocks first startInputAtEnd.
 	editor handle: (self keyboardEvent: $=).
-	self tick.
-	self tick.
-	editor handle: (self keyboardEvent: Character arrowDown).
-	editor handle: (self keyboardEvent: Character arrowDown).
-	editor handle: (self keyboardEvent: Character arrowDown).
-	editor handle: (self keyboardEvent: Character cr).
+	editor handle: (self keyboardEvent: $x).
 	
-	self assert: 'assignment_pattern' equals: module childSandblocks first childSandblocks first type
+	self assert: 'assignment_pattern' equals: module childSandblocks first childSandblocks first type.
+	self assert: 'b=x' equals: module childSandblocks first childSandblocks first sourceString
 ]
 
 { #category : #'tests - modify' }

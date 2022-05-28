@@ -93,32 +93,39 @@ SBTSNodeSeq >> printOn: aStream [
 { #category : #parsing }
 SBTSNodeSeq >> resultsFor: aParser [
 
-	| queue |
+	| queue results incompleteResults reportResultsBlock |
 	queue := OrderedCollection new.
+	results := OrderedCollection new.
+	incompleteResults := OrderedCollection new.
 	
-	^ Array streamContents: [:stream | | reportResultsBlock |
-		reportResultsBlock := [:parser :index | | newResults |
-			newResults := (self elements at: index) resultsFor: parser.
-			index = self elements size
-				ifTrue: [stream nextPutAll: newResults]
-				ifFalse: [
-					newResults do: [:candidate |
-						candidate atEnd
-							ifTrue: [
-								self elements
-									from: index + 1
-									to: self elements size
-									do: [:node | candidate addEmptyBlocks: node buildEmpty].
-								stream nextPut: candidate]
-							ifFalse: [queue add: {candidate. index}]]]].
-		
-		reportResultsBlock value: aParser value: 1.
-		
-		[queue notEmpty] whileTrue: [ | pair index parser |
-			pair := queue removeFirst.
-			parser := pair first.
-			index := pair second + 1.
-			reportResultsBlock value: parser value: index]]
+	reportResultsBlock := [:parser :index | | newResults |
+		newResults := (self elements at: index) resultsFor: parser.
+		index = self elements size ifTrue: [results addAll: newResults] ifFalse: [
+			newResults do: [:candidate |
+				candidate atEnd
+					ifTrue: [
+						index = self elements size
+							ifTrue: [results add: candidate]
+							ifFalse: [incompleteResults add: {candidate. index}]]
+					ifFalse: [queue add: {candidate. index}]]]].
+	
+	reportResultsBlock value: aParser value: 1.
+	
+	[queue notEmpty] whileTrue: [ | pair index parser |
+		pair := queue removeFirst.
+		parser := pair first.
+		index := pair second + 1.
+		reportResultsBlock value: parser value: index].
+	
+	"simplify controlflow, probably dont need separate results lists"
+	self flag: #todo.
+	incompleteResults do: [:pair |
+		self elements
+			from: pair second + 1
+			to: self elements size
+			do: [:node | pair first addEmptyBlocks: node buildEmpty]].
+	results addAll: (incompleteResults collect: [:pair | pair first]).
+	^ results
 ]
 
 { #category : #parsing }

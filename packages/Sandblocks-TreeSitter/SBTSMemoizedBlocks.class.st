@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'blocks',
-		'position'
+		'position',
+		'wasIncomplete'
 	],
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
@@ -12,12 +13,13 @@ Class {
 SBTSMemoizedBlocks >> adapt: aParser for: aSymbol [
 
 	^ aParser copy
-		addEmptyBlocks: (self blocksCopied collect: [:b |
+		basicAddBlocks: (self blocksCopied collect: [:b |
 			aSymbol isBlockInlinedInParent ifFalse: [
 				"we match the memo table by the general symbol; now we replace the matching symbol with the exact symbol that the current context wants"
 				self assert: b slot lastNode type = aSymbol type.
 				b slot replaceLast: aSymbol].
 			b]);
+		wasIncomplete: self wasIncomplete;
 		position: self position;
 		yourself
 ]
@@ -50,4 +52,16 @@ SBTSMemoizedBlocks >> position [
 SBTSMemoizedBlocks >> position: anObject [
 
 	position := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SBTSMemoizedBlocks >> wasIncomplete [
+
+	^ wasIncomplete
+]
+
+{ #category : #'as yet unclassified' }
+SBTSMemoizedBlocks >> wasIncomplete: aBoolean [
+
+	wasIncomplete := aBoolean
 ]

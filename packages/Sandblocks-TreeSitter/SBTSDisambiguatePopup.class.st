@@ -14,8 +14,17 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> applyChoice: aCollectionOfBlocks [
 
+	| cmd editor |
 	self dismiss.
-	target sandblockEditor do: (SBReplaceMultipleCommand new target: target replacers: aCollectionOfBlocks).
+	editor := target sandblockEditor.
+	cmd := SBReplaceMultipleCommand new
+		target: target replacers: aCollectionOfBlocks;
+		shouldMergeWithNext: true.
+	editor do: cmd.
+	
+	"the command already places the cursor, but likely in an incorrect position. to correct the position and still keep the mergeWithNext state, we first leave input mode, re-set the merge flag and then find our new position."
+	editor selectNoInput: target.
+	cmd shouldMergeWithNext: true.
 	self positionCursorIn: aCollectionOfBlocks.
 	
 	^ true
@@ -75,11 +84,13 @@ SBTSDisambiguatePopup >> initialize [
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> positionAfterDo: aBlock [
 
-	| foundSelf |
+	| foundSelf foundContainer |
 	foundSelf := false.
+	foundContainer := false.
 	(target parentSandblock isTSBlock and: [target submorphAfter isNil]) ifTrue: [aBlock value: (SBCursorSelect new block: target parentSandblock)].
 	target owner cursorPositionsDo: [:position |
 		(foundSelf and: [position isInsert or: [position isText and: [position block wantsInput]]]) ifTrue: [aBlock value: position].
+		position block = source containingSandblock ifTrue: [foundContainer := true].
 		(position isText and: [position block = source containingSandblock]) ifTrue: [foundSelf := true]]
 ]
 

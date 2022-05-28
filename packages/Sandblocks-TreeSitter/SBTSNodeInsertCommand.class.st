@@ -129,11 +129,11 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 		self container submorphs
 			at: self insertIndex
 			ifPresent: [:c | true]
-			ifAbsent: [false]]) ifTrue: [
-		SBTSDisambiguatePopup new
-			for: (self container submorphs at: self insertIndex)
-			input: aString
-			before: false.
+			ifAbsent: [false]]) ifTrue: [ | next |
+		"try and forward the input"
+		next := self container submorphs at: self insertIndex.
+		"FIXME: string morphs confuse our positionAfterDo: code, we should instead always work with cursorpositions"
+		next isStringMorph ifFalse: [SBTSDisambiguatePopup new for: next input: aString before: false].
 		^ false].
 	
 	^ options notEmpty

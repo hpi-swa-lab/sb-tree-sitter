@@ -6887,6 +6887,7 @@ SBJavascript >> preprocessGrammar [
 SBJavascript >> removeIndent: aBlock [
 
 	(aBlock containingSandblock type = 'statement_block' and: [aBlock contents = '}']) ifTrue: [^ true].
+	aBlock contents = '}' ifTrue: [^ true].
 	^ false
 ]
 

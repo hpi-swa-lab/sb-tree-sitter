@@ -217,6 +217,12 @@ SBTSTextMorph >> submorphIndex [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> type [
+
+	^ self slot type
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> wantsInput [
 
 	^ false

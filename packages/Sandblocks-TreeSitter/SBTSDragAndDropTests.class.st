@@ -53,6 +53,20 @@ b' equals: module sourceString
 ]
 
 { #category : #'as yet unclassified' }
+SBTSDragAndDropTests >> testDragInsertPyStatementToArgument [
+
+	| module editor |
+	module := SBPython parseToplevel: 'call()'.
+	editor := self editorFor: module.
+	
+	self class
+		dropAt: module childSandblocks last childSandblocks last positionInWorld + (1 @ 1)
+		with: (SBPython parseToplevel: 'a') childSandblocks first
+		in: editor.
+	self assert: 'call(a)' equals: module sourceString
+]
+
+{ #category : #'as yet unclassified' }
 SBTSDragAndDropTests >> testRegexInsertInPattern [
 
 	| module editor |

@@ -141,7 +141,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 	
 	aParser peek = (Character value: 1) ifTrue: [
 		aParser next.
-		^ {aParser addEmptyBlocks: self buildEmpty}].
+		^ {aParser basicAddBlocks: self buildEmpty}].
 	
 	storedBlocks := (aParser peek isMorph and: [aParser peek slot includesParentThat: [:p | p type = self type]])
 		ifTrue: [ | block result |
@@ -153,14 +153,15 @@ SBTSNodeSymbol >> resultsFor: aParser [
 		ifFalse: [{}].
 	newBlocks := (SBToggledCode comment: '' active: 1 do: {
 		["see memoizationFor:ifAbsentPut:, same hack"
-		storedBlocks anySatisfy: [:r | r atEnd]]})
-		ifFalse: [
+		storedBlocks noneSatisfy: [:r | r atEnd]]})
+		ifTrue: [
 			aParser memoizationFor: self ifAbsentPut: [ | currentBlocks results |
 				currentBlocks := aParser blocks.
 				aParser blocks: OrderedCollection new.
 				results := (self bodyTemplate resultsFor: aParser) collect: [:result |
 					SBTSMemoizedBlocks new
 						position: result position;
+						wasIncomplete: result wasIncomplete;
 						blocks: (self isInlined
 							ifTrue: [
 								self isBlockInlinedInParent ifTrue: [result blocks] ifFalse: [
@@ -176,7 +177,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 						yourself].
 				aParser blocks: currentBlocks.
 				results]]
-		ifTrue: [{}].
+		ifFalse: [{}].
 	
 	^ storedBlocks, newBlocks
 ]
