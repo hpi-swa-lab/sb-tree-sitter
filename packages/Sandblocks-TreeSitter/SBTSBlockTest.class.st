@@ -292,8 +292,6 @@ SBTSBlockTest >> testJsIdAdd [
 	editor := self editorAndWorldFor: program.
 	program lastDeepChild startInputAtEnd.
 	self type: '+b' in: editor.
-	self tick.
-	self type: String cr in: editor.
 	self assert: 'a+b' equals: program sourceString
 ]
 
@@ -753,7 +751,6 @@ SBTSBlockTest >> testTypingClosure [
 	editor handle: (SBTest keyboardEvent: $().
 	self tick.
 	self tick.
-	editor handle: (SBTest keyboardEvent: Character arrowDown).
 	editor handle: (SBTest keyboardEvent: Character cr).
 	
 	self assert: 'arrow_function' equals: module childSandblocks first childSandblocks first type.

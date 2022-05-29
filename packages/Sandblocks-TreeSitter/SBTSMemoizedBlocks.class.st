@@ -17,7 +17,7 @@ SBTSMemoizedBlocks >> adapt: aParser for: aSymbol [
 			aSymbol isBlockInlinedInParent ifFalse: [
 				"we match the memo table by the general symbol; now we replace the matching symbol with the exact symbol that the current context wants"
 				self assert: b slot lastNode type = aSymbol type.
-				b slot replaceLast: aSymbol].
+				b slot: (b slot replaceLast: aSymbol)].
 			b]);
 		wasIncomplete: self wasIncomplete;
 		position: self position;
@@ -52,6 +52,13 @@ SBTSMemoizedBlocks >> position [
 SBTSMemoizedBlocks >> position: anObject [
 
 	position := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SBTSMemoizedBlocks >> postCopy [
+
+	super postCopy.
+	blocks := self blocksCopied
 ]
 
 { #category : #'as yet unclassified' }

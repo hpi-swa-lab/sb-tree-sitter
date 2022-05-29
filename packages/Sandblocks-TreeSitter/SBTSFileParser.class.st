@@ -129,6 +129,13 @@ SBTSFileParser >> postCopy [
 	slots := slots copy
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> replaceCurrentSlot: aSlot [
+
+	slots removeLast.
+	slots add: aSlot
+]
+
 { #category : #accessing }
 SBTSFileParser >> slots [
 

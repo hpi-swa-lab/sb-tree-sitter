@@ -66,7 +66,7 @@ SBTSNodeBase >> buildMorphWith: aBlock slot: aSlot [
 				slot: aSlot)].
 	
 	aBlock slot firstNode isBlockInlined ifTrue: [
-		aBlock submorphs do: [:m | (aBlock slot firstNode isBlockInlinedInParent not or: [m slot includesRepeat not]) ifTrue: [aSlot nodes do: [:n | m slot addNode: n]]].
+		aBlock submorphs do: [:m | (aBlock slot firstNode isBlockInlinedInParent not or: [m slot includesRepeat not]) ifTrue: [aSlot nodes do: [:n | m slot: (m slot addNode: n)]]].
 		^ aBlock submorphs].
 	
 	^ aBlock slot: aSlot

@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSMemoEntry >> getBlocksOrMarkRecursionFrom: aSymbol stack: aCollection [
+SBTSMemoEntry >> getBlocksOrMarkRecursionFrom: aSymbol stack: aCollection max: aNumber [
 
 	^ self isLeftRecursion
 		ifTrue: [
@@ -52,9 +52,10 @@ SBTSMemoEntry >> parsers [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSMemoEntry >> parsers: aCollection [
+SBTSMemoEntry >> parsers: aCollection symbol: aSymbol [
 
 	self assert: (aCollection allSatisfy: [:p | p class = SBTSMemoizedBlocks]).
+	self assert: (aSymbol isBlockInlinedInParent or: [(aCollection allSatisfy: [:memo | memo blocks first slot lastNode type = aSymbol type])]).
 	answer := aCollection collect: [:parser | parser copy]
 ]
 

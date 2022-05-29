@@ -40,9 +40,12 @@ SBTSSlot >> adaptSlotFor: anotherSlot [
 { #category : #'as yet unclassified' }
 SBTSSlot >> addNode: aNode [
 
+	| new |
 	self assert: (aNode isKindOf: SBTSNodeBase).
 	self assert: (nodes isEmpty or: [aNode ~= self lastNode]).
-	nodes add: aNode
+	new := self copy.
+	new nodes add: aNode.
+	^ new
 ]
 
 { #category : #'as yet unclassified' }
@@ -211,6 +214,7 @@ SBTSSlot >> parentThat: aBlock [
 { #category : #'as yet unclassified' }
 SBTSSlot >> postCopy [
 
+	super postCopy.
 	nodes := nodes copy
 ]
 
@@ -277,8 +281,11 @@ SBTSSlot >> repeatersDo: aBlock [
 { #category : #'as yet unclassified' }
 SBTSSlot >> replaceLast: aNode [
 
-	nodes removeLast.
-	nodes add: aNode
+	| new |
+	new := self copy.
+	new nodes removeLast.
+	new nodes add: aNode.
+	^ new
 ]
 
 { #category : #'as yet unclassified' }

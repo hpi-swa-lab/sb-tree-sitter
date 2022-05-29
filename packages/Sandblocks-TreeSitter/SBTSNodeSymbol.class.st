@@ -47,7 +47,7 @@ SBTSNodeSymbol >> buildEmpty [
 			self isBlockInlined
 				ifTrue: [ | blocks |
 					blocks := self bodyTemplate buildEmpty.
-					blocks do: [:b | b slot addNode: self].
+					blocks do: [:b | b slot: (b slot addNode: self)].
 					blocks]
 				ifFalse: [
 					{
@@ -151,7 +151,8 @@ SBTSNodeSymbol >> resultsFor: aParser [
 			result addBlock: block.
 			{result}]
 		ifFalse: [{}].
-	newBlocks := (SBToggledCode comment: '' active: 1 do: {
+	newBlocks := (SBToggledCode comment: '' active: 2 do: {
+		[true].
 		["see memoizationFor:ifAbsentPut:, same hack"
 		storedBlocks noneSatisfy: [:r | r atEnd]]})
 		ifTrue: [
@@ -166,7 +167,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 							ifTrue: [
 								self isBlockInlinedInParent ifTrue: [result blocks] ifFalse: [
 									result blocks
-										do: [:b | b slot addNode: self];
+										do: [:b | b slot: (b slot addNode: self)];
 										yourself]]
 							ifFalse: [
 								{
@@ -196,7 +197,7 @@ SBTSNodeSymbol >> resultsNonMemoizedFor: aParser [
 			results do: [:result |
 				self isInlined
 					ifTrue: [
-						result blocks do: [:b | b slot addNode: self].
+						result blocks do: [:b | b slot: (b slot addNode: self)].
 						result blocks: currentBlocks, result blocks]
 					ifFalse: [
 						result blocks: currentBlocks, {
@@ -212,7 +213,7 @@ SBTSNodeSymbol >> takeNodesFrom: aParser [
 	(self isSuperType or: [factory promotedInlineSymbols includes: self type]) ifTrue: [
 		^ (self bodyTemplate takeNodesFrom: aParser) collect: [:parser | | res |
 			res := parser copy.
-			(res currentSlot lastNode hasParent: self bodyTemplate) ifTrue: [res currentSlot addNode: self].
+			(res currentSlot lastNode hasParent: self bodyTemplate) ifTrue: [res replaceCurrentSlot: (res currentSlot addNode: self)].
 			res]].
 	
 	(aParser atEnd not and: [aParser peek isString not and: [aParser peek compatibleWithType: self type]]) ifTrue: [
