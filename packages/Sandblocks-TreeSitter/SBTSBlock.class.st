@@ -45,12 +45,30 @@ SBTSBlock >> adaptSlot: aConverter [
 	aConverter
 		if: [
 			(aConverter objectInterface first isKindOf: SBTSObjectInterface)
-				ifTrue: [self slot copy adaptSlotFor: aConverter objectInterface first slot]
+				ifTrue: [(self adaptSlotFor: aConverter objectInterface first slot ifFailed: [self assert: false]) ~~ false]
 				ifFalse: [false]]
-		do: [ | copy |
-			copy := self copyBlock.
-			copy slot adaptSlotFor: aConverter objectInterface first slot.
-			copy]
+		do: [
+			self copyBlock
+				adaptSlotFor: aConverter objectInterface first slot
+				ifFailed: [self assert: false]]
+]
+
+{ #category : #'inline block compat' }
+SBTSBlock >> adaptSlotFor: anotherSlot ifFailed: aBlock [
+
+	| results |
+	" examples:
+	* self=stmt,expr,id		anotherSlot=expr|num
+	* self=stmt,expr,id		anotherSlot=stmt,expr,id
+	* self=expr,id 			anotherSlot=stmt
+	"
+	results := SBTSInputParser new
+		allowIncomplete: false;
+		optionsForTemplate: anotherSlot transitionRoot givenBlock: self.
+	results ifEmpty: [^ aBlock value].
+	self assert: results size = 1.
+	self assert: results first size = 1.
+	^ results first first
 ]
 
 { #category : #accessing }
@@ -61,7 +79,7 @@ SBTSBlock >> addBlock: aBlock [
 		cursorPositionsDo: [:pos |
 			pos isInsert ifTrue: [ | targetSlot |
 				targetSlot := SBTSSlot new addNode: pos command element.
-				(aBlock slot adaptSlotFor: targetSlot) ifTrue: [^ self addMorphBack: aBlock]]]
+				(aBlock adaptSlotFor: targetSlot ifFailed: [nil]) ifNotNil: [:newBlock | ^ self addMorphBack: newBlock]]]
 		shallow: true.
 	self error: ('no suitable insertion point for a `{1}` in a `{2}` found' format: {aBlock printString. self printString})
 ]
@@ -400,7 +418,7 @@ SBTSBlock >> newEmptyChildNear: aBlock before: aBoolean [
 { #category : #'as yet unclassified' }
 SBTSBlock >> newNullBlock [
 
-	^ SBTSUnknownBlock new slot: (SBTSSlot new addNode: self slot lastNode)
+	^ SBTSUnknownBlock new slot: (SBTSSlot with: self slot lastNode)
 ]
 
 { #category : #'as yet unclassified' }
@@ -420,7 +438,7 @@ SBTSBlock >> objectInterfaceForChild: aBlock [
 { #category : #'as yet unclassified' }
 SBTSBlock >> objectInterfaceForInsert: aCommand [
 
-	^ {SBTSObjectInterface new slot: (SBTSSlot new addNode: aCommand element)}
+	^ {SBTSObjectInterface new slot: (SBTSSlot with: aCommand element)}
 ]
 
 { #category : #highlight }

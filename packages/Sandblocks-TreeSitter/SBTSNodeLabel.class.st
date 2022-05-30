@@ -22,7 +22,7 @@ SBTSNodeLabel >> basicCopy [
 { #category : #build }
 SBTSNodeLabel >> buildEmpty [
 
-	^ {self buildMorphWith: nil slot: (SBTSSlot new addNode: self)}
+	^ {self buildMorphWith: nil slot: (SBTSSlot with: self)}
 ]
 
 { #category : #build }
@@ -163,7 +163,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 		do: {[(labelStream atEnd or: [aParser atEnd]) ifFalse: [^ {}]]}.
 	
 	[aParser peek = $ ] whileTrue: [aParser next].
-	^ {aParser addBlock: (self buildMorphWith: self label slot: (SBTSSlot new addNode: self))}
+	^ {aParser addBlock: (self buildMorphWith: self label slot: (SBTSSlot with: self))}
 ]
 
 { #category : #parsing }

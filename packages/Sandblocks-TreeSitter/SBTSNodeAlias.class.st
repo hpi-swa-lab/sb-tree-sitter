@@ -49,8 +49,7 @@ SBTSNodeAlias >> buildEmpty [
 { #category : #blocks }
 SBTSNodeAlias >> buildMorphWith: aBlock slot: aSlot [
 
-	aSlot addNodeFirst: aBlock slot firstNode element.
-	^ super buildMorphWith: aBlock slot: aSlot
+	^ super buildMorphWith: aBlock slot: (aSlot addNodeFirst: aBlock slot firstNode element)
 ]
 
 { #category : #parsing }

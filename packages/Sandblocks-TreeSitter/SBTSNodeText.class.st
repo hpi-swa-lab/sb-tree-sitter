@@ -26,7 +26,7 @@ SBTSNodeText >> basicCopy [
 { #category : #'as yet unclassified' }
 SBTSNodeText >> buildEmpty [
 
-	^ {self buildMorphWith: '' slot: (SBTSSlot new addNode: self)}
+	^ {self buildMorphWith: '' slot: (SBTSSlot with: self)}
 ]
 
 { #category : #build }
@@ -164,7 +164,7 @@ SBTSNodeText >> resultsFor: aParser [
 					[aParser peek = $ ] whileTrue: [aParser next].
 					^ {
 						aParser addBlock: (SBTSTextMorph new
-							slot: (SBTSSlot new addNode: self);
+							slot: (SBTSSlot with: self);
 							contents: (String withAll: contents))}]
 				ifFalse: [aParser stream position: start]].
 		
@@ -174,7 +174,7 @@ SBTSNodeText >> resultsFor: aParser [
 			[plainPrefix beginsWith: remaining]}) ifTrue: [
 			^ {
 				aParser addBlock: (SBTSTextMorph new
-					slot: (SBTSSlot new addNode: self);
+					slot: (SBTSSlot with: self);
 					contents: (String withAll: (plainPrefix size > remaining size
 						ifTrue: [plainPrefix]
 						ifFalse: [remaining])))}].

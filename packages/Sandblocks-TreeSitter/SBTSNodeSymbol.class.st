@@ -40,7 +40,7 @@ SBTSNodeSymbol >> bodyTemplate [
 SBTSNodeSymbol >> buildEmpty [
 
 	| slot |
-	slot := SBTSSlot new addNode: self.
+	slot := SBTSSlot with: self.
 	^ self bodyTemplate isTSChoice
 		ifTrue: [{SBTSUnknownBlock new slot: slot}]
 		ifFalse: [
@@ -172,7 +172,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 							ifFalse: [
 								{
 									SBTSBlock new
-										slot: (SBTSSlot new addNode: self);
+										slot: (SBTSSlot with: self);
 										addAllMorphs: result blocks;
 										yourself}]);
 						yourself].
@@ -202,7 +202,7 @@ SBTSNodeSymbol >> resultsNonMemoizedFor: aParser [
 					ifFalse: [
 						result blocks: currentBlocks, {
 							SBTSBlock new
-								slot: (SBTSSlot new addNode: self);
+								slot: (SBTSSlot with: self);
 								addAllMorphs: result blocks}]].
 			results]
 ]

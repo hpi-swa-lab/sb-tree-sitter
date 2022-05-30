@@ -11,7 +11,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSFileParser >> addSlot: aNode [
 
-	slots add: (SBTSSlot new addNode: aNode)
+	slots add: (SBTSSlot with: aNode)
 ]
 
 { #category : #stream }
@@ -71,7 +71,7 @@ SBTSFileParser >> nodeForCursor: aCursor [
 		self assert: matches size = 1.
 		
 		SBTSBlock new
-			slot: (SBTSSlot new addNode: (isAlias
+			slot: (SBTSSlot with: (isAlias
 				ifTrue: [
 					SBTSNodeAlias new
 						factory: template factory;

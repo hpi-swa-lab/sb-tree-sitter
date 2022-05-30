@@ -7,11 +7,11 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSSlotTest >> testStmtInArgument [
 
-	| targetPosition dropped |
+	| targetPosition dropped new |
 	"self=stmt,expr,id	anotherSlot=expr|num"
-	targetPosition := SBTSSlot new addNode: (SBPython instance bodyNodeForRule: 'argument_list') elements second element.
-	dropped := (SBPython parseToplevel: 'a') childSandblocks first slot.
-	self assert: (dropped adaptSlotFor: targetPosition).
-	self assert: dropped slot nodes lastNode type equals: #expression.
-	self assert: dropped slot nodes lastNode parent equals: targetPosition firstNode
+	targetPosition := SBTSSlot with: (SBPython instance bodyNodeForRule: 'argument_list') elements second element.
+	dropped := (SBPython parseToplevel: 'a') childSandblocks first.
+	new := dropped adaptSlotFor: targetPosition ifFailed: [self assert: false].
+	self assert: new slot lastNode type equals: #expression.
+	self assert: new slot lastNode parent equals: targetPosition firstNode
 ]

@@ -182,9 +182,11 @@ SBTSReplacementBlock >> ownerWithColor [
 { #category : #'as yet unclassified' }
 SBTSReplacementBlock >> replaceBound: aString with: aBlock [
 
-	self
-		assert: (aBlock slot adaptSlotFor: (bindings at: aString) slot)
-		description: 'adapting block slot'.
+	| new |
+	new := aBlock copy
+		adaptSlotFor: (bindings at: aString) slot
+		ifFailed: [self assert: false description: 'adapting block slot'].
+	aBlock slot: new slot.
 	(bindings at: aString) owner ifNotNil: [(bindings at: aString) replaceBy: aBlock].
 	bindings at: aString put: aBlock
 ]

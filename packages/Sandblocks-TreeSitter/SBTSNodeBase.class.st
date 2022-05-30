@@ -60,7 +60,7 @@ SBTSNodeBase >> buildMorphWith: aBlock slot: aSlot [
 	(self factory promotedInlineSymbols includes: self type) ifTrue: [
 		self assert: aBlock isString.
 		^ SBTSBlock new
-			slot: (SBTSSlot new addNode: aSlot lastNode);
+			slot: (SBTSSlot with: aSlot lastNode);
 			addMorph: (SBTSTextMorph new
 				contents: aBlock;
 				slot: aSlot)].

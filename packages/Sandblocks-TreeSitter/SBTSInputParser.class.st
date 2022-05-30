@@ -8,6 +8,7 @@ Class {
 		'blocks',
 		'symbolStack',
 		'activeRecursion',
+		'allowIncomplete',
 		'wasIncomplete'
 	],
 	#category : #'Sandblocks-TreeSitter-Parser'
@@ -33,6 +34,18 @@ SBTSInputParser >> addEmptyBlocks: aCollection [
 
 	blocks addAll: aCollection.
 	aCollection ifNotEmpty: [wasIncomplete := true]
+]
+
+{ #category : #accessing }
+SBTSInputParser >> allowIncomplete [
+
+	^ allowIncomplete
+]
+
+{ #category : #accessing }
+SBTSInputParser >> allowIncomplete: aBoolean [
+
+	allowIncomplete := aBoolean
 ]
 
 { #category : #stream }
@@ -107,7 +120,8 @@ SBTSInputParser >> initialize [
 	
 	visitedSupertypes := Set new.
 	blocks := OrderedCollection new.
-	wasIncomplete := false
+	wasIncomplete := false.
+	allowIncomplete := true
 ]
 
 { #category : #memo }
@@ -129,7 +143,6 @@ SBTSInputParser >> memoizationFor: aSymbol ifAbsentPut: aBlock [
 					lr ifRecursionDetected: [
 						activeRecursion at: index put: lr.
 						lr newIteration.
-						aSymbol type = 'expression' ifTrue: [SBToggledCode comment: '' active: 0 do: {[self halt]}].
 						results := SBToggledCode
 							comment: ''
 							active: 1
@@ -176,7 +189,7 @@ SBTSInputParser >> next [
 SBTSInputParser >> normalizeResults2: aCollection query: aString [
 
 	| results transitionPairs |
-	SBToggledCode comment: '' active: 0 do: {[self halt]}.
+	SBToggledCode comment: '' active: 0 do: {[^ aCollection]. [self halt]}.
 	results := (SBToggledCode comment: '' active: 1 do: {
 		[(aCollection groupBy: [:candidate | candidate getLastConstructed ifNotNil: [:m | (m containingSandblock ifNotNil: #type ifNil: [m]) ifNil: [m slot firstNode]]]) values collect: [:candidates | (candidates sort: [:a :b | a sortsBefore: b]) first]].
 		[aCollection].
@@ -232,24 +245,34 @@ SBTSInputParser >> normalizeResults: aCollection query: aString [
 { #category : #query }
 SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after: anotherCollection [
 
-	stream := SBTSBlockStringStream on: aCollection, aString asArray, anotherCollection.
-	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
-	activeRecursion := Array new: stream originalContents size withAll: nil.
-	symbolStack := OrderedCollection new.
-	
 	^ self
-		normalizeResults2: ((aTSBlock slot transitionRoot resultsFor: self) select: [:parser | parser atEnd])
-		query: aString
+		optionsForTemplate: aTSBlock slot transitionRoot
+		given: aString
+		before: aCollection
+		after: anotherCollection
 ]
 
 { #category : #query }
 SBTSInputParser >> optionsForTemplate: aNode given: aString [
 
-	stream := SBTSBlockStringStream on: aString asArray.
-	activeRecursion := Array new: aString size withAll: nil.
-	symbolStack := OrderedCollection new.
+	^ self optionsForTemplate: aNode given: aString before: {} after: {}
+]
+
+{ #category : #query }
+SBTSInputParser >> optionsForTemplate: aNode given: aString before: aCollection after: anotherCollection [
+
+	stream := SBTSBlockStringStream on: aCollection, aString asArray, anotherCollection.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
+	activeRecursion := Array new: stream originalContents size withAll: nil.
+	symbolStack := OrderedCollection new.
+	
 	^ self normalizeResults2: ((aNode resultsFor: self) select: [:parser | parser atEnd]) query: aString
+]
+
+{ #category : #query }
+SBTSInputParser >> optionsForTemplate: aNode givenBlock: aBlock [
+
+	^ self optionsForTemplate: aNode given: '' before: {aBlock} after: {}
 ]
 
 { #category : #stream }

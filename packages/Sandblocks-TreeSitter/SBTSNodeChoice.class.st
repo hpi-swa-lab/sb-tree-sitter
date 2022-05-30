@@ -42,7 +42,7 @@ SBTSNodeChoice >> basicCopy [
 { #category : #printing }
 SBTSNodeChoice >> buildEmpty [
 
-	^ {SBTSUnknownBlock new slot: (SBTSSlot new addNode: self)}
+	^ {SBTSUnknownBlock new slot: (SBTSSlot with: self)}
 ]
 
 { #category : #printing }

@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testDeleteInRepeat)
+	^ #(#testDeleteInRepeat #testJsPatternToAssignmentPattern)
 ]
 
 { #category : #'tests - adding' }
@@ -334,6 +334,7 @@ SBTSBlockTest >> testJsNumberToString [
 
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsPatternToAssignmentPattern [
+	<timeout: 0.05>
 
 	| module editor |
 	module := SBTSFileParser new parse: 'function(b) {}' language: SBJavascript instance.

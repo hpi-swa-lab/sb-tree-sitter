@@ -119,12 +119,13 @@ SBTSNodeSeq >> resultsFor: aParser [
 	
 	"simplify controlflow, probably dont need separate results lists"
 	self flag: #todo.
-	incompleteResults do: [:pair |
-		self elements
-			from: pair second + 1
-			to: self elements size
-			do: [:node | pair first addEmptyBlocks: node buildEmpty]].
-	results addAll: (incompleteResults collect: [:pair | pair first]).
+	aParser allowIncomplete ifTrue: [
+		incompleteResults do: [:pair |
+			self elements
+				from: pair second + 1
+				to: self elements size
+				do: [:node | pair first addEmptyBlocks: node buildEmpty]].
+		results addAll: (incompleteResults collect: [:pair | pair first])].
 	^ results
 ]
 

@@ -8,33 +8,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSSlot >> adaptSlotFor: anotherSlot [
+SBTSSlot class >> with: aNode [
 
-	| index |
-	" examples:
-	* self=stmt,expr,id		anotherSlot=expr|num
-	* self=stmt,expr,id		anotherSlot=stmt,expr,id
-	* self=expr,id 			anotherSlot=stmt
-	"
-	(self nodes hasEqualElements: anotherSlot nodes) ifTrue: [^ true].
-	index := anotherSlot nodes findFirst: [:node | node type = self lastNode type].
-	index > 0
-		ifTrue: [
-			nodes removeLast.
-			anotherSlot nodes
-				from: index
-				to: anotherSlot nodes size
-				do: [:node | self addNode: node].
-			^ true]
-		ifFalse: [
-			anotherSlot firstNode transitionRoot
-				allSubTypesDo: [:child :parents |
-					child type = self lastNode type ifTrue: [
-						nodes removeLast.
-						parents reverseDo: [:p | self addNode: p].
-						^ true]]
-				parents: {}].
-	^ false
+	| new |
+	new := self new.
+	new nodes add: aNode.
+	^ new
 ]
 
 { #category : #'as yet unclassified' }
@@ -51,8 +30,10 @@ SBTSSlot >> addNode: aNode [
 { #category : #'as yet unclassified' }
 SBTSSlot >> addNodeFirst: aNode [
 
-	self assert: (aNode isKindOf: SBTSNodeBase).
-	nodes addFirst: aNode
+	| new |
+	new := self copy.
+	new nodes addFirst: aNode.
+	^ new
 ]
 
 { #category : #'as yet unclassified' }
