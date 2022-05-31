@@ -40,6 +40,12 @@ SBTSUnknownBlock >> keepDuringTransform [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknownBlock >> placeholderText: aString [
+
+	self firstSubmorph placeholderText: (aString size < 15 ifTrue: [aString] ifFalse: [(aString first: 12), '...'])
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknownBlock >> prefixValid [
 
 	^ false
@@ -55,12 +61,9 @@ SBTSUnknownBlock >> printOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSUnknownBlock >> slot: aSlot [
 
-	| label |
 	super slot: aSlot.
 	self firstSubmorph slot: aSlot.
-	
-	label := self slot firstNode printString.
-	self firstSubmorph placeholderText: (label size < 15 ifTrue: [label] ifFalse: [(label first: 12), '...'])
+	self placeholderText: self slot firstNode printString
 ]
 
 { #category : #'as yet unclassified' }

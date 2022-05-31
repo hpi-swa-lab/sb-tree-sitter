@@ -20,6 +20,13 @@ SBTSSlider >> build [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlider >> buildClojure [
+	<lang: #clojure match: '(list_lit (sym_lit) ="nth" (vec_lit value: (num_iit) @value (quoting_lit (sym_lit) ="slider")))' sample: '(nth [440 ''slider] 0)'>
+
+	self build
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlider >> buildJs [
 	<lang: #javascript match: '(subscript_expression (array (number) @value (string (_) ="slider")) (number) ="0")' sample: '[123, "slider"][0]'>
 

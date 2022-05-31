@@ -18,17 +18,37 @@ SBClojureRepl class >> openFor: aString in: aDirectoryString [
 ]
 
 { #category : #'as yet unclassified' }
+SBClojureRepl >> connectToREPL [
+	<action>
+
+	self repl: (NREPLClient new
+		path: path;
+		port: (UIManager default request: 'port?') asNumber;
+		yourself)
+]
+
+{ #category : #'as yet unclassified' }
 SBClojureRepl >> evaluate: aBlock [
 
+	(self evaluateString: aBlock) explore
+]
+
+{ #category : #'as yet unclassified' }
+SBClojureRepl >> evaluateString: aString [
+
 	| replies out |
-	replies := repl eval: aBlock sourceString.
+	replies := repl eval: aString.
 	out := Dictionary new.
-	out at: 'out' put: ((replies select: [:r | r includesKey: 'out']) joinSeparatedBy: String cr).
-	out at: 'err' put: ((replies select: [:r | r includesKey: 'err']) joinSeparatedBy: String cr).
+	out
+		at: 'out'
+		put: (((replies select: [:r | r includesKey: 'out']) collect: [:r | r at: 'out']) joinSeparatedBy: String cr).
+	out
+		at: 'err'
+		put: (((replies select: [:r | r includesKey: 'err']) collect: [:r | r at: 'err']) joinSeparatedBy: String cr).
 	replies
 		detect: [:r | r includesKey: 'value']
 		ifFound: [:reply | out at: 'value' put: (reply at: 'value')].
-	out explore
+	^ out
 ]
 
 { #category : #'as yet unclassified' }
@@ -61,9 +81,10 @@ SBClojureRepl >> isArtefact [
 SBClojureRepl >> launchREPL [
 	<action>
 
-	(repl := NREPLClient new path: path) launchREPLProcess
-		ifTrue: [UIManager default inform: 'connected']
-		ifFalse: [UIManager default inform: 'could not connect']
+	self repl: (NREPLClient new
+		path: path;
+		launchREPLProcess;
+		yourself)
 ]
 
 { #category : #'as yet unclassified' }
@@ -71,7 +92,9 @@ SBClojureRepl >> layoutCommands [
 
 	^ SBAlgebraCommand container
 		morph: self;
-		data: (self submorphs collect: [:s | s layoutCommands] separatedBy: [SBAlgebraCommand hardLine])
+		data: (self submorphs
+			collect: [:s | s layoutCommands]
+			separatedBy: [SBAlgebraCommand hardLine withGap: true])
 ]
 
 { #category : #'as yet unclassified' }
@@ -86,6 +109,14 @@ SBClojureRepl >> outOfWorld: aWorld [
 SBClojureRepl >> path: aString [
 
 	path := aString
+]
+
+{ #category : #'as yet unclassified' }
+SBClojureRepl >> repl: aRepl [
+
+	repl := aRepl.
+	self submorphsDo: [:m | m isStringMorph ifTrue: [m delete]].
+	self addMorphFront: (SBStringMorph new contents: 'Connected to nREPL :', repl port asString)
 ]
 
 { #category : #'as yet unclassified' }
