@@ -94,7 +94,7 @@ SBTSParseFileTest >> testJsFunctionPatterns [
 	self assert: #(#identifier #pattern) equals: (module childSandblocks first childSandblocks first slot nodes
 		collect: #type
 		as: Array).
-	self assert: #(nil #formal_parameters) equals: (module childSandblocks first submorphs second slot nodes
+	self assert: #('"("' #formal_parameters) equals: (module childSandblocks first submorphs second slot nodes
 		collect: #type
 		as: Array).
 	

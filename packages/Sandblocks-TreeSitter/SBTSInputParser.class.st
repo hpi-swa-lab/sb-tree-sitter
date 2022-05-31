@@ -188,7 +188,7 @@ SBTSInputParser >> next [
 { #category : #'as yet unclassified' }
 SBTSInputParser >> normalizeResults2: aCollection query: aString [
 
-	| results transitionPairs |
+	| results transitionPairs hasAnyKeywords |
 	SBToggledCode comment: '' active: 0 do: {[^ aCollection]. [self halt]}.
 	results := (SBToggledCode comment: '' active: 1 do: {
 		[(aCollection groupBy: [:candidate | candidate getLastConstructed ifNotNil: [:m | (m containingSandblock ifNotNil: #type ifNil: [m]) ifNil: [m slot firstNode]]]) values collect: [:candidates | (candidates sort: [:a :b | a sortsBefore: b]) first]].
@@ -201,6 +201,16 @@ SBTSInputParser >> normalizeResults2: aCollection query: aString [
 	results ifNotEmpty: [
 		transitionPairs := results anyOne first factory transitionPairs.
 		results := results select: [:blocksA | results noneSatisfy: [:blocksB | transitionPairs anySatisfy: [:pair | pair key = blocksB first type and: [pair value = blocksA first type]]]]].
+	
+	hasAnyKeywords := results anySatisfy: [:r | | node |
+		node := r first firstDeepSubmorph slot firstNode.
+		node isTSLabel and: [ | index |
+			"only disambiguate keywords if they were terminated with a space, otherwise we may break typing e.g. `forage` because we abort with just one result after typing `for`"
+			index := aString indexOfSubCollection: node label.
+			index > 0 and: [(aString at: index + node label size ifAbsent: [$x]) = $ ]]].
+	results := hasAnyKeywords
+		ifTrue: [results select: [:r | r first firstDeepSubmorph slot firstNode isTSLabel]]
+		ifFalse: [results].
 	
 	^ results
 ]
@@ -345,8 +355,8 @@ SBTSInputParser >> remainingSize [
 SBTSInputParser >> sortsBefore: aParser [
 
 	| comp ours theirs |
-	ours := self getLastConstructed containingSandblock ifNil: [self getLastConstructed].
-	theirs := aParser getLastConstructed containingSandblock ifNil: [aParser getLastConstructed].
+	ours := ((self getLastConstructed ifNotNil: #containingSandblock) ifNil: [self getLastConstructed]) ifNil: [self blocks first].
+	theirs := ((aParser getLastConstructed ifNotNil: #containingSandblock) ifNil: [aParser getLastConstructed]) ifNil: [aParser blocks first].
 	comp := (ours slot precedenceAround: ours) compareTo: (theirs slot precedenceAround: theirs).
 	"precedence compare doesnt work yet..."
 	self flag: #fixme.

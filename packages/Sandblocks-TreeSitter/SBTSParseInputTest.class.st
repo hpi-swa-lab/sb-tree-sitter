@@ -16,10 +16,7 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 { #category : #failures }
 SBTSParseInputTest >> expectedFailures [
 
-	^ SBToggledCode
-		comment: ''
-		active: 1
-		do: {[#()]. [#(#testAssignmentPattern #testCreateMemberExpression #testCreateBinaryMessage)]}
+	^ #(#testAssignmentPattern #testReinterpretBinaryOp)
 ]
 
 { #category : #helper }
@@ -49,6 +46,7 @@ SBTSParseInputTest >> statement: aTypeString with: aContentsString [
 
 { #category : #'tests - wrap' }
 SBTSParseInputTest >> testAssignmentPattern [
+	<timeout: 0.1>
 
 	| pattern results |
 	pattern := (SBTSFileParser new
@@ -91,17 +89,10 @@ SBTSParseInputTest >> testCreateArray [
 SBTSParseInputTest >> testCreateArrayAndIdentifier [
 
 	| results |
-	"assignment gets reported as well"
-	self flag: #todo.
 	results := SBTSInputParser new
 		optionsForTemplate: (self nodeForRule: 'dynamic_array')
 		given: '{a'.
-	self assert: 2 equals: results size.
-	
-	results := SBTSInputParser new
-		optionsForTemplate: (self nodeForRule: 'dynamic_array')
-		given: '{a'.
-	self assert: 2 equals: results size
+	self assert: 1 equals: results size
 ]
 
 { #category : #'tests - create' }
