@@ -98,6 +98,8 @@ SBTSDisambiguatePopup >> positionAfterDo: aBlock [
 SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 
 	| all positionInAll stopIndex |
+	(before ifNil: [false]) ifTrue: [^ aCollection first startInputAtStart].
+	
 	all := Array streamContents: [:s | aCollection do: [:block | block allMorphsPreorderDo: [:m | s nextPut: m]]].
 	stopIndex := all findLast: [:m | m valueOfProperty: #lastConstructed ifAbsent: [false]].
 	

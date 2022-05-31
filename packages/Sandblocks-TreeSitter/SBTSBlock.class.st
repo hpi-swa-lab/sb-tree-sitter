@@ -654,7 +654,7 @@ SBTSBlock >> tryApplyChange: aBlock input: aString [
 
 	| previousContents isAtStart |
 	previousContents := self contents.
-	isAtStart := self currentTextMorph cursor = 1.
+	isAtStart := self currentTextMorph cursor = 1 and: [self currentTextMorph contents notEmpty].
 	aBlock value: self.
 	
 	^ self prefixValid ifTrue: [true] ifFalse: [

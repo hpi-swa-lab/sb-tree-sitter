@@ -101,6 +101,18 @@ SBTSBlockTest >> testClojureSymbol [
 	self assert: '''abc' equals: source sourceString
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testClojureWrapInExpr [
+
+	| program editor |
+	program := SBTSFileParser new parse: '(+ 1 2)' language: SBClojure.
+	editor := self editorFor: program.
+	program childSandblocks first startInputAtStart.
+	editor handle: (self keyboardEvent: $().
+	editor handle: (self keyboardEvent: $*).
+	self assert: '(* (+ 1 2))' equals: program sourceString
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testCursorPositionsAroundUnknown [
 
