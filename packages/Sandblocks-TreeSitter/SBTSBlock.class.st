@@ -45,7 +45,7 @@ SBTSBlock >> adaptSlot: aConverter [
 	aConverter
 		if: [
 			(aConverter objectInterface first isKindOf: SBTSObjectInterface)
-				ifTrue: [(self adaptSlotFor: aConverter objectInterface first slot ifFailed: [self assert: false]) ~~ false]
+				ifTrue: [(self adaptSlotFor: aConverter objectInterface first slot ifFailed: [false]) ~~ false]
 				ifFalse: [false]]
 		do: [
 			self copyBlock

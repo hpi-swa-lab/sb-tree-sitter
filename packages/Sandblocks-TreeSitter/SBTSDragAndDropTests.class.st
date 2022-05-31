@@ -76,7 +76,7 @@ SBTSDragAndDropTests >> testRegexInsertInPattern [
 	module := module childSandblocks first.
 	
 	self class
-		dropAt: module childSandblocks first positionInWorld + (1 @ module childSandblocks first height)
+		dropAt: module childSandblocks first positionInWorld + (module childSandblocks first width @ 1)
 		with: (SBRegex parseExpression: 'x') childSandblocks first
 		in: editor.
 	self assert: 'axb' equals: module sourceString
@@ -92,7 +92,7 @@ SBTSDragAndDropTests >> testRegexQuantifierCanInsert [
 	module := module childSandblocks first.
 	
 	self class
-		dropAt: module childSandblocks first positionInWorld + (0 @ module childSandblocks first height)
+		dropAt: module childSandblocks first positionInWorld + (module childSandblocks first width @ 0)
 		with: (SBRegex parseExpression: 'x+') childSandblocks last
 		in: editor.
 	self assert: 'a+b' equals: module sourceString
@@ -109,7 +109,7 @@ SBTSDragAndDropTests >> testRegexQuantifierCanInsertLater [
 	
 	"used to be childSandblocks first --> we were allowing to not choose the closest insert position"
 	self class
-		dropAt: module childSandblocks last positionInWorld + (0 @ module childSandblocks first height)
+		dropAt: module childSandblocks last positionInWorld + (module childSandblocks first width + 1 @ 0)
 		with: (SBRegex parseExpression: 'x+') childSandblocks last
 		in: editor.
 	self assert: 'a+b+' equals: module sourceString
