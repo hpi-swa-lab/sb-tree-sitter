@@ -823,9 +823,9 @@ SBTSSmalltalk class >> grammarJson [
 
 { #category : #properties }
 SBTSSmalltalk class >> highlightQuery [
+	" https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
 
-    " https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
-    ^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
+	^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
 (number) @number
 (string) @string
 (symbol) @string
@@ -834,7 +834,10 @@ SBTSSmalltalk class >> highlightQuery [
 (binary_operator) @variable.part
 (keyword) @variable.part
 ["^" "[" "]" "{" "}"] @important
-'
+
+(unary_selector (identifier) @major_declaration)
+(binary_selector (binary_operator) @major_declaration)
+(keyword_selector (keyword) @major_declaration)'
 ]
 
 { #category : #'as yet unclassified' }

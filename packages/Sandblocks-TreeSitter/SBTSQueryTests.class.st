@@ -25,6 +25,17 @@ SBTSQueryTests >> testCaptureOptional [
 ]
 
 { #category : #tests }
+SBTSQueryTests >> testDoesNotCaptureMismatches [
+
+	| factory |
+	factory := SBMetaBlockFactory new.
+	SBTSQuery new
+		execute: '(array (identifier) @a)'
+		against: ((SBInlineBlockSymbol new type: 'not_array' factory: factory) addMorphBack: (SBInlineBlockRepeat new addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory)))
+		capturesDo: [:c | self assert: c isEmpty]
+]
+
+{ #category : #tests }
 SBTSQueryTests >> testIgnoresComments [
 
 	| structure |

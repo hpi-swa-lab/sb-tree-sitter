@@ -143,7 +143,7 @@ SBTSNodeLabel >> printOn: aStream [
 { #category : #accessing }
 SBTSNodeLabel >> regex [
 
-	^ (self factory escapeStringForRegex: self label) asRegex
+	^ ((self factory escapeStringForRegex: self label) copyReplaceAll: ':' with: '\:') asRegex
 ]
 
 { #category : #parsing }

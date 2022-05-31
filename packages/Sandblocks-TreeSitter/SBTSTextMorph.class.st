@@ -67,6 +67,12 @@ SBTSTextMorph >> drawnColor [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> emphasis [
+
+	^ #derive
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> ensureLayouted [
 
 	
@@ -99,7 +105,9 @@ SBTSTextMorph >> highlight [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> highlight: aString [
 
-	highlight := aString
+	highlight := aString.
+	paragraph := nil.
+	self layoutChanged
 ]
 
 { #category : #'as yet unclassified' }

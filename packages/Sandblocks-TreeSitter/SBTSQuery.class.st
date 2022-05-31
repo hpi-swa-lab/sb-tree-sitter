@@ -23,11 +23,14 @@ SBTSQuery >> executeAgainst: aBlock capturesDo: aClosure [
 	| ret target |
 	target := aBlock.
 	captures := Dictionary new.
-
+	
 	ret := false.
-	expressions do: [:expression |
-		(expression evaluateAgainst: aBlock captures: captures)
-			ifNotNil: [ret := true]
+	expressions do: [:expression | | newCaptures |
+		newCaptures := Dictionary new.
+		(expression evaluateAgainst: aBlock captures: newCaptures)
+			ifNotNil: [
+				ret := true.
+				captures addAll: newCaptures associations]
 			ifNil: [expression isOptional ifTrue: [ret := true]]].
 	
 	predicates do: [:predicate | (predicate verify: captures) ifFalse: [ret := false]].

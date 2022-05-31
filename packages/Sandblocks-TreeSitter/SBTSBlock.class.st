@@ -243,6 +243,14 @@ SBTSBlock >> drawnColor [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> emphasis [
+
+	^ (self highlight notNil and: [self highlight = 'major_declaration'])
+		ifTrue: [TextEmphasis bold]
+		ifFalse: [TextEmphasis normal]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> evaluate [
 
 	self containingArtefact ifNotNil: [:a | ^ a evaluate: self].

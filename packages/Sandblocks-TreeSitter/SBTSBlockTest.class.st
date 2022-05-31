@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testDeleteInRepeat #testJsPatternToAssignmentPattern)
+	^ #(#testDeleteInRepeat #testJsPatternToAssignmentPattern #testStBinaryToAssignment)
 ]
 
 { #category : #'tests - adding' }
@@ -658,6 +658,18 @@ SBTSBlockTest >> testSmalltalkUnaryToKeyword [
 	self assert: #'keyword_message' equals: method childSandblocks second type.
 	editor handle: (self keyboardEvent: $4).
 	self assert: #number equals: editor selection type
+]
+
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testStBinaryToAssignment [
+
+	| module editor |
+	module := SBTSFileParser new parse: 'a b + c' language: SBTSSmalltalk.
+	editor := self editorFor: module.
+	module childSandblocks second childSandblocks second startInsertAtEnd.
+	editor handle: (self keyboardEvent: $a shift: false command: true).
+	editor handle: (self keyboardEvent: $:).
+	self assert: 'assignment' equals: module childSandblocks second type
 ]
 
 { #category : #'tests - deleting' }
