@@ -37,6 +37,21 @@ SBStColor >> build [
 ]
 
 { #category : #'as yet unclassified' }
+SBStColor >> buildPyParam [
+	<lang: #python match: '(keyword_argument (identifier) ="color" (string (string_content) @color) @root)' sample: 'ax.plot(color="red")'>
+
+	self
+		layoutInset: 4;
+		addMorphBack: (self
+			createBinding: [:c |
+				Morph new
+					extent: 16 asPoint;
+					color: (Color fromCSS2String: (c at: 'color') contents);
+					yourself]
+			update: [:c :m | (c at: 'color') contents: m color asHTMLColor])
+]
+
+{ #category : #'as yet unclassified' }
 SBStColor >> colorContentsUpdate: aColor [
 
 	self firstSubmorph color: aColor.

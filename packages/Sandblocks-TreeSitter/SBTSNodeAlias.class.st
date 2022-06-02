@@ -113,6 +113,13 @@ SBTSNodeAlias >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeAlias >> takeNodesFrom: aParser [
 
+	self element isTSText ifTrue: [
+		^ (aParser atEnd not and: [aParser peek isString])
+			ifTrue: [
+				"need to add extra level to slot?"
+				self flag: #todo.
+				self element takeNodesFrom: aParser]
+			ifFalse: [{}]].
 	^ (aParser atEnd not and: [
 		aParser peek isString not and: [
 			SBToggledCode comment: '' active: 1 do: {

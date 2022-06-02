@@ -34,7 +34,7 @@ SBMetaBlockFactory class >> compileParserIn: path name: aString [
 	| filename hasScanner |
 	filename := 'tree-sitter-', aString, '.so'.
 	hasScanner := false.
-	self assert: (OSProcess waitForCommand: ('cd {1}; npx -p tree-sitter-cli tree-sitter generate' format: {path fullName})) exitStatus = 0.
+	self assert: (OSProcess waitForCommand: ('cd {1}; npm i; npx -p tree-sitter-cli tree-sitter generate' format: {path fullName})) exitStatus = 0.
 	
 	((path / 'src' / 'scanner.c') exists or: [(path / 'src' / 'scanner.cc') exists]) ifTrue: [
 		self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src -fPIC" CFLAGS="-I./src -fPIC" make src/scanner.o' format: {path fullName})) exitStatus = 0.

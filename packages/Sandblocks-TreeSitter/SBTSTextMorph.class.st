@@ -79,6 +79,16 @@ SBTSTextMorph >> ensureLayouted [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> exportStructure [
+
+	^ {
+		#class -> #text.
+		#regex -> self slot firstNode regexString.
+		#contents -> self contents.
+		#color -> self color asHTMLColor} as: Dictionary
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> factory [
 
 	^ (self slot ifNil: [self parentSandblock slot]) factory

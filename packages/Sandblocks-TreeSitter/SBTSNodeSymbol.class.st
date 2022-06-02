@@ -74,10 +74,12 @@ SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream 
 	
 	(aStream peek slot includesParent: self) ifTrue: [ | block |
 		block := aStream next.
-		block isTextMorph ifTrue: [
-			aClosure value: (SBCursorText new
-				block: block containingSandblock;
-				currentCommand: (SBTextCommand new textMorph: block))].
+		block isTextMorph
+			ifTrue: [
+				aClosure value: (SBCursorText new
+					block: block containingSandblock;
+					currentCommand: (SBTextCommand new textMorph: block))]
+			ifFalse: [aBoolean ifTrue: [aClosure value: (SBCursorSelect new block: block)]].
 		(aBoolean not and: [block isTSBlock]) ifTrue: [block cursorPositionsDo: aClosure shallow: aBoolean]]
 ]
 

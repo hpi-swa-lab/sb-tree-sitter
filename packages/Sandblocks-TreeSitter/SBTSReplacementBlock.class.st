@@ -37,6 +37,13 @@ SBTSReplacementBlock class >> match: aBlock against: aTSQuery buildSelector: aSy
 ]
 
 { #category : #'as yet unclassified' }
+SBTSReplacementBlock >> asCode: converter [
+	<convert>
+
+	converter do: [self updateDuring: [self root copyBlock]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReplacementBlock >> bindings [
 
 	^ bindings
@@ -207,7 +214,7 @@ SBTSReplacementBlock >> updateDuring: aBlock [
 			m swapWith: original.
 			restore add: m -> original]].
 	updaters do: [:pair | pair value value: bindings value: pair key].
-	aBlock ensure: [restore do: [:pair | pair value swapWith: pair key]]
+	^ aBlock ensure: [restore do: [:pair | pair value swapWith: pair key]]
 ]
 
 { #category : #'as yet unclassified' }

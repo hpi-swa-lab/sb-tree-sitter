@@ -31,5 +31,5 @@ SBPyPltAxvline >> build [
 { #category : #accessing }
 SBPyPltAxvline >> palettes [
 
-	^ {SBPyPltPaletteOverview. SBPyPltPaletteOverview}
+	^ {SBPyPltPaletteAxvline. SBPyPltPaletteOverview}, super palettes
 ]

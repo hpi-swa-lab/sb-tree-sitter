@@ -143,7 +143,15 @@ SBTSNodeLabel >> printOn: aStream [
 { #category : #accessing }
 SBTSNodeLabel >> regex [
 
-	^ ((self factory escapeStringForRegex: self label) copyReplaceAll: ':' with: '\:') asRegex
+	^ self regexString asRegex
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeLabel >> regexString [
+
+	^ (self factory escapeStringForRegex: self label)
+		copyReplaceAll: ':'
+		with: '\:'
 ]
 
 { #category : #parsing }

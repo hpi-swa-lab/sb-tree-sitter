@@ -14,7 +14,7 @@ SBPyPltParamNumber >> build [
 	self addMorphBack: (self
 		createBinding: [ | number |
 			number := SBPyNumberWithPrefix new floatSteps.
-			range ifNotNil: [number rangeFrom: range from to: range to].
+			range ifNotNil: [number rangeFrom: range start to: range stop].
 			number]
 		contents: 'value')
 ]

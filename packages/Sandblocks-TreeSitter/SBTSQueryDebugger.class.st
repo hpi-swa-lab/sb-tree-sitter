@@ -99,9 +99,10 @@ SBTSQueryDebugger >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 	program allBlocksDo: [:block |
 		block query: query contents capturesDo: [:captures |
 			captures keysAndValuesDo: [:name :match |
-				match
-					attachDecorator: (SBReportedValueDecorator new label: name);
-					attachDecorator: SBErrorDecorator new]]].
+				match isSandblock ifTrue: [
+					match
+						attachDecorator: (SBReportedValueDecorator new label: name);
+						attachDecorator: SBErrorDecorator new]]]].
 	
 	^ true
 ]

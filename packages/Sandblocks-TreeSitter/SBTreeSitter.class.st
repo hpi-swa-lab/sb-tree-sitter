@@ -73,6 +73,13 @@ SBTreeSitter >> clojure [
 	^ SBMetaBlockFactory tryPatchLibrary: 'sogaiu/tree-sitter-clojure' name: 'clojure' context: thisContext
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> cpp [
+
+	<apicall: SBTSLanguage* tree_sitter_cpp () module: 'tree-sitter-cpp'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-cpp' name: 'cpp' context: thisContext
+]
+
 { #category : #ffi }
 SBTreeSitter >> cursor: aCursor reset: aNode [
 

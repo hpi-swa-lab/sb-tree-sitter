@@ -30,7 +30,7 @@ SBClojureRepl >> connectToREPL [
 { #category : #'as yet unclassified' }
 SBClojureRepl >> evaluate: aBlock [
 
-	(self evaluateString: aBlock) explore
+	(self evaluateString: aBlock sourceString) explore
 ]
 
 { #category : #'as yet unclassified' }
@@ -115,8 +115,11 @@ SBClojureRepl >> path: aString [
 SBClojureRepl >> repl: aRepl [
 
 	repl := aRepl.
-	self submorphsDo: [:m | m isStringMorph ifTrue: [m delete]].
-	self addMorphFront: (SBStringMorph new contents: 'Connected to nREPL :', repl port asString)
+	self submorphsDo: [:m | (m isKindOf: SBRow) ifTrue: [m delete]].
+	self addMorphFront: (SBRow new
+		cellGap: 4;
+		addMorphBack: SBClojure iconMorph;
+		addMorphBack: (SBStringMorph new contents: 'Connected to nREPL :', repl port asString))
 ]
 
 { #category : #'as yet unclassified' }

@@ -226,6 +226,7 @@ SBTSSlot >> preferredColorIn: aColorPolicy for: aHighlightString [
 			['comment'] -> [aColorPolicy defaultLight].
 			['variable'] -> [aColorPolicy identifier].
 			['variable.part'] -> [aColorPolicy identifier].
+			['variable.builtin'] -> [aColorPolicy identifier].
 			['type'] -> [aColorPolicy keyword].
 			['number'] -> [aColorPolicy literal].
 			['string'] -> [aColorPolicy literal].

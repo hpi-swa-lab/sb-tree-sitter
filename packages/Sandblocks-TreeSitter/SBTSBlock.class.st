@@ -44,7 +44,7 @@ SBTSBlock >> adaptSlot: aConverter [
 
 	aConverter
 		if: [
-			(aConverter objectInterface first isKindOf: SBTSObjectInterface)
+			((self isKindOf: SBTSReplacementBlock) not and: [aConverter objectInterface first isKindOf: SBTSObjectInterface])
 				ifTrue: [(self adaptSlotFor: aConverter objectInterface first slot ifFailed: [false]) ~~ false]
 				ifFalse: [false]]
 		do: [
@@ -258,6 +258,26 @@ SBTSBlock >> evaluate [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> exportStructure [
+
+	| previous |
+	previous := nil.
+	^ {
+		#children -> (Array streamContents: [:stream |
+			self
+				cursorPositionsDo: [:pos |
+					pos isInsert ifTrue: [stream nextPut: ({#class -> #insert. #horizontal -> pos hasHorizontalLayout. #type -> pos command element type} as: Dictionary)].
+					pos isText ifTrue: [stream nextPut: pos block currentTextMorph exportStructure].
+					(pos isSelect and: [pos block ~= self]) ifTrue: [
+						previous ifNotNil: [(pos block factory hardLineBreakBetween: previous and: pos block) ifTrue: [stream nextPut: ({#class -> #hardLineBreak} as: Dictionary)]].
+						stream nextPut: pos block exportStructure.
+						previous := pos block]]
+				shallow: true]).
+		#class -> #block.
+		#type -> self type} as: Dictionary
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> factory [
 
 	^ self slot factory
@@ -446,6 +466,8 @@ SBTSBlock >> objectInterfaceForChild: aBlock [
 { #category : #'as yet unclassified' }
 SBTSBlock >> objectInterfaceForInsert: aCommand [
 
+	(aCommand isKindOf: SBTSNodeInsertCommand) ifFalse: [^ SBInterfaces never].
+	
 	^ {SBTSObjectInterface new slot: (SBTSSlot with: aCommand element)}
 ]
 
