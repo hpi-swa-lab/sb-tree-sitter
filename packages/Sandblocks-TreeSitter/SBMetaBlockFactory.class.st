@@ -709,6 +709,13 @@ SBMetaBlockFactory >> findBlockInlineCandidates [
 	blockInline remove: self rootRuleName ifAbsent: []
 ]
 
+{ #category : #testing }
+SBMetaBlockFactory >> fixmeSupportsRecursion [
+	"return false if your grammar fails to return results within meaningful timeframes with the current recursion code"
+
+	^ true
+]
+
 { #category : #'grammar clean' }
 SBMetaBlockFactory >> flattenSeparatedList: anObject name: aString [
 

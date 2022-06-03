@@ -315,11 +315,12 @@ SBTSSlot >> type [
 { #category : #highlight }
 SBTSSlot >> updateAllHighlightsFor: aBlock [
 
-	self factory hasHighlight ifFalse: [^ self].
+	self factory hasHighlight ifFalse: [^ #'_sb_none'].
 	aBlock allMorphsDo: [:m |
 		m isTSMorph ifTrue: [
 			m highlight: #'_sb_none'.
-			m slot updateHighlightFor: m]]
+			m slot updateHighlightFor: m]].
+	^ aBlock highlight
 ]
 
 { #category : #highlight }

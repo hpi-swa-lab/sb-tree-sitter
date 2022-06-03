@@ -1774,7 +1774,7 @@ SBClojure >> spaceBetween: aBlock and: anotherBlock [
 { #category : #'as yet unclassified' }
 SBClojure >> suggestionsForInsert: aCommand [
 
-	(aCommand container type = 'list_lit' and: [aCommand insertIndex > 2 and: [aCommand container childSandblocks first type = 'sym_lit']]) ifTrue: [ | signatures |
+	(aCommand container containingArtefact notNil and: [aCommand container type = 'list_lit' and: [aCommand insertIndex > 2 and: [aCommand container childSandblocks first type = 'sym_lit']]]) ifTrue: [ | signatures |
 		signatures := (aCommand container containingArtefact evaluateString: ('(:arglists (meta #''{1}))' format: {aCommand container childSandblocks first contents}))
 			at: 'value'
 			ifAbsent: [^ #()].

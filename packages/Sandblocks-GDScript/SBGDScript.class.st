@@ -3378,6 +3378,137 @@ SBGDScript class >> grammarJson [
 ]
 
 { #category : #'as yet unclassified' }
+SBGDScript class >> highlightQuery [
+	" https://github.com/tree-sitter/tree-sitter-python/blob/master/queries/highlights.scm "
+
+	^ '; Identifier naming conventions
+
+((identifier) @constructor
+ (#match? @constructor "^[A-Z]"))
+
+((identifier) @constant
+ (#match? @constant "^[A-Z][A-Z_]*$"))
+
+; Builtin functions
+
+((call
+  function: (identifier) @function.builtin)
+ (#match?
+   @function.builtin
+   "^(abs|all|any|ascii|bin|bool|breakpoint|bytearray|bytes|callable|chr|classmethod|compile|complex|delattr|dict|dir|divmod|enumerate|eval|exec|filter|float|format|frozenset|getattr|globals|hasattr|hash|help|hex|id|input|int|isinstance|issubclass|iter|len|list|locals|map|max|memoryview|min|next|object|oct|open|ord|pow|print|property|range|repr|reversed|round|set|setattr|slice|sorted|staticmethod|str|sum|super|tuple|type|vars|zip|__import__)$"))
+
+; Function calls
+
+(decorator) @function
+
+(call
+  function: (attribute attribute: (identifier) @function.method))
+(call
+  function: (identifier) @function)
+
+; Function definitions
+
+(function_definition
+  name: (identifier) @function)
+
+(identifier) @variable
+(attribute attribute: (identifier) @property)
+(type (identifier) @type)
+
+; Literals
+
+[
+  (none)
+  (true)
+  (false)
+] @constant.builtin
+
+[
+  (integer)
+  (float)
+] @number
+
+(comment) @comment
+(string) @string
+(escape_sequence) @escape
+
+(interpolation
+  "{" @punctuation.special
+  "}" @punctuation.special) @embedded
+
+[
+  "-"
+  "-="
+  "!="
+  "*"
+  "**"
+  "**="
+  "*="
+  "/"
+  "//"
+  "//="
+  "/="
+  "&"
+  "%"
+  "%="
+  "^"
+  "+"
+  "->"
+  "+="
+  "<"
+  "<<"
+  "<="
+  "<>"
+  "="
+  ":="
+  "=="
+  ">"
+  ">="
+  ">>"
+  "|"
+  "~"
+  "and"
+  "in"
+  "is"
+  "not"
+  "or"
+] @operator
+
+[
+  "as"
+  "assert"
+  "async"
+  "await"
+  "break"
+  "class"
+  "continue"
+  "func"
+  "del"
+  "elif"
+  "else"
+  "except"
+  "exec"
+  "finally"
+  "for"
+  "from"
+  "global"
+  "if"
+  "import"
+  "lambda"
+  "nonlocal"
+  "pass"
+  "print"
+  "raise"
+  "return"
+  "match"
+  "try"
+  "while"
+  "with"
+  "yield"
+] @keyword'
+]
+
+{ #category : #'as yet unclassified' }
 SBGDScript class >> language [
 
 	^ #gdscript
@@ -3396,10 +3527,44 @@ SBGDScript class >> statementContainerTypes [
 ]
 
 { #category : #'as yet unclassified' }
+SBGDScript >> addIndent: aBlock [
+
+	aBlock type = '"("' ifTrue: [^ true].
+	^ (aBlock submorphAfter ifNotNil: #type) = 'body'
+]
+
+{ #category : #'as yet unclassified' }
 SBGDScript >> configure [
 
 	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type']].
 	self blockInline: {'parameters'. 'expression_statement'}
+]
+
+{ #category : #'as yet unclassified' }
+SBGDScript >> fixmeSupportsRecursion [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBGDScript >> hardLineBreakBetween: aBlock and: anotherBlock [
+	"match for TSBlock"
+
+	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	((aBlock isStringMorph and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice']]]) ifTrue: [^ true].
+	^ #('else_clause' 'elif_clause') includes: anotherBlock type
+]
+
+{ #category : #'as yet unclassified' }
+SBGDScript >> isImmutableLabel: aLabelNode [
+
+	^ (super isImmutableLabel: aLabelNode) or: [#(':') includes: aLabelNode label]
+]
+
+{ #category : #'as yet unclassified' }
+SBGDScript >> postConfigure [
+
+	blockInline remove: 'body' ifAbsent: []
 ]
 
 { #category : #'as yet unclassified' }
@@ -3409,5 +3574,16 @@ SBGDScript >> preprocessGrammar [
 	self grammar rules
 		at: '_string_content'
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
+	(self grammar rules at: '_statement') members first name: '_simple_statement'.
+	self grammar rules
+		at: 'body'
+		put: (self grammar rules at: 'body') members second members second.
 	#('_newline' '_indent' '_dedent') do: [:sym | self removeSymbol: sym]
+]
+
+{ #category : #'as yet unclassified' }
+SBGDScript >> removeIndent: aBlock [
+
+	aBlock type = '")"' ifTrue: [^ true].
+	^ (aBlock submorphBefore ifNotNil: #type) = 'body'
 ]

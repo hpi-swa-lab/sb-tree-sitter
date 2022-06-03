@@ -45,6 +45,14 @@ SBTSLanguageBox >> buildPython [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageBox >> buildSmalltalk [
+	<lang: #smalltalk match: '(keyword_message receiver: (identifier) ="Polyglot" (keyword) ="eval:" (string) @language (keyword) ="string:" (string) @code)' sample: 'a Polyglot eval: ''python'' string: ''2 + 2'''>
+
+	
+	self build
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageBox >> initialize [
 
 	super initialize.
@@ -58,7 +66,7 @@ SBTSLanguageBox >> layoutCommands [
 	^ SBAlgebraCommand container
 		data: (self submorphs
 			collect: [:s | s layoutCommands]
-			separatedBy: [SBAlgebraCommand hardLine withGap: true]);
+			separatedBy: [SBAlgebraCommand gap withGap: true]);
 		morph: self
 ]
 

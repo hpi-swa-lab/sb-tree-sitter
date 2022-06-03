@@ -136,7 +136,7 @@ SBTSInputParser >> memoizationFor: aSymbol ifAbsentPut: aBlock [
 			results := aBlock value.
 			self memoizeBlocks: results at: index for: aSymbol.
 			(SBToggledCode comment: '' active: 1 do: {
-				[true].
+				[aSymbol factory fixmeSupportsRecursion].
 				["if we already have at least one result that got us to the end, abort. Definitely wrong, but easy workaround for now."
 				results noneSatisfy: [:r | r position = memoizations size]]})
 				ifTrue: [
@@ -202,9 +202,9 @@ SBTSInputParser >> normalizeResults2: aCollection query: aString [
 		transitionPairs := results anyOne first factory transitionPairs.
 		results := results select: [:blocksA | results noneSatisfy: [:blocksB | transitionPairs anySatisfy: [:pair | pair key = blocksB first type and: [pair value = blocksA first type]]]]].
 	
-	hasAnyKeywords := results anySatisfy: [:r | | node |
-		node := r first firstDeepSubmorph slot firstNode.
-		node isTSLabel and: [ | index |
+	hasAnyKeywords := results anySatisfy: [:r | | node block |
+		block := r first firstDeepSubmorph.
+		(block isTSMorph and: [(node := block slot firstNode) isTSLabel]) and: [ | index |
 			"only disambiguate keywords if they were terminated with a space, otherwise we may break typing e.g. `forage` because we abort with just one result after typing `for`"
 			index := aString indexOfSubCollection: node label.
 			index > 0 and: [(aString at: index + node label size ifAbsent: [$x]) = $ ]]].

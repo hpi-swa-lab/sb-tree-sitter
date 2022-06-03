@@ -44,7 +44,7 @@ SBTSBlock >> adaptSlot: aConverter [
 
 	aConverter
 		if: [
-			((self isKindOf: SBTSReplacementBlock) not and: [aConverter objectInterface first isKindOf: SBTSObjectInterface])
+			(aConverter objectInterface first isKindOf: SBTSObjectInterface)
 				ifTrue: [(self adaptSlotFor: aConverter objectInterface first slot ifFailed: [false]) ~~ false]
 				ifFalse: [false]]
 		do: [
@@ -95,7 +95,7 @@ SBTSBlock >> alias [
 { #category : #replacements }
 SBTSBlock >> allReplacementCandidates [
 
-	^ SBTSReplacementBlock allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class), (Pragma allNamed: #lang:match:sample: in: class) select: [:pragma | pragma arguments first = self factory name]]
+	^ SBTSReplacementBlock allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class), (Pragma allNamed: #lang:match:sample: in: class)]
 ]
 
 { #category : #replacements }
@@ -124,7 +124,11 @@ SBTSBlock >> applyReplacements [
 
 	| candidates |
 	candidates := self allReplacementCandidates.
-	self allBlocksDo: [:block | (block isTSBlock and: [block isTSReplacement not]) ifTrue: [self tryApplyReplacements: candidates to: block]]
+	self allBlocksDo: [:block |
+		(block isTSBlock and: [block isTSReplacement not]) ifTrue: [
+			self
+				tryApplyReplacements: (candidates select: [:pragma | pragma arguments first = block factory name])
+				to: block]]
 ]
 
 { #category : #accessing }
@@ -718,7 +722,7 @@ SBTSBlock >> type [
 { #category : #highlight }
 SBTSBlock >> updateAllHighlights [
 
-	self slot updateAllHighlightsFor: self
+	^ self slot updateAllHighlightsFor: self
 ]
 
 { #category : #'as yet unclassified' }

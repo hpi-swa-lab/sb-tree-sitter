@@ -815,6 +815,12 @@ SBRegex >> preprocessGrammar [
 	(self grammar rules at: #lookahead_assertion) members second  at: #name put: 'type'
 ]
 
+{ #category : #palette }
+SBRegex >> softLineBreakBetween: aBlock and: anotherBlock [
+
+	^ true
+]
+
 { #category : #grammar }
 SBRegex >> spaceBetween: aBlock and: anotherBlock [
 
