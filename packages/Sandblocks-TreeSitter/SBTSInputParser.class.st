@@ -354,9 +354,11 @@ SBTSInputParser >> remainingSize [
 { #category : #'as yet unclassified' }
 SBTSInputParser >> sortsBefore: aParser [
 
-	| comp ours theirs |
-	ours := ((self getLastConstructed ifNotNil: #containingSandblock) ifNil: [self getLastConstructed]) ifNil: [self blocks first].
-	theirs := ((aParser getLastConstructed ifNotNil: #containingSandblock) ifNil: [aParser getLastConstructed]) ifNil: [aParser blocks first].
+	| comp ours theirs ourLast theirLast |
+	theirLast := aParser getLastConstructed.
+	ourLast := self getLastConstructed.
+	ours := ((ourLast ifNotNil: #containingSandblock) ifNil: [ourLast]) ifNil: [self blocks first].
+	theirs := ((theirLast ifNotNil: #containingSandblock) ifNil: [theirLast]) ifNil: [aParser blocks first].
 	comp := (ours slot precedenceAround: ours) compareTo: (theirs slot precedenceAround: theirs).
 	"precedence compare doesnt work yet..."
 	self flag: #fixme.

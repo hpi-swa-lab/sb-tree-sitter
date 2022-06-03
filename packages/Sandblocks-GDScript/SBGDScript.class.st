@@ -3574,6 +3574,10 @@ SBGDScript >> preprocessGrammar [
 	self grammar rules
 		at: '_string_content'
 		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
+	self grammar
+		at: 'externals'
+		put: ((self grammar at: 'externals') reject: [:obj | obj name = '_string_content']).
+	self renameSymbol: '_string_content' to: 'string_content'.
 	(self grammar rules at: '_statement') members first name: '_simple_statement'.
 	self grammar rules
 		at: 'body'
