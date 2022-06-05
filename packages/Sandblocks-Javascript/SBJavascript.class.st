@@ -6907,6 +6907,15 @@ SBJavascript >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBJavascript >> sourceForSlider: aBlock [
+
+	| slider |
+	slider := self class parseExpression: '[0.0, "slider"][0]'.
+	slider childSandblocks first childSandblocks first replaceBlock: aBlock.
+	^ (slider adaptSlotFor: aBlock slot ifFailed: [self error: 'blocks not compatible']) applyReplacement
+]
+
+{ #category : #'as yet unclassified' }
 SBJavascript >> terminatorFor: anElement on: aStream [
 
 	(anElement type = 'statement' and: [anElement firstSubmorph isInlineBlock and: [anElement firstSubmorph firstSubmorph isInlineBlock and: [anElement firstSubmorph firstSubmorph type = 'expression_statement']]]) ifTrue: [aStream nextPut: $;]

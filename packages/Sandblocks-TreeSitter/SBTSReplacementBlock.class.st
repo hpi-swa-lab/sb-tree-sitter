@@ -218,6 +218,12 @@ SBTSReplacementBlock >> updateDuring: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSReplacementBlock >> wantsExtraSpace [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReplacementBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
 	self updateDuring: [self root writeSourceOn: aStream indent: aNumber forCompare: aBoolean]

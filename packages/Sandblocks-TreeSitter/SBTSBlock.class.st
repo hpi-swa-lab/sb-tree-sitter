@@ -131,6 +131,15 @@ SBTSBlock >> applyReplacements [
 				to: block]]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> asSlider: converter [
+	<convert>
+
+	converter
+		if: [self type = #float or: [self type = #integer or: [self type = #number]]]
+		do: [self factory sourceForSlider: self]
+]
+
 { #category : #accessing }
 SBTSBlock >> children [
 
@@ -617,6 +626,15 @@ SBTSBlock >> repeaterGroup [
 		start := myIndex - mySubIndex + 1.
 		^ self owner children copyFrom: start to: start + seq elements size - 1].
 	^ nil
+]
+
+{ #category : #accessing }
+SBTSBlock >> replaceBlock: aBlock [
+
+	| new |
+	new := aBlock adaptSlotFor: self slot ifFailed: [self error: 'block not compatible'].
+	self replaceBy: new.
+	^ new
 ]
 
 { #category : #actions }
