@@ -29,6 +29,12 @@ SBTSNodeRepeat >> buildEmpty [
 	^ self required ifTrue: [self element buildEmpty] ifFalse: [{}]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeRepeat >> buildEmptyNodes [
+
+	^ self required ifTrue: [self element buildEmptyNodes] ifFalse: [{}]
+]
+
 { #category : #hierarchy }
 SBTSNodeRepeat >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 

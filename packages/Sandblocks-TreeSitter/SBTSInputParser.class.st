@@ -9,7 +9,9 @@ Class {
 		'symbolStack',
 		'activeRecursion',
 		'allowIncomplete',
-		'wasIncomplete'
+		'wasIncomplete',
+		'nodeCountCache',
+		'lastConstructedCache'
 	],
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
@@ -18,15 +20,15 @@ Class {
 SBTSInputParser >> addBlock: aBlock [
 
 	blocks add: aBlock.
-	self atEnd ifTrue: [aBlock setProperty: #lastConstructed toValue: true]
+	self atEndOfInput ifTrue: [aBlock lastConstructed: true]
 ]
 
 { #category : #blocks }
 SBTSInputParser >> addBlocks: aCollection [
 
 	blocks addAll: aCollection.
-	(self atEnd and: [aCollection notEmpty]) ifTrue: [
-		aCollection last setProperty: #lastConstructed toValue: true]
+	self assert: false description: 'this still needed?'.
+	(self atEndOfInput and: [aCollection notEmpty]) ifTrue: [aCollection last setProperty: #lastConstructed toValue: true]
 ]
 
 { #category : #blocks }
@@ -54,6 +56,15 @@ SBTSInputParser >> atEnd [
 	^ stream atEnd
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> atEndOfInput [
+
+	stream position + 1
+		to: stream size
+		do: [:i | (stream contents at: i) isCharacter ifTrue: [^ false]].
+	^ true
+]
+
 { #category : #blocks }
 SBTSInputParser >> basicAddBlocks: aCollection [
 
@@ -69,7 +80,6 @@ SBTSInputParser >> blocks [
 { #category : #blocks }
 SBTSInputParser >> blocks: aCollection [
 
-	self assert: (aCollection allSatisfy: [:m | m isMorph]).
 	blocks := aCollection
 ]
 
@@ -98,21 +108,6 @@ SBTSInputParser >> checkIntegrity [
 	memoizations do: [:list | list keysAndValuesDo: [:sym :memos | self assert: (memos isLeftRecursion or: [memos parsers allSatisfy: [:p | (p blocks first factory isBlockInlinedInParent: sym) or: [sym = p blocks first slot lastNode type]]])]]
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSInputParser >> getLastConstructed [
-
-	^ self getLastConstructed: self blocks
-]
-
-{ #category : #'as yet unclassified' }
-SBTSInputParser >> getLastConstructed: aCollection [
-
-	| ret |
-	ret := nil.
-	aCollection do: [:b | b allMorphsDo: [:m | m valueOfProperty: #lastConstructed ifPresentDo: [:a | ret := m]]].
-	^ ret
-]
-
 { #category : #'initialize-release' }
 SBTSInputParser >> initialize [
 
@@ -122,6 +117,22 @@ SBTSInputParser >> initialize [
 	blocks := OrderedCollection new.
 	wasIncomplete := false.
 	allowIncomplete := true
+]
+
+{ #category : #accessing }
+SBTSInputParser >> lastConstructed [
+
+	| ret |
+	lastConstructedCache ifNotNil: [^ lastConstructedCache].
+	ret := nil.
+	blocks do: [:b | b allChildrenDo: [:m | m lastConstructed ifTrue: [ret := m]]].
+	^ lastConstructedCache := ret
+]
+
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> lastConstructedChain [
+
+	^ self lastConstructed ifNotNil: [:l | l parentChainIn: self] ifNil: [{''. ''}]
 ]
 
 { #category : #memo }
@@ -138,18 +149,17 @@ SBTSInputParser >> memoizationFor: aSymbol ifAbsentPut: aBlock [
 			(SBToggledCode comment: '' active: 1 do: {
 				[aSymbol factory fixmeSupportsRecursion].
 				["if we already have at least one result that got us to the end, abort. Definitely wrong, but easy workaround for now."
-				results noneSatisfy: [:r | r position = memoizations size]]})
-				ifTrue: [
-					lr ifRecursionDetected: [
-						activeRecursion at: index put: lr.
-						lr newIteration.
-						results := SBToggledCode
-							comment: ''
-							active: 1
-							do: {[aBlock value]. [aBlock value, results]}.
-						self memoizeBlocks: results at: index for: aSymbol.
-						activeRecursion at: index put: nil]]
-				ifFalse: [].
+				results noneSatisfy: [:r | r position = memoizations size]]}) ifTrue: [
+				lr ifRecursionDetected: [
+					activeRecursion at: index put: lr.
+					lr newIteration.
+					Transcript showln: {index. aSymbol}.
+					results := SBToggledCode
+						comment: ''
+						active: 1
+						do: {[aBlock value]. [aBlock value, results]}.
+					self memoizeBlocks: results at: index for: aSymbol.
+					activeRecursion at: index put: nil]].
 			symbolStack remove: aSymbol type.
 			results collect: [:memo | memo adapt: self for: aSymbol]]
 		ifNotNil: [:memoEntry |
@@ -179,6 +189,20 @@ SBTSInputParser >> memoizeRecursionMarkerAt: aNumber for: aSymbol [
 	^ lr
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> merge: candidate intoGroups: groups [
+
+	| new newEntry |
+	newEntry := OrderedCollection with: candidate.
+	new := candidate lastConstructedChain.
+	groups keys do: [:existing |
+		(existing second = new second and: [(new first includesSubstring: existing first) or: [existing first isEmpty]]) ifTrue: [^ (groups at: existing) add: candidate].
+		(existing second = new second and: [(existing first includesSubstring: new first) or: [new first isEmpty]]) ifTrue: [
+			newEntry addAll: (groups at: existing).
+			groups removeKey: existing]].
+	groups at: new put: newEntry
+]
+
 { #category : #stream }
 SBTSInputParser >> next [
 
@@ -186,30 +210,29 @@ SBTSInputParser >> next [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSInputParser >> normalizeResults2: aCollection query: aString [
+SBTSInputParser >> normalizeResults2: aCollection query: aString factory: aFactory [
 
-	| results transitionPairs hasAnyKeywords |
+	| results transitionPairs hasAnyKeywords groups |
+	groups := Dictionary new.
+	aCollection do: [:candidate | self merge: candidate intoGroups: groups].
 	SBToggledCode comment: '' active: 0 do: {[^ aCollection]. [self halt]}.
-	results := (SBToggledCode comment: '' active: 1 do: {
-		[(aCollection groupBy: [:candidate | candidate getLastConstructed ifNotNil: [:m | (m containingSandblock ifNotNil: #type ifNil: [m]) ifNil: [m slot firstNode]]]) values collect: [:candidates | (candidates sort: [:a :b | a sortsBefore: b]) first]].
-		[aCollection].
-		[
-			(aCollection anySatisfy: [:candidate | candidate wasIncomplete not])
-				ifTrue: [aCollection select: [:candidate | candidate wasIncomplete not]]
-				ifFalse: [aCollection]]}) collect: [:candidate | candidate blocks].
+	results := groups values collect: [:candidates | | min |
+		min := candidates first.
+		candidates allButFirstDo: [:c | (c sortsBefore: min) ifTrue: [min := c]].
+		min blocks].
 	
 	results ifNotEmpty: [
-		transitionPairs := results anyOne first factory transitionPairs.
+		transitionPairs := aFactory transitionPairs.
 		results := results select: [:blocksA | results noneSatisfy: [:blocksB | transitionPairs anySatisfy: [:pair | pair key = blocksB first type and: [pair value = blocksA first type]]]]].
 	
 	hasAnyKeywords := results anySatisfy: [:r | | node block |
-		block := r first firstDeepSubmorph.
-		(block isTSMorph and: [(node := block slot firstNode) isTSLabel]) and: [ | index |
+		block := r first firstDeepChild.
+		(node := block slot firstNode) isTSLabel and: [ | index |
 			"only disambiguate keywords if they were terminated with a space, otherwise we may break typing e.g. `forage` because we abort with just one result after typing `for`"
 			index := aString indexOfSubCollection: node label.
 			index > 0 and: [(aString at: index + node label size ifAbsent: [$x]) = $ ]]].
 	results := hasAnyKeywords
-		ifTrue: [results select: [:r | r first firstDeepSubmorph slot firstNode isTSLabel]]
+		ifTrue: [results select: [:r | r first firstDeepChild slot firstNode isTSLabel]]
 		ifFalse: [results].
 	
 	^ results
@@ -276,13 +299,23 @@ SBTSInputParser >> optionsForTemplate: aNode given: aString before: aCollection 
 	activeRecursion := Array new: stream originalContents size withAll: nil.
 	symbolStack := OrderedCollection new.
 	
-	^ self normalizeResults2: ((aNode resultsFor: self) select: [:parser | parser atEnd]) query: aString
+	^ (self
+		normalizeResults2: ((aNode resultsFor: self) select: [:parser | parser atEnd])
+		query: aString
+		factory: aNode factory) collect: [:parseNodes | parseNodes collect: [:p | p buildWith: self]]
 ]
 
 { #category : #query }
 SBTSInputParser >> optionsForTemplate: aNode givenBlock: aBlock [
 
 	^ self optionsForTemplate: aNode given: '' before: {aBlock} after: {}
+]
+
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> parentOf: aNode [
+
+	self blocks do: [:p | (p parentOf: aNode) ifNotNil: [:parent | ^ parent]].
+	^ nil
 ]
 
 { #category : #stream }
@@ -320,7 +353,7 @@ SBTSInputParser >> postCopy [
 		do: {[activeRecursion := activeRecursion collect: [:r | r copy]]}.
 	symbolStack := symbolStack copy.
 	visitedSupertypes := visitedSupertypes copy.
-	blocks := blocks collect: [:block | block copyBlock]
+	blocks := blocks collect: [:block | block copy]
 ]
 
 { #category : #memo }
@@ -345,6 +378,15 @@ SBTSInputParser >> recall: aSymbol evalDo: aBlock [
 	^ memoEntry
 ]
 
+{ #category : #accessing }
+SBTSInputParser >> recursiveNodeCount [
+
+	nodeCountCache ifNotNil: [^ nodeCountCache].
+	^ nodeCountCache := self blocks
+		inject: 0
+		into: [:sum :block | sum + block recursiveNodeCount]
+]
+
 { #category : #stream }
 SBTSInputParser >> remainingSize [
 
@@ -352,19 +394,38 @@ SBTSInputParser >> remainingSize [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSInputParser >> shouldAbortIncompleteExpansion [
+	"check if we want to allow an incomplete result at the moment. do not allow it, if:
+- we have a memoized result that consumed all our input
+- we are currently recursing
+
+e.g., this will block from expanding to 2+_ if our input was just a 2"
+
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[(activeRecursion anySatisfy: #notNil) ifFalse: [^ false]]. [activeRecursion last ifNil: [^ false]]}.
+	^ memoizations last
+		at: self blocks last type
+		ifPresent: [:b | activeRecursion last notNil]
+		ifAbsent: [false]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSInputParser >> sortsBefore: aParser [
 
 	| comp ours theirs ourLast theirLast |
-	theirLast := aParser getLastConstructed.
-	ourLast := self getLastConstructed.
-	ours := ((ourLast ifNotNil: #containingSandblock) ifNil: [ourLast]) ifNil: [self blocks first].
-	theirs := ((theirLast ifNotNil: #containingSandblock) ifNil: [theirLast]) ifNil: [aParser blocks first].
-	comp := (ours slot precedenceAround: ours) compareTo: (theirs slot precedenceAround: theirs).
+	theirLast := aParser lastConstructed.
+	ourLast := self lastConstructed.
+	ours := ((ourLast ifNotNil: [ourLast containingNodeIn: self]) ifNil: [ourLast]) ifNil: [self blocks first].
+	theirs := ((theirLast ifNotNil: [theirLast containingNodeIn: aParser]) ifNil: [theirLast]) ifNil: [aParser blocks first].
 	"precedence compare doesnt work yet..."
 	self flag: #fixme.
-	^ (comp = 0 or: [true])
-		ifTrue: [(self blocks collect: [:b | b recursiveSubmorphCount]) sum <= (aParser blocks collect: [:b | b recursiveSubmorphCount]) sum]
-		ifFalse: [comp > 0]
+	comp := SBToggledCode
+		comment: ''
+		active: 1
+		do: {[0]. [(ours slot precedenceAround: ours) compareTo: (theirs slot precedenceAround: theirs)]}.
+	^ comp = 0 ifTrue: [self recursiveNodeCount <= aParser recursiveNodeCount] ifFalse: [comp > 0]
 ]
 
 { #category : #stream }
@@ -377,6 +438,12 @@ SBTSInputParser >> stream [
 SBTSInputParser >> symbolStack [
 
 	^ symbolStack
+]
+
+{ #category : #memo }
+SBTSInputParser >> trimResults: aCollection [
+
+	^ aCollection reject: #wasIncomplete
 ]
 
 { #category : #accessing }

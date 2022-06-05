@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testDeleteInRepeat #testJsPatternToAssignmentPattern #testStBinaryToAssignment)
+	^ #(#testDeleteInRepeat)
 ]
 
 { #category : #'tests - adding' }
@@ -346,7 +346,6 @@ SBTSBlockTest >> testJsNumberToString [
 
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsPatternToAssignmentPattern [
-	<timeout: 0.05>
 
 	| module editor |
 	module := SBTSFileParser new parse: 'function(b) {}' language: SBJavascript instance.
@@ -666,7 +665,7 @@ SBTSBlockTest >> testStBinaryToAssignment [
 	| module editor |
 	module := SBTSFileParser new parse: 'a b + c' language: SBTSSmalltalk.
 	editor := self editorFor: module.
-	module childSandblocks second childSandblocks second startInsertAtEnd.
+	module childSandblocks second childSandblocks second startInputAtEnd.
 	editor handle: (self keyboardEvent: $a shift: false command: true).
 	editor handle: (self keyboardEvent: $:).
 	self assert: 'assignment' equals: module childSandblocks second type
@@ -774,8 +773,10 @@ SBTSBlockTest >> testTypingClosure [
 	editor := self editorAndWorldFor: module.
 	module childSandblocks first startInsertAtEnd.
 	editor handle: (SBTest keyboardEvent: $().
+	editor handle: (SBTest keyboardEvent: $x).
 	self tick.
 	self tick.
+	editor handle: (SBTest keyboardEvent: Character arrowDown).
 	editor handle: (SBTest keyboardEvent: Character cr).
 	
 	self assert: 'arrow_function' equals: module childSandblocks first childSandblocks first type.

@@ -39,7 +39,7 @@ SBTSMemoizedBlocks >> blocks: anObject [
 { #category : #'as yet unclassified' }
 SBTSMemoizedBlocks >> blocksCopied [
 
-	^ self blocks collect: [:b | b copyBlock]
+	^ self blocks collect: [:b | b copy]
 ]
 
 { #category : #'as yet unclassified' }
@@ -59,6 +59,15 @@ SBTSMemoizedBlocks >> postCopy [
 
 	super postCopy.
 	blocks := self blocksCopied
+]
+
+{ #category : #'as yet unclassified' }
+SBTSMemoizedBlocks >> printOn: aStream [
+
+	aStream nextPutAll: self className.
+	aStream nextPut: $(.
+	aStream print: blocks.
+	aStream nextPut: $)
 ]
 
 { #category : #'as yet unclassified' }

@@ -16,7 +16,7 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 { #category : #failures }
 SBTSParseInputTest >> expectedFailures [
 
-	^ #(#testAssignmentPattern #testReinterpretBinaryOp)
+	^ #()
 ]
 
 { #category : #helper }
@@ -453,8 +453,12 @@ SBTSParseInputTest >> testReinterpretBinaryOp [
 		given: '-'
 		before: {stmt childSandblocks first}
 		after: {stmt childSandblocks last}.
-	self assert: #('binary_expression' 'augmented_assignment_expression') asSet equals: (results collect: [:r | r first type] as: Set).
-	self assert: #('-=' '-') asSet equals: (results collect: [:r | r first submorphs second contents] as: Set)
+	self
+		assert: #('binary_expression' 'augmented_assignment_expression') asSet
+		equals: (results collect: [:r | r first type] as: Set).
+	self
+		assert: #('-=' '-') asSet
+		equals: (results collect: [:r | r first submorphs second contents] as: Set)
 ]
 
 { #category : #'tests - wrap' }

@@ -46,6 +46,12 @@ SBTSNodeAlias >> buildEmpty [
 	^ self element buildEmpty
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeAlias >> buildEmptyNodes [
+
+	^ self element buildEmptyNodes
+]
+
 { #category : #blocks }
 SBTSNodeAlias >> buildMorphWith: aBlock slot: aSlot [
 

@@ -45,6 +45,12 @@ SBTSNodeChoice >> buildEmpty [
 	^ {SBTSUnknownBlock new slot: (SBTSSlot with: self)}
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeChoice >> buildEmptyNodes [
+
+	^ {SBTSParseNode kind: #unknown slot: (SBTSSlot with: self) contents: nil}
+]
+
 { #category : #printing }
 SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 	"check if there is an unknown for this choice"

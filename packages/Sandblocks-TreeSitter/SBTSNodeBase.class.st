@@ -54,6 +54,12 @@ SBTSNodeBase >> buildEmpty [
 	^ self subclassResponsibility
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> buildEmptyNodes [
+
+	^ self subclassResponsibility
+]
+
 { #category : #accessing }
 SBTSNodeBase >> buildMorphWith: aBlock slot: aSlot [
 

@@ -33,6 +33,12 @@ SBTSNodeSeq >> buildEmpty [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeSeq >> buildEmptyNodes [
+
+	^ self elements gather: [:element | element buildEmptyNodes]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeSeq >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
 	self elements do: [:child | child cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock]
@@ -121,11 +127,12 @@ SBTSNodeSeq >> resultsFor: aParser [
 	self flag: #todo.
 	aParser allowIncomplete ifTrue: [
 		incompleteResults do: [:pair |
-			self elements
-				from: pair second + 1
-				to: self elements size
-				do: [:node | pair first addEmptyBlocks: node buildEmpty]].
-		results addAll: (incompleteResults collect: [:pair | pair first])].
+			pair first shouldAbortIncompleteExpansion ifFalse: [
+				self elements
+					from: pair second + 1
+					to: self elements size
+					do: [:node | pair first addEmptyBlocks: node buildEmptyNodes].
+				results add: pair first]]].
 	^ results
 ]
 

@@ -39,6 +39,12 @@ SBTSNodePrecedence >> buildEmpty [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodePrecedence >> buildEmptyNodes [
+
+	^ self element buildEmptyNodes
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodePrecedence >> compareTo: aPrecedence [
 
 	(self value isInteger and: [aPrecedence value isInteger]) ifTrue: [^ (self value - aPrecedence value) sign].
@@ -47,8 +53,8 @@ SBTSNodePrecedence >> compareTo: aPrecedence [
 		sawLeft := false.
 		sawRight := false.
 		precedences do: [:entry | | matchesLeft matchesRight |
-			matchesLeft := self value = entry value.
-			matchesRight := aPrecedence value = entry value.
+			matchesLeft := self value = (entry at: #value).
+			matchesRight := aPrecedence value = (entry at: #value).
 			matchesLeft
 				ifTrue: [
 					sawLeft := true.

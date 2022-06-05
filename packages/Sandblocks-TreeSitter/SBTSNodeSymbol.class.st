@@ -56,6 +56,25 @@ SBTSNodeSymbol >> buildEmpty [
 							addAllMorphs: self bodyTemplate buildEmpty}]]
 ]
 
+{ #category : #accessing }
+SBTSNodeSymbol >> buildEmptyNodes [
+
+	^ self bodyTemplate isTSChoice
+		ifTrue: [{SBTSParseNode kind: #unknown slot: (SBTSSlot with: self) contents: nil}]
+		ifFalse: [
+			self isBlockInlined
+				ifTrue: [ | nodes |
+					nodes := self bodyTemplate buildEmptyNodes.
+					nodes do: [:b | b slot: (b slot addNode: self)].
+					nodes]
+				ifFalse: [
+					{
+						SBTSParseNode
+							kind: #block
+							slot: (SBTSSlot with: self)
+							contents: self bodyTemplate buildEmptyNodes}]]
+]
+
 { #category : #hierarchy }
 SBTSNodeSymbol >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
@@ -143,14 +162,13 @@ SBTSNodeSymbol >> resultsFor: aParser [
 	
 	aParser peek = (Character value: 1) ifTrue: [
 		aParser next.
-		^ {aParser basicAddBlocks: self buildEmpty}].
+		^ {aParser basicAddBlocks: self buildEmptyNodes}].
 	
 	storedBlocks := (aParser peek isMorph and: [aParser peek slot includesParentThat: [:p | p type = self type]])
 		ifTrue: [ | block result |
 			result := aParser copy.
-			block := result next copyBlock.
-			block slot trimNodesToTypeOf: self.
-			result addBlock: block.
+			block := result next.
+			result basicAddBlocks: {SBTSParseNode kind: #blockEmbed slot: (block slot trimNodesToTypeOf: self) contents: block}.
 			{result}]
 		ifFalse: [{}].
 	newBlocks := (SBToggledCode comment: '' active: 2 do: {
@@ -171,12 +189,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 									result blocks
 										do: [:b | b slot: (b slot addNode: self)];
 										yourself]]
-							ifFalse: [
-								{
-									SBTSBlock new
-										slot: (SBTSSlot with: self);
-										addAllMorphs: result blocks;
-										yourself}]);
+							ifFalse: [{SBTSParseNode kind: #block slot: (SBTSSlot with: self) contents: result blocks}]);
 						yourself].
 				aParser blocks: currentBlocks.
 				results]]

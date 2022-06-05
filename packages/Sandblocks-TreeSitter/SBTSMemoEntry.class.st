@@ -55,7 +55,7 @@ SBTSMemoEntry >> parsers [
 SBTSMemoEntry >> parsers: aCollection symbol: aSymbol [
 
 	self assert: (aCollection allSatisfy: [:p | p class = SBTSMemoizedBlocks]).
-	self assert: (aSymbol isBlockInlinedInParent or: [(aCollection allSatisfy: [:memo | memo blocks first slot lastNode type = aSymbol type])]).
+	"self assert: (aSymbol isBlockInlinedInParent or: [(aCollection allSatisfy: [:memo | memo blocks first slot lastNode type = aSymbol type])])."
 	answer := aCollection collect: [:parser | parser copy]
 ]
 

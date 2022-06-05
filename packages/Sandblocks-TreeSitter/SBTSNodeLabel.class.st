@@ -25,6 +25,25 @@ SBTSNodeLabel >> buildEmpty [
 	^ {self buildMorphWith: nil slot: (SBTSSlot with: self)}
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeLabel >> buildEmptyNodes [
+
+	| slot |
+	slot := SBTSSlot with: self.
+	^ {
+		self needsBlockWrapper
+			ifTrue: [
+				SBTSParseNode
+					kind: #block
+					slot: (SBTSSlot with: self)
+					contents: {SBTSParseNode kind: #label slot: slot contents: self label}]
+			ifFalse: [
+				SBTSParseNode
+					kind: (self isEditable ifTrue: [#text] ifFalse: [#label])
+					slot: slot
+					contents: self label]}
+]
+
 { #category : #build }
 SBTSNodeLabel >> buildMorphWith: aString slot: aSlot [
 
@@ -171,7 +190,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 		do: {[(labelStream atEnd or: [aParser atEnd]) ifFalse: [^ {}]]}.
 	
 	[aParser peek = $ ] whileTrue: [aParser next].
-	^ {aParser addBlock: (self buildMorphWith: self label slot: (SBTSSlot with: self))}
+	^ {aParser addBlock: self buildEmptyNodes first}
 ]
 
 { #category : #parsing }

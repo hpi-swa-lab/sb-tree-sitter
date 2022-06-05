@@ -29,6 +29,12 @@ SBTSNodeText >> buildEmpty [
 	^ {self buildMorphWith: '' slot: (SBTSSlot with: self)}
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeText >> buildEmptyNodes [
+
+	^ {SBTSParseNode kind: #text slot: (SBTSSlot with: self) contents: ''}
+]
+
 { #category : #build }
 SBTSNodeText >> buildMorphWith: aString slot: aSlot [
 
@@ -163,9 +169,7 @@ SBTSNodeText >> resultsFor: aParser [
 				ifTrue: [
 					[aParser peek = $ ] whileTrue: [aParser next].
 					^ {
-						aParser addBlock: (SBTSTextMorph new
-							slot: (SBTSSlot with: self);
-							contents: (String withAll: contents))}]
+						aParser addBlock: (SBTSParseNode kind: #text slot: (SBTSSlot with: self) contents: (String withAll: contents))}]
 				ifFalse: [aParser stream position: start]].
 		
 		remaining := aParser stream upToEnd.
@@ -173,11 +177,9 @@ SBTSNodeText >> resultsFor: aParser [
 			[(remaining noneSatisfy: [:c | c isMorph]) and: [self prefixValidFor: remaining]].
 			[plainPrefix beginsWith: remaining]}) ifTrue: [
 			^ {
-				aParser addBlock: (SBTSTextMorph new
-					slot: (SBTSSlot with: self);
-					contents: (String withAll: (plainPrefix size > remaining size
-						ifTrue: [plainPrefix]
-						ifFalse: [remaining])))}].
+				aParser addBlock: (SBTSParseNode kind: #text slot: (SBTSSlot with: self) contents: (String withAll: (plainPrefix size > remaining size
+					ifTrue: [plainPrefix]
+					ifFalse: [remaining])))}].
 		
 		aParser stream position: start.
 		^ {}]
