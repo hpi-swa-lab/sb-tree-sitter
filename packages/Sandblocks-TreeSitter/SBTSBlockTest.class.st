@@ -235,6 +235,10 @@ SBTSBlockTest >> testJsClassField [
 	editor := self editorAndWorldFor: module.
 	module lastDeepChild startInsertAtEnd.
 	self type: 'prop' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
+	
 	self assert: 'prop' equals: module lastDeepChild contents
 ]
 
@@ -353,6 +357,9 @@ SBTSBlockTest >> testJsPatternToAssignmentPattern [
 	module childSandblocks first childSandblocks first startInputAtEnd.
 	editor handle: (self keyboardEvent: $=).
 	editor handle: (self keyboardEvent: $x).
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
 	
 	self assert: 'assignment_pattern' equals: module childSandblocks first childSandblocks first type.
 	self assert: 'b=x' equals: module childSandblocks first childSandblocks first sourceString

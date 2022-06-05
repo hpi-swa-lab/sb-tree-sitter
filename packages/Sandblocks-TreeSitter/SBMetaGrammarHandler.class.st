@@ -43,13 +43,6 @@ SBMetaGrammarHandler >> startOverrideInput: anEvent in: anEditor [
 ]
 
 { #category : #'as yet unclassified' }
-SBMetaGrammarHandler >> textContentsForCopy [
-	"invoking the pretty printer here is rather expensive (e.g. when deleting multiple stmts, so just use the regular sourceString"
-
-	^ self block sourceString
-]
-
-{ #category : #'as yet unclassified' }
 SBMetaGrammarHandler >> wrapWithWatch [
 	<action>
 

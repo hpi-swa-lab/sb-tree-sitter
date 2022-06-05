@@ -46,7 +46,6 @@ SBTSParseInputTest >> statement: aTypeString with: aContentsString [
 
 { #category : #'tests - wrap' }
 SBTSParseInputTest >> testAssignmentPattern [
-	<timeout: 0.1>
 
 	| pattern results |
 	pattern := (SBTSFileParser new

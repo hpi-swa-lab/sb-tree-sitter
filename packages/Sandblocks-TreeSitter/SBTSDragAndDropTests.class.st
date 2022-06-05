@@ -73,6 +73,9 @@ SBTSDragAndDropTests >> testRegexInsertInPattern [
 	module := SBRegex parseToplevel: 'ab'.
 	editor := self editorFor: module.
 	
+	module width: 2000.
+	module fullBounds.
+	
 	module := module childSandblocks first.
 	
 	self class
@@ -89,6 +92,9 @@ SBTSDragAndDropTests >> testRegexQuantifierCanInsert [
 	module := SBRegex parseToplevel: 'ab'.
 	editor := self editorFor: module.
 	
+	module width: 2000.
+	module fullBounds.
+	
 	module := module childSandblocks first.
 	
 	self class
@@ -104,6 +110,9 @@ SBTSDragAndDropTests >> testRegexQuantifierCanInsertLater [
 	| module editor |
 	module := SBRegex parseToplevel: 'a+b'.
 	editor := self editorFor: module.
+	
+	module width: 2000.
+	module fullBounds.
 	
 	module := module childSandblocks first.
 	

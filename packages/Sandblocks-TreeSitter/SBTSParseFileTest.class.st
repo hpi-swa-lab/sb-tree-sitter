@@ -155,7 +155,10 @@ SBTSParseFileTest >> testParensJsBinaryOp [
 	source := '(3+4)*5'.
 	module := SBTSFileParser new parse: source language: SBJavascript.
 	self editorFor: module.
+	
+	"remove the explicit parenthesis node"
 	(module queryNode: '(parenthesized_expression (expression) @)') deleteAround.
+	
 	self assert: source equals: module sourceString
 ]
 

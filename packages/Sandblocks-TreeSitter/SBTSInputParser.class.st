@@ -119,6 +119,18 @@ SBTSInputParser >> initialize [
 	allowIncomplete := true
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> is: aCollection orderedSupersetOf: anotherCollection [
+
+	| haystack search |
+	self example: [SBTSInputParser new] args: [{#(#a #b #c). #(#a #d)}] label: 'fail'.
+	self example: [SBTSInputParser new] args: [{#(#x #a #b #c). #(#a #c)}] label: 'success'.
+	haystack := aCollection readStream.
+	search := anotherCollection readStream.
+	[haystack atEnd] whileFalse: [haystack next = search peek ifTrue: [search next]].
+	^ search atEnd
+]
+
 { #category : #accessing }
 SBTSInputParser >> lastConstructed [
 
@@ -133,6 +145,12 @@ SBTSInputParser >> lastConstructed [
 SBTSInputParser >> lastConstructedChain [
 
 	^ self lastConstructed ifNotNil: [:l | l parentChainIn: self] ifNil: [{''. ''}]
+]
+
+{ #category : #stream }
+SBTSInputParser >> limit [
+
+	^ stream originalContents size
 ]
 
 { #category : #memo }
@@ -153,7 +171,6 @@ SBTSInputParser >> memoizationFor: aSymbol ifAbsentPut: aBlock [
 				lr ifRecursionDetected: [
 					activeRecursion at: index put: lr.
 					lr newIteration.
-					Transcript showln: {index. aSymbol}.
 					results := SBToggledCode
 						comment: ''
 						active: 1
@@ -196,8 +213,8 @@ SBTSInputParser >> merge: candidate intoGroups: groups [
 	newEntry := OrderedCollection with: candidate.
 	new := candidate lastConstructedChain.
 	groups keys do: [:existing |
-		(existing second = new second and: [(new first includesSubstring: existing first) or: [existing first isEmpty]]) ifTrue: [^ (groups at: existing) add: candidate].
-		(existing second = new second and: [(existing first includesSubstring: new first) or: [new first isEmpty]]) ifTrue: [
+		(existing second = new second and: [self is: new first orderedSupersetOf: existing first]) ifTrue: [^ (groups at: existing) add: candidate].
+		(existing second = new second and: [self is: existing first orderedSupersetOf: new first]) ifTrue: [
 			newEntry addAll: (groups at: existing).
 			groups removeKey: existing]].
 	groups at: new put: newEntry
@@ -235,7 +252,7 @@ SBTSInputParser >> normalizeResults2: aCollection query: aString factory: aFacto
 		ifTrue: [results select: [:r | r first firstDeepChild slot firstNode isTSLabel]]
 		ifFalse: [results].
 	
-	^ results
+	^ results sort: [:a :b | a first recursiveNodeCount <= b first recursiveNodeCount]
 ]
 
 { #category : #blocks }
@@ -396,19 +413,17 @@ SBTSInputParser >> remainingSize [
 { #category : #'as yet unclassified' }
 SBTSInputParser >> shouldAbortIncompleteExpansion [
 	"check if we want to allow an incomplete result at the moment. do not allow it, if:
-- we have a memoized result that consumed all our input
+- we have a memoized result that consumed all our input, and
 - we are currently recursing
 
 e.g., this will block from expanding to 2+_ if our input was just a 2"
 
-	SBToggledCode
-		comment: ''
-		active: 1
-		do: {[(activeRecursion anySatisfy: #notNil) ifFalse: [^ false]]. [activeRecursion last ifNil: [^ false]]}.
-	^ memoizations last
-		at: self blocks last type
-		ifPresent: [:b | activeRecursion last notNil]
-		ifAbsent: [false]
+	memoizations withIndexDo: [:memo :index |
+		memo
+			at: self blocks last type
+			ifPresent: [:b | ((b anyResultIsAtEndFor: self) and: [(activeRecursion at: index) notNil]) ifTrue: [^ true]]
+			ifAbsent: [false]].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }

@@ -8,6 +8,13 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSMemoEntry >> anyResultIsAtEndFor: aParser [
+
+	self isLeftRecursion ifTrue: [^ false].
+	^ self parsers anySatisfy: [:p | p position = aParser limit]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSMemoEntry >> getBlocksOrMarkRecursionFrom: aSymbol stack: aCollection max: aNumber [
 
 	^ self isLeftRecursion

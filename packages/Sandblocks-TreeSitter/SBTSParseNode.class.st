@@ -112,8 +112,8 @@ SBTSParseNode >> parentChainIn: aParser [
 		current := aParser parentOf: current.
 		leaf := current type, ',', leaf].
 	
-	chain := ''.
-	[current notNil] whileTrue: [(current := aParser parentOf: current) ifNotNil: [chain := current type, ',', chain]].
+	chain := OrderedCollection new.
+	[current notNil] whileTrue: [(current := aParser parentOf: current) ifNotNil: [chain add: current type]].
 	^ {chain. leaf}
 ]
 
