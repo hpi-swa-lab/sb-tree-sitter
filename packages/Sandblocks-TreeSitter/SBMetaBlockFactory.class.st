@@ -219,6 +219,7 @@ SBMetaBlockFactory >> addDelimitedRules: aCollection [
 { #category : #'as yet unclassified' }
 SBMetaBlockFactory >> addIndent: aBlock [
 
+	(aBlock isTextMorph or: [aBlock isStringMorph]) and: [{'{'. '('. '['. '<'} includes: aBlock contents] ifTrue: [^ true].
 	^ false
 ]
 
@@ -1178,6 +1179,9 @@ SBMetaBlockFactory >> removeHiddenTerminals: anObject [
 { #category : #'as yet unclassified' }
 SBMetaBlockFactory >> removeIndent: aBlock [
 
+	(aBlock isTextMorph or: [aBlock isStringMorph])
+		and: [{'}'. ')'. ']'. '>'} includes: aBlock contents]
+		ifTrue: [^ true].
 	^ false
 ]
 

@@ -6788,9 +6788,7 @@ SBJavascript class >> statementContainerTypes [
 { #category : #'as yet unclassified' }
 SBJavascript >> addIndent: aBlock [
 
-	(aBlock containingSandblock type = 'statement_block' and: [aBlock contents = '{']) ifTrue: [^ true].
-	aBlock contents = '{' ifTrue: [^ true].
-	^ false
+	^ super addIndent: aBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -6886,9 +6884,7 @@ SBJavascript >> preprocessGrammar [
 { #category : #'as yet unclassified' }
 SBJavascript >> removeIndent: aBlock [
 
-	(aBlock containingSandblock type = 'statement_block' and: [aBlock contents = '}']) ifTrue: [^ true].
-	aBlock contents = '}' ifTrue: [^ true].
-	^ false
+	^ super removeIndent: aBlock
 ]
 
 { #category : #testing }

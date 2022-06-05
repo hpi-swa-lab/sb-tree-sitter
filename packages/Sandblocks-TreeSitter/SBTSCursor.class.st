@@ -31,28 +31,14 @@ SBTSCursor >> currentDo: aBlock [
 	
 	template := self factory bodyNodeForRule: type ifAbsent: [
 		isAlias := true.
-		self resolveAlias: self type in: self parentType with: self factory aliasOccurrences
-		"node unpackAlias"].
-	^ aBlock
-		value: type
-		value: (template isTSAlias ifTrue: [template unpackAlias] ifFalse: [template])
-		value: isAlias
+		(self resolveAlias: self type in: self parentType with: self factory aliasOccurrences) unpackAlias].
+	^ aBlock value: type value: template value: isAlias
 ]
 
 { #category : #'as yet unclassified' }
 SBTSCursor >> currentFieldName [
 
 	^ library cursorCurrentFieldName: cursor
-]
-
-{ #category : #'as yet unclassified' }
-SBTSCursor >> currentTemplate [
-
-	| type |
-	type := self type.
-	^ self factory
-		bodyNodeForRule: type
-		ifAbsent: [(self resolveAlias: type in: self parentType with: self factory aliasOccurrences) unpackAlias]
 ]
 
 { #category : #'as yet unclassified' }

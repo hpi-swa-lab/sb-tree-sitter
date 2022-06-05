@@ -38,6 +38,13 @@ SBTSSmalltalk class >> grammarJson [
           ]
         },
         {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "pragma"
+          }
+        },
+        {
           "type": "CHOICE",
           "members": [
             {
@@ -130,8 +137,13 @@ SBTSSmalltalk class >> grammarJson [
       ]
     },
     "unary_selector": {
-      "type": "SYMBOL",
-      "name": "identifier"
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "identifier"
+      },
+      "named": true,
+      "value": "unary_identifier"
     },
     "binary_selector": {
       "type": "SEQ",
@@ -177,8 +189,13 @@ SBTSSmalltalk class >> grammarJson [
             }
           },
           {
-            "type": "SYMBOL",
-            "name": "identifier"
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "identifier"
+            },
+            "named": true,
+            "value": "unary_identifier"
           }
         ]
       }
@@ -528,6 +545,138 @@ SBTSSmalltalk class >> grammarJson [
         }
       ]
     },
+    "literal_array": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "#("
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_literal_array_element"
+          }
+        },
+        {
+          "type": "STRING",
+          "value": ")"
+        }
+      ]
+    },
+    "_literal_array_element": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "string"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "number"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "character"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "nil"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "true"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "false"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "binary_operator"
+          },
+          "named": true,
+          "value": "symbol"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "\\."
+          },
+          "named": true,
+          "value": "symbol"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "STRING",
+            "value": ":="
+          },
+          "named": true,
+          "value": "symbol"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "STRING",
+            "value": "^"
+          },
+          "named": true,
+          "value": "symbol"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "identifier"
+          },
+          "named": true,
+          "value": "symbol"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "nested_array_literal"
+              },
+              "named": true,
+              "value": "literal_array"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "literal_array"
+            }
+          ]
+        }
+      ]
+    },
+    "nested_array_literal": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "("
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_literal_array_element"
+          }
+        },
+        {
+          "type": "STRING",
+          "value": ")"
+        }
+      ]
+    },
     "parenthesized_expression": {
       "type": "SEQ",
       "members": [
@@ -684,6 +833,10 @@ SBTSSmalltalk class >> grammarJson [
         },
         {
           "type": "SYMBOL",
+          "name": "literal_array"
+        },
+        {
+          "type": "SYMBOL",
           "name": "parenthesized_expression"
         },
         {
@@ -761,6 +914,74 @@ SBTSSmalltalk class >> grammarJson [
         }
       ]
     },
+    "pragma": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "<"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "pragma_unary_selector"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "pragma_binary_selector"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "pragma_keyword_selector"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": ">"
+        }
+      ]
+    },
+    "pragma_unary_selector": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "identifier"
+      },
+      "named": true,
+      "value": "unary_identifier"
+    },
+    "pragma_binary_selector": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "binary_operator"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "expression"
+        }
+      ]
+    },
+    "pragma_keyword_selector": {
+      "type": "REPEAT1",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "keyword"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "expression"
+          }
+        ]
+      }
+    },
     "comment": {
       "type": "TOKEN",
       "content": {
@@ -823,21 +1044,18 @@ SBTSSmalltalk class >> grammarJson [
 
 { #category : #properties }
 SBTSSmalltalk class >> highlightQuery [
-	" https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
 
-	^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
+    " https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
+    ^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
 (number) @number
 (string) @string
 (symbol) @string
 (identifier) @variable
-(unary_message (_) (identifier) @variable.part)
+(unary_message (_) (unary_identifier) @variable.part)
 (binary_operator) @variable.part
 (keyword) @variable.part
 ["^" "[" "]" "{" "}"] @important
-
-(unary_selector (identifier) @major_declaration)
-(binary_selector (binary_operator) @major_declaration)
-(keyword_selector (keyword) @major_declaration)'
+'
 ]
 
 { #category : #'as yet unclassified' }
@@ -870,7 +1088,7 @@ SBTSSmalltalk >> addIndent: aBlock [
 	(aBlock submorphIndex = 1 and: [aBlock owner type = 'keyword_message']) ifTrue: [^ true].
 	(aBlock contents = '[' and: [aBlock containingSandblock type = 'block']) ifTrue: [^ true].
 	(aBlock contents = ';' and: [aBlock submorphIndex = 2]) ifTrue: [^ true].
-	^ false
+	^ super addIndent: aBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -929,7 +1147,7 @@ SBTSSmalltalk >> postConfigure [
 SBTSSmalltalk >> removeIndent: aBlock [
 
 	(aBlock contents = ']' and: [aBlock containingSandblock type = 'block']) ifTrue: [^ true].
-	^ false
+	^ super removeIndent: aBlock
 ]
 
 { #category : #'as yet unclassified' }

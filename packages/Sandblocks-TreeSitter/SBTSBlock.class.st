@@ -377,6 +377,12 @@ SBTSBlock >> isBlockBody [
 ]
 
 { #category : #testing }
+SBTSBlock >> isEditor [
+
+	^ true
+]
+
+{ #category : #testing }
 SBTSBlock >> isExpression [
 
 	self slot allSuperTypesDo: [:type | (self factory expressionTypes includes: type type) ifTrue: [^ true]].
