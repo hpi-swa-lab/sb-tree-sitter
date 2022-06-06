@@ -14,6 +14,13 @@ SBTSNodeChoice >> allChildrenDo: aBlock [
 	self alternatives do: [:alt | alt allChildrenDo: aBlock]
 ]
 
+{ #category : #accessing }
+SBTSNodeChoice >> allElementsDo: aBlock [
+
+	aBlock value: self.
+	self alternatives do: [:alt | alt allElementsDo: aBlock]
+]
+
 { #category : #hierarchy }
 SBTSNodeChoice >> allSubTypesDo: aBlock parents: aCollection [
 

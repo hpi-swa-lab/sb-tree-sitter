@@ -13,6 +13,12 @@ SBTSNodeLabel >> allChildrenDo: aBlock [
 	aBlock value: self
 ]
 
+{ #category : #accessing }
+SBTSNodeLabel >> allElementsDo: aBlock [
+
+	aBlock value: self
+]
+
 { #category : #copying }
 SBTSNodeLabel >> basicCopy [
 

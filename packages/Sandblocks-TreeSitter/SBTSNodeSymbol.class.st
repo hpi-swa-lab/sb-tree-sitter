@@ -15,6 +15,12 @@ SBTSNodeSymbol >> allChildrenDo: aBlock [
 ]
 
 { #category : #hierarchy }
+SBTSNodeSymbol >> allElementsDo: aBlock [
+
+	aBlock value: self
+]
+
+{ #category : #hierarchy }
 SBTSNodeSymbol >> allSubTypesDo: aBlock parents: aCollection [
 
 	| parents |

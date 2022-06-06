@@ -15,6 +15,12 @@ SBTSNodeText >> allChildrenDo: aBlock [
 	aBlock value: self
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeText >> allElementsDo: aBlock [
+
+	aBlock value: self
+]
+
 { #category : #copying }
 SBTSNodeText >> basicCopy [
 

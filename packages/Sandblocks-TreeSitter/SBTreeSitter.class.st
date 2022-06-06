@@ -17,7 +17,7 @@ SBTreeSitter class >> moduleName [
 { #category : #'ffi languages' }
 SBTreeSitter >> bash [
 
-	<apicall: SBTSLanguage* tree_sitter_bash () module: 'tree-sitter-bash'>
+	<apicall: SBTSLanguageStruct* tree_sitter_bash () module: 'tree-sitter-bash'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-bash' name: 'bash' context: thisContext
 ]
 
@@ -62,21 +62,21 @@ SBTreeSitter >> buildTreeFrom: aCursor [
 { #category : #'ffi languages' }
 SBTreeSitter >> c [
 
-	<apicall: SBTSLanguage* tree_sitter_c () module: 'tree-sitter-c'>
+	<apicall: SBTSLanguageStruct* tree_sitter_c () module: 'tree-sitter-c'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-c' name: 'c' context: thisContext
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> clojure [
 
-	<apicall: SBTSLanguage* tree_sitter_clojure () module: 'tree-sitter-clojure'>
+	<apicall: SBTSLanguageStruct* tree_sitter_clojure () module: 'tree-sitter-clojure'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'sogaiu/tree-sitter-clojure' name: 'clojure' context: thisContext
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> cpp [
 
-	<apicall: SBTSLanguage* tree_sitter_cpp () module: 'tree-sitter-cpp'>
+	<apicall: SBTSLanguageStruct* tree_sitter_cpp () module: 'tree-sitter-cpp'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-cpp' name: 'cpp' context: thisContext
 ]
 
@@ -185,35 +185,35 @@ SBTreeSitter >> fetchLibrary: aGithubString language: language andRetry: aBlock 
 { #category : #'ffi languages' }
 SBTreeSitter >> gdscript [
 
-	<apicall: SBTSLanguage* tree_sitter_gdscript () module: 'tree-sitter-gdscript'>
+	<apicall: SBTSLanguageStruct* tree_sitter_gdscript () module: 'tree-sitter-gdscript'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'PrestonKnopp/tree-sitter-gdscript' name: 'gdscript' context: thisContext
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> html [
 
-	<apicall: SBTSLanguage* tree_sitter_html () module: 'tree-sitter-html'>
+	<apicall: SBTSLanguageStruct* tree_sitter_html () module: 'tree-sitter-html'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-html' name: 'html' context: thisContext
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> java [
 
-	<apicall: SBTSLanguage* tree_sitter_java () module: 'tree-sitter-java'>
+	<apicall: SBTSLanguageStruct* tree_sitter_java () module: 'tree-sitter-java'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-java' name: 'java' context: thisContext
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> javascript [
 
-	<apicall: SBTSLanguage* tree_sitter_javascript () module: 'tree-sitter-javascript'>
+	<apicall: SBTSLanguageStruct* tree_sitter_javascript () module: 'tree-sitter-javascript'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-javascript' name: 'javascript' context: thisContext
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> json [
 
-	<apicall: SBTSLanguage* tree_sitter_json () module: 'tree-sitter-json'>
+	<apicall: SBTSLanguageStruct* tree_sitter_json () module: 'tree-sitter-json'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-json' name: 'json' context: thisContext
 ]
 
@@ -349,7 +349,7 @@ SBTreeSitter >> parser: aParserPointer old: aTreePointer parseString: aString le
 { #category : #ffi }
 SBTreeSitter >> parser: aParserPointer setLanguage: aLanguagePointer [
 
-	<apicall: void ts_parser_set_language (void* SBTSLanguage*)> 
+	<apicall: void ts_parser_set_language (void* SBTSLanguageStruct*)> 
 	^ self externalCallFailed
 ]
 
@@ -398,42 +398,42 @@ SBTreeSitter >> printTreeFrom: aCursor depth: aNumber [
 { #category : #'ffi languages' }
 SBTreeSitter >> python [
 
-	<apicall: SBTSLanguage* tree_sitter_python () module: 'tree-sitter-python'>
+	<apicall: SBTSLanguageStruct* tree_sitter_python () module: 'tree-sitter-python'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-python' name: 'python' context: thisContext branch: '24b530ca158d2782ea9046e756057a412e16b52f'
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> regex [
 
-	<apicall: SBTSLanguage* tree_sitter_regex () module: 'tree-sitter-regex'>
+	<apicall: SBTSLanguageStruct* tree_sitter_regex () module: 'tree-sitter-regex'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-regex' name: 'regex' context: thisContext branch: '3041aa3472d16fd94c6a9e15b741dbfecd9b714e'
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> ruby [
 
-	<apicall: SBTSLanguage* tree_sitter_ruby () module: 'tree-sitter-ruby'>
+	<apicall: SBTSLanguageStruct* tree_sitter_ruby () module: 'tree-sitter-ruby'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-ruby' name: 'ruby' context: thisContext
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> sexp [
 
-	<apicall: SBTSLanguage* tree_sitter_sexp () module: 'tree-sitter-sexp'>
+	<apicall: SBTSLanguageStruct* tree_sitter_sexp () module: 'tree-sitter-sexp'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'AbstractMachinesLab/tree-sitter-sexp' name: 'sexp' context: thisContext
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> smalltalk [
 
-	<apicall: SBTSLanguage* tree_sitter_smalltalk () module: 'tree-sitter-smalltalk'>
+	<apicall: SBTSLanguageStruct* tree_sitter_smalltalk () module: 'tree-sitter-smalltalk'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tom95/tree-sitter-smalltalk' name: 'smalltalk' context: thisContext branch: 'main'
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> supercollider [
 
-	<apicall: SBTSLanguage* tree_sitter_supercollider () module: 'tree-sitter-supercollider'>
+	<apicall: SBTSLanguageStruct* tree_sitter_supercollider () module: 'tree-sitter-supercollider'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'madskjeldgaard/tree-sitter-supercollider' name: 'supercollider' context: thisContext branch: 'main'
 ]
 
@@ -463,20 +463,20 @@ SBTreeSitter >> treeRootNode: aTree [
 { #category : #'ffi languages' }
 SBTreeSitter >> tsq [
 
-	<apicall: SBTSLanguage* tree_sitter_tsq () module: 'tree-sitter-tsq'>
+	<apicall: SBTSLanguageStruct* tree_sitter_tsq () module: 'tree-sitter-tsq'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-tsq' name: 'tsq' context: thisContext
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> verilog [
 
-	<apicall: SBTSLanguage* tree_sitter_verilog () module: 'tree-sitter-verilog'>
+	<apicall: SBTSLanguageStruct* tree_sitter_verilog () module: 'tree-sitter-verilog'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-verilog' name: 'verilog' context: thisContext
 ]
 
 { #category : #'ffi languages' }
 SBTreeSitter >> vhdl [
 
-	<apicall: SBTSLanguage* tree_sitter_vhdl () module: 'tree-sitter-vhdl'>
+	<apicall: SBTSLanguageStruct* tree_sitter_vhdl () module: 'tree-sitter-vhdl'>
 	^ SBMetaBlockFactory tryPatchLibrary: 'alemuller/tree-sitter-vhdl' name: 'vhdl' context: thisContext branch: 'main'
 ]

@@ -22,6 +22,12 @@ SBTSNodeBase >> allChildrenDo: aBlock [
 	self subclassResponsibility
 ]
 
+{ #category : #blocks }
+SBTSNodeBase >> allElementsDo: aBlock [
+
+	self subclassResponsibility
+]
+
 { #category : #hierarchy }
 SBTSNodeBase >> allSubTypesDo: aBlock parents: aCollection [
 
@@ -102,7 +108,8 @@ SBTSNodeBase >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream pa
 { #category : #hierarchy }
 SBTSNodeBase >> delete [
 
-	self parent elements: (self parent elements reject: [:el | el = self])
+	self parent elements: (self parent elements reject: [:el | el = self]).
+	self parent: nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -282,6 +289,16 @@ SBTSNodeBase >> language [
 	^ self factory name
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> nodeBefore [
+
+	| index |
+	self parent ifNil: [^ nil].
+	index := (self parent elements indexOf: self) - 1.
+	index = 0 ifTrue: [^ nil].
+	^ self parent elements at: index
+]
+
 { #category : #accessing }
 SBTSNodeBase >> parent [
 
@@ -304,9 +321,18 @@ SBTSNodeBase >> parentThat: aBlock [
 { #category : #hierarchy }
 SBTSNodeBase >> replaceBy: aNode [
 
+	self replaceBy: aNode toplevelDo: [:n | self error: 'attempted to replace a top-level child']
+]
+
+{ #category : #hierarchy }
+SBTSNodeBase >> replaceBy: aNode toplevelDo: aBlock [
+
+	self parent ifNil: [^ aBlock value: aNode].
 	self parent elements: (self parent elements
 		at: (self parent elements indexOf: self) put: aNode;
-		yourself)
+		yourself).
+	aNode parent: self parent.
+	self parent: nil
 ]
 
 { #category : #parsing }
@@ -351,5 +377,5 @@ SBTSNodeBase >> type [
 { #category : #'as yet unclassified' }
 SBTSNodeBase >> veryDeepCopyWith: deepCopier [
 
-	
+	^ SBToggledCode comment: '' active: 1 do: {[super veryDeepCopyWith: deepCopier]}
 ]

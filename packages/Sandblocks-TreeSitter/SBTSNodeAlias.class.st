@@ -28,6 +28,13 @@ SBTSNodeAlias >> allChildrenDo: aBlock [
 ]
 
 { #category : #blocks }
+SBTSNodeAlias >> allElementsDo: aBlock [
+
+	aBlock value: self.
+	self element allElementsDo: aBlock
+]
+
+{ #category : #blocks }
 SBTSNodeAlias >> allSubTypesDo: aBlock parents: aCollection [
 
 	aBlock value: self value: aCollection.

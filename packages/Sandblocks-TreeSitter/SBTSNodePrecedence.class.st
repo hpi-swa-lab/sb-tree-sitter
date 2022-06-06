@@ -17,6 +17,13 @@ SBTSNodePrecedence >> allChildrenDo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodePrecedence >> allElementsDo: aBlock [
+
+	aBlock value: self.
+	self element allElementsDo: aBlock
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodePrecedence >> allSubTypesDo: aBlock parents: aCollection [
 
 	self element allSubTypesDo: aBlock parents: aCollection
@@ -88,7 +95,7 @@ SBTSNodePrecedence >> element: aNode [
 { #category : #'as yet unclassified' }
 SBTSNodePrecedence >> hasEqualStructure: aNode [
 
-	(super hasEqualStructure: aNode) and: [aNode precedence = self precedence and: [aNode value = self value]]
+	^ (super hasEqualStructure: aNode) and: [aNode precedence = self precedence and: [aNode value = self value]]
 ]
 
 { #category : #'as yet unclassified' }

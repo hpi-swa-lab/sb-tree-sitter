@@ -75,7 +75,7 @@ SBMetaBlockFactory class >> generateFFIMethodFor: aName github: aGithubString [
 	SBTreeSitter
 		compile: ('{1}
 
-	<apicall: SBTSLanguage* tree_sitter_{1} () module: ''tree-sitter-{1}''>
+	<apicall: SBTSLanguageStruct* tree_sitter_{1} () module: ''tree-sitter-{1}''>
 	^ SBMetaBlockFactory tryPatchLibrary: {2} name: ''{1}'' context: thisContext' format: {aName. aGithubString storeString})
 		classified: 'ffi languages'
 ]
@@ -219,7 +219,7 @@ SBMetaBlockFactory >> addDelimitedRules: aCollection [
 { #category : #'as yet unclassified' }
 SBMetaBlockFactory >> addIndent: aBlock [
 
-	(aBlock isTextMorph or: [aBlock isStringMorph]) and: [{'{'. '('. '['. '<'} includes: aBlock contents] ifTrue: [^ true].
+	((aBlock isTextMorph or: [aBlock isStringMorph]) and: [{'{'. '('. '['. '<'} includes: aBlock contents]) ifTrue: [^ true].
 	^ false
 ]
 
@@ -1179,9 +1179,7 @@ SBMetaBlockFactory >> removeHiddenTerminals: anObject [
 { #category : #'as yet unclassified' }
 SBMetaBlockFactory >> removeIndent: aBlock [
 
-	(aBlock isTextMorph or: [aBlock isStringMorph])
-		and: [{'}'. ')'. ']'. '>'} includes: aBlock contents]
-		ifTrue: [^ true].
+	((aBlock isTextMorph or: [aBlock isStringMorph]) and: [{'}'. ')'. ']'. '>'} includes: aBlock contents]) ifTrue: [^ true].
 	^ false
 ]
 

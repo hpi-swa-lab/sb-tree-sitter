@@ -17,6 +17,13 @@ SBTSNodeRepeat >> allChildrenDo: aBlock [
 	self element allChildrenDo: aBlock
 ]
 
+{ #category : #blocks }
+SBTSNodeRepeat >> allElementsDo: aBlock [
+
+	aBlock value: self.
+	self element allElementsDo: aBlock
+]
+
 { #category : #testing }
 SBTSNodeRepeat >> allSubTypesDo: aBlock parents: aCollection [
 
@@ -128,11 +135,11 @@ SBTSNodeRepeat >> multiple [
 ]
 
 { #category : #accessing }
-SBTSNodeRepeat >> multiple: aBoolean required: anotherBoolean element: aMorph [
+SBTSNodeRepeat >> multiple: aBoolean required: anotherBoolean element: aNode [
 
 	multiple := aBoolean.
 	required := anotherBoolean.
-	element := aMorph.
+	element := aNode.
 	
 	element parent: self
 ]
