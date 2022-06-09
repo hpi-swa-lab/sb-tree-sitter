@@ -110,6 +110,7 @@ SBTSParseNode >> parentChainIn: aParser [
 	current := self.
 	leaf ifNil: [
 		current := aParser parentOf: current.
+		current ifNil: [^ {nil. nil}].
 		leaf := current type, ',', leaf].
 	
 	chain := OrderedCollection new.

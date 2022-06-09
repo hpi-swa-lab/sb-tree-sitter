@@ -704,7 +704,7 @@ SBTSBlock >> sourceStringForCompare [
 { #category : #'as yet unclassified' }
 SBTSBlock >> startInputCommandIn: aTextMorph [
 
-	^ SBTextCommand new textMorph: aTextMorph
+	^ aTextMorph ifNotNil: [SBTextCommand new textMorph: aTextMorph] ifNil: [nil]
 ]
 
 { #category : #'as yet unclassified' }

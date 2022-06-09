@@ -126,7 +126,7 @@ SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 						axis: #none]]]].
 	
 	aCollection last isSandblock ifTrue: [aCollection last lastDeepChild startInputAtEnd].
-	aCollection last isTextMorph ifTrue: [aCollection last moveCursorTo: 900000000]
+	aCollection last isTextMorph ifTrue: [aCollection last containingSandblock sandblockEditor startInput: aCollection last containingSandblock at: 9e8 replacingContents: false in: aCollection last]
 ]
 
 { #category : #'as yet unclassified' }
