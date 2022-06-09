@@ -74,7 +74,7 @@ SBTSBlockTest >> testBinaryOpOnMemberExpression [
 	module lastDeepChild startInputAtEnd.
 	
 	self type: '==2' in: editor.
-	self assert: 'req.query==2' equals: module sourceString
+	self assert: 'req.query==2;' equals: module sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -166,8 +166,8 @@ SBTSBlockTest >> testForwardToAdjacentStatement [
 	module childSandblocks first startInputAtEnd.
 	editor handle: (self keyboardEvent: $,).
 	"no change expected, but we had some issues with input forwarding causing infinite loop"
-	self assert: '2
-()=>' equals: module sourceString
+	self assert: '2;
+()=>;' equals: module sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -218,13 +218,13 @@ SBTSBlockTest >> testJsChangePlusToMinus [
 	module lastDeepChild startInputAtEnd.
 	editor handle: (self keyboardEvent: Character backspace).
 	editor handle: (self keyboardEvent: Character backspace).
-	self assert: '2+' equals: module sourceString.
+	self assert: '2+;' equals: module sourceString.
 	editor handle: (self keyboardEvent: Character backspace).
-	self assert: '2' equals: module sourceString.
+	self assert: '2;' equals: module sourceString.
 	editor handle: (self keyboardEvent: $-).
-	self assert: '2-', Character null equals: module sourceStringForCompare.
+	self assert: '2-', Character null, ';' equals: module sourceStringForCompare.
 	editor handle: (self keyboardEvent: $4).
-	self assert: '2-4' equals: module sourceStringForCompare
+	self assert: '2-4;' equals: module sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -252,7 +252,7 @@ SBTSBlockTest >> testJsCompleteMemberNested [
 	self type: '123' in: editor.
 	editor handle: (self keyboardEvent: Character arrowUp shift: true command: false).
 	self type: ' .xy' in: editor.
-	self assert: '123.xy' equals: module sourceStringForCompare
+	self assert: '123.xy;' equals: module sourceStringForCompare
 ]
 
 { #category : #'tests - deleting' }
@@ -264,11 +264,11 @@ SBTSBlockTest >> testJsDeleteDeclaration [
 	module lastDeepChild startInputAtEnd.
 	
 	editor handle: (self keyboardEvent: Character backspace).
-	self assert: 'const a=', Character null equals: module sourceStringForCompare.
+	self assert: 'const a=', Character null, ';' equals: module sourceStringForCompare.
 	editor handle: (self keyboardEvent: Character backspace).
-	self assert: 'const a' equals: module sourceStringForCompare.
+	self assert: 'const a;' equals: module sourceStringForCompare.
 	editor handle: (self keyboardEvent: Character backspace).
-	self assert: 'const', Character null equals: module sourceStringForCompare.
+	self assert: 'const', Character null, ';' equals: module sourceStringForCompare.
 	editor handle: (self keyboardEvent: Character backspace).
 	self assert: '' equals: module sourceStringForCompare
 ]
@@ -283,10 +283,10 @@ SBTSBlockTest >> testJsDeleteFunction [
 	2 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
 	self assert: '1+function()
 {
-}' equals: module sourceStringForCompare.
+};' equals: module sourceStringForCompare.
 	self assert: module childSandblocks first childSandblocks second equals: editor selection.
 	'function' size + 1 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
-	self assert: '1+' equals: module sourceString
+	self assert: '1+;' equals: module sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -297,7 +297,7 @@ SBTSBlockTest >> testJsExpandObject [
 	editor := self editorAndWorldFor: module.
 	module lastDeepChild startInputAtEnd.
 	self type: ':x' in: editor.
-	self assert: 'const a={id:x}' equals: module sourceString
+	self assert: 'const a={id:x};' equals: module sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -308,7 +308,7 @@ SBTSBlockTest >> testJsIdAdd [
 	editor := self editorAndWorldFor: program.
 	program lastDeepChild startInputAtEnd.
 	self type: '+b' in: editor.
-	self assert: 'a+b' equals: program sourceString
+	self assert: 'a+b;' equals: program sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -321,7 +321,7 @@ SBTSBlockTest >> testJsMethodCall [
 	editor handle: (self keyboardEvent: Character arrowRight).
 	
 	self type: 'console.log("Hello' in: editor.
-	self assert: 'console.log("Hello")' equals: module sourceString
+	self assert: 'console.log("Hello");' equals: module sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -334,7 +334,7 @@ SBTSBlockTest >> testJsNestedMethodCall [
 	editor := self editorAndWorldFor: module.
 	module lastDeepChild startInputAtEnd.
 	self type: '(x' in: editor.
-	self assert: 'res.send().status(x)' equals: module sourceString
+	self assert: 'res.send().status(x);' equals: module sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -345,7 +345,7 @@ SBTSBlockTest >> testJsNumberToString [
 	editor := self editorAndWorldFor: module.
 	module lastDeepChild startInputAtStart.
 	self type: '''' in: editor.
-	self assert: '''123''' equals: module sourceString
+	self assert: '''123'';' equals: module sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -389,7 +389,7 @@ SBTSBlockTest >> testJsTypeAssignment [
 	module startInputAtEnd.
 	editor handle: (self keyboardEvent: Character arrowRight).
 	self type: 'const a=5' in: editor.
-	self assert: 'const a=5' equals: module childSandblocks first sourceString
+	self assert: 'const a=5;' equals: module childSandblocks first sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -400,7 +400,7 @@ SBTSBlockTest >> testJsTypeObject [
 	editor := self editorAndWorldFor: module.
 	module lastDeepChild startInsertAtEnd.
 	self type: 'id:x' in: editor.
-	self assert: 'const a={id:x}' equals: module sourceString
+	self assert: 'const a={id:x};' equals: module sourceString
 ]
 
 { #category : #'tests - input transition' }
@@ -516,7 +516,7 @@ SBTSBlockTest >> testReplacementBlockBinding [
 
 	| regex source wrapped editor |
 	source := '(?<test>1)'.
-	regex := SBTSFileParser new parseTopLevel: source language: SBRegex.
+	regex := SBTSFileParser new parse: source language: SBRegex.
 	editor := self editorAndWorldFor: regex.
 	regex applyReplacements.
 	wrapped := regex childSandblocks first childSandblocks first childSandblocks first.
@@ -535,7 +535,7 @@ SBTSBlockTest >> testReplacementUndo [
 
 	| regex source editor |
 	source := '(?<test>1)'.
-	regex := SBTSFileParser new parseTopLevel: source language: SBRegex.
+	regex := SBTSFileParser new parse: source language: SBRegex.
 	editor := self editorFor: regex.
 	regex applyReplacements.
 	editor undo.
@@ -731,7 +731,7 @@ SBTSBlockTest >> testTypeSeparator [
 	editor handle: (self keyboardEvent: $b).
 	self assert: 'function(a,b)
 {
-}' equals: module sourceString
+};' equals: module sourceString
 ]
 
 { #category : #'tests - cursor position' }

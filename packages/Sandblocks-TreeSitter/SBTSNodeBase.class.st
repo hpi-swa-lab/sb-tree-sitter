@@ -87,7 +87,7 @@ SBTSNodeBase >> buildMorphWith: aBlock slot: aSlot [
 { #category : #testing }
 SBTSNodeBase >> compatibleWithType: aSymbol [
 
-	^ factory type: self type compatibleWith: aSymbol
+	^ self type = aSymbol
 ]
 
 { #category : #'as yet unclassified' }
@@ -146,6 +146,7 @@ SBTSNodeBase >> factory [
 { #category : #accessing }
 SBTSNodeBase >> factory: aFactory [
 
+	self assert: (aFactory isKindOf: SBTSGrammar).
 	factory := aFactory
 ]
 
@@ -286,7 +287,7 @@ SBTSNodeBase >> isTSText [
 { #category : #accessing }
 SBTSNodeBase >> language [
 
-	^ self factory name
+	^ factory language
 ]
 
 { #category : #'as yet unclassified' }
@@ -375,7 +376,9 @@ SBTSNodeBase >> type [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSNodeBase >> veryDeepCopyWith: deepCopier [
+SBTSNodeBase >> veryDeepInner: deepCopier [
 
-	^ SBToggledCode comment: '' active: 1 do: {[super veryDeepCopyWith: deepCopier]}
+	super veryDeepInner: deepCopier.
+	parent := parent veryDeepCopyWith: deepCopier.
+	field := field veryDeepCopyWith: deepCopier
 ]

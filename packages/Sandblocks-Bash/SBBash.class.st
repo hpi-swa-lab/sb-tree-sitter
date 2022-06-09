@@ -1,10 +1,10 @@
 Class {
 	#name : #SBBash,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-Bash'
 }
 
-{ #category : #properties }
+{ #category : #configuration }
 SBBash class >> grammarJson [
 
     " https://github.com/tree-sitter/tree-sitter-bash/blob/master/src/grammar.json "
@@ -2707,7 +2707,7 @@ SBBash class >> grammarJson [
 '
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBBash class >> highlightQuery [
 
     " https://github.com/tree-sitter/tree-sitter-bash/blob/master/src/queries/highlights.scm "
@@ -2769,29 +2769,30 @@ SBBash class >> highlightQuery [
 '
 ]
 
-{ #category : #properties }
+{ #category : #'configuration - editing' }
+SBBash class >> inputTransitionBlackList [
+	"return a list of types that should not be considered during transitions, e.g. the typical C comma operator that just chains multiple expressions and thus yields mostly noise"
+
+	^ #(#concatenation)
+]
+
+{ #category : #'as yet unclassified' }
+SBBash class >> isStatementContainer: aRepeatNode [
+
+	self flag: #todo.
+	^ aRepeatNode element type = 'program'
+]
+
+{ #category : #configuration }
 SBBash class >> language [
 
     ^ #bash
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBBash class >> rootRuleName [
 
 	^ 'program'
-]
-
-{ #category : #'as yet unclassified' }
-SBBash class >> statementContainerTypes [
-
-	^ {'program'}
-]
-
-{ #category : #'as yet unclassified' }
-SBBash >> inputTransitionBlackList [
-	"return a list of types that should not be considered during transitions, e.g. the typical C comma operator that just chains multiple expressions and thus yields mostly noise"
-
-	^ #(#concatenation)
 ]
 
 { #category : #'as yet unclassified' }

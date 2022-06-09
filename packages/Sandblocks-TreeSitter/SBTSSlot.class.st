@@ -72,9 +72,7 @@ SBTSSlot >> compatibleWithType: aTypeString [
 { #category : #'as yet unclassified' }
 SBTSSlot >> delimiterBetween: aBlock and: anotherBlock [
 
-	(self firstNode delimiterBetween: aBlock and: anotherBlock) ifNotEmpty: [:d | ^ d].
-	self firstNode bodyTemplate allChildrenDo: [:node | node isBlockInlinedInParent ifTrue: [(node delimiterBetween: aBlock and: anotherBlock) ifNotEmpty: [:d | ^ d]]].
-	
+	aBlock slot repeatersDo: [:r | (r delimiter notNil and: [anotherBlock slot includesParent: r]) ifTrue: [^ r delimiter]].
 	^ ''
 ]
 
@@ -127,6 +125,13 @@ SBTSSlot >> includesRepeat [
 SBTSSlot >> initialize [
 
 	nodes := OrderedCollection new: 1
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> isStatement [
+
+	self repeatersDo: [:repeater | (self factory isStatementContainer: repeater) ifTrue: [^ true]].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -256,6 +261,13 @@ SBTSSlot >> repeater [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> repeaterThat: aBlock [
+
+	self repeatersDo: [:r | (aBlock value: r) ifTrue: [^ r]].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> repeatersDo: aBlock [
 
 	self allParentsDo: [:p | p isTSRepeat ifTrue: [aBlock value: p]]
@@ -279,7 +291,7 @@ SBTSSlot >> separatorBetween: aBlock and: anotherBlock indent: aNumber [
 		^ String streamContents: [:s |
 			s cr.
 			aNumber timesRepeat: [s tab]]].
-	(self factory spaceBetween: aBlock and: anotherBlock) ifTrue: [^ String space].
+	(self factory language spaceBetween: aBlock and: anotherBlock) ifTrue: [^ String space].
 	^ ''
 ]
 

@@ -1,10 +1,10 @@
 Class {
 	#name : #SBVhdl,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-Vhdl'
 }
 
-{ #category : #properties }
+{ #category : #configuration }
 SBVhdl class >> grammarJson [
 
     " https://github.com/alemuller/tree-sitter-vhdl/blob/master/src/grammar.json "
@@ -19958,7 +19958,7 @@ SBVhdl class >> grammarJson [
 '
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBVhdl class >> highlightQuery [
 
     " https://github.com/alemuller/tree-sitter-vhdl/blob/master/src/queries/highlights.scm "
@@ -20572,13 +20572,13 @@ SBVhdl class >> highlightQuery [
 '
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBVhdl class >> language [
 
     ^ #vhdl
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBVhdl class >> rootRuleName [
 
 	^ 'design_file'

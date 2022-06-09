@@ -55,33 +55,33 @@ SBTSQueryTests >> testIgnoresComments [
 SBTSQueryTests >> testJsClass [
 
 	| block |
-	block := SBJavascript parseElement: 'class A {
+	block := SBJavascript parseToplevel: 'class A {
 example
 }'.
-	self assert: (block matchesQuery: '(class_declaration (class_body
+	self assert: (block matchesQuery: '(program (class_declaration (class_body
 	member: (field_definition
-		property: (property_identifier))))').
+		property: (property_identifier)))))').
 	
-	block := SBJavascript parseElement: 'class A {
+	block := SBJavascript parseToplevel: 'class A {
 example = {}
 render() {}
 }'.
-	self assert: (block matchesQuery: '(class_declaration
+	self assert: (block matchesQuery: '(program (class_declaration
 name: (identifier)
 (class_body
 	member: (field_definition
 		property: (property_identifier)
 		value: (object))
 	member: (method_definition
-		name: (property_identifier))))')
+		name: (property_identifier)))))')
 ]
 
 { #category : #'tests - languages' }
 SBTSQueryTests >> testJsPairMatchString [
 
 	| block |
-	block := SBJavascript parseElement: '{headers: "abc"}'.
-	self assert: (block matchesQuery: '(object (pair key: [(identifier) (string)] ="headers"))')
+	block := SBJavascript parseToplevel: '{headers: "abc"}'.
+	self assert: (block matchesQuery: '(program (object (pair key: [(identifier) (string)] ="headers")))')
 ]
 
 { #category : #tests }

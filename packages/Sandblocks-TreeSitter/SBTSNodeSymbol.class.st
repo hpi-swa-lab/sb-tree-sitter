@@ -164,7 +164,7 @@ SBTSNodeSymbol >> printOn: aStream [
 SBTSNodeSymbol >> resultsFor: aParser [
 
 	| storedBlocks newBlocks |
-	(self factory inputTransitionBlackList includes: self type) ifTrue: [^ {}].
+	(self language inputTransitionBlackList includes: self type) ifTrue: [^ {}].
 	
 	aParser peek = (Character value: 1) ifTrue: [
 		aParser next.
@@ -262,6 +262,7 @@ SBTSNodeSymbol >> type [
 { #category : #accessing }
 SBTSNodeSymbol >> type: aString factory: aFactory [
 
+	self assert: (aFactory isKindOf: SBTSGrammar).
 	type := aString asSymbol.
 	factory := aFactory
 ]

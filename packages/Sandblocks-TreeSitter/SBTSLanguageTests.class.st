@@ -13,8 +13,11 @@ SBTSLanguageTests >> expectedFailures [
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testAliasedRootSymbol [
 
-	SBVhdl parse: 'assert << constant obj : bar_t  >>;'.
-	SBJavascript parse: '{headers: "abc"}'
+	SBToggledCode
+		comment: ''
+		active: 0
+		do: {[SBVhdl parseToplevel: 'assert << constant obj : bar_t  >>;']}.
+	SBJavascript parseToplevel: '{headers: "abc"}'
 ]
 
 { #category : #'testing - parse' }
@@ -33,60 +36,26 @@ SBTSLanguageTests >> testCReturn [
 
 	| source |
 	source := 'return 2;'.
-	self assert: source equals: (SBC parse: source) sourceString
-]
-
-{ #category : #'testing - block inline' }
-SBTSLanguageTests >> testJavascriptBlockInline [
-
-	self assert: (SBJavascript instance shouldBlockInline: 'formal_parameters')
-]
-
-{ #category : #'testing - parse' }
-SBTSLanguageTests >> testJavascriptFoundDelimiters [
-
-	| lang |
-	lang := SBJavascript instance.
-	{
-		'object' -> {','}.
-		'arguments' -> {','}.
-		'formal_parameters' -> {','}.
-		'array_pattern' -> {','}.
-		'named_imports' -> {','}} do: [:pair | self assert: (lang delimitedRules includesAssociation: pair)]
+	self assert: source equals: (SBC parseToplevel: source) sourceString
 ]
 
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testJavascriptImport [
 
 	| block |
-	block := SBJavascript parse: 'import {A} from ''a'''.
-	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (identifier)))))').
+	block := SBJavascript parseToplevel: 'import {A} from ''a'''.
+	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (_ (identifier))))))').
 	
-	block := SBJavascript parse: 'import {A as B} from ''a'''.
-	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (identifier) (identifier)))))')
-]
-
-{ #category : #'testing - interactions' }
-SBTSLanguageTests >> testJavascriptNestedIdentifierForMethodField [
-
-	| identifier |
-	identifier := SBJavascript parseElement: 'abc'.
-	
-	self assert: 1 equals: (SBTSRuleExplore new
-		maxRecursionDepth: 1;
-		explore: (SBJavascript instance getTemplate: 'class_body') elements second element
-			withNested: identifier
-			nestedBefore: true
-			for: '('
-			startSymbol: nil) size
+	block := SBJavascript parseToplevel: 'import {A as B} from ''a'''.
+	self assert: (block matchesQuery: '(program (import_statement (import_clause (named_imports (_ (identifier) (identifier))))))')
 ]
 
 { #category : #'testing - printing' }
 SBTSLanguageTests >> testJavascriptNestedMemberExpression [
 
 	| source |
-	source := 'a.b.c'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString
+	source := 'a.b.c;'.
+	self assert: source equals: (SBJavascript parseExpression: source) sourceString
 ]
 
 { #category : #'testing - parse' }
@@ -94,13 +63,13 @@ SBTSLanguageTests >> testJavascriptTemplateString [
 
 	| source |
 	source := '`ab`;'.
-	self assert: source equals: (SBJavascript parse: source) sourceString.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
 	source := '`ab${a}`;'.
-	self assert: source equals: (SBJavascript parse: source) sourceString.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
 	source := '`ab${a}def${c}`;'.
-	self assert: source equals: (SBJavascript parse: source) sourceString
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString
 ]
 
 { #category : #'testing - printing' }
@@ -109,39 +78,46 @@ SBTSLanguageTests >> testJavascriptToString [
 	| source |
 	source := 'a;
 b;'.
-	self assert: source equals: (SBJavascript parse: source) sourceString.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
-	source := '<h2>Hi</h2>'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	source := '<h2>Hi</h2>;'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
 	source := 'class A extends B
-{}'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+{
+}'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
 	source := 'class Car extends React.Component
-{example={};
+{
+example={}
 render()
-{a;
-return<h2>Hi</h2>}}'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+{
+a;
+return<h2>Hi</h2>;
+}
+}'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
-	source := 'a(b,c)'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	source := 'a(b,c);'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
-	source := 'a(2,3)'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	source := 'a(2,3);'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
-	source := 'const a=5'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	source := 'const a=5;'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
-	source := '<h2 style="color:red"></a>'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	source := '<h2 style="color:red"></a>;'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
 	source := 'if(a)
-{}
+{
+}
 else
-{}'.
-	self assert: source equals: (SBJavascript parse: source) sourceString
+{
+}'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString
 ]
 
 { #category : #'testing - printing' }
@@ -156,42 +132,17 @@ SBTSLanguageTests >> testJavascriptToStringSemicolons [
 ]
 
 { #category : #'testing - parse' }
-SBTSLanguageTests >> testMultipleDelimiters [
-
-	| block |
-	self assert: (SBJavascript instance delimitedRules includesAssociation: 'lexical_declaration' -> {';'. ','}).
-	block := SBJavascript parse: 'let a;'
-]
-
-{ #category : #'testing - parse' }
 SBTSLanguageTests >> testParsePythonFormatString [
 
 	| string |
-	SBPython instance grammar rules at: '_newline'.
-	string := SBPython parseElement: '"abc"'.
-	self assert: 'abc' equals: string contents.
+	string := SBPython parseExpression: '"abc"'.
+	self assert: 'abc' equals: string textMorphs second contents.
 	
-	string := SBPython parseElement: 'f"abc"'.
-	self assert: 'abc' equals: string contents.
+	string := SBPython parseExpression: 'f"abc"'.
+	self assert: 'abc' equals: string textMorphs second contents.
 	
-	string := SBPython parseElement: 'f"abc{var1}def{var2}ghi"'.
-	self assert: 'abcdefghi' equals: string contents
-]
-
-{ #category : #'testing - interactions' }
-SBTSLanguageTests >> testPythonBinaryOperator [
-
-	| block e |
-	block := SBPython parse: '123'.
-	e := self editorFor: block.
-	[
-		block childSandblocks first
-			select;
-			keyStroke: (self keyboardEvent: $+)]
-		on: ProvideAnswerNotification
-		do: [:n | self assert: false].
-	
-	self assert: (block matchesQuery: '(module (expression_statement (binary_operator)))')
+	string := SBPython parseExpression: 'f"abc{var1}def{var2}ghi"'.
+	self assert: 'abcdefghi' equals: string textMorphs second contents
 ]
 
 { #category : #'testing - parse' }
@@ -199,7 +150,7 @@ SBTSLanguageTests >> testPythonComprehension [
 
 	| source |
 	source := '(123 for i in range)'.
-	self assert: source equals: (SBPython parse: source) sourceString
+	self assert: source equals: (SBPython parseToplevel: source) sourceString
 ]
 
 { #category : #'testing - parse' }
@@ -210,14 +161,14 @@ SBTSLanguageTests >> testPythonDecorators [
 @abc
 def a():
 	pass'.
-	self assert: source equals: (SBPython parse: source) sourceString
+	self assert: source equals: (SBPython parseToplevel: source) sourceString
 ]
 
 { #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonDeleteStatement [
 
 	| block e |
-	block := SBPython parse: 'a'.
+	block := SBPython parseToplevel: 'a'.
 	e := self editorFor: block.
 	block childSandblocks first
 		select;
@@ -228,15 +179,7 @@ SBTSLanguageTests >> testPythonDeleteStatement [
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testPythonEmptyModule [
 
-	SBPython parse: ''
-]
-
-{ #category : #'testing - parse' }
-SBTSLanguageTests >> testPythonFoundDelimiters [
-
-	| lang |
-	lang := SBPython instance.
-	{'argument_list' -> {','}. 'parameters' -> {','}. 'tuple_pattern' -> {','}. 'list' -> {','}} do: [:pair | self assert: (lang delimitedRules includesAssociation: pair)]
+	SBPython parseToplevel: ''
 ]
 
 { #category : #'testing - printing' }
@@ -251,17 +194,17 @@ elif f:
 	g
 else:
 	e'.
-	self assert: source equals: (SBPython parse: source) sourceString
+	self assert: source equals: (SBPython parseToplevel: source) sourceString
 ]
 
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testPythonImport [
 
 	| block |
-	block := SBPython parse: 'import numpy'.
+	block := SBPython parseToplevel: 'import numpy'.
 	self assert: (block matchesQuery: '(module (import_statement (dotted_name (identifier))))').
 	
-	block := SBPython parse: 'import numpy as np'.
+	block := SBPython parseToplevel: 'import numpy as np'.
 	self assert: (block matchesQuery: '(module (import_statement (aliased_import (dotted_name (identifier)) alias: (identifier))))')
 ]
 
@@ -272,7 +215,7 @@ SBTSLanguageTests >> testPythonIndent [
 	source := 'if a:
 	if b:
 		pass'.
-	self assert: source equals: (SBPython parse: source) sourceString.
+	self assert: source equals: (SBPython parseToplevel: source) sourceString.
 	
 	source := 'if a:
 	print("a")
@@ -280,54 +223,39 @@ SBTSLanguageTests >> testPythonIndent [
 else:
 	print("c")
 	print("d")'.
-	self assert: source equals: (SBPython parse: source) sourceString
+	self assert: source equals: (SBPython parseToplevel: source) sourceString
 ]
 
 { #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonInsertLambdaParameter [
 
 	| module e |
-	module := SBPython parse: 'lambda: x'.
+	module := SBPython parseToplevel: 'lambda: x'.
 	e := self editorFor: module.
 	
 	e performForSelection: #moveCursorRight.
 	e performForSelection: #moveCursorRight.
 	e handle: (self keyboardEvent: $a).
 	
-	self assert: 'a' equals: module access children first parameters children first contents
-]
-
-{ #category : #'testing - interactions' }
-SBTSLanguageTests >> testPythonIntToFloat [
-
-	| block e |
-	block := SBPython parse: '123'.
-	e := self editorFor: block.
-	[
-		block childSandblocks first
-			select;
-			moveCursorToEnd;
-			keyStroke: (self keyboardEvent: $.)]
-		on: ProvideAnswerNotification
-		do: [:notification | " expect to receive float and member access "
-		notification resume: 1].
-	self assert: (block matchesQuery: '(module (expression_statement (float)))')
+	self assert: 'a' equals: module childSandblocks first childSandblocks first childSandblocks first contents
 ]
 
 { #category : #'testing - interactions' }
 SBTSLanguageTests >> testPythonNumber [
 
 	| block e |
-	block := SBPython parse: 'a'.
-	e := self editorFor: block.
+	block := SBPython parseToplevel: 'a'.
+	e := self editorAndWorldFor: block.
 	block childSandblocks first
 		select;
 		insertStatementBelow.
-	[block childSandblocks second keyStroke: (self keyboardEvent: $1)]
-		on: ProvideAnswerNotification
-		do: [:n | self assert: false].
+	e handle: (self keyboardEvent: $1).
+	self tick.
+	self tick.
+	e handle: (self keyboardEvent: Character arrowDown).
+	e handle: (self keyboardEvent: Character cr).
 	
-	self assert: (block matchesQuery: '(module (expression_statement (integer)))')
+	self assert: (block matchesQuery: '(module (integer))')
 ]
 
 { #category : #'testing - parse' }
@@ -345,23 +273,21 @@ SBTSLanguageTests >> testPythonPatternList [
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testPythonString [
 
-	self assert: 'abc' equals: (SBPython parseElement: '''abc''') contents.
-	self assert: 'abc' equals: (SBPython parseElement: '"abc"') contents.
-	self assert: 'abc' equals: (SBPython parseElement: 'f"abc"') contents.
-	self assert: 'abc\n' equals: (SBPython parseElement: '"abc\n"') contents.
-	self assert: 'abc\n' equals: (SBPython parseElement: '"""abc\n"""') contents
+	self assert: 'abc' equals: (SBPython parseExpression: '''abc''') textMorphs second contents.
+	self assert: 'abc' equals: (SBPython parseExpression: '"abc"') textMorphs second contents.
+	self assert: 'abc' equals: (SBPython parseExpression: 'f"abc"') textMorphs second contents.
+	self assert: 'abc\n' equals: (SBPython parseExpression: '"abc\n"') textMorphs second contents.
+	self assert: 'abc\n' equals: (SBPython parseExpression: '"""abc\n"""') textMorphs second contents
 ]
 
 { #category : #'testing - interactions' }
 SBTSLanguageTests >> testRegexResumeInput [
 
 	| block e |
-	block := SBRegex parse: 'abc'.
+	block := SBRegex parseToplevel: 'abc'.
 	e := self editorFor: block.
 	block lastDeepChild select.
-	[e selection keyStroke: (self keyboardEvent: $d)]
-		on: ProvideAnswerNotification
-		do: [:n | self assert: false].
+	e selection keyStroke: (self keyboardEvent: $d).
 	
 	self assert: 'abcd' equals: block sourceString
 ]
@@ -369,5 +295,5 @@ SBTSLanguageTests >> testRegexResumeInput [
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testSyntaxError [
 
-	self should: [SBPython parse: '"abc"('] raise: SBTSSyntaxError
+	self should: [SBPython parseToplevel: '"abc"('] raise: SBTSSyntaxError
 ]

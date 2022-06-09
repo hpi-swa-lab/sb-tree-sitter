@@ -201,11 +201,7 @@ SBTSCursor >> restoreTo: aCursor [
 { #category : #'as yet unclassified' }
 SBTSCursor >> shouldSkipParsedNode: aNode [
 
-	| parentType type |
-	type := library nodeType: aNode.
-	parentType := library nodeType: (library nodeParent: aNode).
-	
-	^ factory shouldSkipParsing: type in: parentType cursor: self
+	^ factory language statementTerminator = (library nodeType: aNode)
 ]
 
 { #category : #'as yet unclassified' }

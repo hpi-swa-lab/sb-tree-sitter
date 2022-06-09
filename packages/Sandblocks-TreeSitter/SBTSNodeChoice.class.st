@@ -55,7 +55,9 @@ SBTSNodeChoice >> buildEmpty [
 { #category : #'as yet unclassified' }
 SBTSNodeChoice >> buildEmptyNodes [
 
-	^ {SBTSParseNode kind: #unknown slot: (SBTSSlot with: self) contents: nil}
+	^ (self language defaultChoiceDuringInputFor: self)
+		ifNotNil: [:choice | choice buildEmptyNodes]
+		ifNil: [{SBTSParseNode kind: #unknown slot: (SBTSSlot with: self) contents: nil}]
 ]
 
 { #category : #printing }

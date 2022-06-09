@@ -17,6 +17,12 @@ SBTSNodeBlank >> allElementsDo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeBlank >> buildMorphWith: aBlock slot: aSlot [
+
+	^ {}
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeBlank >> elements [
 
 	^ #()

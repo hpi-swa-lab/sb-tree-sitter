@@ -108,7 +108,7 @@ SBTSNodeInsertCommand >> setArtefactFrom [
 { #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> suggestions [
 
-	^ element factory suggestionsForInsert: self
+	^ element language suggestionsForInsert: self
 ]
 
 { #category : #'as yet unclassified' }

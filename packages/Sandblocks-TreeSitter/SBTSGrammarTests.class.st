@@ -29,38 +29,30 @@ SBTSGrammarTests >> testBlockInlineDetect [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSGrammarTests >> testPythonForInClauseRepeat [
-
-	| clause |
-	clause := SBPython instance getTemplate: 'for_in_clause'.
-	self assert: clause elements last required
-]
-
-{ #category : #'as yet unclassified' }
 SBTSGrammarTests >> testResolveAlias [
 
 	| resolved |
-	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript new)
+	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript instance)
 		resolveAlias: 'property_identifier'
 		in: 'member_expression'
-		with: SBJavascript instance aliases.
-	self assert: '(identifier)' equals: resolved printString.
+		with: SBJavascript instance grammar aliasOccurrences.
+	self assert: 'identifier' equals: resolved element printString.
 	
 	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript instance)
 		resolveAlias: 'property_identifier'
 		in: '_property_name'
-		with: SBJavascript instance aliases.
+		with: SBJavascript instance grammar aliasOccurrences.
 	self
 		assert: '(identifier | "get" | "set" | "async" | "static" | "export")'
-		equals: resolved printString.
+		equals: resolved element printString.
 	
 	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript instance)
 		resolveAlias: 'property_identifier'
 		in: 'pair_pattern'
-		with: SBJavascript instance aliases.
+		with: SBJavascript instance grammar aliasOccurrences.
 	self
 		assert: '(identifier | "get" | "set" | "async" | "static" | "export")'
-		equals: resolved printString
+		equals: resolved element printString
 ]
 
 { #category : #'as yet unclassified' }
@@ -68,9 +60,9 @@ SBTSGrammarTests >> testResolveAmbiguousAlias [
 
 	| resolved library |
 	library := SBTreeSitter new.
-	{{'"abc"'. '(unescaped_double_string_fragment)'}. {'''abc'''. '(unescaped_single_string_fragment)'}} do: [:pair |
+	{{'"abc"'. 'unescaped_double_string_fragment'}. {'''abc'''. 'unescaped_single_string_fragment'}} do: [:pair |
 		library parseAsCursor: pair first language: #javascript do: [:c | | cursor |
-			cursor := SBTSCursor new library: library cursor: c factory: SBJavascript new.
+			cursor := SBTSCursor new library: library cursor: c factory: SBJavascript instance grammar.
 			
 			cursor
 				gotoFirstChild;
@@ -82,6 +74,6 @@ SBTSGrammarTests >> testResolveAmbiguousAlias [
 			resolved := cursor
 				resolveAlias: 'string_fragment'
 				in: 'string'
-				with: SBJavascript instance aliases.
-			self assert: pair second equals: resolved printString]]
+				with: SBJavascript instance grammar aliasOccurrences.
+			self assert: pair second equals: resolved element printString]]
 ]

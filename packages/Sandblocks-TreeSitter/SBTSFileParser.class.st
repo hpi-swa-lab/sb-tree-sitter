@@ -88,8 +88,10 @@ SBTSFileParser >> parse: aString language: aFactory [
 	| api language |
 	api := SBTreeSitter new.
 	language := aFactory isBehavior ifTrue: [aFactory instance] ifFalse: [aFactory].
-	^ api parseAsCursor: aString language: language class language do: [:cursor |
-		self nodeForCursor: (SBTSCursor new library: api cursor: cursor factory: language)]
+	^ api
+		parseAsCursor: aString
+		language: language class language
+		do: [:cursor | self nodeForCursor: (SBTSCursor new library: api cursor: cursor factory: language grammar)]
 ]
 
 { #category : #'as yet unclassified' }

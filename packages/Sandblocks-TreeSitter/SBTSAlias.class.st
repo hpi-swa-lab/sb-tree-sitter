@@ -50,6 +50,6 @@ SBTSAlias >> printOn: aStream [
 
 	aStream nextPutAll: self className.
 	aStream nextPut: $(.
-	aStream nextPutAll: self name.
+	aStream print: self name.
 	aStream nextPut: $)
 ]

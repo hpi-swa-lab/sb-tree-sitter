@@ -1,28 +1,31 @@
 Class {
 	#name : #SBJavascript,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-Javascript'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - declarations' }
+SBJavascript class >> declarationsInScope: aScopeBlock do: aClosure [
+
+	aScopeBlock type = 'function' ifTrue: [
+		aScopeBlock childSandblocksDo: [:block | ((block compatibleWithType: 'pattern') or: [block compatibleWithType: 'assignment_pattern']) ifTrue: [block allBlocksDo: [:b | b type = 'identifier' ifTrue: [aClosure value: (SBTSDeclaration block: b label: 'func arg')]]]].
+		self declarationsInScope: (aScopeBlock get: 'body') do: aClosure].
+	(aScopeBlock type = 'statement_block' or: [aScopeBlock type = 'program']) ifTrue: [aScopeBlock childSandblocksDo: [:statement | statement type = 'lexical_declaration' ifTrue: [statement childSandblocksDo: [:declarator | aClosure value: (SBTSDeclaration block: (declarator get: 'name') label: 'lexical decl')]]]]
+]
+
+{ #category : #configuration }
 SBJavascript class >> defaultRuntimeClass [
 
 	^ SBJsRuntimeOSProcess
 ]
 
-{ #category : #'as yet unclassified' }
-SBJavascript class >> expressionTypes [
-
-	^ #('expression')
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBJavascript class >> fileSuffix [
 
 	^ 'js'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBJavascript class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-javascript/blob/master/grammar.js "
 
@@ -6546,7 +6549,17 @@ SBJavascript class >> grammarJson [
 	'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - layout' }
+SBJavascript class >> hardLineBreakBetween: aBlock and: anotherBlock [
+
+	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	aBlock parentSandblock type = #'class_body' ifTrue: [^ true].
+	anotherBlock type = #'else_clause' ifTrue: [^ true].
+	(aBlock contents = '{' and: [aBlock parentSandblock type = #'statement_block']) ifTrue: [^ true].
+	^ #(#'statement_block' #'class_body') includes: anotherBlock type
+]
+
+{ #category : #configuration }
 SBJavascript class >> highlightQuery [
 	" https://github.com/tree-sitter/tree-sitter-javascript/blob/master/queries/highlights.scm "
 
@@ -6757,7 +6770,7 @@ SBJavascript class >> highlightQuery [
 	] @keyword'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBJavascript class >> icon [
 
 	^ Form
@@ -6767,22 +6780,105 @@ SBJavascript class >> icon [
 		offset: 0 @ 0
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - editing' }
+SBJavascript class >> inputTransitionBlackList [
+	"return a list of types that should not be considered during transitions, e.g. the typical C comma operator that just chains multiple expressions and thus yields mostly noise"
+
+	^ #(#'sequence_expression')
+]
+
+{ #category : #'configuration - editing' }
+SBJavascript class >> isBlockInlined: aSymbol [
+
+	^ aSymbol = #'expression_statement' or: [super isBlockInlined: aSymbol]
+]
+
+{ #category : #'configuration - editing' }
+SBJavascript class >> isBlockInlinedInParent: aSymbol [
+
+	^ aSymbol = #'formal_parameters' or: [aSymbol = #arguments]
+]
+
+{ #category : #'configuration - layout' }
+SBJavascript class >> isImmutableLabel: aLabelNode [
+
+	^ (super isImmutableLabel: aLabelNode) or: [#(';') includes: aLabelNode label]
+]
+
+{ #category : #'configuration - declarations' }
+SBJavascript class >> isScope: aBlock [
+
+	^ #('function' 'program' 'statement_block') includes: aBlock type
+]
+
+{ #category : #'configuration - editing' }
+SBJavascript class >> isStatementContainer: aRepeatNode [
+
+	^ aRepeatNode element type = 'statement'
+]
+
+{ #category : #configuration }
 SBJavascript class >> language [
 
 	^ #javascript
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - editing' }
+SBJavascript class >> noteUncapturedText [
+
+	^ #('template_string')
+]
+
+{ #category : #configuration }
+SBJavascript class >> postprocessGrammar: aGrammar [
+	"FIXME: this should not be necessary"
+
+	aGrammar rulesWithStatementTerminator remove: 'class_body'
+]
+
+{ #category : #configuration }
+SBJavascript class >> preprocessGrammar: aGrammar [
+	"for some reason the member_expression accepts both primary_expr and expr as options, which lets our parser think that matches are ambiguous"
+
+	(aGrammar bodyNodeForRule: #'member_expression') element elements first replaceBy: (aGrammar bodyNodeForRule: #'member_expression') element elements first elements first.
+	(aGrammar bodyNodeForRule: #'subscript_expression') element elements first replaceBy: (aGrammar bodyNodeForRule: #'subscript_expression') element elements first elements first.
+	
+	aGrammar rules at: '_semicolon' put: (SBTSNodeLabel new
+		label: ';';
+		factory: aGrammar).
+	SBToggledCode comment: '' active: 1 do: {
+		[aGrammar removeRule: #'_automatic_semicolon'].
+		[
+			aGrammar rules at: '_automatic_semicolon' put: (SBTSNodeLabel new
+				label: '';
+				factory: aGrammar)]}.
+	aGrammar rules at: '_template_chars' put: (SBTSNodeText new
+		regexString: '.*';
+		factory: aGrammar).
+	
+	"does not get added because its semicolon is removed as a separator"
+	aGrammar rulesWithStatementTerminator add: 'expression_statement'
+]
+
+{ #category : #configuration }
 SBJavascript class >> rootRuleName [
 
 	^ 'program'
 ]
 
-{ #category : #'as yet unclassified' }
-SBJavascript class >> statementContainerTypes [
+{ #category : #'configuration - layout' }
+SBJavascript class >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 
-	^ #('program' 'statement_block' 'class_body')
+	(aBlock isTSLabel and: [aBlock contents = ':']) ifTrue: [^ true].
+	(aBlock isTSLabel and: [aBlock contents = '?']) ifTrue: [^ true].
+	(aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']) ifTrue: [^ true].
+	^ false
+]
+
+{ #category : #'configuration - layout' }
+SBJavascript class >> statementTerminator [
+
+	^ ';'
 ]
 
 { #category : #'as yet unclassified' }

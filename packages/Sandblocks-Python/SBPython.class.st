@@ -1,31 +1,42 @@
 Class {
 	#name : #SBPython,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#instVars : [
 		'separatorRule'
 	],
 	#category : #'Sandblocks-Python'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - layout' }
+SBPython class >> addIndent: aBlock [
+
+	(super addIndent: aBlock) ifTrue: [^ true].
+	
+	^ (aBlock submorphAfter ifNotNil: #type) = 'block'
+]
+
+{ #category : #'configuration - editing' }
+SBPython class >> defaultChoiceDuringInputFor: aChoiceNode [
+
+	^ aChoiceNode alternatives
+		detect: [:choice | choice type = 'block']
+		ifFound: [:choice | choice]
+		ifNone: [nil]
+]
+
+{ #category : #configuration }
 SBPython class >> defaultRuntimeClass [
 
 	^ SBPyRuntimeOSProcess
 ]
 
-{ #category : #'as yet unclassified' }
-SBPython class >> expressionTypes [
-
-	^ #('expression' 'primary_expression')
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBPython class >> fileSuffix [
 
 	^ 'py'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBPython class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-python/blob/master/src/grammar.json "
 
@@ -4983,7 +4994,16 @@ SBPython class >> grammarJson [
 }'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - layout' }
+SBPython class >> hardLineBreakBetween: aBlock and: anotherBlock [
+
+	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	aBlock type = 'decorator' ifTrue: [^ true].
+	((aBlock isStringMorph and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice']]]) ifTrue: [^ true].
+	^ #('else_clause' 'elif_clause') includes: anotherBlock type
+]
+
+{ #category : #configuration }
 SBPython class >> highlightQuery [
 	" https://github.com/tree-sitter/tree-sitter-python/blob/master/queries/highlights.scm "
 
@@ -5113,7 +5133,7 @@ SBPython class >> highlightQuery [
 ] @keyword'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBPython class >> icon [
 
 	^ (Form
@@ -5123,19 +5143,43 @@ SBPython class >> icon [
 	offset: 0@0)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - layout' }
+SBPython class >> indentMatch: aBlock [
+
+	^ aBlock type = 'block'
+]
+
+{ #category : #'configuration - editing' }
+SBPython class >> isBlockInlined: aSymbol [
+
+	^ aSymbol = #'expression_statement' or: [super isBlockInlined: aSymbol]
+]
+
+{ #category : #'configuration - editing' }
+SBPython class >> isBlockInlinedInParent: aSymbol [
+
+	^ aSymbol = #parameters
+]
+
+{ #category : #'configuration - layout' }
+SBPython class >> isImmutableLabel: aLabelNode [
+
+	^ (super isImmutableLabel: aLabelNode) or: [#(':') includes: aLabelNode label]
+]
+
+{ #category : #'configuration - layout' }
+SBPython class >> isStatementContainer: aRepeatNode [
+
+	^ aRepeatNode element isTSChoice and: [aRepeatNode element alternatives second type = #'_compound_statement']
+]
+
+{ #category : #configuration }
 SBPython class >> language [
 
 	^ #python
 ]
 
-{ #category : #'as yet unclassified' }
-SBPython class >> parseAsKeywordArgumentAndReplace: aString [
-
-	^ (self parse: ('a({1})' format: {aString})) childSandblocks first childSandblocks second childSandblocks first applyReplacements
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #'instantiate blocks' }
 SBPython class >> parseExpression: aString [
 
 	| expr |
@@ -5145,28 +5189,72 @@ SBPython class >> parseExpression: aString [
 	^ expr
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instantiate blocks' }
 SBPython class >> parseKeywordArgument: aString [
 
 	^ (self parseExpression: ('a({1})' format: {aString})) childSandblocks second childSandblocks first
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instantiate blocks' }
 SBPython class >> parseStatement: aString [
 
 	^ super parseExpression: aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
+SBPython class >> postprocessGrammar: aGrammar [
+
+	(aGrammar bodyNodeForRule: #'expression_statement') alternatives first in: [:alt | alt replaceBy: alt element]
+]
+
+{ #category : #configuration }
+SBPython class >> preprocessGrammar: aGrammar [
+	"the _simple_statements (note the plural) rule poses a challenge because it leads to a expression+* construct that our repeater logic cannot handle well"
+
+	(aGrammar bodyNodeForRule: '_statement') elements first
+		type: '_simple_statement'
+		factory: aGrammar.
+	
+	aGrammar rules at: 'string' put: (SBTSNodeChoice new
+		factory: aGrammar;
+		alternatives: (#('''' '"' '"""') collect: [:quote |
+			SBTSNodeSeq new
+				factory: aGrammar;
+				elements: {
+					SBTSNodeChoice new
+						factory: aGrammar;
+						alternatives: (#('' 'f' 'u' 'b' 'r') collect: [:prefix |
+							SBTSNodeLabel new
+								factory: aGrammar;
+								label: prefix, quote]).
+					SBTSNodeChoice new
+						factory: aGrammar;
+						alternatives: {
+							SBTSNodeSymbol new type: #interpolation factory: aGrammar.
+							SBTSNodeSymbol new type: #'escape_sequence' factory: aGrammar.
+							SBTSNodeSymbol new type: #'_not_escape_sequence' factory: aGrammar.
+							SBTSNodeSymbol new type: #'_string_content' factory: aGrammar}.
+					SBTSNodeLabel new
+						factory: aGrammar;
+						label: quote}])).
+	aGrammar rules at: '_string_content' put: (SBTSNodeContextSensitiveText new
+		factory: aGrammar;
+		validCheck: [:parser :character | character ~= parser slots first firstNode label];
+		regexString: '.*')
+]
+
+{ #category : #'configuration - layout' }
+SBPython class >> removeIndent: aBlock [
+
+	(super removeIndent: aBlock) ifTrue: [^ true].
+	
+	^ (aBlock submorphBefore ifNotNil: #type) = 'block'
+]
+
+{ #category : #configuration }
 SBPython class >> rootRuleName [
 
 	^ 'module'
-]
-
-{ #category : #'as yet unclassified' }
-SBPython class >> statementContainerTypes [
-
-	^ #('block' 'module')
 ]
 
 { #category : #'as yet unclassified' }

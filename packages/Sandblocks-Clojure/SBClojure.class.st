@@ -1,10 +1,10 @@
 Class {
 	#name : #SBClojure,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-Clojure'
 }
 
-{ #category : #properties }
+{ #category : #configuration }
 SBClojure class >> grammarJson [
 
     " https://github.com/sogaiu/tree-sitter-clojure/blob/master/src/grammar.json "
@@ -1685,7 +1685,7 @@ SBClojure class >> grammarJson [
 '
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBClojure class >> highlightQuery [
 
     " https://github.com/sogaiu/tree-sitter-clojure/blob/master/src/queries/highlights.scm "
@@ -1721,7 +1721,7 @@ SBClojure class >> highlightQuery [
 '
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBClojure class >> icon [
 
 	^ Form
@@ -1731,22 +1731,31 @@ SBClojure class >> icon [
 		offset: 0 @ 0
 ]
 
-{ #category : #properties }
+{ #category : #'configuration - editing' }
+SBClojure class >> isStatementContainer: aRepeatNode [
+
+	^ aRepeatNode element isTSChoice and: [aRepeatNode element alternatives anySatisfy: [:sym | sym type = #comment]]
+]
+
+{ #category : #configuration }
 SBClojure class >> language [
 
     ^ #clojure
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBClojure class >> rootRuleName [
 
 	^ 'source'
 ]
 
-{ #category : #'as yet unclassified' }
-SBClojure class >> statementContainerTypes [
+{ #category : #'configuration - layout' }
+SBClojure class >> spaceBetween: aBlock and: anotherBlock [
 
-	^ #('source')
+	(SBToggledCode comment: '' active: 2 do: {
+		[true].
+		[aBlock owner type = 'list_lit' and: [aBlock contents ~= '(' and: [anotherBlock contents ~= ')']]]}) ifTrue: [^ true].
+	^ super spaceBetween: aBlock and: anotherBlock
 ]
 
 { #category : #'as yet unclassified' }

@@ -1,10 +1,19 @@
 Class {
 	#name : #SBTSSmalltalk,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-TSSmalltalk'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - declarations' }
+SBTSSmalltalk class >> declarationsInScope: aScopeBlock do: aClosure [
+
+	aScopeBlock childSandblocks do: [:block |
+		block type = #'block_argument' ifTrue: [aClosure value: (SBTSDeclaration block: block selector: block contents allButFirst label: 'block arg')].
+		block type = #temporaries ifTrue: [block childSandblocks do: [:temp | aClosure value: (SBTSDeclaration block: temp label: 'temporary')]].
+		(#(#'binary_selector' #'keyword_selector') includes: block type) ifTrue: [(block childSandblocks select: [:arg | arg type = #identifier]) do: [:arg | aClosure value: (SBTSDeclaration block: arg label: 'argument')]]]
+]
+
+{ #category : #configuration }
 SBTSSmalltalk class >> defaultRuntimeClass [
 
 	^ SBStSqueakRuntime
@@ -1042,6 +1051,14 @@ SBTSSmalltalk class >> grammarJson [
 '
 ]
 
+{ #category : #'configuration - layout' }
+SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
+
+	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	(aBlock parentSandblock ifNotNil: #type) = #method ifTrue: [^ true].
+	^ false
+]
+
 { #category : #properties }
 SBTSSmalltalk class >> highlightQuery [
 
@@ -1058,28 +1075,79 @@ SBTSSmalltalk class >> highlightQuery [
 '
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBTSSmalltalk class >> icon [
 
 	^ SBStASTNode icon
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - editing' }
+SBTSSmalltalk class >> isBlockInlined: aSymbol [
+
+	^ aSymbol = #statement or: [super isBlockInlined: aSymbol]
+]
+
+{ #category : #'configuration - editing' }
+SBTSSmalltalk class >> isStatementContainer: aRepeatNode [
+
+	^ aRepeatNode element type = 'statement'
+]
+
+{ #category : #configuration }
 SBTSSmalltalk class >> language [
 
 	^ #smalltalk
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - suggestions' }
+SBTSSmalltalk class >> lowercaseSuggestionsFor: aBlock [
+
+	^ Array streamContents: [:stream |
+		self
+			scopesAround: aBlock
+			do: [:scope :declarations | declarations do: [:decl | (decl contents sandblockMatch: aBlock contents) ifTrue: [stream nextPut: decl]]]]
+]
+
+{ #category : #configuration }
 SBTSSmalltalk class >> rootRuleName [
 
 	^ 'method'
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSSmalltalk class >> statementContainerTypes [
+{ #category : #'configuration - suggestions' }
+SBTSSmalltalk class >> suggestionsFor: aBlock [
 
-	^ #('method' 'block')
+	((aBlock type = #identifier and: [aBlock parentSandblock type = #'unary_message']) or: [aBlock type = #keyword]) ifTrue: [
+		^ (aBlock sortedSuggestions: (OrderedCollection withAll: Symbol allSymbols) for: aBlock contents) collect: [:item |
+			SBSuggestionItem
+				selector: (item keywords joinSeparatedBy: (Character value: 1))
+				label: 'send']].
+	aBlock type = #identifier ifTrue: [
+		^ aBlock
+			sortedSuggestions: (aBlock contents first isUppercase
+				ifTrue: [self uppercaseSuggestionsFor: aBlock]
+				ifFalse: [self lowercaseSuggestionsFor: aBlock])
+			for: aBlock contents].
+	^ #()
+]
+
+{ #category : #'configuration - editing' }
+SBTSSmalltalk class >> transitionPairs [
+
+	^ {#'unary_message' -> #'keyword_message'}
+]
+
+{ #category : #'configuration - suggestions' }
+SBTSSmalltalk class >> uppercaseSuggestionsFor: aBlock [
+
+	self flag: #todo.
+	"pool dict etc"
+	^ Array streamContents: [:stream |
+		Smalltalk globals keysAndValuesDo: [:key :value |
+			(key sandblockMatch: aBlock contents) ifTrue: [
+				stream nextPut: (SBSuggestionItem selector: key label: ((value isBehavior and: [key == value name])
+					ifTrue: ['class']
+					ifFalse: ['global']))]]]
 ]
 
 { #category : #'as yet unclassified' }

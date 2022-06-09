@@ -56,7 +56,7 @@ SBTSNodePrecedence >> compareTo: aPrecedence [
 
 	(self value isInteger and: [aPrecedence value isInteger]) ifTrue: [^ (self value - aPrecedence value) sign].
 	
-	self factory grammar precedences do: [:precedences | | sawLeft sawRight |
+	self factory precedences do: [:precedences | | sawLeft sawRight |
 		sawLeft := false.
 		sawRight := false.
 		precedences do: [:entry | | matchesLeft matchesRight |

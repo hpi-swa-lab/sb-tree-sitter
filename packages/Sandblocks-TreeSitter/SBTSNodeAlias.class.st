@@ -3,6 +3,7 @@ Class {
 	#superclass : #SBTSNodeBase,
 	#instVars : [
 		'alias',
+		'named',
 		'element'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
@@ -99,6 +100,18 @@ SBTSNodeAlias >> hasEqualStructure: aNode [
 SBTSNodeAlias >> isTSAlias [
 
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeAlias >> named [
+
+	^ named
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeAlias >> named: aBoolean [
+
+	named := aBoolean
 ]
 
 { #category : #printing }

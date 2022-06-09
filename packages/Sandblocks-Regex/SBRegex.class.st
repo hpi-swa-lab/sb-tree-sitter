@@ -9,24 +9,11 @@ The Treesitter-Regex grammar does not correspond to a well-known regex dialect. 
 "
 Class {
 	#name : #SBRegex,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-Regex'
 }
 
-{ #category : #building }
-SBRegex class >> createBindingIn: aBlock for: aString build: aClosure update: anUpdateClosure [
-
-	^ aBlock
-		createBinding: [:c | aClosure value: ((c at: aString) sourceString from: self className size + 2) base64Decoded]
-		update: [:c :m | | new |
-			new := SBTSFileParser new
-				parse: aBlock className, ':', (anUpdateClosure value: c value: m) base64Encoded
-				language: SBRegex.
-			(c at: aString) replaceBy: new.
-			c at: aString put: new]
-]
-
-{ #category : #accessing }
+{ #category : #configuration }
 SBRegex class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-regex/blob/master/grammar.js "
 
@@ -714,7 +701,7 @@ SBRegex class >> grammarJson [
 '
 ]
 
-{ #category : #accessing }
+{ #category : #configuration }
 SBRegex class >> highlightQuery [
 
 	^ '[
@@ -749,22 +736,34 @@ SBRegex class >> highlightQuery [
 ] @operator'
 ]
 
-{ #category : #accessing }
+{ #category : #'configuration - editing' }
+SBRegex class >> isStatementContainer: aRepeatNode [
+
+	^ false
+]
+
+{ #category : #configuration }
 SBRegex class >> language [
 
 	^ #regex
 ]
 
-{ #category : #accessing }
+{ #category : #configuration }
 SBRegex class >> rootRuleName [
 
 	^ 'pattern'
 ]
 
-{ #category : #accessing }
-SBRegex class >> statementContainerTypes [
+{ #category : #'configuration - layout' }
+SBRegex class >> softLineBreakBetween: aBlock and: anotherBlock [
 
-	^ #()
+	^ true
+]
+
+{ #category : #'configuration - layout' }
+SBRegex class >> spaceBetween: aBlock and: anotherBlock [
+
+	^ false
 ]
 
 { #category : #palette }

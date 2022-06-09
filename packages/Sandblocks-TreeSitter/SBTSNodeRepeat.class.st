@@ -195,11 +195,17 @@ SBTSNodeRepeat >> takeNodesFrom: aParser [
 			parser := pair first copy.
 			index := pair second + 1.
 			currentPosition := parser position.
+			(parser peek isString and: [parser peek = delimiter]) ifTrue: [
+				parser next.
+				parser addSlot: SBTSNodeBlank new].
 			results := self element takeNodesFrom: parser.
 			results do: [:candidate |
 				"to fix troubles with infinitely repeating matches, we only accept results
 if they advanced the parser."
 				candidate position > currentPosition ifTrue: [
+					(candidate peek isString and: [candidate peek = delimiter]) ifTrue: [
+						candidate next.
+						candidate addSlot: SBTSNodeBlank new].
 					stream nextPut: candidate.
 					queue add: {candidate. index}]]]]) ifEmpty: [self required ifTrue: [{}] ifFalse: [{aParser copy}]]
 ]

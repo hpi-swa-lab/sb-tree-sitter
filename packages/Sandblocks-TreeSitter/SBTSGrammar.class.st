@@ -6,7 +6,11 @@ Class {
 		'supertypes',
 		'inlinedRules',
 		'delimitedRepeats',
-		'aliasOccurrences'
+		'aliasOccurrences',
+		'language',
+		'highlightQuery',
+		'precedences',
+		'rulesWithStatementTerminator'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -31,23 +35,39 @@ SBTSGrammar class >> verifyStructures [
 	self verifyStructureLegacy: SBClojure
 ]
 
+{ #category : #layout }
+SBTSGrammar >> addIndent: aNode [
+
+	^ self language addIndent: aNode
+]
+
+{ #category : #accessing }
+SBTSGrammar >> aliasOccurrences [
+
+	^ aliasOccurrences
+]
+
 { #category : #cleaning }
-SBTSGrammar >> applyInlining: aRule grammar: aGrammarJson [
+SBTSGrammar >> applyInlining: aRule grammar: aGrammarJson name: aString [
 
 	aRule allElementsDo: [:node |
-		(node isTSSymbol and: [
-			(aGrammarJson inline includes: node name) and: [
-				SBToggledCode
-					comment: ''
-					active: 2
-					do: {[true]. [(aGrammarJson supertypes includes: node name) not]}]])
+		(node isTSSymbol and: [(inlinedRules includes: node name) and: [SBToggledCode comment: '' active: 2 do: {[true]. [(supertypes includes: node name) not]}]])
 			ifTrue: [ | inline |
 				inline := rules at: node name.
-				node replaceBy: inline veryDeepCopy]
+				node
+					replaceBy: (inline veryDeepCopy
+						field: node field;
+						yourself)
+					toplevelDo: [:n | self rules at: aString put: n]]
 			ifFalse: [
-				(node isTSSymbol and: [node type first = $_ and: [(aGrammarJson externals noneSatisfy: [:e | e name = node name]) and: [(aGrammarJson supertypes includes: node name) not]]]) ifTrue: [ | inline |
+				(node isTSSymbol and: [node type first = $_ and: [(aGrammarJson externals noneSatisfy: [:e | e name = node name]) and: [(supertypes includes: node name) not]]]) ifTrue: [ | inline |
 					inline := rules at: node name.
-					(self includesNonHiddenParts: inline visited: Set new) ifTrue: [node replaceBy: inline veryDeepCopy]]]]
+					(self includesNonHiddenParts: inline visited: Set new) ifTrue: [
+						node
+							replaceBy: (inline veryDeepCopy
+								field: node field;
+								yourself)
+							toplevelDo: [:n | self rules at: aString put: n]]]]]
 ]
 
 { #category : #cleaning }
@@ -59,23 +79,38 @@ SBTSGrammar >> autofixExternals: aGrammar [
 		rules at: external ifAbsent: [
 			rules do: [:rule |
 				rule
-					allChildrenDetect: [:obj | obj isTSAlias and: [obj element type = external]]
-					ifFound: [:alias | rules at: external put: (SBTSNodeLabel new label: alias alias)]
+					allChildrenDetect: [:obj | obj isTSAlias and: [obj element type = external and: [obj named not]]]
+					ifFound: [:alias |
+						rules at: external put: (SBTSNodeLabel new
+							label: alias alias;
+							factory: self;
+							yourself)]
 					ifNone: []]]].
 	
 	(aGrammar externals select: [:rule | rule type = 'STRING']) do: [:external |
-		rules
-			at: external value
-			ifAbsent: [rules at: external value put: (SBTSNodeLabel new label: external value)]].
+		rules at: external value ifAbsent: [
+			rules at: external value put: (SBTSNodeLabel new
+				label: external value;
+				factory: self;
+				yourself)]].
 	
-	(externals reject: [:external | rules includesKey: external]) ifNotEmpty: [:missing | UIManager default inform: 'Missing declarations for: ', (missing joinSeparatedBy: ', ')]
+	externals := externals reject: [:external | rules includesKey: external].
+	externals ifNotEmpty: [:missing | UIManager default inform: 'Missing declarations for: ', (missing joinSeparatedBy: ', ')].
+	aGrammar externals: externals
 ]
 
 { #category : #cleaning }
-SBTSGrammar >> blanksToOptionals: aRule [
+SBTSGrammar >> blanksToOptionals: aRule name: aString [
 	"(A|_BLANK_) -> A?"
 
-	aRule allElementsDo: [:node | (node isTSChoice and: [node elements size = 2 and: [node elements second isTSBlank]]) ifTrue: [node replaceBy: (SBTSNodeRepeat new multiple: false required: false element: node elements first)]]
+	aRule allElementsDo: [:node |
+		(node isTSChoice and: [node elements size = 2 and: [node elements second isTSBlank]]) ifTrue: [
+			node
+				replaceBy: (SBTSNodeRepeat new
+					multiple: false required: false element: node elements first;
+					factory: self;
+					yourself)
+				toplevelDo: [:n | self rules at: aString put: n]]]
 ]
 
 { #category : #accessing }
@@ -101,6 +136,7 @@ SBTSGrammar >> buildNodesFor: anObject [
 	anObject type = 'ALIAS' ifTrue: [
 		^ SBTSNodeAlias new
 			alias: (anObject at: #value);
+			named: (anObject at: #named);
 			element: (self buildNodesFor: anObject content);
 			factory: self;
 			yourself].
@@ -207,7 +243,8 @@ SBTSGrammar >> checkStructure: anObject [
 
 	anObject allElementsDo: [:node |
 		self assert: (node isTSChoice not or: [node elements notEmpty]).
-		self assert: node isTSBlank not]
+		self assert: node isTSBlank not.
+		self assert: node factory class = SBTSGrammar]
 ]
 
 { #category : #helper }
@@ -217,33 +254,53 @@ SBTSGrammar >> escapeStringForRegex: aString [
 ]
 
 { #category : #cleaning }
-SBTSGrammar >> flattenSeparatedList: anObject [
+SBTSGrammar >> flattenSeparatedList: anObject name: aString [
 
 	| looksLikeSepList looksLikeOptionalSep |
 	looksLikeSepList := [:obj |
 		obj isTSSeq and: [
 			obj elements size = 2 and: [ | second |
 				second := obj elements second.
-				second isTSRepeat and: [second element isTSSeq and: [obj elements first hasEqualStructure: obj elements second element elements second]]]]].
+				second isTSRepeat and: [second element isTSSeq and: [(obj elements first hasEqualStructure: obj elements second element elements second) and: [second required not]]]]]].
 	looksLikeOptionalSep := [:obj | obj isTSChoice and: [obj alternatives second isTSBlank and: [obj alternatives first isTSLabel]]].
 	
 	anObject allElementsDo: [:node |
 		" seq(seq(rule, repeat(seq(separator, rule))), (separator|blank)) "
 		(node isTSSeq and: [(looksLikeSepList value: node elements first) and: [looksLikeOptionalSep value: node elements second]]) ifTrue: [ | repeater |
 			repeater := SBTSNodeRepeat new
-				multiple: true
-				required: false
-				element: node elements first elements first.
+				multiple: true required: false element: node elements first elements first;
+				factory: self;
+				yourself.
 			repeater delimiter: node elements second elements first label.
-			node replaceBy: repeater].
+			node replaceBy: repeater toplevelDo: [:n | self rules at: aString put: n]].
 		" seq(rule, repeat(seq(separator, rule))) "
 		(looksLikeSepList value: node) ifTrue: [ | repeater |
 			repeater := SBTSNodeRepeat new
 				multiple: true
-				required: true
-				element: node elements second elements first elements second.
+					required: true
+					element: node elements second elements first elements second;
+				factory: self;
+				yourself.
 			repeater delimiter: node elements second element elements first label.
-			node replaceBy: repeater]]
+			node replaceBy: repeater toplevelDo: [:n | self rules at: aString put: n]]]
+]
+
+{ #category : #layout }
+SBTSGrammar >> hardLineBreakBetween: aBlock and: anotherBlock [
+
+	^ self language hardLineBreakBetween: aBlock and: anotherBlock
+]
+
+{ #category : #testing }
+SBTSGrammar >> hasHighlight [
+
+	^ highlightQuery notNil
+]
+
+{ #category : #accessing }
+SBTSGrammar >> highlightQuery [
+
+	^ highlightQuery
 ]
 
 { #category : #cleaning }
@@ -261,13 +318,44 @@ SBTSGrammar >> inlinedRules [
 { #category : #testing }
 SBTSGrammar >> isBlockInlined: aSymbol [
 
-	^ false
+	^ self language isBlockInlined: aSymbol
+]
+
+{ #category : #testing }
+SBTSGrammar >> isBlockInlinedInParent: aTypeString [
+
+	^ self language isBlockInlinedInParent: aTypeString
+]
+
+{ #category : #testing }
+SBTSGrammar >> isImmutableLabel: aLabelNode [
+
+	^ self language isImmutableLabel: aLabelNode
+]
+
+{ #category : #testing }
+SBTSGrammar >> isStatementContainer: aRepeatNode [
+
+	^ self language isStatementContainer: aRepeatNode
 ]
 
 { #category : #testing }
 SBTSGrammar >> isSuperType: aSymbol [
 
 	^ supertypes includes: aSymbol
+]
+
+{ #category : #accessing }
+SBTSGrammar >> language [
+
+	^ language
+]
+
+{ #category : #accessing }
+SBTSGrammar >> language: aLanguage [
+
+	language := aLanguage.
+	highlightQuery := aLanguage highlightQuery ifNotNil: [:query | SBTSQuery new prepare: query]
 ]
 
 { #category : #cleaning }
@@ -319,7 +407,7 @@ SBTSGrammar >> mergeRedundantRepeats: anObject [
 ]
 
 { #category : #cleaning }
-SBTSGrammar >> mergeRepeats: aRule [
+SBTSGrammar >> mergeRepeats: aRule name: aString [
 	"AA* -> A+"
 
 	aRule allElementsDo: [:node |
@@ -328,7 +416,7 @@ SBTSGrammar >> mergeRepeats: aRule [
 				first := node elements first.
 				second := node elements second.
 				first isTSSymbol and: [second isTSRepeat and: [first type = second element type]]]]) ifTrue: [
-			node replaceBy: node elements second.
+			node replaceBy: node elements second  toplevelDo: [:n | self rules at: aString put: n].
 			node elements second required: true]]
 ]
 
@@ -338,26 +426,46 @@ SBTSGrammar >> noteAliases: anObject name: aString [
 	anObject allElementsDo: [:node |
 		node isTSAlias ifTrue: [
 			aliasOccurrences add: (SBTSAlias new
-				name: node value;
-				object: node element;
+				name: node alias;
+				object: node;
 				parentType: aString)]]
+]
+
+{ #category : #accessing }
+SBTSGrammar >> noteUncapturedText [
+
+	^ self language noteUncapturedText
+]
+
+{ #category : #accessing }
+SBTSGrammar >> precedences [
+
+	^ precedences
 ]
 
 { #category : #cleaning }
 SBTSGrammar >> prepareGrammar: aJSONGrammar [
 
-	self example: [SBTSGrammar new] args: [{SBJavascript grammarJsonObject}] label: 'example'.
+	self
+		example: [SBTSGrammar new language: SBJavascript]
+		args: [{Json readFrom: SBJavascript grammarJson readStream}]
+		label: 'example'.
 	supertypes := aJSONGrammar supertypes.
 	inlinedRules := aJSONGrammar at: 'inline'.
+	precedences := aJSONGrammar at: 'precedences'.
 	aliasOccurrences := OrderedCollection new.
-	rules := aJSONGrammar rules
+	rulesWithStatementTerminator := Set new.
+	rules := (aJSONGrammar at: 'rules')
 		collect: [:rule | self buildNodesFor: rule]
 		as: Dictionary.
+	
+	self language preprocessGrammar: self.
+	
 	SBToggledCode comment: '' active: 1 do: {[self autofixExternals: aJSONGrammar]}.
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[self rules do: [:rule | self removeExternals: rule grammar: aJSONGrammar]]}.
+		do: {[self rules keysAndValuesDo: [:name :rule | self removeExternals: rule grammar: aJSONGrammar]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -371,21 +479,18 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 		active: 1
 		do: {[self rules do: [:rule | self removeHiddenTerminals: rule]]}.
 	SBToggledCode comment: '' active: 1 do: {[self rules do: [:rule | self simplifyList: rule]]}.
-	SBToggledCode comment: '' active: 1 do: {[self rules do: [:rule | self mergeRepeats: rule]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
-		do: {[self rules keysAndValuesDo: [:name :rule | self flattenSeparatedList: rule]]}.
-	self checkParents.
+		do: {[self rules keysAndValuesDo: [:name :rule | self mergeRepeats: rule name: name]]}.
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[self rules keysAndValuesDo: [:name :rule | self flattenSeparatedList: rule name: name]]}.
 	SBToggledCode comment: '' active: 1 do: {
-		[
-			self rules keysAndValuesDo: [:name :rule |
-				self applyInlining: rule grammar: aJSONGrammar.
-				self checkParents]]}.
-	SBToggledCode
-		comment: ''
-		active: 1
-		do: {[self rules keysAndValuesDo: [:name :rule | self applyInlining: rule grammar: aJSONGrammar]]}.
+		[self rules keysAndValuesDo: [:name :rule | self applyInlining: rule grammar: aJSONGrammar name: name]]}.
+	SBToggledCode comment: '' active: 1 do: {
+		[self rules keysAndValuesDo: [:name :rule | self applyInlining: rule grammar: aJSONGrammar name: name]]}.
 	SBToggledCode comment: '' active: 1 do: {
 		[" depends on inlining, requires removing blanks (hidden terminals) "
 		self rules keysAndValuesDo: [:name :rule | self removeMarkedDelimiters: rule]]}.
@@ -393,13 +498,10 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 		comment: ''
 		active: 1
 		do: {[self rules keysAndValuesDo: [:name :rule | self mergeRedundantRepeats: rule]]}.
-	SBToggledCode comment: '' active: 1 do: {
-		[
-			self rules keysAndValuesDo: [:name :rule |
-				SBToggledCode
-					comment: ''
-					active: 1
-					do: {[self noteAliases: rule name: name]. [self removeAliases: rule]}]]}.
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[self rules keysAndValuesDo: [:name :rule | self noteAliases: rule name: name]]}.
 	SBToggledCode
 		comment: ''
 		active: 1
@@ -424,15 +526,26 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 		comment: ''
 		active: 1
 		do: {[self rules do: [:rule | self removeHiddenTerminals: rule]]}.
-	SBToggledCode comment: '' active: 1 do: {
-		[
-			self rules keysAndValuesDo: [:name :rule |
-				SBToggledCode
-					comment: ''
-					active: 0
-					do: {[name = '_import_export_specifier' ifTrue: [self halt]]}.
-				self blanksToOptionals: rule]]}.
-	self rules do: [:rule | self checkStructure: rule]
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[self rules keysAndValuesDo: [:name :rule | self blanksToOptionals: rule name: name]]}.
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[self rules keysAndValuesDo: [:name :rule | self removeStatementTerminators: rule name: name]]}.
+	inlinedRules do: [:rule | (supertypes includes: rule) ifFalse: [rules removeKey: rule ifAbsent: []]].
+	
+	self language postprocessGrammar: self.
+	
+	self rules keysAndValuesDo: [:name :rule | self checkStructure: rule]
+]
+
+{ #category : #accessing }
+SBTSGrammar >> promotedInlineSymbols [
+	"verify if things work without an impl of this"
+
+	^ #()
 ]
 
 { #category : #cleaning }
@@ -448,11 +561,7 @@ SBTSGrammar >> removeDuplicateAlternatives: anObject [
 { #category : #cleaning }
 SBTSGrammar >> removeExternals: aRule grammar: aJSONGrammar [
 
-	aRule allElementsDo: [:node | | skipChildBlock |
-		skipChildBlock := [:child | child isTSSymbol and: [(aJSONGrammar externals anySatisfy: [:external | external name = child type]) and: [((aJSONGrammar at: #inline) includes: child type) not and: [(aJSONGrammar rules includesKey: child type) not]]]].
-		
-		node isTSChoice ifTrue: [node alternatives: (node alternatives reject: skipChildBlock)].
-		node isTSSeq ifTrue: [node elements: (node elements reject: skipChildBlock)]]
+	aRule allElementsDo: [:node | (node isTSSymbol and: [(aJSONGrammar externals includes: node type) and: [((aJSONGrammar at: #inline) includes: node type) not and: [(aJSONGrammar rules includesKey: node type) not]]]) ifTrue: [node parent isTSAlias ifTrue: [node parent delete] ifFalse: [node delete]]]
 ]
 
 { #category : #cleaning }
@@ -464,6 +573,12 @@ SBTSGrammar >> removeHiddenTerminals: aRule [
 		node isTSSeq ifTrue: [node elements: (node elements reject: skipChildBlock)]]
 ]
 
+{ #category : #layout }
+SBTSGrammar >> removeIndent: aNode [
+
+	^ self language removeIndent: aNode
+]
+
 { #category : #cleaning }
 SBTSGrammar >> removeMarkedDelimiters: anObject [
 
@@ -473,10 +588,34 @@ SBTSGrammar >> removeMarkedDelimiters: anObject [
 	delimiters ifNotEmpty: [anObject allElementsDo: [:node | (node isTSLabel and: [delimiters includes: node label]) ifTrue: [node delete]]]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSGrammar >> removeRule: aSymbol [
+
+	rules keysAndValuesDo: [:name :rule | rule allElementsDo: [:node | (node isTSSymbol and: [node type = aSymbol]) ifTrue: [node parent isTSAlias ifTrue: [node parent delete] ifFalse: [node delete]]]]
+]
+
+{ #category : #cleaning }
+SBTSGrammar >> removeStatementTerminators: aNode name: aString [
+
+	self language statementTerminator ifNil: [^ self].
+	aNode allChildrenDo: [:node |
+		(node isTSLabel and: [node label = self language statementTerminator]) ifTrue: [
+			(node parent ifNotNil: #isTSOptional ifNil: [false])
+				ifTrue: [node parent delete]
+				ifFalse: [node parent ifNotNil: [node delete]].
+			rulesWithStatementTerminator add: aString]]
+]
+
 { #category : #accessing }
 SBTSGrammar >> rules [
 
 	^ rules
+]
+
+{ #category : #accessing }
+SBTSGrammar >> rulesWithStatementTerminator [
+
+	^ rulesWithStatementTerminator
 ]
 
 { #category : #cleaning }
@@ -484,6 +623,12 @@ SBTSGrammar >> simplifyList: anObject [
 	" make a*? to a* "
 
 	anObject allElementsDo: [:node | (node isTSChoice and: [node elements size = 2 and: [node elements last isTSBlank and: [node elements first isTSRepeat]]]) ifTrue: [node replaceBy: node members first]]
+]
+
+{ #category : #layout }
+SBTSGrammar >> softLineBreakBetween: aBlock and: anotherBlock [
+
+	^ self language softLineBreakBetween: aBlock and: anotherBlock
 ]
 
 { #category : #helper }
@@ -494,7 +639,8 @@ SBTSGrammar >> unpackTypes [
 
 { #category : #cleaning }
 SBTSGrammar >> unwrapSingleChoices: anObject rule: aString [
-	" (a) -> a, (a* | BLANK) -> a* "
+	" (a) -> a, (a* | BLANK) -> a* 
+ (|) -> delete"
 
 	anObject allElementsDo: [:node |
 		(node isTSChoice and: [node alternatives size = 1]) ifTrue: [node replaceBy: node alternatives anyOne toplevelDo: [:n | self rules at: aString put: n]].
@@ -503,7 +649,8 @@ SBTSGrammar >> unwrapSingleChoices: anObject rule: aString [
 				first := node alternatives first.
 				second := node alternatives second.
 				first isTSRepeat and: [first multiple and: [first required not and: [second isTSBlank]]]]]) ifTrue: [node replaceBy: node elements first].
-		(node isTSSeq and: [node elements size = 1]) ifTrue: [node replaceBy: node elements anyOne]]
+		(node isTSSeq and: [node elements size = 1]) ifTrue: [node replaceBy: node elements anyOne toplevelDo: [:n | self rules at: aString put: n]].
+		(node isTSChoice and: [node elements isEmpty and: [node parent notNil]]) ifTrue: [node delete]]
 ]
 
 { #category : #cleaning }

@@ -165,7 +165,7 @@ SBTSInputParser >> memoizationFor: aSymbol ifAbsentPut: aBlock [
 			results := aBlock value.
 			self memoizeBlocks: results at: index for: aSymbol.
 			(SBToggledCode comment: '' active: 1 do: {
-				[aSymbol factory fixmeSupportsRecursion].
+				[aSymbol language fixmeSupportsRecursion].
 				["if we already have at least one result that got us to the end, abort. Definitely wrong, but easy workaround for now."
 				results noneSatisfy: [:r | r position = memoizations size]]}) ifTrue: [
 				lr ifRecursionDetected: [
@@ -239,7 +239,7 @@ SBTSInputParser >> normalizeResults2: aCollection query: aString factory: aFacto
 		min blocks].
 	
 	results ifNotEmpty: [
-		transitionPairs := aFactory transitionPairs.
+		transitionPairs := aFactory language transitionPairs.
 		results := results select: [:blocksA | results noneSatisfy: [:blocksB | transitionPairs anySatisfy: [:pair | pair key = blocksB first type and: [pair value = blocksA first type]]]]].
 	
 	hasAnyKeywords := results anySatisfy: [:r | | node block |

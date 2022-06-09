@@ -290,7 +290,7 @@ SBTSBlock >> exportStructure [
 		#type -> self type} as: Dictionary
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSBlock >> factory [
 
 	^ self slot factory
@@ -342,7 +342,7 @@ SBTSBlock >> highlight: aString [
 { #category : #'as yet unclassified' }
 SBTSBlock >> indentFor: aBlock current: aNumber [
 
-	^ (self factory indentMatch: aBlock)
+	^ (self language indentMatch: aBlock)
 		ifTrue: [aNumber + 1]
 		ifFalse: [aNumber]
 ]
@@ -370,10 +370,42 @@ SBTSBlock >> insertCommandRequest: aMorph near: aBlock before: aBoolean [
 	^ nil
 ]
 
+{ #category : #actions }
+SBTSBlock >> insertStatementAbove [
+	<action>
+
+	self insertStatementAboveOrBelow: true
+]
+
+{ #category : #actions }
+SBTSBlock >> insertStatementAboveOrBelow: anAboveBoolean [
+
+	self andAllParentSandblocksDo: [:block |
+		block isTSBlock ifTrue: [
+			"look in my template --> insert as child of me"
+			(block slot repeaterThat: [:p | block language isStatementContainer: p]) ifNotNil: [:repeater |
+				^ block sandblockEditor do: (SBTSNodeInsertCommand new
+					element: repeater element
+					container: block parentSandblock
+					index: block submorphIndex + (anAboveBoolean ifTrue: [0] ifFalse: [1]))].
+			"look above me --> insert adjacent to me"
+			block
+				cursorPositionsDo: [:cursor | (cursor isInsert and: [block language isStatementContainer: cursor command element parent]) ifTrue: [^ block sandblockEditor do: cursor command]]
+				shallow: true]]
+]
+
+{ #category : #actions }
+SBTSBlock >> insertStatementBelow [
+	<action>
+
+	self insertStatementAboveOrBelow: false
+]
+
 { #category : #testing }
 SBTSBlock >> isBlockBody [
 
-	^ self slot factory isStatementContainer: self type
+	self slot firstNode bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [self factory isStatementContainer: node]) ifTrue: [^ true]].
+	^ false
 ]
 
 { #category : #testing }
@@ -419,10 +451,10 @@ SBTSBlock >> keyStroke: anEvent [
 	self tryApplyChange: [:block | super keyStroke: anEvent] input: anEvent keyCharacter asString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSBlock >> language [
 
-	^ self slot factory name
+	^ self factory language
 ]
 
 { #category : #'as yet unclassified' }
@@ -522,7 +554,7 @@ SBTSBlock >> prefixValid [
 SBTSBlock >> prettySourceString [
 
 	self allBlocksDo: [:b | b valid ifFalse: [^ self sourceString]].
-	^ self factory runtime
+	^ self language runtime
 		ifNotNil: [:r | r prettyPrint: self sourceString]
 		ifNil: [self sourceString]
 ]
@@ -684,7 +716,7 @@ SBTSBlock >> statements [
 { #category : #'as yet unclassified' }
 SBTSBlock >> suggestions [
 
-	^ self factory suggestionsFor: self
+	^ self language suggestionsFor: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -829,7 +861,7 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 	self children ifEmpty: [^ self].
 	
 	parens := self parentSandblock notNil and: [self parentSandblock isTSBlock and: [self slot needsParenthesis: self]].
-	(self factory indentMatch: self) ifTrue: [aStream tab: aNumber].
+	(self language indentMatch: self) ifTrue: [aStream tab: aNumber].
 	parens ifTrue: [aStream nextPut: $(].
 	self children overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.
@@ -838,5 +870,6 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 		writeSourceOn: aStream
 		indent: (self indentFor: self lastSubmorph current: aNumber)
 		forCompare: aBoolean.
+	self slot allSuperTypesDo: [:type | (self factory rulesWithStatementTerminator includes: type type) ifTrue: [aStream nextPutAll: self language statementTerminator]].
 	parens ifTrue: [aStream nextPut: $)]
 ]

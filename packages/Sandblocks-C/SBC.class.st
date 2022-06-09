@@ -1,22 +1,22 @@
 Class {
 	#name : #SBC,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-C'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBC class >> defaultRuntimeClass [
 
 	^ SBCRuntimeOSProcess
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBC class >> fileSuffix [
 
 	^ 'c'
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBC class >> grammarJson [
 
     " https://github.com/tree-sitter/tree-sitter-c/blob/master/src/grammar.json "
@@ -6661,7 +6661,7 @@ SBC class >> grammarJson [
 '
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBC class >> highlightQuery [
 
     " https://github.com/tree-sitter/tree-sitter-c/blob/master/src/queries/highlights.scm "
@@ -6749,32 +6749,26 @@ SBC class >> highlightQuery [
 '
 ]
 
-{ #category : #properties }
+{ #category : #'configuration - editing' }
+SBC class >> isStatementContainer: aRepeatNode [
+
+	^ #('compound_statement' 'translation_unit') includes: aRepeatNode element type
+]
+
+{ #category : #configuration }
 SBC class >> language [
 
     ^ #c
 ]
 
-{ #category : #properties }
+{ #category : #'configuration - layout' }
+SBC class >> noteUncapturedText [
+
+	^ #('string_literal')
+]
+
+{ #category : #configuration }
 SBC class >> rootRuleName [
 
 	^ 'translation_unit'
-]
-
-{ #category : #properties }
-SBC class >> statementContainerTypes [
-
-	^ #('compound_statement' 'translation_unit')
-]
-
-{ #category : #'as yet unclassified' }
-SBC >> configure [
-
-	self noteUncapturedText: #('string_literal')
-]
-
-{ #category : #'as yet unclassified' }
-SBC >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
-
-	^ #('compound_statement') includes: anotherBlock firstVisibleType
 ]

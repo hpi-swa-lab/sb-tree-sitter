@@ -50,10 +50,10 @@ SBTSParseFileTest >> testClojureSpaces [
 SBTSParseFileTest >> testJavascriptImport [
 
 	| block source |
-	source := 'import{A}from''a'''.
+	source := 'import{A}from''a'';'.
 	block := SBTSFileParser new parse: source language: SBJavascript instance.
 	self assert: source equals: block sourceString.
-	source := 'import{A as B}from''a'''.
+	source := 'import{A as B}from''a'';'.
 	block := SBTSFileParser new parse: source language: SBJavascript instance.
 	self assert: source equals: block sourceString
 ]
@@ -62,7 +62,7 @@ SBTSParseFileTest >> testJavascriptImport [
 SBTSParseFileTest >> testJavascriptString [
 
 	| sourceString parsed |
-	sourceString := '"a"'.
+	sourceString := '"a";'.
 	parsed := SBTSFileParser new parse: sourceString language: SBJavascript instance.
 	self assert: sourceString equals: parsed sourceString
 ]
@@ -71,15 +71,15 @@ SBTSParseFileTest >> testJavascriptString [
 SBTSParseFileTest >> testJavascriptTemplateString [
 
 	| source |
-	source := '`ab`'.
+	source := '`ab`;'.
 	self
 		assert: source
 		equals: (SBTSFileParser new parse: source language: SBJavascript instance) sourceString.
-	source := '`ab${a}`'.
+	source := '`ab${a}`;'.
 	self
 		assert: source
 		equals: (SBTSFileParser new parse: source language: SBJavascript instance) sourceString.
-	source := '`ab${a}def${c}`'.
+	source := '`ab${a}def${c}`;'.
 	self
 		assert: source
 		equals: (SBTSFileParser new parse: source language: SBJavascript instance) sourceString
@@ -152,7 +152,7 @@ SBTSParseFileTest >> testNodesAreShared [
 SBTSParseFileTest >> testParensJsBinaryOp [
 
 	| source module |
-	source := '(3+4)*5'.
+	source := '(3+4)*5;'.
 	module := SBTSFileParser new parse: source language: SBJavascript.
 	self editorFor: module.
 	
@@ -240,7 +240,7 @@ SBTSParseFileTest >> testParseJS [
 	
 	self assert: block childSandblocks first isTSBlock.
 	self
-		assert: (SBJavascript instance bodyNodeForRule: 'program') elements second element
+		assert: (SBJavascript instance grammar bodyNodeForRule: 'program') elements second element
 		equals: block childSandblocks first slot lastNode
 ]
 

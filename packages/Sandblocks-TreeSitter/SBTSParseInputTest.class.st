@@ -24,7 +24,7 @@ SBTSParseInputTest >> nodeForRule: aString [
 
 	| lang |
 	lang := SBTSSmalltalk new.
-	^ SBTSNodeSymbol new type: aString factory: lang
+	^ SBTSNodeSymbol new type: aString factory: lang grammar
 ]
 
 { #category : #helper }
@@ -126,7 +126,7 @@ SBTSParseInputTest >> testCreateBashCommand [
 
 	| results |
 	results := SBTSInputParser new
-		optionsForTemplate: (SBTSNodeSymbol new type: '_statement' factory: SBBash instance)
+		optionsForTemplate: (SBTSNodeSymbol new type: '_statement' factory: SBBash instance grammar)
 		given: 'l'.
 	self assert: (results anySatisfy: [:blocks | blocks first type = 'command'])
 ]
@@ -168,7 +168,7 @@ SBTSParseInputTest >> testCreateFunction [
 
 	| results |
 	results := (SBTSInputParser new
-		optionsForTemplate: (SBTSNodeSymbol new type: 'statement' factory: SBJavascript instance)
+		optionsForTemplate: (SBTSNodeSymbol new type: 'statement' factory: SBJavascript instance grammar)
 		given: 'func')
 		collect: [:b | b first type]
 		as: Set.
@@ -182,7 +182,7 @@ SBTSParseInputTest >> testCreateHashBangLine [
 
 	| results |
 	results := SBTSInputParser new
-		optionsForTemplate: (SBTSNodeSymbol new type: 'hash_bang_line' factory: SBJavascript instance)
+		optionsForTemplate: (SBTSNodeSymbol new type: 'hash_bang_line' factory: SBJavascript instance grammar)
 		given: '#'.
 	self assert: 1 equals: results size.
 	self assert: 'hash_bang_line' equals: results first first type.
@@ -217,7 +217,7 @@ SBTSParseInputTest >> testCreateJavascriptIdentifier [
 
 	| results |
 	results := SBTSInputParser new
-		optionsForTemplate: (SBTSNodeSymbol new type: 'expression' factory: SBJavascript instance)
+		optionsForTemplate: (SBTSNodeSymbol new type: 'expression' factory: SBJavascript instance grammar)
 		given: 'test'.
 	
 	self assert: 1 equals: results size.
@@ -229,7 +229,7 @@ SBTSParseInputTest >> testCreateKeyword [
 
 	| options |
 	options := SBTSInputParser new
-		optionsForTemplate: (SBTSNodeSymbol new type: 'statement' factory: SBJavascript instance)
+		optionsForTemplate: (SBTSNodeSymbol new type: 'statement' factory: SBJavascript instance grammar)
 		given: 'const '.
 	self assert: 1 equals: options size
 ]
@@ -241,7 +241,7 @@ SBTSParseInputTest >> testCreateMemberExpression [
 	self flag: #todo.
 	"will recurse on expression and thus get blocked"
 	results := SBTSInputParser new
-		optionsForTemplate: (SBTSNodeSymbol new type: 'statement' factory: SBJavascript instance)
+		optionsForTemplate: (SBTSNodeSymbol new type: 'statement' factory: SBJavascript instance grammar)
 		given: 'a.b'.
 	self assert: 1 equals: results size.
 	self assert: 'member_expression' equals: results first first type
@@ -512,7 +512,7 @@ SBTSParseInputTest >> testWrapBinaryExpression [
 	self assert: 1 equals: results size.
 	self assert: 3 equals: results first first childSandblocks size.
 	self
-		assert: (SBTSSmalltalk instance bodyNodeForRule: 'binary_message')
+		assert: (SBTSSmalltalk instance grammar bodyNodeForRule: 'binary_message')
 		equals: results first first childSandblocks first slot lastNode parent parent.
 	self assert: #statement equals: results first first slot lastNode type
 ]
