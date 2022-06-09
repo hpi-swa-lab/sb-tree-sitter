@@ -81,7 +81,7 @@ SBTSQueryTests >> testJsPairMatchString [
 
 	| block |
 	block := SBJavascript parseToplevel: '{headers: "abc"}'.
-	self assert: (block matchesQuery: '(program (object (pair key: [(identifier) (string)] ="headers")))')
+	self assert: (block matchesQuery: '(program (object (pair key: [(property_identifier) (string)] ="headers")))')
 ]
 
 { #category : #tests }

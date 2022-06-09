@@ -127,7 +127,7 @@ SBTSBlock >> applyReplacements [
 	self allBlocksDo: [:block |
 		(block isTSBlock and: [block isTSReplacement not]) ifTrue: [
 			self
-				tryApplyReplacements: (candidates select: [:pragma | pragma arguments first = block factory name])
+				tryApplyReplacements: (candidates select: [:pragma | pragma arguments first = block language language])
 				to: block]]
 ]
 
@@ -136,8 +136,8 @@ SBTSBlock >> asSlider: converter [
 	<convert>
 
 	converter
-		if: [self type = #float or: [self type = #integer or: [self type = #number]]]
-		do: [self factory sourceForSlider: self]
+		if: [self type = #float or: [self type = #integer or: [self type = #number or: [self type = #'num_lit']]]]
+		do: [self language sourceForSlider: self]
 ]
 
 { #category : #accessing }
@@ -383,14 +383,14 @@ SBTSBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 	self andAllParentSandblocksDo: [:block |
 		block isTSBlock ifTrue: [
 			"look in my template --> insert as child of me"
-			(block slot repeaterThat: [:p | block language isStatementContainer: p]) ifNotNil: [:repeater |
+			(block slot repeaterThat: [:p | block language isStatementContainer: p in: block parentSandblock]) ifNotNil: [:repeater |
 				^ block sandblockEditor do: (SBTSNodeInsertCommand new
 					element: repeater element
 					container: block parentSandblock
 					index: block submorphIndex + (anAboveBoolean ifTrue: [0] ifFalse: [1]))].
 			"look above me --> insert adjacent to me"
 			block
-				cursorPositionsDo: [:cursor | (cursor isInsert and: [block language isStatementContainer: cursor command element parent]) ifTrue: [^ block sandblockEditor do: cursor command]]
+				cursorPositionsDo: [:cursor | (cursor isInsert and: [block language isStatementContainer: cursor command element parent in: block]) ifTrue: [^ block sandblockEditor do: cursor command]]
 				shallow: true]]
 ]
 
@@ -404,7 +404,7 @@ SBTSBlock >> insertStatementBelow [
 { #category : #testing }
 SBTSBlock >> isBlockBody [
 
-	self slot firstNode bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [self factory isStatementContainer: node]) ifTrue: [^ true]].
+	self slot firstNode bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [self language isStatementContainer: node in: self]) ifTrue: [^ true]].
 	^ false
 ]
 
@@ -679,7 +679,7 @@ SBTSBlock >> replaceBlock: aBlock [
 SBTSBlock >> showHelp [
 	<action>
 
-	self factory showHelpFor: self
+	SBClojure basicNew showHelpFor: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -861,7 +861,7 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 	self children ifEmpty: [^ self].
 	
 	parens := self parentSandblock notNil and: [self parentSandblock isTSBlock and: [self slot needsParenthesis: self]].
-	(self language indentMatch: self) ifTrue: [aStream tab: aNumber].
+	(self language indentMatch: self) ifTrue: [aStream tab].
 	parens ifTrue: [aStream nextPut: $(].
 	self children overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.

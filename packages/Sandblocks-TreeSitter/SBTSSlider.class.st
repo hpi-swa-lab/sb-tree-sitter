@@ -21,7 +21,7 @@ SBTSSlider >> build [
 
 { #category : #'as yet unclassified' }
 SBTSSlider >> buildClojure [
-	<lang: #clojure match: '(list_lit (sym_lit) ="nth" (vec_lit value: (num_iit) @value (quoting_lit (sym_lit) ="slider")))' sample: '(nth [440 ''slider] 0)'>
+	<lang: #clojure match: '(list_lit (sym_lit) ="nth" (vec_lit (num_lit) @value (quoting_lit (sym_lit) ="slider")))' sample: '(nth [440 ''slider] 0)'>
 
 	self build
 ]

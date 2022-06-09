@@ -51,7 +51,7 @@ SBTSBlockTest >> testApplyPyFilePathReplacement [
 		print('', ''.join(row))'
 		language: SBPython.
 	parsed applyReplacements.
-	self assert: (parsed childSandblocks first childSandblocks first childSandblocks first childSandblocks second childSandblocks first isKindOf: SBPyFilePath)
+	self assert: (parsed childSandblocks first childSandblocks first childSandblocks first childSandblocks first childSandblocks second childSandblocks first isKindOf: SBPyFilePath)
 ]
 
 { #category : #'tests - input transition' }
@@ -496,7 +496,7 @@ SBTSBlockTest >> testRegexDeleteCountQuantifier [
 	| term editor |
 	term := SBTSFileParser new parse: '[0]{0}' language: SBRegex.
 	editor := self editorFor: term.
-	term lastDeepChild select deleteBlock.
+	term lastDeepChild parentSandblock select deleteBlock.
 	self assert: '[0]' equals: term sourceString
 ]
 

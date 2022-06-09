@@ -162,7 +162,7 @@ SBTSLanguage class >> grammarJson [
 { #category : #'configuration - layout' }
 SBTSLanguage class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
-	aBlock slot isStatement ifTrue: [^ true].
+	(aBlock slot isStatementIn: aBlock parentSandblock) ifTrue: [^ true].
 	^ false
 ]
 
@@ -246,7 +246,7 @@ SBTSLanguage class >> isScope: aBlock [
 ]
 
 { #category : #'configuration - editing' }
-SBTSLanguage class >> isStatementContainer: aRepeatNode [
+SBTSLanguage class >> isStatementContainer: aRepeatNode in: aBlock [
 
 	^ aRepeatNode element type = 'statement'
 ]
@@ -359,6 +359,12 @@ SBTSLanguage class >> scopesAround: aBlock do: aClosure [
 				value: current
 				value: (Array streamContents: [:stream | self declarationsInScope: current do: [:decl | stream nextPut: decl]])].
 		current := current parentSandblock]
+]
+
+{ #category : #'configuration - semantics' }
+SBTSLanguage class >> showHelpFor: aBlock [
+
+	
 ]
 
 { #category : #'configuration - layout' }

@@ -1732,9 +1732,9 @@ SBClojure class >> icon [
 ]
 
 { #category : #'configuration - editing' }
-SBClojure class >> isStatementContainer: aRepeatNode [
+SBClojure class >> isStatementContainer: aRepeatNode in: aBlock [
 
-	^ aRepeatNode element isTSChoice and: [aRepeatNode element alternatives anySatisfy: [:sym | sym type = #comment]]
+	^ aBlock type = #source and: [aRepeatNode element isTSChoice and: [aRepeatNode element alternatives anySatisfy: [:sym | sym type = #'sym_lit']]]
 ]
 
 { #category : #configuration }
@@ -1747,6 +1747,21 @@ SBClojure class >> language [
 SBClojure class >> rootRuleName [
 
 	^ 'source'
+]
+
+{ #category : #'configuration - semantics' }
+SBClojure class >> showHelpFor: aBlock [
+
+	aBlock containingArtefact showHelpFor: aBlock
+]
+
+{ #category : #builder }
+SBClojure class >> sourceForSlider: aBlock [
+
+	| slider |
+	slider := self parseExpression: '(nth [0 ''slider] 0)'.
+	slider childSandblocks second childSandblocks first replaceBlock: aBlock.
+	^ (slider adaptSlotFor: aBlock slot ifFailed: [self error: 'blocks not compatible']) applyReplacement
 ]
 
 { #category : #'configuration - layout' }
@@ -1763,12 +1778,6 @@ SBClojure >> addIndent: aBlock [
 
 	(aBlock isTextMorph and: [{'('. '{'. '['} includes: aBlock contents]) ifTrue: [^ true].
 	^ super addIndent: aBlock
-]
-
-{ #category : #'as yet unclassified' }
-SBClojure >> showHelpFor: aBlock [
-
-	aBlock containingArtefact showHelpFor: aBlock
 ]
 
 { #category : #'as yet unclassified' }

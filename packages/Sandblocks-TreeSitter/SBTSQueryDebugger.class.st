@@ -25,7 +25,7 @@ SBTSQueryDebugger >> asInlineFor: aPragma [
 	inline := true.
 	query contents: aPragma arguments second contents.
 	aPragma arguments size >= 3 ifTrue: [source contents: aPragma arguments third contents].
-	language object: (SBGrammarLanguage allSubclasses detect: [:class | class language = aPragma arguments first contents]).
+	language object: (SBTSLanguage allSubclasses detect: [:class | class language = aPragma arguments first contents]).
 	self firstSubmorph contents: 'Query Match'
 ]
 

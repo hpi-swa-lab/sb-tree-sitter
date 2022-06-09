@@ -737,7 +737,7 @@ SBRegex class >> highlightQuery [
 ]
 
 { #category : #'configuration - editing' }
-SBRegex class >> isStatementContainer: aRepeatNode [
+SBRegex class >> isStatementContainer: aRepeatNode in: aBlock [
 
 	^ false
 ]

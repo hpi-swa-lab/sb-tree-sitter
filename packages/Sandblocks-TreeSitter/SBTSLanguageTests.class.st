@@ -142,7 +142,7 @@ SBTSLanguageTests >> testParsePythonFormatString [
 	self assert: 'abc' equals: string textMorphs second contents.
 	
 	string := SBPython parseExpression: 'f"abc{var1}def{var2}ghi"'.
-	self assert: 'abcdefghi' equals: string textMorphs second contents
+	self assert: 'f"abc{var1}def{var2}ghi"' equals: string sourceString
 ]
 
 { #category : #'testing - parse' }
@@ -276,8 +276,8 @@ SBTSLanguageTests >> testPythonString [
 	self assert: 'abc' equals: (SBPython parseExpression: '''abc''') textMorphs second contents.
 	self assert: 'abc' equals: (SBPython parseExpression: '"abc"') textMorphs second contents.
 	self assert: 'abc' equals: (SBPython parseExpression: 'f"abc"') textMorphs second contents.
-	self assert: 'abc\n' equals: (SBPython parseExpression: '"abc\n"') textMorphs second contents.
-	self assert: 'abc\n' equals: (SBPython parseExpression: '"""abc\n"""') textMorphs second contents
+	self assert: '"abc\n"' equals: (SBPython parseExpression: '"abc\n"') sourceString.
+	self assert: '"""abc\n"""' equals: (SBPython parseExpression: '"""abc\n"""') sourceString
 ]
 
 { #category : #'testing - interactions' }

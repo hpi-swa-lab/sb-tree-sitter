@@ -2777,7 +2777,7 @@ SBBash class >> inputTransitionBlackList [
 ]
 
 { #category : #'as yet unclassified' }
-SBBash class >> isStatementContainer: aRepeatNode [
+SBBash class >> isStatementContainer: aRepeatNode in: aBlock [
 
 	self flag: #todo.
 	^ aRepeatNode element type = 'program'

@@ -253,6 +253,12 @@ SBTSGrammar >> escapeStringForRegex: aString [
 	^ aString copyWithRegex: '[.*+?^${}()|\[\]\\]' matchesTranslatedUsing: [:m | '\', m]
 ]
 
+{ #category : #accessing }
+SBTSGrammar >> expressionTypes [
+
+	^ #()
+]
+
 { #category : #cleaning }
 SBTSGrammar >> flattenSeparatedList: anObject name: aString [
 
@@ -331,12 +337,6 @@ SBTSGrammar >> isBlockInlinedInParent: aTypeString [
 SBTSGrammar >> isImmutableLabel: aLabelNode [
 
 	^ self language isImmutableLabel: aLabelNode
-]
-
-{ #category : #testing }
-SBTSGrammar >> isStatementContainer: aRepeatNode [
-
-	^ self language isStatementContainer: aRepeatNode
 ]
 
 { #category : #testing }
@@ -588,7 +588,7 @@ SBTSGrammar >> removeMarkedDelimiters: anObject [
 	delimiters ifNotEmpty: [anObject allElementsDo: [:node | (node isTSLabel and: [delimiters includes: node label]) ifTrue: [node delete]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #cleaning }
 SBTSGrammar >> removeRule: aSymbol [
 
 	rules keysAndValuesDo: [:name :rule | rule allElementsDo: [:node | (node isTSSymbol and: [node type = aSymbol]) ifTrue: [node parent isTSAlias ifTrue: [node parent delete] ifFalse: [node delete]]]]

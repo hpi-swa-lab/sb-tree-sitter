@@ -65,7 +65,7 @@ SBTSSlot >> buildMorphWith: anObject [
 { #category : #'as yet unclassified' }
 SBTSSlot >> compatibleWithType: aTypeString [
 
-	self allSuperTypesDo: [:type | type type = aTypeString ifTrue: [^ true]].
+	self allParentsDo: [:node | (node type = aTypeString or: [node isTSAlias and: [node alias = aTypeString]]) ifTrue: [^ true]].
 	^ false
 ]
 
@@ -128,10 +128,16 @@ SBTSSlot >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSSlot >> isStatement [
+SBTSSlot >> isStatementIn: aContainerBlock [
 
-	self repeatersDo: [:repeater | (self factory isStatementContainer: repeater) ifTrue: [^ true]].
+	self repeatersDo: [:repeater | (self language isStatementContainer: repeater in: aContainerBlock) ifTrue: [^ true]].
 	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> language [
+
+	^ self factory language
 ]
 
 { #category : #'as yet unclassified' }
@@ -343,6 +349,12 @@ SBTSSlot >> updateHighlightFor: aBlock [
 	self factory highlightQuery
 		executeAgainst: aBlock
 		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | (block highlight isNil or: [block highlight = #'_sb_none' or: [block highlight size < id size]]) ifTrue: [block highlight: id]]]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> veryDeepCopyWith: deepCopier [
+
+	
 ]
 
 { #category : #'as yet unclassified' }

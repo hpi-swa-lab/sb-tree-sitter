@@ -1088,7 +1088,7 @@ SBTSSmalltalk class >> isBlockInlined: aSymbol [
 ]
 
 { #category : #'configuration - editing' }
-SBTSSmalltalk class >> isStatementContainer: aRepeatNode [
+SBTSSmalltalk class >> isStatementContainer: aRepeatNode in: aBlock [
 
 	^ aRepeatNode element type = 'statement'
 ]

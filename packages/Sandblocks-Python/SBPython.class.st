@@ -4999,7 +4999,7 @@ SBPython class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
 	aBlock type = 'decorator' ifTrue: [^ true].
-	((aBlock isStringMorph and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice']]]) ifTrue: [^ true].
+	(((aBlock isStringMorph or: [aBlock isTextMorph]) and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice']]]) ifTrue: [^ true].
 	^ #('else_clause' 'elif_clause') includes: anotherBlock type
 ]
 
@@ -5168,7 +5168,7 @@ SBPython class >> isImmutableLabel: aLabelNode [
 ]
 
 { #category : #'configuration - layout' }
-SBPython class >> isStatementContainer: aRepeatNode [
+SBPython class >> isStatementContainer: aRepeatNode in: aBlock [
 
 	^ aRepeatNode element isTSChoice and: [aRepeatNode element alternatives second type = #'_compound_statement']
 ]
@@ -5227,13 +5227,15 @@ SBPython class >> preprocessGrammar: aGrammar [
 							SBTSNodeLabel new
 								factory: aGrammar;
 								label: prefix, quote]).
-					SBTSNodeChoice new
-						factory: aGrammar;
-						alternatives: {
-							SBTSNodeSymbol new type: #interpolation factory: aGrammar.
-							SBTSNodeSymbol new type: #'escape_sequence' factory: aGrammar.
-							SBTSNodeSymbol new type: #'_not_escape_sequence' factory: aGrammar.
-							SBTSNodeSymbol new type: #'_string_content' factory: aGrammar}.
+					SBTSNodeRepeat new
+						multiple: true required: false element: (SBTSNodeChoice new
+							factory: aGrammar;
+							alternatives: {
+								SBTSNodeSymbol new type: #interpolation factory: aGrammar.
+								SBTSNodeSymbol new type: #'escape_sequence' factory: aGrammar.
+								SBTSNodeSymbol new type: #'_not_escape_sequence' factory: aGrammar.
+								SBTSNodeSymbol new type: #'_string_content' factory: aGrammar});
+						factory: aGrammar.
 					SBTSNodeLabel new
 						factory: aGrammar;
 						label: quote}])).

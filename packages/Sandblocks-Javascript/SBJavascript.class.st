@@ -6812,7 +6812,7 @@ SBJavascript class >> isScope: aBlock [
 ]
 
 { #category : #'configuration - editing' }
-SBJavascript class >> isStatementContainer: aRepeatNode [
+SBJavascript class >> isStatementContainer: aRepeatNode in: aBlock [
 
 	^ aRepeatNode element type = 'statement'
 ]
@@ -6873,6 +6873,15 @@ SBJavascript class >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 	(aBlock isTSLabel and: [aBlock contents = '?']) ifTrue: [^ true].
 	(aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']) ifTrue: [^ true].
 	^ false
+]
+
+{ #category : #builder }
+SBJavascript class >> sourceForSlider: aBlock [
+
+	| slider |
+	slider := self parseExpression: '[0.0, "slider"][0]'.
+	slider childSandblocks first childSandblocks first replaceBlock: aBlock.
+	^ (slider adaptSlotFor: aBlock slot ifFailed: [self error: 'blocks not compatible']) applyReplacement
 ]
 
 { #category : #'configuration - layout' }
@@ -7002,7 +7011,7 @@ SBJavascript >> softLineBreakMatchBetween: aBlock and: anotherBlock [
 SBJavascript >> sourceForSlider: aBlock [
 
 	| slider |
-	slider := self class parseExpression: '[0.0, "slider"][0]'.
+	slider := self parseExpression: '[0.0, "slider"][0]'.
 	slider childSandblocks first childSandblocks first replaceBlock: aBlock.
 	^ (slider adaptSlotFor: aBlock slot ifFailed: [self error: 'blocks not compatible']) applyReplacement
 ]

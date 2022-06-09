@@ -6750,7 +6750,7 @@ SBC class >> highlightQuery [
 ]
 
 { #category : #'configuration - editing' }
-SBC class >> isStatementContainer: aRepeatNode [
+SBC class >> isStatementContainer: aRepeatNode in: aBlock [
 
 	^ #('compound_statement' 'translation_unit') includes: aRepeatNode element type
 ]
