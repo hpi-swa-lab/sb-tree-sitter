@@ -9,6 +9,12 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #accessing }
+SBTSNodeBase >> alias [
+
+	^ nil
+]
+
 { #category : #hierarchy }
 SBTSNodeBase >> allChildrenDetect: aBlock ifFound: aSuccessBlock ifNone: aFailBlock [
 
@@ -184,6 +190,12 @@ SBTSNodeBase >> hasParent: aNode [
 SBTSNodeBase >> hasParentThat: aBlock [
 
 	self andParentsDo: [:p | (aBlock value: p) ifTrue: [^ true]].
+	^ false
+]
+
+{ #category : #testing }
+SBTSNodeBase >> hasStatementTerminator [
+
 	^ false
 ]
 

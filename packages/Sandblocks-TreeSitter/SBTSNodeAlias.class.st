@@ -131,7 +131,11 @@ SBTSNodeAlias >> resultsFor: aParser [
 	currentBlocks := aParser blocks.
 	aParser blocks: OrderedCollection new.
 	^ (self element resultsFor: aParser) collect: [:result |
-		result blocks do: [:b | b slot: (b slot addNode: self)].
+		result blocks do: [:b |
+			SBToggledCode comment: '' active: 0 do: {[self assert: self element = b slot lastNode]}.
+			(b slot lastNode isTSText or: [b slot lastNode isTSLabel])
+				ifTrue: [b slot: (b slot addNode: self)]
+				ifFalse: [b slot: (b slot replaceLast: self)]].
 		result blocks: currentBlocks, result blocks.
 		result]
 ]

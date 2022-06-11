@@ -184,7 +184,10 @@ SBTSInputParser >> memoizationFor: aSymbol ifAbsentPut: aBlock [
 				ifNotNil: [:recur |
 					recur
 						tryExpandSymbol: aSymbol
-						do: aBlock
+						do: [ | results |
+							results := aBlock value.
+							self memoizeBlocks: results at: index for: aSymbol.
+							results]
 						otherwise: [memoEntry getBlocksOrMarkRecursionFrom: aSymbol stack: symbolStack max: memoizations size]]
 				ifNil: [memoEntry getBlocksOrMarkRecursionFrom: aSymbol stack: symbolStack max: memoizations size]) collect: [:memo | memo adapt: self for: aSymbol]]
 ]

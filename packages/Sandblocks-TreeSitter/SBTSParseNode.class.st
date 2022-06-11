@@ -108,13 +108,21 @@ SBTSParseNode >> parentChainIn: aParser [
 	| chain current leaf |
 	leaf := self type.
 	current := self.
-	leaf ifNil: [
+	[current type isNil and: [current notNil]] whileTrue: [
 		current := aParser parentOf: current.
-		current ifNil: [^ {nil. nil}].
-		leaf := current type, ',', leaf].
+		current ifNil: [^ {{}. ''}].
+		leaf := current type].
 	
 	chain := OrderedCollection new.
 	[current notNil] whileTrue: [(current := aParser parentOf: current) ifNotNil: [chain add: current type]].
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			[current notNil] whileTrue: [
+				current slot allParentsDo: [:sym | | first |
+					first ifTrue: [first := false] ifFalse: [
+						(sym isTSSymbol and: [sym isSuperType not]) ifTrue: [chain add: sym type].
+						sym isTSAlias ifTrue: [chain add: sym alias]]].
+				current := aParser parentOf: current]]}.
 	^ {chain. leaf}
 ]
 

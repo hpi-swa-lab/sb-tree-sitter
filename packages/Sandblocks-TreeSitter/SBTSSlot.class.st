@@ -37,6 +37,12 @@ SBTSSlot >> addNodeFirst: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> alias [
+
+	^ self firstNode alias
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> allChildrenDo: aBlock [
 
 	nodes reverseDo: [:node | node root allChildrenDo: aBlock]

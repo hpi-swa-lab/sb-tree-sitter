@@ -88,12 +88,9 @@ SBTSMemoEntry >> setLeftRecursionDetectedFrom: aSymbol stack: aCollection [
 	| stack |
 	self assert: self isLeftRecursion.
 	stack := aCollection reversed copyUpTo: aSymbol type.
-	answer head
-		ifNotNil: [
-			answer addInvolved: stack]
-		ifNil: [
-			answer
-				head: aSymbol type;
-				allowedSymbols: {};
-				involvedSymbols: stack asSet]
+	answer head ifNotNil: [answer addInvolved: stack] ifNil: [
+		answer
+			head: aSymbol type;
+			allowedSymbols: {};
+			involvedSymbols: stack asSet]
 ]

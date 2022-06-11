@@ -6752,7 +6752,7 @@ SBC class >> highlightQuery [
 { #category : #'configuration - editing' }
 SBC class >> isStatementContainer: aRepeatNode in: aBlock [
 
-	^ #('compound_statement' 'translation_unit') includes: aRepeatNode element type
+	^ aBlock type = #'compound_statement' or: [aBlock type = #'translation_unit']
 ]
 
 { #category : #configuration }
@@ -6771,4 +6771,10 @@ SBC class >> noteUncapturedText [
 SBC class >> rootRuleName [
 
 	^ 'translation_unit'
+]
+
+{ #category : #configuration }
+SBC class >> statementTerminator [
+
+	^ ';'
 ]

@@ -599,11 +599,17 @@ SBTSGrammar >> removeStatementTerminators: aNode name: aString [
 
 	self language statementTerminator ifNil: [^ self].
 	aNode allChildrenDo: [:node |
-		(node isTSLabel and: [node label = self language statementTerminator]) ifTrue: [
-			(node parent ifNotNil: #isTSOptional ifNil: [false])
-				ifTrue: [node parent delete]
-				ifFalse: [node parent ifNotNil: [node delete]].
-			rulesWithStatementTerminator add: aString]]
+		SBToggledCode comment: '' active: 1 do: {
+			[
+				(node isTSSeq and: [node elements last isTSLabel and: [node elements last label = self language statementTerminator]]) ifTrue: [
+					node hasStatementTerminator: true.
+					node elements last delete]].
+			[
+				(node isTSLabel and: [node label = self language statementTerminator]) ifTrue: [
+					(node parent ifNotNil: #isTSOptional ifNil: [false])
+						ifTrue: [node parent delete]
+						ifFalse: [node parent ifNotNil: [node delete]].
+					rulesWithStatementTerminator add: aString]]}]
 ]
 
 { #category : #accessing }

@@ -2,7 +2,8 @@ Class {
 	#name : #SBTSNodeSeq,
 	#superclass : #SBTSNodeBase,
 	#instVars : [
-		'elements'
+		'elements',
+		'hasStatementTerminator'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -30,7 +31,9 @@ SBTSNodeSeq >> allSubTypesDo: aBlock parents: aCollection [
 { #category : #copying }
 SBTSNodeSeq >> basicCopy [
 
-	^ super basicCopy elements: self elements
+	^ super basicCopy
+		elements: self elements;
+		hasStatementTerminator: self hasStatementTerminator
 ]
 
 { #category : #'as yet unclassified' }
@@ -63,6 +66,26 @@ SBTSNodeSeq >> elements: aCollection [
 	elements := aCollection.
 	
 	aCollection do: [:elem | elem parent: self]
+]
+
+{ #category : #accessing }
+SBTSNodeSeq >> hasStatementTerminator [
+
+	^ hasStatementTerminator
+]
+
+{ #category : #accessing }
+SBTSNodeSeq >> hasStatementTerminator: aBoolean [
+
+	hasStatementTerminator := aBoolean
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeSeq >> initialize [
+
+	super initialize.
+	
+	hasStatementTerminator := false
 ]
 
 { #category : #testing }

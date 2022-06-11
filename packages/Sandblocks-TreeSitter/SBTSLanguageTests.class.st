@@ -252,7 +252,6 @@ SBTSLanguageTests >> testPythonNumber [
 	e handle: (self keyboardEvent: $1).
 	self tick.
 	self tick.
-	e handle: (self keyboardEvent: Character arrowDown).
 	e handle: (self keyboardEvent: Character cr).
 	
 	self assert: (block matchesQuery: '(module (integer))')

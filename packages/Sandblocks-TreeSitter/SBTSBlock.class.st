@@ -86,10 +86,8 @@ SBTSBlock >> addBlock: aBlock [
 
 { #category : #'inline block compat' }
 SBTSBlock >> alias [
-	"remove, compat to inlineblocks"
 
-	self flag: #todo.
-	^ nil
+	^ self slot alias
 ]
 
 { #category : #replacements }
@@ -136,7 +134,7 @@ SBTSBlock >> asSlider: converter [
 	<convert>
 
 	converter
-		if: [self type = #float or: [self type = #integer or: [self type = #number or: [self type = #'num_lit']]]]
+		if: [(self language respondsTo: #sourceForSlider:) and: [self type = #float or: [self type = #integer or: [self type = #number or: [self type = #'num_lit']]]]]
 		do: [self language sourceForSlider: self]
 ]
 
@@ -863,6 +861,9 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 		writeSourceOn: aStream
 		indent: (self indentFor: self lastSubmorph current: aNumber)
 		forCompare: aBoolean.
-	self slot allSuperTypesDo: [:type | (self factory rulesWithStatementTerminator includes: type type) ifTrue: [aStream nextPutAll: self language statementTerminator]].
+	self slot nodes do: [:node |
+		node bodyTemplate andParentsDo: [:type |
+			type hasStatementTerminator ifTrue: [
+				aStream nextPutAll: self language statementTerminator]]].
 	parens ifTrue: [aStream nextPut: $)]
 ]

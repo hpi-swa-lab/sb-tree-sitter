@@ -6830,13 +6830,6 @@ SBJavascript class >> noteUncapturedText [
 ]
 
 { #category : #configuration }
-SBJavascript class >> postprocessGrammar: aGrammar [
-	"FIXME: this should not be necessary"
-
-	aGrammar rulesWithStatementTerminator remove: 'class_body'
-]
-
-{ #category : #configuration }
 SBJavascript class >> preprocessGrammar: aGrammar [
 	"for some reason the member_expression accepts both primary_expr and expr as options, which lets our parser think that matches are ambiguous"
 

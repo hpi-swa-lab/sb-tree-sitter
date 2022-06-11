@@ -1117,7 +1117,7 @@ SBTSSmalltalk class >> rootRuleName [
 { #category : #'configuration - suggestions' }
 SBTSSmalltalk class >> suggestionsFor: aBlock [
 
-	((aBlock type = #identifier and: [aBlock parentSandblock type = #'unary_message']) or: [aBlock type = #keyword]) ifTrue: [
+	((aBlock alias = #'unary_identifier' and: [aBlock parentSandblock type = #'unary_message']) or: [aBlock type = #keyword]) ifTrue: [
 		^ (aBlock sortedSuggestions: (OrderedCollection withAll: Symbol allSymbols) for: aBlock contents) collect: [:item |
 			SBSuggestionItem
 				selector: (item keywords joinSeparatedBy: (Character value: 1))

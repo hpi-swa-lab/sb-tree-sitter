@@ -90,6 +90,29 @@ SBTSBlockTest >> testBinaryOpOnMemberExpression [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testCTypeCall [
+
+	| unit editor |
+	unit := SBC parseToplevel: 'int main() {
+}'.
+	editor := self editorAndWorldFor: unit.
+	unit childSandblocks first startInsertAtEnd.
+	
+	self type: 'call' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character arrowDown).
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: #identifier equals: unit lastDeepChild type.
+	self assert: (unit lastDeepChild compatibleWithType: #'_expression').
+	
+	editor handle: (self keyboardEvent: $().
+	
+	self assert: 'int main(){call();
+}' equals: unit sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testCanTypeOverKeywordSuggestion [
 
 	| module editor |
