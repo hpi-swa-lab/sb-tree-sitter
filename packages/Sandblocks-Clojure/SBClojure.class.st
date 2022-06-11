@@ -1749,8 +1749,9 @@ SBClojure class >> rootRuleName [
 	^ 'source'
 ]
 
-{ #category : #'configuration - semantics' }
-SBClojure class >> showHelpFor: aBlock [
+{ #category : #actions }
+SBClojure class >> showHelp: aBlock [
+	<action>
 
 	aBlock containingArtefact showHelpFor: aBlock
 ]

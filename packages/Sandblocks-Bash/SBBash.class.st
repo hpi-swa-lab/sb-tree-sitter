@@ -2776,7 +2776,7 @@ SBBash class >> inputTransitionBlackList [
 	^ #(#concatenation)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - editing' }
 SBBash class >> isStatementContainer: aRepeatNode in: aBlock [
 
 	self flag: #todo.
@@ -2789,13 +2789,21 @@ SBBash class >> language [
     ^ #bash
 ]
 
+{ #category : #actions }
+SBBash class >> promptTransition: aBlock [
+	"just jump the cursor out of the current block to hopefully land in an insert position where we have suggestions"
+	<inputAction>
+
+	aBlock sandblockEditor performForSelection: #moveCursorRight
+]
+
 { #category : #configuration }
 SBBash class >> rootRuleName [
 
 	^ 'program'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - layout' }
 SBBash class >> spaceBetween: aBlock and: anotherBlock [
 
 	^ aBlock containingSandblock ~= anotherBlock containingSandblock

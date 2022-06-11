@@ -32,10 +32,10 @@ SBTSBlock >> absorbsInput: anEvent [
 				basicCursor: oldPosition]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #actions }
 SBTSBlock >> actionProviders [
 
-	^ super actionProviders, {self grammarHandler}
+	^ {self language}, super actionProviders
 ]
 
 { #category : #'as yet unclassified' }
@@ -673,13 +673,6 @@ SBTSBlock >> replaceBlock: aBlock [
 	new := aBlock adaptSlotFor: self slot ifFailed: [self error: 'block not compatible'].
 	self replaceBy: new.
 	^ new
-]
-
-{ #category : #actions }
-SBTSBlock >> showHelp [
-	<action>
-
-	SBClojure basicNew showHelpFor: self
 ]
 
 { #category : #'as yet unclassified' }
