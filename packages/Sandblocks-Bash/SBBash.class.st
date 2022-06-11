@@ -2796,6 +2796,12 @@ SBBash class >> rootRuleName [
 ]
 
 { #category : #'as yet unclassified' }
+SBBash class >> spaceBetween: aBlock and: anotherBlock [
+
+	^ aBlock containingSandblock ~= anotherBlock containingSandblock
+]
+
+{ #category : #'as yet unclassified' }
 SBBash >> preprocessGrammar [
 
 	self grammar rules

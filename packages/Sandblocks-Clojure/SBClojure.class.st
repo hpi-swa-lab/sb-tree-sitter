@@ -1774,22 +1774,6 @@ SBClojure class >> spaceBetween: aBlock and: anotherBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBClojure >> addIndent: aBlock [
-
-	(aBlock isTextMorph and: [{'('. '{'. '['} includes: aBlock contents]) ifTrue: [^ true].
-	^ super addIndent: aBlock
-]
-
-{ #category : #'as yet unclassified' }
-SBClojure >> spaceBetween: aBlock and: anotherBlock [
-
-	(SBToggledCode comment: '' active: 2 do: {
-		[true].
-		[aBlock owner type = 'list_lit' and: [aBlock contents ~= '(' and: [anotherBlock contents ~= ')']]]}) ifTrue: [^ true].
-	^ super spaceBetween: aBlock and: anotherBlock
-]
-
-{ #category : #'as yet unclassified' }
 SBClojure >> suggestionsForInsert: aCommand [
 
 	(aCommand container containingArtefact notNil and: [aCommand container type = 'list_lit' and: [aCommand insertIndex > 2 and: [aCommand container childSandblocks first type = 'sym_lit']]]) ifTrue: [ | signatures |

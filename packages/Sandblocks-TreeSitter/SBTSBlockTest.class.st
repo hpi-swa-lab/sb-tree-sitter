@@ -66,6 +66,18 @@ SBTSBlockTest >> testBashCommand [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testBashContinueCommand [
+
+	| program editor |
+	program := SBBash parseToplevel: ''.
+	editor := self editorAndWorldFor: program.
+	program startInsertAtEnd.
+	
+	self type: 'git commit -am "hello' in: editor.
+	self assert: 'git commit -am "hello"' equals: program sourceString
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testBinaryOpOnMemberExpression [
 
 	| module editor |
@@ -787,8 +799,8 @@ SBTSBlockTest >> testTypingClosure [
 	editor handle: (SBTest keyboardEvent: Character cr).
 	
 	self assert: 'arrow_function' equals: module childSandblocks first childSandblocks first type.
-	self assert: 'pattern' equals: editor cursor cursorPosition command element alternatives first type.
-	self assert: #insert equals: editor cursor mode
+	self assert: 'x' equals: editor cursor cursorPosition block contents.
+	self assert: #input equals: editor cursor mode
 ]
 
 { #category : #'tests - cursor position' }

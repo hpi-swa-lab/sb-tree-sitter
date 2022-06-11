@@ -115,7 +115,10 @@ SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 					childIndex + (((cursor container submorphs copyFrom: 1 to: cursor command insertIndex - 1) collect: #recursiveSubmorphCount)
 						inject: 0
 						into: [:s :c | s + c]) + 1]
-				ifFalse: [all indexOf: cursor block currentTextMorph]].
+				ifFalse: [
+					"if we are in a finished label, just return our index so that the next position will be taken.
+					otherwise, we will likely want to continue typing here, so pretend that we were one index further out"
+					(all indexOf: cursor block currentTextMorph) + (cursor block currentTextMorph slot firstNode isTSLabel ifTrue: [0] ifFalse: [1])]].
 		
 		aCollection do: [:block |
 			block cursorPositionsDo: [:cursor |
@@ -126,7 +129,12 @@ SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 						axis: #none]]]].
 	
 	aCollection last isSandblock ifTrue: [aCollection last lastDeepChild startInputAtEnd].
-	aCollection last isTextMorph ifTrue: [aCollection last containingSandblock sandblockEditor startInput: aCollection last containingSandblock at: 9e8 replacingContents: false in: aCollection last]
+	aCollection last isTextMorph ifTrue: [
+		aCollection last containingSandblock sandblockEditor
+			startInput: aCollection last containingSandblock
+			at: 900000000
+			replacingContents: false
+			in: aCollection last]
 ]
 
 { #category : #'as yet unclassified' }

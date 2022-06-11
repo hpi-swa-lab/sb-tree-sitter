@@ -139,6 +139,12 @@ SBTSNodePrecedence >> takeNodesFrom: aParser [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodePrecedence >> traverseBlocks: aStream do: aBlock [
+
+	self element traverseBlocks: aStream do: aBlock
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodePrecedence >> value [
 
 	^ value
