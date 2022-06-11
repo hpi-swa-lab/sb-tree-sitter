@@ -95,7 +95,7 @@ SBTSGrammar >> autofixExternals: aGrammar [
 				yourself)]].
 	
 	externals := externals reject: [:external | rules includesKey: external].
-	externals ifNotEmpty: [:missing | UIManager default inform: 'Missing declarations for: ', (missing joinSeparatedBy: ', ')].
+	externals ifNotEmpty: [:missing | Transcript showln: 'Missing declarations for: ', (missing joinSeparatedBy: ', ')].
 	aGrammar externals: externals
 ]
 
