@@ -5,6 +5,18 @@ Class {
 }
 
 { #category : #configuration }
+SBClojure class >> extraHighlightQuery [
+
+	^ '(list_lit (sym_lit) @variable .)'
+]
+
+{ #category : #configuration }
+SBClojure class >> fileSuffix [
+
+	^ 'clj'
+]
+
+{ #category : #configuration }
 SBClojure class >> grammarJson [
 
     " https://github.com/sogaiu/tree-sitter-clojure/blob/master/src/grammar.json "
@@ -1687,9 +1699,9 @@ SBClojure class >> grammarJson [
 
 { #category : #configuration }
 SBClojure class >> highlightQuery [
+	" https://github.com/sogaiu/tree-sitter-clojure/blob/master/src/queries/highlights.scm "
 
-    " https://github.com/sogaiu/tree-sitter-clojure/blob/master/src/queries/highlights.scm "
-    ^ ';; Literals
+	^ ';; Literals
 
 (num_lit) @number
 
@@ -1718,7 +1730,7 @@ SBClojure class >> highlightQuery [
  "@"
  "~@"
 ] @operator
-'
+', self extraHighlightQuery
 ]
 
 { #category : #configuration }

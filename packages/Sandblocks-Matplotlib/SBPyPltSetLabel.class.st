@@ -15,7 +15,7 @@ SBPyPltSetLabel >> build [
          		attribute: [(identifier) ="set_xlabel" (identifier) ="set_ylabel"] @setLabel
             )
         	arguments: (argument_list
-			(string (string_content) @param)
+			(string) @param
 		)
         ) @call' sample: 'ax.set_xlabel("example")'>
 

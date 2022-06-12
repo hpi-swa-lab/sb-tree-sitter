@@ -50,6 +50,23 @@ SBPyRuntimeOSProcess class >> selectPath [
 ]
 
 { #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess >> buildWatchSourceFor: aBlock id: aString [
+
+	| watch |
+	self
+		example: [SBPyRuntimeOSProcess new]
+		args: [{SBPython parseExpression: '3'. 'myid'}]
+		label: 'example'.
+	watch := SBPython parseExpression: '(lambda e:
+            ((lambda s: (s.connect(("localhost", int(__import__("os").environ["SQ_WATCH"]))), s.send(("PAYLOAD_START"+str(e)+"\"}").encode()), s.close()))(__import__("socket").socket()), e))(e)[1]'.
+	watch childSandblocks first childSandblocks second childSandblocks first replaceBlock: aBlock.
+	self assert: (watch
+		queryRecursiveFirstMatch: '(string) ="PAYLOAD_START" @node'
+		capturesDo: [:c | (c at: 'node') contents: '{\"id\":\"', aString, '\",\"expression\":\"']).
+	^ watch
+]
+
+{ #category : #'as yet unclassified' }
 SBPyRuntimeOSProcess >> evaluate: aString [
 
 	| python |
@@ -128,16 +145,4 @@ SBPyRuntimeOSProcess >> selectPath [
 	self class pythonPath: (UIManager default
 		request: 'Path to python executable?'
 		initialAnswer: (self class pythonPath ifNil: [self which: 'python3']))
-]
-
-{ #category : #'as yet unclassified' }
-SBPyRuntimeOSProcess >> writeWatchSourceOn: aStream watch: aWatch [
-
-	aStream
-		nextPutAll: '(lambda e:
-            ((lambda s: (s.connect(("localhost", int(__import__("os").environ["SQ_WATCH"]))), s.send(("{\"id\":\"';
-		nextPutAll: aWatch id;
-		nextPutAll: '\",\"expression\":\""+str(e)+"\"}").encode()), s.close()))(__import__("socket").socket()), e))('.
-	aWatch expression writeSourceOn: aStream.
-	aStream nextPutAll: ')[1]'
 ]

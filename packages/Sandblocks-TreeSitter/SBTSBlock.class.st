@@ -265,7 +265,7 @@ SBTSBlock >> emphasis [
 SBTSBlock >> evaluate [
 
 	self containingArtefact ifNotNil: [:a | ^ a evaluate: self].
-	^ self factory runtime evaluate: self sourceString
+	^ self language runtime evaluate: self sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -415,7 +415,7 @@ SBTSBlock >> isEditor [
 { #category : #testing }
 SBTSBlock >> isExpression [
 
-	self slot allSuperTypesDo: [:type | (self factory expressionTypes includes: type type) ifTrue: [^ true]].
+	self slot allSuperTypesDo: [:type | (self language expressionTypes includes: type type) ifTrue: [^ true]].
 	^ false
 ]
 
@@ -725,7 +725,7 @@ SBTSBlock >> textMorphs [
 { #category : #'as yet unclassified' }
 SBTSBlock >> toplevel [
 
-	^ (self type = self factory rootRuleName and: [self owner isTSBlock not])
+	^ (self type = self language rootRuleName and: [self owner isTSBlock not])
 		ifTrue: [self]
 		ifFalse: [self owner toplevel]
 ]
@@ -773,6 +773,18 @@ SBTSBlock >> updateAllHighlights [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> updateMyHighlight [
+
+	| current |
+	highlight := nil.
+	current := self.
+	[highlight isNil and: [current notNil and: [current isTSBlock]]] whileTrue: [
+		self slot updateHighlightFor: current.
+		current := current parentSandblock].
+	self clearCacheSelf
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> useSuggestion: anItem [
 
 	| editor |
@@ -816,7 +828,8 @@ SBTSBlock >> wantsInput [
 SBTSBlock >> wasDeselected [
 
 	super wasDeselected.
-	SBTSListener allSubclassesDo: [:listener | (listener matches: self) ifTrue: [listener wasDeselected: self]]
+	SBTSListener allSubclassesDo: [:listener | (listener matches: self) ifTrue: [listener wasDeselected: self]].
+	self updateMyHighlight
 ]
 
 { #category : #events }

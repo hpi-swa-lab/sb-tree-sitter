@@ -14,7 +14,7 @@ SBPyFilePath >> build [
 	self addMorphBack: (SBIcon iconFile on: #click send: #choose to: self).
 	
 	self addMorphBack: (self
-		createBinding: [:c | SBStringMorph new contents: (c at: 'path') textMorphs second contents]
+		createBinding: [:c | SBStringMorph new contents: (c at: 'path') contents]
 		update: [:c :m | (c at: 'path') contents: m contents])
 ]
 

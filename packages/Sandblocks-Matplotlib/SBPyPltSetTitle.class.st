@@ -15,7 +15,7 @@ SBPyPltSetTitle >> build [
                 attribute: (identifier) @setTitle ="set_title"
             )
         	arguments: (argument_list
-			(string (string_content) @param)
+			(string) @param
 		)
         ) @call' sample: 'ax.set_title("example")'>
 

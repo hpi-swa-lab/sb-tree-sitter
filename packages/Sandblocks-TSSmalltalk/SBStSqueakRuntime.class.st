@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBStSqueakRuntime class >> language [
+
+	^ SBTSSmalltalk
+]
+
+{ #category : #'as yet unclassified' }
 SBStSqueakRuntime >> buildWatchSourceFor: aBlock id: aString [
 
 	| watch |

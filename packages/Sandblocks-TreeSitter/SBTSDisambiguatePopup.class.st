@@ -187,7 +187,7 @@ SBTSDisambiguatePopup >> tryFill [
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> tryOwner [
 
-	target owner owner isTSBlock ifFalse: [^ false].
+	target owner isTSBlock ifFalse: [^ false].
 	
 	^ SBTSDisambiguatePopup new
 		for: target owner
@@ -222,6 +222,8 @@ SBTSDisambiguatePopup >> tryReinterpret [
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> trySeparator [
 
+	target owner isTSBlock ifFalse: [^ false].
+	
 	(target owner slot delimiterBetween: target and: target) ifNotEmpty: [:delimiter |
 		delimiter = self contents ifTrue: [
 			target sandblockEditor do: (target sandblockEditor cursor positionAfter: target) command.

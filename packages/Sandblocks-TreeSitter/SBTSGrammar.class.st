@@ -252,12 +252,6 @@ SBTSGrammar >> escapeStringForRegex: aString [
 	^ aString copyWithRegex: '[.*+?^${}()|\[\]\\]' matchesTranslatedUsing: [:m | '\', m]
 ]
 
-{ #category : #accessing }
-SBTSGrammar >> expressionTypes [
-
-	^ #()
-]
-
 { #category : #cleaning }
 SBTSGrammar >> flattenSeparatedList: anObject name: aString [
 

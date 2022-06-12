@@ -131,13 +131,20 @@ SBTSReplacementBlock >> createBinding: aBuilderClosure update: anUpdateClosure [
 SBTSReplacementBlock >> createBindingBlock: aNameString [
 
 	^ self
-		createBinding: [:c | | block |
+		createBinding: [:c | | block container |
+			container := SBTSReplacedBlockContainer new.
 			block := self bindings at: aNameString.
 			block replaceBy: (SBTSReplacementPlaceholder new
-				setProperty: #tsReplacementPlaceholder toValue: block;
+				setProperty: #tsReplacementPlaceholder toValue: container;
 				yourself).
-			block]
-		update: [:c :m | self replaceBound: aNameString with: m]
+			container
+				addMorph: block;
+				yourself]
+		update: [:c :m |
+			SBToggledCode
+				comment: ''
+				active: 0
+				do: {[self replaceBound: aNameString with: m firstSubmorph]}]
 ]
 
 { #category : #'as yet unclassified' }
@@ -210,9 +217,10 @@ SBTSReplacementBlock >> updateDuring: aBlock [
 	| restore |
 	restore := OrderedCollection new.
 	self root allMorphsDo: [:m |
-		m valueOfProperty: #tsReplacementPlaceholder ifPresentDo: [:original |
-			m swapWith: original.
-			restore add: m -> original]].
+		m valueOfProperty: #tsReplacementPlaceholder ifPresentDo: [:original | | block |
+			block := original firstSubmorph.
+			m swapWith: block.
+			restore add: m -> block]].
 	updaters do: [:pair | pair value value: bindings value: pair key].
 	^ aBlock ensure: [restore do: [:pair | pair value swapWith: pair key]]
 ]

@@ -74,6 +74,12 @@ SBTSLanguage class >> defaultRuntimeClass [
 	^ nil
 ]
 
+{ #category : #configuration }
+SBTSLanguage class >> expressionTypes [
+
+	^ #()
+]
+
 { #category : #'loading - helper' }
 SBTSLanguage class >> fetchLibrary: aGithubString branch: aString [
 
@@ -360,7 +366,7 @@ SBTSLanguage class >> rootRuleName [
 { #category : #accessing }
 SBTSLanguage class >> runtime [
 
-	SBTSActiveRuntime value ifNotNil: [:runtime | runtime language = self class ifTrue: [^ runtime]].
+	SBTSActiveRuntime value ifNotNil: [:runtime | runtime class language = self ifTrue: [^ runtime]].
 	^ self defaultRuntimeClass ifNotNil: [:cl | cl new factory: self]
 ]
 

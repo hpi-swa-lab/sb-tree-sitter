@@ -19,6 +19,12 @@ SBTSSmalltalk class >> defaultRuntimeClass [
 	^ SBStSqueakRuntime
 ]
 
+{ #category : #configuration }
+SBTSSmalltalk class >> expressionTypes [
+
+	^ #(#expression)
+]
+
 { #category : #properties }
 SBTSSmalltalk class >> grammarJson [
 

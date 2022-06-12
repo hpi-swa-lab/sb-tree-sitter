@@ -200,7 +200,7 @@ SBTSLanguageRuntime >> handleConnection: aSocket [
 	env := SBExecutionEnvironment value.
 	data := Json readFrom: (self contentFromSocket: aSocket) readStream.
 	
-	Project current addDeferredUIMessage: [SBTSWatch reportId: data id value: data expression env: env]
+	Project current addDeferredUIMessage: [SBWatch2 reportId: data id value: data expression env: env]
 ]
 
 { #category : #'runtime interface' }
@@ -235,7 +235,7 @@ SBTSLanguageRuntime >> spawnWatchDuring: aBlock [
 SBTSLanguageRuntime >> tmpFile: aString do: aBlock [
 
 	| path |
-	path := '/tmp/', (UUID new asString, '.', self factory class fileSuffix).
+	path := '/tmp/', (UUID new asString, '.', self factory fileSuffix).
 	^ [
 		FileStream forceNewFileNamed: path do: [:tmpFile | tmpFile nextPutAll: aString].
 		aBlock value: path] ensure: [FileDirectory deleteFilePath: path]

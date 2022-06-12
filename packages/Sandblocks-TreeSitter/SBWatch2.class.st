@@ -15,7 +15,7 @@ Class {
 SBWatch2 class >> newEmptyFor: aBlock [
 
 	| source |
-	source := aBlock factory runtime
+	source := aBlock language runtime
 		buildWatchSourceFor: aBlock
 		id: UUID new asString.
 	^ source applyReplacement
@@ -44,6 +44,24 @@ SBWatch2 class >> reportId: aString value: aValueString env: anEnvironment [
 SBWatch2 class >> watches [
 
 	^ Watches ifNil: [Watches := WeakArray new]
+]
+
+{ #category : #'as yet unclassified' }
+SBWatch2 >> buildJavascript [
+	<lang: #javascript match: '(call_expression (parenthesized_expression (arrow_function (parenthesized_expression (sequence_expression (call_expression (call_expression (object (pair key: (_) ="id" (string (_) @id))))))))) (_) @expression) @root' sample: '((e) => (
+  require("net")
+    .connect(process.env.SQ_WATCH, "localhost")
+    .end(
+      JSON.stringify({
+        id: "8760eb08-6e29-47e6-a1fc-78d5c8bcb9fb",
+        expression: require("util").inspect(e),
+      })
+    ),
+  e
+))(req.path);'>
+
+	self id: (self bindings at: 'id') contents.
+	self addMorphFront: (self createBindingBlock: 'expression')
 ]
 
 { #category : #'as yet unclassified' }

@@ -44,7 +44,7 @@ SBTSFile class >> forNoReplace: aFilepathString [
 { #category : #'as yet unclassified' }
 SBTSFile class >> languageForPath: aString [
 
-	^ SBGrammarLanguage allSubclasses detect: [:lang | lang fileSuffix = (FileDirectory extensionFor: aString)]
+	^ SBTSLanguage allSubclasses detect: [:lang | lang fileSuffix = (FileDirectory extensionFor: aString)]
 ]
 
 { #category : #'as yet unclassified' }
@@ -64,13 +64,11 @@ SBTSFile >> artefactSaved: aMethodBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSFile >> buildCopy [
+SBTSFile >> evaluate: aBlock [
 
-	^ self class new
-		filepath: filepath
-		toplevel: self root buildCopy
-		language: self root factory class
-		collapsed: false
+	^ runtime object new
+		factory: aBlock language;
+		evaluate: aBlock sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -91,7 +89,7 @@ SBTSFile >> filepath: aString language: aLanguageClass collapsed: aCollapsedBool
 	self
 		filepath: aString
 		toplevel: (FileStream readOnlyFileNamed: aString do: [:stream | | toplevel |
-			toplevel := aLanguageClass parse: stream contents.
+			toplevel := SBTSFileParser new parse: stream contents language: aLanguageClass.
 			aReplaceBoolean ifTrue: [toplevel applyReplacements] ifFalse: [toplevel]])
 		language: aLanguageClass
 		collapsed: aCollapsedBoolean
@@ -115,7 +113,7 @@ SBTSFile >> filepath: aString toplevel: aBlock language: aLanguageClass collapse
 	root := aBlock hResizing: #spaceFill.
 	aBoolean ifFalse: [self addMorphBack: root].
 	
-	(self root factory runtime notNil and: [aBoolean not]) ifTrue: [
+	(self root language runtime notNil and: [aBoolean not]) ifTrue: [
 		self firstSubmorph
 			addMorphBack: (runtime := SBTSRuntimeChooser new language: aLanguageClass);
 			addMorphBack: (runButton := SBIcon iconPlay
@@ -173,7 +171,7 @@ SBTSFile >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 
 	| source |
 	source := SBTSActiveRuntime
-		value: (runtime object new factory: self root factory)
+		value: (runtime ifNotNil: [:r | r object new factory: self root factory])
 		during: [aQuickBoolean ifTrue: [self root sourceString] ifFalse: [self root prettySourceString]].
 	FileStream forceNewFileNamed: self filepath do: [:stream | stream nextPutAll: source].
 	^ true

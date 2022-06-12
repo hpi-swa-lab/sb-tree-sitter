@@ -201,7 +201,9 @@ SBTSCursor >> restoreTo: aCursor [
 { #category : #'as yet unclassified' }
 SBTSCursor >> shouldSkipParsedNode: aNode [
 
-	^ factory language statementTerminator = (library nodeType: aNode)
+	| type |
+	type := library nodeType: aNode.
+	^ factory language statementTerminator = type or: [type = #comment]
 ]
 
 { #category : #'as yet unclassified' }

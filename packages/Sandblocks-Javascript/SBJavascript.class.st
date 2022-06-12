@@ -20,6 +20,12 @@ SBJavascript class >> defaultRuntimeClass [
 ]
 
 { #category : #configuration }
+SBJavascript class >> expressionTypes [
+
+	^ #(#expression)
+]
+
+{ #category : #configuration }
 SBJavascript class >> fileSuffix [
 
 	^ 'js'

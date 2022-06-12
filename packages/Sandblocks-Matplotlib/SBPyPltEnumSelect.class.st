@@ -6,7 +6,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBPyPltEnumSelect >> build [
-	<lang: #python match: '(keyword_argument name: (identifier) @name value: (string (string_content) @value))' sample: 'ax.plot(abc="asd")'>
+	<lang: #python match: '(keyword_argument name: (identifier) @name value: (string) @value)' sample: 'ax.plot(abc="asd")'>
 
 	| capStyles joinStyles |
 	joinStyles := {

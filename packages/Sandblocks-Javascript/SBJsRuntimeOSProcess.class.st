@@ -42,6 +42,22 @@ SBJsRuntimeOSProcess class >> runtimeName [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsRuntimeOSProcess >> buildWatchSourceFor: aBlock id: aString [
+
+	| watch |
+	self
+		example: [SBJsRuntimeOSProcess new]
+		args: [{SBJavascript parseExpression: '3'. 'myid'}]
+		label: 'example'.
+	watch := SBJavascript parseExpression: '((e) => (require("net").connect(process.env.SQ_WATCH, "localhost").end(JSON.stringify({id:"ID",expression: require("util").inspect(e)})), e))(expr)'.
+	watch childSandblocks second replaceBlock: aBlock.
+	self assert: (watch
+		queryRecursiveFirstMatch: '(string_fragment) ="ID" @node'
+		capturesDo: [:c | (c at: 'node') contents: aString]).
+	^ watch
+]
+
+{ #category : #'as yet unclassified' }
 SBJsRuntimeOSProcess >> evaluate: aString [
 
 	| node |
@@ -73,16 +89,4 @@ SBJsRuntimeOSProcess >> prettyPrint: aString [
 	prettier ifNil: [^ aString].
 	
 	^ self checkedCmd: prettier arguments: {'--stdin-filepath'. 'file.js'} env: nil stdin: aString
-]
-
-{ #category : #'as yet unclassified' }
-SBJsRuntimeOSProcess >> writeWatchSourceOn: aStream watch: aWatch [
-
-	aStream
-		nextPutAll: '((e) => (require("net").connect(process.env.SQ_WATCH, "localhost").end(JSON.stringify({id:"';
-		nextPutAll: aWatch id;
-		nextPutAll: '", ';
-		nextPutAll: 'expression: require("util").inspect(e)})), e))('.
-	aWatch expression writeSourceOn: aStream.
-	aStream nextPutAll: ')'
 ]

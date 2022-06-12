@@ -15,7 +15,7 @@ SBPyPltSetScale >> build [
                 attribute: [(identifier) ="set_xscale" (identifier) ="set_yscale"] @setScale
             )
         	arguments: (argument_list
-			(string (string_content) @param)
+			(string) @param
 		)
         ) @call' sample: 'ax.set_xscale("log")'>
 

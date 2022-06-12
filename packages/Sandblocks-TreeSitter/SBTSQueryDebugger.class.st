@@ -57,7 +57,7 @@ SBTSQueryDebugger >> initialize [
 			contents: 'Tree Sitter Query Debugger';
 			bold);
 		addMorphBack: (language := SBComboBox new
-			values: SBGrammarLanguage allSubclasses;
+			values: SBTSLanguage allSubclasses;
 			prefix: 'Language: ';
 			object: SBJavascript);
 		addMorphBack: (SBStringMorph new contents: 'Source Code:');

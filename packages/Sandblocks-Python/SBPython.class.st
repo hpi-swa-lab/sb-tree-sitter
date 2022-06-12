@@ -31,6 +31,12 @@ SBPython class >> defaultRuntimeClass [
 ]
 
 { #category : #configuration }
+SBPython class >> expressionTypes [
+
+	^ #(#expression)
+]
+
+{ #category : #configuration }
 SBPython class >> fileSuffix [
 
 	^ 'py'
@@ -5164,7 +5170,7 @@ SBPython class >> isBlockInlinedInParent: aSymbol [
 { #category : #'configuration - layout' }
 SBPython class >> isImmutableLabel: aLabelNode [
 
-	^ (super isImmutableLabel: aLabelNode) or: [#(':') includes: aLabelNode label]
+	^ (super isImmutableLabel: aLabelNode) or: [#(':' '"' '''') includes: aLabelNode label]
 ]
 
 { #category : #'configuration - layout' }
@@ -5339,12 +5345,6 @@ SBPython >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 SBPython >> indentMatch: aBlock [
 
 	^ aBlock type = 'block'
-]
-
-{ #category : #testing }
-SBPython >> isImmutableLabel: aLabelNode [
-
-	^ (super isImmutableLabel: aLabelNode) or: [#(':') includes: aLabelNode label]
 ]
 
 { #category : #semantics }
