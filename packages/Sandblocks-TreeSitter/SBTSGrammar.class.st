@@ -9,8 +9,7 @@ Class {
 		'aliasOccurrences',
 		'language',
 		'highlightQuery',
-		'precedences',
-		'rulesWithStatementTerminator'
+		'precedences'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -60,7 +59,7 @@ SBTSGrammar >> applyInlining: aRule grammar: aGrammarJson name: aString [
 						yourself)
 					toplevelDo: [:n | self rules at: aString put: n]]
 			ifFalse: [
-				(node isTSSymbol and: [node type first = $_ and: [(aGrammarJson externals noneSatisfy: [:e | e name = node name]) and: [(supertypes includes: node name) not]]]) ifTrue: [ | inline |
+				(node isTSSymbol and: [node type first = $_ and: [(aGrammarJson externals noneSatisfy: [:e | e name = node name]) and: [(supertypes includes: node name) not and: [self language canInline: node name]]]]) ifTrue: [ | inline |
 					inline := rules at: node name.
 					(self includesNonHiddenParts: inline visited: Set new) ifTrue: [
 						node
@@ -262,7 +261,12 @@ SBTSGrammar >> expressionTypes [
 { #category : #cleaning }
 SBTSGrammar >> flattenSeparatedList: anObject name: aString [
 
-	| looksLikeSepList looksLikeOptionalSep |
+	| looksLikeSepList looksLikeOptionalSep labelFromSeparator |
+	labelFromSeparator := [:obj |
+		(obj isTSChoice
+			ifTrue: ["in e.g. typescript both , and ; are allowed as separators in object types. it may not always be an interchangeable semantic though FIXME"
+			obj elements anyOne]
+			ifFalse: [obj]) label].
 	looksLikeSepList := [:obj |
 		obj isTSSeq and: [
 			obj elements size = 2 and: [ | second |
@@ -277,7 +281,7 @@ SBTSGrammar >> flattenSeparatedList: anObject name: aString [
 				multiple: true required: false element: node elements first elements first;
 				factory: self;
 				yourself.
-			repeater delimiter: node elements second elements first label.
+			repeater delimiter: (labelFromSeparator value: node elements second elements first).
 			node replaceBy: repeater toplevelDo: [:n | self rules at: aString put: n]].
 		" seq(rule, repeat(seq(separator, rule))) "
 		(looksLikeSepList value: node) ifTrue: [ | repeater |
@@ -287,7 +291,7 @@ SBTSGrammar >> flattenSeparatedList: anObject name: aString [
 					element: node elements second elements first elements second;
 				factory: self;
 				yourself.
-			repeater delimiter: node elements second element elements first label.
+			repeater delimiter: (labelFromSeparator value: node elements second element elements first).
 			node replaceBy: repeater toplevelDo: [:n | self rules at: aString put: n]]]
 ]
 
@@ -450,11 +454,10 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 		example: [SBTSGrammar new language: SBJavascript]
 		args: [{Json readFrom: SBJavascript grammarJson readStream}]
 		label: 'example'.
-	supertypes := aJSONGrammar supertypes.
-	inlinedRules := aJSONGrammar at: 'inline'.
+	supertypes := (aJSONGrammar at: 'supertypes') collect: #asSymbol.
+	inlinedRules := (aJSONGrammar at: 'inline') collect: #asSymbol.
 	precedences := aJSONGrammar at: 'precedences'.
 	aliasOccurrences := OrderedCollection new.
-	rulesWithStatementTerminator := Set new.
 	rules := (aJSONGrammar at: 'rules')
 		collect: [:rule | self buildNodesFor: rule]
 		as: Dictionary.
@@ -616,12 +619,6 @@ SBTSGrammar >> removeStatementTerminators: aNode name: aString [
 SBTSGrammar >> rules [
 
 	^ rules
-]
-
-{ #category : #accessing }
-SBTSGrammar >> rulesWithStatementTerminator [
-
-	^ rulesWithStatementTerminator
 ]
 
 { #category : #cleaning }

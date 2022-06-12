@@ -799,7 +799,7 @@ SBTSBlock >> valid [
 { #category : #'as yet unclassified' }
 SBTSBlock >> wantsExtraSpace [
 
-	^ self slot needsParenthesis: self
+	^ SBToggledCode comment: '' active: 1 do: {[false]. [self slot needsParenthesis: self]}
 ]
 
 { #category : #'as yet unclassified' }

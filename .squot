@@ -15,5 +15,6 @@ OrderedDictionary {
 	'packages/Sandblocks-Bash' : #SquotTonelSerializer,
 	'packages/Sandblocks-RequestsTool' : #SquotTonelSerializer,
 	'packages/Sandblocks-Matplotlib' : #SquotTonelSerializer,
-	'packages/Sandblocks-Clojure' : #SquotTonelSerializer
+	'packages/Sandblocks-Clojure' : #SquotTonelSerializer,
+	'packages/Sandblocks-Typescript' : #SquotTonelSerializer
 }

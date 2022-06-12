@@ -6847,10 +6847,7 @@ SBJavascript class >> preprocessGrammar: aGrammar [
 				factory: aGrammar)]}.
 	aGrammar rules at: '_template_chars' put: (SBTSNodeText new
 		regexString: '.*';
-		factory: aGrammar).
-	
-	"does not get added because its semicolon is removed as a separator"
-	aGrammar rulesWithStatementTerminator add: 'expression_statement'
+		factory: aGrammar)
 ]
 
 { #category : #configuration }

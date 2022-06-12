@@ -5,6 +5,24 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSSlotTest >> expectedFailures [
+
+	^ #(#testParseEqualsTyped)
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlotTest >> testParseEqualsTyped [
+
+	| parsed typed editor |
+	parsed := SBTypescript parseToplevel: 'let a = {key}'.
+	typed := SBTypescript parseToplevel: 'let a = {}'.
+	editor := self editorAndWorldFor: typed.
+	typed lastDeepChild startInsertAtEnd.
+	self type: 'key' in: editor.
+	self assert: parsed lastDeepChild slot nodes equals: typed lastDeepChild slot nodes
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlotTest >> testStmtInArgument [
 
 	| targetPosition dropped new |

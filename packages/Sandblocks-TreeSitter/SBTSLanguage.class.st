@@ -23,6 +23,12 @@ SBTSLanguage class >> allRuntimes [
 	^ Array streamContents: [:stream | SBTSLanguageRuntime allSubclassesDo: [:cl | cl language = self ifTrue: [stream nextPut: cl]]]
 ]
 
+{ #category : #'configuration - layout' }
+SBTSLanguage class >> canInline: aSymbol [
+
+	^ (#(#'_type_query_member_expression' #'_type_query_subscript_expression' #'_type_query_call_expression') includes: aSymbol) not
+]
+
 { #category : #'instantiate blocks' }
 SBTSLanguage class >> canParse: aString [
 
@@ -267,6 +273,16 @@ SBTSLanguage class >> loadLanguage: aGithubString name: aString branch: anotherS
 	self generateFFIMethodFor: aString github: aGithubString
 ]
 
+{ #category : #loading }
+SBTSLanguage class >> loadLanguage: aGithubString name: aString branch: anotherString subpath: aPathString [
+
+	| path |
+	path := (self fetchLibrary: aGithubString branch: anotherString) / aPathString.
+	self compileParserIn: path name: aString.
+	self generateGrammarClassFrom: path name: aString github: aGithubString.
+	self generateFFIMethodFor: aString github: aGithubString
+]
+
 { #category : #'configuration - layout' }
 SBTSLanguage class >> noteUncapturedText [
 
@@ -415,7 +431,7 @@ SBTSLanguage class >> transitionPairs [
 ]
 
 { #category : #'loading - helper' }
-SBTSLanguage class >> tryPatchLibrary: aGithubString name: aString context: aContext branch: anotherString [
+SBTSLanguage class >> tryPatchLibrary: aGithubString name: aString context: aContext branch: anotherString subpath: aPathString [
 
 	| path library |
 	ExternalFunction getLastError = 15 ifFalse: [^ self externalCallFailed].
@@ -423,6 +439,7 @@ SBTSLanguage class >> tryPatchLibrary: aGithubString name: aString context: aCon
 		aContext method externalLibraryName: 'tree-sitter-', aString, '.so'.
 		^ aContext method externalLibraryFunction invoke].
 	path := self fetchLibrary: aGithubString branch: anotherString.
+	aPathString ifNotEmpty: [path := path / aPathString].
 	library := self compileParserIn: path name: aString.
 	aContext method externalLibraryName: library fullName.
 	^ aContext method externalLibraryFunction invoke

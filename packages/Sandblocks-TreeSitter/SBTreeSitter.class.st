@@ -468,6 +468,13 @@ SBTreeSitter >> tsq [
 ]
 
 { #category : #'ffi languages' }
+SBTreeSitter >> typescript [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_typescript () module: 'tree-sitter-typescript'>
+	^ SBTSLanguage tryPatchLibrary: 'tree-sitter/tree-sitter-typescript' name: 'typescript' context: thisContext branch: 'master' subpath: 'typescript'
+]
+
+{ #category : #'ffi languages' }
 SBTreeSitter >> verilog [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_verilog () module: 'tree-sitter-verilog'>
