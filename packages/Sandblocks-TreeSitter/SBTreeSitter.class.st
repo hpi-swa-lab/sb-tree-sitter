@@ -464,7 +464,7 @@ SBTreeSitter >> treeRootNode: aTree [
 SBTreeSitter >> tsq [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_tsq () module: 'tree-sitter-tsq'>
-	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-tsq' name: 'tsq' context: thisContext
+	^ SBTSLanguage tryPatchLibrary: 'tree-sitter/tree-sitter-tsq' name: 'tsq' context: thisContext branch: 'main' subpath: ''
 ]
 
 { #category : #'ffi languages' }

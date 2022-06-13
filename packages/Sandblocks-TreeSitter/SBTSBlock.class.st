@@ -395,8 +395,23 @@ SBTSBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 { #category : #actions }
 SBTSBlock >> insertStatementBelow [
 	<action>
+	<actionValidIf: #insertStatementHasCandidate>
 
 	self insertStatementAboveOrBelow: false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> insertStatementHasCandidate [
+
+	self andAllParentSandblocksDo: [:block |
+		block isTSBlock ifTrue: [
+			"look in my template --> insert as child of me"
+			(block slot repeaterThat: [:p | block language isStatementContainer: p in: block parentSandblock]) ifNotNil: [:repeater | ^ true].
+			"look above me --> insert adjacent to me"
+			block
+				cursorPositionsDo: [:cursor | (cursor isInsert and: [block language isStatementContainer: cursor command element parent in: block]) ifTrue: [^ true]]
+				shallow: true]].
+	^ false
 ]
 
 { #category : #testing }
@@ -776,6 +791,8 @@ SBTSBlock >> updateAllHighlights [
 SBTSBlock >> updateMyHighlight [
 
 	| current |
+	self factory hasHighlight ifFalse: [^ self highlight: #_sb_none].
+	
 	highlight := nil.
 	current := self.
 	[highlight isNil and: [current notNil and: [current isTSBlock]]] whileTrue: [

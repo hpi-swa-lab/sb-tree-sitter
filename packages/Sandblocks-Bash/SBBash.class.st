@@ -4,6 +4,13 @@ Class {
 	#category : #'Sandblocks-Bash'
 }
 
+{ #category : #actions }
+SBBash class >> confirm: aBlock [
+	<action>
+
+	UIManager default inform: (aBlock orOwnerSuchThat: [:b | b type = #command]) sourceString
+]
+
 { #category : #configuration }
 SBBash class >> grammarJson [
 
@@ -2807,6 +2814,27 @@ SBBash class >> rootRuleName [
 SBBash class >> spaceBetween: aBlock and: anotherBlock [
 
 	^ aBlock containingSandblock ~= anotherBlock containingSandblock
+]
+
+{ #category : #'configuration - suggestions' }
+SBBash class >> suggestionsFor: aBlock [
+
+	(aBlock type = #word and: [aBlock parentSandblock type = #command]) ifTrue: [
+		^ {
+			SBTSBlockSuggestion new
+				blocks: {(SBBash parseToplevel: 'x word') childSandblocks first childSandblocks second}
+				in: aBlock sandblockEditor}].
+	^ #()
+]
+
+{ #category : #'configuration - suggestions' }
+SBBash class >> suggestionsForInsert: aCommand [
+
+	^ {
+		(SBInsertSuggestionItem selector: 'a' label: 'arg')
+			morph: (SBBash parseToplevel: 'git commit') childSandblocks first childSandblocks second
+				previewOnly: true;
+			yourself}
 ]
 
 { #category : #'as yet unclassified' }

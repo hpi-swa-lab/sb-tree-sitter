@@ -1,6 +1,6 @@
 Class {
 	#name : #SBTsq,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-Tsq'
 }
 
