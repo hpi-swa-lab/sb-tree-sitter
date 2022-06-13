@@ -6808,7 +6808,7 @@ SBJavascript class >> isBlockInlinedInParent: aSymbol [
 { #category : #'configuration - layout' }
 SBJavascript class >> isImmutableLabel: aLabelNode [
 
-	^ (super isImmutableLabel: aLabelNode) or: [#(';') includes: aLabelNode label]
+	^ (super isImmutableLabel: aLabelNode) or: [#(';' '''' '"' '`') includes: aLabelNode label]
 ]
 
 { #category : #'configuration - declarations' }

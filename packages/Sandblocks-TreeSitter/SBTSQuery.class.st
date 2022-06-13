@@ -73,7 +73,7 @@ SBTSQuery >> parseLiteral [
 			caseOf: {
 				[$"] -> [[:c | c = $"]].
 				[$=] -> [[:c | c = $"]]}
-			otherwise: [[:c | c isSeparator or: [c = $) or: [c = $(]]]].
+			otherwise: [[:c | c isSeparator or: [c = $) or: [c = $( or: [c = $[ or: [c = $]]]]]]].
 		stream peek = $= ifTrue: [str nextPut: stream next].
 		[str nextPut: stream next] doWhileTrue: [stream peek notNil and: [(endCheck value: stream peek) not]]].
 	

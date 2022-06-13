@@ -1094,6 +1094,12 @@ SBTSSmalltalk class >> isBlockInlined: aSymbol [
 ]
 
 { #category : #'configuration - editing' }
+SBTSSmalltalk class >> isImmutableLabel: aLabelNode [
+
+	^ (super isImmutableLabel: aLabelNode) or: [#('|' '''' ';') includes: aLabelNode label]
+]
+
+{ #category : #'configuration - editing' }
 SBTSSmalltalk class >> isStatementContainer: aRepeatNode in: aBlock [
 
 	^ aRepeatNode element type = 'statement'
@@ -1193,12 +1199,6 @@ SBTSSmalltalk >> hardLineBreakBetween: aBlock and: anotherBlock [
 SBTSSmalltalk >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 
 	^ aBlock parentSandblock type = 'method'
-]
-
-{ #category : #'as yet unclassified' }
-SBTSSmalltalk >> isImmutableLabel: aLabelNode [
-
-	^ (super isImmutableLabel: aLabelNode) or: [#('|' '''' ';') includes: aLabelNode label]
 ]
 
 { #category : #'as yet unclassified' }

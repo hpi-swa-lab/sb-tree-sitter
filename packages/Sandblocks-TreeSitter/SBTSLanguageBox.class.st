@@ -8,7 +8,7 @@ Class {
 SBTSLanguageBox >> build [
 
 	| language |
-	language := SBGrammarLanguage allSubclasses detect: [:lang | lang language = (bindings at: 'language') contents].
+	language := SBTSLanguage allSubclasses detect: [:lang | lang language = (bindings at: 'language') contents].
 	self addMorphBack: language iconMorph.
 	self addMorphBack: (self
 		createBinding: [:c | SBTSFileParser new parse: (c at: 'code') contents language: language]
@@ -28,7 +28,10 @@ SBTSLanguageBox >> buildClojure [
 
 { #category : #'as yet unclassified' }
 SBTSLanguageBox >> buildJs [
-	<lang: #javascript match: '(call_expression (member_expression (identifier) ="Polyglot" property: (_) ="eval") (string (_) (_) @language) [(string (_) (_) @code) (template_string (_) (_) @code)])' sample: 'Polyglot.eval("somelang", "code")'>
+	<lang: #javascript match: '(call_expression
+	(member_expression (identifier) ="Polyglot" property: (_) ="eval")
+	(string (_) @language)
+	[(string (_) @code) (template_string) @code])' sample: 'Polyglot.eval("somelang", `code`)'>
 
 	self build
 ]
@@ -38,8 +41,8 @@ SBTSLanguageBox >> buildPython [
 	<lang: #python match: '(call
 	(attribute (identifier) ="polyglot" (identifier) ="eval")
 	(argument_list
-		(keyword_argument (identifier) ="language" (string (string_content) @language))
-		(keyword_argument (identifier) ="string" (string (string_content) @code))) @x)' sample: 'polyglot.eval(language="somelang", string="""code""")'>
+		(keyword_argument (identifier) ="language" (string) @language)
+		(keyword_argument (identifier) ="string" (string) @code)) @x)' sample: 'polyglot.eval(language="somelang", string="""code""")'>
 
 	self build
 ]
@@ -48,7 +51,6 @@ SBTSLanguageBox >> buildPython [
 SBTSLanguageBox >> buildSmalltalk [
 	<lang: #smalltalk match: '(keyword_message receiver: (identifier) ="Polyglot" (keyword) ="eval:" (string) @language (keyword) ="string:" (string) @code)' sample: 'a Polyglot eval: ''python'' string: ''2 + 2'''>
 
-	
 	self build
 ]
 
