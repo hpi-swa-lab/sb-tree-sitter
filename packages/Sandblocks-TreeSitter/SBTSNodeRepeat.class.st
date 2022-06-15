@@ -178,6 +178,7 @@ SBTSNodeRepeat >> resultsFor: aParser [
 		next := queue removeFirst copy.
 		lastPosition := next position.
 		(self element resultsFor: next) do: [:result |
+			delimiter ifNotNil: [result stream nextMatchAll: delimiter].
 			candidates add: result.
 			(result position > lastPosition and: [result atEnd not]) ifTrue: [queue add: result]]].
 	

@@ -285,7 +285,7 @@ SBTSLanguageTests >> testRegexResumeInput [
 	| block e |
 	block := SBRegex parseToplevel: 'abc'.
 	e := self editorFor: block.
-	block lastDeepChild select.
+	block lastDeepChild startInputAtEnd.
 	e selection keyStroke: (self keyboardEvent: $d).
 	
 	self assert: 'abcd' equals: block sourceString

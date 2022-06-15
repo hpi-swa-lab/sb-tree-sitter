@@ -141,9 +141,13 @@ SBTSBlockTest >> testClojureWrapInExpr [
 
 	| program editor |
 	program := SBTSFileParser new parse: '(+ 1 2)' language: SBClojure.
-	editor := self editorFor: program.
+	editor := self editorAndWorldFor: program.
 	program childSandblocks first startInputAtStart.
 	editor handle: (self keyboardEvent: $().
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
+	editor handle: (self keyboardEvent: Character arrowRight).
 	editor handle: (self keyboardEvent: $*).
 	self assert: '(* (+ 1 2))' equals: program sourceString
 ]
@@ -203,6 +207,21 @@ SBTSBlockTest >> testForwardToAdjacentStatement [
 	"no change expected, but we had some issues with input forwarding causing infinite loop"
 	self assert: '2;
 ()=>;' equals: module sourceString
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsAddAssignmentToStatement [
+
+	| program editor |
+	program := SBJavascript parseToplevel: '123'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtStart.
+	self type: (self keyboardEvent: Character space shift: true command: false) in: editor.
+	self type: 'x=' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: 'x=123;' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -380,6 +399,9 @@ SBTSBlockTest >> testJsNumberToString [
 	editor := self editorAndWorldFor: module.
 	module lastDeepChild startInputAtStart.
 	self type: '''' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
 	self assert: '''123'';' equals: module sourceString
 ]
 
@@ -412,6 +434,18 @@ SBTSBlockTest >> testJsReinterpretIncompleteLabel [
 	self
 		assert: 'identifier'
 		equals: module childSandblocks first childSandblocks second childSandblocks first type
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsSeparatorInPendingPattern [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'abc()'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInsertAtEnd.
+	self type: 'a' in: editor.
+	self type: ',' in: editor.
+	self assert: 'abc(a);' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -465,6 +499,21 @@ SBTSBlockTest >> testPasteListIntoLiteral [
 	
 	self assert: '5
 5' equals: source sourceString
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testPyAddKeywordToArg [
+
+	| program editor |
+	program := SBPython parseToplevel: 'myFunc(123)'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtStart.
+	self type: (self keyboardEvent: Character space shift: true command: false) in: editor.
+	self type: 'arg=' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: 'myFunc(arg=123)' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - deleting' }
@@ -542,7 +591,7 @@ SBTSBlockTest >> testRegexEnterClassRanges [
 	term := SBTSFileParser new parse: 'a' language: SBRegex.
 	editor := self editorFor: term.
 	term startInsertAtEnd.
-	self type: '[A-Za-z]' in: editor.
+	self type: '[A-Za-z' in: editor.
 	self assert: 'a[A-Za-z]' equals: term sourceString
 ]
 
@@ -656,6 +705,22 @@ SBTSBlockTest >> testSmalltalkKeywordMessage [
 	insertCount := 0.
 	module childSandblocks second cursorPositionsDo: [:pos | pos isInsert ifTrue: [insertCount := insertCount + 1]].
 	self assert: 3 equals: insertCount
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testSmalltalkKeywordToUnary [
+
+	| method editor |
+	method := SBTSFileParser new
+		parse: 'abc a keyword: 4'
+		language: SBTSSmalltalk instance.
+	editor := self editorAndWorldFor: method.
+	
+	method childSandblocks second childSandblocks second startInputAtEnd.
+	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: #'unary_message' equals: method childSandblocks second type
 ]
 
 { #category : #'tests - cursor position' }

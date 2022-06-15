@@ -87,6 +87,7 @@ SBTSDisambiguatePopup >> positionAfterDo: aBlock [
 	| foundSelf foundContainer |
 	foundSelf := false.
 	foundContainer := false.
+	target owner isTSBlock ifFalse: [^ self].
 	(target parentSandblock isTSBlock and: [target submorphAfter isNil]) ifTrue: [aBlock value: (SBCursorSelect new block: target parentSandblock)].
 	target owner cursorPositionsDo: [:position |
 		(foundSelf and: [position isInsert or: [position isText and: [position block wantsInput]]]) ifTrue: [aBlock value: position].
@@ -156,6 +157,7 @@ SBTSDisambiguatePopup >> suggestions [
 SBTSDisambiguatePopup >> tryAdjacent [
 	"if we are at the very lowest level, in a textmorph still, dont try adjacent blocks just yet"
 
+	before ifTrue: [^ false].
 	target isTextMorph ifTrue: [^ false].
 	
 	self positionAfterDo: [:position |
@@ -236,7 +238,8 @@ SBTSDisambiguatePopup >> tryTransition [
 
 	self tryFill ifFalse: [self tryReinterpret ifFalse: [self trySeparator ifFalse: [self tryWrap ifFalse: [self tryAdjacent ifFalse: [^ self tryOwner]]]]].
 	choices ifNil: [^ false].
-	choices size = 1 ifTrue: [^ self applyChoice: choices first].
+	(choices size = 1 and: ["if we insert before, we never auto-confirm an input. There's too much room for false positives as most grammars are intended to be written from left to right"
+	before not]) ifTrue: [^ self applyChoice: choices first].
 	choices size = 0 ifTrue: [^ true].
 	^ false
 ]

@@ -5,13 +5,23 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSSlotTest >> expectedFailures [
+SBTSSlotTest >> testParseEqualsTypedIdentifier [
 
-	^ #(#testParseEqualsTyped)
+	| parsed typed editor |
+	parsed := SBJavascript parseToplevel: 'x'.
+	typed := SBJavascript parseToplevel: ''.
+	editor := self editorAndWorldFor: typed.
+	typed lastDeepChild startInsertAtEnd.
+	self type: 'x' in: editor.
+	self
+		tick;
+		tick.
+	self type: String cr in: editor.
+	self assert: parsed lastDeepChild slot nodes equals: typed lastDeepChild slot nodes
 ]
 
 { #category : #'as yet unclassified' }
-SBTSSlotTest >> testParseEqualsTyped [
+SBTSSlotTest >> testParseEqualsTypedShorthandProp [
 
 	| parsed typed editor |
 	parsed := SBTypescript parseToplevel: 'let a = {key}'.

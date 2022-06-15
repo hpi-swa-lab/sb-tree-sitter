@@ -5005,7 +5005,7 @@ SBPython class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
 	aBlock type = 'decorator' ifTrue: [^ true].
-	(((aBlock isStringMorph or: [aBlock isTextMorph]) and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice']]]) ifTrue: [^ true].
+	(((aBlock isStringMorph or: [aBlock isTextMorph]) and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice' and: [(aBlock parentSandblock ifNotNil: #type) ~= #string]]]]) ifTrue: [^ true].
 	^ #('else_clause' 'elif_clause') includes: anotherBlock type
 ]
 
