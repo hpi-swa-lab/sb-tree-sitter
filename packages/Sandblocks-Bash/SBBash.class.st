@@ -5,6 +5,20 @@ Class {
 }
 
 { #category : #actions }
+SBBash class >> autocompleteFile: aBlock [
+	<action>
+	<actionValidIf: #canAutocompleteFile:>
+
+	self halt
+]
+
+{ #category : #actions }
+SBBash class >> canAutocompleteFile: aBlock [
+
+	^ aBlock type = #word and: [aBlock sandblockEditor suggestionMenu canUseSuggestion not]
+]
+
+{ #category : #actions }
 SBBash class >> confirm: aBlock [
 	<action>
 
@@ -2822,7 +2836,7 @@ SBBash class >> suggestionsFor: aBlock [
 	(aBlock type = #word and: [aBlock parentSandblock type = #command]) ifTrue: [
 		^ {
 			SBTSBlockSuggestion new
-				blocks: {(SBBash parseToplevel: 'x word') childSandblocks first childSandblocks second}
+				blocks: {(self parseToplevel: 'x word') childSandblocks first childSandblocks second}
 				in: aBlock sandblockEditor}].
 	^ #()
 ]
@@ -2832,7 +2846,7 @@ SBBash class >> suggestionsForInsert: aCommand [
 
 	^ {
 		(SBInsertSuggestionItem selector: 'a' label: 'arg')
-			morph: (SBBash parseToplevel: 'git commit') childSandblocks first childSandblocks second
+			morph: (self parseToplevel: 'git commit') childSandblocks first childSandblocks second
 				previewOnly: true;
 			yourself}
 ]

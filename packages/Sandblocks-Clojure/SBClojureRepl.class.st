@@ -30,7 +30,7 @@ SBClojureRepl >> connectToREPL [
 { #category : #'as yet unclassified' }
 SBClojureRepl >> evaluate: aBlock [
 
-	(self evaluateString: aBlock sourceString) explore
+	^ self evaluateString: aBlock sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -120,6 +120,12 @@ SBClojureRepl >> repl: aRepl [
 		cellGap: 4;
 		addMorphBack: SBClojure iconMorph;
 		addMorphBack: (SBStringMorph new contents: 'Connected to nREPL :', repl port asString))
+]
+
+{ #category : #'as yet unclassified' }
+SBClojureRepl >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
+
+	^ true
 ]
 
 { #category : #'as yet unclassified' }

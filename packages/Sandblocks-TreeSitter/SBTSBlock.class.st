@@ -268,6 +268,16 @@ SBTSBlock >> evaluate [
 	^ self language runtime evaluate: self sourceString
 ]
 
+{ #category : #actions }
+SBTSBlock >> evaluateExpression [
+	<action>
+	<actionValidIf: #isExpression>
+
+	| result |
+	result := self evaluate.
+	^ result explore
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> exportStructure [
 

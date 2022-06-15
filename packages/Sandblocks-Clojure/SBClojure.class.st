@@ -4,6 +4,12 @@ Class {
 	#category : #'Sandblocks-Clojure'
 }
 
+{ #category : #'as yet unclassified' }
+SBClojure class >> expressionTypes [
+
+	^ #(#'list_lit')
+]
+
 { #category : #configuration }
 SBClojure class >> extraHighlightQuery [
 
@@ -1784,6 +1790,23 @@ SBClojure class >> spaceBetween: aBlock and: anotherBlock [
 		[true].
 		[aBlock owner type = 'list_lit' and: [aBlock contents ~= '(' and: [anotherBlock contents ~= ')']]]}) ifTrue: [^ true].
 	^ super spaceBetween: aBlock and: anotherBlock
+]
+
+{ #category : #'configuration - suggestions' }
+SBClojure class >> suggestionsForInsert: aCommand [
+
+	(aCommand container containingArtefact notNil and: [aCommand container type = 'list_lit' and: [aCommand insertIndex > 2 and: [aCommand container childSandblocks first type = 'sym_lit']]]) ifTrue: [ | signatures |
+		signatures := (aCommand container containingArtefact evaluateString: ('(:arglists (meta #''{1}))' format: {aCommand container childSandblocks first contents}))
+			at: 'value'
+			ifAbsent: [^ #()].
+		signatures := SBScmParser new parse: signatures readStream.
+		^ signatures firstSubmorph submorphs collect: [:expr | | signature |
+			signature := expr sourceString.
+			(SBInsertSuggestionItem selector: signature label: 'arg')
+				morph: (aCommand element buildEmpty first placeholderText: signature)
+					previewOnly: true;
+				yourself]].
+	^ super suggestionsForInsert: aCommand
 ]
 
 { #category : #'as yet unclassified' }

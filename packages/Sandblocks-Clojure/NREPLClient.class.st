@@ -152,6 +152,8 @@ NREPLClient >> send: anObject [
 
 	| socket buffered replies |
 	socket := self createSocket.
+	socket ifNil: [ConnectionClosed signal: 'repl seems to be gone'].
+	
 	socket sendData: (String streamContents: [:s | anObject bencodeOn: s]).
 	
 	buffered := ''.
@@ -168,6 +170,6 @@ NREPLClient >> send: anObject [
 { #category : #'as yet unclassified' }
 NREPLClient >> terminate [
 
-	[self close] on: ConnectionTimedOut do: [].
+	[self close] on: ConnectionClosed do: [].
 	replProcess ifNotNil: #terminate
 ]
