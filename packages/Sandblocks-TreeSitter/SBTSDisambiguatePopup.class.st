@@ -157,8 +157,9 @@ SBTSDisambiguatePopup >> suggestions [
 SBTSDisambiguatePopup >> tryAdjacent [
 	"if we are at the very lowest level, in a textmorph still, dont try adjacent blocks just yet"
 
-	before ifTrue: [^ false].
 	target isTextMorph ifTrue: [^ false].
+	
+	before ifTrue: [^ false].
 	
 	self positionAfterDo: [:position |
 		(position isText and: [position block wantsInput]) ifTrue: [
@@ -190,6 +191,9 @@ SBTSDisambiguatePopup >> tryFill [
 SBTSDisambiguatePopup >> tryOwner [
 
 	target owner isTSBlock ifFalse: [^ false].
+	
+	"currently, we have no use cases where we need to go more than two steps, so abort here for now, to optimize the worst case (where we just keep exploring and don't find anything)"
+	(source ownerChain indexOf: target) > 2 ifTrue: [^ false].
 	
 	^ SBTSDisambiguatePopup new
 		for: target owner

@@ -437,7 +437,7 @@ SBTSBlockTest >> testJsReinterpretIncompleteLabel [
 ]
 
 { #category : #'tests - input transition' }
-SBTSBlockTest >> testJsSeparatorInPendingPattern [
+SBTSBlockTest >> testJsSeparatorInPendingArg [
 
 	| program editor |
 	program := SBJavascript parseToplevel: 'abc()'.
@@ -446,6 +446,22 @@ SBTSBlockTest >> testJsSeparatorInPendingPattern [
 	self type: 'a' in: editor.
 	self type: ',' in: editor.
 	self assert: 'abc(a);' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsSeparatorInPendingPattern [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'function abc() {}'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInsertAtEnd.
+	self type: 'a' in: editor.
+	self type: ',' in: editor.
+	self type: 'b' in: editor.
+	self type: ',' in: editor.
+	self assert: 'function abc(a,b)
+{
+}' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
