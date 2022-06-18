@@ -29,9 +29,21 @@ SBTSCursor >> currentDo: aBlock [
 	type := self unaliasedType.
 	isAlias := type ~= self type.
 	
-	template := self factory bodyNodeForRule: type ifAbsent: [
-		isAlias := true.
-		(self resolveAlias: self type in: self parentType with: self factory aliasOccurrences) unpackAlias].
+	SBToggledCode comment: '' active: 2 do: {
+		[
+			template := isAlias
+				ifTrue: [
+					SBTSNodeAlias new
+						factory: self factory;
+						alias: type;
+						element: (self factory bodyNodeForRule: type ifAbsent: [
+							isAlias := true.
+							(self resolveAlias: self type in: self parentType with: self factory aliasOccurrences) unpackAlias])]
+				ifFalse: [SBTSNodeSymbol new type: type factory: self factory]].
+		[
+			template := self factory bodyNodeForRule: type ifAbsent: [
+				isAlias := true.
+				(self resolveAlias: self type in: self parentType with: self factory aliasOccurrences) unpackAlias]]}.
 	^ aBlock value: type value: template value: isAlias
 ]
 

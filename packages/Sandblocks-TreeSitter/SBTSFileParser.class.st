@@ -3,10 +3,17 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'stream',
-		'slots'
+		'slots',
+		'blocks'
 	],
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
+
+{ #category : #blocks }
+SBTSFileParser >> addBlock: aBlock [
+
+	blocks add: aBlock
+]
 
 { #category : #'as yet unclassified' }
 SBTSFileParser >> addSlot: aNode [
@@ -18,6 +25,58 @@ SBTSFileParser >> addSlot: aNode [
 SBTSFileParser >> atEnd [
 
 	^ stream atEnd
+]
+
+{ #category : #blocks }
+SBTSFileParser >> blocks [
+
+	^ blocks
+]
+
+{ #category : #blocks }
+SBTSFileParser >> blocks: aCollection [
+
+	blocks := aCollection
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> blocksForCursor: aCursor [
+
+	aCursor isNamed ifFalse: [^ {aCursor text}].
+	^ aCursor currentDo: [:type :template :isAlias | | fields matches result |
+		fields := Array streamContents: [:s |
+			aCursor gotoFirstChild ifTrue: [ | current |
+				current := aCursor node.
+				[s nextPutAll: (self blocksForCursor: aCursor)] doWhileFalse: [ | gap atEnd |
+					atEnd := aCursor gotoNextSibling.
+					(aCursor factory noteUncapturedText includes: type) ifTrue: [
+						gap := aCursor textBetween: current and: (atEnd ifTrue: [nil] ifFalse: [aCursor node]).
+						gap size > 0 ifTrue: [s nextPut: gap].
+						current := aCursor node].
+					atEnd].
+				aCursor gotoParent]].
+		stream := (fields ifEmpty: [aCursor text ifEmpty: [#()] ifNotEmpty: [{aCursor text}]]) readStream.
+		blocks := OrderedCollection new.
+		matches := template resultsForBlocks: self.
+		self assert: matches notEmpty description: ('could not construct `{1}`' format: {type}).
+		matches := matches select: [:match | match atEnd].
+		self assert: matches size = 1.
+		
+		result := SBTSBlock new
+			slot: (SBTSSlot with: (isAlias
+				ifTrue: [
+					SBTSNodeAlias new
+						factory: template factory;
+						alias: aCursor type;
+						element: template]
+				ifFalse: [SBTSNodeSymbol new type: type factory: template factory]));
+			addAllMorphs: matches anyOne blocks;
+			yourself.
+		result slot lastNode isBlockInlined
+			ifTrue: [
+				result slot lastNode isBlockInlinedInParent ifFalse: [result submorphs do: [:m | m slot: (m slot addNode: result slot lastNode)]].
+				result submorphs]
+			ifFalse: [{result}]]
 ]
 
 { #category : #stream }
@@ -37,7 +96,8 @@ SBTSFileParser >> initialize [
 
 	super initialize.
 	
-	slots := OrderedCollection new
+	slots := OrderedCollection new.
+	blocks := OrderedCollection new
 ]
 
 { #category : #stream }
@@ -88,10 +148,10 @@ SBTSFileParser >> parse: aString language: aFactory [
 	| api language |
 	api := SBTreeSitter new.
 	language := aFactory isBehavior ifTrue: [aFactory instance] ifFalse: [aFactory].
-	^ api
-		parseAsCursor: aString
-		language: language class language
-		do: [:cursor | self nodeForCursor: (SBTSCursor new library: api cursor: cursor factory: language grammar)]
+	^ api parseAsCursor: aString language: language class language do: [:cursor | | result |
+		result := self blocksForCursor: (SBTSCursor new library: api cursor: cursor factory: language grammar).
+		self assert: result size = 1.
+		result anyOne]
 ]
 
 { #category : #'as yet unclassified' }
@@ -126,7 +186,8 @@ SBTSFileParser >> postCopy [
 	stream := (ReadStream on: stream contents)
 		position: stream position;
 		yourself.
-	slots := slots copy
+	slots := slots copy.
+	blocks := blocks copy
 ]
 
 { #category : #'as yet unclassified' }

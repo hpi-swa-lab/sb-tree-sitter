@@ -186,6 +186,30 @@ SBTSNodeRepeat >> resultsFor: aParser [
 ]
 
 { #category : #parsing }
+SBTSNodeRepeat >> resultsForBlocks: aParser [
+
+	| queue |
+	queue := OrderedCollection with: {aParser. 0}.
+	^ (Array streamContents: [:stream |
+		[queue notEmpty] whileTrue: [ | pair results parser currentPosition index |
+			pair := queue removeFirst.
+			parser := pair first copy.
+			index := pair second + 1.
+			currentPosition := parser position.
+			(parser peek isString and: [parser peek = delimiter]) ifTrue: [
+				parser next.
+				parser addSlot: SBTSNodeBlank new].
+			results := self element resultsForBlocks: parser.
+			results do: [:candidate |
+				"to fix troubles with infinitely repeating matches, we only accept results
+if they advanced the parser."
+				candidate position > currentPosition ifTrue: [
+					(candidate peek isString and: [candidate peek = delimiter]) ifTrue: [candidate next].
+					stream nextPut: candidate.
+					queue add: {candidate. index}]]]]) ifEmpty: [self required ifTrue: [{}] ifFalse: [{aParser copy}]]
+]
+
+{ #category : #parsing }
 SBTSNodeRepeat >> takeNodesFrom: aParser [
 
 	| queue |

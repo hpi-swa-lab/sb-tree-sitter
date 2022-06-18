@@ -192,6 +192,21 @@ SBTSNodeText >> resultsFor: aParser [
 ]
 
 { #category : #parsing }
+SBTSNodeText >> resultsForBlocks: aParser [
+
+	(aParser atEnd not and: [aParser peek isString not and: [aParser peek isTextMorph and: [aParser peek slot lastNode = self]]]) ifTrue: [^ {aParser addBlock: aParser next copyBlock}].
+	
+	^ (aParser atEnd not and: [aParser peek isString and: [self characterValid: aParser peek in: aParser]])
+		ifTrue: [ | text |
+			text := aParser next.
+			{
+				aParser copy addBlock: (SBTSTextMorph new
+					contents: text;
+					slot: (SBTSSlot with: self))}]
+		ifFalse: [(self regex matches: '') ifTrue: [{aParser copy}] ifFalse: [{}]]
+]
+
+{ #category : #parsing }
 SBTSNodeText >> takeNodesFrom: aParser [
 
 	^ (aParser atEnd not and: [aParser peek isString and: [self characterValid: aParser peek in: aParser]])

@@ -25,10 +25,14 @@ SBTSSlotTest >> testParseEqualsTypedShorthandProp [
 
 	| parsed typed editor |
 	parsed := SBTypescript parseToplevel: 'let a = {key}'.
+	self halt.
 	typed := SBTypescript parseToplevel: 'let a = {}'.
 	editor := self editorAndWorldFor: typed.
 	typed lastDeepChild startInsertAtEnd.
 	self type: 'key' in: editor.
+	self tick.
+	self tick.
+	self type: String cr in: editor.
 	self assert: parsed lastDeepChild slot nodes equals: typed lastDeepChild slot nodes
 ]
 

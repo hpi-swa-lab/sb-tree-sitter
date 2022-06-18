@@ -167,6 +167,23 @@ SBTSNodeSeq >> resultsFor: aParser [
 ]
 
 { #category : #parsing }
+SBTSNodeSeq >> resultsForBlocks: aParser [
+
+	| queue |
+	queue := OrderedCollection with: {aParser. 0}.
+	^ Array streamContents: [:stream |
+		[queue notEmpty] whileTrue: [ | pair parser results index |
+			pair := queue removeFirst.
+			parser := pair first copy.
+			index := pair second + 1.
+			results := (self elements at: index) resultsForBlocks: parser.
+			results do: [:candidate |
+				index = self elements size
+					ifTrue: [stream nextPut: candidate]
+					ifFalse: [queue add: {candidate. index}]]]]
+]
+
+{ #category : #parsing }
 SBTSNodeSeq >> takeNodesFrom: aParser [
 
 	| queue |

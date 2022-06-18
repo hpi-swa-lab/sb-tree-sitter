@@ -354,6 +354,12 @@ SBTSNodeBase >> resultsFor: aParser [
 	^ self subclassResponsibility
 ]
 
+{ #category : #parsing }
+SBTSNodeBase >> resultsForBlocks: aParser [
+
+	^ self subclassResponsibility
+]
+
 { #category : #hierarchy }
 SBTSNodeBase >> root [
 

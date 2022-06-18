@@ -21,7 +21,9 @@ SBTSSlot >> addNode: aNode [
 
 	| new |
 	self assert: (aNode isKindOf: SBTSNodeBase).
-	self assert: (nodes isEmpty or: [aNode ~= self lastNode]).
+	SBToggledCode comment: '' active: 1 do: {
+		[self assert: (nodes includes: aNode) not].
+		[self assert: (nodes isEmpty or: [aNode ~= self lastNode])]}.
 	new := self copy.
 	new nodes add: aNode.
 	^ new

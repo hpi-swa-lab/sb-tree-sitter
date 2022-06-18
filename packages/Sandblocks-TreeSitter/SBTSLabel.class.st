@@ -23,6 +23,12 @@ SBTSLabel >> childrenForQuery [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> compatibleWithType: aSymbol [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> copyBlock [
 
 	| copy |

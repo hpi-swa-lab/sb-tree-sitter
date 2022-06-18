@@ -5247,7 +5247,7 @@ SBPython class >> preprocessGrammar: aGrammar [
 						label: quote}])).
 	aGrammar rules at: '_string_content' put: (SBTSNodeContextSensitiveText new
 		factory: aGrammar;
-		validCheck: [:parser :character | character ~= parser slots first firstNode label];
+		validCheck: [:parser :character | character ~= parser blocks first slot firstNode label];
 		regexString: '.*')
 ]
 

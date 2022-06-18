@@ -205,6 +205,25 @@ SBTSNodeLabel >> resultsFor: aParser [
 ]
 
 { #category : #parsing }
+SBTSNodeLabel >> resultsForBlocks: aParser [
+
+	(aParser atEnd not and: [aParser peek isString not and: [(aParser peek isStringMorph or: [aParser peek isTextMorph]) and: [aParser peek contents = self label]]]) ifTrue: [^ {aParser addBlock: aParser next copyBlock}].
+	
+	^ (aParser atEnd not and: [aParser peek = self label])
+		ifTrue: [ | text block |
+			text := aParser next.
+			block := (self isEditable ifTrue: [SBTSTextMorph] ifFalse: [SBTSLabel]) new
+				contents: text;
+				slot: (SBTSSlot with: self).
+			self needsBlockWrapper ifTrue: [
+				block := SBTSBlock new
+					addMorphBack: text;
+					slot: block slot].
+			{aParser addBlock: block}]
+		ifFalse: [{}]
+]
+
+{ #category : #parsing }
 SBTSNodeLabel >> takeNodesFrom: aParser [
 
 	^ (aParser atEnd not and: [aParser peek = self label])

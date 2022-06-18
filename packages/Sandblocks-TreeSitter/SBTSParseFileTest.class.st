@@ -201,7 +201,7 @@ SBTSParseFileTest >> testParse [
 	cursor := SBTSTestCursor new
 		factory: factory;
 		tree: {'module'. ''. true. {{'id'. 'ab'. true}. {'id'. 'cd'. true}}}.
-	block := SBTSFileParser new nodeForCursor: cursor.
+	block := (SBTSFileParser new blocksForCursor: cursor) first.
 	
 	self assert: block childSandblocks first isTSBlock.
 	self assert: moduleRule elements first equals: block childSandblocks first slot lastNode.

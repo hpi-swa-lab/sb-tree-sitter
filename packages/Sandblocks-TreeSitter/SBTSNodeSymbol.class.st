@@ -205,6 +205,23 @@ SBTSNodeSymbol >> resultsFor: aParser [
 ]
 
 { #category : #parsing }
+SBTSNodeSymbol >> resultsForBlocks: aParser [
+
+	(aParser atEnd not and: [aParser peek isString not and: [aParser peek slot lastNode type = self type]]) ifTrue: [ | block |
+		block := aParser next copyBlock.
+		block slot: (block slot replaceLast: self).
+		^ {aParser addBlock: block}].
+	(self isSuperType or: [self isBlockInlinedInParent]) ifTrue: [ | currentBlocks |
+		currentBlocks := aParser blocks.
+		aParser blocks: OrderedCollection new.
+		^ (self bodyTemplate resultsForBlocks: aParser) collect: [:res |
+			res blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]].
+			res blocks: currentBlocks, res blocks.
+			res]].
+	^ {}
+]
+
+{ #category : #parsing }
 SBTSNodeSymbol >> resultsNonMemoizedFor: aParser [
 
 	| currentBlocks |

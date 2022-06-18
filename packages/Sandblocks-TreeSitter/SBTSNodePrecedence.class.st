@@ -133,6 +133,12 @@ SBTSNodePrecedence >> resultsFor: aParser [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodePrecedence >> resultsForBlocks: aParser [
+
+	^ element resultsForBlocks: aParser
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodePrecedence >> takeNodesFrom: aParser [
 
 	^ element takeNodesFrom: aParser
