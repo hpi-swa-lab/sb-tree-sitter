@@ -4,7 +4,10 @@ Class {
 	#instVars : [
 		'stream',
 		'slots',
-		'blocks'
+		'blocks',
+		'cursor',
+		'pendingText',
+		'justEnteredAlias'
 	],
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
@@ -12,6 +15,7 @@ Class {
 { #category : #blocks }
 SBTSFileParser >> addBlock: aBlock [
 
+	self assert: aBlock isTSMorph.
 	blocks add: aBlock
 ]
 
@@ -21,10 +25,23 @@ SBTSFileParser >> addSlot: aNode [
 	slots add: (SBTSSlot with: aNode)
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> ascend [
+
+	^ pendingText
+		ifNotNil: [
+			pendingText := nil.
+			true]
+		ifNil: [ | success |
+			success := cursor atEnd.
+			cursor gotoParent.
+			success]
+]
+
 { #category : #stream }
 SBTSFileParser >> atEnd [
 
-	^ stream atEnd
+	^ cursor atEnd
 ]
 
 { #category : #blocks }
@@ -92,18 +109,58 @@ SBTSFileParser >> currentSlot [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFileParser >> cursor [
+
+	^ cursor
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> descend [
+
+	cursor gotoFirstChild ifFalse: [pendingText := cursor text]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFileParser >> initialize [
 
 	super initialize.
 	
 	slots := OrderedCollection new.
-	blocks := OrderedCollection new
+	blocks := OrderedCollection new.
+	justEnteredAlias := false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> justEnteredAlias [
+
+	^ justEnteredAlias
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> justEnteredAlias: aBoolean [
+
+	justEnteredAlias := aBoolean
 ]
 
 { #category : #stream }
-SBTSFileParser >> next [
+SBTSFileParser >> nextFor: aNode [
 
-	^ stream next
+	| currentBlocks result |
+	cursor gotoFirstChild ifFalse: [cursor text].
+	currentBlocks := blocks.
+	blocks := OrderedCollection new.
+	aNode bodyTemplate resultsForBlocks: self.
+	result := SBTSBlock new
+		addAllMorphs: blocks;
+		slot: (SBTSSlot with: aNode).
+	blocks := currentBlocks.
+	^ result
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> nextSibling [
+
+	cursor gotoNextSibling
 ]
 
 { #category : #'as yet unclassified' }
@@ -143,15 +200,19 @@ SBTSFileParser >> nodeForCursor: aCursor [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSFileParser >> parse: aString language: aFactory [
+SBTSFileParser >> parse: aString language: aLanguage [
 
 	| api language |
 	api := SBTreeSitter new.
-	language := aFactory isBehavior ifTrue: [aFactory instance] ifFalse: [aFactory].
-	^ api parseAsCursor: aString language: language class language do: [:cursor | | result |
-		result := self blocksForCursor: (SBTSCursor new library: api cursor: cursor factory: language grammar).
-		self assert: result size = 1.
-		result anyOne]
+	language := aLanguage isBehavior ifTrue: [aLanguage instance] ifFalse: [aLanguage].
+	^ api parseAsCursor: aString language: language class language do: [:cursorObj | | results |
+		cursor := SBTSCursor new library: api cursor: cursorObj factory: language grammar.
+		results := (SBTSNodeSymbol new
+			type: language class rootRuleName
+			factory: language grammar) resultsForBlocks: self.
+		self assert: results size = 1.
+		self assert: results anyOne blocks size = 1.
+		results anyOne blocks anyOne]
 ]
 
 { #category : #'as yet unclassified' }
@@ -167,27 +228,42 @@ SBTSFileParser >> parseTopLevel: aString language: aFactory [
 	^ toplevel
 ]
 
-{ #category : #stream }
-SBTSFileParser >> peek [
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> peekHasText [
 
-	^ stream peek
+	^ pendingText notNil
+]
+
+{ #category : #stream }
+SBTSFileParser >> peekIsNamed [
+
+	^ cursor isNamed
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> peekText [
+
+	^ pendingText
+]
+
+{ #category : #stream }
+SBTSFileParser >> peekType [
+
+	^ cursor type
 ]
 
 { #category : #stream }
 SBTSFileParser >> position [
 
-	^ stream position
+	^ cursor currentIndex
 ]
 
 { #category : #'as yet unclassified' }
 SBTSFileParser >> postCopy [
 
 	super postCopy.
-	stream := (ReadStream on: stream contents)
-		position: stream position;
-		yourself.
-	slots := slots copy.
-	blocks := blocks copy
+	blocks := blocks collect: [:block | block copyBlock].
+	cursor := cursor copy
 ]
 
 { #category : #'as yet unclassified' }

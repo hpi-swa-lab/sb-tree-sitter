@@ -207,17 +207,42 @@ SBTSNodeSymbol >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeSymbol >> resultsForBlocks: aParser [
 
-	(aParser atEnd not and: [aParser peek isString not and: [aParser peek slot lastNode type = self type]]) ifTrue: [ | block |
-		block := aParser next copyBlock.
-		block slot: (block slot replaceLast: self).
-		^ {aParser addBlock: block}].
-	(self isSuperType or: [self isBlockInlinedInParent]) ifTrue: [ | currentBlocks |
+	type = #string ifTrue: [self halt].
+	(self isSuperType or: [aParser justEnteredAlias]) ifTrue: [ | currentBlocks |
 		currentBlocks := aParser blocks.
+		aParser justEnteredAlias: false.
 		aParser blocks: OrderedCollection new.
 		^ (self bodyTemplate resultsForBlocks: aParser) collect: [:res |
 			res blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]].
 			res blocks: currentBlocks, res blocks.
 			res]].
+	
+	(aParser peekIsNamed and: [aParser peekType = self type]) ifTrue: [ | currentBlocks results |
+		currentBlocks := aParser blocks.
+		aParser blocks: OrderedCollection new.
+		aParser descend.
+		results := self bodyTemplate resultsForBlocks: aParser.
+		^ (results select: [:result |
+			result ascend
+				ifTrue: [
+					result nextSibling.
+					true]
+				ifFalse: [false]]) collect: [:result | | newBlocks |
+			newBlocks := self isBlockInlined
+				ifTrue: [
+					self isBlockInlinedInParent ifTrue: [result blocks] ifFalse: [
+						result blocks
+							do: [:b | b slot: (b slot addNode: self)];
+							yourself]]
+				ifFalse: [
+					{
+						SBTSBlock new
+							addAllMorphs: result blocks;
+							slot: (SBTSSlot with: self)}].
+			result
+				blocks: currentBlocks, newBlocks;
+				yourself]].
+	
 	^ {}
 ]
 

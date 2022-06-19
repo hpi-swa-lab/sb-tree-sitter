@@ -54,6 +54,12 @@ SBTSCursor >> currentFieldName [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursor >> currentIndex [
+
+	^ library nodeStartByte: self node
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursor >> factory [
 
 	^ factory
@@ -152,6 +158,13 @@ SBTSCursor >> position [
 SBTSCursor >> position: aPosition [
 
 	self restoreTo: aPosition
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCursor >> postCopy [
+
+	super postCopy.
+	cursor := self createRestorePoint
 ]
 
 { #category : #'as yet unclassified' }

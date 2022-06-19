@@ -143,25 +143,27 @@ SBTSNodeAlias >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeAlias >> resultsForBlocks: aParser [
 
-	| currentBlocks |
-	currentBlocks := aParser blocks.
-	(aParser atEnd not and: [aParser peek isString not and: [aParser peek slot firstNode isTSAlias and: [aParser peek slot firstNode alias = self alias]]]) ifTrue: [^ {aParser addBlock: aParser next copyBlock}].
-	
-	SBToggledCode comment: '' active: 2 do: {
-		[^ {}].
-		[
-			aParser blocks: OrderedCollection new.
-			^ (self element resultsForBlocks: aParser) collect: [:result |
-				result blocks do: [:b |
-					SBToggledCode comment: '' active: 0 do: {[self assert: self element = b slot lastNode]}.
-					SBToggledCode comment: '' active: 1 do: {
-						[b slot: (b slot replaceLast: self)].
-						[
-							(b slot lastNode isTSText or: [b slot lastNode isTSLabel])
-								ifTrue: [b slot: (b slot addNode: self)]
-								ifFalse: [b slot: (b slot replaceLast: self)]]}].
-				result blocks: currentBlocks, result blocks.
-				result]]}
+	(aParser atEnd not and: [aParser peekIsNamed and: [aParser peekType = self alias]]) ifTrue: [ | block currentBlocks results |
+		currentBlocks := aParser blocks.
+		aParser blocks: OrderedCollection new.
+		aParser descend.
+		aParser justEnteredAlias: true.
+		results := self bodyTemplate resultsForBlocks: aParser.
+		aParser justEnteredAlias: false.
+		^ (results select: [:result |
+			result ascend
+				ifTrue: [
+					result nextSibling.
+					true]
+				ifFalse: [false]]) collect: [:result |
+			block := SBTSBlock new
+				addAllMorphs: result blocks;
+				slot: (SBTSSlot with: self).
+			result
+				blocks: currentBlocks;
+				addBlock: block;
+				yourself]].
+	^ {}
 ]
 
 { #category : #parsing }

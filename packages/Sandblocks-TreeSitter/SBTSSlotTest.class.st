@@ -25,7 +25,6 @@ SBTSSlotTest >> testParseEqualsTypedShorthandProp [
 
 	| parsed typed editor |
 	parsed := SBTypescript parseToplevel: 'let a = {key}'.
-	self halt.
 	typed := SBTypescript parseToplevel: 'let a = {}'.
 	editor := self editorAndWorldFor: typed.
 	typed lastDeepChild startInsertAtEnd.

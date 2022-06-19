@@ -5210,7 +5210,9 @@ SBPython class >> parseStatement: aString [
 { #category : #configuration }
 SBPython class >> postprocessGrammar: aGrammar [
 
-	(aGrammar bodyNodeForRule: #'expression_statement') alternatives first in: [:alt | alt replaceBy: alt element]
+	(aGrammar bodyNodeForRule: #'expression_statement') alternatives first in: [:alt | alt replaceBy: alt element].
+	"simplify block/_suite declaration to only say block"
+	aGrammar rules do: [:rule | rule allElementsDo: [:element | (element isTSAlias and: [element alias = #block and: [element parent isTSChoice]]) ifTrue: [element parent replaceBy: element parent alternatives second]]]
 ]
 
 { #category : #configuration }
