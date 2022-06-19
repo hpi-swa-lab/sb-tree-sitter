@@ -207,17 +207,18 @@ SBTSNodeSymbol >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeSymbol >> resultsForBlocks: aParser [
 
-	type = #string ifTrue: [self halt].
 	(self isSuperType or: [aParser justEnteredAlias]) ifTrue: [ | currentBlocks |
 		currentBlocks := aParser blocks.
 		aParser justEnteredAlias: false.
 		aParser blocks: OrderedCollection new.
-		^ (self bodyTemplate resultsForBlocks: aParser) collect: [:res |
-			res blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]].
+		((self bodyTemplate resultsForBlocks: aParser) collect: [:res |
+			res blocks do: [:b | b slot: (b slot addNode: self)].
 			res blocks: currentBlocks, res blocks.
-			res]].
+			res]) ifNotEmpty: [:results | "haven't found a good way yet to distinguish between just-entered-alias applying or not. e.g., in named_imports it should not apply to identifier.
+so, as a workaround, we just fall-through if we did not match and try to take the symbol"
+		^ results]].
 	
-	(aParser peekIsNamed and: [aParser peekType = self type]) ifTrue: [ | currentBlocks results |
+	(aParser peekForType: self type) ifTrue: [ | currentBlocks results |
 		currentBlocks := aParser blocks.
 		aParser blocks: OrderedCollection new.
 		aParser descend.
@@ -229,11 +230,7 @@ SBTSNodeSymbol >> resultsForBlocks: aParser [
 					true]
 				ifFalse: [false]]) collect: [:result | | newBlocks |
 			newBlocks := self isBlockInlined
-				ifTrue: [
-					self isBlockInlinedInParent ifTrue: [result blocks] ifFalse: [
-						result blocks
-							do: [:b | b slot: (b slot addNode: self)];
-							yourself]]
+				ifTrue: [result blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]]]
 				ifFalse: [
 					{
 						SBTSBlock new

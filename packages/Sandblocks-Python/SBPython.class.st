@@ -5250,7 +5250,10 @@ SBPython class >> preprocessGrammar: aGrammar [
 	aGrammar rules at: '_string_content' put: (SBTSNodeContextSensitiveText new
 		factory: aGrammar;
 		validCheck: [:parser :character | character ~= parser blocks first slot firstNode label];
-		regexString: '.*')
+		regexString: '.*').
+	
+	"causes unambiguous file parses (#testPythonPrint) and we don't need it for our purposes"
+	aGrammar removeRule: #'keyword_identifier'
 ]
 
 { #category : #'configuration - layout' }

@@ -194,14 +194,23 @@ SBTSNodeText >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeText >> resultsForBlocks: aParser [
 
+	| success |
+	success := [:text |
+		{
+			aParser addBlock: (SBTSTextMorph new
+				contents: text;
+				slot: (SBTSSlot with: self))}].
+	
 	^ (aParser peekHasText and: [self characterValid: aParser peekText in: aParser])
-		ifTrue: [ | text |
-			text := aParser peekText.
-			{
-				aParser addBlock: (SBTSTextMorph new
-					contents: text;
-					slot: (SBTSSlot with: self))}]
-		ifFalse: [(self regex matches: '') ifTrue: [{aParser}] ifFalse: [{}]]
+		ifTrue: [success value: aParser text]
+		ifFalse: [ | uncaptured |
+			uncaptured := aParser peekUncapturedText.
+			uncaptured
+				ifNotEmpty: [
+					(self characterValid: uncaptured in: aParser)
+						ifTrue: [success value: aParser uncapturedText]
+						ifFalse: [{}]]
+				ifEmpty: [(self regex matches: '') ifTrue: [{aParser}] ifFalse: [{}]]]
 ]
 
 { #category : #parsing }

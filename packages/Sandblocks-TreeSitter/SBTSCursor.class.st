@@ -60,6 +60,12 @@ SBTSCursor >> currentIndex [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursor >> endByteIndex: aNode [
+
+	^ library nodeEndByte: aNode
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursor >> factory [
 
 	^ factory
@@ -165,6 +171,14 @@ SBTSCursor >> postCopy [
 
 	super postCopy.
 	cursor := self createRestorePoint
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCursor >> previousNode: aNode [
+
+	| prev |
+	prev := library nodePrevSibling: aNode.
+	^ prev id isNull ifFalse: [prev] ifTrue: [nil]
 ]
 
 { #category : #'as yet unclassified' }

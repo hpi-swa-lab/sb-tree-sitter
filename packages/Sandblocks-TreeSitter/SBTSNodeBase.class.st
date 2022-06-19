@@ -340,6 +340,8 @@ SBTSNodeBase >> replaceBy: aNode [
 { #category : #hierarchy }
 SBTSNodeBase >> replaceBy: aNode toplevelDo: aBlock [
 
+	aNode field ifNil: [aNode field: self field].
+	
 	self parent ifNil: [^ aBlock value: aNode].
 	self parent elements: (self parent elements
 		at: (self parent elements indexOf: self) put: aNode;

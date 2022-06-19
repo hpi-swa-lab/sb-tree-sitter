@@ -9,7 +9,8 @@ Class {
 		'aliasOccurrences',
 		'language',
 		'highlightQuery',
-		'precedences'
+		'precedences',
+		'extras'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -252,6 +253,18 @@ SBTSGrammar >> escapeStringForRegex: aString [
 	^ aString copyWithRegex: '[.*+?^${}()|\[\]\\]' matchesTranslatedUsing: [:m | '\', m]
 ]
 
+{ #category : #accessing }
+SBTSGrammar >> extras [
+
+	^ extras
+]
+
+{ #category : #accessing }
+SBTSGrammar >> extras: aCollection [
+
+	extras := aCollection
+]
+
 { #category : #cleaning }
 SBTSGrammar >> flattenSeparatedList: anObject name: aString [
 
@@ -329,6 +342,15 @@ SBTSGrammar >> isBlockInlined: aSymbol [
 SBTSGrammar >> isBlockInlinedInParent: aTypeString [
 
 	^ self language isBlockInlinedInParent: aTypeString
+]
+
+{ #category : #testing }
+SBTSGrammar >> isExtra: aString [
+
+	^ extras anySatisfy: [:regex | | ret |
+		ret := regex matches: aString.
+		SBToggledCode comment: '' active: 0 do: {[ret ifFalse: [self halt]]}.
+		ret]
 ]
 
 { #category : #testing }
@@ -452,6 +474,7 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 	inlinedRules := (aJSONGrammar at: 'inline') collect: #asSymbol.
 	precedences := aJSONGrammar at: 'precedences'.
 	aliasOccurrences := OrderedCollection new.
+	extras := ((aJSONGrammar at: 'extras') select: [:extra | extra type = 'PATTERN']) collect: [:extra | ('({1})*' format: {extra value}) asRegex].
 	rules := (aJSONGrammar at: 'rules')
 		collect: [:rule | self buildNodesFor: rule]
 		as: Dictionary.

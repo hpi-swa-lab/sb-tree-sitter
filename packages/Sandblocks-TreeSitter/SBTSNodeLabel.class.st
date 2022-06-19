@@ -207,18 +207,28 @@ SBTSNodeLabel >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeLabel >> resultsForBlocks: aParser [
 
-	^ (aParser atEnd not and: [aParser peekIsNamed not and: [aParser peekType = self label]])
-		ifTrue: [ | block |
-			aParser nextSibling.
-			block := (self isEditable ifTrue: [SBTSTextMorph] ifFalse: [SBTSLabel]) new
-				contents: self label;
-				slot: (SBTSSlot with: self).
-			self needsBlockWrapper ifTrue: [
-				block := SBTSBlock new
-					addMorphBack: block;
-					slot: block slot].
-			{aParser addBlock: block}]
-		ifFalse: [{}]
+	| success |
+	success := [ | block |
+		block := (self isEditable ifTrue: [SBTSTextMorph] ifFalse: [SBTSLabel]) new
+			contents: self label;
+			slot: (SBTSSlot with: self).
+		self needsBlockWrapper ifTrue: [
+			block := SBTSBlock new
+				addMorphBack: block;
+				slot: block slot].
+		{aParser addBlock: block}].
+	
+	(aParser peekForLabel: self label) ifTrue: [
+		aParser nextSibling.
+		^ success value].
+	
+	(aParser justEnteredAlias and: [aParser peekText = self label]) ifTrue: [
+		aParser justEnteredAlias: false.
+		^ success value].
+	
+	aParser peekText = self label ifTrue: [^ success value].
+	
+	^ {}
 ]
 
 { #category : #parsing }

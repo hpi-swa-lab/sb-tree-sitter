@@ -143,7 +143,7 @@ SBTSNodeAlias >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeAlias >> resultsForBlocks: aParser [
 
-	(aParser atEnd not and: [aParser peekIsNamed and: [aParser peekType = self alias]]) ifTrue: [ | block currentBlocks results |
+	(aParser atEnd not and: [aParser peekForType: self alias]) ifTrue: [ | block currentBlocks results |
 		currentBlocks := aParser blocks.
 		aParser blocks: OrderedCollection new.
 		aParser descend.

@@ -80,7 +80,10 @@ SBTSSlot >> compatibleWithType: aTypeString [
 { #category : #'as yet unclassified' }
 SBTSSlot >> delimiterBetween: aBlock and: anotherBlock [
 
-	aBlock slot repeatersDo: [:r | (r delimiter notNil and: [anotherBlock slot includesParent: r]) ifTrue: [^ r delimiter]].
+	aBlock slot allParentsDo: [:p |
+		"if we first hit a seq where both of these are involved, do not put a delimiter"
+		(p isTSSeq and: [anotherBlock slot includesParent: p]) ifTrue: [^ ''].
+		(p isTSRepeat and: [(anotherBlock slot includesParent: p) and: [p delimiter notNil]]) ifTrue: [^ p delimiter]].
 	^ ''
 ]
 

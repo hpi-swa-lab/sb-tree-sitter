@@ -266,6 +266,13 @@ SBTreeSitter >> nodeParent: aNode [
 ]
 
 { #category : #ffi }
+SBTreeSitter >> nodePrevSibling: aNode [
+
+	<apicall: SBTSNode ts_node_prev_sibling (SBTSNode)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
 SBTreeSitter >> nodePrivAlias: aNode [
 
 	<apicall: uint16_t ts_node__alias (SBTSNode)>

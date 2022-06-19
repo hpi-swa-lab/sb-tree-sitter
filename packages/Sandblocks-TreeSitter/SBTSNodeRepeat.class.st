@@ -193,19 +193,23 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 	^ (Array streamContents: [:stream |
 		[queue notEmpty] whileTrue: [ | pair results parser currentPosition index wasAtEnd |
 			pair := queue removeFirst.
+			SBToggledCode comment: '' active: 0 do: {
+				[(self element isTSChoice and: [self element alternatives first type = #interpolation]) ifTrue: [self halt]]}.
 			parser := pair first copy.
 			index := pair second + 1.
 			currentPosition := parser position.
 			wasAtEnd := parser atEnd.
-			(parser peekIsNamed not and: [parser peekType = delimiter]) ifTrue: [parser nextSibling].
+			(parser peekForLabel: delimiter) ifTrue: [parser nextSibling].
 			results := self element resultsForBlocks: parser.
 			results do: [:candidate |
 				"to fix troubles with infinitely repeating matches, we only accept results
 if they advanced the parser."
-				candidate position > currentPosition or: [wasAtEnd not and: [candidate atEnd]] ifTrue: [
-					(parser peekIsNamed not and: [parser peekType = delimiter]) ifTrue: [candidate nextSibling].
-					stream nextPut: candidate.
-					queue add: {candidate. index}]]]]) ifEmpty: [self required ifTrue: [{}] ifFalse: [{aParser copy}]]
+				candidate position > currentPosition
+					or: [wasAtEnd not and: [candidate atEnd]]
+					ifTrue: [
+						(parser peekForLabel: delimiter) ifTrue: [candidate nextSibling].
+						stream nextPut: candidate.
+						queue add: {candidate. index}]]]]) ifEmpty: [self required ifTrue: [{}] ifFalse: [{aParser copy}]]
 ]
 
 { #category : #parsing }
