@@ -469,7 +469,6 @@ SBTSBlockTest >> testJsSeparatorInPendingPattern [
 	self type: 'a' in: editor.
 	self type: ',' in: editor.
 	self type: 'b' in: editor.
-	self type: ',' in: editor.
 	self assert: 'function abc(a,b)
 {
 }' equals: program sourceStringForCompare

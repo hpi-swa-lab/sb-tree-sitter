@@ -119,15 +119,20 @@ SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 				ifFalse: [
 					"if we are in a finished label, just return our index so that the next position will be taken.
 					otherwise, we will likely want to continue typing here, so pretend that we were one index further out"
-					(all indexOf: cursor block currentTextMorph) + (cursor block currentTextMorph slot firstNode isTSLabel ifTrue: [0] ifFalse: [1])]].
+					(all indexOf: cursor block currentTextMorph) + (cursor block currentTextMorph slot firstNode isTSLabel
+						ifTrue: [0]
+						ifFalse: [1])]].
 		
 		aCollection do: [:block |
 			block cursorPositionsDo: [:cursor |
 				(((cursor isInsert and: [(cursor command element hasParentThat: [:p | p isTSRepeat and: [p required or: [p multiple not]]]) not]) or: [cursor isText]) and: [(positionInAll value: cursor) > stopIndex]) ifTrue: [
-					^ block sandblockEditor cursor
+					block sandblockEditor cursor
 						cursorPosition: (cursor placeAtEnd: true)
 						explicitMove: false
-						axis: #none]]]].
+						axis: #none.
+					"if we completed a keyword and the input finished at the very boundary of the block, move one to the right to facilitate continuing to type (may be replaced with a post-do action, mostly need in tryFill with separators)"
+					(self contents notEmpty and: [self contents last = $  and: [block = block lastDeepChild containingSandblock]]) ifTrue: [block sandblockEditor performForSelection: #moveCursorRight].
+					^ self]]]].
 	
 	aCollection last isSandblock ifTrue: [aCollection last lastDeepChild startInputAtEnd].
 	aCollection last isTextMorph ifTrue: [
@@ -193,11 +198,14 @@ SBTSDisambiguatePopup >> tryApplyFirstChoice [
 { #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> tryFill [
 
+	| query |
 	(target wantsInput not or: [target childSandblocks notEmpty]) ifTrue: [^ false].
 	
-	choices := SBTSInputParser new
-		optionsForTemplate: target slot lastNode
-		given: self contents.
+	query := self contents.
+	(target owner slot delimiterBetween: target and: target) ifNotEmpty: [:delimiter | (query endsWith: delimiter) ifTrue: [query := (query allButLast: delimiter size), ' ']].
+	
+	choices := SBTSInputParser new optionsForTemplate: target slot lastNode given: query.
+	choices ifNotEmpty: [self currentTextMorph basicContents: query].
 	^ choices notEmpty
 ]
 
