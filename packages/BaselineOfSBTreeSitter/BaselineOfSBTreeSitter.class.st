@@ -85,10 +85,7 @@ BaselineOfSBTreeSitter >> depSqueakSource: aMCRepository name: aString targetRep
 BaselineOfSBTreeSitter >> preload: loader package: packageSpec [
 
 	(self depSqueakSource: #inbox name: 'Multilingual-ct.259' targetRepository: #trunk) value value.
-	SBToggledCode
-		comment: ''
-		active: 0
-		do: {[(Installer url: 'https://tmbe.me/c/Regex-Core-ct.75.mcz') install]}
+	"(Installer url: 'https://tmbe.me/c/Regex-Core-ct.75.mcz') install"
 ]
 
 { #category : #baseline }

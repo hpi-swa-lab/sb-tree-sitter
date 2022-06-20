@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #()
+	^ #(#testJsAddAssignmentToStatement)
 ]
 
 { #category : #'tests - adding' }
