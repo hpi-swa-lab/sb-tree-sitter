@@ -60,6 +60,12 @@ SBTSLabel >> field [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> firstSourceCharacter [
+
+	^ self contents size = 0 ifTrue: [self contents first] ifFalse: [nil]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> foregroundColor [
 
 	^ self containingSandblock colorPolicy foregroundColorForBlock: self

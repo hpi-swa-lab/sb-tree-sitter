@@ -761,7 +761,7 @@ SBRegex class >> softLineBreakBetween: aBlock and: anotherBlock [
 ]
 
 { #category : #'configuration - layout' }
-SBRegex class >> spaceBetween: aBlock and: anotherBlock [
+SBRegex class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
 	^ false
 ]
@@ -818,10 +818,4 @@ SBRegex >> preprocessGrammar [
 SBRegex >> softLineBreakBetween: aBlock and: anotherBlock [
 
 	^ true
-]
-
-{ #category : #grammar }
-SBRegex >> spaceBetween: aBlock and: anotherBlock [
-
-	^ false
 ]

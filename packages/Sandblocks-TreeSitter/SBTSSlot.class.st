@@ -301,14 +301,17 @@ SBTSSlot >> replaceLast: aNode [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSSlot >> separatorBetween: aBlock and: anotherBlock indent: aNumber [
+SBTSSlot >> separatorBetween: aBlock and: anotherBlock indent: aNumber lastCharacterOfFirst: aCharacter [
 
 	(self delimiterBetween: aBlock and: anotherBlock) ifNotEmpty: [:delimiter | ^ delimiter].
 	(self factory hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [
 		^ String streamContents: [:s |
 			s cr.
 			aNumber timesRepeat: [s tab]]].
-	(self factory language spaceBetween: aBlock and: anotherBlock) ifTrue: [^ String space].
+	(self factory language
+		spaceBetween: aBlock
+		and: anotherBlock
+		lastCharacterOfFirst: aCharacter) ifTrue: [^ String space].
 	^ ''
 ]
 
@@ -364,12 +367,7 @@ SBTSSlot >> updateHighlightFor: aBlock [
 
 { #category : #'as yet unclassified' }
 SBTSSlot >> veryDeepCopyWith: deepCopier [
+	"immutable, so can be shared"
 
 	
-]
-
-{ #category : #'as yet unclassified' }
-SBTSSlot >> writeSourceOn: aStream with: aCollection [
-
-	nodes last
 ]

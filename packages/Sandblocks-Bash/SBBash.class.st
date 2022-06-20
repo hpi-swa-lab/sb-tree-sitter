@@ -2825,7 +2825,7 @@ SBBash class >> rootRuleName [
 ]
 
 { #category : #'configuration - layout' }
-SBBash class >> spaceBetween: aBlock and: anotherBlock [
+SBBash class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
 	^ aBlock containingSandblock ~= anotherBlock containingSandblock
 ]

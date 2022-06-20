@@ -25,6 +25,13 @@ SBTSParseFileTest >> testAdaptRegexNodes [
 		equals: b childSandblocks first childSandblocks first slot firstNode
 ]
 
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testCInclude [
+
+	SBC parseToplevel: '#include <test.h>
+'
+]
+
 { #category : #'tests - print' }
 SBTSParseFileTest >> testClojureSpaces [
 
@@ -113,6 +120,12 @@ SBTSParseFileTest >> testJsParameters [
 	self
 		assert: source
 		equals: (SBTSFileParser new parse: source language: SBJavascript instance) sourceString
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testJsTrailingComma [
+
+	SBJavascript parseToplevel: 'const a = {a,}'
 ]
 
 { #category : #'tests - languages' }

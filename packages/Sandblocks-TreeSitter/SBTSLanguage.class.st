@@ -402,14 +402,12 @@ SBTSLanguage class >> softLineBreakBetween: aBlock and: anotherBlock [
 ]
 
 { #category : #'configuration - layout' }
-SBTSLanguage class >> spaceBetween: aBlock and: anotherBlock [
+SBTSLanguage class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
-	^ (aBlock sourceString
-		ifNotEmpty: [:s | s last isAlphaNumeric or: [s last = $_]]
-		ifEmpty: [false]) and: [
-		anotherBlock sourceString
-			ifNotEmpty: [:s | s first isAlphaNumeric or: [s first = $_]]
-			ifEmpty: [false]]
+	^ (aCharacter isAlphaNumeric or: [aCharacter = $_]) and: [
+		anotherBlock firstSourceCharacter
+			ifNotNil: [:c | c isAlphaNumeric or: [c = $_]]
+			ifNil: [false]]
 ]
 
 { #category : #configuration }

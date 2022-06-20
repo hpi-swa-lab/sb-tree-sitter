@@ -322,6 +322,13 @@ SBTSBlock >> field [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> firstSourceCharacter [
+
+	self writeSourceOn: (SBImmediateStream with: [:c | ^ c]) indent: 0 forCompare: false.
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> fixedNumberOfChildren [
 
 	self cursorPositionsDo: [:c | (c isKindOf: SBCursorInsert) ifTrue: [^ false]] shallow: true.
@@ -908,14 +915,11 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 	parens ifTrue: [aStream nextPut: $(].
 	self children overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.
-		aStream nextPutAll: (self slot separatorBetween: first and: second indent: aNumber)].
+		aStream nextPutAll: (self slot separatorBetween: first and: second indent: aNumber lastCharacterOfFirst: aStream last)].
 	self lastSubmorph
 		writeSourceOn: aStream
 		indent: (self indentFor: self lastSubmorph current: aNumber)
 		forCompare: aBoolean.
-	self slot nodes do: [:node |
-		node bodyTemplate andParentsDo: [:type |
-			type hasStatementTerminator ifTrue: [
-				aStream nextPutAll: self language statementTerminator]]].
+	self slot nodes do: [:node | node bodyTemplate andParentsDo: [:type | type hasStatementTerminator ifTrue: [aStream nextPutAll: self language statementTerminator]]].
 	parens ifTrue: [aStream nextPut: $)]
 ]

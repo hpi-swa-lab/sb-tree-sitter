@@ -71,8 +71,7 @@ SBWatch2 >> buildPython [
         (lambda e: ((lambda s: (s.connect(("localhost", int(__import__("os").environ["SQ_WATCH"]))), s.send(
     ("{\"id\":\"08cd4b51-8b2d-4d6a-8a2b-c1728c42cd3a\",\"expression\":"+str(e)+"}").encode()), s.close()))(__import__("socket").socket()), e))(2)[1])+2'>
 
-	self id: ((((self bindings at: 'string') sourceString allRegexMatches: '\\"id\\"\:\\"([^\\]+)\\"') first
-		allButFirst: 9) allButLast: 2).
+	self id: ((((self bindings at: 'string') sourceString allRegexMatches: '\\"id\\"\:\\"([^\\]+)\\"') first allButFirst: 9) allButLast: 2).
 	
 	self addMorphFront: (self createBindingBlock: 'expression')
 ]

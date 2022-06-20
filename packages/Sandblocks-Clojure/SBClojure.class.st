@@ -1791,12 +1791,12 @@ SBClojure class >> sourceForSlider: aBlock [
 ]
 
 { #category : #'configuration - layout' }
-SBClojure class >> spaceBetween: aBlock and: anotherBlock [
+SBClojure class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
 	(SBToggledCode comment: '' active: 2 do: {
 		[true].
 		[aBlock owner type = 'list_lit' and: [aBlock contents ~= '(' and: [anotherBlock contents ~= ')']]]}) ifTrue: [^ true].
-	^ super spaceBetween: aBlock and: anotherBlock
+	^ super spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter
 ]
 
 { #category : #'configuration - suggestions' }
