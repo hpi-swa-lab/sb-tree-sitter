@@ -4,6 +4,14 @@ Class {
 	#category : #'Sandblocks-TSSmalltalk'
 }
 
+{ #category : #'configuration - layout' }
+SBTSSmalltalk class >> addIndent: aBlock [
+
+	(super addIndent: aBlock) ifTrue: [^ true].
+	aBlock field = #receiver ifTrue: [^ true].
+	^ false
+]
+
 { #category : #'configuration - declarations' }
 SBTSSmalltalk class >> declarationsInScope: aScopeBlock do: aClosure [
 
@@ -25,7 +33,7 @@ SBTSSmalltalk class >> expressionTypes [
 	^ #(#expression)
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBTSSmalltalk class >> grammarJson [
 
     " https://github.com/smalltalk/blob/master/src/grammar.json "
@@ -390,7 +398,7 @@ SBTSSmalltalk class >> grammarJson [
     },
     "number": {
       "type": "PATTERN",
-      "value": "([0-9]+r)?[0-9]+|[0-9]+\\.[0-9]+"
+      "value": "[0-9]+\\.[0-9]+|([0-9]+r)?[0-9]+"
     },
     "string": {
       "type": "SEQ",
@@ -1060,25 +1068,36 @@ SBTSSmalltalk class >> grammarJson [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
-	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	(aBlock slot lastNode type = #statement and: [anotherBlock slot lastNode type = #statement]) ifTrue: [^ true].
+	(anotherBlock slot lastNode type = #statement and: [(anotherBlock owner submorphs count: [:m | m slot lastNode type = #statement]) > 1]) ifTrue: [^ true].
 	(aBlock parentSandblock ifNotNil: #type) = #method ifTrue: [^ true].
 	^ false
 ]
 
-{ #category : #properties }
+{ #category : #configuration }
 SBTSSmalltalk class >> highlightQuery [
+	" https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
 
-    " https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
-    ^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
+	^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
+
 (number) @number
+
 (string) @string
 (symbol) @string
+(character) @string
+
 (identifier) @variable
+(block_argument) @variable
+
 (unary_message (_) (unary_identifier) @variable.part)
 (binary_operator) @variable.part
 (keyword) @variable.part
+
 ["^" "[" "]" "{" "}"] @important
-'
+
+(keyword_selector (keyword) @major_declaration)
+(binary_selector (binary_operator) @major_declaration)
+(unary_selector (unary_identifier) @major_declaration)'
 ]
 
 { #category : #configuration }
@@ -1124,6 +1143,16 @@ SBTSSmalltalk class >> lowercaseSuggestionsFor: aBlock [
 SBTSSmalltalk class >> rootRuleName [
 
 	^ 'method'
+]
+
+{ #category : #'configuration - layout' }
+SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
+
+	aBlock type = #'block_argument' ifTrue: [^ false].
+	(super softLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
+	aBlock field = #receiver ifTrue: [^ true].
+	anotherBlock type = #keyword ifTrue: [^ true].
+	^ false
 ]
 
 { #category : #'configuration - suggestions' }

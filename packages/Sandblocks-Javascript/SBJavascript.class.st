@@ -6887,12 +6887,6 @@ SBJavascript class >> statementTerminator [
 ]
 
 { #category : #'as yet unclassified' }
-SBJavascript >> addIndent: aBlock [
-
-	^ super addIndent: aBlock
-]
-
-{ #category : #'as yet unclassified' }
 SBJavascript >> configure [
 
 	self blockInline: #('expression_statement').

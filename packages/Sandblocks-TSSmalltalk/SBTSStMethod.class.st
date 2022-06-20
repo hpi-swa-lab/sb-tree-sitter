@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSStMethod class >> for: aCompiledMethod [
+
+	^ self new for: aCompiledMethod
+]
+
+{ #category : #'as yet unclassified' }
 SBTSStMethod >> for: aCompiledMethod [
 
 	self addMorphBack: (SBStClassNameInput new object: aCompiledMethod methodClass).

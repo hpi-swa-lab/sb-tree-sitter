@@ -11062,6 +11062,12 @@ SBTypescript class >> highlightQuery [
 ]
 
 { #category : #configuration }
+SBTypescript class >> isBlockInlined: aSymbol [
+
+	^ aSymbol = #'expression_statement' or: [super isBlockInlined: aSymbol]
+]
+
+{ #category : #configuration }
 SBTypescript class >> language [
 
     ^ #typescript
@@ -11075,7 +11081,11 @@ SBTypescript class >> preprocessGrammar: aGrammar [
 	(aGrammar bodyNodeForRule: #'subscript_expression') element elements first replaceBy: (aGrammar bodyNodeForRule: #'subscript_expression') element elements first elements first.
 	
 	"bug in the grammar: string is mentioned twice"
-	((aGrammar bodyNodeForRule: #'predefined_type') elements detect: [:node | node label = 'string']) delete
+	((aGrammar bodyNodeForRule: #'predefined_type') elements detect: [:node | node label = 'string']) delete.
+	
+	aGrammar rules at: '_template_chars' put: (SBTSNodeText new
+		regexString: '.*';
+		factory: aGrammar)
 ]
 
 { #category : #configuration }
