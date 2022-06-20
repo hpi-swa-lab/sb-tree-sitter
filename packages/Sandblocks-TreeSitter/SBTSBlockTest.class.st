@@ -264,7 +264,7 @@ SBTSBlockTest >> testJsCallToSubscript [
 ]
 
 { #category : #'tests - deleting' }
-SBTSBlockTest >> testJsChangePlusToMinus [
+SBTSBlockTest >> testJsChangePlusToDivide [
 
 	| module editor |
 	module := SBTSFileParser new parse: '2+3' language: SBJavascript.
@@ -275,10 +275,10 @@ SBTSBlockTest >> testJsChangePlusToMinus [
 	self assert: '2+;' equals: module sourceString.
 	editor handle: (self keyboardEvent: Character backspace).
 	self assert: '2;' equals: module sourceString.
-	editor handle: (self keyboardEvent: $-).
-	self assert: '2-', Character null, ';' equals: module sourceStringForCompare.
+	editor handle: (self keyboardEvent: $/).
+	self assert: '2/', Character null, ';' equals: module sourceStringForCompare.
 	editor handle: (self keyboardEvent: $4).
-	self assert: '2-4;' equals: module sourceStringForCompare
+	self assert: '2/4;' equals: module sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -464,7 +464,8 @@ SBTSBlockTest >> testJsSeparatorInPendingPattern [
 	| program editor |
 	program := SBJavascript parseToplevel: 'function abc() {}'.
 	editor := self editorAndWorldFor: program.
-	program lastDeepChild startInsertAtEnd.
+	(program queryNode: '(identifier)') startInputAtEnd.
+	3 timesRepeat: [editor handle: (self keyboardEvent: Character arrowRight)].
 	self type: 'a' in: editor.
 	self type: ',' in: editor.
 	self type: 'b' in: editor.
@@ -754,7 +755,7 @@ SBTSBlockTest >> testSmalltalkKeywordToUnary [
 		language: SBTSSmalltalk instance.
 	editor := self editorAndWorldFor: method.
 	
-	method childSandblocks second childSandblocks second startInputAtEnd.
+	method lastDeepChild startInputAtEnd.
 	editor handle: (self keyboardEvent: Character backspace).
 	editor handle: (self keyboardEvent: Character backspace).
 	editor handle: (self keyboardEvent: Character backspace).

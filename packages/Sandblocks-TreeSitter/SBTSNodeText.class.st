@@ -179,7 +179,8 @@ SBTSNodeText >> resultsFor: aParser [
 				ifFalse: [aParser stream position: start]].
 		
 		remaining := aParser stream upToEnd.
-		(SBToggledCode comment: '' active: 1 do: {
+		(SBToggledCode comment: '' active: 2 do: {
+			[false].
 			[(remaining noneSatisfy: [:c | c isMorph]) and: [self prefixValidFor: remaining]].
 			[plainPrefix beginsWith: remaining]}) ifTrue: [
 			^ {

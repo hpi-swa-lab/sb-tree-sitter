@@ -217,7 +217,14 @@ SBTSBlock >> deleteBeforeCursor [
 
 	| editor textMorph |
 	textMorph := self sandblockEditor currentInputCommand textMorph.
-	self contents ifNotEmpty: [^ super deleteBeforeCursor].
+	self contents ifNotEmpty: [
+		super deleteBeforeCursor.
+		(self valid not and: [self contents notEmpty]) ifTrue: [
+			SBTSDisambiguatePopup new
+				source: self currentTextMorph target: self owner before: false;
+				tryReinterpret;
+				tryApplyFirstChoice].
+		^ self].
 	editor := self sandblockEditor.
 	
 	textMorph submorphBefore ifNil: [
@@ -468,8 +475,9 @@ SBTSBlock >> isTSReplacement [
 
 { #category : #testing }
 SBTSBlock >> keepDuringTransform [
+	"if we wrap a single text field, check if that field is empty and if that is the case, do not necessarily keep this block during transforms"
 
-	^ true
+	^ (self submorphCount = 1 and: [self currentTextMorph notNil and: [self contents isEmpty]]) not
 ]
 
 { #category : #'as yet unclassified' }

@@ -139,6 +139,14 @@ SBTSDisambiguatePopup >> positionCursorIn: aCollection [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSDisambiguatePopup >> source: aBlock target: anotherBlock before: aBoolean [
+
+	source := aBlock.
+	target := anotherBlock.
+	before := aBoolean
+]
+
+{ #category : #'as yet unclassified' }
 SBTSDisambiguatePopup >> suggestAlways [
 
 	^ true
@@ -174,6 +182,12 @@ SBTSDisambiguatePopup >> tryAdjacent [
 				choices := #().
 				^ true]]].
 	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSDisambiguatePopup >> tryApplyFirstChoice [
+
+	choices ifNotEmpty: [self applyChoice: choices first]
 ]
 
 { #category : #'as yet unclassified' }

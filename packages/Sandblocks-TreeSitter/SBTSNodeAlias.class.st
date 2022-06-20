@@ -219,7 +219,6 @@ SBTSNodeAlias >> unpackAlias [
 { #category : #parsing }
 SBTSNodeAlias >> unwrapsNestedBlock [
 
-	SBToggledCode comment: '' active: 0 do: {[^ true]}.
 	self allElementsDo: [:e | (e isTSRepeat or: [e isTSSeq]) ifTrue: [^ false]].
 	^ true
 ]
