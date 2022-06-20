@@ -238,10 +238,14 @@ SBTSBlock >> deleteBeforeCursor [
 { #category : #'as yet unclassified' }
 SBTSBlock >> deleteCommandFor: aBlock [
 
-	| groups |
-	aBlock slot repeatersDo: [:repeater |
-		groups := repeater groupsIn: self.
-		(repeater required not or: [groups size > 1]) ifTrue: [groups do: [:group | (group includes: aBlock) ifTrue: [^ SBCombinedCommand newWith: (group collect: [:block | SBDeleteCommand new target: block])]]]].
+	| target |
+	target := aBlock.
+	" walk up the chain of nodes, looking for either a repeater that we can delete from or any nodes that would have created other blocks, thus changing our deletion target "
+	aBlock slot allParentsDo: [:p |
+		(p createsNewBlock and: [p ~= aBlock slot firstNode]) ifTrue: [target := target parentSandblock].
+		p isTSRepeat ifTrue: [ | groups |
+			groups := p groupsIn: target owner.
+			(p required not or: [groups size > 1]) ifTrue: [groups do: [:group | (group includes: target) ifTrue: [^ SBCombinedCommand newWith: (group collect: [:block | SBDeleteCommand new target: block])]]]]].
 	^ nil
 ]
 

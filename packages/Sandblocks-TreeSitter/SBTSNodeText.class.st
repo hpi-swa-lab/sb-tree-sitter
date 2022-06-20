@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSNodeText >> allChildrenDo: aBlock [
+SBTSNodeText >> allChildrenDo: aBlock visited: aSet [
 
 	aBlock value: self
 ]

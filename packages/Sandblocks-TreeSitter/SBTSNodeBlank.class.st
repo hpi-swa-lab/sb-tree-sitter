@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSNodeBlank >> allChildrenDo: aBlock [
+SBTSNodeBlank >> allChildrenDo: aBlock visited: aSet [
 
 	aBlock value: self
 ]

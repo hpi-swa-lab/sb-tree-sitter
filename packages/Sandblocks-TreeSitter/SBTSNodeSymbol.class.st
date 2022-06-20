@@ -8,10 +8,12 @@ Class {
 }
 
 { #category : #hierarchy }
-SBTSNodeSymbol >> allChildrenDo: aBlock [
+SBTSNodeSymbol >> allChildrenDo: aBlock visited: aSet [
 
 	aBlock value: self.
-	self isInlined ifTrue: [self bodyTemplate allChildrenDo: aBlock]
+	(self isInlined and: [(aSet includes: self) not]) ifTrue: [
+		aSet add: self.
+		self bodyTemplate allChildrenDo: aBlock visited: aSet]
 ]
 
 { #category : #hierarchy }
@@ -79,6 +81,12 @@ SBTSNodeSymbol >> buildEmptyNodes [
 							kind: #block
 							slot: (SBTSSlot with: self)
 							contents: self bodyTemplate buildEmptyNodes}]]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeSymbol >> createsNewBlock [
+
+	^ self isInlined not
 ]
 
 { #category : #hierarchy }

@@ -25,6 +25,12 @@ SBTSNodeBase >> allChildrenDetect: aBlock ifFound: aSuccessBlock ifNone: aFailBl
 { #category : #blocks }
 SBTSNodeBase >> allChildrenDo: aBlock [
 
+	self allChildrenDo: aBlock visited: IdentitySet new
+]
+
+{ #category : #blocks }
+SBTSNodeBase >> allChildrenDo: aBlock visited: aSet [
+
 	self subclassResponsibility
 ]
 
@@ -103,6 +109,12 @@ SBTSNodeBase >> countType: aSymbol [
 	count := 0.
 	self allChildrenDo: [:c | c type = aSymbol ifTrue: [count := count + 1]].
 	^ count
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> createsNewBlock [
+
+	^ false
 ]
 
 { #category : #blocks }
@@ -221,7 +233,7 @@ SBTSNodeBase >> isBlockInlinedInParent [
 { #category : #testing }
 SBTSNodeBase >> isInlined [
 
-	^ self isSuperType or: [self isBlockInlined]
+	^ self isSuperType or: [self isBlockInlined or: [self hasParentThat: [:parent | parent isTSAlias and: [parent unwrapsNestedBlock]]]]
 ]
 
 { #category : #testing }

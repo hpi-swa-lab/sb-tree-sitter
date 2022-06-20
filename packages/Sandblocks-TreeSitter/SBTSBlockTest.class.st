@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testDeleteInRepeat)
+	^ #()
 ]
 
 { #category : #'tests - adding' }
@@ -169,7 +169,7 @@ SBTSBlockTest >> testDeleteInRepeat [
 	module := SBTSFileParser new parse: '[1,2]' language: SBJavascript.
 	editor := self editorFor: module.
 	module lastDeepChild startInputAtEnd.
-	6 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	8 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
 	self assert: '' equals: module sourceString
 ]
 
@@ -343,6 +343,16 @@ SBTSBlockTest >> testJsDeleteFunction [
 	self assert: '1+;' equals: module sourceString
 ]
 
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testJsDeleteImport [
+
+	| module editor import |
+	module := SBJavascript parseToplevel: 'import {a} from ''C'''.
+	editor := self editorAndWorldFor: module.
+	import := module queryNode: '(identifier)'.
+	import deleteBlock
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsExpandObject [
 
@@ -475,6 +485,18 @@ SBTSBlockTest >> testJsTypeAssignment [
 	editor handle: (self keyboardEvent: Character arrowRight).
 	self type: 'const a=5' in: editor.
 	self assert: 'const a=5;' equals: module childSandblocks first sourceString
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsTypeImport [
+
+	| module editor import |
+	module := SBJavascript parseToplevel: 'import {} from ''C'''.
+	editor := self editorAndWorldFor: module.
+	import := module queryNode: '(named_imports)'.
+	import startInsertAtEnd.
+	self type: 'a' in: editor.
+	self assert: 6 equals: import recursiveSubmorphCount
 ]
 
 { #category : #'tests - input transition' }

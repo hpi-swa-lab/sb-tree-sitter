@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #accessing }
-SBTSNodeLabel >> allChildrenDo: aBlock [
+SBTSNodeLabel >> allChildrenDo: aBlock visited: aSet [
 
 	aBlock value: self
 ]

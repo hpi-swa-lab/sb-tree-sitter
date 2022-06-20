@@ -10,10 +10,10 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSNodePrecedence >> allChildrenDo: aBlock [
+SBTSNodePrecedence >> allChildrenDo: aBlock visited: aSet [
 
 	aBlock value: self.
-	self element allChildrenDo: aBlock
+	self element allChildrenDo: aBlock visited: aSet
 ]
 
 { #category : #'as yet unclassified' }

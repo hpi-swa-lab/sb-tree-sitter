@@ -47,6 +47,12 @@ SBTSGrammar >> aliasOccurrences [
 	^ aliasOccurrences
 ]
 
+{ #category : #enumerating }
+SBTSGrammar >> allElementsDo: aBlock [
+
+	self rules do: [:rule | rule allElementsDo: aBlock]
+]
+
 { #category : #cleaning }
 SBTSGrammar >> applyInlining: aRule grammar: aGrammarJson name: aString [
 
@@ -347,10 +353,7 @@ SBTSGrammar >> isBlockInlinedInParent: aTypeString [
 { #category : #testing }
 SBTSGrammar >> isExtra: aString [
 
-	^ extras anySatisfy: [:regex | | ret |
-		ret := regex matches: aString.
-		SBToggledCode comment: '' active: 0 do: {[ret ifFalse: [self halt]]}.
-		ret]
+	^ extras anySatisfy: [:regex | regex matches: aString]
 ]
 
 { #category : #testing }

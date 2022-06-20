@@ -13,10 +13,6 @@ SBTSSlotTest >> testParseEqualsTypedIdentifier [
 	editor := self editorAndWorldFor: typed.
 	typed lastDeepChild startInsertAtEnd.
 	self type: 'x' in: editor.
-	self
-		tick;
-		tick.
-	self type: String cr in: editor.
 	self assert: parsed lastDeepChild slot nodes equals: typed lastDeepChild slot nodes
 ]
 

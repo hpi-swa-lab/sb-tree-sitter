@@ -173,7 +173,7 @@ SBTSParseInputTest >> testCreateFunction [
 		collect: [:b | b first type]
 		as: Set.
 	self
-		assert: #(#identifier #function #'generator_function' #'function_declaration' #'generator_function_declaration' #labeled_statement) asSet
+		assert: #(#identifier #function #'generator_function' #'function_declaration' #'generator_function_declaration') asSet
 		equals: results
 ]
 

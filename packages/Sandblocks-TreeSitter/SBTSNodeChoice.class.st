@@ -8,10 +8,10 @@ Class {
 }
 
 { #category : #accessing }
-SBTSNodeChoice >> allChildrenDo: aBlock [
+SBTSNodeChoice >> allChildrenDo: aBlock visited: aSet [
 
 	aBlock value: self.
-	self alternatives do: [:alt | alt allChildrenDo: aBlock]
+	self alternatives do: [:alt | alt allChildrenDo: aBlock visited: aSet]
 ]
 
 { #category : #accessing }

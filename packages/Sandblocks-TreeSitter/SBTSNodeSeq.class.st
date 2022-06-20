@@ -9,10 +9,10 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSNodeSeq >> allChildrenDo: aBlock [
+SBTSNodeSeq >> allChildrenDo: aBlock visited: aSet [
 
 	aBlock value: self.
-	self elements do: [:el | el allChildrenDo: aBlock]
+	self elements do: [:el | el allChildrenDo: aBlock visited: aSet]
 ]
 
 { #category : #'as yet unclassified' }

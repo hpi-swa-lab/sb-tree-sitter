@@ -22,10 +22,10 @@ SBTSNodeAlias >> alias: aString [
 ]
 
 { #category : #blocks }
-SBTSNodeAlias >> allChildrenDo: aBlock [
+SBTSNodeAlias >> allChildrenDo: aBlock visited: aSet [
 
 	aBlock value: self.
-	self element allChildrenDo: aBlock
+	self unwrapsNestedBlock ifFalse: [self element allChildrenDo: aBlock visited: aSet]
 ]
 
 { #category : #blocks }
@@ -64,6 +64,12 @@ SBTSNodeAlias >> buildEmptyNodes [
 SBTSNodeAlias >> buildMorphWith: aBlock slot: aSlot [
 
 	^ super buildMorphWith: aBlock slot: (aSlot addNodeFirst: aBlock slot firstNode element)
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeAlias >> createsNewBlock [
+
+	^ self unwrapsNestedBlock not
 ]
 
 { #category : #parsing }
@@ -130,20 +136,22 @@ SBTSNodeAlias >> resultsFor: aParser [
 	| currentBlocks |
 	currentBlocks := aParser blocks.
 	aParser blocks: OrderedCollection new.
-	^ (self element resultsFor: aParser) collect: [:result |
-		result blocks do: [:b |
-			SBToggledCode comment: '' active: 0 do: {[self assert: self element = b slot lastNode]}.
-			(b slot lastNode isTSText or: [b slot lastNode isTSLabel])
-				ifTrue: [b slot: (b slot addNode: self)]
-				ifFalse: [b slot: (b slot replaceLast: self)]].
-		result blocks: currentBlocks, result blocks.
+	^ (self element resultsFor: aParser) collect: [:result | | blocks |
+		blocks := true
+			ifTrue: [{SBTSParseNode kind: #block slot: (SBTSSlot with: self) contents: result blocks}]
+			ifFalse: [
+				result blocks do: [:b |
+					(b slot lastNode isTSText or: [b slot lastNode isTSLabel])
+						ifTrue: [b slot: (b slot addNode: self)]
+						ifFalse: [b slot: (b slot replaceLast: self)]]].
+		result blocks: currentBlocks, blocks.
 		result]
 ]
 
 { #category : #parsing }
 SBTSNodeAlias >> resultsForBlocks: aParser [
 
-	(aParser atEnd not and: [aParser peekForType: self alias]) ifTrue: [ | block currentBlocks results |
+	(aParser atEnd not and: [aParser peekForType: self alias]) ifTrue: [ | currentBlocks results |
 		currentBlocks := aParser blocks.
 		aParser blocks: OrderedCollection new.
 		aParser descend.
@@ -155,13 +163,16 @@ SBTSNodeAlias >> resultsForBlocks: aParser [
 				ifTrue: [
 					result nextSibling.
 					true]
-				ifFalse: [false]]) collect: [:result |
-			block := SBTSBlock new
-				addAllMorphs: result blocks;
-				slot: (SBTSSlot with: self).
+				ifFalse: [false]]) collect: [:result | | blocks |
+			blocks := true
+				ifTrue: [
+					{
+						SBTSBlock new
+							addAllMorphs: result blocks;
+							slot: (SBTSSlot with: self)}]
+				ifFalse: [result blocks].
 			result
-				blocks: currentBlocks;
-				addBlock: block;
+				blocks: currentBlocks, blocks;
 				yourself]].
 	^ {}
 ]
@@ -203,4 +214,12 @@ SBTSNodeAlias >> unpackAlias [
 	^ self element isTSSymbol
 		ifTrue: [self element bodyTemplate]
 		ifFalse: [self element]
+]
+
+{ #category : #parsing }
+SBTSNodeAlias >> unwrapsNestedBlock [
+
+	SBToggledCode comment: '' active: 0 do: {[^ true]}.
+	self allElementsDo: [:e | (e isTSRepeat or: [e isTSSeq]) ifTrue: [^ false]].
+	^ true
 ]

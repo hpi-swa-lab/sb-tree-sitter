@@ -11,10 +11,10 @@ Class {
 }
 
 { #category : #blocks }
-SBTSNodeRepeat >> allChildrenDo: aBlock [
+SBTSNodeRepeat >> allChildrenDo: aBlock visited: aSet [
 
 	aBlock value: self.
-	self element allChildrenDo: aBlock
+	self element allChildrenDo: aBlock visited: aSet
 ]
 
 { #category : #blocks }
