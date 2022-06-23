@@ -100,6 +100,12 @@ SBTSParseFileTest >> testJsFunctionPatterns [
 		as: Array)
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSParseFileTest >> testJsImportExpression [
+
+	SBJavascript parseToplevel: 'import'
+]
+
 { #category : #'tests - languages' }
 SBTSParseFileTest >> testJsObjectFieldNames [
 
@@ -108,6 +114,12 @@ SBTSParseFileTest >> testJsObjectFieldNames [
 	self
 		assert: #('key' 'value')
 		equals: (module childSandblocks first childSandblocks first childSandblocks collect: #field)
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testJsObjectWithReserved [
+
+	SBJavascript parseToplevel: 'a={static: 1}'
 ]
 
 { #category : #'tests - print' }
@@ -120,6 +132,12 @@ SBTSParseFileTest >> testJsParameters [
 	self
 		assert: source
 		equals: (SBTSFileParser new parse: source language: SBJavascript instance) sourceString
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testJsParseTernary [
+
+	SBJavascript parseToplevel: 'a ? 1 : 2'
 ]
 
 { #category : #'tests - languages' }
@@ -204,6 +222,12 @@ SBTSParseFileTest >> testParseJsArrowFunc [
 	| module |
 	module := SBTSFileParser new parse: '() => 1' language: SBJavascript.
 	self assert: 7 equals: (module childSandblocks first performEnum: #cursorPositionsDo:) size
+]
+
+{ #category : #'as yet unclassified' }
+SBTSParseFileTest >> testParseJsRegex [
+
+	SBJavascript parseToplevel: '/\.(js|ts)x?$/'
 ]
 
 { #category : #'tests - languages' }

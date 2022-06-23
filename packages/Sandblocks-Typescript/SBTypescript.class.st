@@ -11085,7 +11085,10 @@ SBTypescript class >> preprocessGrammar: aGrammar [
 	
 	aGrammar rules at: '_template_chars' put: (SBTSNodeText new
 		regexString: '.*';
-		factory: aGrammar)
+		factory: aGrammar).
+	
+	"see SBJavascript"
+	aGrammar removeRule: #'_reserved_identifier'
 ]
 
 { #category : #configuration }

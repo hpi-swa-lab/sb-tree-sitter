@@ -157,9 +157,16 @@ SBTSGrammar >> buildNodesFor: anObject [
 			label: anObject value;
 			factory: self].
 	(#('PATTERN' 'TOKEN' 'IMMEDIATE_TOKEN') includes: anObject type) ifTrue: [
-		^ SBTSNodeText new
-			regexString: (self buildRegexString: anObject);
-			factory: self].
+		"if the token only consists of a STRING, tree-sitter seems to optimize the parse tree. See testJsImportExpression"
+		^ ((#('TOKEN' 'IMMEDIATE_TOKEN') includes: anObject type) and: [anObject content type = 'STRING'])
+			ifTrue: [
+				SBTSNodeLabel new
+					label: anObject content value;
+					factory: self]
+			ifFalse: [
+				SBTSNodeText new
+					regexString: (self buildRegexString: anObject);
+					factory: self]].
 	(#('SYMBOL') includes: anObject type) ifTrue: [
 		^ SBTSNodeSymbol new
 			type: anObject name factory: self;

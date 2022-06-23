@@ -5,7 +5,8 @@ Class {
 		'library',
 		'cursor',
 		'atEnd',
-		'factory'
+		'factory',
+		'previousSiblings'
 	],
 	#category : #'Sandblocks-TreeSitter-FFI'
 }
@@ -76,6 +77,7 @@ SBTSCursor >> gotoFirstChild [
 
 	| ret |
 	ret := library cursorGotoFirstChild: cursor.
+	ret ifTrue: [previousSiblings add: nil].
 	(ret and: [self shouldSkipParsedNode: self node]) ifTrue: [^ self gotoNextSibling not].
 	
 	^ ret
@@ -89,23 +91,30 @@ SBTSCursor >> gotoFirstChild [
 SBTSCursor >> gotoNextSibling [
 
 	| ret |
+	previousSiblings atLast: 1 put: self node.
 	ret := library cursorGotoNextSibling: cursor.
-	[ret and: [self shouldSkipParsedNode: self node]] whileTrue: [ret := library cursorGotoNextSibling: cursor].
+	[ret and: [self shouldSkipParsedNode: self node]] whileTrue: [
+		previousSiblings atLast: 1 put: self node.
+		ret := library cursorGotoNextSibling: cursor].
 	^ atEnd := ret not
 ]
 
 { #category : #'as yet unclassified' }
 SBTSCursor >> gotoParent [
 
+	| ret |
 	atEnd := false.
-	^ library cursorGotoParent: cursor
+	ret := library cursorGotoParent: cursor.
+	ret ifTrue: [previousSiblings removeLast].
+	^ ret
 ]
 
 { #category : #'as yet unclassified' }
 SBTSCursor >> initialize [
 
 	super initialize.
-	atEnd := false
+	atEnd := false.
+	previousSiblings := OrderedCollection with: nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -161,24 +170,22 @@ SBTSCursor >> position [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSCursor >> position: aPosition [
-
-	self restoreTo: aPosition
-]
-
-{ #category : #'as yet unclassified' }
 SBTSCursor >> postCopy [
 
 	super postCopy.
-	cursor := self createRestorePoint
+	cursor := self createRestorePoint.
+	previousSiblings := previousSiblings copy
 ]
 
 { #category : #'as yet unclassified' }
 SBTSCursor >> previousNode: aNode [
 
-	| prev |
-	prev := library nodePrevSibling: aNode.
-	^ prev id isNull ifFalse: [prev] ifTrue: [nil]
+	SBToggledCode comment: '' active: 2 do: {
+		[ | prev |
+			prev := library nodePrevSibling: aNode.
+			^ prev id isNull ifFalse: [prev] ifTrue: [nil]].
+		["our custom data structure saves about 30% of time"
+		^ previousSiblings size > 0 ifTrue: [previousSiblings last] ifFalse: [nil]]}
 ]
 
 { #category : #'as yet unclassified' }
@@ -229,12 +236,6 @@ SBTSCursor >> resolveCurrentAliasIfString: aBlock ifBlock: anotherBlock ifSymbol
 				value: rule key
 				value: ((self factory buildBlocksFor: rule value) alias: rule key)].
 		[anotherBlock value: ((self factory buildBlocksFor: rule value) alias: rule key)]}
-]
-
-{ #category : #'as yet unclassified' }
-SBTSCursor >> restoreTo: aCursor [
-
-	cursor := aCursor
 ]
 
 { #category : #'as yet unclassified' }
@@ -298,12 +299,4 @@ SBTSCursor >> unaliasedType [
 	" does the entry actually exist? apparently aliases can be reused as proper symbol names as part of the symbolNames table. (_import_export_specifier in JS) "
 	"factory bodyNodeForRule: type ifAbsent: [^ library nodeType: n]."
 	^ type
-]
-
-{ #category : #'as yet unclassified' }
-SBTSCursor >> visitTextSlot: aSlot morph: aMorph [
-
-	aMorph textFieldPattern: aSlot regex.
-	aMorph contents: self text.
-	true
 ]

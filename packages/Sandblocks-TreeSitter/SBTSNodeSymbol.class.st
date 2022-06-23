@@ -230,13 +230,14 @@ so, as a workaround, we just fall-through if we did not match and try to take th
 		currentBlocks := aParser blocks.
 		aParser blocks: OrderedCollection new.
 		aParser descend.
-		results := self bodyTemplate resultsForBlocks: aParser.
-		^ (results select: [:result |
+		results := (self bodyTemplate resultsForBlocks: aParser) select: [:result |
 			result ascend
 				ifTrue: [
 					result nextSibling.
 					true]
-				ifFalse: [false]]) collect: [:result | | newBlocks |
+				ifFalse: [false]].
+		results size > 1 ifTrue: [self error: 'should deduplicate here?'].
+		^ results collect: [:result | | newBlocks |
 			newBlocks := self isBlockInlined
 				ifTrue: [result blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]]]
 				ifFalse: [

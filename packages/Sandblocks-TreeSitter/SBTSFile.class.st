@@ -44,7 +44,7 @@ SBTSFile class >> forNoReplace: aFilepathString [
 { #category : #'as yet unclassified' }
 SBTSFile class >> languageForPath: aString [
 
-	^ SBTSLanguage allSubclasses detect: [:lang | lang fileSuffix = (FileDirectory extensionFor: aString)]
+	^ SBTSLanguage allSubclasses detect: [:lang | lang fileSuffix = (FileDirectory extensionFor: aString)] ifNone: [nil]
 ]
 
 { #category : #'as yet unclassified' }

@@ -43,7 +43,7 @@ SBTSGrammarTests >> testResolveAlias [
 		in: '_property_name'
 		with: SBJavascript instance grammar aliasOccurrences.
 	self
-		assert: '(identifier | "get" | "set" | "async" | "static" | "export")'
+		assert: 'identifier'
 		equals: resolved element printString.
 	
 	resolved := (SBTSCursor new library: nil cursor: nil factory: SBJavascript instance)
@@ -51,7 +51,7 @@ SBTSGrammarTests >> testResolveAlias [
 		in: 'pair_pattern'
 		with: SBJavascript instance grammar aliasOccurrences.
 	self
-		assert: '(identifier | "get" | "set" | "async" | "static" | "export")'
+		assert: 'identifier'
 		equals: resolved element printString
 ]
 

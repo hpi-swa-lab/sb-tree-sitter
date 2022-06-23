@@ -174,7 +174,7 @@ SBTSNodeSeq >> resultsForBlocks: aParser [
 	^ Array streamContents: [:stream |
 		[queue notEmpty] whileTrue: [ | pair parser results index |
 			pair := queue removeFirst.
-			parser := pair first copy.
+			parser := pair first.
 			index := pair second + 1.
 			results := (self elements at: index) resultsForBlocks: parser.
 			results do: [:candidate |
