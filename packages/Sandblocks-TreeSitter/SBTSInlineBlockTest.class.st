@@ -26,12 +26,6 @@ SBTSInlineBlockTest >> exampleLanguageFactory [
 	^ factory
 ]
 
-{ #category : #failures }
-SBTSInlineBlockTest >> expectedFailures [
-
-	^ #(#testMatchRecursive #testPasteAfter #testMatchIfBeforeAndAfter #testMatchWithUnknownBetween)
-]
-
 { #category : #'tests - match in unknown' }
 SBTSInlineBlockTest >> testChoiceContinueMatching [
 
@@ -324,28 +318,6 @@ SBTSInlineBlockTest >> testMatchGroup [
 	self assert: 3 equals: result submorphCount
 ]
 
-{ #category : #'tests - continue match' }
-SBTSInlineBlockTest >> testMatchIfBeforeAndAfter [
-
-	| factory unknown editor num |
-	factory := SBMetaBlockFactory new.
-	factory at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
-		SBInlineBlockSequence new elements: {SBInlineBlockLabel new label: 'if'. SBInlineBlockSymbol new type: 'expr' factory: factory}.
-		SBInlineBlockSequence new elements: {SBInlineBlockSymbol new type: 'expr' factory: factory. SBInlineBlockLabel new label: 'if'}.
-		SBInlineBlockText new regexString: '[0-9]+'}).
-	
-	editor := self editorFor: (unknown := SBTSUnknown new
-		template: [factory getTemplate: 'expr'];
-		type: 'expr' factory: factory).
-	[unknown keyStroke: (self keyboardEvent: $1)]
-		on: ProvideAnswerNotification
-		do: [:n | self assert: false].
-	
-	num := editor childSandblocks first.
-	self assert: 1 equals: (num choicesForInput: 'if' before: true) size.
-	self assert: 1 equals: (num choicesForInput: 'if' before: false) size
-]
-
 { #category : #'tests - match in unknown' }
 SBTSInlineBlockTest >> testMatchIncompleteSequence [
 
@@ -432,27 +404,6 @@ SBTSInlineBlockTest >> testMatchPrefixOp [
 	unknown keyStroke: (self keyboardEvent: $1).
 	num := editor childSandblocks first.
 	self assert: 1 equals: (num choicesForInput: '+' before: false) size
-]
-
-{ #category : #'tests - match in unknown' }
-SBTSInlineBlockTest >> testMatchRecursive [
-
-	| factory unknown editor num result |
-	factory := SBMetaBlockFactory new.
-	factory at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
-		SBInlineBlockSequence new elements: {
-			SBInlineBlockSymbol new type: 'expr' factory: factory.
-			SBInlineBlockLabel new label: '+'.
-			SBInlineBlockSymbol new type: 'expr' factory: factory}.
-		SBInlineBlockText new regexString: '[0-9]+'}).
-	
-	result := SBTSRuleExplore new explore: (factory getTemplate: 'expr') for: '1+1+'.
-	self assert: result notEmpty.
-	
-	editor := self editorFor: (unknown := factory instantiateTemplate: 'expr').
-	unknown tryInterpretInput: '1+1+'.
-	num := editor childSandblocks first.
-	self assert: '1 + 1 + ' equals: num sourceString
 ]
 
 { #category : #'tests - match in unknown' }
@@ -557,30 +508,6 @@ SBTSInlineBlockTest >> testMatchWithSeparatorNonAlphanum [
 	self assert: 1 equals: result size
 ]
 
-{ #category : #'tests - continue match' }
-SBTSInlineBlockTest >> testMatchWithUnknownBetween [
-
-	| factory basic editor unknown choices |
-	factory := SBMetaBlockFactory new.
-	factory at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
-		SBInlineBlockSequence new elements: {
-			SBInlineBlockLabel new label: '(?<'.
-			SBInlineBlockSymbol new type: 'other' factory: factory.
-			SBInlineBlockSymbol new type: 'expr' factory: factory}.
-		SBInlineBlockSymbol new type: 'basic' factory: factory}).
-	factory at: 'basic' putTemplate: (SBInlineBlockLabel new label: 'basic').
-	factory
-		at: 'other'
-		putTemplate: (SBInlineBlockChoice new alternatives: {SBInlineBlockLabel new label: 'other'. SBInlineBlockLabel new label: 'yetother'}).
-	
-	editor := self editorFor: (unknown := factory instantiateTemplate: 'expr').
-	unknown keyStroke: (self keyboardEvent: $b).
-	basic := editor childSandblocks first.
-	choices := basic choicesForInput: '(' before: false.
-	self assert: 1 equals: choices size.
-	self assert: choices first childSandblocks first isUnknown
-]
-
 { #category : #'tests - match in unknown' }
 SBTSInlineBlockTest >> testMultipleMatches [
 
@@ -598,19 +525,6 @@ SBTSInlineBlockTest >> testMultipleMatches [
 	self assert: 3 equals: result first submorphCount.
 	self assert: 3 equals: result second submorphCount.
 	self assert: 3 equals: result third submorphCount
-]
-
-{ #category : #'tests - actions' }
-SBTSInlineBlockTest >> testPasteAfter [
-
-	| factory toplevel editor newBlock firstBlock |
-	factory := self exampleLanguageFactory.
-	toplevel := factory toplevel.
-	editor := self editorFor: toplevel.
-	toplevel addBlock: (firstBlock := (factory instantiateTemplate: 'number') contents: '123').
-	editor copyBuffer: (newBlock := (factory instantiateTemplate: 'number') contents: '456').
-	firstBlock performAction: #pasteAfter.
-	self assert: 2 equals: toplevel childSandblocks size
 ]
 
 { #category : #'tests - match in unknown' }

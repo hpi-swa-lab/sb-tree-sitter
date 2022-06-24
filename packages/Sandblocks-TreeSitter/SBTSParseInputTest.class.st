@@ -13,12 +13,6 @@ SBTSParseInputTest >> concreteNodeForRule: aString [
 	^ symbol makeConcrete addChild: symbol bodyTemplate makeConcrete
 ]
 
-{ #category : #failures }
-SBTSParseInputTest >> expectedFailures [
-
-	^ #()
-]
-
 { #category : #helper }
 SBTSParseInputTest >> nodeForRule: aString [
 

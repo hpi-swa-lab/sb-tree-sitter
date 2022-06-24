@@ -186,6 +186,12 @@ SBTSReplacementBlock >> layoutCommands [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSReplacementBlock >> newEmptyChildNear: aBlock before: aBoolean [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReplacementBlock >> ownerWithColor [
 
 	^ self root highlight = #'_sb_none'

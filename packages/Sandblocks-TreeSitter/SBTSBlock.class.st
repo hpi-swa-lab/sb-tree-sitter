@@ -53,6 +53,12 @@ SBTSBlock >> adaptSlot: aConverter [
 				ifFailed: [self assert: false]]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> adaptSlotFor: anotherSlot [
+
+	^ self adaptSlotFor: anotherSlot ifFailed: [self error: 'blocks not compatible']
+]
+
 { #category : #'inline block compat' }
 SBTSBlock >> adaptSlotFor: anotherSlot ifFailed: aBlock [
 
@@ -636,7 +642,7 @@ SBTSBlock >> printTreeOn: aStream indent: aNumber [
 SBTSBlock >> promptTransition [
 	<action>
 
-	SBTSDisambiguatePopup new for: self input: '' before: ActiveEvent shiftPressed
+	SBTSInputReconcile new for: self input: '' before: ActiveEvent shiftPressed
 ]
 
 { #category : #query }
@@ -782,10 +788,13 @@ SBTSBlock >> tryApplyChange: aBlock input: aString [
 	isAtStart := self currentTextMorph cursor = 1 and: [self currentTextMorph contents notEmpty].
 	aBlock value: self.
 	
-	^ self prefixValid ifTrue: [true] ifFalse: [
+	self prefixValid ifFalse: [
 		self contents: previousContents.
-		SBTSDisambiguatePopup new
-			for: (self isUnknown ifTrue: [self] ifFalse: [self currentTextMorph])
+		(SBToggledCode comment: '' active: 1 do: {[SBTSInputReconcile]. [SBTSDisambiguatePopup]}) new
+			for: (SBToggledCode
+				comment: ''
+				active: 1
+				do: {[self currentTextMorph]. [self isUnknown ifTrue: [self] ifFalse: [self currentTextMorph]]})
 			input: aString
 			before: isAtStart]
 ]

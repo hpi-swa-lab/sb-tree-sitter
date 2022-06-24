@@ -88,15 +88,21 @@ SBTSNodeInsertCommand >> morphs [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> morphs: aCollection [
+
+	morphs := aCollection
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> postDo [
 
 	continueInputString
 		ifNotNil: [
-			SBTSDisambiguatePopup new
-				for: morphs first
+			SBTSInputReconcile new
+				for: morphs first currentTextMorph
 				input: continueInputString
 				before: false]
-		ifNil: [SBTSDisambiguatePopup new positionCursorIn: morphs]
+		ifNil: [SBTSInputReconcile new positionCursorIn: morphs]
 ]
 
 { #category : #'as yet unclassified' }
@@ -125,16 +131,18 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 	options size = 1 ifTrue: [morphs := options first].
 	options size > 1 ifTrue: [continueInputString := aString].
 	
-	(options isEmpty and: [
-		self container submorphs
-			at: self insertIndex
-			ifPresent: [:c | true]
-			ifAbsent: [false]]) ifTrue: [ | next |
-		"try and forward the input"
-		next := self container submorphs at: self insertIndex.
-		"FIXME: string morphs confuse our positionAfterDo: code, we should instead always work with cursorpositions"
-		next isStringMorph ifFalse: [SBTSDisambiguatePopup new for: next input: aString before: false].
-		^ false].
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			(options isEmpty and: [
+				self container submorphs
+					at: self insertIndex
+					ifPresent: [:c | true]
+					ifAbsent: [false]]) ifTrue: [ | next |
+				"try and forward the input"
+				next := self container submorphs at: self insertIndex.
+				"FIXME: string morphs confuse our positionAfterDo: code, we should instead always work with cursorpositions"
+				next isStringMorph ifFalse: [SBTSDisambiguatePopup new for: next input: aString before: false].
+				^ false]]}.
 	
 	^ options notEmpty
 ]

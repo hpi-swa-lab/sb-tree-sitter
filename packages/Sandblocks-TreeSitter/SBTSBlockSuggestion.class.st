@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'blocks',
 		'target',
-		'disambiguatePopup'
+		'disambiguatePopup',
+		'command'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -16,17 +17,17 @@ SBTSBlockSuggestion >> blocks: aCollection in: anEditor [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSBlockSuggestion >> blocks: aCollection in: anEditor popup: aPopup [
+SBTSBlockSuggestion >> blocks: aCommand in: anEditor popup: aPopup [
 
 	disambiguatePopup := aPopup.
-	self selector: aCollection first printString label: 'block'.
+	self selector: aCommand morphs first printString label: 'block'.
 	self
 		preview: (anEditor newSelectionContainer
-			addAllMorphs: aCollection;
+			addAllMorphs: aCommand morphs;
 			width: 400;
 			imageForm)
 		previewOnly: false.
-	blocks := aCollection
+	command := aCommand
 ]
 
 { #category : #'as yet unclassified' }
@@ -57,6 +58,6 @@ SBTSBlockSuggestion >> target: aBlock [
 SBTSBlockSuggestion >> useSuggestionOn: aBlock in: anEditor [
 
 	disambiguatePopup
-		ifNotNil: [:popup | popup applyChoice: blocks]
+		ifNotNil: [:popup | popup applyCommand: command]
 		ifNil: [anEditor do: (SBReplaceMultipleCommand new target: aBlock replacers: blocks)]
 ]

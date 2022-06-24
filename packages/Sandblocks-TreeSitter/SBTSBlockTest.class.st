@@ -4,12 +4,6 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #failures }
-SBTSBlockTest >> expectedFailures [
-
-	^ #(#testJsAddAssignmentToStatement)
-]
-
 { #category : #'tests - adding' }
 SBTSBlockTest >> testAddAdaptsSlotPythonStmt [
 
@@ -220,6 +214,7 @@ SBTSBlockTest >> testJsAddAssignmentToStatement [
 	self type: 'x=' in: editor.
 	self tick.
 	self tick.
+	editor handle: (self keyboardEvent: Character arrowDown).
 	editor handle: (self keyboardEvent: Character cr).
 	self assert: 'x=123;' equals: program sourceStringForCompare
 ]
@@ -452,7 +447,7 @@ SBTSBlockTest >> testJsSeparatorInPendingArg [
 	| program editor |
 	program := SBJavascript parseToplevel: 'abc()'.
 	editor := self editorAndWorldFor: program.
-	program lastDeepChild startInsertAtEnd.
+	program childSandblocks first startInsertAtEnd.
 	self type: 'a' in: editor.
 	self type: ',' in: editor.
 	self assert: 'abc(a);' equals: program sourceStringForCompare

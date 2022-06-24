@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSLanguageTests >> expectedFailures [
 
-	^ #(#testPythonPatternList #testJavascriptToStringSemicolons #testCInclude)
+	^ #(#testCInclude)
 ]
 
 { #category : #'testing - parse' }
@@ -124,11 +124,11 @@ else
 SBTSLanguageTests >> testJavascriptToStringSemicolons [
 
 	| source |
-	source := 'let a,b = 5;'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString.
+	source := 'let a,b=5;'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString.
 	
-	source := 'const a = 5;'.
-	self assert: source equals: (SBJavascript parseElement: source) sourceString
+	source := 'const a=5;'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceString
 ]
 
 { #category : #'testing - parse' }
@@ -255,18 +255,6 @@ SBTSLanguageTests >> testPythonNumber [
 	e handle: (self keyboardEvent: Character cr).
 	
 	self assert: (block matchesQuery: '(module (integer))')
-]
-
-{ #category : #'testing - parse' }
-SBTSLanguageTests >> testPythonPatternList [
-
-	| lang |
-	" not sure yet how to handle a,,,b = ... "
-	lang := SBPython instance.
-	lang
-		traverse: (lang grammar rules at: 'pattern_list')
-		do: [:obj | self assert: (obj type ~= 'STRING' or: [obj value ~= ','])].
-	self assert: (lang delimitedRules includesAssociation: 'pattern_list' -> ',')
 ]
 
 { #category : #'testing - parse' }

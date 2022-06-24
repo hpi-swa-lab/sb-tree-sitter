@@ -4,12 +4,6 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
 
-{ #category : #failures }
-SBTSParseFileTest >> expectedFailures [
-
-	^ #()
-]
-
 { #category : #'tests - languages' }
 SBTSParseFileTest >> testAdaptRegexNodes [
 

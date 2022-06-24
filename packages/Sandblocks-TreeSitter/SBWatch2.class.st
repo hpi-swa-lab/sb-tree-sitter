@@ -18,7 +18,7 @@ SBWatch2 class >> newEmptyFor: aBlock [
 	source := aBlock language runtime
 		buildWatchSourceFor: aBlock
 		id: UUID new asString.
-	^ source applyReplacement
+	^ (source adaptSlotFor: aBlock slot) applyReplacement
 ]
 
 { #category : #'as yet unclassified' }
