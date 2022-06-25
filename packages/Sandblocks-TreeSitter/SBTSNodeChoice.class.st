@@ -112,14 +112,7 @@ SBTSNodeChoice >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeChoice >> resultsForBlocks: aParser [
 
-	| res |
-	res := Array streamContents: [:stream |
-		self alternatives do: [:alt | | parserCopy results |
-			parserCopy := aParser copy.
-			results := alt resultsForBlocks: parserCopy.
-			results do: [:result | stream nextPut: result]]].
-	SBToggledCode comment: '' active: 0 do: {[self assert: res size <= 1]}.
-	^ res
+	^ Array streamContents: [:stream | self alternatives do: [:alt | (alt resultsForBlocks: aParser copy) do: [:result | stream nextPut: result]]]
 ]
 
 { #category : #parsing }

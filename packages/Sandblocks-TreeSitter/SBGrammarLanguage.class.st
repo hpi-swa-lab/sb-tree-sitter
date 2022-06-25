@@ -36,12 +36,6 @@ SBGrammarLanguage class >> defaultRuntimeClass [
 ]
 
 { #category : #'as yet unclassified' }
-SBGrammarLanguage class >> expressionTypes [
-
-	^ #()
-]
-
-{ #category : #'as yet unclassified' }
 SBGrammarLanguage class >> file: aFilenameString [
 
 	^ SBTSFile new filepath: aFilenameString language: self
@@ -99,6 +93,12 @@ SBGrammarLanguage class >> instance [
 SBGrammarLanguage class >> invalidate [
 
 	instance := nil
+]
+
+{ #category : #'as yet unclassified' }
+SBGrammarLanguage class >> isExpression: aBlock [
+
+	^ #()
 ]
 
 { #category : #'as yet unclassified' }

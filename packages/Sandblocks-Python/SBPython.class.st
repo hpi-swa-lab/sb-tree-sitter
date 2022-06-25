@@ -31,12 +31,6 @@ SBPython class >> defaultRuntimeClass [
 ]
 
 { #category : #configuration }
-SBPython class >> expressionTypes [
-
-	^ #(#expression)
-]
-
-{ #category : #configuration }
 SBPython class >> fileSuffix [
 
 	^ 'py'
@@ -5165,6 +5159,12 @@ SBPython class >> isBlockInlined: aSymbol [
 SBPython class >> isBlockInlinedInParent: aSymbol [
 
 	^ aSymbol = #parameters
+]
+
+{ #category : #configuration }
+SBPython class >> isExpression: aBlock [
+
+	^ #expression = aBlock type
 ]
 
 { #category : #'configuration - layout' }

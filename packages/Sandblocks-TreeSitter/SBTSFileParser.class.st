@@ -289,7 +289,7 @@ SBTSFileParser >> peekUncapturedText [
 	
 	position > (cursor endByteIndex: previous) ifTrue: [^ ''].
 	text := cursor textBetween: previous and: current.
-	(text notEmpty and: [(cursor factory isExtra: text)]) ifTrue: [^ ''].
+	text := cursor factory trimExtra: text.
 	^ text
 ]
 

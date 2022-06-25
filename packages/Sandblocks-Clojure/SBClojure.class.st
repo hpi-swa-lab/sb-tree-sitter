@@ -5,9 +5,9 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBClojure class >> expressionTypes [
+SBClojure class >> allFileSuffixes [
 
-	^ #(#'list_lit')
+	^ {self fileSuffix. 'cljs'}
 ]
 
 { #category : #configuration }
@@ -1749,6 +1749,12 @@ SBClojure class >> icon [
 		offset: 0 @ 0
 ]
 
+{ #category : #'as yet unclassified' }
+SBClojure class >> isExpression: aBlock [
+
+	^ true
+]
+
 { #category : #'configuration - editing' }
 SBClojure class >> isStatementContainer: aRepeatNode in: aBlock [
 
@@ -1765,7 +1771,7 @@ SBClojure class >> language [
 SBClojure class >> preprocessGrammar: aGrammar [
 	"clojure usually tracks whitespaces specifically which creates a lot of nodes in our system. mark these as extras for now such that they are skipped during block creation."
 
-	aGrammar extras: {'\s' asRegex}
+	aGrammar extras: {'\s*' asRegex}
 ]
 
 { #category : #configuration }
@@ -1795,7 +1801,7 @@ SBClojure class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: 
 
 	(SBToggledCode comment: '' active: 2 do: {
 		[true].
-		[aBlock owner type = 'list_lit' and: [aBlock contents ~= '(' and: [anotherBlock contents ~= ')']]]}) ifTrue: [^ true].
+		[(#('map_lit' 'vec_lit' 'list_lit') includes: aBlock owner type) and: [aBlock ~= aBlock owner firstSubmorph and: [anotherBlock ~= aBlock owner lastSubmorph]]]}) ifTrue: [^ true].
 	^ super spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter
 ]
 
@@ -1803,7 +1809,7 @@ SBClojure class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: 
 SBClojure class >> suggestionsForInsert: aCommand [
 
 	(aCommand container containingArtefact notNil and: [aCommand container type = 'list_lit' and: [aCommand insertIndex > 2 and: [aCommand container childSandblocks first type = 'sym_lit']]]) ifTrue: [ | signatures |
-		signatures := (aCommand container containingArtefact evaluateString: ('(:arglists (meta #''{1}))' format: {aCommand container childSandblocks first contents}))
+		signatures := ((aCommand container containingArtefact evaluateString: ('(:arglists (meta #''{1}))' format: {aCommand container childSandblocks first contents})) ifNil: [Dictionary new])
 			at: 'value'
 			ifAbsent: [^ #()].
 		signatures := SBScmParser new parse: signatures readStream.

@@ -22,13 +22,14 @@ SBFileTree >> example [
 { #category : #'as yet unclassified' }
 SBFileTree >> on: aFile [
 
+	self removeAllMorphs.
 	file := aFile.
 	self
 		addMorphBack: (SBRow new
 			cellPositioning: #center;
 			cellGap: 8;
 			addMorphBack: (aFile isDirectory
-				ifTrue: [SBIcon iconFolder]
+				ifTrue: [SBIcon iconAngleRight on: #click send: #toggleExpand to: self]
 				ifFalse: [((SBTSFile languageForPath: aFile name) ifNil: [SBTSLanguage]) iconMorph]);
 			addMorphBack: (SBStringMorph new contents: aFile basename));
 		color: Color transparent;
@@ -37,14 +38,7 @@ SBFileTree >> on: aFile [
 		layoutPolicy: SBVerticalLayout new;
 		cellPositioning: #left;
 		hResizing: #shrinkWrap;
-		vResizing: #shrinkWrap.
-	
-	aFile isDirectory
-		ifTrue: [
-			self firstSubmorph addMorphFront: (SBIcon iconChevronRight
-				small;
-				on: #click send: #toggleExpand to: self)]
-		ifFalse: [self firstSubmorph layoutInset: (SBEdgeInsets left: 17)]
+		vResizing: #shrinkWrap
 ]
 
 { #category : #'as yet unclassified' }
@@ -61,9 +55,9 @@ SBFileTree >> toggleExpand [
 
 	| list |
 	self submorphCount > 1 ifTrue: [
-		self firstSubmorph firstSubmorph changeIconName: #iconChevronRight.
+		self firstSubmorph firstSubmorph changeIconName: #iconAngleRight.
 		^ self lastSubmorph delete].
-	self firstSubmorph firstSubmorph changeIconName: #iconChevronDown.
+	self firstSubmorph firstSubmorph changeIconName: #iconAngleDown.
 	self addMorphBack: (list := SBColumn new layoutInset: (SBEdgeInsets left: 16)).
 	file children
 		ifNotEmpty: [

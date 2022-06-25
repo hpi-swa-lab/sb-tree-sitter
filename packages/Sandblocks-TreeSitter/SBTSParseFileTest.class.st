@@ -31,6 +31,9 @@ SBTSParseFileTest >> testClojureSpaces [
 
 	| source |
 	source := '(+ 3 test =)'.
+	self assert: source equals: (SBTSFileParser new parse: source language: SBClojure) sourceString.
+	
+	source := '[re :as re-frame]'.
 	self assert: source equals: (SBTSFileParser new parse: source language: SBClojure) sourceString
 ]
 
@@ -202,6 +205,14 @@ SBTSParseFileTest >> testParseBinaryExpression [
 	| module |
 	module := SBTSFileParser new parse: '2+2' language: SBJavascript instance.
 	self assert: 'binary_expression' equals: module childSandblocks first type
+]
+
+{ #category : #'as yet unclassified' }
+SBTSParseFileTest >> testParseClojureMeta [
+
+	| source |
+	source := '^:dev/after-load m'.
+	self assert: source equals: (SBClojure parseToplevel: source) sourceString
 ]
 
 { #category : #'tests - languages' }

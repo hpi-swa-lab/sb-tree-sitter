@@ -18,6 +18,12 @@ SBTSLanguage class >> addIndent: aBlock [
 ]
 
 { #category : #accessing }
+SBTSLanguage class >> allFileSuffixes [
+
+	^ {self fileSuffix}
+]
+
+{ #category : #accessing }
 SBTSLanguage class >> allRuntimes [
 
 	^ Array streamContents: [:stream | SBTSLanguageRuntime allSubclassesDo: [:cl | cl language = self ifTrue: [stream nextPut: cl]]]
@@ -72,12 +78,6 @@ SBTSLanguage class >> defaultChoiceDuringInputFor: aChoiceNode [
 SBTSLanguage class >> defaultRuntimeClass [
 
 	^ nil
-]
-
-{ #category : #configuration }
-SBTSLanguage class >> expressionTypes [
-
-	^ #()
 ]
 
 { #category : #'loading - helper' }
@@ -235,6 +235,12 @@ SBTSLanguage class >> isBlockInlined: aSymbol [
 
 { #category : #'configuration - editing' }
 SBTSLanguage class >> isBlockInlinedInParent: aSymbol [
+
+	^ false
+]
+
+{ #category : #configuration }
+SBTSLanguage class >> isExpression: aBlock [
 
 	^ false
 ]

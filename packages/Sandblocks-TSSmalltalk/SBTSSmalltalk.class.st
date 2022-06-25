@@ -1112,6 +1112,12 @@ SBTSSmalltalk class >> isBlockInlined: aSymbol [
 	^ aSymbol = #statement or: [super isBlockInlined: aSymbol]
 ]
 
+{ #category : #configuration }
+SBTSSmalltalk class >> isExpression: aBlock [
+
+	^ #expression = aBlock type
+]
+
 { #category : #'configuration - editing' }
 SBTSSmalltalk class >> isImmutableLabel: aLabelNode [
 
@@ -1210,12 +1216,6 @@ SBTSSmalltalk >> declarationsInScope: aScopeBlock do: aClosure [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSSmalltalk >> expressionTypes [
-
-	^ #('expression')
-]
-
-{ #category : #'as yet unclassified' }
 SBTSSmalltalk >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	aBlock parentSandblock type = 'block' ifTrue: [^ aBlock parentSandblock childSandblocks size > 1 and: [anotherBlock contents ~= ']']].
@@ -1228,6 +1228,12 @@ SBTSSmalltalk >> hardLineBreakBetween: aBlock and: anotherBlock [
 SBTSSmalltalk >> hardLineBreakMatchBetween: aBlock and: anotherBlock [
 
 	^ aBlock parentSandblock type = 'method'
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk >> isExpression: aBlock [
+
+	^ #expression = aBlock type
 ]
 
 { #category : #'as yet unclassified' }

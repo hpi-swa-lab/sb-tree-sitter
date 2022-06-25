@@ -662,6 +662,15 @@ SBTSGrammar >> softLineBreakBetween: aBlock and: anotherBlock [
 ]
 
 { #category : #helper }
+SBTSGrammar >> trimExtra: aString [
+
+	| stream |
+	stream := aString readStream.
+	[extras anySatisfy: [:extra | stream atEnd not and: [extra matchesStreamPrefix: stream]]] whileTrue.
+	^ stream upToEnd
+]
+
+{ #category : #helper }
 SBTSGrammar >> unpackTypes [
 
 	^ #('PREC_RIGHT' 'PREC_LEFT' 'PREC_DYNAMIC' 'PREC' 'ALIAS' 'FIELD')

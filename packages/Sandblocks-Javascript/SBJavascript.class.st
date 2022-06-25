@@ -20,12 +20,6 @@ SBJavascript class >> defaultRuntimeClass [
 ]
 
 { #category : #configuration }
-SBJavascript class >> expressionTypes [
-
-	^ #(#expression)
-]
-
-{ #category : #configuration }
 SBJavascript class >> fileSuffix [
 
 	^ 'js'
@@ -6803,6 +6797,12 @@ SBJavascript class >> isBlockInlined: aSymbol [
 SBJavascript class >> isBlockInlinedInParent: aSymbol [
 
 	^ aSymbol = #'formal_parameters' or: [aSymbol = #arguments]
+]
+
+{ #category : #configuration }
+SBJavascript class >> isExpression: aBlock [
+
+	^ #expression = aBlock type
 ]
 
 { #category : #'configuration - layout' }

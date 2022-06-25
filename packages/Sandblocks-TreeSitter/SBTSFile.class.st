@@ -44,7 +44,9 @@ SBTSFile class >> forNoReplace: aFilepathString [
 { #category : #'as yet unclassified' }
 SBTSFile class >> languageForPath: aString [
 
-	^ SBTSLanguage allSubclasses detect: [:lang | lang fileSuffix = (FileDirectory extensionFor: aString)] ifNone: [nil]
+	^ SBTSLanguage allSubclasses
+		detect: [:lang | lang allFileSuffixes includes: (FileDirectory extensionFor: aString)]
+		ifNone: [nil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -66,9 +68,19 @@ SBTSFile >> artefactSaved: aMethodBlock [
 { #category : #'as yet unclassified' }
 SBTSFile >> evaluate: aBlock [
 
-	^ runtime object new
-		factory: aBlock language;
-		evaluate: aBlock sourceString
+	^ runtime object ifNotNil: [:runtime |
+		runtime new
+			factory: aBlock language;
+			evaluate: aBlock sourceString]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile >> evaluateString: aString [
+
+	^ runtime object ifNotNil: [:runtime |
+		runtime new
+			factory: self root language;
+			evaluate: aString]
 ]
 
 { #category : #'as yet unclassified' }

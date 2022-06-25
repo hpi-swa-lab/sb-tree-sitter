@@ -326,11 +326,12 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 	currentString := aString withUnixLineEndings.
 	language := self perform: aSymbol asSymbol.
 	
-	^ [
+	^ [ | utf8 |
 		parser := self parserNew.
 		self parser: parser setLanguage: language.
 		
-		tree := self parser: parser old: nil parseString: currentString length: currentString size.
+		utf8 := currentString utf8Encoded.
+		tree := self parser: parser old: nil parseString: utf8 length: utf8 size.
 		
 		root := self treeRootNode: tree.
 		cursor := self cursorNew: root.
