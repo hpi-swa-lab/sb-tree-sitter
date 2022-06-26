@@ -6,6 +6,7 @@ Class {
 		'slots',
 		'blocks',
 		'cursor',
+		'memoizations',
 		'pendingText',
 		'justEnteredAlias',
 		'position'
@@ -128,6 +129,7 @@ SBTSFileParser >> initialize [
 	
 	slots := OrderedCollection new.
 	blocks := OrderedCollection new.
+	memoizations := Dictionary new.
 	justEnteredAlias := false.
 	position := 0
 ]
@@ -142,6 +144,21 @@ SBTSFileParser >> justEnteredAlias [
 SBTSFileParser >> justEnteredAlias: aBoolean [
 
 	justEnteredAlias := aBoolean
+]
+
+{ #category : #memo }
+SBTSFileParser >> memoizedAt: aNumber for: aSymbol ifNone: aBlock [
+
+	SBToggledCode comment: '' active: 0 do: {[true ifTrue: [^ aBlock value]]}.
+	^ (memoizations at: aNumber ifAbsentPut: [Dictionary new])
+		at: aSymbol
+		ifPresent: [:parsers |
+			parsers do: [:p | self assert: p blocks last slot lastNode type = aSymbol].
+			parsers collect: [:p | p copy]]
+		ifAbsent: [ | orig |
+			orig := aBlock value.
+			(memoizations at: aNumber) at: aSymbol put: (orig collect: [:p | p copy]).
+			orig]
 ]
 
 { #category : #stream }
@@ -162,10 +179,10 @@ SBTSFileParser >> nextFor: aNode [
 { #category : #'as yet unclassified' }
 SBTSFileParser >> nextSibling [
 
-	| newPosition |
+	| newPosition t |
+	t := cursor type.
 	newPosition := cursor endByteIndex: cursor node.
-	position := newPosition.
-	cursor gotoNextSibling
+	cursor gotoNextSibling ifFalse: [self position: newPosition]
 ]
 
 { #category : #'as yet unclassified' }
@@ -268,9 +285,8 @@ SBTSFileParser >> peekText [
 { #category : #stream }
 SBTSFileParser >> peekType [
 
-	self peekIsNamed ifFalse: [
-		" for e.g. python f-strings, the type is aliased to just the quote, so if we find an unnamed we may be better served to always return the node's full content "
-		^ cursor text].
+	self peekIsNamed ifFalse: [" for e.g. python f-strings, the type is aliased to just the quote, so if we find an unnamed we may be better served to always return the node's full content "
+	^ cursor text].
 	^ cursor type
 ]
 
@@ -297,6 +313,12 @@ SBTSFileParser >> peekUncapturedText [
 SBTSFileParser >> position [
 
 	^ position
+]
+
+{ #category : #stream }
+SBTSFileParser >> position: aNumber [
+
+	position := aNumber
 ]
 
 { #category : #'as yet unclassified' }
@@ -335,7 +357,7 @@ SBTSFileParser >> stream: aStream [
 { #category : #'as yet unclassified' }
 SBTSFileParser >> text [
 
-	position := position + pendingText size.
+	self position: position + pendingText size.
 	^ pendingText
 ]
 
@@ -344,6 +366,6 @@ SBTSFileParser >> uncapturedText [
 
 	| text |
 	text := self peekUncapturedText.
-	position := position + text size.
+	self position: position + text size.
 	^ text
 ]

@@ -164,13 +164,10 @@ SBTSNodeAlias >> resultsForBlocks: aParser [
 					result nextSibling.
 					true]
 				ifFalse: [false]]) collect: [:result | | blocks |
-			blocks := true
-				ifTrue: [
-					{
-						SBTSBlock new
-							addAllMorphs: result blocks;
-							slot: (SBTSSlot with: self)}]
-				ifFalse: [result blocks].
+			blocks := {
+				SBTSBlock new
+					addAllMorphs: result blocks;
+					slot: (SBTSSlot with: self)}.
 			result
 				blocks: currentBlocks, blocks;
 				yourself]].

@@ -323,15 +323,14 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 
 	| parser root tree cursor wasFreed |
 	wasFreed := false.
-	currentString := aString withUnixLineEndings.
+	currentString := aString withUnixLineEndings utf8Encoded.
 	language := self perform: aSymbol asSymbol.
 	
-	^ [ | utf8 |
+	^ [
 		parser := self parserNew.
 		self parser: parser setLanguage: language.
 		
-		utf8 := currentString utf8Encoded.
-		tree := self parser: parser old: nil parseString: utf8 length: utf8 size.
+		tree := self parser: parser old: nil parseString: currentString length: currentString size.
 		
 		root := self treeRootNode: tree.
 		cursor := self cursorNew: root.
@@ -447,18 +446,17 @@ SBTreeSitter >> supercollider [
 
 { #category : #helper }
 SBTreeSitter >> textBetween: aNode and: anEndNode [
-	" TODO: will break with UTF-8 "
 
-	^ currentString copyFrom: (self nodeEndByte: aNode) + 1 to: (anEndNode
+	^ (currentString copyFrom: (self nodeEndByte: aNode) + 1 to: (anEndNode
 		ifNil: [self nodeEndByte: (self nodeParent: aNode)]
-		ifNotNil: [self nodeStartByte: anEndNode])
+		ifNotNil: [self nodeStartByte: anEndNode])) utf8Decoded
 ]
 
 { #category : #helper }
 SBTreeSitter >> textForNode: aNode [
-	" TODO: will break with UTF-8 "
 
-	^ currentString copyFrom: (self nodeStartByte: aNode) + 1 to: (self nodeEndByte: aNode)
+	self assert: (aNode isNull not and: [aNode tree isNull not]).
+	^ (currentString copyFrom: (self nodeStartByte: aNode) + 1 to: (self nodeEndByte: aNode)) utf8Decoded
 ]
 
 { #category : #ffi }

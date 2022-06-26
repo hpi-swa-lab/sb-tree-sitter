@@ -450,3 +450,11 @@ SBTSParseFileTest >> testStSymbol [
 
 	SBTSFileParser new parse: 'a #a' language: SBTSSmalltalk
 ]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testTypescriptTernary [
+	"https://github.com/tree-sitter/tree-sitter-typescript/issues/200"
+
+	SBTypescript parseToplevel: 'a ? b : c'.
+	SBTypescript parseToplevel: 'function(a?: int) {}'
+]

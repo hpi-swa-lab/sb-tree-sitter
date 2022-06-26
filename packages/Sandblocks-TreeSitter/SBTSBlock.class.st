@@ -192,7 +192,7 @@ SBTSBlock >> copyBlock [
 	| copy |
 	copy := self class new
 		addAllMorphs: (self isUnknown ifTrue: [{}] ifFalse: [self submorphs collect: [:s | s copyBlock]]);
-		slot: self slot copy.
+		slot: self slot.
 	self
 		valueOfProperty: #lastConstructed
 		ifPresentDo: [:val | copy setProperty: #lastConstructed toValue: true].
@@ -464,7 +464,7 @@ SBTSBlock >> isEditor [
 { #category : #testing }
 SBTSBlock >> isExpression [
 
-	self slot allSuperTypesDo: [:type | (self language isExpression: type type) ifTrue: [^ true]].
+	self slot allSuperTypesDo: [:type | (self language isExpression: type) ifTrue: [^ true]].
 	^ false
 ]
 

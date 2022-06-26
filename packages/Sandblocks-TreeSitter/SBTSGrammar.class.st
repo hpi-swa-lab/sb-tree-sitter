@@ -671,6 +671,15 @@ SBTSGrammar >> trimExtra: aString [
 ]
 
 { #category : #helper }
+SBTSGrammar >> trimExtraEnd: aString [
+
+	| stream |
+	stream := aString reversed readStream.
+	[extras anySatisfy: [:extra | stream atEnd not and: [extra matchesStreamPrefix: stream]]] whileTrue.
+	^ aString allButLast: stream position
+]
+
+{ #category : #helper }
 SBTSGrammar >> unpackTypes [
 
 	^ #('PREC_RIGHT' 'PREC_LEFT' 'PREC_DYNAMIC' 'PREC' 'ALIAS' 'FIELD')

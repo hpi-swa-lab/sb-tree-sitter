@@ -180,7 +180,7 @@ SBTSNodeRepeat >> resultsFor: aParser [
 		(self element resultsFor: next) do: [:result |
 			delimiter ifNotNil: [result stream nextMatchAll: delimiter].
 			candidates add: result.
-			(result position > lastPosition and: [result atEnd not]) ifTrue: [queue add: result]]].
+			(multiple and: [result position > lastPosition and: [result atEnd not]]) ifTrue: [queue add: result]]].
 	
 	^ candidates
 ]
@@ -189,23 +189,20 @@ SBTSNodeRepeat >> resultsFor: aParser [
 SBTSNodeRepeat >> resultsForBlocks: aParser [
 
 	| queue |
-	queue := OrderedCollection with: {aParser. 0}.
+	queue := OrderedCollection with: aParser.
 	^ (Array streamContents: [:stream |
-		[queue notEmpty] whileTrue: [ | pair results parser currentPosition index wasAtEnd |
-			pair := queue removeFirst.
-			parser := pair first copy.
-			index := pair second + 1.
+		[queue notEmpty] whileTrue: [ | results parser currentPosition wasAtEnd |
+			parser := queue removeFirst copy.
 			currentPosition := parser position.
 			wasAtEnd := parser atEnd.
 			(parser peekForLabel: delimiter) ifTrue: [parser nextSibling].
 			results := self element resultsForBlocks: parser.
 			results do: [:candidate |
-				"to fix troubles with infinitely repeating matches, we only accept results
-if they advanced the parser."
+				"to fix troubles with infinitely repeating matches, we only accept results if they advanced the parser."
 				(candidate position > currentPosition or: [wasAtEnd not and: [candidate atEnd]]) ifTrue: [
 					(candidate peekForLabel: delimiter) ifTrue: [candidate nextSibling].
 					stream nextPut: candidate.
-					queue add: {candidate. index}]]]]) ifEmpty: [self required ifTrue: [{}] ifFalse: [{aParser}]]
+					multiple ifTrue: [queue add: candidate]]]]]) ifEmpty: [self required ifTrue: [{}] ifFalse: [{aParser}]]
 ]
 
 { #category : #parsing }

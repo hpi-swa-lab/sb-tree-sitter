@@ -226,28 +226,31 @@ SBTSNodeSymbol >> resultsForBlocks: aParser [
 so, as a workaround, we just fall-through if we did not match and try to take the symbol"
 		^ results]].
 	
-	(aParser peekForType: self type) ifTrue: [ | currentBlocks results |
-		currentBlocks := aParser blocks.
-		aParser blocks: OrderedCollection new.
-		aParser descend.
-		results := (self bodyTemplate resultsForBlocks: aParser) select: [:result |
-			result ascend
-				ifTrue: [
-					result nextSibling.
-					true]
-				ifFalse: [false]].
-		results size > 1 ifTrue: [self error: 'should deduplicate here?'].
-		^ results collect: [:result | | newBlocks |
-			newBlocks := self isBlockInlined
-				ifTrue: [result blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]]]
-				ifFalse: [
-					{
-						SBTSBlock new
-							addAllMorphs: result blocks;
-							slot: (SBTSSlot with: self)}].
-			result
-				blocks: currentBlocks, newBlocks;
-				yourself]].
+	(aParser atEnd not and: [aParser peekForType: self type]) ifTrue: [
+		^ aParser memoizedAt: aParser position for: self type ifNone: [ | currentBlocks results |
+			currentBlocks := aParser blocks.
+			aParser blocks: OrderedCollection new.
+			aParser descend.
+			results := (self bodyTemplate resultsForBlocks: aParser) select: [:option |
+				option ascend
+					ifTrue: [
+						option nextSibling.
+						true]
+					ifFalse: [false]].
+			results size > 1 ifTrue: [self error: 'should deduplicate here?'].
+			results ifEmpty: [{}] ifNotEmpty: [ | result newBlocks |
+				result := results anyOne.
+				newBlocks := self isBlockInlined
+					ifTrue: [result blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]]]
+					ifFalse: [
+						{
+							SBTSBlock new
+								addAllMorphs: result blocks;
+								slot: (SBTSSlot with: self)}].
+				{
+					result
+						blocks: currentBlocks, newBlocks;
+						yourself}]]].
 	
 	^ {}
 ]

@@ -16,7 +16,7 @@ SBTSSlot class >> with: aNode [
 	^ new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #mutating }
 SBTSSlot >> addNode: aNode [
 
 	| new |
@@ -29,7 +29,7 @@ SBTSSlot >> addNode: aNode [
 	^ new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #mutating }
 SBTSSlot >> addNodeFirst: aNode [
 
 	| new |
@@ -175,7 +175,7 @@ SBTSSlot >> lastRepeater [
 	^ repeater
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #mutating }
 SBTSSlot >> mergeWith: aSlot [
 
 	nodes addAll: aSlot nodes
@@ -290,7 +290,7 @@ SBTSSlot >> repeatersDo: aBlock [
 	self allParentsDo: [:p | p isTSRepeat ifTrue: [aBlock value: p]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #mutating }
 SBTSSlot >> replaceLast: aNode [
 
 	| new |
@@ -321,7 +321,7 @@ SBTSSlot >> transitionRoot [
 	^ self nodes last transitionRoot
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #mutating }
 SBTSSlot >> trimNodesTo: aNode [
 
 	| index |
@@ -329,7 +329,7 @@ SBTSSlot >> trimNodesTo: aNode [
 	nodes removeLast: nodes size - index
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #mutating }
 SBTSSlot >> trimNodesToTypeOf: aNode [
 
 	| index new |
