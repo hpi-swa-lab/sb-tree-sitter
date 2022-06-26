@@ -151,13 +151,17 @@ SBTSFileParser >> memoizedAt: aNumber for: aSymbol ifNone: aBlock [
 
 	SBToggledCode comment: '' active: 0 do: {[true ifTrue: [^ aBlock value]]}.
 	^ (memoizations at: aNumber ifAbsentPut: [Dictionary new])
-		at: aSymbol
+		at: aSymbol type
 		ifPresent: [:parsers |
-			parsers do: [:p | self assert: p blocks last slot lastNode type = aSymbol].
-			parsers collect: [:p | p copy]]
+			parsers do: [:p | self assert: p blocks last slot lastNode type = aSymbol type].
+			parsers collect: [:p | | parser |
+				parser := p copy.
+				"adapt to exact expected instances of that symbol"
+				parser blocks do: [:block | block slot lastNode type = aSymbol type ifTrue: [block slot: (block slot replaceLast: aSymbol)]].
+				parser]]
 		ifAbsent: [ | orig |
 			orig := aBlock value.
-			(memoizations at: aNumber) at: aSymbol put: (orig collect: [:p | p copy]).
+			orig ifNotEmpty: [(memoizations at: aNumber) at: aSymbol type put: (orig collect: [:p | p copy])].
 			orig]
 ]
 

@@ -37,7 +37,7 @@ SBFileTree >> on: aFile [
 		listDirection: #topToBottom;
 		layoutPolicy: SBVerticalLayout new;
 		cellPositioning: #left;
-		hResizing: #shrinkWrap;
+		hResizing: #spaceFill;
 		vResizing: #shrinkWrap
 ]
 

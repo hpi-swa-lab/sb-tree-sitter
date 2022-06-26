@@ -215,19 +215,20 @@ SBTSNodeSymbol >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeSymbol >> resultsForBlocks: aParser [
 
-	(self isSuperType or: [aParser justEnteredAlias]) ifTrue: [ | currentBlocks |
-		currentBlocks := aParser blocks.
-		aParser justEnteredAlias: false.
-		aParser blocks: OrderedCollection new.
-		((self bodyTemplate resultsForBlocks: aParser) collect: [:res |
-			res blocks do: [:b | b slot: (b slot addNode: self)].
-			res blocks: currentBlocks, res blocks.
-			res]) ifNotEmpty: [:results | "haven't found a good way yet to distinguish between just-entered-alias applying or not. e.g., in named_imports it should not apply to identifier.
+	^ aParser memoizedAt: aParser position for: self ifNone: [ | ret |
+		ret := nil.
+		(self isSuperType or: [aParser justEnteredAlias]) ifTrue: [ | currentBlocks |
+			currentBlocks := aParser blocks.
+			aParser justEnteredAlias: false.
+			aParser blocks: OrderedCollection new.
+			((self bodyTemplate resultsForBlocks: aParser) collect: [:res |
+				res blocks do: [:b | b slot: (b slot addNode: self)].
+				res blocks: currentBlocks, res blocks.
+				res]) ifNotEmpty: [:results | "haven't found a good way yet to distinguish between just-entered-alias applying or not. e.g., in named_imports it should not apply to identifier.
 so, as a workaround, we just fall-through if we did not match and try to take the symbol"
-		^ results]].
-	
-	(aParser atEnd not and: [aParser peekForType: self type]) ifTrue: [
-		^ aParser memoizedAt: aParser position for: self type ifNone: [ | currentBlocks results |
+			ret := results]].
+		
+		(ret isNil and: [aParser atEnd not and: [aParser peekForType: self type]]) ifTrue: [ | currentBlocks results |
 			currentBlocks := aParser blocks.
 			aParser blocks: OrderedCollection new.
 			aParser descend.
@@ -237,8 +238,11 @@ so, as a workaround, we just fall-through if we did not match and try to take th
 						option nextSibling.
 						true]
 					ifFalse: [false]].
-			results size > 1 ifTrue: [self error: 'should deduplicate here?'].
-			results ifEmpty: [{}] ifNotEmpty: [ | result newBlocks |
+			results size > 1 ifTrue: [
+				SBToggledCode comment: '' active: 1 do: {
+					[results := {results detectMax: [:r | (r blocks collect: [:b | b recursiveSubmorphCount]) sum]}].
+					[self error: 'should deduplicate here?']}].
+			ret := results ifEmpty: [{}] ifNotEmpty: [ | result newBlocks |
 				result := results anyOne.
 				newBlocks := self isBlockInlined
 					ifTrue: [result blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]]]
@@ -250,9 +254,9 @@ so, as a workaround, we just fall-through if we did not match and try to take th
 				{
 					result
 						blocks: currentBlocks, newBlocks;
-						yourself}]]].
-	
-	^ {}
+						yourself}]].
+		
+		ret ifNil: [{}]]
 ]
 
 { #category : #parsing }
