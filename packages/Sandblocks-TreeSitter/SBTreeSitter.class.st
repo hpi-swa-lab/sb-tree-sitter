@@ -474,6 +474,13 @@ SBTreeSitter >> tsq [
 ]
 
 { #category : #'ffi languages' }
+SBTreeSitter >> tsx [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_tsx () module: 'tree-sitter-tsx'>
+	^ SBTSLanguage tryPatchLibrary: 'tree-sitter/tree-sitter-typescript' name: 'tsx' context: thisContext branch: 'master' subpath: 'tsx'
+]
+
+{ #category : #'ffi languages' }
 SBTreeSitter >> typescript [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_typescript () module: 'tree-sitter-typescript'>

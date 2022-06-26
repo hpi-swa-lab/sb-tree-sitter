@@ -3,7 +3,8 @@ Class {
 	#superclass : #SBBlock,
 	#instVars : [
 		'slot',
-		'highlight'
+		'highlight',
+		'range'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -354,6 +355,15 @@ SBTSBlock >> get: aFieldNameString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> getSourceStringAndMark [
+
+	| stream |
+	stream := SBLineInfoStream on: ''.
+	self writeSourceOn: stream indent: 0 forCompare: false.
+	^ stream contents
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> grammarHandler [
 
 	^ SBGrammarHandler new
@@ -383,6 +393,8 @@ SBTSBlock >> indentFor: aBlock current: aNumber [
 SBTSBlock >> initialize [
 
 	super initialize.
+	
+	range := (SBTSPosition line: 0 character: 0) -> (SBTSPosition line: 0 character: 0).
 	
 	self
 		layoutPolicy: SBAlgebraLayout new;
@@ -673,6 +685,12 @@ SBTSBlock >> queryRecursiveFirstMatch: aString capturesDo: aBlock [
 	^ false
 ]
 
+{ #category : #accessing }
+SBTSBlock >> range [
+
+	^ range
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> reinterpretWithoutEmpty [
 
@@ -721,6 +739,12 @@ SBTSBlock >> replaceBlock: aBlock [
 	new := aBlock adaptSlotFor: self slot ifFailed: [self error: 'block not compatible'].
 	self replaceBy: new.
 	^ new
+]
+
+{ #category : #accessing }
+SBTSBlock >> semantics [
+
+	^ (self containingArtefact ifNotNil: [:a | a semantics]) ifNil: [self language]
 ]
 
 { #category : #'as yet unclassified' }
@@ -919,6 +943,8 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 	| parens |
 	self children ifEmpty: [^ self].
 	
+	aStream hasLineInfo ifTrue: [range key line: aStream currentLine character: aStream currentIndexInLine].
+	
 	parens := self parentSandblock notNil and: [self parentSandblock isTSBlock and: [self slot needsParenthesis: self]].
 	(self language indentMatch: self) ifTrue: [aStream tab].
 	parens ifTrue: [aStream nextPut: $(].
@@ -930,5 +956,7 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 		indent: (self indentFor: self lastSubmorph current: aNumber)
 		forCompare: aBoolean.
 	self slot nodes do: [:node | node bodyTemplate andParentsDo: [:type | type hasStatementTerminator ifTrue: [aStream nextPutAll: self language statementTerminator]]].
-	parens ifTrue: [aStream nextPut: $)]
+	parens ifTrue: [aStream nextPut: $)].
+	
+	aStream hasLineInfo ifTrue: [range value line: aStream currentLine character: aStream currentIndexInLine]
 ]

@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBFileTree >> directory [
+
+	^ file
+]
+
+{ #category : #'as yet unclassified' }
 SBFileTree >> example [
 
 	SBMorphExample
@@ -17,6 +23,12 @@ SBFileTree >> example [
 				toggleExpand]
 		cases: {SBMorphExampleCase name: 'example 1' caseBlock: [:m | m]}
 		extent: 300 @ 300
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> file [
+
+	^ file
 ]
 
 { #category : #'as yet unclassified' }

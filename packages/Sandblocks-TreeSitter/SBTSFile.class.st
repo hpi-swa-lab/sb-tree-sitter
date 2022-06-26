@@ -8,7 +8,8 @@ Class {
 		'runtime',
 		'root',
 		'autoRestartButton',
-		'autoRestart'
+		'autoRestart',
+		'sematics'
 	],
 	#category : #'Sandblocks-TreeSitter'
 }
@@ -138,6 +139,12 @@ SBTSFile >> filepath: aString toplevel: aBlock language: aLanguageClass collapse
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile >> getSourceStringAndMark [
+
+	^ self root getSourceStringAndMark
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> initialize [
 
 	super initialize.
@@ -184,9 +191,27 @@ SBTSFile >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 	| source |
 	source := SBTSActiveRuntime
 		value: (runtime ifNotNil: [:r | r object new factory: self root factory])
-		during: [aQuickBoolean ifTrue: [self root sourceString] ifFalse: [self root prettySourceString]].
+		during: [
+			SBToggledCode comment: '' active: 1 do: {
+				[self root getSourceStringAndMark].
+				[
+					aQuickBoolean
+						ifTrue: [self root getSourceStringAndMark]
+						ifFalse: [self root prettySourceString]]}].
 	FileStream forceNewFileNamed: self filepath do: [:stream | stream nextPutAll: source].
 	^ true
+]
+
+{ #category : #accessing }
+SBTSFile >> semantics [
+
+	^ sematics ifNil: [SBTSLanguageSemantics new]
+]
+
+{ #category : #accessing }
+SBTSFile >> semantics: aLanguageSemantics [
+
+	sematics := aLanguageSemantics
 ]
 
 { #category : #'as yet unclassified' }

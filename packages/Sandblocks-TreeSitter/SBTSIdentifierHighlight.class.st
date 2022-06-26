@@ -13,7 +13,7 @@ SBTSIdentifierHighlight class >> matches: aBlock [
 { #category : #'as yet unclassified' }
 SBTSIdentifierHighlight class >> wasDeselected: aBlock [
 
-	aBlock language
+	aBlock semantics
 		usagesOf: aBlock
 		do: [:usage | usage detachDecorators: SBHighlightDecorator]
 ]
@@ -21,7 +21,7 @@ SBTSIdentifierHighlight class >> wasDeselected: aBlock [
 { #category : #'as yet unclassified' }
 SBTSIdentifierHighlight class >> wasSelected: aBlock [
 
-	aBlock language
+	aBlock semantics
 		usagesOf: aBlock
 		do: [:usage | usage attachDecorator: SBHighlightDecorator new]
 ]

@@ -1,30 +1,29 @@
 Class {
-	#name : #SBTypescript,
-	#superclass : #SBTSLanguage,
+	#name : #SBTSX,
+	#superclass : #SBTypescript,
 	#category : #'Sandblocks-Typescript'
 }
 
-{ #category : #configuration }
-SBTypescript class >> addIndent: aBlock [
+{ #category : #'as yet unclassified' }
+SBTSX class >> addIndent: aBlock [
 
-	aBlock contents = '=' ifTrue: [^ true].
-	aBlock contents = '=>' ifTrue: [^ true].
-	(aBlock submorphAfter ifNotNil: #type) = #arguments ifTrue: [^ true].
-	^ super addIndent: aBlock
+	(super addIndent: aBlock) ifTrue: [^ true].
+	aBlock type = #'jsx_opening_element' ifTrue: [^ true].
+	^ false
 ]
 
-{ #category : #configuration }
-SBTypescript class >> fileSuffix [
+{ #category : #'as yet unclassified' }
+SBTSX class >> fileSuffix [
 
-	^ 'ts'
+	^ 'tsx'
 ]
 
-{ #category : #configuration }
-SBTypescript class >> grammarJson [
-	" https://github.com/tree-sitter/tree-sitter-typescript/blob/master/typescript/src/grammar.json "
+{ #category : #'as yet unclassified' }
+SBTSX class >> grammarJson [
+	"https://github.com/tree-sitter/tree-sitter-typescript/blob/master/tsx/src/grammar.json"
 
 	^ '{
-  "name": "typescript",
+  "name": "tsx",
   "word": "identifier",
   "rules": {
     "program": {
@@ -1931,11 +1930,15 @@ SBTypescript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "type_assertion"
+          "name": "primary_expression"
         },
         {
           "type": "SYMBOL",
-          "name": "primary_expression"
+          "name": "_jsx_element"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "jsx_fragment"
         },
         {
           "type": "SYMBOL",
@@ -11025,118 +11028,16 @@ SBTypescript class >> grammarJson [
 '
 ]
 
-{ #category : #'configuration - layout' }
-SBTypescript class >> hardLineBreakBetween: aBlock and: anotherBlock [
+{ #category : #'as yet unclassified' }
+SBTSX class >> language [
 
-	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
-	aBlock parentSandblock type = #'class_body' ifTrue: [^ true].
-	anotherBlock type = #'else_clause' ifTrue: [^ true].
-	(aBlock contents = '{' and: [aBlock parentSandblock type = #'statement_block']) ifTrue: [^ true].
-	^ #(#'statement_block' #'class_body') includes: anotherBlock type
+	^ 'tsx'
 ]
 
-{ #category : #configuration }
-SBTypescript class >> highlightQuery [
-	"https://github.com/tree-sitter/tree-sitter-typescript/blob/master/queries/highlights.scm"
+{ #category : #'as yet unclassified' }
+SBTSX class >> removeIndent: aBlock [
 
-	^ SBJavascript highlightQuery, '
-; Types
-
-(type_identifier) @type
-(predefined_type) @type.builtin
-
-((identifier) @type
- (#match? @type "^[A-Z]"))
-
-(type_arguments
-  "<" @punctuation.bracket
-  ">" @punctuation.bracket)
-
-; Variables
-
-(required_parameter (identifier) @variable.parameter)
-(optional_parameter (identifier) @variable.parameter)
-
-; Keywords
-
-[ "abstract"
-  "declare"
-  "enum"
-  "export"
-  "implements"
-  "interface"
-  "keyof"
-  "namespace"
-  "private"
-  "protected"
-  "public"
-  "type"
-  "readonly"
-  "override"
-] @keyword'
-]
-
-{ #category : #configuration }
-SBTypescript class >> icon [
-
-	^ Form
-		extent: 16 @ 16
-		depth: 32
-		fromArray: #(4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278484172 4279403470 4279403470 4279403470 4279403470 4279403470 4278812365 4278287051 4278746828 4280651218 4278746828 4278287051 4278287051 4278287051 4278287051 4278287051 4281636309 4294967295 4294967295 4294967295 4294967295 4294967295 4285839074 4281833174 4293588219 4294967295 4293719547 4281570517 4278287051 4278287051 4278287051 4278287051 4279206350 4282752473 4284262878 4294967295 4287283943 4282752473 4280322769 4288991468 4293325562 4281964502 4287546600 4280322769 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4280388562 4294967295 4284591327 4278287051 4278287051 4287809257 4294638846 4285904611 4279009485 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4280388562 4294967295 4284591327 4278287051 4278287051 4279534799 4289516782 4294967295 4293456890 4282358488 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4280388562 4294967295 4284591327 4278287051 4278287051 4278287051 4278287051 4282358488 4292340471 4292865784 4278352843 4278287051 4278287051 4278287051 4278287051 4278287051 4280388562 4294967295 4284591327 4278287051 4278681036 4289319661 4287743721 4280454098 4289516782 4294376189 4278352843 4278287051 4278287051 4278287051 4278287051 4278287051 4280388562 4294967295 4284591327 4278287051 4278287051 4286561509 4294573310 4294967295 4294835967 4286167523 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278549708 4280519890 4279140814 4278287051 4278287051 4278287051 4279731663 4281636309 4280125905 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051 4278287051)
-		offset: 0 @ 0
-]
-
-{ #category : #configuration }
-SBTypescript class >> isBlockInlined: aSymbol [
-
-	^ aSymbol = #'expression_statement' or: [super isBlockInlined: aSymbol]
-]
-
-{ #category : #configuration }
-SBTypescript class >> language [
-
-    ^ #typescript
-]
-
-{ #category : #configuration }
-SBTypescript class >> preprocessGrammar: aGrammar [
-	"for some reason the member_expression accepts both primary_expr and expr as options, which lets our parser think that matches are ambiguous"
-
-	(aGrammar bodyNodeForRule: #'member_expression') element elements first replaceBy: (aGrammar bodyNodeForRule: #'member_expression') element elements first elements first.
-	(aGrammar bodyNodeForRule: #'subscript_expression') element elements first replaceBy: (aGrammar bodyNodeForRule: #'subscript_expression') element elements first elements first.
-	
-	"bug in the grammar: string is mentioned twice"
-	((aGrammar bodyNodeForRule: #'predefined_type') elements detect: [:node | node label = 'string']) delete.
-	
-	aGrammar rules at: '_template_chars' put: (SBTSNodeText new
-		regexString: '.*';
-		factory: aGrammar).
-	
-	"see SBJavascript"
-	aGrammar removeRule: #'_reserved_identifier'
-]
-
-{ #category : #configuration }
-SBTypescript class >> rootRuleName [
-
-	^ 'program'
-]
-
-{ #category : #configuration }
-SBTypescript class >> softLineBreakBetween: aBlock and: anotherBlock [
-
-	aBlock isTextMorph ifTrue: [
-		aBlock contents = ':' ifTrue: [^ true].
-		aBlock contents = '?' ifTrue: [^ true].
-		aBlock contents = '=' ifTrue: [^ true].
-		aBlock contents = '=>' ifTrue: [^ true]].
-	anotherBlock type = #arguments ifTrue: [^ true].
-	(aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']) ifTrue: [^ true].
-	^ super softLineBreakBetween: aBlock and: anotherBlock
-]
-
-{ #category : #configuration }
-SBTypescript class >> statementTerminator [
-
-	^ ';'
+	(super removeIndent: aBlock) ifTrue: [^ true].
+	aBlock type = #'jsx_closing_element' ifTrue: [^ true].
+	^ false
 ]

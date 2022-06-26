@@ -256,7 +256,7 @@ SBTSSlot >> preferredColorIn: aColorPolicy for: aHighlightString [
 			['punctuation.bracket'] -> [aColorPolicy builtIn].
 			['constant.builtin'] -> [aColorPolicy builtIn].
 			['operator'] -> [aColorPolicy identifier].
-			['property'] -> [aColorPolicy identifier].
+			['property'] -> [aColorPolicy important].
 			['important'] -> [aColorPolicy important].
 			['major_declaration'] -> [aColorPolicy default]}
 		otherwise: [aColorPolicy default]

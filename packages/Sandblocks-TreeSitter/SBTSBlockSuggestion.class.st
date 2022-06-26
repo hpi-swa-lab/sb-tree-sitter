@@ -59,5 +59,5 @@ SBTSBlockSuggestion >> useSuggestionOn: aBlock in: anEditor [
 
 	disambiguatePopup
 		ifNotNil: [:popup | popup applyCommand: command]
-		ifNil: [anEditor do: (SBReplaceMultipleCommand new target: aBlock replacers: blocks)]
+		ifNil: [anEditor do: command]
 ]

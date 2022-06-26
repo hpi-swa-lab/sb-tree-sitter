@@ -76,7 +76,7 @@ SBTSUnknownBlock >> suggestAlways [
 SBTSUnknownBlock >> suggestions [
 
 	^ (self slot firstNode isTSChoice and: [self slot firstNode alternatives allSatisfy: #isTSLabel])
-		ifTrue: [self slot firstNode alternatives collect: [:alt | SBTSBlockSuggestion new blocks: alt buildEmpty in: self sandblockEditor]]
+		ifTrue: [self slot firstNode alternatives collect: [:alt | SBTSBlockSuggestion new blocks: (SBReplaceMultipleCommand new target: self replacers: alt buildEmpty) in: self sandblockEditor]]
 		ifFalse: [#()]
 ]
 
