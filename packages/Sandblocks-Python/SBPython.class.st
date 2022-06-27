@@ -5210,6 +5210,8 @@ SBPython class >> parseStatement: aString [
 { #category : #configuration }
 SBPython class >> postprocessGrammar: aGrammar [
 
+	super postprocessGrammar: aGrammar.
+	
 	(aGrammar bodyNodeForRule: #'expression_statement') alternatives first in: [:alt | alt replaceBy: alt element].
 	"simplify block/_suite declaration to only say block"
 	aGrammar rules do: [:rule | rule allElementsDo: [:element | (element isTSAlias and: [element alias = #block and: [element parent isTSChoice]]) ifTrue: [element parent replaceBy: element parent alternatives second]]]
@@ -5217,8 +5219,10 @@ SBPython class >> postprocessGrammar: aGrammar [
 
 { #category : #configuration }
 SBPython class >> preprocessGrammar: aGrammar [
-	"the _simple_statements (note the plural) rule poses a challenge because it leads to a expression+* construct that our repeater logic cannot handle well"
 
+	super preprocessGrammar: aGrammar.
+	
+	"the _simple_statements (note the plural) rule poses a challenge because it leads to a expression+* construct that our repeater logic cannot handle well"
 	(aGrammar bodyNodeForRule: '_statement') elements first
 		type: '_simple_statement'
 		factory: aGrammar.

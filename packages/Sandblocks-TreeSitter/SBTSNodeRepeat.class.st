@@ -5,7 +5,8 @@ Class {
 		'multiple',
 		'required',
 		'element',
-		'delimiter'
+		'delimiter',
+		'isStatementRepeater'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -110,6 +111,18 @@ SBTSNodeRepeat >> hasEqualStructure: aNode [
 	^ (super hasEqualStructure: aNode) and: [aNode required = self required and: [self multiple = aNode multiple]]
 ]
 
+{ #category : #accessing }
+SBTSNodeRepeat >> isStatementRepeater [
+
+	^ isStatementRepeater
+]
+
+{ #category : #accessing }
+SBTSNodeRepeat >> isStatementRepeater: aBoolean [
+
+	isStatementRepeater := aBoolean
+]
+
 { #category : #testing }
 SBTSNodeRepeat >> isTSOptional [
 
@@ -140,6 +153,7 @@ SBTSNodeRepeat >> multiple: aBoolean required: anotherBoolean element: aNode [
 	multiple := aBoolean.
 	required := anotherBoolean.
 	element := aNode.
+	isStatementRepeater := false.
 	
 	element parent: self
 ]
@@ -196,6 +210,7 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 			currentPosition := parser position.
 			wasAtEnd := parser atEnd.
 			(parser peekForLabel: delimiter) ifTrue: [parser nextSibling].
+			self isStatementRepeater ifTrue: [parser numberOfNewLinesToNext - 1 timesRepeat: [parser addBlock: element alternatives second buildEmpty first]].
 			results := self element resultsForBlocks: parser.
 			results do: [:candidate |
 				"to fix troubles with infinitely repeating matches, we only accept results if they advanced the parser."

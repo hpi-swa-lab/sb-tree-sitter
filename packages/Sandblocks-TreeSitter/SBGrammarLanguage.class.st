@@ -242,7 +242,8 @@ SBGrammarLanguage >> initialize [
 	grammar := Json readFrom: self class grammarJson readStream.
 	self supertypes: grammar supertypes.
 	name := self class language.
-	highlightQuery := self class highlightQuery ifNotNil: [:query | SBTSQuery new prepare: query].
+	highlightQuery := self class highlightQuery ifNotNil: [:query | SBTSQuery new prepare: query, '
+(empty) @variable.part'].
 	extras := grammar extras
 		select: [:rule | rule type = 'SYMBOL']
 		thenCollect: [:rule | rule name].

@@ -385,7 +385,8 @@ SBTSGrammar >> language [
 SBTSGrammar >> language: aLanguage [
 
 	language := aLanguage.
-	highlightQuery := aLanguage highlightQuery ifNotNil: [:query | SBTSQuery new prepare: query]
+	highlightQuery := aLanguage highlightQuery ifNotNil: [:query | SBTSQuery new prepare: query, '
+(empty) @variable.part']
 ]
 
 { #category : #cleaning }

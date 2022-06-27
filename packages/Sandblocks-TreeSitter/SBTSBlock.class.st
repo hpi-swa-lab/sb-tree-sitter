@@ -427,14 +427,14 @@ SBTSBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 	self andAllParentSandblocksDo: [:block |
 		block isTSBlock ifTrue: [
 			"look in my template --> insert as child of me"
-			(block slot repeaterThat: [:p | block language isStatementContainer: p in: block parentSandblock]) ifNotNil: [:repeater |
+			(block slot repeaterThat: [:p | p isStatementRepeater]) ifNotNil: [:repeater |
 				^ block sandblockEditor do: (SBTSNodeInsertCommand new
-					element: repeater element
+					element: repeater element alternatives second
 					container: block parentSandblock
 					index: block submorphIndex + (anAboveBoolean ifTrue: [0] ifFalse: [1]))].
 			"look above me --> insert adjacent to me"
 			block
-				cursorPositionsDo: [:cursor | (cursor isInsert and: [block language isStatementContainer: cursor command element parent in: block]) ifTrue: [^ block sandblockEditor do: cursor command]]
+				cursorPositionsDo: [:cursor | (cursor isInsert and: [cursor command element parent isStatementRepeater]) ifTrue: [^ block sandblockEditor do: cursor command]]
 				shallow: true]]
 ]
 
@@ -452,10 +452,10 @@ SBTSBlock >> insertStatementHasCandidate [
 	self andAllParentSandblocksDo: [:block |
 		block isTSBlock ifTrue: [
 			"look in my template --> insert as child of me"
-			(block slot repeaterThat: [:p | block language isStatementContainer: p in: block parentSandblock]) ifNotNil: [:repeater | ^ true].
+			(block slot repeaterThat: [:p | p isStatementRepeater]) ifNotNil: [:repeater | ^ true].
 			"look above me --> insert adjacent to me"
 			block
-				cursorPositionsDo: [:cursor | (cursor isInsert and: [block language isStatementContainer: cursor command element parent in: block]) ifTrue: [^ true]]
+				cursorPositionsDo: [:cursor | (cursor isInsert and: [cursor command element parent isStatementRepeater]) ifTrue: [^ true]]
 				shallow: true]].
 	^ false
 ]
@@ -463,7 +463,7 @@ SBTSBlock >> insertStatementHasCandidate [
 { #category : #testing }
 SBTSBlock >> isBlockBody [
 
-	self slot firstNode bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [self language isStatementContainer: node in: self]) ifTrue: [^ true]].
+	self slot firstNode bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [node isStatementRepeater]) ifTrue: [^ true]].
 	^ false
 ]
 

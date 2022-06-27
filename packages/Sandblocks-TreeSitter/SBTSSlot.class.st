@@ -141,7 +141,7 @@ SBTSSlot >> initialize [
 { #category : #'as yet unclassified' }
 SBTSSlot >> isStatementIn: aContainerBlock [
 
-	self repeatersDo: [:repeater | (self language isStatementContainer: repeater in: aContainerBlock) ifTrue: [^ true]].
+	self repeatersDo: [:repeater | repeater isStatementRepeater ifTrue: [^ true]].
 	^ false
 ]
 

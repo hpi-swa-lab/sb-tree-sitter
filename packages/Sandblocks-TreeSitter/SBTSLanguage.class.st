@@ -80,6 +80,12 @@ SBTSLanguage class >> defaultRuntimeClass [
 	^ nil
 ]
 
+{ #category : #'configuration - layout' }
+SBTSLanguage class >> emptyLineSymbol [
+
+	^ #empty
+]
+
 { #category : #'loading - helper' }
 SBTSLanguage class >> fetchLibrary: aGithubString branch: aString [
 
@@ -329,7 +335,18 @@ SBTSLanguage class >> parseToplevel: aString [
 SBTSLanguage class >> postprocessGrammar: aGrammar [
 	"hook for modifying properties of the grammar just after we apply inlining rules etc"
 
-	
+	self emptyLineSymbol ifNotNil: [
+		aGrammar rules at: self emptyLineSymbol put: (SBTSNodeText new
+			factory: aGrammar;
+			regexString: '').
+		aGrammar rules keysAndValuesDo: [:symbol :body |
+			body allElementsDo: [:node |
+				(node isTSRepeat and: [self isStatementContainer: node in: (SBTSNodeSymbol new type: symbol factory: aGrammar)]) ifTrue: [ | choice current |
+					node isStatementRepeater: true.
+					current := node element.
+					choice := SBTSNodeChoice new factory: aGrammar.
+					current replaceBy: choice.
+					choice alternatives: {current. SBTSNodeSymbol new type: self emptyLineSymbol factory: aGrammar}]]]]
 ]
 
 { #category : #configuration }

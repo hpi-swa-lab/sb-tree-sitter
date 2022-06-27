@@ -226,6 +226,24 @@ SBTSFileParser >> nodeForCursor: aCursor [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFileParser >> numberOfNewLinesToNext [
+
+	| current previous text |
+	cursor atEnd
+		ifTrue: [
+			current := nil.
+			previous := cursor node]
+		ifFalse: [
+			current := cursor node.
+			previous := cursor previousNode: current.
+			previous ifNil: [^ 0]].
+	
+	position > (cursor endByteIndex: previous) ifTrue: [^ 0].
+	text := cursor textBetween: previous and: current.
+	^ text occurrencesOf: Character lf
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFileParser >> parse: aString language: aLanguage [
 
 	| api language |

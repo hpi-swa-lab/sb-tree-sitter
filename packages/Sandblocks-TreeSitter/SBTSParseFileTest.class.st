@@ -131,6 +131,18 @@ SBTSParseFileTest >> testJsParameters [
 		equals: (SBTSFileParser new parse: source language: SBJavascript instance) sourceString
 ]
 
+{ #category : #'tests - empty lines' }
+SBTSParseFileTest >> testJsParseEmptyLines [
+
+	| source program |
+	source := 'a;
+
+b;'.
+	program := SBJavascript parseToplevel: source.
+	self assert: 3 equals: program childSandblocks size.
+	self assert: source equals: program sourceString
+]
+
 { #category : #'tests - languages' }
 SBTSParseFileTest >> testJsParseTernary [
 

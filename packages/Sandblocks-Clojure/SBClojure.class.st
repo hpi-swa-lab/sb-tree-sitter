@@ -1769,8 +1769,9 @@ SBClojure class >> language [
 
 { #category : #configuration }
 SBClojure class >> preprocessGrammar: aGrammar [
-	"clojure usually tracks whitespaces specifically which creates a lot of nodes in our system. mark these as extras for now such that they are skipped during block creation."
 
+	super preprocessGrammar: aGrammar.
+	"clojure usually tracks whitespaces specifically which creates a lot of nodes in our system. mark these as extras for now such that they are skipped during block creation."
 	aGrammar extras: {'\s*' asRegex}
 ]
 

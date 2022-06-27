@@ -6837,8 +6837,10 @@ SBJavascript class >> noteUncapturedText [
 
 { #category : #configuration }
 SBJavascript class >> preprocessGrammar: aGrammar [
-	"for some reason the member_expression accepts both primary_expr and expr as options, which lets our parser think that matches are ambiguous"
 
+	super preprocessGrammar: aGrammar.
+	
+	"for some reason the member_expression accepts both primary_expr and expr as options, which lets our parser think that matches are ambiguous"
 	(aGrammar bodyNodeForRule: #'member_expression') element elements first replaceBy: (aGrammar bodyNodeForRule: #'member_expression') element elements first elements first.
 	(aGrammar bodyNodeForRule: #'subscript_expression') element elements first replaceBy: (aGrammar bodyNodeForRule: #'subscript_expression') element elements first elements first.
 	
