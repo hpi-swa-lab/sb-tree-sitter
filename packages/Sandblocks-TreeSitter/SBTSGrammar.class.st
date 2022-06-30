@@ -10,7 +10,8 @@ Class {
 		'language',
 		'highlightQuery',
 		'precedences',
-		'extras'
+		'extras',
+		'keywords'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -376,6 +377,12 @@ SBTSGrammar >> isSuperType: aSymbol [
 ]
 
 { #category : #accessing }
+SBTSGrammar >> keywords [
+
+	^ keywords
+]
+
+{ #category : #accessing }
 SBTSGrammar >> language [
 
 	^ language
@@ -569,7 +576,9 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 	
 	self language postprocessGrammar: self.
 	
-	self rules keysAndValuesDo: [:name :rule | self checkStructure: rule]
+	self rules keysAndValuesDo: [:name :rule | self checkStructure: rule].
+	
+	keywords := Array streamContents: [:stream | self allElementsDo: [:element | (element isTSLabel and: [element label allSatisfy: #isAlphaNumeric]) ifTrue: [stream nextPut: element label]]]
 ]
 
 { #category : #accessing }

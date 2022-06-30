@@ -250,11 +250,11 @@ SBTSLanguageTests >> testPythonNumber [
 		select;
 		insertStatementBelow.
 	e handle: (self keyboardEvent: $1).
-	self tick.
-	self tick.
-	e handle: (self keyboardEvent: Character cr).
+	self assert: (block matchesQuery: '(module (integer))').
 	
-	self assert: (block matchesQuery: '(module (integer))')
+	e handle: (self keyboardEvent: $.).
+	e handle: (self keyboardEvent: $3).
+	self assert: (block matchesQuery: '(module (float))')
 ]
 
 { #category : #'testing - parse' }

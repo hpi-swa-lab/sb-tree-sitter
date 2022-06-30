@@ -180,6 +180,18 @@ SBTSParseFileTest >> testParensJsBinaryOp [
 ]
 
 { #category : #'tests - print parentheses' }
+SBTSParseFileTest >> testParensStBinaryAndUnary [
+
+	| source module |
+	source := 'a
+(3+4)squared'.
+	module := SBTSFileParser new parse: source language: SBTSSmalltalk.
+	self editorFor: module.
+	(module queryNode: '(parenthesized_expression (expression) @)') deleteAround.
+	self assert: source equals: module sourceString
+]
+
+{ #category : #'tests - print parentheses' }
 SBTSParseFileTest >> testParensStBinaryOp [
 
 	| source module |

@@ -812,15 +812,14 @@ SBTSBlock >> tryApplyChange: aBlock input: aString [
 	isAtStart := self currentTextMorph cursor = 1 and: [self currentTextMorph contents notEmpty].
 	aBlock value: self.
 	
-	self prefixValid ifFalse: [
-		self contents: previousContents.
-		(SBToggledCode comment: '' active: 1 do: {[SBTSInputReconcile]. [SBTSDisambiguatePopup]}) new
-			for: (SBToggledCode
-				comment: ''
-				active: 1
-				do: {[self currentTextMorph]. [self isUnknown ifTrue: [self] ifFalse: [self currentTextMorph]]})
-			input: aString
-			before: isAtStart]
+	self prefixValid
+		ifTrue: [
+			(self factory keywords includes: self contents) ifTrue: [
+				self contents: previousContents.
+				SBTSInputReconcile new for: self currentTextMorph input: aString before: isAtStart]]
+		ifFalse: [
+			self contents: previousContents.
+			SBTSInputReconcile new for: self currentTextMorph input: aString before: isAtStart]
 ]
 
 { #category : #'as yet unclassified' }
@@ -950,7 +949,7 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 	parens ifTrue: [aStream nextPut: $(].
 	self children overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.
-		aStream nextPutAll: (self slot separatorBetween: first and: second indent: aNumber lastCharacterOfFirst: aStream last)].
+		aStream nextPutAll: (self slot separatorBetween: first and: second indent: aNumber lastCharacterOfFirst: (aStream position > 0 ifFalse: [$ ] ifTrue: [aStream last]))].
 	self lastSubmorph
 		writeSourceOn: aStream
 		indent: (self indentFor: self lastSubmorph current: aNumber)

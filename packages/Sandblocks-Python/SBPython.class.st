@@ -5274,6 +5274,12 @@ SBPython class >> rootRuleName [
 	^ 'module'
 ]
 
+{ #category : #'configuration - editing' }
+SBPython class >> transitionPairs [
+
+	^ {#integer -> #float}
+]
+
 { #category : #'as yet unclassified' }
 SBPython >> addIndent: aBlock [
 

@@ -370,6 +370,27 @@ SBTSBlockTest >> testJsIdAdd [
 	self assert: 'a+b;' equals: program sourceString
 ]
 
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testJsIdentifierToAssignment [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'conts'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self assert: #identifier equals: program childSandblocks first type.
+	
+	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: $s).
+	editor handle: (self keyboardEvent: $t).
+	self
+		tick;
+		tick.
+	editor handle: (self keyboardEvent: Character arrowDown).
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: #'lexical_declaration' equals: program childSandblocks first type
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsMethodCall [
 

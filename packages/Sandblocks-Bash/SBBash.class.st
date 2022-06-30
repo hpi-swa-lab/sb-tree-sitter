@@ -27,9 +27,9 @@ SBBash class >> confirm: aBlock [
 
 { #category : #configuration }
 SBBash class >> grammarJson [
+	" https://github.com/tree-sitter/tree-sitter-bash/blob/master/src/grammar.json "
 
-    " https://github.com/tree-sitter/tree-sitter-bash/blob/master/src/grammar.json "
-    ^ '{
+	^ '{
   "name": "bash",
   "word": "word",
   "rules": {
@@ -1864,6 +1864,10 @@ SBBash class >> grammarJson [
       "members": [
         {
           "type": "SYMBOL",
+          "name": "flag"
+        },
+        {
+          "type": "SYMBOL",
           "name": "word"
         },
         {
@@ -1897,6 +1901,27 @@ SBBash class >> grammarJson [
         {
           "type": "SYMBOL",
           "name": "process_substitution"
+        }
+      ]
+    },
+    "flag": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_flag_start"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "flag_argument"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
@@ -2707,6 +2732,14 @@ SBBash class >> grammarJson [
     {
       "type": "STRING",
       "value": "\n"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_flag_start"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "flag_argument"
     }
   ],
   "inline": [
@@ -2808,6 +2841,25 @@ SBBash class >> isStatementContainer: aRepeatNode in: aBlock [
 SBBash class >> language [
 
     ^ #bash
+]
+
+{ #category : #'as yet unclassified' }
+SBBash class >> preprocessGrammar: aGrammar [
+
+	super preprocessGrammar: aGrammar.
+	
+	aGrammar rules at: #'_flag_start' put: (SBTSNodeText new
+		factory: aGrammar;
+		regexString: '-[a-z-]+').
+	aGrammar rules at: #'flag_argument' put: (SBTSNodeSeq new
+		elements: {
+			SBTSNodeLabel new
+				factory: aGrammar;
+				label: '='.
+			SBTSNodeText new
+				factory: aGrammar;
+				regexString: '.*'};
+		factory: aGrammar)
 ]
 
 { #category : #actions }
