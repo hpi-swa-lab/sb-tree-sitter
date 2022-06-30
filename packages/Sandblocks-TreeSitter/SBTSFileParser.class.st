@@ -323,7 +323,9 @@ SBTSFileParser >> peekUncapturedText [
 		ifFalse: [
 			current := cursor node.
 			previous := cursor previousNode: current.
-			previous ifNil: [^ '']].
+			previous ifNil: [
+				position >= ((cursor startByteIndex: current) - 1) ifTrue: [^ ''].
+				^ cursor textBetween: nil and: current]].
 	
 	position > (cursor endByteIndex: previous) ifTrue: [^ ''].
 	text := cursor textBetween: previous and: current.

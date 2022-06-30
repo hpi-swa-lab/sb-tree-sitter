@@ -73,10 +73,7 @@ SBJsRuntimeOSProcess >> evaluate: aString [
 SBJsRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 
 	| node ret |
-	node := SBToggledCode
-		comment: ''
-		active: 1
-		do: {['/home/tom/.nvm/versions/node/v15.14.0/bin/node']. [self which: 'node']}.
+	node := self which: 'node'.
 	node ifNil: [^ self error: 'node executable not found'].
 	
 	ret := Promise new.

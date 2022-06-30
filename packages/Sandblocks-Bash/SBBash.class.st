@@ -25,9 +25,9 @@ SBBash class >> confirm: aBlock [
 	UIManager default inform: (aBlock orOwnerSuchThat: [:b | b type = #command]) sourceString
 ]
 
-{ #category : #configuration }
+{ #category : #properties }
 SBBash class >> grammarJson [
-	" https://github.com/tree-sitter/tree-sitter-bash/blob/master/src/grammar.json "
+	" https://github.com/bash/blob/master/src/grammar.json "
 
 	^ '{
   "name": "bash",
@@ -2565,7 +2565,7 @@ SBBash class >> grammarJson [
             "members": [
               {
                 "type": "PATTERN",
-                "value": "[^#''\"<>{}\\[\\]()`$|&;\\\\\\s]"
+                "value": "[^#''\"<>{}\\[\\]()`$|&;\\\\\\s-]"
               },
               {
                 "type": "SEQ",
@@ -2761,10 +2761,10 @@ SBBash class >> grammarJson [
 '
 ]
 
-{ #category : #configuration }
+{ #category : #properties }
 SBBash class >> highlightQuery [
 
-    " https://github.com/tree-sitter/tree-sitter-bash/blob/master/src/queries/highlights.scm "
+    " https://github.com/bash/blob/master/src/queries/highlights.scm "
     ^ '[
   (string)
   (raw_string)
@@ -2850,16 +2850,10 @@ SBBash class >> preprocessGrammar: aGrammar [
 	
 	aGrammar rules at: #'_flag_start' put: (SBTSNodeText new
 		factory: aGrammar;
-		regexString: '-[a-z-]+').
-	aGrammar rules at: #'flag_argument' put: (SBTSNodeSeq new
-		elements: {
-			SBTSNodeLabel new
-				factory: aGrammar;
-				label: '='.
-			SBTSNodeText new
-				factory: aGrammar;
-				regexString: '.*'};
-		factory: aGrammar)
+		regexString: '-[A-Z0-9a-z\-]+').
+	aGrammar rules at: #'flag_argument' put: (SBTSNodeText new
+		factory: aGrammar;
+		regexString: '=.*')
 ]
 
 { #category : #actions }

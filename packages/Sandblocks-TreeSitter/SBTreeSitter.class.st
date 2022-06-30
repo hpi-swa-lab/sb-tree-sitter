@@ -447,9 +447,15 @@ SBTreeSitter >> supercollider [
 { #category : #helper }
 SBTreeSitter >> textBetween: aNode and: anEndNode [
 
-	^ (currentString copyFrom: (self nodeEndByte: aNode) + 1 to: (anEndNode
-		ifNil: [self nodeEndByte: (self nodeParent: aNode)]
-		ifNotNil: [self nodeStartByte: anEndNode])) utf8Decoded
+	^ (currentString
+		copyFrom: (aNode
+			ifNil: [
+				self assert: anEndNode notNil.
+				(self nodeStartByte: anEndNode) - 1 max: 1]
+			ifNotNil: [(self nodeEndByte: aNode) + 1])
+		to: (anEndNode
+			ifNil: [self nodeEndByte: (self nodeParent: aNode)]
+			ifNotNil: [self nodeStartByte: anEndNode])) utf8Decoded
 ]
 
 { #category : #helper }

@@ -247,6 +247,12 @@ SBTSCursor >> shouldSkipParsedNode: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursor >> startByteIndex: aNode [
+
+	^ library nodeStartByte: aNode
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursor >> text [
 
 	^ library textForNode: self node
