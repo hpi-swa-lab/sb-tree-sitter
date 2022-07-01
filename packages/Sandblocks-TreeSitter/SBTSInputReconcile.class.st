@@ -220,7 +220,7 @@ SBTSInputReconcile >> updateChoices [
 		currentChoices := {}.
 		^ self].
 	
-	currentChoices := self findOptionsBlock cull: self.
+	currentChoices := self findOptionsBlock cull: self cull: self contents.
 	
 	(currentChoices size = 1 and: [before not]) ifTrue: [self applyCommand: currentChoices anyOne]
 ]

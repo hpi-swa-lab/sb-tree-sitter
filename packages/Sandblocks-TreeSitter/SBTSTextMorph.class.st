@@ -159,10 +159,10 @@ SBTSTextMorph >> language [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSTextMorph >> ownerWithColor [
+SBTSTextMorph >> ownerWithForegroundColor [
 
 	^ self highlight = #'_sb_none'
-		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
+		ifTrue: [self owner ifNotNil: [:o | o ownerWithForegroundColor]]
 		ifFalse: [self]
 ]
 

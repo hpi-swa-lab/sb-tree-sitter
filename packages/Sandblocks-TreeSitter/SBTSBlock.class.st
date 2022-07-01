@@ -583,10 +583,10 @@ SBTSBlock >> objectInterfaceForInsert: aCommand [
 ]
 
 { #category : #highlight }
-SBTSBlock >> ownerWithColor [
+SBTSBlock >> ownerWithForegroundColor [
 
 	^ self highlight = #'_sb_none'
-		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
+		ifTrue: [self owner ifNotNil: [:o | o ownerWithForegroundColor]]
 		ifFalse: [self]
 ]
 

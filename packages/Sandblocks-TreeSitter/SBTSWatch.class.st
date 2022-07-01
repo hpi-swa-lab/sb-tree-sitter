@@ -214,12 +214,6 @@ SBTSWatch >> listensToExamples [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSWatch >> ownerWithColor [
-
-	^ self owner ownerWithColor
-]
-
-{ #category : #'as yet unclassified' }
 SBTSWatch >> registerWatch [
 
 	self class registerWatch: self

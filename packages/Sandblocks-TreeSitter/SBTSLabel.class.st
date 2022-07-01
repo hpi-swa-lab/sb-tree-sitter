@@ -116,10 +116,10 @@ SBTSLabel >> language [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLabel >> ownerWithColor [
+SBTSLabel >> ownerWithForegroundColor [
 
 	^ self highlight = #'_sb_none'
-		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
+		ifTrue: [self owner ifNotNil: [:o | o ownerWithForegroundColor]]
 		ifFalse: [self]
 ]
 

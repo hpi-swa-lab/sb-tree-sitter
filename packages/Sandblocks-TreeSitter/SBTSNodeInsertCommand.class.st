@@ -140,7 +140,7 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 		newPos isInsert ifTrue: [
 			SBTSInputReconcile new
 				for: self container input: aString before: false;
-				findOptionsBlock: [:reconcile | reconcile optionsForInsert: newPos command given: aString]].
+				findOptionsBlock: [:reconcile :string | reconcile optionsForInsert: newPos given: string]].
 		^ false].
 	
 	^ options notEmpty

@@ -192,10 +192,10 @@ SBTSReplacementBlock >> newEmptyChildNear: aBlock before: aBoolean [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSReplacementBlock >> ownerWithColor [
+SBTSReplacementBlock >> ownerWithForegroundColor [
 
 	^ self root highlight = #'_sb_none'
-		ifTrue: [self owner ifNotNil: [:o | o ownerWithColor]]
+		ifTrue: [self owner ifNotNil: [:o | o ownerWithForegroundColor]]
 		ifFalse: [self]
 ]
 
