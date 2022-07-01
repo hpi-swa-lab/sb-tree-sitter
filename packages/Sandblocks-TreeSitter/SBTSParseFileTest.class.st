@@ -4,6 +4,12 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
 
+{ #category : #failures }
+SBTSParseFileTest >> expectedFailures [
+
+	^ #(#testParensStBinaryAndUnary)
+]
+
 { #category : #'tests - languages' }
 SBTSParseFileTest >> testAdaptRegexNodes [
 
@@ -97,7 +103,7 @@ SBTSParseFileTest >> testJsFunctionPatterns [
 		as: Array)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testJsImportExpression [
 
 	SBJavascript parseToplevel: 'import'
@@ -231,7 +237,7 @@ SBTSParseFileTest >> testParseBinaryExpression [
 	self assert: 'binary_expression' equals: module childSandblocks first type
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testParseClojureMeta [
 
 	| source |
@@ -253,7 +259,7 @@ SBTSParseFileTest >> testParseJsArrowFunc [
 	self assert: 7 equals: (module childSandblocks first performEnum: #cursorPositionsDo:) size
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testParseJsRegex [
 
 	SBJavascript parseToplevel: '/\.(js|ts)x?$/'

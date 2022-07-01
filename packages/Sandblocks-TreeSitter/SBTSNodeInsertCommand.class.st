@@ -131,18 +131,17 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 	options size = 1 ifTrue: [morphs := options first].
 	options size > 1 ifTrue: [continueInputString := aString].
 	
-	SBToggledCode comment: '' active: 0 do: {
-		[
-			(options isEmpty and: [
-				self container submorphs
-					at: self insertIndex
-					ifPresent: [:c | true]
-					ifAbsent: [false]]) ifTrue: [ | next |
-				"try and forward the input"
-				next := self container submorphs at: self insertIndex.
-				"FIXME: string morphs confuse our positionAfterDo: code, we should instead always work with cursorpositions"
-				next isStringMorph ifFalse: [SBTSDisambiguatePopup new for: next input: aString before: false].
-				^ false]]}.
+	"if we cannot match anything here, look to the right of us to see if there is a position that could take the input"
+	options isEmpty ifTrue: [ | newPos |
+		newPos := self container sandblockEditor cursor cursorPosition
+			moveHorizontal: 1
+			wordWise: false.
+		newPos isText ifTrue: [SBTSInputReconcile new for: newPos textMorph input: aString before: false].
+		newPos isInsert ifTrue: [
+			SBTSInputReconcile new
+				for: self container input: aString before: false;
+				findOptionsBlock: [:reconcile | reconcile optionsForInsert: newPos command given: aString]].
+		^ false].
 	
 	^ options notEmpty
 ]

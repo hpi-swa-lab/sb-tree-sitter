@@ -2879,11 +2879,13 @@ SBBash class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCh
 { #category : #'configuration - suggestions' }
 SBBash class >> suggestionsFor: aBlock [
 
-	(aBlock type = #word and: [aBlock parentSandblock type = #command]) ifTrue: [
-		^ {
-			SBTSBlockSuggestion new
-				blocks: {(self parseToplevel: 'x word') childSandblocks first childSandblocks second}
-				in: aBlock sandblockEditor}].
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			(aBlock type = #word and: [aBlock parentSandblock type = #command]) ifTrue: [
+				^ {
+					SBTSBlockSuggestion new
+						blocks: {(self parseToplevel: 'x word') childSandblocks first childSandblocks second}
+						in: aBlock sandblockEditor}]]}.
 	^ #()
 ]
 

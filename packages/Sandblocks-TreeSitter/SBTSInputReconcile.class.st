@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'target',
 		'before',
-		'currentChoices'
+		'currentChoices',
+		'findOptionsBlock'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -41,6 +42,18 @@ SBTSInputReconcile >> dismiss [
 		moveCursorToEnd
 ]
 
+{ #category : #accessing }
+SBTSInputReconcile >> findOptionsBlock [
+
+	^ findOptionsBlock ifNil: [[self tryReconcileFor: target input: self contents in: target containingSandblock before: before]]
+]
+
+{ #category : #accessing }
+SBTSInputReconcile >> findOptionsBlock: aBlock [
+
+	findOptionsBlock := aBlock
+]
+
 { #category : #'initialize-release' }
 SBTSInputReconcile >> for: aTextMorph input: aString before: aBoolean [
 
@@ -61,6 +74,12 @@ SBTSInputReconcile >> initialize [
 
 	super initialize.
 	self addMorphBack: (SBOwnTextMorph new when: #contentsChanged send: #contentsChanged to: self)
+]
+
+{ #category : #'reconciliation helper' }
+SBTSInputReconcile >> optionsForInsert: aPosition given: aString [
+
+	^ (SBTSInputParser new optionsForTemplate: aPosition command element given: aString) collect: [:blocks | aPosition command copy morphs: blocks]
 ]
 
 { #category : #'reconciliation helper' }
@@ -136,7 +155,7 @@ SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 	self positionsAfter: aBlock do: [:position |
 		(position isText and: [position block wantsInput]) ifTrue: ["TODO: do we want the full reconciliation logic or just reinterpret?"
 		^ self tryReinterpretFrom: position textMorph in: position block given: aString before: false].
-		position isInsert ifTrue: [((SBTSInputParser new optionsForTemplate: position command element given: aString) collect: [:blocks | position command copy morphs: blocks]) ifNotEmpty: [:res | ^ res]]].
+		position isInsert ifTrue: [(self optionsForInsert: position given: aString) ifNotEmpty: [:res | ^ res]]].
 	^ {}
 ]
 
@@ -201,11 +220,7 @@ SBTSInputReconcile >> updateChoices [
 		currentChoices := {}.
 		^ self].
 	
-	currentChoices := self
-		tryReconcileFor: target
-		input: self contents
-		in: target containingSandblock
-		before: before.
+	currentChoices := self findOptionsBlock cull: self.
 	
 	(currentChoices size = 1 and: [before not]) ifTrue: [self applyCommand: currentChoices anyOne]
 ]
