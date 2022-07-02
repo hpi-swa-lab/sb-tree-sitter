@@ -111,6 +111,14 @@ SBTSNodeRepeat >> hasEqualStructure: aNode [
 	^ (super hasEqualStructure: aNode) and: [aNode required = self required and: [self multiple = aNode multiple]]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeRepeat >> initialize [
+
+	super initialize.
+	
+	isStatementRepeater := false
+]
+
 { #category : #accessing }
 SBTSNodeRepeat >> isStatementRepeater [
 
@@ -153,7 +161,6 @@ SBTSNodeRepeat >> multiple: aBoolean required: anotherBoolean element: aNode [
 	multiple := aBoolean.
 	required := anotherBoolean.
 	element := aNode.
-	isStatementRepeater := false.
 	
 	element parent: self
 ]

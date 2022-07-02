@@ -38,7 +38,7 @@ SBStColor >> build [
 
 { #category : #'as yet unclassified' }
 SBStColor >> buildPyParam [
-	<lang: #python match: '(keyword_argument (identifier) ="color" (string (string_content) @color) @root)' sample: 'ax.plot(color="red")'>
+	<lang: #python match: '(keyword_argument (identifier) ="color" (string) @color @root)' sample: 'ax.plot(color="red")'>
 
 	self
 		layoutInset: 4;

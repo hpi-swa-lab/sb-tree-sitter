@@ -61,3 +61,9 @@ SBTSBlockSuggestion >> useSuggestionOn: aBlock in: anEditor [
 		ifNotNil: [:popup | popup applyCommand: command]
 		ifNil: [anEditor do: command]
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSBlockSuggestion >> wouldChange: aBlock [
+
+	^ true
+]

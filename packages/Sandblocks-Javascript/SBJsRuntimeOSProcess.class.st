@@ -85,6 +85,8 @@ SBJsRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 SBJsRuntimeOSProcess >> prettyPrint: aString [
 
 	| prettier |
+	SBToggledCode comment: '' active: 1 do: {[^ aString]}.
+	
 	prettier := self which: 'prettier'.
 	prettier ifNil: [^ aString].
 	
