@@ -376,6 +376,23 @@ SBTSBlockTest >> testJsForOf [
 		equals: program sourceStringForCompare
 ]
 
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testJsForOfToForIn [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'for (const a of [1]) {}'.
+	editor := self editorFor: program.
+	program childSandblocks first startInputAtStart.
+	editor performForSelection: #clearInput.
+	self assert: Character null asString, '(const a of[1])
+{
+}' equals: program sourceStringForCompare.
+	
+	editor performForSelection: #moveCursorLarger.
+	editor performForSelection: #clearInput.
+	self assert: Character null asString equals: program sourceStringForCompare
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsIdAdd [
 
@@ -479,6 +496,34 @@ SBTSBlockTest >> testJsReinterpretIncompleteLabel [
 		equals: module childSandblocks first childSandblocks second childSandblocks first type
 ]
 
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testJsReturnInString [
+
+	| program editor |
+	program := SBJavascript parseToplevel: '"abc"'.
+	editor := self editorFor: program.
+	program lastDeepChild startInputAtStart.
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: 2 equals: program childSandblocks size
+]
+
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testJsReturnMultilineInString [
+
+	| program editor |
+	program := SBJavascript parseToplevel: '"abc"'.
+	editor := self editorFor: program.
+	program lastDeepChild startInputAtStart.
+	editor handle: (self keyboardEvent: Character cr shift: false command: true).
+	self assert: '"
+abc";' equals: program sourceStringForCompare.
+	self assert: 1 equals: program childSandblocks size.
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: '"
+
+abc";' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsSeparatorInPendingArg [
 
@@ -557,6 +602,25 @@ SBTSBlockTest >> testJsTypeImport [
 	import startInsertAtEnd.
 	self type: 'a' in: editor.
 	self assert: 6 equals: import recursiveSubmorphCount
+]
+
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testJsTypeMissingFor [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'for (const a of [1]) {}'.
+	editor := self editorFor: program.
+	program childSandblocks first startInputAtStart.
+	editor performForSelection: #clearInput.
+	self assert: Character null asString, '(const a of[1])
+{
+}' equals: program sourceStringForCompare.
+	
+	self type: 'for' in: editor.
+	
+	self assert: 'for(const a of[1])
+{
+}' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }

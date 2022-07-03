@@ -21,9 +21,13 @@ SBTSBlock class >> registerShortcuts: aProvider [
 SBTSBlock >> absorbsInput: anEvent [
 
 	(anEvent commandKeyPressed or: [anEvent optionKeyPressed or: [anEvent controlKeyPressed]]) ifTrue: [^ false].
+	
 	^ anEvent keyCharacter isPrintable and: [ | text oldContents oldPosition |
 		text := self sandblockEditor cursor cursorPosition textMorph.
 		oldContents := text contents.
+		
+		anEvent keyCharacter = Character cr ifTrue: [^ (oldContents lineCount = 1 and: [anEvent commandKeyPressed not]) not].
+		
 		oldPosition := text cursor.
 		[
 			text keyStroke: anEvent.
@@ -203,7 +207,7 @@ SBTSBlock >> copyBlock [
 { #category : #'as yet unclassified' }
 SBTSBlock >> currentTextMorph [
 
-	self submorphsDo: [:m | (m isKindOf: SBTSTextMorph) ifTrue: [^ m]].
+	self submorphsDo: [:m | m isTextMorph ifTrue: [^ m]].
 	^ nil
 ]
 
@@ -468,6 +472,12 @@ SBTSBlock >> isBlockBody [
 ]
 
 { #category : #testing }
+SBTSBlock >> isEditingKeyword [
+
+	^ self currentTextMorph ifNotNil: [:t | t slot firstNode isTSLabel] ifNil: [false]
+]
+
+{ #category : #testing }
 SBTSBlock >> isEditor [
 
 	^ true
@@ -676,8 +686,8 @@ SBTSBlock >> queryNode: aString [
 { #category : #query }
 SBTSBlock >> queryRecursiveFirstMatch: aString capturesDo: aBlock [
 
-	self allBlocksDo: [:block |
-		block isTSBlock ifTrue: [ | captures |
+	self allMorphsDo: [:block |
+		block isTSMorph ifTrue: [ | captures |
 			captures := nil.
 			(SBTSQuery new execute: aString against: block capturesDo: [:cap | captures := cap]) ifTrue: [
 				aBlock cull: captures cull: block.
@@ -814,7 +824,7 @@ SBTSBlock >> tryApplyChange: aBlock input: aString [
 	
 	self prefixValid
 		ifTrue: [
-			(self factory keywords includes: self contents) ifTrue: [
+			((self factory keywords includes: self contents) and: [self isEditingKeyword not]) ifTrue: [
 				self contents: previousContents.
 				SBTSInputReconcile new for: self currentTextMorph input: aString before: isAtStart]]
 		ifFalse: [
@@ -840,6 +850,14 @@ SBTSBlock >> tryApplyReplacements: aCollection to: aBlock [
 SBTSBlock >> type [
 
 	^ self slot type
+]
+
+{ #category : #actions }
+SBTSBlock >> typeNewLine [
+	"workaround, as we want cmd+cr to put a new line, which will otherwise get blocked in keyStroke: because it contains a cmd"
+	<inputAction>
+
+	self sandblockEditor cursor cursorPosition textMorph insertString: String cr
 ]
 
 { #category : #highlight }
