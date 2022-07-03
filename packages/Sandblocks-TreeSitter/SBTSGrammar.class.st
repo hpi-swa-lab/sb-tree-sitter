@@ -572,6 +572,10 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 		comment: ''
 		active: 1
 		do: {[self rules keysAndValuesDo: [:name :rule | self removeStatementTerminators: rule name: name]]}.
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[self rules keysAndValuesDo: [:name :rule | self unwrapSingleChoices: rule rule: name]]}.
 	inlinedRules do: [:rule | (supertypes includes: rule) ifFalse: [rules removeKey: rule ifAbsent: []]].
 	
 	self language postprocessGrammar: self.
@@ -625,7 +629,7 @@ SBTSGrammar >> removeMarkedDelimiters: anObject [
 	| delimiters |
 	" (a delim) -> (a) "
 	delimiters := Array streamContents: [:stream | anObject allElementsDo: [:node | (node isTSRepeat and: [node delimiter notNil]) ifTrue: [stream nextPut: node delimiter]]].
-	delimiters ifNotEmpty: [anObject allElementsDo: [:node | (node isTSLabel and: [delimiters includes: node label]) ifTrue: [node delete]]]
+	delimiters ifNotEmpty: [anObject allElementsDo: [:node | (node isTSLabel and: [(delimiters includes: node label) and: [node parent notNil]]) ifTrue: [node delete]]]
 ]
 
 { #category : #cleaning }
@@ -637,11 +641,15 @@ SBTSGrammar >> removeRule: aSymbol [
 { #category : #cleaning }
 SBTSGrammar >> removeStatementTerminators: aNode name: aString [
 
+	| isTerminator |
 	self language statementTerminator ifNil: [^ self].
+	
+	isTerminator := [:node | node isTSLabel and: [node label = self language statementTerminator]].
+	
 	aNode allChildrenDo: [:node |
 		SBToggledCode comment: '' active: 1 do: {
 			[
-				(node isTSSeq and: [node elements last isTSLabel and: [node elements last label = self language statementTerminator]]) ifTrue: [
+				(node isTSSeq and: [(isTerminator value: node elements last) or: [node elements last isTSOptional and: [isTerminator value: node elements last element]]]) ifTrue: [
 					node hasStatementTerminator: true.
 					node elements last delete]].
 			[

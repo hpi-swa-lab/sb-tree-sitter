@@ -284,10 +284,6 @@ SBTSBlockTest >> testJsClassField [
 	editor := self editorAndWorldFor: module.
 	module lastDeepChild startInsertAtEnd.
 	self type: 'prop' in: editor.
-	self tick.
-	self tick.
-	editor handle: (self keyboardEvent: Character cr).
-	
 	self assert: 'prop' equals: module lastDeepChild contents
 ]
 
@@ -357,6 +353,27 @@ SBTSBlockTest >> testJsExpandObject [
 	module lastDeepChild startInputAtEnd.
 	self type: ':x' in: editor.
 	self assert: 'const a={id:x};' equals: module sourceString
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsForOf [
+
+	| program editor |
+	program := SBJavascript parseToplevel: ''.
+	editor := self editorAndWorldFor: program.
+	self type: 'for ' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character arrowDown).
+	editor handle: (self keyboardEvent: Character cr).
+	self
+		assert: 'for(', Character null, Character null, Character null, (')', Character null)
+		equals: program sourceStringForCompare.
+	
+	self type: 'const a' in: editor.
+	self
+		assert: 'for(const a', Character null, Character null, (')', Character null)
+		equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -488,6 +505,33 @@ SBTSBlockTest >> testJsSeparatorInPendingPattern [
 	self assert: 'function abc(a,b)
 {
 }' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testJsTabToEmptyStatement [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'a;
+class {
+}'.
+	editor := self editorFor: program.
+	program childSandblocks first startInputAtStart.
+	editor handle: (self keyboardEvent: Character tab).
+	self assert: #insert equals: editor cursor mode.
+	editor handle: (self keyboardEvent: $x).
+	self assert: 'a;
+class
+{
+x
+};' equals: program sourceStringForCompare.
+	editor handle: (self keyboardEvent: $().
+	self assert: 'a;
+class
+{
+x()
+{
+}
+};' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -872,6 +916,26 @@ SBTSBlockTest >> testStUnaryMessageSend [
 	self type: ' ' in: editor.
 	self type: 'show' in: editor.
 	self assert: #'unary_message' equals: method childSandblocks second type
+]
+
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testTypeJsClass [
+
+	| program editor |
+	program := SBJavascript parseToplevel: ''.
+	editor := self editorAndWorldFor: program.
+	
+	program startInsertAtEnd.
+	self type: 'class ' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: 'class' equals: program childSandblocks first type.
+	
+	self type: 'Name' in: editor.
+	self assert: 'class Name
+{
+};' equals: program sourceString
 ]
 
 { #category : #'tests - input transition' }

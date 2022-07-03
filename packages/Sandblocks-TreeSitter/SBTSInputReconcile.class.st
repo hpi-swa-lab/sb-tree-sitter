@@ -13,8 +13,12 @@ Class {
 { #category : #'reconciliation helper' }
 SBTSInputReconcile >> applyCommand: aCommand [
 
+	| anyConstructed |
 	target sandblockEditor do: aCommand.
-	self positionCursorIn: aCommand morphs
+	
+	anyConstructed := false.
+	aCommand morphs do: [:p | p allMorphsDo: [:m | (m valueOfProperty: #lastConstructed ifAbsent: [false]) ifTrue: [anyConstructed := true]]].
+	anyConstructed ifTrue: [self positionCursorIn: aCommand morphs]
 ]
 
 { #category : #callbacks }
@@ -69,11 +73,30 @@ SBTSInputReconcile >> for: aTextMorph input: aString before: aBoolean [
 	self updateChoices
 ]
 
+{ #category : #'reconciliation helper' }
+SBTSInputReconcile >> indexOf: aCursor in: aCollectionOfMorphs [
+
+	^ aCursor isInsert
+		ifTrue: [ | childIndex |
+			childIndex := aCollectionOfMorphs findFirst: [:m | m = aCursor container or: [m owner = aCursor container]].
+			childIndex + (((aCursor container submorphs copyFrom: 1 to: aCursor command insertIndex - 1) collect: #recursiveSubmorphCount)
+				inject: 0
+				into: [:s :c | s + c]) + 1]
+		ifFalse: [
+			"if we are in a finished label, just return our index so that the next position will be taken.
+					otherwise, we will likely want to continue typing here, so pretend that we were one index further out"
+			(aCollectionOfMorphs indexOf: aCursor block currentTextMorph) + (aCursor block currentTextMorph slot firstNode isTSLabel
+				ifTrue: [0]
+				ifFalse: [1])]
+]
+
 { #category : #'initialize-release' }
 SBTSInputReconcile >> initialize [
 
 	super initialize.
-	self addMorphBack: (SBOwnTextMorph new when: #contentsChanged send: #contentsChanged to: self)
+	self addMorphBack: (SBOwnTextMorph new
+		when: #contentsChanged send: #contentsChanged to: self;
+		placeholderText: 'Add characters ...')
 ]
 
 { #category : #'reconciliation helper' }
@@ -85,35 +108,28 @@ SBTSInputReconcile >> optionsForInsert: aPosition given: aString [
 { #category : #'reconciliation helper' }
 SBTSInputReconcile >> positionCursorIn: aCollection [
 
-	| all positionInAll stopIndex |
+	| all stopIndex |
 	(before ifNil: [false]) ifTrue: [^ aCollection first startInputAtStart].
+	
 	all := Array streamContents: [:s | aCollection do: [:block | block allMorphsPreorderDo: [:m | s nextPut: m]]].
 	stopIndex := all findLast: [:m | m valueOfProperty: #lastConstructed ifAbsent: [false]].
+	
 	stopIndex > 0 ifTrue: [
 		aCollection do: [:m | m allMorphsDo: [:i | i removeProperty: #lastConstructed]].
 		(all at: stopIndex) containingSandblock valid ifFalse: [^ (all at: stopIndex) containingSandblock startInputAtEnd].
-		positionInAll := [:cursor |
-			cursor isInsert
-				ifTrue: [ | childIndex |
-					childIndex := all findFirst: [:m | m = cursor container or: [m owner = cursor container]].
-					childIndex + (((cursor container submorphs copyFrom: 1 to: cursor command insertIndex - 1) collect: #recursiveSubmorphCount)
-						inject: 0
-						into: [:s :c | s + c]) + 1]
-				ifFalse: [
-					"if we are in a finished label, just return our index so that the next position will be taken.
-					otherwise, we will likely want to continue typing here, so pretend that we were one index further out"
-					(all indexOf: cursor block currentTextMorph) + (cursor block currentTextMorph slot firstNode isTSLabel
-						ifTrue: [0]
-						ifFalse: [1])]].
+		
 		aCollection do: [:block |
 			block cursorPositionsDo: [:cursor |
-				(((cursor isInsert and: [(cursor command element hasParentThat: [:p | p isTSRepeat and: [p required or: [p multiple not]]]) not]) or: [cursor isText]) and: [(positionInAll value: cursor) > stopIndex]) ifTrue: [
+				(((cursor isInsert and: [(cursor command element hasParentThat: [:p | p isTSRepeat and: [p required]]) not and: [cursor command element isTSLabel not]]) or: [cursor isText]) and: [(self indexOf: cursor in: all) > stopIndex]) ifTrue: [
 					block sandblockEditor cursor
 						cursorPosition: (cursor placeAtEnd: true)
 						explicitMove: false
 						axis: #none.
 					"if we completed a keyword and the input finished at the very boundary of the block, move one to the right to facilitate continuing to type (may be replaced with a post-do action, mostly need in tryFill with separators)"
-					(self contents notEmpty and: [self contents last = $  and: [block = block lastDeepChild containingSandblock]]) ifTrue: [block sandblockEditor performForSelection: #moveCursorRight].
+					(self contents notEmpty and: [
+						self contents last = $  and: [ | boundary |
+							boundary := (all at: stopIndex) containingSandblock.
+							boundary = boundary lastDeepChild containingSandblock]]) ifTrue: [block sandblockEditor performForSelection: #moveCursorRight].
 					^ self]]]].
 	aCollection last isSandblock ifTrue: [aCollection last lastDeepChild startInputAtEnd].
 	aCollection last isTextMorph ifTrue: [

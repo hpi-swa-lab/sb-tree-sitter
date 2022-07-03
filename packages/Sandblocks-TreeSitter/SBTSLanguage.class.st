@@ -339,14 +339,7 @@ SBTSLanguage class >> postprocessGrammar: aGrammar [
 		aGrammar rules at: self emptyLineSymbol put: (SBTSNodeText new
 			factory: aGrammar;
 			regexString: '').
-		aGrammar rules keysAndValuesDo: [:symbol :body |
-			body allElementsDo: [:node |
-				(node isTSRepeat and: [self isStatementContainer: node in: (SBTSNodeSymbol new type: symbol factory: aGrammar)]) ifTrue: [ | choice current |
-					node isStatementRepeater: true.
-					current := node element.
-					choice := SBTSNodeChoice new factory: aGrammar.
-					current replaceBy: choice.
-					choice alternatives: {current. SBTSNodeSymbol new type: self emptyLineSymbol factory: aGrammar}]]]]
+		aGrammar rules keysAndValuesDo: [:symbol :body | body allElementsDo: [:node | (node isTSRepeat and: [self isStatementContainer: node in: (SBTSNodeSymbol new type: symbol factory: aGrammar)]) ifTrue: [node transformToStatementRepeater]]]]
 ]
 
 { #category : #configuration }

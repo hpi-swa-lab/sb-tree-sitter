@@ -253,6 +253,17 @@ if they advanced the parser."
 					queue add: {candidate. index}]]]]) ifEmpty: [self required ifTrue: [{}] ifFalse: [{aParser copy}]]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeRepeat >> transformToStatementRepeater [
+
+	| current choice |
+	self isStatementRepeater: true.
+	current := self element.
+	choice := SBTSNodeChoice new factory: self factory.
+	current replaceBy: choice.
+	choice alternatives: {current. SBTSNodeSymbol new type: self factory language emptyLineSymbol factory: self factory}
+]
+
 { #category : #hierarchy }
 SBTSNodeRepeat >> traverseBlocks: aStream do: aBlock [
 

@@ -6836,6 +6836,14 @@ SBJavascript class >> noteUncapturedText [
 ]
 
 { #category : #configuration }
+SBJavascript class >> postprocessGrammar: aGrammar [
+
+	super postprocessGrammar: aGrammar.
+	
+	(aGrammar bodyNodeForRule: 'class_body') elements second transformToStatementRepeater
+]
+
+{ #category : #configuration }
 SBJavascript class >> preprocessGrammar: aGrammar [
 
 	super preprocessGrammar: aGrammar.
@@ -6889,6 +6897,12 @@ SBJavascript class >> sourceForSlider: aBlock [
 SBJavascript class >> statementTerminator [
 
 	^ ';'
+]
+
+{ #category : #'configuration - editing' }
+SBJavascript class >> transitionPairs [
+
+	^ {#'field_definition' -> #'method_definition'}
 ]
 
 { #category : #'as yet unclassified' }
