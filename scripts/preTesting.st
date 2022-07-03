@@ -7,4 +7,6 @@ SBTreeSitter new
 	smalltalk;
 	bash;
 	clojure;
+	typescript;
+	tsx;
 	parserNew.
