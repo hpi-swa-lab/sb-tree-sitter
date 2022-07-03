@@ -149,7 +149,7 @@ SBTSTextMorph >> isUnknown [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> keepDuringTransform [
 
-	^ true
+	^ self contents notEmpty
 ]
 
 { #category : #'as yet unclassified' }

@@ -226,11 +226,13 @@ SBTSBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 SBTSBlock >> deleteBeforeCursor [
 	<action>
 
-	| editor textMorph |
+	| editor textMorph target |
 	editor := self sandblockEditor.
 	
 	editor mode = #insert ifTrue: [ | newPos |
 		newPos := editor cursor cursorPosition moveHorizontal: -1 wordWise: false.
+		newPos ifNil: [^ self].
+		
 		^ (newPos block = self or: [newPos block hasOwner: self])
 			ifTrue: [self sandblockEditor performForSelection: #moveCursorLeft]
 			ifFalse: [
@@ -244,10 +246,11 @@ SBTSBlock >> deleteBeforeCursor [
 	self contents ifNotEmpty: [
 		super deleteBeforeCursor.
 		(self valid not and: [self contents notEmpty]) ifTrue: [
-			SBTSDisambiguatePopup new
-				source: self currentTextMorph target: self owner before: false;
-				tryReinterpret;
-				tryApplyFirstChoice].
+			(SBTSInputReconcile new
+				tryReinterpretFrom: self currentTextMorph
+				in: self owner
+				given: ''
+				before: false) ifNotEmpty: [:options | editor do: options first]].
 		^ self].
 	
 	textMorph submorphBefore ifNil: [
@@ -257,12 +260,18 @@ SBTSBlock >> deleteBeforeCursor [
 			editor cursor cursorPosition: pos explicitMove: true axis: #x.
 			^ self]].
 	
-	self reinterpretWithoutEmpty ifFalse: [
-		self parentSandblock reinterpretWithoutEmpty ifFalse: [
-			self parentSandblock parentSandblock reinterpretWithoutEmpty ifFalse: [
-				self childSandblocks size > 0
-					ifTrue: [self changeToUnknown]
-					ifFalse: [editor performForSelection: #moveCursorLeft]]]]
+	target := self.
+	3 timesRepeat: [
+		target reinterpretWithoutEmpty ifTrue: [^ self].
+		target := target parentSandblock.
+		target isTSBlock ifFalse: [
+			self childSandblocks size > 0
+				ifTrue: [self changeToUnknown]
+				ifFalse: [editor performForSelection: #moveCursorLeft].
+			^ self]].
+	self childSandblocks size > 0
+		ifTrue: [self changeToUnknown]
+		ifFalse: [editor performForSelection: #moveCursorLeft]
 ]
 
 { #category : #'as yet unclassified' }
@@ -718,7 +727,7 @@ SBTSBlock >> reinterpretWithoutEmpty [
 
 	| remaining options editor |
 	editor := self sandblockEditor.
-	remaining := self children select: [:m | m sourceString notEmpty].
+	remaining := self children select: [:m | m keepDuringTransform].
 	remaining ifEmpty: [
 		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
 			editor do: c.

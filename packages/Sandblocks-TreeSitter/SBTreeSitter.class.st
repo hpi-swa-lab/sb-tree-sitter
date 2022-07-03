@@ -490,7 +490,12 @@ SBTreeSitter >> tsx [
 SBTreeSitter >> typescript [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_typescript () module: 'tree-sitter-typescript'>
-	^ SBTSLanguage tryPatchLibrary: 'tree-sitter/tree-sitter-typescript' name: 'typescript' context: thisContext branch: 'master' subpath: 'typescript'
+	^ SBTSLanguage
+		tryPatchLibrary: 'tom95/tree-sitter-typescript'
+		name: 'typescript'
+		context: thisContext
+		branch: 'ternary-range-200'
+		subpath: 'typescript'
 ]
 
 { #category : #'ffi languages' }

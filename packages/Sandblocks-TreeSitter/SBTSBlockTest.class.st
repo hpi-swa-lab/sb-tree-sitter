@@ -314,7 +314,7 @@ SBTSBlockTest >> testJsDeleteDeclaration [
 	self assert: 'const a;' equals: module sourceStringForCompare.
 	editor handle: (self keyboardEvent: Character backspace).
 	self assert: 'const', Character null, ';' equals: module sourceStringForCompare.
-	editor handle: (self keyboardEvent: Character backspace).
+	8 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
 	self assert: '' equals: module sourceStringForCompare
 ]
 
@@ -342,6 +342,17 @@ SBTSBlockTest >> testJsDeleteImport [
 	editor := self editorAndWorldFor: module.
 	import := module queryNode: '(identifier)'.
 	import deleteBlock
+]
+
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testJsDeleteMethodCall [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'log()'.
+	editor := self editorAndWorldFor: program.
+	program childSandblocks first startInsertAtEnd.
+	3 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: 'log;' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
