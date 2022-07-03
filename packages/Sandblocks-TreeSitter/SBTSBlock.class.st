@@ -449,6 +449,9 @@ SBTSBlock >> insertStatementAbove [
 { #category : #actions }
 SBTSBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 
+	(self sandblockEditor cursor mode = #insert and: [self sandblockEditor cursor cursorPosition command element parent isStatementRepeater]) ifTrue: [
+		^ self sandblockEditor do: self sandblockEditor cursor cursorPosition command].
+	
 	self andAllParentSandblocksDo: [:block |
 		block isTSBlock ifTrue: [
 			"look in my template --> insert as child of me"

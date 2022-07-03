@@ -507,6 +507,20 @@ SBTSBlockTest >> testJsReinterpretIncompleteLabel [
 		equals: module childSandblocks first childSandblocks second childSandblocks first type
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsReturn [
+
+	| program editor |
+	program := SBJavascript parseToplevel: ''.
+	editor := self editorAndWorldFor: program.
+	
+	program startInsertAtStart.
+	editor performForSelection: #moveCursorRight.
+	self type: 'return ' in: editor.
+	self type: '2' in: editor.
+	self assert: 'return 2;' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testJsReturnInString [
 

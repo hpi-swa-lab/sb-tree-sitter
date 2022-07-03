@@ -126,10 +126,11 @@ SBTSInputReconcile >> positionCursorIn: aCollection [
 						explicitMove: false
 						axis: #none.
 					"if we completed a keyword and the input finished at the very boundary of the block, move one to the right to facilitate continuing to type (may be replaced with a post-do action, mostly need in tryFill with separators)"
-					(self contents notEmpty and: [
-						self contents last = $  and: [ | boundary |
-							boundary := (all at: stopIndex) containingSandblock.
-							boundary = boundary lastDeepChild containingSandblock]]) ifTrue: [block sandblockEditor performForSelection: #moveCursorRight].
+					(block sandblockEditor mode ~= #insert and: [
+						self contents notEmpty and: [
+							self contents last = $  and: [ | boundary |
+								boundary := (all at: stopIndex) containingSandblock.
+								boundary = boundary lastDeepChild containingSandblock]]]) ifTrue: [block sandblockEditor performForSelection: #moveCursorRight].
 					^ self]]]].
 	aCollection last isSandblock ifTrue: [aCollection last lastDeepChild startInputAtEnd].
 	aCollection last isTextMorph ifTrue: [

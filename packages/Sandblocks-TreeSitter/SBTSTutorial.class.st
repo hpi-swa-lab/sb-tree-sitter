@@ -19,6 +19,38 @@ SBTSTutorial class >> openIn: anEditor [
 ]
 
 { #category : #steps }
+SBTSTutorial class >> stepInsert: anEditor [
+
+	SBTutorialStep new
+		toplevelSteps: self steps in: self;
+		title: 'Inserting Elements';
+		setup: anEditor do: [:step | | program |
+			program := step createStep: (SBJavascript parseToplevel: '
+function() {await Promise.resolve(arg)}
+"line1line2"').
+			step
+				addStep: 'Sandblocks will display a hint when your cursor is at a position where an element can be inserted. Keep pressing <#moveCursorRight> or <#moveCursorLeft> until it offers you to add an "async" in front of the function. Press the first letter of the input, in this case `a` to confirm.'
+				checkCondition: [:editor | program sourceString includesSubstring: 'async function'].
+			step
+				addStep: 'Next, add an argument called `arg` to the function by again moving into the right stop and typing `arg`.'
+				checkCondition: [:editor | program sourceString includesSubstring: 'async function(arg)'].
+			step
+				addStep: 'You can create a new statement by pressing <#insertStatementBelow> or <#insertStatementAbove> *anywhere*. Try moving into the function and pressing <#insertStatementBelow>.'
+				checkCondition: [:editor | (program queryNode: '(statement_block)') childSandblocks size = 2].
+			step
+				addStep: 'Now, create a new statement underneath, outside the function. To do so, you have to move the cursor out of the current statement block via <#moveCursorLarger> and only then press <#insertStatementBelow>.'
+				checkCondition: [:editor | program sourceString includesSubstring: 'async function(arg)
+{
+
+}
+'].
+			step
+				addStep: 'If you want to create a multiline string, you have to press <#typeNewLine>, as otherwise the <#insertStatementBelow> input would be used to create a new line. Try splitting the lines of the below string.'
+				checkCondition: [:editor | program sourceString includesSubstring: '"line1
+line2"']]
+]
+
+{ #category : #steps }
 SBTSTutorial class >> stepIntro: anEditor [
 
 	SBTutorialStep new
@@ -72,7 +104,7 @@ SBTSTutorial class >> stepTryItYourself: anEditor [
 	SBTutorialStep new
 		toplevelSteps: self steps in: self;
 		title: 'Try It Yourself';
-		addIntroText: 'Finally, feel free to take 1-2 minutes to explore the input system by yourself by modifying, deleting or extending the below JavaScript code as you wish.
+		addIntroText: 'Finally, feel free to take some moments to explore the input system by yourself by modifying, deleting or extending the below JavaScript code as you wish.
 
 For example, try creating a new class named Dog and add an appropriate method with a console.log. Or try adding a loop that iterates over the number list.
 
@@ -105,10 +137,10 @@ SBTSTutorial class >> stepWrapping: anEditor [
 				addStep: 'First, navigate to the `42` in the first row and type `+1` to extend the expression.'
 				checkCondition: [:editor | program childSandblocks first sourceString = '23*(42+1);'].
 			step
-				addStep: 'In the second row, we want to multiply the result of the addition by 5. To do so, move your cursor to the `12` and use <#moveCursorLarger> to select the addition `12+43`. Then press space and type `*5`.'
+				addStep: 'In the second row, we want to multiply the result of the addition by 5. To do so, move your cursor to the `43` and use <#moveCursorLarger> to select the addition `12+43`. Then press space and type `*5`.'
 				checkCondition: [:editor | program childSandblocks second sourceString = '(12+43)*5;'].
 			step
-				addStep: 'Space wrapped and added new constructs *after* our selection. Using <#moveCursorLarger>, you can add constructs before the selection. Select the string in the thid row, press <#moveCursorLarger> *twice* to select the whole string and type `[`, then <#confirm>, to wrap the string in an array.'
+				addStep: 'Space wrapped and added new constructs *after* our selection. Using Shift+Space, you can add constructs before the selection. Select the string in the thid row, press <#moveCursorLarger> *twice* to select the whole string and type `[`, then <#confirm>, to wrap the string in an array.'
 				checkCondition: [:editor | program childSandblocks third sourceString = '[''array member?''];'].
 			step
 				addStep: 'Finally, you can also insert larger constructs. Select the addition in the last row using <#moveCursorLarger>, press Shift+Space and type `const pi=`, then <#confirm>.'
@@ -118,5 +150,5 @@ SBTSTutorial class >> stepWrapping: anEditor [
 { #category : #steps }
 SBTSTutorial class >> steps [
 
-	^ {#stepIntro:. #stepWrapping:. #stepShortcuts:. #stepTryItYourself:}
+	^ {#stepIntro:. #stepWrapping:. #stepInsert:. #stepShortcuts:. #stepTryItYourself:}
 ]
