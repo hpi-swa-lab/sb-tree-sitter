@@ -46,12 +46,13 @@ SBTSLanguage class >> canParse: aString [
 ]
 
 { #category : #'loading - helper' }
-SBTSLanguage class >> compileParserIn: path name: aString [
+SBTSLanguage class >> compileParserIn: path name: aString root: aRootPath [
 
 	| filename hasScanner |
 	filename := 'tree-sitter-', aString, '.so'.
 	hasScanner := false.
-	self assert: (OSProcess waitForCommand: ('cd {1}; npm i; npx -p tree-sitter-cli tree-sitter generate' format: {path fullName})) exitStatus = 0.
+	self assert: (OSProcess waitForCommand: ('cd {1}; npm i' format: {aRootPath fullName})) exitStatus = 0.
+	self assert: (OSProcess waitForCommand: ('cd {1}; npx -p tree-sitter-cli tree-sitter generate' format: {path fullName})) exitStatus = 0.
 	((path / 'src' / 'scanner.c') exists or: [(path / 'src' / 'scanner.cc') exists]) ifTrue: [
 		self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src -fPIC" CFLAGS="-I./src -fPIC" make src/scanner.o' format: {path fullName})) exitStatus = 0.
 		hasScanner := true].
@@ -286,7 +287,7 @@ SBTSLanguage class >> loadLanguage: aGithubString name: aString branch: anotherS
 
 	| path |
 	path := self fetchLibrary: aGithubString branch: anotherString.
-	self compileParserIn: path name: aString.
+	self compileParserIn: path name: aString root: path.
 	self generateGrammarClassFrom: path name: aString github: aGithubString.
 	self generateFFIMethodFor: aString github: aGithubString
 ]
@@ -294,9 +295,10 @@ SBTSLanguage class >> loadLanguage: aGithubString name: aString branch: anotherS
 { #category : #loading }
 SBTSLanguage class >> loadLanguage: aGithubString name: aString branch: anotherString subpath: aPathString [
 
-	| path |
-	path := (self fetchLibrary: aGithubString branch: anotherString) / aPathString.
-	self compileParserIn: path name: aString.
+	| path subpath |
+	path := self fetchLibrary: aGithubString branch: anotherString.
+	subpath := path / aPathString.
+	self compileParserIn: subpath name: aString root: path.
 	self generateGrammarClassFrom: path name: aString github: aGithubString.
 	self generateFFIMethodFor: aString github: aGithubString
 ]
@@ -453,14 +455,14 @@ SBTSLanguage class >> transitionPairs [
 { #category : #'loading - helper' }
 SBTSLanguage class >> tryPatchLibrary: aGithubString name: aString context: aContext branch: anotherString subpath: aPathString [
 
-	| path library |
+	| path library subpath |
 	ExternalFunction getLastError = 15 ifFalse: [^ self externalCallFailed].
 	Smalltalk platformName = 'Mac OS' ifTrue: [
 		aContext method externalLibraryName: 'tree-sitter-', aString, '.so'.
 		^ aContext method externalLibraryFunction invoke].
 	path := self fetchLibrary: aGithubString branch: anotherString.
-	aPathString ifNotEmpty: [path := path / aPathString].
-	library := self compileParserIn: path name: aString.
+	subpath := aPathString ifNotEmpty: [path / aPathString].
+	library := self compileParserIn: subpath name: aString root: path.
 	aContext method externalLibraryName: library fullName.
 	^ aContext method externalLibraryFunction invoke
 ]
@@ -482,7 +484,7 @@ SBTSLanguage class >> updateFrom: aGithubString branch: aString [
 
 	| path grammarFile highlightsFile |
 	path := self fetchLibrary: aGithubString branch: aString.
-	self compileParserIn: path name: self language.
+	self compileParserIn: path name: self language root: path.
 	[
 		grammarFile := path / 'src' / 'grammar.json' in: [:file | file exists ifTrue: [FileStream readOnlyFileNamed: file fullName] ifFalse: [nil]].
 		highlightsFile := path / 'queries' / 'highlights.scm' in: [:file | file exists ifTrue: [FileStream readOnlyFileNamed: file fullName] ifFalse: [nil]].

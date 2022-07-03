@@ -552,6 +552,17 @@ SBTSBlockTest >> testJsSeparatorInPendingPattern [
 }' equals: program sourceStringForCompare
 ]
 
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testJsString [
+
+	| program editor |
+	program := SBJavascript parseToplevel: '"a"'.
+	editor := self editorFor: program.
+	program childSandblocks first startInputAtEnd.
+	4 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: program childSandblocks isEmpty
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testJsTabToEmptyStatement [
 

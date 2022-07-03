@@ -227,6 +227,19 @@ SBTSBlock >> deleteBeforeCursor [
 	<action>
 
 	| editor textMorph |
+	editor := self sandblockEditor.
+	
+	editor mode = #insert ifTrue: [ | newPos |
+		newPos := editor cursor cursorPosition moveHorizontal: -1 wordWise: false.
+		^ (newPos block = self or: [newPos block hasOwner: self])
+			ifTrue: [self sandblockEditor performForSelection: #moveCursorLeft]
+			ifFalse: [
+				(self parentSandblock deleteCommandFor: self) ifNotNil: [:c | | pos |
+					pos := editor cursor positionBefore: c commands first target.
+					editor do: c.
+					editor cursor cursorPosition: pos explicitMove: true axis: #x.
+					^ self]]].
+	
 	textMorph := self sandblockEditor currentInputCommand textMorph.
 	self contents ifNotEmpty: [
 		super deleteBeforeCursor.
@@ -236,11 +249,10 @@ SBTSBlock >> deleteBeforeCursor [
 				tryReinterpret;
 				tryApplyFirstChoice].
 		^ self].
-	editor := self sandblockEditor.
 	
 	textMorph submorphBefore ifNil: [
 		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c | | pos |
-			pos := self sandblockEditor cursor positionBefore: c commands first target.
+			pos := editor cursor positionBefore: c commands first target.
 			editor do: c.
 			editor cursor cursorPosition: pos explicitMove: true axis: #x.
 			^ self]].
