@@ -391,7 +391,7 @@ SBTSBlock >> getSourceStringAndMark [
 { #category : #'as yet unclassified' }
 SBTSBlock >> grammarHandler [
 
-	^ SBGrammarHandler new
+	^ SBTSGrammarHandler new
 ]
 
 { #category : #highlight }

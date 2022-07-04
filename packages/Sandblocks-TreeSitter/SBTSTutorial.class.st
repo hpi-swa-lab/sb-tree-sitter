@@ -39,15 +39,13 @@ function() {await Promise.resolve(arg)}
 				checkCondition: [:editor | (program queryNode: '(statement_block)') childSandblocks size = 2].
 			step
 				addStep: 'Now, create a new statement underneath, outside the function. To do so, you have to move the cursor out of the current statement block via <#moveCursorLarger> and only then press <#insertStatementBelow>.'
-				checkCondition: [:editor | program sourceString includesSubstring: 'async function(arg)
-{
-
-}
+				checkCondition: [:editor | program sourceString includesSubstring: '};
 '].
 			step
 				addStep: 'If you want to create a multiline string, you have to press <#typeNewLine>, as otherwise the <#insertStatementBelow> input would be used to create a new line. Try splitting the lines of the below string.'
 				checkCondition: [:editor | program sourceString includesSubstring: '"line1
-line2"']]
+line2"'].
+			program firstDeepChild startInputAtStart]
 ]
 
 { #category : #steps }
@@ -63,7 +61,7 @@ SBTSTutorial class >> stepIntro: anEditor [
 			step
 				addStep: 'Try simply typing in the input at the bottom `console.log("Hello world")` while ignoring all popups. Sandblocks will automatically dismiss popups as you give it more input.'
 				checkCondition: [:editor |
-					(program sourceString includesSubstring: 'console.log("Hello world")')
+					(program sourceString asLowercase includesSubstring: 'console.log("hello world")')
 						ifTrue: [
 							firstDone := true.
 							true]
@@ -88,14 +86,15 @@ const justNumber=[2.123123];').
 				addStep: 'Select identifier `nameIdentifier` and press <#clearInput> to quickly clear the contents of just the selected block and change it to a `42`.'
 				checkCondition: [:editor | program childSandblocks first sourceString = 'const goodNum=42;'].
 			step
-				addStep: 'Copy and paste works as you would expect it to: select the number `37`, press <#copyToBuffer>, then move the cursor right until it becomes a dashed line and press <#pasteReplace>.'
+				addStep: 'Copy and paste works as you would expect it to: select the number `37`, press <#copyToBuffer>, then move the cursor right until it becomes a dashed line inside the array and press <#pasteReplace>.'
 				checkCondition: [:editor | program childSandblocks second sourceString = '[37,37];'].
 			step
 				addStep: 'Similarly, cutting works via <#deleteBlockWithCopy>. It is also a quick way to delete a block (otherwise, you should select the whole block via <#moveCursorLarger>, then press <#deleteBlock>). Try emptying the array again by pressing <#deleteBlockWithCopy> on both `37`s.'
 				checkCondition: [:editor | program childSandblocks second sourceString = '[];'].
 			step
 				addStep: 'When you want to unwrap a block, the easiest way is to copy it, then select its parent and paste over it. For example, delete the array but keep the number in the last row by copying the number, selecting the array via <#moveCursorLarger>, then pasting.'
-				checkCondition: [:editor | program childSandblocks third sourceString = 'const justNumber=2.123123;']]
+				checkCondition: [:editor | program childSandblocks third sourceString = 'const justNumber=2.123123;'].
+			program firstDeepChild startInputAtStart]
 ]
 
 { #category : #steps }
@@ -110,8 +109,8 @@ For example, try creating a new class named Dog and add an appropriate method wi
 
 Tipp 1: you can use <Tab> to jump to empty statement blocks and holes (blocks with a red border).
 Tipp 2: note that adding comments is currently not supported in Sandblocks.';
-		setup: anEditor
-			do: [:step | step createStep: (SBJavascript parseToplevel: 'class A {
+		setup: anEditor do: [:step | | program |
+			program := step createStep: (SBJavascript parseToplevel: 'class A {
 	numbers = [3, 67, 1, 4, 8]
 
 	constructor() {
@@ -119,7 +118,8 @@ Tipp 2: note that adding comments is currently not supported in Sandblocks.';
 	}
 }
 
-{key: "value", weather: "good"}')]
+{key: "value", weather: "good"}').
+			program firstDeepChild startInputAtStart]
 ]
 
 { #category : #steps }
@@ -138,14 +138,15 @@ SBTSTutorial class >> stepWrapping: anEditor [
 				addStep: 'First, navigate to the `42` in the first row and type `+1` to extend the expression.'
 				checkCondition: [:editor | program childSandblocks first sourceString = '23*(42+1);'].
 			step
-				addStep: 'In the second row, we want to multiply the result of the addition by 5. To do so, move your cursor to the `43` and use <#moveCursorLarger> to select the addition `12+43`. Then press space and type `*5`.'
+				addStep: 'In the second row, we want to multiply the result of the addition by 5. To do so, move your cursor to the `43` and use <#moveCursorLarger> to select the addition `12+43`. Then press <#promptTransition> and type `*5`.'
 				checkCondition: [:editor | program childSandblocks second sourceString = '(12+43)*5;'].
 			step
-				addStep: 'Space wrapped and added new constructs *after* our selection. Using Shift+Space, you can add constructs before the selection. Select the string in the thid row, press <#moveCursorLarger> *twice* to select the whole string and type `[`, then <#confirm>, to wrap the string in an array.'
+				addStep: '<#promptTransition> wrapped and added new constructs *after* our selection. Using <Shift+Space>, you can add constructs before the selection. Select the string in the thid row, press <#moveCursorLarger> *twice* to select the whole string and type `[`, then <#confirm>, to wrap the string in an array.'
 				checkCondition: [:editor | program childSandblocks third sourceString = '[''array member?''];'].
 			step
-				addStep: 'Finally, you can also insert larger constructs. Select the addition in the last row using <#moveCursorLarger>, press Shift+Space and type `const pi=`, then <#confirm>.'
-				checkCondition: [:editor | program childSandblocks fourth sourceString = 'const pi=3+0.14;']]
+				addStep: 'Finally, you can also insert larger constructs. Select the addition in the last row using <#moveCursorLarger>, press <Shift+Space> and type `const pi=`, then <#confirm>.'
+				checkCondition: [:editor | program childSandblocks fourth sourceString = 'const pi=3+0.14;'].
+			program firstDeepChild startInputAtStart]
 ]
 
 { #category : #steps }

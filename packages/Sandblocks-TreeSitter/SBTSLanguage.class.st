@@ -522,6 +522,18 @@ SBTSLanguage class >> usagesOfDeclaration: aDeclaration [
 	^ #()
 ]
 
+{ #category : #configuration }
+SBTSLanguage class >> validPrefixInputs [
+
+	^ #($[ ${ $()
+]
+
+{ #category : #configuration }
+SBTSLanguage class >> validSuffixIputs [
+
+	^ #($+ $- $+ $/ $% $. $= $< $>)
+]
+
 { #category : #grammar }
 SBTSLanguage >> grammar [
 

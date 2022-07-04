@@ -70,6 +70,8 @@ SBTSInputReconcile >> for: aTextMorph input: aString before: aBoolean [
 		moveCursorToEnd;
 		queueUpdateSuggestionsFocused: true.
 	
+	self currentTextMorph placeholderText: ('Add characters {1}...' format: {aBoolean ifTrue: ['before'] ifFalse: ['after']}).
+	
 	self updateChoices
 ]
 
