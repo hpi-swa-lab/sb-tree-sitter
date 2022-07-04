@@ -69,3 +69,9 @@ SBTSStMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 	
 	^ true
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSStMethod >> semantics [
+
+	^ SBTSSmalltalk
+]

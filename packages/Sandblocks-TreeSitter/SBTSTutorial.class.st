@@ -108,7 +108,8 @@ SBTSTutorial class >> stepTryItYourself: anEditor [
 
 For example, try creating a new class named Dog and add an appropriate method with a console.log. Or try adding a loop that iterates over the number list.
 
-Note that adding comments is currently not supported in Sandblocks.';
+Tipp 1: you can use <Tab> to jump to empty statement blocks and holes (blocks with a red border).
+Tipp 2: note that adding comments is currently not supported in Sandblocks.';
 		setup: anEditor
 			do: [:step | step createStep: (SBJavascript parseToplevel: 'class A {
 	numbers = [3, 67, 1, 4, 8]

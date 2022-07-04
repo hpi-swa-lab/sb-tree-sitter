@@ -70,6 +70,12 @@ SBTSNodeInsertCommand >> isInsert [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> isStatementInsert [
+
+	^ element parent isStatementRepeater
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> morph [
 
 	^ morphs first
