@@ -143,6 +143,12 @@ SBTSNodeRepeat >> isTSRepeat [
 	^ true
 ]
 
+{ #category : #printing }
+SBTSNodeRepeat >> labelPrintOn: aStream [
+
+	self element labelPrintOn: aStream
+]
+
 { #category : #accessing }
 SBTSNodeRepeat >> maxChildren [
 

@@ -17,13 +17,13 @@ SBTSGrammarHandler >> startOverrideInput: anEvent in: anEditor [
 		^ SBTSInputReconcile new
 			for: anEditor selection
 			input: anEvent keyCharacter asString
-			before: true].
+			at: 1].
 	
 	(anEditor selection language validSuffixIputs includes: anEvent keyCharacter) ifTrue: [
 		^ SBTSInputReconcile new
 			for: anEditor selection
 			input: anEvent keyCharacter asString
-			before: false].
+			at: SBTSInputReconcile endIndex].
 	
 	^ super startOverrideInput: anEvent in: anEditor
 ]

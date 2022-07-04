@@ -132,6 +132,12 @@ SBTSNodeLabel >> label: aString [
 	label := aString
 ]
 
+{ #category : #printing }
+SBTSNodeLabel >> labelPrintOn: aStream [
+
+	aStream nextPutAll: (self label asText addAttribute: TextEmphasis italic)
+]
+
 { #category : #accessing }
 SBTSNodeLabel >> maxChildren [
 

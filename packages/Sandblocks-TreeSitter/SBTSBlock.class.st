@@ -250,7 +250,7 @@ SBTSBlock >> deleteBeforeCursor [
 				tryReinterpretFrom: self currentTextMorph
 				in: self owner
 				given: ''
-				before: false) ifNotEmpty: [:options | editor do: options first]].
+				at: SBTSInputReconcile endIndex) ifNotEmpty: [:options | editor do: options first]].
 		^ self].
 	
 	textMorph submorphBefore ifNil: [
@@ -688,7 +688,10 @@ SBTSBlock >> printTreeOn: aStream indent: aNumber [
 SBTSBlock >> promptTransition [
 	<action>
 
-	SBTSInputReconcile new for: self input: '' before: ActiveEvent shiftPressed
+	SBTSInputReconcile new
+		for: self
+		input: ''
+		at: (ActiveEvent shiftPressed ifTrue: [1] ifFalse: [SBTSInputReconcile endIndex])
 ]
 
 { #category : #query }
@@ -841,19 +844,21 @@ SBTSBlock >> toplevel [
 { #category : #'as yet unclassified' }
 SBTSBlock >> tryApplyChange: aBlock input: aString [
 
-	| previousContents isAtStart |
+	| previousContents insertIndex |
 	previousContents := self contents.
-	isAtStart := self currentTextMorph cursor = 1 and: [self currentTextMorph contents notEmpty].
+	insertIndex := self currentTextMorph contents
+		ifNotEmpty: [self currentTextMorph cursor]
+		ifEmpty: [SBTSInputReconcile endIndex].
 	aBlock value: self.
 	
 	self prefixValid
 		ifTrue: [
 			((self factory keywords includes: self contents) and: [self isEditingKeyword not]) ifTrue: [
 				self contents: previousContents.
-				SBTSInputReconcile new for: self currentTextMorph input: aString before: isAtStart]]
+				SBTSInputReconcile new for: self currentTextMorph input: aString at: insertIndex]]
 		ifFalse: [
 			self contents: previousContents.
-			SBTSInputReconcile new for: self currentTextMorph input: aString before: isAtStart]
+			SBTSInputReconcile new for: self currentTextMorph input: aString at: insertIndex]
 ]
 
 { #category : #'as yet unclassified' }

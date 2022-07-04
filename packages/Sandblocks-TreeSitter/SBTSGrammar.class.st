@@ -576,9 +576,14 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 		comment: ''
 		active: 1
 		do: {[self rules keysAndValuesDo: [:name :rule | self unwrapSingleChoices: rule rule: name]]}.
+	
 	inlinedRules do: [:rule | (supertypes includes: rule) ifFalse: [rules removeKey: rule ifAbsent: []]].
 	
 	self language postprocessGrammar: self.
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[self rules do: [:rule | self mergeNestedChoices: rule]]}.
 	
 	self rules keysAndValuesDo: [:name :rule | self checkStructure: rule].
 	

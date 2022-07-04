@@ -3,12 +3,18 @@ Class {
 	#superclass : #SBPopup,
 	#instVars : [
 		'target',
-		'before',
 		'currentChoices',
-		'findOptionsBlock'
+		'findOptionsBlock',
+		'insertIndex'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSInputReconcile class >> endIndex [
+
+	^ 900000000
+]
 
 { #category : #'reconciliation helper' }
 SBTSInputReconcile >> applyCommand: aCommand [
@@ -49,7 +55,7 @@ SBTSInputReconcile >> dismiss [
 { #category : #accessing }
 SBTSInputReconcile >> findOptionsBlock [
 
-	^ findOptionsBlock ifNil: [[self tryReconcileFor: target input: self contents in: target containingSandblock before: before]]
+	^ findOptionsBlock ifNil: [[self tryReconcileFor: target input: self contents in: target containingSandblock at: insertIndex]]
 ]
 
 { #category : #accessing }
@@ -59,10 +65,10 @@ SBTSInputReconcile >> findOptionsBlock: aBlock [
 ]
 
 { #category : #'initialize-release' }
-SBTSInputReconcile >> for: aTextMorph input: aString before: aBoolean [
+SBTSInputReconcile >> for: aTextMorph input: aString at: aNumber [
 
 	target := aTextMorph.
-	before := aBoolean.
+	insertIndex := aNumber.
 	
 	self
 		contents: aString;
@@ -70,7 +76,7 @@ SBTSInputReconcile >> for: aTextMorph input: aString before: aBoolean [
 		moveCursorToEnd;
 		queueUpdateSuggestionsFocused: true.
 	
-	self currentTextMorph placeholderText: ('Add characters {1}...' format: {aBoolean ifTrue: ['before'] ifFalse: ['after']}).
+	self currentTextMorph placeholderText: 'Add characters...'.
 	
 	self updateChoices
 ]
@@ -111,7 +117,7 @@ SBTSInputReconcile >> optionsForInsert: aPosition given: aString [
 SBTSInputReconcile >> positionCursorIn: aCollection [
 
 	| all stopIndex |
-	(before ifNil: [false]) ifTrue: [^ aCollection first startInputAtStart].
+	insertIndex = 1 ifTrue: [^ aCollection first startInputAtStart].
 	
 	all := Array streamContents: [:s | aCollection do: [:block | block allMorphsPreorderDo: [:m | s nextPut: m]]].
 	stopIndex := all findLast: [:m | m valueOfProperty: #lastConstructed ifAbsent: [false]].
@@ -172,37 +178,42 @@ SBTSInputReconcile >> suggestions [
 SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 
 	self positionsAfter: aBlock do: [:position |
-		(position isText and: [position block wantsInput]) ifTrue: ["TODO: do we want the full reconciliation logic or just reinterpret?"
-		^ self tryReinterpretFrom: position textMorph in: position block given: aString before: false].
+		(position isText and: [position block wantsInput]) ifTrue: [
+			"TODO: do we want the full reconciliation logic or just reinterpret?"
+			^ self tryReinterpretFrom: position textMorph in: position block given: aString at: self class endIndex].
 		position isInsert ifTrue: [(self optionsForInsert: position given: aString) ifNotEmpty: [:res | ^ res]]].
 	^ {}
 ]
 
 { #category : #reconciliation }
-SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock before: aBoolean [
+SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNumber [
 	"recursive stop condition: either our owner is no longer a ts-block or we have already gone two steps. two steps were enough for all valid scenarios we have encountered thus far."
 
 	aBlock isTSBlock ifFalse: [^ {}].
 	(aMorph ownerChain indexOf: aBlock) > 3 ifTrue: [^ {}].
 	
-	^ aBoolean
-		ifTrue: [(self tryReinterpretFrom: aMorph in: aBlock given: aString before: true) ifEmpty: [self tryWrap: aBlock given: aString before: true]]
-		ifFalse: [(self trySeparator: aString in: aBlock) ifEmpty: [(self tryReinterpretFrom: aMorph in: aBlock given: aString before: false) ifEmpty: [(self tryWrap: aBlock given: aString before: false) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner before: false]]]]]
+	^ aNumber = 1
+		ifTrue: [(self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber) ifEmpty: [self tryWrap: aBlock given: aString before: true]]
+		ifFalse: [(self trySeparator: aString in: aBlock) ifEmpty: [(self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber) ifEmpty: [(self tryWrap: aBlock given: aString before: false) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner at: aNumber]]]]]
 ]
 
 { #category : #reconciliation }
-SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString before: aBoolean [
+SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber [
 
-	| pivot |
+	| pivot string |
 	aMorph contents ifNil: [^ {}].
 	pivot := (aMorph orOwnerSuchThat: [:m | m owner = aBlock]) ifNil: [^ {}].
 	
 	"we may only consider owners if they do not introduce additional tokens"
 	aMorph contents = pivot sourceString ifFalse: [^ {}].
 	
+	string := aNumber = self class endIndex
+		ifTrue: [pivot contents, aString]
+		ifFalse: [(pivot contents first: aNumber - 1), aString, (pivot contents allButFirst: aNumber - 1)].
+	
 	^ (SBTSInputParser new
 		optionsFor: pivot owner
-		given: (aBoolean ifTrue: [aString, aMorph contents] ifFalse: [aMorph contents, aString])
+		given: string
 		before: ((aBlock submorphs first: pivot submorphIndex - 1) select: #keepDuringTransform)
 		after: ((aBlock submorphs allButFirst: pivot submorphIndex) select: #keepDuringTransform)) collect: [:blocks |
 		SBReplaceMultipleCommand new
@@ -241,5 +252,5 @@ SBTSInputReconcile >> updateChoices [
 	
 	currentChoices := self findOptionsBlock cull: self cull: self contents.
 	
-	(currentChoices size = 1 and: [before not]) ifTrue: [self applyCommand: currentChoices anyOne]
+	(currentChoices size = 1 and: [insertIndex > 1]) ifTrue: [self applyCommand: currentChoices anyOne]
 ]

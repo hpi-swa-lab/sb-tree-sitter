@@ -107,7 +107,7 @@ SBTSNodeInsertCommand >> postDo [
 			SBTSInputReconcile new
 				for: morphs first currentTextMorph
 				input: continueInputString
-				before: false]
+				at: SBTSInputReconcile endIndex]
 		ifNil: [SBTSInputReconcile new positionCursorIn: morphs]
 ]
 
@@ -126,7 +126,7 @@ SBTSNodeInsertCommand >> suggestions [
 { #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> title [
 
-	^ 'insert ', element printString
+	^ 'insert ' asText, (Text streamContents: [:s | element labelPrintOn: s])
 ]
 
 { #category : #'as yet unclassified' }
@@ -142,10 +142,14 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 		newPos := self container sandblockEditor cursor cursorPosition
 			moveHorizontal: 1
 			wordWise: false.
-		newPos isText ifTrue: [SBTSInputReconcile new for: newPos textMorph input: aString before: false].
+		newPos isText ifTrue: [
+			SBTSInputReconcile new
+				for: newPos textMorph
+				input: aString
+				at: SBTSInputReconcile endIndex].
 		newPos isInsert ifTrue: [
 			SBTSInputReconcile new
-				for: self container input: aString before: false;
+				for: self container input: aString at: SBTSInputReconcile endIndex;
 				findOptionsBlock: [:reconcile :string | reconcile optionsForInsert: newPos given: string]].
 		^ false].
 	

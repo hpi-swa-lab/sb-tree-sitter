@@ -108,6 +108,12 @@ SBTSNodeAlias >> isTSAlias [
 	^ true
 ]
 
+{ #category : #printing }
+SBTSNodeAlias >> labelPrintOn: aStream [
+
+	aStream nextPutAll: ((self alias copyReplaceAll: '_' with: ' ') asText addAttribute: TextEmphasis italic)
+]
+
 { #category : #'as yet unclassified' }
 SBTSNodeAlias >> named [
 

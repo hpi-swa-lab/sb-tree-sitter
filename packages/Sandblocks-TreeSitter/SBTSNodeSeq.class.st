@@ -94,6 +94,14 @@ SBTSNodeSeq >> isTSSeq [
 	^ true
 ]
 
+{ #category : #printing }
+SBTSNodeSeq >> labelPrintOn: aStream [
+
+	self elements
+		do: [:element | element labelPrintOn: aStream]
+		separatedBy: [aStream nextPutAll: ' ']
+]
+
 { #category : #layout }
 SBTSNodeSeq >> layoutCommands [
 

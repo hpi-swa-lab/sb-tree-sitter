@@ -94,6 +94,14 @@ SBTSNodeChoice >> isTSChoice [
 ]
 
 { #category : #printing }
+SBTSNodeChoice >> labelPrintOn: aStream [
+
+	self elements
+		do: [:element | element labelPrintOn: aStream]
+		separatedBy: [aStream nextPutAll: ' or ']
+]
+
+{ #category : #printing }
 SBTSNodeChoice >> printOn: aStream [
 
 	aStream nextPut: $(.

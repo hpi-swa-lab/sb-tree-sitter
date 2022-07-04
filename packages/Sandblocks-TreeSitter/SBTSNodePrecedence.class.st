@@ -105,6 +105,12 @@ SBTSNodePrecedence >> isTSPrecedence [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodePrecedence >> labelPrintOn: aStream [
+
+	self element labelPrintOn: aStream
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodePrecedence >> precedence [
 
 	^ precedence

@@ -577,6 +577,18 @@ SBTSBlockTest >> testJsSeparatorInPendingPattern [
 }' equals: program sourceStringForCompare
 ]
 
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testJsSplitBinary [
+
+	| program editor |
+	program := SBTSFileParser new parse: '1123' language: SBJavascript.
+	editor := self editorAndWorldFor: program.
+	program childSandblocks first startInputAtStart.
+	editor handle: (self keyboardEvent: Character arrowRight).
+	editor handle: (self keyboardEvent: $+).
+	self assert: '1+123;' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - deleting' }
 SBTSBlockTest >> testJsString [
 

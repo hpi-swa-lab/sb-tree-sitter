@@ -308,6 +308,12 @@ SBTSNodeBase >> isTSText [
 	^ false
 ]
 
+{ #category : #printing }
+SBTSNodeBase >> labelPrintOn: aStream [
+
+	self subclassResponsibility
+]
+
 { #category : #accessing }
 SBTSNodeBase >> language [
 

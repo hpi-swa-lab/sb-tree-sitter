@@ -155,6 +155,12 @@ SBTSNodeSymbol >> isTSSymbol [
 	^ true
 ]
 
+{ #category : #printing }
+SBTSNodeSymbol >> labelPrintOn: aStream [
+
+	aStream nextPutAll: ((self type copyReplaceAll: '_' with: ' ') asText addAttribute: TextEmphasis italic)
+]
+
 { #category : #testing }
 SBTSNodeSymbol >> noRepeatOrSeq [
 

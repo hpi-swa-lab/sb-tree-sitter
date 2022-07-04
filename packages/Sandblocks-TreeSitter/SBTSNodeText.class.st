@@ -108,6 +108,14 @@ SBTSNodeText >> isTSText [
 	^ true
 ]
 
+{ #category : #printing }
+SBTSNodeText >> labelPrintOn: aStream [
+
+	aStream nextPut: $/.
+	aStream nextPutAll: self regexString.
+	aStream nextPut: $/
+]
+
 { #category : #accessing }
 SBTSNodeText >> maxChildren [
 

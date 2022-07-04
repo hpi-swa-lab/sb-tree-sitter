@@ -33,3 +33,9 @@ SBTSNodeBlank >> isTSBlank [
 
 	^ true
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeBlank >> labelPrintOn: aStream [
+
+	aStream nextPut: (Character value: 0)
+]
