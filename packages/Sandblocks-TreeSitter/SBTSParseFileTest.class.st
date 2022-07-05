@@ -26,6 +26,12 @@ SBTSParseFileTest >> testAdaptRegexNodes [
 ]
 
 { #category : #'tests - languages' }
+SBTSParseFileTest >> testBashFlag [
+
+	SBBash parseToplevel: 'ls --block-size=SIZE'
+]
+
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testCInclude [
 
 	SBC parseToplevel: '#include <test.h>

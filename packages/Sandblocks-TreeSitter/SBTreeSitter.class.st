@@ -18,7 +18,11 @@ SBTreeSitter class >> moduleName [
 SBTreeSitter >> bash [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_bash () module: 'tree-sitter-bash'>
-	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-bash' name: 'bash' context: thisContext
+	^ SBMetaBlockFactory
+		tryPatchLibrary: 's4pu/tree-sitter-bash'
+		name: 'bash'
+		context: thisContext
+		branch: 'flags'
 ]
 
 { #category : #'as yet unclassified' }
@@ -451,7 +455,7 @@ SBTreeSitter >> textBetween: aNode and: anEndNode [
 		copyFrom: (aNode
 			ifNil: [
 				self assert: anEndNode notNil.
-				(self nodeStartByte: anEndNode) - 1 max: 1]
+				(self nodeStartByte: (self nodeParent: anEndNode)) max: 1]
 			ifNotNil: [(self nodeEndByte: aNode) + 1])
 		to: (anEndNode
 			ifNil: [self nodeEndByte: (self nodeParent: aNode)]
