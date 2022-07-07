@@ -424,7 +424,7 @@ SBTSBlock >> initialize [
 	self
 		layoutPolicy: SBAlgebraLayout new;
 		layoutInset: 0;
-		cellGap: 2;
+		cellGap: 2 sbScaled;
 		hResizing: #shrinkWrap;
 		vResizing: #shrinkWrap
 ]
