@@ -44,6 +44,12 @@ SBTSBlock >> actionProviders [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> activeTextMorph [
+
+	^ self sandblockEditor currentInputCommand textMorph
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> adaptSlot: aConverter [
 	<convert>
 
@@ -636,12 +642,10 @@ SBTSBlock >> prefersNoBorder [
 	^ self highlight notNil and: [self highlight endsWith: '.part']
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSBlock >> prefixValid [
+{ #category : #testing }
+SBTSBlock >> prefixValidFor: aTextMorph [
 
-	^ self currentTextMorph
-		ifNotNil: [:t | t slot firstNode prefixValidFor: t contents]
-		ifNil: [true]
+	^ aTextMorph slot firstNode prefixValidFor: aTextMorph contents
 ]
 
 { #category : #accessing }
@@ -844,21 +848,22 @@ SBTSBlock >> toplevel [
 { #category : #'as yet unclassified' }
 SBTSBlock >> tryApplyChange: aBlock input: aString [
 
-	| previousContents insertIndex |
-	previousContents := self contents.
-	insertIndex := self currentTextMorph contents
-		ifNotEmpty: [self currentTextMorph cursor]
+	| previousContents insertIndex textMorph |
+	textMorph := self activeTextMorph.
+	previousContents := textMorph contents.
+	insertIndex := textMorph contents
+		ifNotEmpty: [textMorph cursor]
 		ifEmpty: [SBTSInputReconcile endIndex].
 	aBlock value: self.
 	
-	self prefixValid
+	(self prefixValidFor: textMorph)
 		ifTrue: [
-			((self factory keywords includes: self contents) and: [self isEditingKeyword not]) ifTrue: [
-				self contents: previousContents.
-				SBTSInputReconcile new for: self currentTextMorph input: aString at: insertIndex]]
+			((self factory keywords includes: textMorph contents) and: [self isEditingKeyword not]) ifTrue: [
+				textMorph contents: previousContents.
+				SBTSInputReconcile new for: textMorph input: aString at: insertIndex]]
 		ifFalse: [
-			self contents: previousContents.
-			SBTSInputReconcile new for: self currentTextMorph input: aString at: insertIndex]
+			textMorph contents: previousContents.
+			SBTSInputReconcile new for: textMorph input: aString at: insertIndex]
 ]
 
 { #category : #'as yet unclassified' }
