@@ -104,6 +104,12 @@ SBTSLabel >> isUnknown [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> keepDuringDelete [
+
+	^ self keepDuringTransform
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> keepDuringTransform [
 
 	^ false

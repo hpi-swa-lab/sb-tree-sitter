@@ -184,7 +184,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 		aParser next.
 		^ {aParser basicAddBlocks: self buildEmptyNodes}].
 	
-	storedBlocks := (aParser peek isMorph and: [aParser peek slot includesParentThat: [:p | p type = self type]])
+	storedBlocks := (aParser peek isMorph and: [aParser peek slot type = self type])
 		ifTrue: [ | block result |
 			result := aParser copy.
 			block := result next.

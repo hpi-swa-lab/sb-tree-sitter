@@ -83,6 +83,7 @@ SBTSTextMorph >> exportStructure [
 
 	^ {
 		#class -> #text.
+		#bounds -> (self bounds in: [:r | {r left. r top. r width. r height}]).
 		#regex -> self slot firstNode regexString.
 		#contents -> self contents.
 		#color -> self color asHTMLColor} as: Dictionary
@@ -144,6 +145,12 @@ SBTSTextMorph >> isTSSymbol [
 SBTSTextMorph >> isUnknown [
 
 	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> keepDuringDelete [
+
+	^ self contents anySatisfy: [:c | c isAlphaNumeric]
 ]
 
 { #category : #'as yet unclassified' }
@@ -219,7 +226,9 @@ SBTSTextMorph >> slot [
 SBTSTextMorph >> slot: aSlot [
 
 	self assert: (aSlot isNil or: [aSlot class = SBTSSlot]).
-	slot := aSlot
+	slot := aSlot.
+	
+	aSlot firstNode isTSLabel ifTrue: [self placeholderText: aSlot firstNode label]
 ]
 
 { #category : #'as yet unclassified' }

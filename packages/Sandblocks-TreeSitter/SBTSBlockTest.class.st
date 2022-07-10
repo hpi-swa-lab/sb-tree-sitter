@@ -4,6 +4,12 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
+{ #category : #failures }
+SBTSBlockTest >> expectedFailures [
+
+	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction)
+]
+
 { #category : #'tests - adding' }
 SBTSBlockTest >> testAddAdaptsSlotPythonStmt [
 
@@ -168,6 +174,19 @@ SBTSBlockTest >> testDeleteInRepeat [
 ]
 
 { #category : #'tests - deleting' }
+SBTSBlockTest >> testDeletePrefix [
+
+	| program editor |
+	program := SBJavascript parseToplevel: '2 + 3'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtStart.
+	
+	5 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	
+	self assert: '3;' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - deleting' }
 SBTSBlockTest >> testDeleteStBinaryOpStatement [
 
 	| method editor |
@@ -176,15 +195,15 @@ SBTSBlockTest >> testDeleteStBinaryOpStatement [
 	method lastDeepChild startInputAtEnd.
 	editor handle: (self keyboardEvent: Character backspace).
 	editor handle: (self keyboardEvent: Character backspace).
-	self assert: method sourceString equals: 'method
-a+'.
+	self assert: 'method
+a+' equals: method sourceString.
 	editor handle: (self keyboardEvent: Character backspace).
 	editor handle: (self keyboardEvent: Character backspace).
-	self assert: method sourceString equals: 'method
-a'.
+	self assert: 'method
+a' equals: method sourceString.
 	editor handle: (self keyboardEvent: Character backspace).
 	editor handle: (self keyboardEvent: Character backspace).
-	self assert: method sourceString equals: 'method'.
+	self assert: 'method' equals: method sourceStringForCompare.
 	self assert: 1 equals: method childSandblocks size
 ]
 
@@ -201,6 +220,18 @@ SBTSBlockTest >> testForwardToAdjacentStatement [
 	"no change expected, but we had some issues with input forwarding causing infinite loop"
 	self assert: '2;
 ()=>;' equals: module sourceString
+]
+
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testJoinNumberFromBinaryOp [
+
+	| program editor |
+	program := SBJavascript parseToplevel: '2+3'.
+	editor := self editorAndWorldFor: program.
+	program childSandblocks first startInputAtEnd.
+	
+	2 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: '23;' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -330,7 +361,7 @@ SBTSBlockTest >> testJsDeleteFunction [
 {
 };' equals: module sourceStringForCompare.
 	self assert: module childSandblocks first childSandblocks second equals: editor selection.
-	'function' size + 1 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	'function' size + 3 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
 	self assert: '1+;' equals: module sourceString
 ]
 

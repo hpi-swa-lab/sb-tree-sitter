@@ -23,10 +23,10 @@ SBTSBlock >> absorbsInput: anEvent [
 	(anEvent commandKeyPressed or: [anEvent optionKeyPressed or: [anEvent controlKeyPressed]]) ifTrue: [^ false].
 	
 	^ anEvent keyCharacter isPrintable and: [ | text oldContents oldPosition |
-		text := self sandblockEditor cursor cursorPosition textMorph.
+		text := self activeTextMorph.
 		oldContents := text contents.
 		
-		anEvent keyCharacter = Character cr ifTrue: [^ (oldContents lineCount = 1 and: [anEvent commandKeyPressed not]) not].
+		anEvent keyCharacter = Character cr ifTrue: [^ (oldContents lineCount <= 1 and: [anEvent commandKeyPressed not]) not].
 		
 		oldPosition := text cursor.
 		[
@@ -169,6 +169,24 @@ SBTSBlock >> childrenForQuery [
 	^ self children
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> childrenToKeepDuringDelete [
+
+	| current keep found |
+	"up until our current cursor position we use the more strict keepDuringTransform, everything after our cursor position we use the looser keepDuringDelete"
+	current := self sandblockEditor cursor cursorPosition.
+	keep := OrderedCollection new.
+	found := false.
+	self cursorPositionsDo: [:c |
+		(c morph owner = self and: [(keep includes: c morph) not and: [found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]]]) ifTrue: [keep add: c morph].
+		c = current ifTrue: [found := true]].
+	
+	SBToggledCode comment: '' active: 0 do: {
+		[(current morph keepDuringDelete not and: [keep notEmpty and: [current morph = keep last]]) ifTrue: [keep remove: current morph ifAbsent: []]]}.
+	
+	^ keep
+]
+
 { #category : #actions }
 SBTSBlock >> collapseBlock [
 	<action>
@@ -230,6 +248,32 @@ SBTSBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 
 { #category : #'as yet unclassified' }
 SBTSBlock >> deleteBeforeCursor [
+	<action>
+
+	| editor textMorph target |
+	editor := self sandblockEditor.
+	
+	textMorph := self sandblockEditor currentInputCommand ifNotNil: #textMorph.
+	(textMorph ifNotNil: #contents ifNil: ['']) ifNotEmpty: [
+		super deleteBeforeCursor.
+		(self valid not and: [textMorph contents notEmpty]) ifTrue: [
+			(SBTSInputReconcile new
+				tryReinterpretFrom: textMorph
+				in: self owner
+				given: ''
+				at: SBTSInputReconcile endIndex) ifNotEmpty: [:options | editor do: options first]].
+		^ self].
+	
+	target := self.
+	3 timesRepeat: [
+		target reinterpretWithoutEmpty ifTrue: [^ self].
+		target := target parentSandblock.
+		target isTSBlock ifFalse: [^ editor performForSelection: #moveCursorLeft]].
+	^ editor performForSelection: #moveCursorLeft
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> deleteBeforeCursorOld [
 	<action>
 
 	| editor textMorph target |
@@ -344,6 +388,7 @@ SBTSBlock >> exportStructure [
 						previous := pos block]]
 				shallow: true]).
 		#class -> #block.
+		#bounds -> (self bounds in: [:r | {r left. r top. r width. r height}]).
 		#type -> self type} as: Dictionary
 ]
 
@@ -539,10 +584,15 @@ SBTSBlock >> isTSReplacement [
 ]
 
 { #category : #testing }
-SBTSBlock >> keepDuringTransform [
-	"if we wrap a single text field, check if that field is empty and if that is the case, do not necessarily keep this block during transforms"
+SBTSBlock >> keepDuringDelete [
 
-	^ (self submorphCount = 1 and: [self currentTextMorph notNil and: [self contents isEmpty]]) not
+	^ self submorphs anySatisfy: [:s | s keepDuringDelete]
+]
+
+{ #category : #testing }
+SBTSBlock >> keepDuringTransform [
+
+	^ self submorphs anySatisfy: [:s | s keepDuringTransform]
 ]
 
 { #category : #'as yet unclassified' }
@@ -628,6 +678,32 @@ SBTSBlock >> ownerWithForegroundColor [
 	^ self highlight = #'_sb_none'
 		ifTrue: [self owner ifNotNil: [:o | o ownerWithForegroundColor]]
 		ifFalse: [self]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> placeCursorCloseAfterDo: aBlock [
+
+	| index container found |
+	container := self owner.
+	index := 0.
+	found := false.
+	container cursorPositionsDo: [:c |
+		(found not and: [c block ~= self or: [c isSelect]])
+			ifTrue: [index := index + 1]
+			ifFalse: [found := true]].
+	
+	"if we are in a repeater for multiple elements and we delete ourselves, then cursor positions actually disappear"
+	(self slot repeaterThat: #multiple) ifNotNil: [index := index - 1].
+	
+	aBlock value.
+	found ifTrue: [
+		container cursorPositionsDo: [:c |
+			index > 1 ifTrue: [index := index - 1] ifFalse: [
+				^ container sandblockEditor cursor
+					cursorPosition: (c placeAtEnd: true)
+					explicitMove: true
+					axis: #none]]].
+	container sandblockEditor selection moveCursorToEnd
 ]
 
 { #category : #highlight }
@@ -737,23 +813,25 @@ SBTSBlock >> reinterpretWithoutEmpty [
 
 	| remaining options editor |
 	editor := self sandblockEditor.
-	remaining := self children select: [:m | m keepDuringTransform].
+	remaining := self childrenToKeepDuringDelete.
 	remaining ifEmpty: [
 		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
-			editor do: c.
-			editor selection moveCursorToEnd.
+			self placeCursorCloseAfterDo: [editor do: c].
 			^ true].
 		^ false].
 	options := SBTSInputParser new optionsFor: self given: '' before: remaining after: #().
-	(options size = 1 and: [options first first type ~= self type]) ifTrue: [
-		editor do: (SBReplaceMultipleCommand new target: self replacers: options first).
-		options first last lastDeepChild startInputAtEnd.
+	(remaining hasEqualElements: self submorphs) ifTrue: [^ false].
+	
+	(options size = 1 and: [options first first sourceStringForCompare ~= self copyBlock sourceStringForCompare]) ifTrue: [
+		self placeCursorCloseAfterDo: [editor do: (SBReplaceMultipleCommand new target: self replacers: options first)].
 		^ true].
-	(remaining allSatisfy: [:m | m slot firstNode isTSLabel]) ifTrue: [
-		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
-			editor do: c.
-			editor selection moveCursorToEnd.
-			^ true]].
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			(remaining allSatisfy: [:m | m slot firstNode isTSLabel]) ifTrue: [
+				(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
+					editor do: c.
+					editor selection moveCursorToEnd.
+					^ true]]]}.
 	^ false
 ]
 

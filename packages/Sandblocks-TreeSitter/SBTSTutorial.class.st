@@ -28,14 +28,16 @@ SBTSTutorial class >> stepInsert: anEditor [
 			program := step createStep: (SBJavascript parseToplevel: '
 function() {await Promise.resolve(arg)}
 "line1line2"').
+			step addExplanationStep: 'Sandblocks will display a hint when your cursor is at positions where an element can be inserted.'.
 			step
-				addStep: 'Sandblocks will display a hint when your cursor is at a position where an element can be inserted. Keep pressing <#moveCursorRight> or <#moveCursorLeft> until it offers you to add an "async" in front of the function. Press the first letter of the input, in this case `a` to confirm.'
+				addStep: 'To add an "async" in front of the function keep pressing <#moveCursorRight> or <#moveCursorLeft> until the popup indicates "async" and press the first letter of the input, in this case `a`, to confirm.'
 				checkCondition: [:editor | program sourceString includesSubstring: 'async function'].
 			step
 				addStep: 'Next, add an argument called `arg` to the function by again moving into the right stop and typing `arg`.'
 				checkCondition: [:editor | program sourceString includesSubstring: 'async function(arg)'].
+			step addExplanationStep: 'You can create a new statement by pressing <#insertStatementBelow> or <#insertStatementAbove> *anywhere*.'.
 			step
-				addStep: 'You can create a new statement by pressing <#insertStatementBelow> or <#insertStatementAbove> *anywhere*. Try moving into the function and pressing <#insertStatementBelow>.'
+				addStep: 'Try moving into the function and pressing <#insertStatementBelow>.'
 				checkCondition: [:editor | (program queryNode: '(statement_block)') childSandblocks size = 2].
 			step
 				addStep: 'Now, create a new statement underneath, outside the function. To do so, you have to move the cursor out of the current statement block via <#moveCursorLarger> and only then press <#insertStatementBelow>.'
@@ -83,17 +85,18 @@ SBTSTutorial class >> stepShortcuts: anEditor [
 [37];
 const justNumber=[2.123123];').
 			step
-				addStep: 'Select identifier `nameIdentifier` and press <#clearInput> to quickly clear the contents of just the selected block and change it to a `42`.'
+				addStep: 'To quickly clear the contents of just the selected text field move your cursor into the identifier `nameIdentifier`, press <#clearInput> and change it to a `42`.'
 				checkCondition: [:editor | program childSandblocks first sourceString = 'const goodNum=42;'].
 			step
-				addStep: 'Copy and paste works as you would expect it to: select the number `37`, press <#copyToBuffer>, then move the cursor right until it becomes a dashed line inside the array and press <#pasteReplace>.'
-				checkCondition: [:editor | program childSandblocks second sourceString = '[37,37];'].
+				addStep: 'Copy and paste works as you would expect it to: duplicate the `37` by moving the cursor into the number `37`, pressing <#copyToBuffer>, then moving the cursor right until it becomes a dashed line inside the array and press <#pasteReplace>.'
+				checkCondition: [:editor | program sourceString includesSubstring: '[37,37];'].
 			step
-				addStep: 'Similarly, cutting works via <#deleteBlockWithCopy>. It is also a quick way to delete a block (otherwise, you should select the whole block via <#moveCursorLarger>, then press <#deleteBlock>). Try emptying the array again by pressing <#deleteBlockWithCopy> on both `37`s.'
-				checkCondition: [:editor | program childSandblocks second sourceString = '[];'].
+				addStep: 'Similarly, cutting works via <#deleteBlockWithCopy>. It is also a quick way to delete a block. Try emptying the array again by pressing <#deleteBlockWithCopy> on each `37`.'
+				checkCondition: [:editor | program sourceString includesSubstring: '[];'].
+			step addExplanationStep: 'When you want to unwrap a block, the easiest way is to copy it, then select its parent and paste over it.'.
 			step
-				addStep: 'When you want to unwrap a block, the easiest way is to copy it, then select its parent and paste over it. For example, delete the array but keep the number in the last row by copying the number, selecting the array via <#moveCursorLarger>, then pasting.'
-				checkCondition: [:editor | program childSandblocks third sourceString = 'const justNumber=2.123123;'].
+				addStep: 'Delete the array but keep the number in the last row by copying the number, selecting the array via <#moveCursorLarger>, then pasting.'
+				checkCondition: [:editor | program childSandblocks last sourceString = 'const justNumber=2.123123;'].
 			program firstDeepChild startInputAtStart]
 ]
 
@@ -135,13 +138,14 @@ SBTSTutorial class >> stepWrapping: anEditor [
 ''array member?''
 3+0.14').
 			step
-				addStep: 'First, navigate to the `42` in the first row and type `+1` to extend the expression.'
+				addStep: 'To extend an expression place your cursor at the end of the `42` in the first row and type `+1` .'
 				checkCondition: [:editor | program childSandblocks first sourceString = '23*(42+1);'].
 			step
 				addStep: 'In the second row, we want to multiply the result of the addition by 5. To do so, move your cursor to the `43` and use <#moveCursorLarger> to select the addition `12+43`. Then press <#promptTransition> and type `*5`.'
 				checkCondition: [:editor | program childSandblocks second sourceString = '(12+43)*5;'].
+			step addExplanationStep: '<#promptTransition> wrapped and added new constructs *after* our selection. Using <Shift+Space>, you can add constructs before the selection. '.
 			step
-				addStep: '<#promptTransition> wrapped and added new constructs *after* our selection. Using <Shift+Space>, you can add constructs before the selection. Select the string in the thid row, press <#moveCursorLarger> *twice* to select the whole string and type `[`, then <#confirm>, to wrap the string in an array.'
+				addStep: 'To wrap the string in an array select the string in the thid row, press <#moveCursorLarger> *twice* to select the whole string, hit <#promptTransition> and type `[`, then <#confirm>.'
 				checkCondition: [:editor | program childSandblocks third sourceString = '[''array member?''];'].
 			step
 				addStep: 'Finally, you can also insert larger constructs. Select the addition in the last row using <#moveCursorLarger>, press <Shift+Space> and type `const pi=`, then <#confirm>.'
