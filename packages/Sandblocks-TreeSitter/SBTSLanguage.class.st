@@ -45,6 +45,12 @@ SBTSLanguage class >> canParse: aString [
 		do: [false]
 ]
 
+{ #category : #configuration }
+SBTSLanguage class >> commentSymbol [
+
+	^ #comment
+]
+
 { #category : #'loading - helper' }
 SBTSLanguage class >> compileParserIn: path name: aString root: aRootPath [
 
@@ -337,10 +343,12 @@ SBTSLanguage class >> parseToplevel: aString [
 SBTSLanguage class >> postprocessGrammar: aGrammar [
 	"hook for modifying properties of the grammar just after we apply inlining rules etc"
 
-	self emptyLineSymbol ifNotNil: [
-		aGrammar rules at: self emptyLineSymbol put: (SBTSNodeText new
-			factory: aGrammar;
-			regexString: '').
+	(self emptyLineSymbol notNil or: [self commentSymbol notNil]) ifNotNil: [
+		self emptyLineSymbol ifNotNil: [:sym |
+			aGrammar rules at: sym put: (SBTSNodeText new
+				factory: aGrammar;
+				regexString: '')].
+		
 		aGrammar rules keysAndValuesDo: [:symbol :body | body allElementsDo: [:node | (node isTSRepeat and: [self isStatementContainer: node in: (SBTSNodeSymbol new type: symbol factory: aGrammar)]) ifTrue: [node transformToStatementRepeater]]]]
 ]
 

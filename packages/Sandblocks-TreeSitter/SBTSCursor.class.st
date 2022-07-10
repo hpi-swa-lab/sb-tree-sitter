@@ -6,7 +6,8 @@ Class {
 		'cursor',
 		'atEnd',
 		'factory',
-		'previousSiblings'
+		'previousSiblings',
+		'comments'
 	],
 	#category : #'Sandblocks-TreeSitter-FFI'
 }
@@ -20,7 +21,7 @@ SBTSCursor >> atEnd [
 { #category : #'as yet unclassified' }
 SBTSCursor >> createRestorePoint [
 
-	^ library cursorCopy: cursor
+	^ SBToggledCode comment: '' active: 1 do: {[cursor copy]. [library cursorCopy: cursor]}
 ]
 
 { #category : #'as yet unclassified' }
@@ -76,7 +77,10 @@ SBTSCursor >> factory [
 SBTSCursor >> gotoFirstChild [
 
 	| ret |
-	ret := library cursorGotoFirstChild: cursor.
+	ret := SBToggledCode
+		comment: ''
+		active: 1
+		do: {[cursor gotoFirstChild]. [library cursorGotoFirstChild: cursor]}.
 	ret ifTrue: [previousSiblings add: nil].
 	(ret and: [self shouldSkipParsedNode: self node]) ifTrue: [^ self gotoNextSibling not].
 	
@@ -92,10 +96,16 @@ SBTSCursor >> gotoNextSibling [
 
 	| ret |
 	previousSiblings atLast: 1 put: self node.
-	ret := library cursorGotoNextSibling: cursor.
+	ret := SBToggledCode
+		comment: ''
+		active: 1
+		do: {[cursor gotoNextSibling]. [library cursorGotoNextSibling: cursor]}.
 	[ret and: [self shouldSkipParsedNode: self node]] whileTrue: [
 		previousSiblings atLast: 1 put: self node.
-		ret := library cursorGotoNextSibling: cursor].
+		ret := SBToggledCode
+			comment: ''
+			active: 1
+			do: {[cursor gotoNextSibling]. [library cursorGotoNextSibling: cursor]}].
 	^ atEnd := ret not
 ]
 
@@ -104,7 +114,10 @@ SBTSCursor >> gotoParent [
 
 	| ret |
 	atEnd := false.
-	ret := library cursorGotoParent: cursor.
+	ret := SBToggledCode
+		comment: ''
+		active: 1
+		do: {[cursor gotoParent]. [library cursorGotoParent: cursor]}.
 	ret ifTrue: [previousSiblings removeLast].
 	^ ret
 ]
@@ -114,7 +127,8 @@ SBTSCursor >> initialize [
 
 	super initialize.
 	atEnd := false.
-	previousSiblings := OrderedCollection with: nil
+	previousSiblings := OrderedCollection with: nil.
+	comments := OrderedCollection new
 ]
 
 { #category : #'as yet unclassified' }
@@ -152,7 +166,10 @@ SBTSCursor >> library: aLibrary cursor: aCursor factory: aFactory [
 { #category : #'as yet unclassified' }
 SBTSCursor >> node [
 
-	^ library cursorCurrentNode: cursor
+	^ SBToggledCode
+		comment: ''
+		active: 1
+		do: {[cursor currentNode]. [library cursorCurrentNode: cursor]}
 ]
 
 { #category : #'as yet unclassified' }
@@ -161,6 +178,15 @@ SBTSCursor >> parentType [
 	| parent |
 	parent := library nodeParent: self node.
 	^ parent tree isNull ifTrue: [nil] ifFalse: [library nodeType: parent]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCursor >> popComments [
+
+	| c |
+	c := comments.
+	comments := OrderedCollection new.
+	^ c
 ]
 
 { #category : #'as yet unclassified' }
@@ -174,7 +200,8 @@ SBTSCursor >> postCopy [
 
 	super postCopy.
 	cursor := self createRestorePoint.
-	previousSiblings := previousSiblings copy
+	previousSiblings := previousSiblings copy.
+	comments := comments copy
 ]
 
 { #category : #'as yet unclassified' }
@@ -243,7 +270,10 @@ SBTSCursor >> shouldSkipParsedNode: aNode [
 
 	| type |
 	type := library nodeType: aNode.
-	^ factory language statementTerminator = type or: [type = #comment]
+	type = #comment ifTrue: [
+		comments add: (library textForNode: aNode).
+		^ true].
+	^ factory language statementTerminator = type
 ]
 
 { #category : #'as yet unclassified' }

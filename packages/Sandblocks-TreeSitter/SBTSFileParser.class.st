@@ -333,6 +333,12 @@ SBTSFileParser >> peekUncapturedText [
 	^ text
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> popPendingComments [
+
+	^ cursor popComments
+]
+
 { #category : #stream }
 SBTSFileParser >> position [
 

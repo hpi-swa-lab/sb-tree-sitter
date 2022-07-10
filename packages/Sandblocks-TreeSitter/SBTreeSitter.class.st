@@ -242,6 +242,13 @@ SBTreeSitter >> node: aNode childByFieldName: aString length: aNumber [
 ]
 
 { #category : #ffi }
+SBTreeSitter >> nodeChild: aNode at: aNumber [
+
+	<apicall: SBTSNode ts_node_child (SBTSNode, uint32_t)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
 SBTreeSitter >> nodeEndByte: aNode [
 
 	<apicall: uint32_t ts_node_end_byte (SBTSNode)>
@@ -259,6 +266,20 @@ SBTreeSitter >> nodeHasError: aNode [
 SBTreeSitter >> nodeIsNamed: aNode [
 
 	<apicall: bool ts_node_is_named (SBTSNode)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
+SBTreeSitter >> nodeIsNull: aNode [
+
+	<apicall: bool ts_node_is_null (SBTSNode)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
+SBTreeSitter >> nodeNextSibling: aNode [
+
+	<apicall: SBTSNode ts_node_next_sibling (SBTSNode)>
 	^ self externalCallFailed
 ]
 
@@ -312,17 +333,6 @@ SBTreeSitter >> nodeType: aNode [
 ]
 
 { #category : #'as yet unclassified' }
-SBTreeSitter >> parse: aString language: aSymbol factory: aFactory [
-
-	^ self parseAsCursor: aString language: aSymbol do: [:cursor |
-		(self buildTreeFrom: (SBTSCursor new library: self cursor: cursor factory: aFactory))
-			hResizing: #rigid;
-			attachDecorator: SBResizableDecorator new;
-			attachDecorator: SBForceMoveDecorator new;
-			updateAllHighlights]
-]
-
-{ #category : #'as yet unclassified' }
 SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 
 	| parser root tree cursor wasFreed |
@@ -337,16 +347,18 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 		tree := self parser: parser old: nil parseString: currentString length: currentString size.
 		
 		root := self treeRootNode: tree.
-		cursor := self cursorNew: root.
 		(self nodeHasError: root) ifTrue: [^ SBTSSyntaxError signal].
+		cursor := SBTSNodeCursor new on: root library: self.
 		
 		aBlock value: cursor] ensure: [
 		" there were problems with double-free when debugging "
 		wasFreed ifFalse: [
 			wasFreed := true.
-			(cursor notNil and: ["we can't check for cursor isNull because it is stack-allocated
+			SBToggledCode comment: '' active: 0 do: {
+				[
+					(cursor notNil and: ["we can't check for cursor isNull because it is stack-allocated
 use this check instead as a best-guess to prevent crashes after a debugger popped up"
-			parser isNull not]) ifTrue: [self cursorDelete: cursor].
+					parser isNull not]) ifTrue: [self cursorDelete: cursor]]}.
 			(parser notNil and: [parser isNull not]) ifTrue: [self parserDelete: parser]]]
 ]
 
@@ -382,15 +394,15 @@ SBTreeSitter >> parserNew [
 SBTreeSitter >> printTree: aCursor factory: aFactory [
 
 	| node type |
-	node := self cursorCurrentNode: aCursor.
+	node := aCursor currentNode.
 	type := self nodeType: node.
 	
 	Transcript showln: type.
 	
-	(self cursorGotoFirstChild: aCursor) ifTrue: [
+	aCursor gotoFirstChild ifTrue: [
 		self printTree: aCursor factory: aFactory.
-		[self cursorGotoNextSibling: aCursor] whileTrue: [self printTree: aCursor factory: aFactory].
-		self cursorGotoParent: aCursor]
+		[aCursor gotoNextSibling] whileTrue: [self printTree: aCursor factory: aFactory].
+		aCursor gotoParent]
 ]
 
 { #category : #'as yet unclassified' }

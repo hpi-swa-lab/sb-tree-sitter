@@ -349,9 +349,10 @@ SBTSBlock >> drawnColor [
 { #category : #'as yet unclassified' }
 SBTSBlock >> emphasis [
 
-	^ (self highlight notNil and: [self highlight = 'major_declaration'])
-		ifTrue: [TextEmphasis bold]
-		ifFalse: [TextEmphasis normal]
+	self highlight ifNotNil: [:h |
+		h = 'major_declaration' ifTrue: [^ TextEmphasis bold].
+		self type = #comment ifTrue: [^ TextEmphasis italic]].
+	^ TextEmphasis normal
 ]
 
 { #category : #'as yet unclassified' }

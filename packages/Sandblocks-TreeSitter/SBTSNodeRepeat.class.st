@@ -223,14 +223,31 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 			currentPosition := parser position.
 			wasAtEnd := parser atEnd.
 			(parser peekForLabel: delimiter) ifTrue: [parser nextSibling].
-			self isStatementRepeater ifTrue: [parser numberOfNewLinesToNext - 1 timesRepeat: [parser addBlock: element alternatives second buildEmpty first]].
+			self isStatementRepeater ifTrue: [
+				parser numberOfNewLinesToNext - 1 timesRepeat: [parser addBlock: element alternatives second buildEmpty first].
+				parser popPendingComments do: [:comment |
+					parser addBlock: (element alternatives third buildEmpty first
+						contents: comment;
+						yourself)]].
 			results := self element resultsForBlocks: parser.
 			results do: [:candidate |
 				"to fix troubles with infinitely repeating matches, we only accept results if they advanced the parser."
 				(candidate position > currentPosition or: [wasAtEnd not and: [candidate atEnd]]) ifTrue: [
 					(candidate peekForLabel: delimiter) ifTrue: [candidate nextSibling].
+					self isStatementRepeater ifTrue: [
+						candidate popPendingComments do: [:comment |
+							candidate addBlock: (element alternatives third buildEmpty first
+								contents: comment;
+								yourself)]].
 					stream nextPut: candidate.
-					multiple ifTrue: [queue add: candidate]]]]]) ifEmpty: [self required ifTrue: [{}] ifFalse: [{aParser}]]
+					multiple ifTrue: [queue add: candidate]]]]]) ifEmpty: [
+		self required ifTrue: [{}] ifFalse: [
+			self isStatementRepeater ifTrue: [
+				aParser popPendingComments do: [:comment |
+					aParser addBlock: (element alternatives third buildEmpty first
+						contents: comment;
+						yourself)]].
+			{aParser}]]
 ]
 
 { #category : #parsing }
@@ -262,12 +279,18 @@ if they advanced the parser."
 { #category : #'as yet unclassified' }
 SBTSNodeRepeat >> transformToStatementRepeater [
 
-	| current choice |
+	| current choice lang alts |
+	lang := self factory language.
 	self isStatementRepeater: true.
 	current := self element.
 	choice := SBTSNodeChoice new factory: self factory.
 	current replaceBy: choice.
-	choice alternatives: {current. SBTSNodeSymbol new type: self factory language emptyLineSymbol factory: self factory}
+	alts := {current}, (lang emptyLineSymbol
+		ifNotNil: [:sym | {SBTSNodeSymbol new type: sym factory: self factory}]
+		ifNil: [{}]), (lang commentSymbol
+		ifNotNil: [:sym | {SBTSNodeSymbol new type: sym factory: self factory}]
+		ifNil: [{}]).
+	choice alternatives: alts
 ]
 
 { #category : #hierarchy }

@@ -88,6 +88,38 @@ SBTSParseFileTest >> testJavascriptTemplateString [
 		equals: (SBTSFileParser new parse: source language: SBJavascript instance) sourceString
 ]
 
+{ #category : #'tests - comments' }
+SBTSParseFileTest >> testJsComments [
+
+	| source |
+	source := '// a
+a;
+// b dasd
+c;
+// e'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceStringForCompare.
+	
+	source := '/* a */
+a;
+/* b
+
+dasd*/
+c;
+// e'.
+	self
+		assert: source
+		equals: (SBJavascript parseToplevel: source) sourceStringForCompare withSqueakLineEndings.
+	
+	source := '// a
+a;
+function()
+{
+// b dasd
+};
+c;'.
+	self assert: source equals: (SBJavascript parseToplevel: source) sourceStringForCompare
+]
+
 { #category : #'tests - languages' }
 SBTSParseFileTest >> testJsFunctionPatterns [
 

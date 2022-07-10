@@ -1104,12 +1104,6 @@ SBMetaBlockFactory >> palettesFor: aBlock [
 	^ #()
 ]
 
-{ #category : #templates }
-SBMetaBlockFactory >> parse: aString [
-
-	^ SBTreeSitter new parse: aString language: name factory: self
-]
-
 { #category : #'as yet unclassified' }
 SBMetaBlockFactory >> promotedInlineSymbols [
 
