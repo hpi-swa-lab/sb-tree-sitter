@@ -256,12 +256,25 @@ SBTSBlock >> deleteBeforeCursor [
 	textMorph := self sandblockEditor currentInputCommand ifNotNil: #textMorph.
 	(textMorph ifNotNil: #contents ifNil: ['']) ifNotEmpty: [
 		super deleteBeforeCursor.
-		(self valid not and: [textMorph contents notEmpty]) ifTrue: [
+		(self valid not and: [textMorph contents notEmpty]) ifTrue: [ | currentCursor evalOption |
+			evalOption := [:options |
+				editor do: options first.
+				editor currentInputCommand ifNotNil: [:c | c textMorph moveCursorTo: currentCursor]].
+			currentCursor := textMorph cursor.
 			(SBTSInputReconcile new
 				tryReinterpretFrom: textMorph
-				in: self owner
+				in: self
 				given: ''
-				at: SBTSInputReconcile endIndex) ifNotEmpty: [:options | editor do: options first]].
+				at: SBTSInputReconcile endIndex
+				fullToken: true)
+				ifNotEmpty: evalOption
+				ifEmpty: [
+					(SBTSInputReconcile new
+						tryReinterpretFrom: textMorph
+						in: self owner
+						given: ''
+						at: SBTSInputReconcile endIndex
+						fullToken: true) ifNotEmpty: evalOption]].
 		^ self].
 	
 	target := self.
@@ -548,12 +561,6 @@ SBTSBlock >> isBlockBody [
 ]
 
 { #category : #testing }
-SBTSBlock >> isEditingKeyword [
-
-	^ self currentTextMorph ifNotNil: [:t | t slot firstNode isTSLabel] ifNil: [false]
-]
-
-{ #category : #testing }
 SBTSBlock >> isEditor [
 
 	^ true
@@ -564,6 +571,14 @@ SBTSBlock >> isExpression [
 
 	self slot allSuperTypesDo: [:type | (self language isExpression: type) ifTrue: [^ true]].
 	^ false
+]
+
+{ #category : #testing }
+SBTSBlock >> isMyActiveKeyword: aString [
+
+	^ self activeTextMorph
+		ifNotNil: [:t | t slot firstNode isTSLabel and: [t slot firstNode label = aString]]
+		ifNil: [false]
 ]
 
 { #category : #testing }
@@ -937,7 +952,7 @@ SBTSBlock >> tryApplyChange: aBlock input: aString [
 	
 	(self prefixValidFor: textMorph)
 		ifTrue: [
-			((self factory keywords includes: textMorph contents) and: [self isEditingKeyword not]) ifTrue: [
+			((self factory keywords includes: textMorph contents) and: [(self isMyActiveKeyword: textMorph contents) not]) ifTrue: [
 				textMorph contents: previousContents.
 				SBTSInputReconcile new for: textMorph input: aString at: insertIndex]]
 		ifFalse: [

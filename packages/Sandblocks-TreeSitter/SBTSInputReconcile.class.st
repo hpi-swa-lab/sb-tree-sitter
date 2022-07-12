@@ -200,6 +200,12 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 { #category : #reconciliation }
 SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber [
 
+	^ self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber fullToken: false
+]
+
+{ #category : #reconciliation }
+SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber fullToken: aBoolean [
+
 	| pivot string |
 	aMorph contents ifNil: [^ {}].
 	pivot := (aMorph orOwnerSuchThat: [:m | m owner = aBlock]) ifNil: [^ {}].
@@ -212,10 +218,11 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 		ifFalse: [(pivot contents first: aNumber - 1), aString, (pivot contents allButFirst: aNumber - 1)].
 	
 	^ (SBTSInputParser new
+		matchFullToken: aBoolean;
 		optionsFor: pivot owner
-		given: string
-		before: ((aBlock submorphs first: pivot submorphIndex - 1) select: #keepDuringTransform)
-		after: ((aBlock submorphs allButFirst: pivot submorphIndex) select: #keepDuringTransform)) collect: [:blocks |
+			given: string
+			before: ((aBlock submorphs first: pivot submorphIndex - 1) select: #keepDuringTransform)
+			after: ((aBlock submorphs allButFirst: pivot submorphIndex) select: #keepDuringTransform)) collect: [:blocks |
 		SBReplaceMultipleCommand new
 			target: pivot owner replacers: blocks;
 			shouldMergeWithNext: true]

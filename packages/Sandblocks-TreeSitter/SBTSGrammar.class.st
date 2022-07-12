@@ -587,7 +587,7 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 	
 	self rules keysAndValuesDo: [:name :rule | self checkStructure: rule].
 	
-	keywords := Array streamContents: [:stream | self allElementsDo: [:element | (element isTSLabel and: [element label allSatisfy: #isAlphaNumeric]) ifTrue: [stream nextPut: element label]]]
+	keywords := Array streamContents: [:stream | self allElementsDo: [:element | element isTSLabel ifTrue: [stream nextPut: element label]]]
 ]
 
 { #category : #accessing }

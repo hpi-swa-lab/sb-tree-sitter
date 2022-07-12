@@ -245,7 +245,6 @@ SBTSBlockTest >> testJsAddAssignmentToStatement [
 	self type: 'x=' in: editor.
 	self tick.
 	self tick.
-	editor handle: (self keyboardEvent: Character arrowDown).
 	editor handle: (self keyboardEvent: Character cr).
 	self assert: 'x=123;' equals: program sourceStringForCompare
 ]
@@ -656,6 +655,22 @@ x()
 {
 }
 };' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testJsTripleEqualToDouble [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'a === 3'.
+	editor := self editorAndWorldFor: program.
+	program childSandblocks first startInputAtEnd.
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: 'a==3;' equals: program sourceStringForCompare.
+	self assert: program childSandblocks first valid.
+	
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: 'a=3;' equals: program sourceStringForCompare.
+	self assert: program childSandblocks first valid
 ]
 
 { #category : #'tests - input transition' }

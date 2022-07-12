@@ -9,6 +9,7 @@ Class {
 		'symbolStack',
 		'activeRecursion',
 		'allowIncomplete',
+		'matchFullToken',
 		'wasIncomplete',
 		'nodeCountCache',
 		'lastConstructedCache'
@@ -116,7 +117,8 @@ SBTSInputParser >> initialize [
 	visitedSupertypes := Set new.
 	blocks := OrderedCollection new.
 	wasIncomplete := false.
-	allowIncomplete := true
+	allowIncomplete := true.
+	matchFullToken := false
 ]
 
 { #category : #'as yet unclassified' }
@@ -151,6 +153,18 @@ SBTSInputParser >> lastConstructedChain [
 SBTSInputParser >> limit [
 
 	^ stream originalContents size
+]
+
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> matchFullToken [
+
+	^ matchFullToken
+]
+
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> matchFullToken: aboolean [
+
+	matchFullToken := aboolean
 ]
 
 { #category : #memo }
@@ -255,7 +269,7 @@ SBTSInputParser >> normalizeResults2: aCollection query: aString factory: aFacto
 		ifTrue: [results select: [:r | r first firstDeepChild slot firstNode isTSLabel]]
 		ifFalse: [results].
 	
-	^ results sort: [:a :b | a first recursiveNodeCount <= b first recursiveNodeCount]
+	^ results sort: [:a :b | a first characterAndBlockCount <= b first characterAndBlockCount]
 ]
 
 { #category : #blocks }

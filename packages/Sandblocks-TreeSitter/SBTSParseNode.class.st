@@ -47,6 +47,17 @@ SBTSParseNode >> buildWith: aParser [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSParseNode >> characterAndBlockCount [
+
+	^ kind
+		caseOf: {
+			[#block] -> [contents inject: 1 into: [:sum :node | sum + node characterAndBlockCount]].
+			[#text] -> [contents size].
+			[#label] -> [contents size]}
+		otherwise: [1]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSParseNode >> children [
 
 	^ kind = #block ifTrue: [contents] ifFalse: [{}]

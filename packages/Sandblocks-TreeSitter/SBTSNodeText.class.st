@@ -189,7 +189,7 @@ SBTSNodeText >> resultsFor: aParser [
 		remaining := aParser stream upToEnd.
 		(SBToggledCode comment: '' active: 2 do: {
 			[false].
-			[(remaining noneSatisfy: [:c | c isMorph]) and: [self prefixValidFor: remaining]].
+			[aParser matchFullToken not and: [(remaining noneSatisfy: [:c | c isMorph]) and: [self prefixValidFor: remaining]]].
 			[plainPrefix beginsWith: remaining]}) ifTrue: [
 			^ {
 				aParser addBlock: (SBTSParseNode kind: #text slot: (SBTSSlot with: self) contents: (String withAll: (plainPrefix size > remaining size
