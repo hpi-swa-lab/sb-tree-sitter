@@ -26,7 +26,8 @@ SBTSNodeInsertCommand >> continueAfterInsert: aCharacter [
 { #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> do [
 
-	morphs := morphs ifNil: [element buildEmpty].
+	morphs := morphs
+		ifNil: [element buildEmpty].
 	morphs reverseDo: [:m | container addMorph: m asElementNumber: index].
 	^ morphs detect: [:m | m isSandblock] ifFound: [:m | m] ifNone: [container]
 ]

@@ -57,9 +57,9 @@ SBTSBlockSuggestion >> target: aBlock [
 { #category : #'as yet unclassified' }
 SBTSBlockSuggestion >> useSuggestionOn: aBlock in: anEditor [
 
-	disambiguatePopup
-		ifNotNil: [:popup | popup applyCommand: command]
-		ifNil: [anEditor do: command]
+	disambiguatePopup ifNotNil: [:popup | popup applyCommand: command] ifNil: [
+		anEditor do: command.
+		anEditor selection ifNotNil: #startInputAtEnd]
 ]
 
 { #category : #'as yet unclassified' }

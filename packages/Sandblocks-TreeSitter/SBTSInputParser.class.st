@@ -17,6 +17,16 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
 
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> adaptSlotsFor: aCollectionOfBlock to: aNode [
+
+	| results |
+	self allowIncomplete: false.
+	results := self optionsForTemplate: aNode transitionRoot givenBlocks: aCollectionOfBlock.
+	self assert: results size = 1.
+	^ results anyOne
+]
+
 { #category : #blocks }
 SBTSInputParser >> addBlock: aBlock [
 
@@ -94,6 +104,13 @@ SBTSInputParser >> blocks: aCollection contain: anotherCollection [
 	find isUnknown ifTrue: [^ false].
 	aCollection do: [:morph | morph allMorphsDo: [:m | (m type = find type and: [m contents = find contents]) ifTrue: [^ true]]].
 	^ false
+]
+
+{ #category : #query }
+SBTSInputParser >> canInsert: aBlock for: aNode [
+
+	self allowIncomplete: false.
+	^ (self rawOptionsForTemplate: aNode transitionRoot given: '' before: {aBlock} after: {}) notEmpty
 ]
 
 { #category : #stream }
@@ -328,21 +345,16 @@ SBTSInputParser >> optionsForTemplate: aNode given: aString [
 { #category : #query }
 SBTSInputParser >> optionsForTemplate: aNode given: aString before: aCollection after: anotherCollection [
 
-	stream := SBTSBlockStringStream on: aCollection, aString asArray, anotherCollection.
-	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
-	activeRecursion := Array new: stream originalContents size withAll: nil.
-	symbolStack := OrderedCollection new.
-	
 	^ (self
-		normalizeResults2: ((aNode resultsFor: self) select: [:parser | parser atEnd])
+		normalizeResults2: (self rawOptionsForTemplate: aNode given: aString before: aCollection after: anotherCollection)
 		query: aString
 		factory: aNode factory) collect: [:parseNodes | parseNodes collect: [:p | p buildWith: self]]
 ]
 
 { #category : #query }
-SBTSInputParser >> optionsForTemplate: aNode givenBlock: aBlock [
+SBTSInputParser >> optionsForTemplate: aNode givenBlocks: aCollection [
 
-	^ self optionsForTemplate: aNode given: '' before: {aBlock} after: {}
+	^ self optionsForTemplate: aNode given: '' before: aCollection after: {}
 ]
 
 { #category : #'as yet unclassified' }
@@ -390,6 +402,17 @@ SBTSInputParser >> postCopy [
 	blocks := blocks collect: [:block | block copy]
 ]
 
+{ #category : #query }
+SBTSInputParser >> rawOptionsForTemplate: aNode given: aString before: aCollection after: anotherCollection [
+
+	stream := SBTSBlockStringStream on: aCollection, aString asArray, anotherCollection.
+	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
+	activeRecursion := Array new: stream originalContents size withAll: nil.
+	symbolStack := OrderedCollection new.
+	
+	^ (aNode resultsFor: self) select: [:parser | parser atEnd]
+]
+
 { #category : #memo }
 SBTSInputParser >> recall: aSymbol evalDo: aBlock [
 
@@ -435,11 +458,14 @@ SBTSInputParser >> shouldAbortIncompleteExpansion [
 
 e.g., this will block from expanding to 2+_ if our input was just a 2"
 
+	self blocks ifEmpty: [^ true].
+	
 	memoizations withIndexDo: [:memo :index |
 		memo
 			at: self blocks last type
 			ifPresent: [:b | ((b anyResultIsAtEndFor: self) and: [(activeRecursion at: index) notNil]) ifTrue: [^ true]]
 			ifAbsent: [false]].
+	
 	^ false
 ]
 

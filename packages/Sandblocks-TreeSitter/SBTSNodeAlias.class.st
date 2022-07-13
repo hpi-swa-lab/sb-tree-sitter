@@ -140,6 +140,13 @@ SBTSNodeAlias >> printOn: aStream [
 SBTSNodeAlias >> resultsFor: aParser [
 
 	| currentBlocks |
+	(aParser peek isMorph and: [aParser peek slot lastNode isTSAlias and: [aParser peek slot lastNode alias = self alias]])
+		ifTrue: [ | block result |
+			result := aParser copy.
+			block := result next.
+			result basicAddBlocks: {SBTSParseNode kind: #blockEmbed slot: (block slot trimNodesToTypeOf: self) contents: block}.
+			^ {result}].
+	
 	currentBlocks := aParser blocks.
 	aParser blocks: OrderedCollection new.
 	^ (self element resultsFor: aParser) collect: [:result | | blocks |

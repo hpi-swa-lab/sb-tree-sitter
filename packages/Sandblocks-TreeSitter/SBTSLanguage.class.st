@@ -29,6 +29,12 @@ SBTSLanguage class >> allRuntimes [
 	^ Array streamContents: [:stream | SBTSLanguageRuntime allSubclassesDo: [:cl | cl language = self ifTrue: [stream nextPut: cl]]]
 ]
 
+{ #category : #'instantiate blocks' }
+SBTSLanguage class >> blockFor: aSymbol [
+
+	^ (SBTSNodeSymbol new type: aSymbol factory: self instance grammar) buildEmpty first
+]
+
 { #category : #'configuration - layout' }
 SBTSLanguage class >> canInline: aSymbol [
 

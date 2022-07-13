@@ -81,7 +81,7 @@ SBTSBlock >> adaptSlotFor: anotherSlot ifFailed: aBlock [
 	"
 	results := SBTSInputParser new
 		allowIncomplete: false;
-		optionsForTemplate: anotherSlot transitionRoot givenBlock: self.
+		optionsForTemplate: anotherSlot transitionRoot givenBlocks: {self}.
 	results ifEmpty: [^ aBlock value].
 	self assert: results size = 1.
 	self assert: results first size = 1.

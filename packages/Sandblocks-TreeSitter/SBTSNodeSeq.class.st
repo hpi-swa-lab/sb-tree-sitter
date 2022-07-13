@@ -163,14 +163,18 @@ SBTSNodeSeq >> resultsFor: aParser [
 	
 	"simplify controlflow, probably dont need separate results lists"
 	self flag: #todo.
-	aParser allowIncomplete ifTrue: [
-		incompleteResults do: [:pair |
-			pair first shouldAbortIncompleteExpansion ifFalse: [
-				self elements
-					from: pair second + 1
-					to: self elements size
-					do: [:node | pair first addEmptyBlocks: node buildEmptyNodes].
-				results add: pair first]]].
+	aParser allowIncomplete
+		ifTrue: [
+			incompleteResults do: [:pair |
+				pair first shouldAbortIncompleteExpansion ifFalse: [
+					self elements
+						from: pair second + 1
+						to: self elements size
+						do: [:node | pair first addEmptyBlocks: node buildEmptyNodes].
+					results add: pair first]]]
+		ifFalse: [
+			incompleteResults do: [:pair | "if none of the remaining nodes produce any blocks it is still a complete result"
+			((self elements viewFrom: pair second + 1 to: self elements size) allSatisfy: [:node | node buildEmptyNodes isEmpty]) ifTrue: [results add: pair first]]].
 	^ results
 ]
 

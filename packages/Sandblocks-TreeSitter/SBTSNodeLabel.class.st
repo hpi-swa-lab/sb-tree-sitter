@@ -192,9 +192,10 @@ SBTSNodeLabel >> resultsFor: aParser [
 	labelStream := self label readStream.
 	oldPosition := aParser position.
 	
-	(aParser peek isCharacter not and: [((aParser peek isTextMorph or: [aParser peek isStringMorph]) and: [self label = aParser peek contents])]) ifTrue: [ | block |
+	(aParser peek isCharacter not and: [(aParser peek isTextMorph or: [aParser peek isStringMorph]) and: [self label = aParser peek contents]]) ifTrue: [ | block |
 		block := aParser next.
-		^ {aParser basicAddBlocks: {SBTSParseNode kind: #blockEmbed slot: (block slot trimNodesToTypeOf: self) contents: block}}].
+		^ {
+			aParser basicAddBlocks: {SBTSParseNode kind: #blockEmbed slot: (block slot trimNodesToTypeOf: self) contents: block}}].
 	
 	[aParser atEnd or: [(aParser peek isMorph and: [labelStream position > 0]) or: [labelStream atEnd]]] whileFalse: [
 		labelStream next = aParser next ifFalse: [

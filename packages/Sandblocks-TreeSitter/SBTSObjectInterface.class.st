@@ -23,6 +23,6 @@ SBTSObjectInterface >> slot: aSlot [
 SBTSObjectInterface >> value: anObject [
 
 	(anObject isSandblock and: [anObject isTSBlock]) ifFalse: [^ false].
-	(anObject slot includesParent: slot lastNode transitionRoot) ifTrue: [^ true].
+	((anObject slot includesParent: slot lastNode transitionRoot) and: [SBTSInputParser new canInsert: anObject for: slot transitionRoot]) ifTrue: [^ true].
 	^ false
 ]
