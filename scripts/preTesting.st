@@ -9,4 +9,5 @@ SBTreeSitter new
 	clojure;
 	typescript;
 	tsx;
+	regex;
 	parserNew.
