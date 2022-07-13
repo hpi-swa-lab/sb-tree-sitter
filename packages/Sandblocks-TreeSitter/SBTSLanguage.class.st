@@ -449,6 +449,12 @@ SBTSLanguage class >> statementTerminator [
 ]
 
 { #category : #'configuration - suggestions' }
+SBTSLanguage class >> suggestAlwaysFor: aBlock [
+
+	^ false
+]
+
+{ #category : #'configuration - suggestions' }
 SBTSLanguage class >> suggestionsFor: aBlock [
 
 	^ #()

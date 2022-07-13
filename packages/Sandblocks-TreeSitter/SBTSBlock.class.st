@@ -914,6 +914,12 @@ SBTSBlock >> statements [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> suggestAlways [
+
+	^ self language suggestAlwaysFor: self
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> suggestions [
 
 	^ self language suggestionsFor: self
