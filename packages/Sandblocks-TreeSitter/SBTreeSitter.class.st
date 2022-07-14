@@ -221,6 +221,13 @@ SBTreeSitter >> json [
 	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-json' name: 'json' context: thisContext
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> kotlin [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_kotlin () module: 'tree-sitter-kotlin'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'fwcd/tree-sitter-kotlin' name: 'kotlin' context: thisContext
+]
+
 { #category : #accessing }
 SBTreeSitter >> language [
 

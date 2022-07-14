@@ -514,15 +514,14 @@ SBTSBlock >> insertStatementAbove [
 { #category : #actions }
 SBTSBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 
-	(self sandblockEditor cursor mode = #insert and: [self sandblockEditor cursor cursorPosition command element parent isStatementRepeater]) ifTrue: [
-		^ self sandblockEditor do: self sandblockEditor cursor cursorPosition command].
+	(self sandblockEditor cursor mode = #insert and: [self sandblockEditor cursor cursorPosition command element parent isStatementRepeater]) ifTrue: [^ self sandblockEditor do: self sandblockEditor cursor cursorPosition command].
 	
 	self andAllParentSandblocksDo: [:block |
 		block isTSBlock ifTrue: [
 			"look in my template --> insert as child of me"
 			(block slot repeaterThat: [:p | p isStatementRepeater]) ifNotNil: [:repeater |
 				^ block sandblockEditor do: (SBTSNodeInsertCommand new
-					element: repeater element alternatives second
+					element: (repeater element alternatives detect: [:t | t type = #empty])
 					container: block parentSandblock
 					index: block submorphIndex + (anAboveBoolean ifTrue: [0] ifFalse: [1]))].
 			"look above me --> insert adjacent to me"

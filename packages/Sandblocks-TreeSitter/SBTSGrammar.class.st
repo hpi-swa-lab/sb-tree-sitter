@@ -610,7 +610,7 @@ SBTSGrammar >> removeDuplicateAlternatives: anObject [
 { #category : #cleaning }
 SBTSGrammar >> removeExternals: aRule grammar: aJSONGrammar [
 
-	aRule allElementsDo: [:node | (node isTSSymbol and: [(aJSONGrammar externals includes: node type) and: [((aJSONGrammar at: #inline) includes: node type) not and: [(aJSONGrammar rules includesKey: node type) not]]]) ifTrue: [node parent isTSAlias ifTrue: [node parent delete] ifFalse: [node delete]]]
+	aRule allElementsDo: [:node | (node isTSSymbol and: [(aJSONGrammar externals includes: node type) and: [((aJSONGrammar at: #inline) includes: node type) not and: [(aJSONGrammar rules includesKey: node type) not and: [node parent notNil]]]]) ifTrue: [node parent isTSAlias ifTrue: [node parent delete] ifFalse: [node delete]]]
 ]
 
 { #category : #cleaning }
@@ -640,7 +640,7 @@ SBTSGrammar >> removeMarkedDelimiters: anObject [
 { #category : #cleaning }
 SBTSGrammar >> removeRule: aSymbol [
 
-	rules keysAndValuesDo: [:name :rule | rule allElementsDo: [:node | (node isTSSymbol and: [node type = aSymbol]) ifTrue: [node parent isTSAlias ifTrue: [node parent delete] ifFalse: [node delete]]]]
+	rules keysAndValuesDo: [:name :rule | rule allElementsDo: [:node | (node isTSSymbol and: [node type = aSymbol and: [node parent notNil]]) ifTrue: [node parent isTSAlias ifTrue: [node parent delete] ifFalse: [node delete]]]]
 ]
 
 { #category : #cleaning }
