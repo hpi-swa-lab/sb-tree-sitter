@@ -278,9 +278,9 @@ SBTSInputParser >> next [
 SBTSInputParser >> normalizeResults2: aCollection query: aString factory: aFactory [
 
 	| results transitionPairs hasAnyKeywords groups |
+	SBToggledCode comment: '' active: 0 do: {[^ aCollection collect: #blocks]. [self halt]}.
 	groups := Dictionary new.
 	aCollection do: [:candidate | self merge: candidate intoGroups: groups].
-	SBToggledCode comment: '' active: 0 do: {[^ aCollection]. [self halt]}.
 	results := groups values collect: [:candidates | | min |
 		min := candidates first.
 		candidates allButFirstDo: [:c | (c sortsBefore: min) ifTrue: [min := c]].

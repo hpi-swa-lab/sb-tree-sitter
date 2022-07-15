@@ -47,6 +47,13 @@ SBTSNodeInsertCommand >> element: aNode container: aBlock index: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> firstTextMorphIn: aCollection [
+
+	aCollection do: [:morph | morph allBlocksDo: [:m | m currentTextMorph ifNotNil: [^ m]]].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> hasSamePositionAs: aCommand [
 
 	^ aCommand class ~= SBCombinedCommand and: [self container = aCommand container and: [self insertIndex = aCommand insertIndex and: [element = aCommand element]]]
@@ -106,7 +113,7 @@ SBTSNodeInsertCommand >> postDo [
 	continueInputString
 		ifNotNil: [
 			SBTSInputReconcile new
-				for: morphs first currentTextMorph
+				for: (self firstTextMorphIn: morphs)
 				input: continueInputString
 				at: SBTSInputReconcile endIndex]
 		ifNil: [SBTSInputReconcile new positionCursorIn: morphs]

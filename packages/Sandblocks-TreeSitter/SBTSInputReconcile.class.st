@@ -189,6 +189,12 @@ SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNumber [
 	"recursive stop condition: either our owner is no longer a ts-block or we have already gone two steps. two steps were enough for all valid scenarios we have encountered thus far."
 
+	aMorph isUnknown ifTrue: [
+		((SBTSInputParser new optionsForTemplate: aMorph slot firstNode given: aString) collect: [:blocks |
+			SBReplaceMultipleCommand new
+				target: aMorph replacers: blocks;
+				shouldMergeWithNext: true]) ifNotEmpty: [:res | ^ res]].
+	
 	aBlock isTSBlock ifFalse: [^ {}].
 	(aMorph ownerChain indexOf: aBlock) > 3 ifTrue: [^ {}].
 	

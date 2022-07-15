@@ -6241,7 +6241,11 @@ SBKotlin class >> hardLineBreakBetween: aBlock and: anotherBlock [
 { #category : #'as yet unclassified' }
 SBKotlin class >> highlightQuery [
 
-	^ '"fun" @keyword'
+	^ '"fun" @keyword
+
+[(integer_literal) (real_literal)] @number
+
+[(simple_identifier)] @variable'
 ]
 
 { #category : #'as yet unclassified' }

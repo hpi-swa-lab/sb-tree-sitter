@@ -166,7 +166,10 @@ SBTSNodeSeq >> resultsFor: aParser [
 	aParser allowIncomplete
 		ifTrue: [
 			incompleteResults do: [:pair |
-				pair first shouldAbortIncompleteExpansion ifFalse: [
+				(SBToggledCode
+					comment: ''
+					active: 2
+					do: {[false]. [pair first shouldAbortIncompleteExpansion]}) ifFalse: [
 					self elements
 						from: pair second + 1
 						to: self elements size
