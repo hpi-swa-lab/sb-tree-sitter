@@ -294,7 +294,7 @@ SBTSParseFileTest >> testParseJsArrowFunc [
 
 	| module |
 	module := SBTSFileParser new parse: '() => 1' language: SBJavascript.
-	self assert: 7 equals: (module childSandblocks first performEnum: #cursorPositionsDo:) size
+	self assert: 8 equals: (module childSandblocks first performEnum: #cursorPositionsDo:) size
 ]
 
 { #category : #'tests - languages' }

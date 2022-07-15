@@ -12,6 +12,7 @@ Class {
 		'matchFullToken',
 		'wasIncomplete',
 		'nodeCountCache',
+		'copyEmbeds',
 		'lastConstructedCache'
 	],
 	#category : #'Sandblocks-TreeSitter-Parser'
@@ -126,6 +127,18 @@ SBTSInputParser >> checkIntegrity [
 	memoizations do: [:list | list keysAndValuesDo: [:sym :memos | self assert: (memos isLeftRecursion or: [memos parsers allSatisfy: [:p | (p blocks first factory isBlockInlinedInParent: sym) or: [sym = p blocks first slot lastNode type]]])]]
 ]
 
+{ #category : #accessing }
+SBTSInputParser >> copyEmbeds [
+
+	^ copyEmbeds
+]
+
+{ #category : #accessing }
+SBTSInputParser >> copyEmbeds: aBoolean [
+
+	copyEmbeds := aBoolean
+]
+
 { #category : #'initialize-release' }
 SBTSInputParser >> initialize [
 
@@ -135,7 +148,8 @@ SBTSInputParser >> initialize [
 	blocks := OrderedCollection new.
 	wasIncomplete := false.
 	allowIncomplete := true.
-	matchFullToken := false
+	matchFullToken := false.
+	copyEmbeds := true
 ]
 
 { #category : #'as yet unclassified' }

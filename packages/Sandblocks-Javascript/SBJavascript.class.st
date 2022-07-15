@@ -6808,7 +6808,7 @@ SBJavascript class >> isExpression: aBlock [
 { #category : #'configuration - layout' }
 SBJavascript class >> isImmutableLabel: aLabelNode [
 
-	^ (super isImmutableLabel: aLabelNode) or: [#(';' '''' '"' '`') includes: aLabelNode label]
+	^ #(';' '''' '"' '`') includes: aLabelNode label
 ]
 
 { #category : #'configuration - declarations' }

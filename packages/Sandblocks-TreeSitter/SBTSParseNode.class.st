@@ -41,7 +41,7 @@ SBTSParseNode >> buildWith: aParser [
 			SBTSTextMorph new
 				contents: contents;
 				slot: slot].
-		[#blockEmbed] -> [contents copyBlock slot: slot]}.
+		[#blockEmbed] -> [(aParser copyEmbeds ifTrue: [contents copyBlock] ifFalse: [contents]) slot: slot]}.
 	self lastConstructed ifTrue: [morph setProperty: #lastConstructed toValue: true].
 	^ morph
 ]

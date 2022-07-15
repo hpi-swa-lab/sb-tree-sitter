@@ -1755,6 +1755,12 @@ SBClojure class >> isExpression: aBlock [
 	^ true
 ]
 
+{ #category : #'configuration - layout' }
+SBClojure class >> isImmutableLabel: aLabelNode [
+
+	^ false
+]
+
 { #category : #'configuration - editing' }
 SBClojure class >> isStatementContainer: aRepeatNode in: aBlock [
 

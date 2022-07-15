@@ -46,7 +46,7 @@ SBTSBlock >> actionProviders [
 { #category : #'as yet unclassified' }
 SBTSBlock >> activeTextMorph [
 
-	^ self sandblockEditor currentInputCommand textMorph
+	^ self sandblockEditor currentInputCommand ifNotNil: #textMorph
 ]
 
 { #category : #'as yet unclassified' }
@@ -922,6 +922,30 @@ SBTSBlock >> suggestAlways [
 SBTSBlock >> suggestions [
 
 	^ self language suggestionsFor: self
+]
+
+{ #category : #'action helpers' }
+SBTSBlock >> swap: aNumber [
+
+	self activeTextMorph ifNotNil: [:text |
+		(#('(' ')' '[' ']' '{' '}') includes: text contents) ifTrue: [ | options list |
+			list := self submorphs asOrderedCollection.
+			list addAllFirst: (self owner submorphs first: self submorphIndex - 1).
+			list addAllLast: (self owner submorphs allButFirst: self submorphIndex).
+			list remove: text.
+			list add: text beforeIndex: self submorphIndex + text submorphIndex + aNumber - 1.
+			options := SBTSInputParser new
+				copyEmbeds: false;
+				optionsForTemplate: self owner slot transitionRoot givenBlocks: list.
+			self sandblockEditor do: (SBReplaceMultipleCommand new target: self owner replacers: options first).
+			text owner sandblockEditor
+				startInput: text owner
+				at: 1
+				replacingContents: false
+				in: text.
+			^ self]].
+	
+	^ super swap: aNumber
 ]
 
 { #category : #'as yet unclassified' }
