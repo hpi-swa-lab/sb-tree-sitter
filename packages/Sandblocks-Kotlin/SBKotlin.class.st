@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBKotlin class >> fileSuffix [
+
+	^ 'kt'
+]
+
+{ #category : #'as yet unclassified' }
 SBKotlin class >> grammarJson [
 
     " https://github.com/fwcd/tree-sitter-kotlin/blob/master/src/grammar.json "
