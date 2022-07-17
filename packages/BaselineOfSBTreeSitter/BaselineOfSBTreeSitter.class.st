@@ -4,6 +4,63 @@ Class {
 	#category : #BaselineOfSBTreeSitter
 }
 
+{ #category : #'as yet unclassified' }
+BaselineOfSBTreeSitter class >> createSAR [
+
+	| packageNames zip preamble |
+	packageNames := self orderedDependencies reject: [:d | d startsWith: 'BaselineOf'].
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			packageNames := ((self project version: 'baseline') allPackagesForSpecNamed: #('default')) collect: #name.
+			packageNames := packageNames copyWithoutAll: MCRepository trunk allPackageNames]}.
+	
+	zip := ZipArchive new.
+	preamble := String streamContents: [:preambleStream |
+		preambleStream
+			nextPutAll: '| loader |
+loader := MCVersionLoader new.';
+			cr.
+		(packageNames select: [:name | (MCPackage named: name) packageInfo classes notEmpty]) do: [:name | | stream version package |
+			package := MCPackage named: name.
+			stream := RWBinaryOrTextStream on: (String new: 10000).
+			version := MCVersion package: package info: (package workingCopy ancestry ancestors
+				ifNotEmpty: #first
+				ifEmpty: [
+					[(MCPackage named: name) workingCopy newVersion info]
+						on: MCVersionNameAndMessageRequest
+						do: [:notification | notification resume: {notification suggestedName. 'Version for export'}]]).
+			version fileOutOn: stream.
+			(zip addString: stream contents as: name, '.mcz') desiredCompressionLevel: 0.
+			preambleStream
+				nextPutAll: 'loader addVersion: (MCMczReader versionFromStream: (self memberNamed: ''';
+				nextPutAll: name;
+				nextPutAll: '.mcz'') contentStream).';
+				cr].
+		preambleStream nextPutAll: 'loader load.'].
+	zip addString: preamble as: 'install/preamble'.
+	^ zip writeToFileNamed: (self name allButFirst: 'BaselineOf' size), '.sar'
+]
+
+{ #category : #'as yet unclassified' }
+BaselineOfSBTreeSitter class >> flattenDirectives: aDirective [
+
+	(aDirective isKindOf: MetacelloLinearLoadDirective) ifFalse: [^ {aDirective}].
+	^ aDirective loadDirectives gather: [:d | self flattenDirectives: d]
+]
+
+{ #category : #'as yet unclassified' }
+BaselineOfSBTreeSitter class >> orderedDependencies [
+
+	| deduplicated all |
+	deduplicated := OrderedCollection new.
+	all := ((Array streamContents: [:s |
+		(Metacello new
+			baseline: #SBTreeSitter;
+			record) versionDirectivesDo: [:d | s nextPut: d]]) gather: [:d | BaselineOfSBTreeSitter flattenDirectives: d]) collect: #label.
+	all do: [:d | (deduplicated includes: d) ifFalse: [deduplicated add: d]].
+	^ deduplicated select: [:d | d last isDigit not]
+]
+
 { #category : #baseline }
 BaselineOfSBTreeSitter >> baseline: spec [
 	<baseline>
@@ -14,7 +71,7 @@ BaselineOfSBTreeSitter >> baseline: spec [
 		spec baseline: 'Sandblocks' with: [
 			spec
 				repository: 'github://tom95/sandblocks/packages';
-				loads: #('Sandblocks-Core' 'Sandblocks-Smalltalk')].
+				loads: #('Sandblocks-Core' 'Sandblocks-Smalltalk' 'Sandblocks-Babylonian')].
 		spec project: 'FFI' with: [
 			spec
 				className: 'ConfigurationOfFFI';
@@ -45,11 +102,12 @@ BaselineOfSBTreeSitter >> baseline: spec [
 			package: 'Sandblocks-Matplotlib' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-RequestsTool' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Clojure' with: [spec requires: #('Sandblocks-TreeSitter')];
-			package: 'Sandblocks-Typescript' with: [spec requires: #('Sandblocks-TreeSitter')].
+			package: 'Sandblocks-Typescript' with: [spec requires: #('Sandblocks-TreeSitter')];
+			package: 'Sandblocks-Kotlin' with: [spec requires: #('Sandblocks-TreeSitter')].
 		
 		spec
 			group: 'default'
-			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-Clojure' 'Sandblocks-TSSmalltalk' 'Sandblocks-Typescript' 'Sandblocks-Matplotlib' 'Sandblocks-RequestsTool')]
+			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-Clojure' 'Sandblocks-TSSmalltalk' 'Sandblocks-Typescript' 'Sandblocks-Matplotlib' 'Sandblocks-RequestsTool' 'Sandblocks-Kotlin')]
 ]
 
 { #category : #baseline }
