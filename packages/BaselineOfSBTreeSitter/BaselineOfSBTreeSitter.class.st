@@ -70,8 +70,8 @@ BaselineOfSBTreeSitter >> baseline: spec [
 		" smalltalk needed for the tool integration "
 		spec baseline: 'Sandblocks' with: [
 			spec
-				repository: 'github://tom95/sandblocks/packages';
-				loads: #('Sandblocks-Core' 'Sandblocks-Smalltalk' 'Sandblocks-Babylonian')].
+				repository: 'github://hpi-swa/sandblocks/packages';
+				loads: #('Sandblocks-Core' 'Sandblocks-Smalltalk' 'Sandblocks-Tutorial' 'Sandblockcs-Watch' 'Sandblockcs-Babylonian')].
 		spec project: 'FFI' with: [
 			spec
 				className: 'ConfigurationOfFFI';
