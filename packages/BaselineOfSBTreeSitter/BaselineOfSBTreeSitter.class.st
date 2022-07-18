@@ -71,7 +71,7 @@ BaselineOfSBTreeSitter >> baseline: spec [
 		spec baseline: 'Sandblocks' with: [
 			spec
 				repository: 'github://hpi-swa/sandblocks/packages';
-				loads: #('Sandblocks-Core' 'Sandblocks-Smalltalk' 'Sandblocks-Tutorial' 'Sandblockcs-Watch' 'Sandblockcs-Babylonian')].
+				loads: #('Sandblocks-Core' 'Sandblocks-Smalltalk' 'Sandblocks-Tutorial' 'Sandblocks-Watch' 'Sandblocks-Babylonian')].
 		spec project: 'FFI' with: [
 			spec
 				className: 'ConfigurationOfFFI';
