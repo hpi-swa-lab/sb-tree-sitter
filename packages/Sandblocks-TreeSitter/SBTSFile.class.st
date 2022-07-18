@@ -67,6 +67,12 @@ SBTSFile >> artefactSaved: aMethodBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile >> deleteCommandFor: aBlock [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> evaluate: aBlock [
 
 	^ runtime object ifNotNil: [:runtime |
@@ -123,7 +129,9 @@ SBTSFile >> filepath: aString toplevel: aBlock language: aLanguageClass collapse
 		addMorphBack: (Morph new
 			extent: 8 @ 0;
 			color: Color transparent)).
-	root := aBlock hResizing: #spaceFill.
+	root := aBlock
+		hResizing: #spaceFill;
+		minHeight: TextStyle defaultFont height.
 	aBoolean ifFalse: [self addMorphBack: root].
 	
 	(self root language runtime notNil and: [aBoolean not]) ifTrue: [

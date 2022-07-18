@@ -26,7 +26,10 @@ SBEditor >> newFileFor: aLanguage [
 
 	SBTSLanguageRuntime new
 		factory: aLanguage;
-		tmpFile: '' do: [:path | self createArtefactInView: (SBTSFile for: path)]
+		tmpFile: '' do: [:path | | file |
+			file := SBTSFile for: path.
+			self createArtefactInView: file.
+			file lastDeepChild startInsertAtEnd]
 ]
 
 { #category : #'*Sandblocks-TreeSitter' }
