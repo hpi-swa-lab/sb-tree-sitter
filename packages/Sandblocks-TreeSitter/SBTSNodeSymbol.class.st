@@ -2,7 +2,8 @@ Class {
 	#name : #SBTSNodeSymbol,
 	#superclass : #SBTSNodeBase,
 	#instVars : [
-		'type'
+		'type',
+		'hidden'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -141,6 +142,18 @@ SBTSNodeSymbol >> elements [
 SBTSNodeSymbol >> hasEqualStructure: aNode [
 
 	^ (super hasEqualStructure: aNode) and: [self type = aNode type]
+]
+
+{ #category : #accessing }
+SBTSNodeSymbol >> hidden [
+
+	^ hidden ifNil: [false]
+]
+
+{ #category : #accessing }
+SBTSNodeSymbol >> hidden: aBoolean [
+
+	hidden := aBoolean
 ]
 
 { #category : #testing }

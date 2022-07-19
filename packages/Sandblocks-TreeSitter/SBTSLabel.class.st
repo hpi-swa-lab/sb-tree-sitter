@@ -29,6 +29,12 @@ SBTSLabel >> compatibleWithType: aSymbol [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> contentsToDisplay [
+
+	^ self contents
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> copyBlock [
 
 	| copy |

@@ -13,7 +13,7 @@ Class {
 { #category : #'configuration - layout' }
 SBTSLanguage class >> addIndent: aBlock [
 
-	((aBlock isTextMorph or: [aBlock isStringMorph]) and: [{'{'. '('. '['. '<'} includes: aBlock contents]) ifTrue: [^ true].
+	((aBlock isTextMorph or: [aBlock isStringMorph]) and: [{'{'. '('. '['. '<'} includes: aBlock contentsToDisplay]) ifTrue: [^ true].
 	^ false
 ]
 
@@ -490,13 +490,7 @@ SBTSLanguage class >> tryPatchLibrary: aGithubString name: aString context: aCon
 { #category : #'instantiate blocks' }
 SBTSLanguage class >> unknownFor: aSymbol [
 
-	| morphs |
-	morphs := (self instance bodyNodeForRule: aSymbol) buildEmpty.
-	(morphs size = 1 and: [morphs first isUnknown]) ifTrue: [^ morphs anyOne].
-	^ SBTSBlock new
-		slot: (SBTSSlot new addNode: (SBTSNodeSymbol new type: aSymbol factory: self instance grammar));
-		addAllMorphs: morphs;
-		yourself
+	^ SBTSUnknownBlock new slot: (SBTSSlot with: (SBTSNodeSymbol new type: aSymbol factory: self instance grammar))
 ]
 
 { #category : #loading }

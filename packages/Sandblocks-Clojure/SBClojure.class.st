@@ -1815,6 +1815,16 @@ SBClojure class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: 
 { #category : #'configuration - suggestions' }
 SBClojure class >> suggestionsForInsert: aCommand [
 
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			(aCommand element isTSChoice and: [aCommand element alternatives anySatisfy: [:alt | alt type = 'sym_lit']]) ifTrue: [
+				^ {
+					SBTSBlockSuggestion new
+						command: (aCommand morphs: ({
+								(SBClojure blockFor: 'sym_lit') contents: 'yup'.
+								(SBClojure unknownFor: 'sym_lit') placeholderText: 'abc'} collect: [:m | m adaptSlotFor: aCommand element]))
+							in: aCommand container sandblockEditor;
+						yourself}]]}.
 	(aCommand container containingArtefact notNil and: [aCommand container type = 'list_lit' and: [aCommand insertIndex > 2 and: [aCommand container childSandblocks first type = 'sym_lit']]]) ifTrue: [ | signatures |
 		signatures := ((aCommand container containingArtefact evaluateString: ('(:arglists (meta #''{1}))' format: {aCommand container childSandblocks first contents})) ifNil: [Dictionary new])
 			at: 'value'

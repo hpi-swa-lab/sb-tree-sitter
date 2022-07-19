@@ -53,7 +53,8 @@ SBTSTextMorph >> copyBlock [
 	| copy |
 	copy := self class new
 		contents: self contents;
-		slot: self slot.
+		slot: self slot;
+		placeholderText: self placeholderText.
 	self
 		valueOfProperty: #lastConstructed
 		ifPresentDo: [:val | copy setProperty: #lastConstructed toValue: true].
@@ -156,7 +157,7 @@ SBTSTextMorph >> keepDuringDelete [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> keepDuringTransform [
 
-	^ self contents notEmpty
+	^ self contents notEmpty and: [(#(')' ']' '}') includes: self contents) not]
 ]
 
 { #category : #'as yet unclassified' }

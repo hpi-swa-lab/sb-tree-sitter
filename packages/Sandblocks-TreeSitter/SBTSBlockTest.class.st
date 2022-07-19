@@ -282,8 +282,8 @@ SBTSBlockTest >> testJsCallToSubscript [
 	| module editor |
 	module := SBTSFileParser new parse: 'abc(12)' language: SBJavascript.
 	editor := self editorFor: module.
-	module childSandblocks first startInputAtEnd.
-	editor handle: (self keyboardEvent: Character backspace).
+	module childSandblocks first startInputAtStart.
+	editor handle: (self keyboardEvent: Character delete).
 	editor handle: (self keyboardEvent: $[).
 	self assert: 'subscript_expression' equals: module childSandblocks first type
 ]
@@ -671,6 +671,22 @@ SBTSBlockTest >> testJsTripleEqualToDouble [
 	editor handle: (self keyboardEvent: Character backspace).
 	self assert: 'a=3;' equals: program sourceStringForCompare.
 	self assert: program childSandblocks first valid
+]
+
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testJsTypeAmbiguousIdentifierAndSpace [
+
+	| program editor |
+	program := SBJavascript parseToplevel: ''.
+	editor := self editorAndWorldFor: program.
+	
+	program startInsertAtEnd.
+	
+	editor handle: (self keyboardEvent: $a).
+	editor handle: (self keyboardEvent: Character space).
+	
+	self assert: 'a;' equals: program sourceStringForCompare.
+	self assert: #identifier equals: editor selection type
 ]
 
 { #category : #'tests - input transition' }

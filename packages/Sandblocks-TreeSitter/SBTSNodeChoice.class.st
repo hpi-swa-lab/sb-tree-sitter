@@ -96,7 +96,7 @@ SBTSNodeChoice >> isTSChoice [
 { #category : #printing }
 SBTSNodeChoice >> labelPrintOn: aStream [
 
-	self elements
+	(self elements select: [:e | e hidden not])
 		do: [:element | element labelPrintOn: aStream]
 		separatedBy: [aStream nextPutAll: ' or ']
 ]

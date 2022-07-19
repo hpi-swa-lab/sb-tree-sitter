@@ -11,6 +11,15 @@ SBTSUnknownBlock >> absorbsInput: anEvent [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknownBlock >> copyBlock [
+
+	| copy |
+	copy := super copyBlock.
+	copy firstSubmorph placeholderText: self firstSubmorph placeholderText.
+	^ copy
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknownBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 
 	aBlock value: (SBCursorSelect new block: self).
@@ -63,7 +72,7 @@ SBTSUnknownBlock >> slot: aSlot [
 
 	super slot: aSlot.
 	self firstSubmorph slot: aSlot.
-	self placeholderText: self slot firstNode printString
+	self firstSubmorph placeholderText ifEmpty: [self placeholderText: self slot firstNode printString]
 ]
 
 { #category : #'as yet unclassified' }
@@ -76,7 +85,11 @@ SBTSUnknownBlock >> suggestAlways [
 SBTSUnknownBlock >> suggestions [
 
 	^ (self slot firstNode isTSChoice and: [self slot firstNode alternatives allSatisfy: #isTSLabel])
-		ifTrue: [self slot firstNode alternatives collect: [:alt | SBTSBlockSuggestion new blocks: (SBReplaceMultipleCommand new target: self replacers: alt buildEmpty) in: self sandblockEditor]]
+		ifTrue: [
+			self slot firstNode alternatives collect: [:alt |
+				SBTSBlockSuggestion new
+					command: (SBReplaceMultipleCommand new target: self replacers: alt buildEmpty)
+					in: self sandblockEditor]]
 		ifFalse: [#()]
 ]
 

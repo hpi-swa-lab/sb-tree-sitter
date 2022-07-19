@@ -6555,7 +6555,7 @@ SBJavascript class >> hardLineBreakBetween: aBlock and: anotherBlock [
 	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
 	aBlock parentSandblock type = #'class_body' ifTrue: [^ true].
 	anotherBlock type = #'else_clause' ifTrue: [^ true].
-	(aBlock contents = '{' and: [aBlock parentSandblock type = #'statement_block']) ifTrue: [^ true].
+	(aBlock contentsToDisplay = '{' and: [aBlock parentSandblock type = #'statement_block']) ifTrue: [^ true].
 	^ #(#'statement_block' #'class_body') includes: anotherBlock type
 ]
 

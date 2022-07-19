@@ -70,13 +70,18 @@ SBTSInputReconcile >> for: aTextMorph input: aString at: aNumber [
 	target := aTextMorph.
 	insertIndex := aNumber.
 	
+	self currentTextMorph placeholderText: ('Add characters {1}...' format: {aNumber = 1 ifTrue: ['before'] ifFalse: ['after']}).
+	
 	self
 		contents: aString;
 		showBelow: aTextMorph closeOnDeselect: true;
 		moveCursorToEnd;
 		queueUpdateSuggestionsFocused: true.
 	
-	self currentTextMorph placeholderText: 'Add characters...'.
+	aNumber = 1 ifTrue: [self topRight: aTextMorph position] ifFalse: [
+		aTextMorph sourceString
+			ifEmpty: [self topLeft: aTextMorph topLeft]
+			ifNotEmpty: [self topLeft: aTextMorph topRight]].
 	
 	self updateChoices
 ]
@@ -171,7 +176,7 @@ SBTSInputReconcile >> suggestAlways [
 { #category : #suggestions }
 SBTSInputReconcile >> suggestions [
 
-	^ (currentChoices ifNil: [{}]) collect: [:command | SBTSBlockSuggestion new blocks: command in: self sandblockEditor popup: self]
+	^ (currentChoices ifNil: [{}]) collect: [:command | SBTSBlockSuggestion new command: command in: self sandblockEditor popup: self]
 ]
 
 { #category : #reconciliation }

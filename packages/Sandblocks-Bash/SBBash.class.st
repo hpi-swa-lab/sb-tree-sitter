@@ -2851,9 +2851,15 @@ SBBash class >> preprocessGrammar: aGrammar [
 	aGrammar rules at: #'_flag_start' put: (SBTSNodeText new
 		factory: aGrammar;
 		regexString: '-[A-Z0-9a-z\-]+').
-	aGrammar rules at: #'flag_argument' put: (SBTSNodeText new
+	aGrammar rules at: #'flag_argument' put: (SBTSNodeSeq new
 		factory: aGrammar;
-		regexString: '=[^ ]*')
+		elements: {
+			SBTSNodeLabel new
+				factory: aGrammar;
+				label: '='.
+			SBTSNodeText new
+				factory: aGrammar;
+				regexString: '[^ ]*'})
 ]
 
 { #category : #actions }

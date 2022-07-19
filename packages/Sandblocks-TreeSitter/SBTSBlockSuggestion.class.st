@@ -11,19 +11,21 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSBlockSuggestion >> blocks: aCollection in: anEditor [
+SBTSBlockSuggestion >> command: aCollection in: anEditor [
 
-	self blocks: aCollection in: anEditor popup: nil
+	self command: aCollection in: anEditor popup: nil
 ]
 
 { #category : #'as yet unclassified' }
-SBTSBlockSuggestion >> blocks: aCommand in: anEditor popup: aPopup [
+SBTSBlockSuggestion >> command: aCommand in: anEditor popup: aPopup [
 
 	disambiguatePopup := aPopup.
 	self selector: aCommand morphs first printString label: 'block'.
 	self
 		preview: (anEditor newSelectionContainer
 			addAllMorphs: aCommand morphs;
+			changeTableLayout;
+			listDirection: #leftToRight;
 			width: 400;
 			imageForm)
 		previewOnly: false.

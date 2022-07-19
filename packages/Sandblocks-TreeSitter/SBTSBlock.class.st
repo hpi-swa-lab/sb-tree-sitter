@@ -215,6 +215,12 @@ SBTSBlock >> compatibleWithType: aString [
 	^ self slot compatibleWithType: aString
 ]
 
+{ #category : #accessing }
+SBTSBlock >> contentsToDisplay [
+
+	^ self contents
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> copyBlock [
 
@@ -719,6 +725,12 @@ SBTSBlock >> placeCursorCloseAfterDo: aBlock [
 					explicitMove: true
 					axis: #none]]].
 	container sandblockEditor selection moveCursorToEnd
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> preferInsertCursor [
+
+	^ self type = self language rootRuleName
 ]
 
 { #category : #highlight }

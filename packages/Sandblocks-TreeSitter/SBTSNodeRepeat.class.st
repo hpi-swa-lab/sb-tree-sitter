@@ -286,9 +286,17 @@ SBTSNodeRepeat >> transformToStatementRepeater [
 	choice := SBTSNodeChoice new factory: self factory.
 	current replaceBy: choice.
 	alts := {current}, (lang emptyLineSymbol
-		ifNotNil: [:sym | {SBTSNodeSymbol new type: sym factory: self factory}]
+		ifNotNil: [:sym |
+			{
+				SBTSNodeSymbol new
+					type: sym factory: self factory;
+					hidden: true}]
 		ifNil: [{}]), (lang commentSymbol
-		ifNotNil: [:sym | {SBTSNodeSymbol new type: sym factory: self factory}]
+		ifNotNil: [:sym |
+			{
+				SBTSNodeSymbol new
+					type: sym factory: self factory;
+					hidden: true}]
 		ifNil: [{}]).
 	choice alternatives: alts
 ]

@@ -211,6 +211,12 @@ SBTSNodeBase >> hasStatementTerminator [
 	^ false
 ]
 
+{ #category : #accessing }
+SBTSNodeBase >> hidden [
+
+	^ false
+]
+
 { #category : #testing }
 SBTSNodeBase >> includesChild: aBlock [
 
