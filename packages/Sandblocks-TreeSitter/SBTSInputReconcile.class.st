@@ -143,7 +143,7 @@ SBTSInputReconcile >> positionCursorIn: aCollection [
 						self contents notEmpty and: [
 							self contents last = $  and: [ | boundary |
 								boundary := (all at: stopIndex) containingSandblock.
-								boundary = boundary lastDeepChild containingSandblock]]]) ifTrue: [block sandblockEditor performForSelection: #moveCursorRight].
+								boundary = boundary lastDeepChild containingSandblock and: [boundary slot firstNode isTSLabel]]]]) ifTrue: [block sandblockEditor performForSelection: #moveCursorRight].
 					^ self]]]].
 	aCollection last isSandblock ifTrue: [aCollection last lastDeepChild startInputAtEnd].
 	aCollection last isTextMorph ifTrue: [
