@@ -761,6 +761,12 @@ SBTSBlock >> prettySourceString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> printLabelOn: aStream [
+
+	self printOn: aStream
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> printOn: aStream [
 
 	self slot ifNotNil: [slot firstNode printOn: aStream]

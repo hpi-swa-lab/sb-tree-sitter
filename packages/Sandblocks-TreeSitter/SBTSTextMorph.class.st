@@ -181,6 +181,12 @@ SBTSTextMorph >> preferredColorIn: aColorPolicy [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> printLabelOn: aStream [
+
+	aStream nextPutAll: self contents
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> printOn: aStream [
 
 	super printOn: aStream.

@@ -20,13 +20,13 @@ SBTSBlockSuggestion >> command: aCollection in: anEditor [
 SBTSBlockSuggestion >> command: aCommand in: anEditor popup: aPopup [
 
 	disambiguatePopup := aPopup.
-	self selector: aCommand morphs first printString label: 'block'.
+	self selector: (String streamContents: [:s | aCommand morphs first printLabelOn: s]) label: 'block'.
 	self
 		preview: (anEditor newSelectionContainer
 			addAllMorphs: aCommand morphs;
 			changeTableLayout;
+			hResizing: #shrinkWrap;
 			listDirection: #leftToRight;
-			width: 400;
 			imageForm)
 		previewOnly: false.
 	command := aCommand

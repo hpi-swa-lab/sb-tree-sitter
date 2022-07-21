@@ -176,7 +176,16 @@ SBTSInputReconcile >> suggestAlways [
 { #category : #suggestions }
 SBTSInputReconcile >> suggestions [
 
-	^ (currentChoices ifNil: [{}]) collect: [:command | SBTSBlockSuggestion new command: command in: self sandblockEditor popup: self]
+	^ ((currentChoices ifNil: [{}]) collect: [:command | SBTSBlockSuggestion new command: command in: self sandblockEditor popup: self]) ifEmpty: [
+		{
+			SBSuggestionItemNonSelectable
+				selector: ('input `{3}` not valid in {1} {2}' format: {
+					target containingSandblock type first isVowel
+						ifTrue: ['an']
+						ifFalse: ['a'].
+					target containingSandblock type.
+					self contents})
+				label: ''}]
 ]
 
 { #category : #reconciliation }

@@ -142,6 +142,12 @@ SBTSLabel >> preferredColorIn: aColorPolicy [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> printLabelOn: aStream [
+
+	aStream nextPutAll: self contents
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> repeaterGroup [
 
 	^ {self}
