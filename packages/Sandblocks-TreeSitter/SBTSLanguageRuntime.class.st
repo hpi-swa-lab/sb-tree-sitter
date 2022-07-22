@@ -123,6 +123,12 @@ SBTSLanguageRuntime class >> language [
 	^ self subclassResponsibility
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSLanguageRuntime class >> runtimeName [
+
+	^ self subclassResponsibility
+]
+
 { #category : #'os process' }
 SBTSLanguageRuntime class >> trimEOF: aString [
 

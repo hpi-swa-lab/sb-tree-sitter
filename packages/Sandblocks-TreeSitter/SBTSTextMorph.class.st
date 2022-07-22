@@ -157,7 +157,13 @@ SBTSTextMorph >> keepDuringDelete [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> keepDuringTransform [
 
-	^ self contents notEmpty and: [(#(')' ']' '}') includes: self contents) not]
+	self contents ifEmpty: [^ false].
+	self symmetricSibling ifNotNil: [:sibling |
+		(SBToggledCode
+			comment: ''
+			active: 2
+			do: {[true]. [self submorphIndex > sibling submorphIndex]}) ifTrue: [^ false]].
+	^ true
 ]
 
 { #category : #'as yet unclassified' }
@@ -254,6 +260,20 @@ SBTSTextMorph >> sourceStringForCompare [
 SBTSTextMorph >> submorphIndex [
 
 	^ self owner submorphs indexOf: self
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> symmetricSibling [
+
+	| pairs lookingFor label |
+	self slot firstNode isTSLabel ifFalse: [^ nil].
+	pairs := Dictionary newFrom: {'(' -> ')'. '[' -> ']'. '{' -> '}'. '<' -> '>'}.
+	label := self slot firstNode label.
+	lookingFor := pairs at: label ifAbsent: [pairs keyAtValue: label ifAbsent: [label]].
+	
+	self owner submorphs do: [:s | (s ~= self and: [s isTextMorph and: [s slot firstNode isTSLabel and: [s slot firstNode label = lookingFor]]]) ifTrue: [^ s]].
+	
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }

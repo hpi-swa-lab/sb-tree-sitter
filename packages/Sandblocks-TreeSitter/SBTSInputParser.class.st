@@ -36,14 +36,6 @@ SBTSInputParser >> addBlock: aBlock [
 ]
 
 { #category : #blocks }
-SBTSInputParser >> addBlocks: aCollection [
-
-	blocks addAll: aCollection.
-	self assert: false description: 'this still needed?'.
-	(self atEndOfInput and: [aCollection notEmpty]) ifTrue: [aCollection last setProperty: #lastConstructed toValue: true]
-]
-
-{ #category : #blocks }
 SBTSInputParser >> addEmptyBlocks: aCollection [
 
 	blocks addAll: aCollection.

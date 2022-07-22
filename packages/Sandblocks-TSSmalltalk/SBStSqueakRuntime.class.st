@@ -11,6 +11,12 @@ SBStSqueakRuntime class >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBStSqueakRuntime class >> runtimeName [
+
+	^ 'Squeak'
+]
+
+{ #category : #'as yet unclassified' }
 SBStSqueakRuntime >> buildWatchSourceFor: aBlock id: aString [
 
 	| watch |

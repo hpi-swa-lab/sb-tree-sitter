@@ -174,6 +174,17 @@ SBTSBlockTest >> testDeleteInRepeat [
 ]
 
 { #category : #'tests - deleting' }
+SBTSBlockTest >> testDeleteJsString [
+
+	| program editor |
+	program := SBJavascript parseToplevel: '"a"'.
+	editor := self editorFor: program.
+	program childSandblocks first startInputAtEnd.
+	8 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: program childSandblocks isEmpty
+]
+
+{ #category : #'tests - deleting' }
 SBTSBlockTest >> testDeletePrefix [
 
 	| program editor |
@@ -343,6 +354,7 @@ SBTSBlockTest >> testJsDeleteDeclaration [
 	editor handle: (self keyboardEvent: Character backspace).
 	self assert: 'const a;' equals: module sourceStringForCompare.
 	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: Character backspace).
 	self assert: 'const', Character null, ';' equals: module sourceStringForCompare.
 	8 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
 	self assert: '' equals: module sourceStringForCompare
@@ -383,6 +395,18 @@ SBTSBlockTest >> testJsDeleteMethodCall [
 	program childSandblocks first startInsertAtEnd.
 	3 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
 	self assert: 'log;' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testJsDeleteStatements [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'console.log;
+a;'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	9 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: 'console;' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -617,17 +641,6 @@ SBTSBlockTest >> testJsSplitBinary [
 	editor handle: (self keyboardEvent: Character arrowRight).
 	editor handle: (self keyboardEvent: $+).
 	self assert: '1+123;' equals: program sourceStringForCompare
-]
-
-{ #category : #'tests - deleting' }
-SBTSBlockTest >> testJsString [
-
-	| program editor |
-	program := SBJavascript parseToplevel: '"a"'.
-	editor := self editorFor: program.
-	program childSandblocks first startInputAtEnd.
-	4 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
-	self assert: program childSandblocks isEmpty
 ]
 
 { #category : #'tests - cursor position' }

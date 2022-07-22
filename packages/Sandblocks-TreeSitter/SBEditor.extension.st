@@ -64,7 +64,12 @@ SBEditor >> newRegexFile [
 SBEditor >> newSmalltalkFile [
 	<addAction>
 
-	self newFileFor: SBTSSmalltalk
+	SBTSLanguageRuntime new
+		factory: SBTSSmalltalk;
+		tmpFile: 'method' do: [:path | | file |
+			file := SBTSFile for: path.
+			self createArtefactInView: file.
+			file lastDeepChild startInsertAtEnd]
 ]
 
 { #category : #'*Sandblocks-TreeSitter' }

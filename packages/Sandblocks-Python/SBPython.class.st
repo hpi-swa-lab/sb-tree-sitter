@@ -5170,7 +5170,7 @@ SBPython class >> isExpression: aBlock [
 { #category : #'configuration - layout' }
 SBPython class >> isImmutableLabel: aLabelNode [
 
-	^ (super isImmutableLabel: aLabelNode) or: [#(':' '"' '''' '"""') includes: aLabelNode label]
+	^ (super isImmutableLabel: aLabelNode) or: [#(':') includes: aLabelNode label]
 ]
 
 { #category : #'configuration - layout' }

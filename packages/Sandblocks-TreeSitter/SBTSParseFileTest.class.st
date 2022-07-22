@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSParseFileTest >> expectedFailures [
 
-	^ #(#testParensStBinaryAndUnary)
+	^ #(#testParensStBinaryAndUnary #testBashFlag)
 ]
 
 { #category : #'tests - languages' }

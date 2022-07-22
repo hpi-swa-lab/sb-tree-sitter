@@ -34,6 +34,12 @@ SBTSSmalltalk class >> expressionTypes [
 ]
 
 { #category : #configuration }
+SBTSSmalltalk class >> fileSuffix [
+
+	^ 'st'
+]
+
+{ #category : #configuration }
 SBTSSmalltalk class >> grammarJson [
 
     " https://github.com/smalltalk/blob/master/src/grammar.json "
@@ -1121,7 +1127,7 @@ SBTSSmalltalk class >> isExpression: aBlock [
 { #category : #'configuration - editing' }
 SBTSSmalltalk class >> isImmutableLabel: aLabelNode [
 
-	^ (super isImmutableLabel: aLabelNode) or: [#('|' '''' ';') includes: aLabelNode label]
+	^ (super isImmutableLabel: aLabelNode) or: [#('|') includes: aLabelNode label]
 ]
 
 { #category : #'configuration - editing' }

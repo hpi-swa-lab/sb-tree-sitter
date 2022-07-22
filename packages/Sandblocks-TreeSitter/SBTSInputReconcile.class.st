@@ -95,12 +95,8 @@ SBTSInputReconcile >> indexOf: aCursor in: aCollectionOfMorphs [
 			childIndex + (((aCursor container submorphs copyFrom: 1 to: aCursor command insertIndex - 1) collect: #recursiveSubmorphCount)
 				inject: 0
 				into: [:s :c | s + c]) + 1]
-		ifFalse: [
-			"if we are in a finished label, just return our index so that the next position will be taken.
-					otherwise, we will likely want to continue typing here, so pretend that we were one index further out"
-			(aCollectionOfMorphs indexOf: aCursor block currentTextMorph) + (aCursor block currentTextMorph slot firstNode isTSLabel
-				ifTrue: [0]
-				ifFalse: [1])]
+		ifFalse: ["if we are in a finished label, just return our index so that the next position will be taken. otherwise, we will likely want to continue typing here, so pretend that we were one index further out"
+		(aCollectionOfMorphs indexOf: aCursor morph) + (aCursor morph slot firstNode isTSLabel ifTrue: [-1] ifFalse: [1])]
 ]
 
 { #category : #'initialize-release' }

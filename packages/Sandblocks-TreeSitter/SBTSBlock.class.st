@@ -210,6 +210,12 @@ SBTSBlock >> collapsedContent [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> colorPolicy [
+
+	^ super colorPolicy copy enlarge: true
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> compatibleWithType: aString [
 
 	^ self slot compatibleWithType: aString
@@ -237,6 +243,7 @@ SBTSBlock >> copyBlock [
 { #category : #'as yet unclassified' }
 SBTSBlock >> currentTextMorph [
 
+	self submorphsDo: [:m | (m isTextMorph and: [m symmetricSibling isNil]) ifTrue: [^ m]].
 	self submorphsDo: [:m | m isTextMorph ifTrue: [^ m]].
 	^ nil
 ]
@@ -263,10 +270,10 @@ SBTSBlock >> deleteBeforeCursor [
 	(textMorph ifNotNil: #contents ifNil: ['']) ifNotEmpty: [
 		super deleteBeforeCursor.
 		(self valid not and: [textMorph contents notEmpty]) ifTrue: [ | currentCursor evalOption |
+			currentCursor := textMorph cursor.
 			evalOption := [:options |
 				editor do: options first.
 				editor currentInputCommand ifNotNil: [:c | c textMorph moveCursorTo: currentCursor]].
-			currentCursor := textMorph cursor.
 			(SBTSInputReconcile new
 				tryReinterpretFrom: textMorph
 				in: self
@@ -709,21 +716,33 @@ SBTSBlock >> placeCursorCloseAfterDo: aBlock [
 	index := 0.
 	found := false.
 	container cursorPositionsDo: [:c |
-		(found not and: [c block ~= self or: [c isSelect]])
-			ifTrue: [index := index + 1]
+		(found not and: [
+			SBToggledCode
+				comment: ''
+				active: 1
+				do: {[self activeTextMorph ~= c morph]. [c block ~= self or: [c isSelect]]}])
+			ifTrue: [c isSelect ifFalse: [index := index + 1]]
 			ifFalse: [found := true]].
 	
 	"if we are in a repeater for multiple elements and we delete ourselves, then cursor positions actually disappear"
-	(self slot repeaterThat: #multiple) ifNotNil: [index := index - 1].
 	
 	aBlock value.
+	
+	SBToggledCode comment: '' active: 0 do: {
+		[ | count |container sandblockEditor selection recursiveSubmorphCount < count ifTrue: [index := index - 1]].
+		[(self slot repeaterThat: #multiple) ifNotNil: [index := index - 1]]}.
+	
 	found ifTrue: [
 		container cursorPositionsDo: [:c |
-			index > 1 ifTrue: [index := index - 1] ifFalse: [
-				^ container sandblockEditor cursor
-					cursorPosition: (c placeAtEnd: true)
-					explicitMove: true
-					axis: #none]]].
+			c isSelect ifFalse: [
+				index > 1 ifTrue: [index := index - 1] ifFalse: [
+					"if we were to be put inside our container and not in the child, don't move"
+					nil.
+					(SBToggledCode comment: '' active: 1 do: {[true]. [c block ~= container]}) ifTrue: [
+						^ container sandblockEditor cursor
+							cursorPosition: (c placeAtEnd: true)
+							explicitMove: true
+							axis: #none]]]]].
 	container sandblockEditor selection moveCursorToEnd
 ]
 

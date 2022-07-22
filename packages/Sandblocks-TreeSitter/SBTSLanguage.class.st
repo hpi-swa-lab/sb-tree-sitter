@@ -93,6 +93,17 @@ SBTSLanguage class >> defaultRuntimeClass [
 	^ nil
 ]
 
+{ #category : #'instantiate blocks' }
+SBTSLanguage class >> empty [
+
+	^ (self blockFor: self rootRuleName)
+		hResizing: #rigid;
+		layoutInset: 12;
+		attachDecorator: SBResizableDecorator new;
+		attachDecorator: SBForceMoveDecorator newConfigured;
+		extent: 100 @ (TextStyle defaultFont height + (12 * 2))
+]
+
 { #category : #'configuration - layout' }
 SBTSLanguage class >> emptyLineSymbol [
 
@@ -273,7 +284,7 @@ SBTSLanguage class >> isIdentifier: aBlock [
 { #category : #'configuration - editing' }
 SBTSLanguage class >> isImmutableLabel: aLabelNode [
 
-	^ #(')' ']' '}' '>') includes: aLabelNode label
+	^ false
 ]
 
 { #category : #'configuration - declarations' }

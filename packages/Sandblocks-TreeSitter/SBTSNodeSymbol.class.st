@@ -171,7 +171,7 @@ SBTSNodeSymbol >> isTSSymbol [
 { #category : #printing }
 SBTSNodeSymbol >> labelPrintOn: aStream [
 
-	aStream nextPutAll: ((self type copyReplaceAll: '_' with: ' ') asText addAttribute: TextEmphasis italic)
+	aStream nextPutAll: ((self type copyReplaceAll: '_' with: ' ') withBlanksTrimmed asText addAttribute: TextEmphasis italic)
 ]
 
 { #category : #testing }
