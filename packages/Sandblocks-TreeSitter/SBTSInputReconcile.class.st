@@ -151,16 +151,17 @@ SBTSInputReconcile >> positionCursorIn: aCollection [
 ]
 
 { #category : #'reconciliation helper' }
-SBTSInputReconcile >> positionsAfter: aBlock do: aClosure [
+SBTSInputReconcile >> positionsAfter: aBlock from: aSourceBlock do: aClosure [
 
-	| foundSelf foundContainer |
+	| foundSelf |
 	foundSelf := false.
-	foundContainer := false.
 	aBlock owner isTSBlock ifFalse: [^ self].
 	aBlock owner cursorPositionsDo: [:position |
-		(foundSelf and: [position isInsert or: [position isText and: [position block wantsInput]]]) ifTrue: [aClosure value: position].
-		position block = aBlock containingSandblock ifTrue: [foundContainer := true].
-		(position isText and: [position block = aBlock containingSandblock]) ifTrue: [foundSelf := true]]
+		(foundSelf and: [position isInsert or: [position isText]]) ifTrue: [aClosure value: position].
+		(position isText and: [
+			aSourceBlock isTextMorph
+				ifTrue: [position textMorph = aSourceBlock]
+				ifFalse: [position block = aSourceBlock containingSandblock]]) ifTrue: [foundSelf := true]]
 ]
 
 { #category : #accessing }
@@ -176,10 +177,10 @@ SBTSInputReconcile >> suggestions [
 		{
 			SBSuggestionItemNonSelectable
 				selector: ('input `{3}` not valid in {1} {2}' format: {
-					target containingSandblock type first isVowel
+					target containingSandblock printString first isVowel
 						ifTrue: ['an']
 						ifFalse: ['a'].
-					target containingSandblock type.
+					target containingSandblock printString.
 					self contents})
 				label: ''}]
 ]
@@ -187,10 +188,9 @@ SBTSInputReconcile >> suggestions [
 { #category : #reconciliation }
 SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 
-	self positionsAfter: aBlock do: [:position |
-		(position isText and: [position block wantsInput]) ifTrue: [
-			"TODO: do we want the full reconciliation logic or just reinterpret?"
-			^ self tryReinterpretFrom: position textMorph in: position block given: aString at: self class endIndex].
+	self positionsAfter: aBlock from: aBlock do: [:position |
+		(position isText and: [position block wantsInput]) ifTrue: ["TODO: do we want the full reconciliation logic or just reinterpret?"
+		^ self tryReinterpretFrom: position textMorph in: position block given: aString at: self class endIndex].
 		position isInsert ifTrue: [(self optionsForInsert: position given: aString) ifNotEmpty: [:res | ^ res]]].
 	^ {}
 ]
@@ -209,8 +209,8 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 	(aMorph ownerChain indexOf: aBlock) > 3 ifTrue: [^ {}].
 	
 	^ aNumber = 1
-		ifTrue: [(self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber) ifEmpty: [self tryWrap: aBlock given: aString before: true]]
-		ifFalse: [(self trySeparator: aString in: aBlock) ifEmpty: [(self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber) ifEmpty: [(self tryWrap: aBlock given: aString before: false) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner at: aNumber]]]]]
+		ifTrue: [(self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber) ifEmpty: [(self tryWrap: aBlock given: aString before: true) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]]
+		ifFalse: [(self trySeparator: aString in: aBlock) ifEmpty: [(self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber) ifEmpty: [(self tryWrap: aBlock given: aString before: false) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner at: aNumber]]]]]]
 ]
 
 { #category : #reconciliation }
@@ -254,6 +254,19 @@ SBTSInputReconcile >> trySeparator: aString in: aBlock [
 ]
 
 { #category : #reconciliation }
+SBTSInputReconcile >> trySkipLabel: aString in: aBlock from: aMorph at: aNumber [
+
+	(aMorph isTextMorph and: [aMorph contents = aString and: [aNumber < (aMorph contents size + 1)]]) ifTrue: [^ {SBDoItCommand new do: [aMorph]}].
+	
+	self
+		positionsAfter: aBlock
+		from: aMorph
+		do: [:position | (position isText and: [position textMorph contents = aString and: [position textMorph ~= aMorph]]) ifTrue: [^ {SBDoItCommand new do: [position textMorph]}]].
+	
+	^ {}
+]
+
+{ #category : #reconciliation }
 SBTSInputReconcile >> tryWrap: aBlock given: aString before: aBoolean [
 
 	^ (SBTSInputParser new
@@ -275,5 +288,5 @@ SBTSInputReconcile >> updateChoices [
 	
 	currentChoices := self findOptionsBlock cull: self cull: self contents.
 	
-	(currentChoices size = 1 and: [insertIndex > 1]) ifTrue: [self applyCommand: currentChoices anyOne]
+	(currentChoices size = 1 and: [insertIndex > 1 or: [currentChoices first isKindOf: SBDoItCommand]]) ifTrue: [self applyCommand: currentChoices anyOne]
 ]

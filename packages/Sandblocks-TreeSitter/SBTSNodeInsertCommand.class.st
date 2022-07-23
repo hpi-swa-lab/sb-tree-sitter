@@ -154,7 +154,7 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 			SBTSInputReconcile new
 				for: newPos textMorph
 				input: aString
-				at: SBTSInputReconcile endIndex].
+				at: 1].
 		newPos isInsert ifTrue: [
 			SBTSInputReconcile new
 				for: self container input: aString at: SBTSInputReconcile endIndex;

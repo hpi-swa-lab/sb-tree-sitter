@@ -503,6 +503,16 @@ SBTSBlockTest >> testJsMethodCall [
 	self assert: 'console.log("Hello");' equals: module sourceString
 ]
 
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testJsMethodChain [
+
+	| program editor |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	self type: 'a.b().c()' in: editor.
+	self assert: 'a.b().c();' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsNestedMethodCall [
 
