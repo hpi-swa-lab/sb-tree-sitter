@@ -193,38 +193,41 @@ SBTSInputParser >> matchFullToken: aboolean [
 { #category : #memo }
 SBTSInputParser >> memoizationFor: aSymbol ifAbsentPut: aBlock [
 
-	| index |
+	| index expand |
+	expand := [ | res |
+		symbolStack add: aSymbol.
+		res := aBlock value.
+		symbolStack remove: aSymbol.
+		res].
 	index := stream position + 1.
 	^ ((memoizations at: index) at: aSymbol type ifAbsent: [nil])
 		ifNil: [ | lr results |
 			lr := self memoizeRecursionMarkerAt: index for: aSymbol.
-			symbolStack add: aSymbol type.
-			results := aBlock value.
+			results := expand value.
 			self memoizeBlocks: results at: index for: aSymbol.
-			(SBToggledCode comment: '' active: 1 do: {
-				[aSymbol language fixmeSupportsRecursion].
-				["if we already have at least one result that got us to the end, abort. Definitely wrong, but easy workaround for now."
-				results noneSatisfy: [:r | r position = memoizations size]]}) ifTrue: [
-				lr ifRecursionDetected: [
-					activeRecursion at: index put: lr.
+			lr ifRecursionDetected: [ | lastMax |
+				lastMax := 0.
+				activeRecursion at: index put: lr.
+				[
+					SBToggledCode comment: '' active: 2 do: {
+						[true].
+						[results notEmpty and: [(results collect: [:r | r position]) max > lastMax]].
+						[(results noneSatisfy: [:r | r position = self limit]) and: [results notEmpty]]}] whileTrue: [
+					lastMax := (results collect: [:r | r position]) max.
 					lr newIteration.
-					results := SBToggledCode
-						comment: ''
-						active: 1
-						do: {[aBlock value]. [aBlock value, results]}.
-					self memoizeBlocks: results at: index for: aSymbol.
-					activeRecursion at: index put: nil]].
-			symbolStack remove: aSymbol type.
+					results := expand value.
+					self memoizeBlocks: results at: index for: aSymbol].
+				activeRecursion at: index put: nil].
 			results collect: [:memo | memo adapt: self for: aSymbol]]
 		ifNotNil: [:memoEntry |
 			((activeRecursion at: index)
 				ifNotNil: [:recur |
 					recur
 						tryExpandSymbol: aSymbol
-						do: [ | results |
-							results := aBlock value.
-							self memoizeBlocks: results at: index for: aSymbol.
-							results]
+						do: [ | all |
+							all := memoEntry parsers, expand value.
+							self memoizeBlocks: all at: index for: aSymbol.
+							all]
 						otherwise: [memoEntry getBlocksOrMarkRecursionFrom: aSymbol stack: symbolStack max: memoizations size]]
 				ifNil: [memoEntry getBlocksOrMarkRecursionFrom: aSymbol stack: symbolStack max: memoizations size]) collect: [:memo | memo adapt: self for: aSymbol]]
 ]

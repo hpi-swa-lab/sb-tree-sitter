@@ -21,7 +21,11 @@ SBTSMemoEntry >> getBlocksOrMarkRecursionFrom: aSymbol stack: aCollection max: a
 		ifTrue: [
 			self setLeftRecursionDetectedFrom: aSymbol stack: aCollection.
 			{}]
-		ifFalse: [self parsers]
+		ifFalse: [
+			self parsers select: [:p |
+				((p blocks first children ifNotEmpty: [:c | c first] ifEmpty: [p blocks first]) slot parentThat: [:node | node isTSPrecedence])
+					ifNotNil: [:precedence | precedence canExpandInStack: aCollection, {aSymbol}]
+					ifNil: [true]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -87,7 +91,8 @@ SBTSMemoEntry >> setLeftRecursionDetectedFrom: aSymbol stack: aCollection [
 
 	| stack |
 	self assert: self isLeftRecursion.
-	stack := aCollection reversed copyUpTo: aSymbol type.
+	stack := (aCollection reversed first: (aCollection reversed findFirst: [:el | el type = aSymbol type]) - 1) collect: [:t | t type].
+	
 	answer head ifNotNil: [answer addInvolved: stack] ifNil: [
 		answer
 			head: aSymbol type;

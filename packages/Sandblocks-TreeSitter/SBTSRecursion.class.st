@@ -17,12 +17,6 @@ SBTSRecursion >> addInvolved: aCollection [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSRecursion >> allowedSymbols [
-
-	^ allowedSymbols
-]
-
-{ #category : #'as yet unclassified' }
 SBTSRecursion >> allowedSymbols: aSet [
 
 	allowedSymbols := aSet

@@ -52,9 +52,29 @@ SBTSNodePrecedence >> buildEmptyNodes [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSNodePrecedence >> compareTo: aPrecedence [
+SBTSNodePrecedence >> canExpandInStack: aCollection [
+
+	SBToggledCode comment: '' active: 0 do: {[^ true]}.
+	^ self
+		parentPrecedence: aCollection
+		do: [:parentPrec :isLeftMost | | comp hasActiveRecursion |
+			comp := parentPrec compareTo: self ifNotComparable: [-1].
+			
+			"FIXME: we should probably check if these are involved in this precise precedence contest"
+			hasActiveRecursion := aCollection withoutDuplicates size = aCollection size and: [false].
+			
+			(hasActiveRecursion or: [comp < 0 or: [comp = 0 and: [self isLeftAssociative and: [isLeftMost]]]])
+				ifTrue: [true]
+				ifFalse: [false]]
+		ifNone: [true]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodePrecedence >> compareTo: aPrecedence ifNotComparable: aBlock [
 
 	(self value isInteger and: [aPrecedence value isInteger]) ifTrue: [^ (self value - aPrecedence value) sign].
+	
+	self value isInteger = aPrecedence value isInteger ifFalse: [^ aBlock value].
 	
 	self factory precedences do: [:precedences | | sawLeft sawRight |
 		sawLeft := false.
@@ -99,6 +119,12 @@ SBTSNodePrecedence >> hasEqualStructure: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodePrecedence >> isLeftAssociative [
+
+	^ precedence = 'PREC_LEFT'
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodePrecedence >> isTSPrecedence [
 
 	^ true
@@ -108,6 +134,19 @@ SBTSNodePrecedence >> isTSPrecedence [
 SBTSNodePrecedence >> labelPrintOn: aStream [
 
 	self element labelPrintOn: aStream
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodePrecedence >> parentPrecedence: aCollection do: aBlock ifNone: anotherBlock [
+
+	| isLeftMost |
+	isLeftMost := true.
+	aCollection reverseDo: [:root |
+		root andParentsDo: [:node |
+			(node parent notNil and: [node parent isTSSeq]) ifTrue: [isLeftMost := isLeftMost and: [node parent elements first = node]].
+			node isTSPrecedence ifTrue: [^ aBlock value: node value: isLeftMost]]].
+	
+	^ anotherBlock value
 ]
 
 { #category : #'as yet unclassified' }
@@ -135,7 +174,9 @@ SBTSNodePrecedence >> printOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSNodePrecedence >> resultsFor: aParser [
 
-	^ self element resultsFor: aParser
+	^ (self precedence = 'PREC_DYNAMIC' or: [self canExpandInStack: aParser symbolStack])
+		ifTrue: [self element resultsFor: aParser]
+		ifFalse: [{}]
 ]
 
 { #category : #'as yet unclassified' }

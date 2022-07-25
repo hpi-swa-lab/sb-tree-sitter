@@ -283,30 +283,6 @@ so, as a workaround, we just fall-through if we did not match and try to take th
 ]
 
 { #category : #parsing }
-SBTSNodeSymbol >> resultsNonMemoizedFor: aParser [
-
-	| currentBlocks |
-	currentBlocks := aParser blocks.
-	aParser blocks: OrderedCollection new.
-	^ (self bodyTemplate resultsFor: aParser)
-		ifEmpty: [
-			aParser blocks: currentBlocks.
-			{}]
-		ifNotEmpty: [:results |
-			results do: [:result |
-				self isInlined
-					ifTrue: [
-						result blocks do: [:b | b slot: (b slot addNode: self)].
-						result blocks: currentBlocks, result blocks]
-					ifFalse: [
-						result blocks: currentBlocks, {
-							SBTSBlock new
-								slot: (SBTSSlot with: self);
-								addAllMorphs: result blocks}]].
-			results]
-]
-
-{ #category : #parsing }
 SBTSNodeSymbol >> takeNodesFrom: aParser [
 
 	(self isSuperType or: [factory promotedInlineSymbols includes: self type]) ifTrue: [

@@ -137,13 +137,6 @@ SBTSLanguage class >> fileSuffix [
 	^ nil
 ]
 
-{ #category : #'configuration - editing' }
-SBTSLanguage class >> fixmeSupportsRecursion [
-	"return false if your grammar fails to return results within meaningful timeframes with the current recursion code"
-
-	^ true
-]
-
 { #category : #'loading - helper' }
 SBTSLanguage class >> generateFFIMethodFor: aName github: aGithubString [
 

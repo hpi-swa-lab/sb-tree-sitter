@@ -3541,12 +3541,6 @@ SBGDScript >> configure [
 ]
 
 { #category : #'as yet unclassified' }
-SBGDScript >> fixmeSupportsRecursion [
-
-	^ false
-]
-
-{ #category : #'as yet unclassified' }
 SBGDScript >> hardLineBreakBetween: aBlock and: anotherBlock [
 	"match for TSBlock"
 

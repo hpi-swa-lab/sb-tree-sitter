@@ -355,6 +355,12 @@ SBTSNodeBase >> parentThat: aBlock [
 	^ nil
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> precedence [
+
+	^ self parentThat: [:p | p isTSPrecedence]
+]
+
 { #category : #hierarchy }
 SBTSNodeBase >> replaceBy: aNode [
 

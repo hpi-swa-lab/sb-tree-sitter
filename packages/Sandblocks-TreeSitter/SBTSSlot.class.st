@@ -194,7 +194,7 @@ SBTSSlot >> needsParenthesis: aBlock [
 	
 	mine := self precedenceAround: aBlock firstSubmorph.
 	parent := parentSlot precedenceAround: aBlock.
-	cmp := mine compareTo: parent.
+	cmp := mine compareTo: parent ifNotComparable: [0].
 	cmp = 0 ifTrue: [
 		(parent associativity = #left and: [aBlock isFirstChild]) ifTrue: [^ false].
 		(parent associativity = #right and: [aBlock isFirstChild not]) ifTrue: [^ false]].
