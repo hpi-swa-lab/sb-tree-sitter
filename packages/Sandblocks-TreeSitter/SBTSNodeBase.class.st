@@ -349,6 +349,19 @@ SBTSNodeBase >> parent: aNode [
 ]
 
 { #category : #hierarchy }
+SBTSNodeBase >> parentPrecedence: aCollection do: aBlock ifNone: anotherBlock [
+
+	| isLeftMost |
+	isLeftMost := true.
+	aCollection reverseDo: [:root |
+		root andParentsDo: [:node |
+			(node parent notNil and: [node parent isTSSeq]) ifTrue: [isLeftMost := isLeftMost and: [node parent elements first = node]].
+			node isTSPrecedence ifTrue: [^ aBlock value: node value: isLeftMost]]].
+	
+	^ anotherBlock value
+]
+
+{ #category : #hierarchy }
 SBTSNodeBase >> parentThat: aBlock [
 
 	self andParentsDo: [:p | (aBlock value: p) ifTrue: [^ p]].

@@ -40,6 +40,17 @@ SBTSBlockTest >> testAddAdaptsSlotSmalltalkStmt [
 		equals: target childSandblocks third slot lastNode
 ]
 
+{ #category : #'tests - associativity' }
+SBTSBlockTest >> testAppendMultiplication [
+
+	| program editor |
+	program := SBJavascript parseToplevel: '1+2+3'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self type: '*4' in: editor.
+	self assert: '1+2+3*4;' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - replacements' }
 SBTSBlockTest >> testApplyPyFilePathReplacement [
 
@@ -233,6 +244,17 @@ SBTSBlockTest >> testForwardToAdjacentStatement [
 ()=>;' equals: module sourceString
 ]
 
+{ #category : #'tests - associativity' }
+SBTSBlockTest >> testInsertAddition [
+
+	| program editor |
+	program := SBJavascript parseToplevel: '1+3+4'.
+	editor := self editorAndWorldFor: program.
+	program firstDeepChild startInputAtEnd.
+	self type: '+2' in: editor.
+	self assert: '1+2+3+4;' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - deleting' }
 SBTSBlockTest >> testJoinNumberFromBinaryOp [
 
@@ -279,11 +301,11 @@ SBTSBlockTest >> testJsCall [
 	module := SBTSFileParser new parse: 'a.b' language: SBJavascript instance.
 	editor := self editorAndWorldFor: module.
 	
-	module childSandblocks first select.
+	editor selectNoInput: module childSandblocks first.
 	editor handle: (self keyboardEvent: $ ).
 	editor handle: (self keyboardEvent: $().
-	self assert: #call_expression equals: module childSandblocks first type.
-	self assert: #call_expression equals: editor cursor cursorPosition block type.
+	self assert: #'call_expression' equals: module childSandblocks first type.
+	self assert: #'call_expression' equals: editor cursor cursorPosition block type.
 	self assert: editor cursor cursorPosition isInsert
 ]
 
@@ -767,6 +789,17 @@ SBTSBlockTest >> testJsTypeObject [
 	self assert: 'const a={id:x};' equals: module sourceString
 ]
 
+{ #category : #'tests - associativity' }
+SBTSBlockTest >> testNestMultiplication [
+
+	| results |
+	results := SBTSInputParser new
+		optionsForTemplate: (SBTSNodeSymbol new type: #expression factory: SBJavascript instance grammar)
+		given: '2+3*4'.
+	self assert: results size = 1.
+	self assert: '2+3*4' equals: results anyOne first sourceStringForCompare
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testNewStatementAfterTransition [
 
@@ -1113,6 +1146,17 @@ SBTSBlockTest >> testStUnaryMessageSend [
 	self type: ' ' in: editor.
 	self type: 'show' in: editor.
 	self assert: #'unary_message' equals: method childSandblocks second type
+]
+
+{ #category : #'tests - associativity' }
+SBTSBlockTest >> testTypeAddition [
+
+	| program editor |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	program startInsertAtEnd.
+	self type: '1+2+3+4' in: editor.
+	self assert: '1+2+3+4;' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - cursor position' }

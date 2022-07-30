@@ -15,17 +15,24 @@ SBTSMemoEntry >> anyResultIsAtEndFor: aParser [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSMemoEntry >> getBlocksOrMarkRecursionFrom: aSymbol stack: aCollection max: aNumber [
+SBTSMemoEntry >> getBlocksOrMarkRecursionFrom: aSymbol stack: aCollection parser: aParser [
 
 	^ self isLeftRecursion
 		ifTrue: [
 			self setLeftRecursionDetectedFrom: aSymbol stack: aCollection.
 			{}]
 		ifFalse: [
-			self parsers select: [:p |
-				((p blocks first children ifNotEmpty: [:c | c first] ifEmpty: [p blocks first]) slot parentThat: [:node | node isTSPrecedence])
-					ifNotNil: [:precedence | precedence canExpandInStack: aCollection, {aSymbol}]
-					ifNil: [true]]]
+			(self parsers collect: [:p | p adapt: aParser for: aSymbol]) select: [:p |
+				(aParser isCurrentlyRecursingFor: aSymbol) not or: [ | nestedSlot |
+					nestedSlot := (p blocks first effectiveChildren
+						ifNotEmpty: [:c | c first]
+						ifEmpty: [p blocks first]) slot.
+					(nestedSlot parentThat: [:node | node isTSPrecedence])
+						ifNotNil: [:precedence |
+							(precedence canExpandInStack: aCollection, (p blocks first effectiveChildren ifNotEmpty: [:c | {aSymbol}] ifEmpty: [{}]))
+								ifTrue: [true]
+								ifFalse: [false]]
+						ifNil: [true]]]]
 ]
 
 { #category : #'as yet unclassified' }

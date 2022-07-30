@@ -55,17 +55,19 @@ SBTSNodePrecedence >> buildEmptyNodes [
 SBTSNodePrecedence >> canExpandInStack: aCollection [
 
 	SBToggledCode comment: '' active: 0 do: {[^ true]}.
+	
 	^ self
 		parentPrecedence: aCollection
 		do: [:parentPrec :isLeftMost | | comp hasActiveRecursion |
 			comp := parentPrec compareTo: self ifNotComparable: [-1].
 			
-			"FIXME: we should probably check if these are involved in this precise precedence contest"
-			hasActiveRecursion := aCollection withoutDuplicates size = aCollection size and: [false].
+			hasActiveRecursion := SBToggledCode comment: '' active: 3 do: {
+				[true].
+				[aCollection anySatisfy: [:node | node hasParentThat: [:p | p = self parent]]].
+				["FIXME: we should probably check if these are involved in this precise precedence contest"
+				(aCollection collect: #type) withoutDuplicates size < aCollection size]}.
 			
-			(hasActiveRecursion or: [comp < 0 or: [comp = 0 and: [self isLeftAssociative and: [isLeftMost]]]])
-				ifTrue: [true]
-				ifFalse: [false]]
+			hasActiveRecursion not or: [comp < 0 or: [comp = 0 and: [self isLeftAssociative and: [isLeftMost]]]]]
 		ifNone: [true]
 ]
 
@@ -139,12 +141,14 @@ SBTSNodePrecedence >> labelPrintOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSNodePrecedence >> parentPrecedence: aCollection do: aBlock ifNone: anotherBlock [
 
-	| isLeftMost |
+	| isLeftMost potentialConflict |
 	isLeftMost := true.
+	potentialConflict := false.
 	aCollection reverseDo: [:root |
 		root andParentsDo: [:node |
 			(node parent notNil and: [node parent isTSSeq]) ifTrue: [isLeftMost := isLeftMost and: [node parent elements first = node]].
-			node isTSPrecedence ifTrue: [^ aBlock value: node value: isLeftMost]]].
+			(node isTSSeq and: [potentialConflict not]) ifTrue: [potentialConflict := node hasPotentialPrecedenceConflict].
+			(node isTSPrecedence and: [potentialConflict]) ifTrue: [^ aBlock value: node value: isLeftMost]]].
 	
 	^ anotherBlock value
 ]
@@ -166,7 +170,9 @@ SBTSNodePrecedence >> printOn: aStream [
 
 	aStream nextPut: $(.
 	aStream nextPutAll: precedence.
-	aStream nextPutAll: ': '.
+	aStream nextPut: $[.
+	aStream print: value.
+	aStream nextPutAll: ']: '.
 	self element printOn: aStream.
 	aStream nextPut: $)
 ]
@@ -174,7 +180,9 @@ SBTSNodePrecedence >> printOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSNodePrecedence >> resultsFor: aParser [
 
-	^ (self precedence = 'PREC_DYNAMIC' or: [self canExpandInStack: aParser symbolStack])
+	^ (self precedence = 'PREC_DYNAMIC' or: [ | recursing |
+		recursing := (aParser symbolStack collect: #type) withoutDuplicates size < aParser symbolStack size.
+		recursing not or: [self canExpandInStack: aParser symbolStack]])
 		ifTrue: [self element resultsFor: aParser]
 		ifFalse: [{}]
 ]

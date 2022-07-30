@@ -68,6 +68,14 @@ SBTSNodeSeq >> elements: aCollection [
 	aCollection do: [:elem | elem parent: self]
 ]
 
+{ #category : #testing }
+SBTSNodeSeq >> hasPotentialPrecedenceConflict [
+
+	| types |
+	types := self elements select: [:el | el type notNil].
+	^ (types collect: [:el | el type]) withoutDuplicates size < types size
+]
+
 { #category : #accessing }
 SBTSNodeSeq >> hasStatementTerminator [
 

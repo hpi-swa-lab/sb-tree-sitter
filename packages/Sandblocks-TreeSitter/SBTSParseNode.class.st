@@ -74,6 +74,22 @@ SBTSParseNode >> containingNodeIn: aParser [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSParseNode >> contents [
+
+	^ contents
+]
+
+{ #category : #'as yet unclassified' }
+SBTSParseNode >> effectiveChildren [
+
+	^ kind
+		caseOf: {
+			[#block] -> [contents].
+			[#blockEmbed] -> [contents childSandblocks]}
+		otherwise: [{}]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSParseNode >> firstDeepChild [
 
 	^ self children ifEmpty: [self] ifNotEmpty: [:c | c first firstDeepChild]

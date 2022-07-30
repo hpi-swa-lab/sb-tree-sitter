@@ -156,6 +156,12 @@ SBTSInputParser >> is: aCollection orderedSupersetOf: anotherCollection [
 	^ search atEnd
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> isCurrentlyRecursingFor: aSymbol [
+
+	^ ((activeRecursion at: stream position + 1) ifNotNil: #head) = aSymbol type
+]
+
 { #category : #accessing }
 SBTSInputParser >> lastConstructed [
 
@@ -220,16 +226,16 @@ SBTSInputParser >> memoizationFor: aSymbol ifAbsentPut: aBlock [
 				activeRecursion at: index put: nil].
 			results collect: [:memo | memo adapt: self for: aSymbol]]
 		ifNotNil: [:memoEntry |
-			((activeRecursion at: index)
+			(activeRecursion at: index)
 				ifNotNil: [:recur |
 					recur
 						tryExpandSymbol: aSymbol
 						do: [ | all |
 							all := memoEntry parsers, expand value.
 							self memoizeBlocks: all at: index for: aSymbol.
-							all]
-						otherwise: [memoEntry getBlocksOrMarkRecursionFrom: aSymbol stack: symbolStack max: memoizations size]]
-				ifNil: [memoEntry getBlocksOrMarkRecursionFrom: aSymbol stack: symbolStack max: memoizations size]) collect: [:memo | memo adapt: self for: aSymbol]]
+							all collect: [:memo | memo adapt: self for: aSymbol]]
+						otherwise: [memoEntry getBlocksOrMarkRecursionFrom: aSymbol stack: symbolStack parser: self]]
+				ifNil: [memoEntry getBlocksOrMarkRecursionFrom: aSymbol stack: symbolStack parser: self]]
 ]
 
 { #category : #memo }
@@ -417,7 +423,7 @@ SBTSInputParser >> rawOptionsForTemplate: aNode given: aString before: aCollecti
 	stream := SBTSBlockStringStream on: aCollection, aString asArray, anotherCollection.
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
 	activeRecursion := Array new: stream originalContents size withAll: nil.
-	symbolStack := OrderedCollection new.
+	symbolStack := OrderedCollection with: aNode.
 	
 	^ (aNode resultsFor: self) select: [:parser | parser atEnd]
 ]

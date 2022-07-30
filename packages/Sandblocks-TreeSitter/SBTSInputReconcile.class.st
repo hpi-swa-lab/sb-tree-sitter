@@ -197,7 +197,6 @@ SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 
 { #category : #reconciliation }
 SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNumber [
-	"recursive stop condition: either our owner is no longer a ts-block or we have already gone two steps. two steps were enough for all valid scenarios we have encountered thus far."
 
 	aMorph isUnknown ifTrue: [
 		((SBTSInputParser new optionsForTemplate: aMorph slot firstNode given: aString) collect: [:blocks |
@@ -205,12 +204,13 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 				target: aMorph replacers: blocks;
 				shouldMergeWithNext: true]) ifNotEmpty: [:res | ^ res]].
 	
+	"recursive stop condition: either our owner is no longer a ts-block or we have already gone two steps. two steps were enough for all valid scenarios we have encountered thus far."
 	aBlock isTSBlock ifFalse: [^ {}].
 	(aMorph ownerChain indexOf: aBlock) > 3 ifTrue: [^ {}].
 	
 	^ aNumber = 1
-		ifTrue: [(self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber) ifEmpty: [(self tryWrap: aBlock given: aString before: true) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]]
-		ifFalse: [(self trySeparator: aString in: aBlock) ifEmpty: [(self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber) ifEmpty: [(self tryWrap: aBlock given: aString before: false) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner at: aNumber]]]]]]
+		ifTrue: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]
+		ifFalse: [(self trySeparator: aString in: aBlock) ifEmpty: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner at: aNumber]]]]]
 ]
 
 { #category : #reconciliation }
@@ -269,14 +269,40 @@ SBTSInputReconcile >> trySkipLabel: aString in: aBlock from: aMorph at: aNumber 
 { #category : #reconciliation }
 SBTSInputReconcile >> tryWrap: aBlock given: aString before: aBoolean [
 
-	^ (SBTSInputParser new
-		optionsFor: aBlock
-		given: aString
-		before: (aBoolean ifTrue: [{}] ifFalse: [{aBlock}])
-		after: (aBoolean ifTrue: [{aBlock}] ifFalse: [{}])) collect: [:blocks |
-		SBReplaceMultipleCommand new
-			target: aBlock replacers: blocks;
-			shouldMergeWithNext: true]
+	| get considerOwner |
+	get := [:root |
+		(SBTSInputParser new
+			optionsFor: root
+			given: aString
+			before: (aBoolean ifTrue: [{}] ifFalse: [{root}])
+			after: (aBoolean ifTrue: [{root}] ifFalse: [{}])) collect: [:blocks |
+			SBReplaceMultipleCommand new
+				target: root replacers: blocks;
+				shouldMergeWithNext: true]].
+	
+	"if we have a left associative parent, we should always also check the owner for options, otherwise we risk committing too early to a local solution. For example, consider _+_ and _++ in e.g. C"
+	considerOwner := aBlock slot firstNode
+		parentPrecedence: aBlock slot nodes
+		do: [:node :isLeftMost | isLeftMost not]
+		ifNone: [false].
+	
+	^ (get value: aBlock), (considerOwner ifTrue: [get value: aBlock owner] ifFalse: [{}])
+]
+
+{ #category : #reconciliation }
+SBTSInputReconcile >> tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber [
+
+	| atBorder reinterpret wrap |
+	"consider 2+3 and the input '+' on the 3.
+Here, if we do reinterpret first, the 3 will be stringified. Instead, we want to keep the three by trying wrap first, if the input happened at the very border of the source block."
+	wrap := [self tryWrap: aBlock given: aString before: aNumber = 1].
+	reinterpret := [self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber].
+	
+	atBorder := (aMorph contents isNil or: [aMorph contents isEmpty]) not and: [aNumber = 1 or: [aNumber > aMorph contents size]].
+	
+	^ (atBorder and: [aBlock language transitionPairs noneSatisfy: [:pair | pair key = aBlock type]])
+		ifTrue: [wrap value ifEmpty: reinterpret]
+		ifFalse: [reinterpret value ifEmpty: wrap]
 ]
 
 { #category : #callbacks }

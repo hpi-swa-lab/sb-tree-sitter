@@ -201,8 +201,13 @@ SBTSNodeSymbol >> resultsFor: aParser [
 		ifTrue: [ | block result |
 			result := aParser copy.
 			block := result next.
-			result basicAddBlocks: {SBTSParseNode kind: #blockEmbed slot: (block slot trimNodesToTypeOf: self) contents: block}.
-			{result}]
+			(((block childSandblocks ifNotEmpty: [:c | c first slot] ifEmpty: [self]) parentThat: [:node | node isTSPrecedence])
+				ifNotNil: [:precedence | precedence canExpandInStack: aParser symbolStack, (block childSandblocks ifNotEmpty: [{self}] ifEmpty: [{}])]
+				ifNil: [true])
+				ifTrue: [
+					result basicAddBlocks: {SBTSParseNode kind: #blockEmbed slot: (block slot trimNodesToTypeOf: self) contents: block}.
+					{result}]
+				ifFalse: [{}]]
 		ifFalse: [{}].
 	newBlocks := (SBToggledCode comment: '' active: 2 do: {
 		[true].
