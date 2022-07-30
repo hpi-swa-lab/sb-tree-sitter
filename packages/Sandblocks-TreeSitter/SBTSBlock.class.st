@@ -234,9 +234,7 @@ SBTSBlock >> copyBlock [
 	copy := self class new
 		addAllMorphs: (self isUnknown ifTrue: [{}] ifFalse: [self submorphs collect: [:s | s copyBlock]]);
 		slot: self slot.
-	self
-		valueOfProperty: #lastConstructed
-		ifPresentDo: [:val | copy setProperty: #lastConstructed toValue: true].
+	#(#lastConstructed #copyPlaceholder) do: [:prop | self valueOfProperty: prop ifPresentDo: [:val | copy setProperty: prop toValue: val]].
 	^ copy
 ]
 
@@ -593,6 +591,12 @@ SBTSBlock >> isMyActiveKeyword: aString [
 		ifNil: [false]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> isPart [
+
+	^ self highlight notNil and: [self highlight endsWith: '.part']
+]
+
 { #category : #testing }
 SBTSBlock >> isTSBlock [
 
@@ -709,6 +713,12 @@ SBTSBlock >> ownerWithForegroundColor [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> pickUp: anEvent [
+
+	self isPart ifTrue: [self owner pickUp: anEvent] ifFalse: [super pickUp: anEvent]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> placeCursorCloseAfterDo: aBlock [
 
 	| index container found |
@@ -761,7 +771,7 @@ SBTSBlock >> preferredColorIn: aColorPolicy [
 { #category : #'as yet unclassified' }
 SBTSBlock >> prefersNoBorder [
 
-	^ self highlight notNil and: [self highlight endsWith: '.part']
+	^ self isPart
 ]
 
 { #category : #testing }
@@ -788,7 +798,7 @@ SBTSBlock >> printLabelOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSBlock >> printOn: aStream [
 
-	self slot ifNotNil: [slot firstNode printOn: aStream]
+	self slot ifNotNil: [slot firstNode labelPrintOn: aStream]
 ]
 
 { #category : #'as yet unclassified' }

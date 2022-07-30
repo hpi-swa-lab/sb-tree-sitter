@@ -72,7 +72,7 @@ SBTSUnknownBlock >> slot: aSlot [
 
 	super slot: aSlot.
 	self firstSubmorph slot: aSlot.
-	self firstSubmorph placeholderText ifEmpty: [self placeholderText: self slot firstNode printString]
+	self firstSubmorph placeholderText ifEmpty: [self placeholderText: (String streamContents: [:s | aSlot firstNode labelPrintOn: s])]
 ]
 
 { #category : #'as yet unclassified' }
