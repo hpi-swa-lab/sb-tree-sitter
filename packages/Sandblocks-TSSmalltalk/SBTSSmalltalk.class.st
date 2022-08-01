@@ -1074,7 +1074,7 @@ SBTSSmalltalk class >> grammarJson [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
-	(aBlock slot lastNode type = #statement and: [anotherBlock slot lastNode type = #statement]) ifTrue: [^ true].
+	(({#statement. #empty. #comment} includes: aBlock slot lastNode type) and: [{#statement. #empty. #comment} includes: anotherBlock slot lastNode type]) ifTrue: [^ true].
 	(anotherBlock slot lastNode type = #statement and: [(anotherBlock owner submorphs count: [:m | m slot lastNode type = #statement]) > 1]) ifTrue: [^ true].
 	(aBlock parentSandblock ifNotNil: #type) = #method ifTrue: [^ true].
 	^ false
@@ -1170,6 +1170,10 @@ SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
 { #category : #'configuration - suggestions' }
 SBTSSmalltalk class >> suggestionsFor: aBlock [
 
+	aBlock type = #symbol ifTrue: [
+		^ (aBlock
+			sortedSuggestions: (OrderedCollection withAll: Symbol allSymbols)
+			for: aBlock textMorphs second contents) collect: [:item | SBSuggestionItem selector: item label: 'symbol']].
 	((aBlock alias = #'unary_identifier' and: [aBlock parentSandblock type = #'unary_message']) or: [aBlock type = #keyword]) ifTrue: [
 		^ (aBlock sortedSuggestions: (OrderedCollection withAll: Symbol allSymbols) for: aBlock contents) collect: [:item |
 			SBSuggestionItem
@@ -1187,7 +1191,7 @@ SBTSSmalltalk class >> suggestionsFor: aBlock [
 { #category : #'configuration - editing' }
 SBTSSmalltalk class >> transitionPairs [
 
-	^ {#'unary_message' -> #'keyword_message'}
+	^ {#'unary_message' -> #'keyword_message'. #'cascaded_unary_message' -> #'cascaded_keyword_message'}
 ]
 
 { #category : #'configuration - suggestions' }

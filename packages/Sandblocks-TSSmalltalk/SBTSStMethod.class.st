@@ -11,6 +11,13 @@ SBTSStMethod class >> for: aCompiledMethod [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSStMethod >> browse [
+	<action>
+
+	Browser newOnClass: self methodClass selector: self selector
+]
+
+{ #category : #'as yet unclassified' }
 SBTSStMethod >> for: aCompiledMethod [
 
 	self addMorphBack: (SBStClassNameInput new object: aCompiledMethod methodClass).
@@ -58,6 +65,12 @@ SBTSStMethod >> methodClass [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSStMethod >> object [
+
+	^ self methodClass >> self selector
+]
+
+{ #category : #'as yet unclassified' }
 SBTSStMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 
 	| text newSelector |
@@ -68,6 +81,14 @@ SBTSStMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 	newSelector := self methodClass compile: text asText classified: nil.
 	
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSStMethod >> selector [
+
+	^ (((self method childSandblocks first childSandblocks
+		viewFrom: 1
+		by: 2) collect: [:p | p contents]) joinSeparatedBy: '') asSymbol
 ]
 
 { #category : #'as yet unclassified' }

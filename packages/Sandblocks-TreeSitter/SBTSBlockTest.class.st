@@ -431,6 +431,22 @@ a;'.
 	self assert: 'console;' equals: program sourceStringForCompare
 ]
 
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testJsDeleteStatementsWithEmpty [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'console.log;
+
+a;'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	2 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: 'console.log;
+' equals: program sourceStringForCompare.
+	2 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: 'console.log;' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsExpandObject [
 
@@ -986,7 +1002,7 @@ SBTSBlockTest >> testSmalltalkContinueInArray [
 	method := SBTSFileParser new parse: 'abc {}' language: SBTSSmalltalk instance.
 	editor := self editorAndWorldFor: method.
 	
-	method childSandblocks second startInputAtEnd.
+	method childSandblocks second startInsertAtEnd.
 	editor handle: (self keyboardEvent: $$).
 	self assert: #character equals: method childSandblocks second childSandblocks first type.
 	editor handle: (self keyboardEvent: $a).
@@ -1157,6 +1173,19 @@ SBTSBlockTest >> testTypeAddition [
 	program startInsertAtEnd.
 	self type: '1+2+3+4' in: editor.
 	self assert: '1+2+3+4;' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testTypeCallAndStringWithClosingSymbols [
+
+	| program editor source |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	
+	source := 'test("abc")'.
+	program startInsertAtEnd.
+	self type: source in: editor.
+	self assert: source, ';' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - cursor position' }

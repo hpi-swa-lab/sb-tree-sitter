@@ -10,7 +10,7 @@ SBJavascript class >> declarationsInScope: aScopeBlock do: aClosure [
 	aScopeBlock type = 'function' ifTrue: [
 		aScopeBlock childSandblocksDo: [:block | ((block compatibleWithType: 'pattern') or: [block compatibleWithType: 'assignment_pattern']) ifTrue: [block allBlocksDo: [:b | b type = 'identifier' ifTrue: [aClosure value: (SBTSDeclaration block: b label: 'func arg')]]]].
 		self declarationsInScope: (aScopeBlock get: 'body') do: aClosure].
-	(aScopeBlock type = 'statement_block' or: [aScopeBlock type = 'program']) ifTrue: [aScopeBlock childSandblocksDo: [:statement | statement type = 'lexical_declaration' ifTrue: [statement childSandblocksDo: [:declarator | aClosure value: (SBTSDeclaration block: (declarator get: 'name') label: 'lexical decl')]]]]
+	(aScopeBlock type = 'statement_block' or: [aScopeBlock type = 'program']) ifTrue: [aScopeBlock childSandblocksDo: [:statement | statement type = 'lexical_declaration' ifTrue: [statement childSandblocksDo: [:declarator | declarator isUnknown ifFalse: [aClosure value: (SBTSDeclaration block: (declarator get: 'name') label: 'lexical decl')]]]]]
 ]
 
 { #category : #configuration }

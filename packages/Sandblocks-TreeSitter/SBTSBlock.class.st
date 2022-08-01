@@ -44,12 +44,6 @@ SBTSBlock >> actionProviders [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSBlock >> activeTextMorph [
-
-	^ self sandblockEditor currentInputCommand ifNotNil: #textMorph
-]
-
-{ #category : #'as yet unclassified' }
 SBTSBlock >> adaptSlot: aConverter [
 	<convert>
 
@@ -382,7 +376,7 @@ SBTSBlock >> emphasis [
 { #category : #'as yet unclassified' }
 SBTSBlock >> evaluate [
 
-	self containingArtefact ifNotNil: [:a | ^ a evaluate: self].
+	self containingArtefact ifNotNil: [:a | (a respondsTo: #evaluate:) ifTrue: [^ a evaluate: self]].
 	^ self language runtime evaluate: self sourceString
 ]
 
@@ -630,7 +624,7 @@ SBTSBlock >> keepDuringTransform [
 { #category : #'as yet unclassified' }
 SBTSBlock >> keyStroke: anEvent [
 
-	self tryApplyChange: [:block | super keyStroke: anEvent] input: anEvent keyCharacter asString
+	self tryApplyChange: [:textMorph | super keyStroke: anEvent] input: anEvent keyCharacter asString
 ]
 
 { #category : #accessing }
@@ -1024,7 +1018,7 @@ SBTSBlock >> tryApplyChange: aBlock input: aString [
 	insertIndex := textMorph contents
 		ifNotEmpty: [textMorph cursor]
 		ifEmpty: [SBTSInputReconcile endIndex].
-	aBlock value: self.
+	aBlock value: textMorph.
 	
 	(self prefixValidFor: textMorph)
 		ifTrue: [
@@ -1089,8 +1083,8 @@ SBTSBlock >> useSuggestion: anItem [
 
 	| editor |
 	editor := self sandblockEditor.
-	self contents: ''.
-	self tryApplyChange: [:b | b contents: anItem contents] input: anItem contents.
+	self activeTextMorph contents: ''.
+	self tryApplyChange: [:t | t contents: anItem contents] input: anItem contents.
 	" we may autocomplete multiple unknowns, where we all always select the last one. typically, in the autocompletion we actually want the first one though "
 	editor selection parentSandblock
 		allBlocksDetect: [:b | b isUnknown]
@@ -1103,9 +1097,10 @@ SBTSBlock >> valid [
 
 	self flag: #todo.
 	" cache valid "
-	^ self currentTextMorph
-		ifNotNil: [:t | t slot firstNode validFor: t contents]
-		ifNil: [true]
+	^ self textMorphs allSatisfy: [:t |
+		t
+			ifNotNil: [t slot firstNode validFor: t contents]
+			ifNil: [true]]
 ]
 
 { #category : #'as yet unclassified' }

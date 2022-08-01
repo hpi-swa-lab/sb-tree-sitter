@@ -188,7 +188,7 @@ SBTSInputReconcile >> suggestions [
 { #category : #reconciliation }
 SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 
-	self positionsAfter: aBlock from: aBlock do: [:position |
+	self positionsAfter: aBlock from: target do: [:position |
 		(position isText and: [position block wantsInput]) ifTrue: ["TODO: do we want the full reconciliation logic or just reinterpret?"
 		^ self tryReinterpretFrom: position textMorph in: position block given: aString at: self class endIndex].
 		position isInsert ifTrue: [(self optionsForInsert: position given: aString) ifNotEmpty: [:res | ^ res]]].
