@@ -13,7 +13,8 @@ Class {
 		'wasIncomplete',
 		'nodeCountCache',
 		'copyEmbeds',
-		'lastConstructedCache'
+		'lastConstructedCache',
+		'validCondition'
 	],
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
@@ -425,7 +426,7 @@ SBTSInputParser >> rawOptionsForTemplate: aNode given: aString before: aCollecti
 	activeRecursion := Array new: stream originalContents size withAll: nil.
 	symbolStack := OrderedCollection with: aNode.
 	
-	^ (aNode resultsFor: self) select: [:parser | parser atEnd]
+	^ (aNode resultsFor: self) select: [:parser | self validCondition value: parser]
 ]
 
 { #category : #memo }
@@ -517,6 +518,18 @@ SBTSInputParser >> symbolStack [
 SBTSInputParser >> trimResults: aCollection [
 
 	^ aCollection reject: #wasIncomplete
+]
+
+{ #category : #accessing }
+SBTSInputParser >> validCondition [
+
+	^ validCondition ifNil: [[:p | p atEnd]]
+]
+
+{ #category : #accessing }
+SBTSInputParser >> validCondition: aBlock [
+
+	validCondition := aBlock
 ]
 
 { #category : #accessing }

@@ -825,9 +825,10 @@ SBTSBlock >> promptTransition [
 	<action>
 
 	SBTSInputReconcile new
+		explicitAppend: true;
 		for: self
-		input: ''
-		at: (ActiveEvent shiftPressed ifTrue: [1] ifFalse: [SBTSInputReconcile endIndex])
+			input: ''
+			at: (ActiveEvent shiftPressed ifTrue: [1] ifFalse: [SBTSInputReconcile endIndex])
 ]
 
 { #category : #query }

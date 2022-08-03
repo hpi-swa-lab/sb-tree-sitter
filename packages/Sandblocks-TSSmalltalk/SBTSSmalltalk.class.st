@@ -1075,7 +1075,7 @@ SBTSSmalltalk class >> grammarJson [
 SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	(({#statement. #empty. #comment} includes: aBlock slot lastNode type) and: [{#statement. #empty. #comment} includes: anotherBlock slot lastNode type]) ifTrue: [^ true].
-	(anotherBlock slot lastNode type = #statement and: [(anotherBlock owner submorphs count: [:m | m slot lastNode type = #statement]) > 1]) ifTrue: [^ true].
+	(({#statement. #empty. #comment} includes: anotherBlock slot lastNode type) and: [(anotherBlock owner submorphs count: [:m | m slot lastNode type = #statement]) > 1]) ifTrue: [^ true].
 	(aBlock parentSandblock ifNotNil: #type) = #method ifTrue: [^ true].
 	^ false
 ]

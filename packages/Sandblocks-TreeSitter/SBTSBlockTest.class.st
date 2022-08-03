@@ -148,6 +148,18 @@ SBTSBlockTest >> testClojureSymbol [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testClojureWithClosingParen [
+
+	| program editor |
+	program := SBClojure empty.
+	editor := self editorAndWorldFor: program.
+	
+	self type: '(dec n)' in: editor.
+	
+	self assert: '(dec n)' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testClojureWrapInExpr [
 
 	| program editor |

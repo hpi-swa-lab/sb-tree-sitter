@@ -5,7 +5,8 @@ Class {
 		'target',
 		'currentChoices',
 		'findOptionsBlock',
-		'insertIndex'
+		'insertIndex',
+		'explicitAppend'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -53,9 +54,22 @@ SBTSInputReconcile >> dismiss [
 ]
 
 { #category : #accessing }
+SBTSInputReconcile >> explicitAppend: aBoolean [
+
+	explicitAppend := aBoolean
+]
+
+{ #category : #accessing }
 SBTSInputReconcile >> findOptionsBlock [
 
-	^ findOptionsBlock ifNil: [[self tryReconcileFor: target input: self contents in: target containingSandblock at: insertIndex]]
+	^ findOptionsBlock ifNil: [
+		[
+			self
+				tryReconcileFor: target
+				input: self contents
+				in: target containingSandblock
+				at: insertIndex
+				explicitAppend: (explicitAppend ifNil: [false])]]
 ]
 
 { #category : #accessing }
@@ -111,7 +125,12 @@ SBTSInputReconcile >> initialize [
 { #category : #'reconciliation helper' }
 SBTSInputReconcile >> optionsForInsert: aPosition given: aString [
 
-	^ (SBTSInputParser new optionsForTemplate: aPosition command element given: aString) collect: [:blocks | aPosition command copy morphs: blocks]
+	| next boundaryChar |
+	next := aPosition adjacentPosition: 1 in: aPosition block sandblockEditor.
+	boundaryChar := next isText ifTrue: [next morph contents ifNotEmpty: #first].
+	^ (SBTSInputParser new
+		validCondition: [:p | p atEnd or: [p stream next = boundaryChar and: [p stream atEnd]]];
+		optionsForTemplate: aPosition command element given: aString) collect: [:blocks | aPosition command copy morphs: blocks]
 ]
 
 { #category : #'reconciliation helper' }
@@ -196,7 +215,7 @@ SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 ]
 
 { #category : #reconciliation }
-SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNumber [
+SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNumber explicitAppend: aBoolean [
 
 	aMorph isUnknown ifTrue: [
 		((SBTSInputParser new optionsForTemplate: aMorph slot firstNode given: aString) collect: [:blocks |
@@ -209,8 +228,8 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 	(aMorph ownerChain indexOf: aBlock) > 3 ifTrue: [^ {}].
 	
 	^ aNumber = 1
-		ifTrue: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]
-		ifFalse: [(self trySeparator: aString in: aBlock) ifEmpty: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner at: aNumber]]]]]
+		ifTrue: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]
+		ifFalse: [(self trySeparator: aString in: aBlock) ifEmpty: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner at: aNumber explicitAppend: aBoolean]]]]]
 ]
 
 { #category : #reconciliation }
@@ -290,13 +309,15 @@ SBTSInputReconcile >> tryWrap: aBlock given: aString before: aBoolean [
 ]
 
 { #category : #reconciliation }
-SBTSInputReconcile >> tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber [
+SBTSInputReconcile >> tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean [
 
 	| atBorder reinterpret wrap |
 	"consider 2+3 and the input '+' on the 3.
 Here, if we do reinterpret first, the 3 will be stringified. Instead, we want to keep the three by trying wrap first, if the input happened at the very border of the source block."
 	wrap := [self tryWrap: aBlock given: aString before: aNumber = 1].
 	reinterpret := [self tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber].
+	
+	aBoolean ifTrue: [^ wrap value].
 	
 	atBorder := (aMorph contents isNil or: [aMorph contents isEmpty]) not and: [aNumber = 1 or: [aNumber > aMorph contents size]].
 	
