@@ -2879,6 +2879,7 @@ SBBash class >> rootRuleName [
 { #category : #'configuration - layout' }
 SBBash class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
+	anotherBlock contents ifNotEmpty: [:c | c first = $= ifTrue: [^ false]].
 	^ aBlock containingSandblock ~= anotherBlock containingSandblock
 ]
 
