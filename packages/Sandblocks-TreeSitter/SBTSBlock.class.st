@@ -206,7 +206,7 @@ SBTSBlock >> collapsedContent [
 { #category : #'as yet unclassified' }
 SBTSBlock >> colorPolicy [
 
-	^ super colorPolicy copy enlarge: true
+	^ super colorPolicy copy enlarge: self language alwaysEnlargeInsets
 ]
 
 { #category : #'as yet unclassified' }

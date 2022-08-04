@@ -29,6 +29,12 @@ SBTSLanguage class >> allRuntimes [
 	^ Array streamContents: [:stream | SBTSLanguageRuntime allSubclassesDo: [:cl | cl language = self ifTrue: [stream nextPut: cl]]]
 ]
 
+{ #category : #'configuration - layout' }
+SBTSLanguage class >> alwaysEnlargeInsets [
+
+	^ true
+]
+
 { #category : #'instantiate blocks' }
 SBTSLanguage class >> blockFor: aSymbol [
 
