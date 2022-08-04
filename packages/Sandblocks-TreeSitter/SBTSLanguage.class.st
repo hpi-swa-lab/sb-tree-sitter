@@ -425,6 +425,12 @@ SBTSLanguage class >> showHelpFor: aBlock [
 	
 ]
 
+{ #category : #'configuration - editing' }
+SBTSLanguage class >> showInsertHints [
+
+	^ true
+]
+
 { #category : #'configuration - layout' }
 SBTSLanguage class >> softLineBreakBetween: aBlock and: anotherBlock [
 

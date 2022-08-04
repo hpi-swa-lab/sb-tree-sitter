@@ -3,7 +3,8 @@ Class {
 	#superclass : #SBMultilineOwnTextMorph,
 	#instVars : [
 		'slot',
-		'highlight'
+		'highlight',
+		'fixedText'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -45,6 +46,20 @@ SBTSTextMorph >> contents: aString [
 
 	super contents: aString.
 	self owner ifNotNil: #clearCache
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> contentsToDisplay [
+
+	| fixed append |
+	true ifTrue: [^ super contentsToDisplay].
+	self contents ifEmpty: [^ super contentsToDisplay].
+	
+	fixed := self fixedText ifNil: [''].
+	append := self contents size < fixed size
+		ifTrue: [(fixed allButFirst: self contents size) asText addAttribute: TextEmphasis italic]
+		ifFalse: [''].
+	^ self contents, append
 ]
 
 { #category : #'as yet unclassified' }
@@ -106,6 +121,18 @@ SBTSTextMorph >> field [
 SBTSTextMorph >> firstSourceCharacter [
 
 	^ self contents size > 0 ifTrue: [self contents first] ifFalse: [nil]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> fixedText [
+
+	^ fixedText
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> fixedText: aString [
+
+	fixedText := aString
 ]
 
 { #category : #'as yet unclassified' }

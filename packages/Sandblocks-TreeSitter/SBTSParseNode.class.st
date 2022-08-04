@@ -41,6 +41,11 @@ SBTSParseNode >> buildWith: aParser [
 			SBTSTextMorph new
 				contents: contents;
 				slot: slot].
+		[#editableLabel] -> [
+			SBTSTextMorph new
+				fixedText: slot firstNode label;
+				contents: contents;
+				slot: slot].
 		[#blockEmbed] -> [(aParser copyEmbeds ifTrue: [contents copyBlock] ifFalse: [contents]) slot: slot]}.
 	self lastConstructed ifTrue: [morph setProperty: #lastConstructed toValue: true].
 	^ morph
@@ -53,6 +58,7 @@ SBTSParseNode >> characterAndBlockCount [
 		caseOf: {
 			[#block] -> [contents inject: 1 into: [:sum :node | sum + node characterAndBlockCount]].
 			[#text] -> [contents size].
+			[#editableLabel] -> [contents size].
 			[#label] -> [contents size]}
 		otherwise: [1]
 ]
@@ -93,12 +99,6 @@ SBTSParseNode >> effectiveChildren [
 SBTSParseNode >> firstDeepChild [
 
 	^ self children ifEmpty: [self] ifNotEmpty: [:c | c first firstDeepChild]
-]
-
-{ #category : #'as yet unclassified' }
-SBTSParseNode >> isLabel [
-
-	^ kind = #label
 ]
 
 { #category : #'as yet unclassified' }

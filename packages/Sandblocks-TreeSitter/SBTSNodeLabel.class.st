@@ -45,7 +45,7 @@ SBTSNodeLabel >> buildEmptyNodes [
 					contents: {SBTSParseNode kind: #label slot: slot contents: self label}]
 			ifFalse: [
 				SBTSParseNode
-					kind: (self isEditable ifTrue: [#text] ifFalse: [#label])
+					kind: (self isEditable ifTrue: [#editableLabel] ifFalse: [#label])
 					slot: slot
 					contents: self label]}
 ]

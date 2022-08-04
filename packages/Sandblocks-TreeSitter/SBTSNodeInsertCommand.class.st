@@ -134,7 +134,9 @@ SBTSNodeInsertCommand >> suggestions [
 { #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> title [
 
-	^ 'insert ' asText, (Text streamContents: [:s | element labelPrintOn: s])
+	^ self element language showInsertHints
+		ifTrue: ['insert ' asText, (Text streamContents: [:s | element labelPrintOn: s])]
+		ifFalse: [nil]
 ]
 
 { #category : #'as yet unclassified' }

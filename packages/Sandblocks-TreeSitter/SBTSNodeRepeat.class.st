@@ -224,9 +224,9 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 			wasAtEnd := parser atEnd.
 			(parser peekForLabel: delimiter) ifTrue: [parser nextSibling].
 			self isStatementRepeater ifTrue: [
-				parser numberOfNewLinesToNext - 1 timesRepeat: [parser addBlock: element alternatives second buildEmpty first].
+				parser numberOfNewLinesToNext - 1 timesRepeat: [parser addBlock: (element alternatives atLast: 2) buildEmpty first].
 				parser popPendingComments do: [:comment |
-					parser addBlock: (element alternatives third buildEmpty first
+					parser addBlock: (element alternatives last buildEmpty first
 						contents: comment;
 						yourself)]].
 			results := self element resultsForBlocks: parser.
@@ -236,7 +236,7 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 					(candidate peekForLabel: delimiter) ifTrue: [candidate nextSibling].
 					self isStatementRepeater ifTrue: [
 						candidate popPendingComments do: [:comment |
-							candidate addBlock: (element alternatives third buildEmpty first
+							candidate addBlock: (element alternatives last buildEmpty first
 								contents: comment;
 								yourself)]].
 					stream nextPut: candidate.
@@ -244,7 +244,7 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 		self required ifTrue: [{}] ifFalse: [
 			self isStatementRepeater ifTrue: [
 				aParser popPendingComments do: [:comment |
-					aParser addBlock: (element alternatives third buildEmpty first
+					aParser addBlock: (element alternatives last buildEmpty first
 						contents: comment;
 						yourself)]].
 			{aParser}]]
