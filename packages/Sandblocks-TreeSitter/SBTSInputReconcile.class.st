@@ -311,7 +311,7 @@ SBTSInputReconcile >> tryWrap: aBlock given: aString before: aBoolean [
 { #category : #reconciliation }
 SBTSInputReconcile >> tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean [
 
-	| atBorder reinterpret wrap |
+	| atBorder reinterpret wrap involvedInExplicitTransition extendsToken |
 	"consider 2+3 and the input '+' on the 3.
 Here, if we do reinterpret first, the 3 will be stringified. Instead, we want to keep the three by trying wrap first, if the input happened at the very border of the source block."
 	wrap := [self tryWrap: aBlock given: aString before: aNumber = 1].
@@ -320,8 +320,13 @@ Here, if we do reinterpret first, the 3 will be stringified. Instead, we want to
 	aBoolean ifTrue: [^ wrap value].
 	
 	atBorder := (aMorph contents isNil or: [aMorph contents isEmpty]) not and: [aNumber = 1 or: [aNumber > aMorph contents size]].
+	involvedInExplicitTransition := aBlock language transitionPairs anySatisfy: [:pair | pair key = aBlock type].
+	extendsToken := aString first isLetter and: [
+		(aMorph contents notNil and: [aMorph contents notEmpty])
+			ifTrue: [aMorph contents first isLetter]
+			ifFalse: [false]].
 	
-	^ (atBorder and: [aBlock language transitionPairs noneSatisfy: [:pair | pair key = aBlock type]])
+	^ (atBorder and: [involvedInExplicitTransition not and: [aString first isLetter not and: [extendsToken not]]])
 		ifTrue: [wrap value ifEmpty: reinterpret]
 		ifFalse: [reinterpret value ifEmpty: wrap]
 ]

@@ -1134,6 +1134,23 @@ SBTSBlockTest >> testStBinaryToAssignment [
 	self assert: 'assignment' equals: module childSandblocks second type
 ]
 
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testStCreateKeyword [
+
+	| method editor |
+	method := SBTSSmalltalk parseToplevel: 'a ni'.
+	editor := self editorAndWorldFor: method.
+	method lastDeepChild startInputAtEnd.
+	
+	editor handle: (self keyboardEvent: $l).
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
+	
+	self assert: 'a
+nil' equals: method sourceStringForCompare
+]
+
 { #category : #'tests - deleting' }
 SBTSBlockTest >> testStDeleteAroundExpression [
 

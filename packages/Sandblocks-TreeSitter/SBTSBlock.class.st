@@ -22,6 +22,8 @@ SBTSBlock >> absorbsInput: anEvent [
 
 	(anEvent commandKeyPressed or: [anEvent optionKeyPressed or: [anEvent controlKeyPressed]]) ifTrue: [^ false].
 	
+	(anEvent keyCharacter = Character tab and: [anEvent shiftPressed]) ifTrue: [^ false].
+	
 	^ anEvent keyCharacter isPrintable and: [ | text oldContents oldPosition |
 		text := self activeTextMorph.
 		oldContents := text contents.
