@@ -41,9 +41,9 @@ SBTSSmalltalk class >> fileSuffix [
 
 { #category : #configuration }
 SBTSSmalltalk class >> grammarJson [
+	" https://github.com/smalltalk/blob/master/src/grammar.json "
 
-    " https://github.com/smalltalk/blob/master/src/grammar.json "
-    ^ '{
+	^ '{
   "name": "smalltalk",
   "word": "keyword",
   "rules": {
@@ -400,11 +400,11 @@ SBTSSmalltalk class >> grammarJson [
     },
     "keyword": {
       "type": "PATTERN",
-      "value": "[A-Za-z_]+:"
+      "value": "[A-Za-z_][A-Za-z0-9_]*:"
     },
     "number": {
       "type": "PATTERN",
-      "value": "[0-9]+\\.[0-9]+|([0-9]+r)?[0-9]+"
+      "value": "-?[0-9]+\\.[0-9]+|-?([0-9]+r)?[0-9]+"
     },
     "string": {
       "type": "SEQ",
@@ -415,7 +415,7 @@ SBTSSmalltalk class >> grammarJson [
         },
         {
           "type": "PATTERN",
-          "value": "[^'']*"
+          "value": "(?:[^'']|'''')*"
         },
         {
           "type": "STRING",
@@ -435,7 +435,7 @@ SBTSSmalltalk class >> grammarJson [
           "members": [
             {
               "type": "PATTERN",
-              "value": "[A-Za-z0-9_:]+|[+\\-/*~<>=@,%|&?!]+"
+              "value": "[A-Za-z0-9_:]+|[-+\\\\/*~<>=@,%|&?!]+"
             },
             {
               "type": "SEQ",
@@ -468,7 +468,7 @@ SBTSSmalltalk class >> grammarJson [
     },
     "binary_operator": {
       "type": "PATTERN",
-      "value": "[+\\-/*~<>=@,%|&?!]+"
+      "value": "[-+\\\\/*~<>=@,%|&?!]+"
     },
     "statement": {
       "type": "CHOICE",
@@ -620,6 +620,15 @@ SBTSSmalltalk class >> grammarJson [
         {
           "type": "SYMBOL",
           "name": "false"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "PATTERN",
+            "value": "[A-Za-z0-9_:]+|[-+\\\\/*~<>=@,%|&?!]+"
+          },
+          "named": true,
+          "value": "symbol"
         },
         {
           "type": "ALIAS",

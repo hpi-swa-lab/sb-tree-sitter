@@ -226,7 +226,7 @@ SBTSNodeLabel >> resultsForBlocks: aParser [
 		{aParser addBlock: block}].
 	
 	(aParser peekForLabel: self label) ifTrue: [
-		aParser justEnteredAlias ifFalse: [aParser nextSibling].
+		(aParser justEnteredAlias not or: [self parent isTSAlias not or: [self parent named]]) ifTrue: [aParser nextSibling].
 		^ success value].
 	
 	(aParser justEnteredAlias and: [aParser peekText = self label]) ifTrue: [

@@ -497,6 +497,12 @@ SBTSParseFileTest >> testSmalltalkEmptyString [
 ]
 
 { #category : #'tests - languages' }
+SBTSParseFileTest >> testSmalltalkNestedLiteralArray [
+
+	SBTSSmalltalk parseToplevel: 'a #((a))'
+]
+
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testSmalltalkString [
 
 	| source |
