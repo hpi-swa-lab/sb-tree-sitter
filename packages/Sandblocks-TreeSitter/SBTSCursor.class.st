@@ -119,6 +119,7 @@ SBTSCursor >> gotoParent [
 		active: 1
 		do: {[cursor gotoParent]. [library cursorGotoParent: cursor]}.
 	ret ifTrue: [previousSiblings removeLast].
+	
 	^ ret
 ]
 

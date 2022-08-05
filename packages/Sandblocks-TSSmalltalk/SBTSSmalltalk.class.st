@@ -55,22 +55,19 @@ SBTSSmalltalk class >> grammarJson [
           "name": "selector"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "temporaries"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
           "type": "REPEAT",
           "content": {
-            "type": "SYMBOL",
-            "name": "pragma"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "pragma"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "temporaries"
+              }
+            ]
           }
         },
         {
@@ -407,21 +404,24 @@ SBTSSmalltalk class >> grammarJson [
       "value": "-?[0-9]+\\.[0-9]+|-?([0-9]+r)?[0-9]+"
     },
     "string": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "''"
-        },
-        {
-          "type": "PATTERN",
-          "value": "(?:[^'']|'''')*"
-        },
-        {
-          "type": "STRING",
-          "value": "''"
-        }
-      ]
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "''"
+          },
+          {
+            "type": "PATTERN",
+            "value": "([^'']|'''')*"
+          },
+          {
+            "type": "STRING",
+            "value": "''"
+          }
+        ]
+      }
     },
     "symbol": {
       "type": "SEQ",
@@ -622,6 +622,10 @@ SBTSSmalltalk class >> grammarJson [
           "name": "false"
         },
         {
+          "type": "SYMBOL",
+          "name": "symbol"
+        },
+        {
           "type": "ALIAS",
           "content": {
             "type": "PATTERN",
@@ -734,7 +738,7 @@ SBTSSmalltalk class >> grammarJson [
     },
     "block_argument": {
       "type": "PATTERN",
-      "value": ":[A-Za-z_]+"
+      "value": ": *[A-Za-z_][A-Za-z0-9_]*"
     },
     "block": {
       "type": "SEQ",
@@ -1048,7 +1052,7 @@ SBTSSmalltalk class >> grammarJson [
     },
     {
       "type": "PATTERN",
-      "value": "[\\s]"
+      "value": "[\\s\\f]"
     }
   ],
   "conflicts": [

@@ -474,7 +474,7 @@ SBTreeSitter >> textBetween: aNode and: anEndNode [
 		copyFrom: (aNode
 			ifNil: [
 				self assert: anEndNode notNil.
-				(self nodeStartByte: (self nodeParent: anEndNode)) max: 1]
+				(self nodeStartByte: (self nodeParent: anEndNode)) + 1 max: 1]
 			ifNotNil: [(self nodeEndByte: aNode) + 1])
 		to: (anEndNode
 			ifNil: [self nodeEndByte: (self nodeParent: aNode)]

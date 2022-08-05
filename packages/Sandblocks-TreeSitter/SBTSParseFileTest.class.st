@@ -519,6 +519,21 @@ SBTSParseFileTest >> testStBinaryOp [
 	self assert: '1+2' equals: op childSandblocks second sourceString
 ]
 
+{ #category : #'tests - comments' }
+SBTSParseFileTest >> testStCommentWithoutGap [
+
+	SBTSSmalltalk parseToplevel: 'a 
+	"a"a'
+]
+
+{ #category : #'tests - languages' }
+SBTSParseFileTest >> testStEmptyTrailingStatement [
+
+	SBTSSmalltalk parseToplevel: 'scrollToBottom
+
+	self vScrollBar scrollToMaximum..'
+]
+
 { #category : #'tests - languages' }
 SBTSParseFileTest >> testStSymbol [
 
