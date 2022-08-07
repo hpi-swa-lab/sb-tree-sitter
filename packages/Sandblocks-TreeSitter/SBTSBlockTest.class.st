@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction)
+	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testJsDeleteStatementsWithEmpty)
 ]
 
 { #category : #'tests - adding' }

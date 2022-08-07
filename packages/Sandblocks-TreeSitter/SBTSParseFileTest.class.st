@@ -497,6 +497,21 @@ SBTSParseFileTest >> testSmalltalkEmptyString [
 ]
 
 { #category : #'tests - languages' }
+SBTSParseFileTest >> testSmalltalkGodotMethod [
+
+	SBTSSmalltalk parseToplevel: 'process: delta    | gravity origin maxSpeed |
+    speed ifNil: [speed := 0].
+    gravity := -10.
+    maxSpeed := 1000.
+    speed := (speed min: maxSpeed) + (gravity * delta).
+    origin := self transform origin + (GDVector3 newX: 0 y: speed * delta z: 0).
+    (self transform origin dotB: (GDVector3 newX: 0 y: 1 z: 0)) < 0 ifTrue: [
+        speed := speed * -1.
+        origin := self transform origin * (GDVector3 newX: 1 y: 0 z: 1)].
+    self translation: origin.'
+]
+
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testSmalltalkNestedLiteralArray [
 
 	SBTSSmalltalk parseToplevel: 'a #((a))'
@@ -531,7 +546,7 @@ SBTSParseFileTest >> testStEmptyTrailingStatement [
 
 	SBTSSmalltalk parseToplevel: 'scrollToBottom
 
-	self vScrollBar scrollToMaximum..'
+	self..'
 ]
 
 { #category : #'tests - languages' }

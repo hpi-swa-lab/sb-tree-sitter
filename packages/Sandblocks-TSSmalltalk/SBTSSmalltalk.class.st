@@ -1180,6 +1180,12 @@ SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
 	^ false
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk class >> statementTerminator [
+
+	^ '.'
+]
+
 { #category : #'configuration - suggestions' }
 SBTSSmalltalk class >> suggestionsFor: aBlock [
 
