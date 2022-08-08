@@ -252,9 +252,10 @@ SBTSNodeSymbol >> resultsForBlocks: aParser [
 so, as a workaround, we just fall-through if we did not match and try to take the symbol"
 			ret := results]].
 		
-		(ret isNil and: [aParser atEnd not and: [aParser peekForType: self type]]) ifTrue: [ | currentBlocks results |
+		(ret isNil and: [aParser atEnd not and: [aParser peekForType: self type]]) ifTrue: [ | currentBlocks results range |
 			currentBlocks := aParser blocks.
 			aParser blocks: OrderedCollection new.
+			range := aParser currentRange.
 			aParser descend.
 			results := (self bodyTemplate resultsForBlocks: aParser) select: [:option |
 				option ascend
@@ -277,6 +278,7 @@ so, as a workaround, we just fall-through if we did not match and try to take th
 					ifFalse: [
 						{
 							SBTSBlock new
+								range: range;
 								addAllMorphs: result blocks;
 								slot: (SBTSSlot with: self)}].
 				{

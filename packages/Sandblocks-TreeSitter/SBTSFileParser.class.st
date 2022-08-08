@@ -58,50 +58,16 @@ SBTSFileParser >> blocks: aCollection [
 	blocks := aCollection
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSFileParser >> blocksForCursor: aCursor [
-
-	aCursor isNamed ifFalse: [^ {aCursor text}].
-	^ aCursor currentDo: [:type :template :isAlias | | fields matches result |
-		fields := Array streamContents: [:s |
-			aCursor gotoFirstChild ifTrue: [ | current |
-				current := aCursor node.
-				[s nextPutAll: (self blocksForCursor: aCursor)] doWhileFalse: [ | gap atEnd |
-					atEnd := aCursor gotoNextSibling.
-					(aCursor factory noteUncapturedText includes: type) ifTrue: [
-						gap := aCursor textBetween: current and: (atEnd ifTrue: [nil] ifFalse: [aCursor node]).
-						gap size > 0 ifTrue: [s nextPut: gap].
-						current := aCursor node].
-					atEnd].
-				aCursor gotoParent]].
-		stream := (fields ifEmpty: [aCursor text ifEmpty: [#()] ifNotEmpty: [{aCursor text}]]) readStream.
-		blocks := OrderedCollection new.
-		matches := template resultsForBlocks: self.
-		self assert: matches notEmpty description: ('could not construct `{1}`' format: {type}).
-		matches := matches select: [:match | match atEnd].
-		self assert: matches size = 1.
-		
-		result := SBTSBlock new
-			slot: (SBTSSlot with: (isAlias
-				ifTrue: [
-					SBTSNodeAlias new
-						factory: template factory;
-						alias: aCursor type;
-						element: template]
-				ifFalse: [SBTSNodeSymbol new type: type factory: template factory]));
-			addAllMorphs: matches anyOne blocks;
-			yourself.
-		result slot lastNode isBlockInlined
-			ifTrue: [
-				result slot lastNode isBlockInlinedInParent ifFalse: [result submorphs do: [:m | m slot: (m slot addNode: result slot lastNode)]].
-				result submorphs]
-			ifFalse: [{result}]]
-]
-
 { #category : #stream }
 SBTSFileParser >> contentsSize [
 
 	^ stream originalContents size
+]
+
+{ #category : #accessing }
+SBTSFileParser >> currentRange [
+
+	^ cursor range
 ]
 
 { #category : #'as yet unclassified' }
@@ -165,21 +131,6 @@ SBTSFileParser >> memoizedAt: aNumber for: aSymbol ifNone: aBlock [
 			orig]
 ]
 
-{ #category : #stream }
-SBTSFileParser >> nextFor: aNode [
-
-	| currentBlocks result |
-	cursor gotoFirstChild ifFalse: [cursor text].
-	currentBlocks := blocks.
-	blocks := OrderedCollection new.
-	aNode bodyTemplate resultsForBlocks: self.
-	result := SBTSBlock new
-		addAllMorphs: blocks;
-		slot: (SBTSSlot with: aNode).
-	blocks := currentBlocks.
-	^ result
-]
-
 { #category : #'as yet unclassified' }
 SBTSFileParser >> nextSibling [
 
@@ -187,42 +138,6 @@ SBTSFileParser >> nextSibling [
 	t := cursor type.
 	newPosition := cursor endByteIndex: cursor node.
 	cursor gotoNextSibling ifFalse: [self position: newPosition]
-]
-
-{ #category : #'as yet unclassified' }
-SBTSFileParser >> nodeForCursor: aCursor [
-
-	aCursor isNamed ifFalse: [^ aCursor text].
-	^ aCursor currentDo: [:type :template :isAlias | | fields matches blocks |
-		fields := Array streamContents: [:s |
-			aCursor gotoFirstChild ifTrue: [ | current |
-				current := aCursor node.
-				[s nextPut: (self nodeForCursor: aCursor)] doWhileFalse: [ | gap atEnd |
-					atEnd := aCursor gotoNextSibling.
-					(aCursor factory noteUncapturedText includes: type) ifTrue: [
-						gap := aCursor textBetween: current and: (atEnd ifTrue: [nil] ifFalse: [aCursor node]).
-						gap size > 0 ifTrue: [s nextPut: gap].
-						current := aCursor node].
-					atEnd].
-				aCursor gotoParent]].
-		blocks := fields ifEmpty: [aCursor text ifEmpty: [#()] ifNotEmpty: [{aCursor text}]].
-		stream := (blocks collect: [:b | b isString ifTrue: [b] ifFalse: [b slot firstNode]]) readStream.
-		slots := OrderedCollection new.
-		matches := template takeNodesFrom: self.
-		self assert: matches notEmpty description: ('could not construct `{1}`' format: {type}).
-		matches := matches select: [:match | match atEnd].
-		self assert: matches size = 1.
-		
-		SBTSBlock new
-			slot: (SBTSSlot with: (isAlias
-				ifTrue: [
-					SBTSNodeAlias new
-						factory: template factory;
-						alias: aCursor type;
-						element: template]
-				ifFalse: [SBTSNodeSymbol new type: type factory: template factory]));
-			addAllMorphs: (blocks with: matches first slots collect: [:subBlock :slot | slot buildMorphWith: subBlock]) flatten;
-			yourself]
 ]
 
 { #category : #'as yet unclassified' }

@@ -164,11 +164,12 @@ SBTSNodeAlias >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeAlias >> resultsForBlocks: aParser [
 
-	(aParser atEnd not and: [named ifTrue: [aParser peekForType: self alias] ifFalse: [aParser peekForLabel: self alias]]) ifTrue: [ | currentBlocks results |
+	(aParser atEnd not and: [named ifTrue: [aParser peekForType: self alias] ifFalse: [aParser peekForLabel: self alias]]) ifTrue: [ | currentBlocks results range |
 		currentBlocks := aParser blocks.
 		aParser blocks: OrderedCollection new.
 		aParser descend.
 		aParser justEnteredAlias: true.
+		range := aParser currentRange.
 		results := self bodyTemplate resultsForBlocks: aParser.
 		aParser justEnteredAlias: false.
 		^ (results select: [:result |
@@ -179,6 +180,7 @@ SBTSNodeAlias >> resultsForBlocks: aParser [
 				ifFalse: [false]]) collect: [:result | | blocks |
 			blocks := {
 				SBTSBlock new
+					range: range;
 					addAllMorphs: result blocks;
 					slot: (SBTSSlot with: self)}.
 			result

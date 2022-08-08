@@ -217,6 +217,16 @@ SBTSCursor >> previousNode: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursor >> range [
+
+	| start end node |
+	node := self node.
+	start := library nodeStartPoint: node.
+	end := library nodeEndPoint: node.
+	^ (SBTSPosition line: start row character: start column) -> (SBTSPosition line: end row character: end column)
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursor >> resolveAlias: aString in: aParentString with: aCollection [
 
 	| candidates indices symbolIndex |

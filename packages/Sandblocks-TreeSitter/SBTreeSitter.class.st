@@ -263,6 +263,13 @@ SBTreeSitter >> nodeEndByte: aNode [
 ]
 
 { #category : #ffi }
+SBTreeSitter >> nodeEndPoint: aNode [
+
+	<apicall: SBTSPoint ts_node_end_point (SBTSNode)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
 SBTreeSitter >> nodeHasError: aNode [
 
 	<apicall: bool ts_node_has_error (SBTSNode)>
@@ -315,6 +322,13 @@ SBTreeSitter >> nodePrivAlias: aNode [
 SBTreeSitter >> nodeStartByte: aNode [
 
 	<apicall: uint32_t ts_node_start_byte (SBTSNode)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
+SBTreeSitter >> nodeStartPoint: aNode [
+
+	<apicall: SBTSPoint ts_node_start_point (SBTSNode)>
 	^ self externalCallFailed
 ]
 

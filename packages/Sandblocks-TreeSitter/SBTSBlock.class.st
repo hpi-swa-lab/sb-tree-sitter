@@ -229,6 +229,7 @@ SBTSBlock >> copyBlock [
 	| copy |
 	copy := self class new
 		addAllMorphs: (self isUnknown ifTrue: [{}] ifFalse: [self submorphs collect: [:s | s copyBlock]]);
+		range: range key copy -> range value copy;
 		slot: self slot.
 	#(#lastConstructed #copyPlaceholder) do: [:prop | self valueOfProperty: prop ifPresentDo: [:val | copy setProperty: prop toValue: val]].
 	^ copy
@@ -865,6 +866,12 @@ SBTSBlock >> queryRecursiveFirstMatch: aString capturesDo: aBlock [
 SBTSBlock >> range [
 
 	^ range
+]
+
+{ #category : #accessing }
+SBTSBlock >> range: anAssociation [
+
+	range := anAssociation
 ]
 
 { #category : #'as yet unclassified' }

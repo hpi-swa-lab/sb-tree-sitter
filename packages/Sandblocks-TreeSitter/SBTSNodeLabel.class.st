@@ -215,25 +215,27 @@ SBTSNodeLabel >> resultsFor: aParser [
 SBTSNodeLabel >> resultsForBlocks: aParser [
 
 	| success |
-	success := [ | block |
+	success := [:range | | block |
 		block := (self isEditable ifTrue: [SBTSTextMorph] ifFalse: [SBTSLabel]) new
 			contents: self label;
 			slot: (SBTSSlot with: self).
 		self needsBlockWrapper ifTrue: [
 			block := SBTSBlock new
+				range: range;
 				addMorphBack: block;
 				slot: block slot].
 		{aParser addBlock: block}].
 	
-	(aParser peekForLabel: self label) ifTrue: [
+	(aParser peekForLabel: self label) ifTrue: [ | range |
+		range := aParser currentRange.
 		(aParser justEnteredAlias not or: [self parent isTSAlias not or: [self parent named]]) ifTrue: [aParser nextSibling].
-		^ success value].
+		^ success value: range].
 	
 	(aParser justEnteredAlias and: [aParser peekText = self label]) ifTrue: [
 		aParser justEnteredAlias: false.
-		^ success value].
+		^ success value: aParser currentRange].
 	
-	aParser peekText = self label ifTrue: [^ success value].
+	aParser peekText = self label ifTrue: [^ success value: aParser currentRange].
 	
 	^ {}
 ]
