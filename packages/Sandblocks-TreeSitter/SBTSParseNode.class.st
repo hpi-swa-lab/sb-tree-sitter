@@ -130,6 +130,12 @@ SBTSParseNode >> lastConstructed: aBoolean [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSParseNode >> lastDeepChild [
+
+	^ self children ifEmpty: [self] ifNotEmpty: [:c | c last lastDeepChild]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSParseNode >> parentChainIn: aParser [
 
 	| chain current leaf |

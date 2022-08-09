@@ -599,7 +599,8 @@ SBTSBlockTest >> testJsObjectInCall [
 	
 	program childSandblocks first startInsertAtEnd.
 	self type: '{})' in: editor.
-	self assert: 'a({});' equals: program sourceStringForCompare
+	self assert: 'a({});' equals: program sourceStringForCompare.
+	self assert: ')' equals: editor cursor cursorPosition textMorph contents
 ]
 
 { #category : #'tests - input transition' }

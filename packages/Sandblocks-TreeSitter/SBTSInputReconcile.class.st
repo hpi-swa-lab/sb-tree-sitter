@@ -217,16 +217,19 @@ SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 { #category : #reconciliation }
 SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNumber explicitAppend: aBoolean [
 
-	aMorph isUnknown ifTrue: [ | validCondition |
+	aMorph isUnknown ifTrue: [ | validCondition boundary |
+		boundary := aMorph submorphAfter.
 		validCondition := (aMorph submorphAfter ifNotNil: #isTextMorph ifNil: [false])
-			ifTrue: [[:p | p atEnd or: [p stream next = aMorph submorphAfter contents first and: [p stream atEnd]]]]
+			ifTrue: [[:p | p atEnd or: [p stream next = boundary contents first and: [p stream atEnd]]]]
 			ifFalse: [nil].
 		((SBTSInputParser new
 			validCondition: validCondition;
-			optionsForTemplate: aMorph slot firstNode given: aString) collect: [:blocks |
-			SBReplaceMultipleCommand new
-				target: aMorph replacers: blocks;
-				shouldMergeWithNext: true]) ifNotEmpty: [:res | ^ res]].
+			optionsForTemplate: aMorph slot firstNode given: aString) collect: [:blocks | | jumpAfterBoundary |
+			jumpAfterBoundary := blocks noneSatisfy: [:b | b lastConstructedChild notNil].
+			SBCombinedCommand newWith: {
+				SBReplaceMultipleCommand new
+					target: aMorph replacers: blocks;
+					shouldMergeWithNext: true}, (jumpAfterBoundary ifTrue: [{SBDoItCommand new do: [boundary]}] ifFalse: [{}])]) ifNotEmpty: [:res | ^ res]].
 	
 	"recursive stop condition: either our owner is no longer a ts-block or we have already gone two steps. two steps were enough for all valid scenarios we have encountered thus far."
 	aBlock isTSBlock ifFalse: [^ {}].

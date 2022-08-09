@@ -646,6 +646,13 @@ SBTSBlock >> language [
 	^ self factory language
 ]
 
+{ #category : #accessing }
+SBTSBlock >> lastConstructedChild [
+
+	self allMorphsDo: [:m | m valueOfProperty: #lastConstructed ifPresentDo: [:prop | ^ m]].
+	^ nil
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> layoutCommands [
 
