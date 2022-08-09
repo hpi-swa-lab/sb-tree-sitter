@@ -377,6 +377,16 @@ SBTSBlock >> emphasis [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> encompasses: aRange [
+
+	range key line > aRange key line ifTrue: [^ false].
+	range value line < aRange value line ifTrue: [^ false].
+	range key column > aRange key column ifTrue: [^ false].
+	range value column < aRange value column ifTrue: [^ false].
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> evaluate [
 
 	self containingArtefact ifNotNil: [:a | (a respondsTo: #evaluate:) ifTrue: [^ a evaluate: self]].
@@ -943,6 +953,15 @@ SBTSBlock >> slot: aSlot [
 
 	self assert: (aSlot isKindOf: SBTSSlot).
 	slot := aSlot
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> smallestBlockEncompassig: aRange [
+
+	| min |
+	min := self.
+	self allBlocksDo: [:block | (block encompasses: aRange) ifTrue: [min recursiveSubmorphCount > block recursiveSubmorphCount ifTrue: [min := block]]].
+	^ min
 ]
 
 { #category : #'as yet unclassified' }

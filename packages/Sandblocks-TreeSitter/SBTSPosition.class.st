@@ -21,6 +21,12 @@ SBTSPosition >> character [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSPosition >> column [
+
+	^ self character
+]
+
+{ #category : #'as yet unclassified' }
 SBTSPosition >> forLSP [
 
 	^ Dictionary newFrom: {'line' -> line. 'character' -> character}

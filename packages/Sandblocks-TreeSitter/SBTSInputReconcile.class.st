@@ -217,8 +217,13 @@ SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 { #category : #reconciliation }
 SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNumber explicitAppend: aBoolean [
 
-	aMorph isUnknown ifTrue: [
-		((SBTSInputParser new optionsForTemplate: aMorph slot firstNode given: aString) collect: [:blocks |
+	aMorph isUnknown ifTrue: [ | validCondition |
+		validCondition := (aMorph submorphAfter ifNotNil: #isTextMorph ifNil: [false])
+			ifTrue: [[:p | p atEnd or: [p stream next = aMorph submorphAfter contents first and: [p stream atEnd]]]]
+			ifFalse: [nil].
+		((SBTSInputParser new
+			validCondition: validCondition;
+			optionsForTemplate: aMorph slot firstNode given: aString) collect: [:blocks |
 			SBReplaceMultipleCommand new
 				target: aMorph replacers: blocks;
 				shouldMergeWithNext: true]) ifNotEmpty: [:res | ^ res]].

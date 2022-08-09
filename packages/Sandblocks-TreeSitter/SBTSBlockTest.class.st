@@ -591,6 +591,18 @@ SBTSBlockTest >> testJsNumberToString [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testJsObjectInCall [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'a()'.
+	editor := self editorAndWorldFor: program.
+	
+	program childSandblocks first startInsertAtEnd.
+	self type: '{})' in: editor.
+	self assert: 'a({});' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testJsPatternToAssignmentPattern [
 
 	| module editor |
