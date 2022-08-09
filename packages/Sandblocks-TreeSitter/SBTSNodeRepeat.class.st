@@ -228,28 +228,17 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 			(parser peekForLabel: delimiter) ifTrue: [parser nextSibling].
 			self isStatementRepeater ifTrue: [
 				parser numberOfNewLinesToNext - 1 timesRepeat: [parser addBlock: (element alternatives atLast: 2) buildEmpty first].
-				parser popPendingComments do: [:comment |
-					parser addBlock: (element alternatives last buildEmpty first
-						contents: comment;
-						yourself)]].
+				(parser popPendingCommentsFor: element alternatives last) do: [:comment | parser addBlock: comment]].
 			results := self element resultsForBlocks: parser.
 			results do: [:candidate |
 				"to fix troubles with infinitely repeating matches, we only accept results if they advanced the parser."
 				(candidate position > currentPosition or: [wasAtEnd not and: [candidate atEnd]]) ifTrue: [
 					(candidate peekForLabel: delimiter) ifTrue: [candidate nextSibling].
-					self isStatementRepeater ifTrue: [
-						candidate popPendingComments do: [:comment |
-							candidate addBlock: (element alternatives last buildEmpty first
-								contents: comment;
-								yourself)]].
+					self isStatementRepeater ifTrue: [(candidate popPendingCommentsFor: element alternatives last) do: [:comment | candidate addBlock: comment]].
 					stream nextPut: candidate.
 					multiple ifTrue: [queue add: candidate]]]]]) ifEmpty: [
 		self required ifTrue: [{}] ifFalse: [
-			self isStatementRepeater ifTrue: [
-				aParser popPendingComments do: [:comment |
-					aParser addBlock: (element alternatives last buildEmpty first
-						contents: comment;
-						yourself)]].
+			self isStatementRepeater ifTrue: [(aParser popPendingCommentsFor: element alternatives last) do: [:comment | aParser addBlock: comment]].
 			{aParser}]]
 ]
 

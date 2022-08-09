@@ -249,9 +249,13 @@ SBTSFileParser >> peekUncapturedText [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSFileParser >> popPendingComments [
+SBTSFileParser >> popPendingCommentsFor: anElement [
 
-	^ cursor popComments
+	^ cursor popComments collect: [:pair |
+		anElement buildEmpty first
+			contents: pair first;
+			range: pair second;
+			yourself]
 ]
 
 { #category : #stream }
