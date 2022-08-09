@@ -153,15 +153,13 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 			moveHorizontal: 1
 			wordWise: false.
 		newPos isText ifTrue: [
-			SBTSInputReconcile new
-				for: newPos textMorph
-				input: aString
-				at: 1].
+			SBTSInputReconcile new for: newPos textMorph input: aString at: 1.
+			^ newPos command].
 		newPos isInsert ifTrue: [
 			SBTSInputReconcile new
 				for: self container input: aString at: SBTSInputReconcile endIndex;
-				findOptionsBlock: [:reconcile :string | reconcile optionsForInsert: newPos given: string]].
-		^ false].
+				findOptionsBlock: [:reconcile :string | reconcile optionsForInsert: newPos given: string].
+			^ newPos command]].
 	
 	^ options notEmpty
 ]

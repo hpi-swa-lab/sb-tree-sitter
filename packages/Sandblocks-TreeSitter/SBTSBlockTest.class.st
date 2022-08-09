@@ -740,6 +740,18 @@ SBTSBlockTest >> testJsStatementTerminator [
 	self assert: 'x;' equals: program sourceStringForCompare
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsStringWithSpace [
+
+	| program editor |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	program startInsertAtEnd.
+	
+	self type: ''' ''' in: editor.
+	self assert: ''' '';' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testJsTabToEmptyStatement [
 
