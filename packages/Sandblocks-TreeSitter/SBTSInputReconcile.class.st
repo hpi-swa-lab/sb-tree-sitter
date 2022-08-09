@@ -277,6 +277,10 @@ SBTSInputReconcile >> trySeparator: aString in: aBlock [
 	aBlock owner isTSBlock ifFalse: [^ {}].
 	
 	(aBlock owner slot delimiterBetween: aBlock and: aBlock) ifNotEmpty: [:delimiter | delimiter = aString ifTrue: [^ {(aBlock sandblockEditor cursor positionAfter: aBlock) command}]].
+	
+	aString = aBlock language statementTerminator ifTrue: ["FIXME: might catch too many cases, check for proximity to stmt end morph?"
+	^ {SBDoItCommand new}].
+	
 	^ {}
 ]
 

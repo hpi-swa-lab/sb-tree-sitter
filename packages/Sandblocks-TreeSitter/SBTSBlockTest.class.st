@@ -604,6 +604,19 @@ SBTSBlockTest >> testJsObjectInCall [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testJsObjectWithMultipleFieldsInCall [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'a()'.
+	editor := self editorAndWorldFor: program.
+	
+	program childSandblocks first startInsertAtEnd.
+	self type: '{a,b})' in: editor.
+	self assert: 'a({a,b});' equals: program sourceStringForCompare.
+	self assert: ')' equals: editor cursor cursorPosition textMorph contents
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testJsPatternToAssignmentPattern [
 
 	| module editor |
@@ -714,6 +727,17 @@ SBTSBlockTest >> testJsSplitBinary [
 	editor handle: (self keyboardEvent: Character arrowRight).
 	editor handle: (self keyboardEvent: $+).
 	self assert: '1+123;' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsStatementTerminator [
+
+	| program editor |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	program startInsertAtEnd.
+	self type: 'x;' in: editor.
+	self assert: 'x;' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - cursor position' }
