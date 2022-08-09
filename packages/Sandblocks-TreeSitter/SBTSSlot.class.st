@@ -186,6 +186,8 @@ SBTSSlot >> needsParenthesis: aBlock [
 
 	| mine parent recursiveType parentSlot cmp |
 	aBlock parentSandblock isTSBlock ifFalse: [^ false].
+	"FIXME: drop this and fix it propper"
+	aBlock type = #'parenthesized_expression' ifTrue: [^ false].
 	parentSlot := aBlock parentSandblock slot.
 	recursiveType := (self lastCommonAncestorWith: parentSlot) ifNil: [^ false].
 	self flag: #todo.

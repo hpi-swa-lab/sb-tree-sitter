@@ -141,13 +141,17 @@ SBTSNodePrecedence >> labelPrintOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSNodePrecedence >> parentPrecedence: aCollection do: aBlock ifNone: anotherBlock [
 
-	| isLeftMost potentialConflict |
+	| isLeftMost potentialConflict myTypes |
 	isLeftMost := true.
 	potentialConflict := false.
+	myTypes := self element elements collect: [:element | element type] thenSelect: [:element | element notNil]. 
+	myTypes := (myTypes select: [:type | (myTypes occurrencesOf: type) > 1]) asSet.
+	
 	aCollection reverseDo: [:root |
 		root andParentsDo: [:node |
 			(node parent notNil and: [node parent isTSSeq]) ifTrue: [isLeftMost := isLeftMost and: [node parent elements first = node]].
-			(node isTSSeq and: [potentialConflict not]) ifTrue: [potentialConflict := node hasPotentialPrecedenceConflict].
+			(node isTSSeq and: [potentialConflict not]) ifTrue: [
+				potentialConflict := (node elements collect: [:element | element type]) includesAnyOf: myTypes].
 			(node isTSPrecedence and: [potentialConflict]) ifTrue: [^ aBlock value: node value: isLeftMost]]].
 	
 	^ anotherBlock value

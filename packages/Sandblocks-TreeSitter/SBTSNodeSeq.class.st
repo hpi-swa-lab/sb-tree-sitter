@@ -69,11 +69,19 @@ SBTSNodeSeq >> elements: aCollection [
 ]
 
 { #category : #testing }
-SBTSNodeSeq >> hasPotentialPrecedenceConflict [
+SBTSNodeSeq >> hasPotentialPrecedenceConflict: aCollection [
 
-	| types |
+	| types newAnswer otherTypes |
+	true ifTrue: [^ false].
+	
+	SBToggledCode comment: '' active: 0 do: {
+		[ | recursing |recursing := ((aCollection select: [:node | (aCollection count: [:n | n type = node type]) > 1]) collect: [:node | node type]) withoutDuplicates]}.
+	
 	types := self elements select: [:el | el type notNil].
-	^ (types collect: [:el | el type]) withoutDuplicates size < types size
+	otherTypes := (aCollection collect: #type) select: #notNil.
+	aCollection last type.
+	newAnswer := types anySatisfy: [:type | type type = aCollection last type or: [type allSubTypes anySatisfy: [:sym | sym type = aCollection last type]]].
+	^ newAnswer
 ]
 
 { #category : #accessing }

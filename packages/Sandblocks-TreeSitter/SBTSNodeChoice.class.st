@@ -21,6 +21,12 @@ SBTSNodeChoice >> allElementsDo: aBlock [
 	self alternatives do: [:alt | alt allElementsDo: aBlock]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeChoice >> allSubTypes [
+
+	^ self alternatives select: [:alt | alt isTSSymbol]
+]
+
 { #category : #hierarchy }
 SBTSNodeChoice >> allSubTypesDo: aBlock parents: aCollection [
 

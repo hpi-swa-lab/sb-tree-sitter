@@ -41,6 +41,17 @@ SBTSNodeBase >> allElementsDo: aBlock [
 ]
 
 { #category : #hierarchy }
+SBTSNodeBase >> allSubTypes [
+
+	self isSuperType ifTrue: [
+		^ Array streamContents: [:stream | | sub |
+			sub := self bodyTemplate allSubTypes.
+			stream nextPutAll: sub.
+			sub do: [:type | stream nextPutAll: type allSubTypes]]].
+	^ {}
+]
+
+{ #category : #hierarchy }
 SBTSNodeBase >> allSubTypesDo: aBlock parents: aCollection [
 
 	

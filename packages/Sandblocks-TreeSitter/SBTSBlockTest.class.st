@@ -1274,6 +1274,18 @@ SBTSBlockTest >> testTypeJsClass [
 };' equals: program sourceString
 ]
 
+{ #category : #'tests - associativity' }
+SBTSBlockTest >> testTypeMember [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'a+b'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	
+	self type: '.' in: editor.
+	self assert: 'a+b.', Character null, ';' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testTypeSeparator [
 
