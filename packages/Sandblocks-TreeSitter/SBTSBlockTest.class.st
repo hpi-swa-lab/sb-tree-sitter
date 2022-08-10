@@ -482,6 +482,16 @@ a;'.
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testJsEndWithSemicolon [
+
+	| program editor |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	self type: 'a;' in: editor.
+	self assert: 'a;' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testJsExpandObject [
 
 	| module editor |

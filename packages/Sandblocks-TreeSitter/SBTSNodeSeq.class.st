@@ -160,14 +160,15 @@ SBTSNodeSeq >> resultsFor: aParser [
 	
 	reportResultsBlock := [:parser :index | | newResults |
 		newResults := (self elements at: index) resultsFor: parser.
-		index = self elements size ifTrue: [results addAll: newResults] ifFalse: [
-			newResults do: [:candidate |
-				candidate atEnd
-					ifTrue: [
-						index = self elements size
-							ifTrue: [results add: candidate]
-							ifFalse: [incompleteResults add: {candidate. index}]]
-					ifFalse: [queue add: {candidate. index}]]]].
+		index = self elements size
+			ifTrue: [
+				self hasStatementTerminator ifTrue: [newResults do: [:r | r stream nextMatchAll: self language statementTerminator]].
+				results addAll: newResults]
+			ifFalse: [
+				newResults do: [:candidate |
+					candidate atEnd
+						ifTrue: [incompleteResults add: {candidate. index}]
+						ifFalse: [queue add: {candidate. index}]]]].
 	
 	reportResultsBlock value: aParser value: 1.
 	

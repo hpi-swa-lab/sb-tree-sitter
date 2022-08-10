@@ -720,7 +720,7 @@ SBTSGrammar >> unwrapSingleChoices: anObject rule: aString [
 				first := node alternatives first.
 				second := node alternatives second.
 				first isTSRepeat and: [first multiple and: [first required not and: [second isTSBlank]]]]]) ifTrue: [node replaceBy: node elements first].
-		(node isTSSeq and: [node elements size = 1]) ifTrue: [node replaceBy: node elements anyOne toplevelDo: [:n | self rules at: aString put: n]].
+		(node isTSSeq and: [node elements size = 1 and: [node hasStatementTerminator not]]) ifTrue: [node replaceBy: node elements anyOne toplevelDo: [:n | self rules at: aString put: n]].
 		(node isTSChoice and: [node elements isEmpty and: [node parent notNil]]) ifTrue: [node delete]]
 ]
 
