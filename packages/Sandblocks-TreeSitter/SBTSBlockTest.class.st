@@ -1080,6 +1080,17 @@ SBTSBlockTest >> testPythonString [
 	self assert: '''a''' equals: program sourceStringForCompare
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testPythonTripleString [
+
+	| program editor |
+	program := SBPython empty.
+	editor := self editorAndWorldFor: program.
+	
+	self type: '"""a' in: editor.
+	self assert: '"""a"""' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - query' }
 SBTSBlockTest >> testQueryBlockInlined [
 

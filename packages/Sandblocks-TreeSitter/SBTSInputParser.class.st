@@ -14,7 +14,8 @@ Class {
 		'nodeCountCache',
 		'copyEmbeds',
 		'lastConstructedCache',
-		'validCondition'
+		'validCondition',
+		'siblings'
 	],
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
@@ -484,6 +485,19 @@ e.g., this will block from expanding to 2+_ if our input was just a 2"
 			ifAbsent: [false]].
 	
 	^ false
+]
+
+{ #category : #accessing }
+SBTSInputParser >> siblings [
+
+	^ siblings ifNil: [blocks]
+]
+
+{ #category : #accessing }
+SBTSInputParser >> siblings: aCollection [
+	"can set this for context-sensitive text nodes to gather information"
+
+	siblings := aCollection
 ]
 
 { #category : #'as yet unclassified' }

@@ -24,7 +24,7 @@ SBTSNodeContextSensitiveText >> prefixValidFor: aString in: aSiblingsCollection 
 SBTSNodeContextSensitiveText >> resultsFor: aParser [
 
 	| contents |
-	contents := String streamContents: [:stream | [aParser peek isCharacter and: [validCheck value: aParser blocks value: aParser peek]] whileTrue: [stream nextPut: aParser next]].
+	contents := String streamContents: [:stream | [aParser peek isCharacter and: [validCheck value: aParser siblings value: aParser peek]] whileTrue: [stream nextPut: aParser next]].
 	aParser addBlock: (SBTSParseNode kind: #text slot: (SBTSSlot with: self) contents: (String withAll: contents)).
 	^ {aParser}
 ]
