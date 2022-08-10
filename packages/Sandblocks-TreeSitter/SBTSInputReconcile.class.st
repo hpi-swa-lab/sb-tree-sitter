@@ -300,7 +300,7 @@ SBTSInputReconcile >> trySkipLabel: aString in: aBlock from: aMorph at: aNumber 
 { #category : #reconciliation }
 SBTSInputReconcile >> tryWrap: aBlock given: aString before: aBoolean [
 
-	| get considerOwner |
+	| get |
 	get := [:root |
 		(SBTSInputParser new
 			optionsFor: root
@@ -312,12 +312,19 @@ SBTSInputReconcile >> tryWrap: aBlock given: aString before: aBoolean [
 				shouldMergeWithNext: true]].
 	
 	"if we have a left associative parent, we should always also check the owner for options, otherwise we risk committing too early to a local solution. For example, consider _+_ and _++ in e.g. C"
-	considerOwner := aBlock slot firstNode
-		parentPrecedence: aBlock slot nodes
-		do: [:node :isLeftMost :isRightMost | isLeftMost not]
-		ifNone: [false].
-	
-	^ (get value: aBlock), (considerOwner ifTrue: [get value: aBlock owner] ifFalse: [{}])
+	^ Array streamContents: [:stream | | current |
+		stream nextPutAll: (get value: aBlock).
+		current := aBlock.
+		SBToggledCode comment: '' active: 1 do: {
+			[
+				aBlock allOwnersDo: [:owner | | considerOwner |
+					considerOwner := owner isTSBlock and: [
+						current slot firstNode
+							parentPrecedence: current slot nodes
+							do: [:node :isLeftMost :isRightMost | node isLeftAssociative and: [isLeftMost not]]
+							ifNone: [false]].
+					considerOwner ifTrue: [stream nextPutAll: (get value: owner)].
+					owner isTSBlock ifTrue: [current := owner]]]}]
 ]
 
 { #category : #reconciliation }

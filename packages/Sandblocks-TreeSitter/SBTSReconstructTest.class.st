@@ -52,7 +52,7 @@ SBTSReconstructTest >> testJsonCommitExpressJS [
 	changes := FileStream
 		readOnlyFileNamed: '/home/tom/Code/squeak/sle2022-partial-parser/express.json'
 		do: [:stream | Json readFrom: stream].
-	(changes first: 30)
+	((changes allButFirst: 16) first: 30)
 		do: [:change |
 			[ | program block string editor originalSource |
 				program := SBJavascript parseToplevel: change fullSourceCode.

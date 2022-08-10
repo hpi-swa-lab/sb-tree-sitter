@@ -41,6 +41,17 @@ SBTSBlockTest >> testAddAdaptsSlotSmalltalkStmt [
 ]
 
 { #category : #'tests - associativity' }
+SBTSBlockTest >> testAdditionWithMember [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'a+b.c'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self type: '+x' in: editor.
+	self assert: 'a+b.c+x;' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - associativity' }
 SBTSBlockTest >> testAppendMultiplication [
 
 	| program editor |
@@ -304,6 +315,17 @@ SBTSBlockTest >> testJsAmbiguousCall [
 	
 	self type: 'a(' in: editor.
 	self assert: 'call_expression' equals: module childSandblocks first type
+]
+
+{ #category : #'tests - associativity' }
+SBTSBlockTest >> testJsBinaryInUnary [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'typeof x'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self type: '+x' in: editor.
+	self assert: 'typeof x+x;' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -896,6 +918,17 @@ SBTSBlockTest >> testNestMultiplication [
 		given: '2+3*4'.
 	self assert: results size = 1.
 	self assert: '2+3*4' equals: results anyOne first sourceStringForCompare
+]
+
+{ #category : #'tests - associativity' }
+SBTSBlockTest >> testNestedMemberInAssign [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'x=x.x'.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self type: '.x' in: editor.
+	self assert: 'x=x.x.x;' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }

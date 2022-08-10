@@ -54,8 +54,8 @@ SBTSNodePrecedence >> buildEmptyNodes [
 { #category : #'as yet unclassified' }
 SBTSNodePrecedence >> canExpandInStack: aCollection [
 
-	SBToggledCode comment: '' active: 0 do: {[^ true]}.
-	
+	SBToggledCode comment: '' active: 0 do: {
+		[((aCollection anySatisfy: [:c | c hasParentThat: [:x | x isTSPrecedence and: [x value = 'call']]]) and: [value = 'member']) ifTrue: [self halt]]}.
 	^ self
 		parentPrecedence: aCollection
 		do: [:parentPrec :isLeftMost :isRightMost | | comp hasActiveRecursion |
@@ -157,8 +157,16 @@ SBTSNodePrecedence >> parentPrecedence: aCollection do: aBlock ifNone: anotherBl
 			(node parent notNil and: [node parent isTSSeq]) ifTrue: [
 				isLeftMost := isLeftMost and: [node parent elements first = node].
 				isRightMost := isRightMost and: [node parent elements last = node]].
-			(node isTSSeq and: [potentialConflict not and: [node elements first type notNil]]) ifTrue: [potentialConflict := node elements first type = self element elements last type].
-			(node isTSPrecedence and: [potentialConflict]) ifTrue: [^ aBlock value: node value: isLeftMost value: isRightMost]]].
+			(node isTSSeq and: [potentialConflict not]) ifTrue: [
+				node elements first type ifNotNil: [potentialConflict := node elements first type = self element elements last type].
+				node elements last type ifNotNil: [potentialConflict := node elements last type = self element elements first type]].
+			node isTSPrecedence ifTrue: [
+				potentialConflict
+					ifTrue: [^ aBlock value: node value: isLeftMost value: isRightMost]
+					ifFalse: [
+						"this one wasn't a conflict, let's check the next one"
+						isLeftMost := true.
+						isRightMost := true]]]].
 	
 	^ anotherBlock value
 ]
@@ -192,7 +200,7 @@ SBTSNodePrecedence >> resultsFor: aParser [
 
 	^ (self precedence = 'PREC_DYNAMIC' or: [ | recursing |
 		recursing := (aParser symbolStack collect: #type) withoutDuplicates size < aParser symbolStack size.
-		recursing not or: [self canExpandInStack: aParser symbolStack]])
+		self canExpandInStack: aParser symbolStack])
 		ifTrue: [self element resultsFor: aParser]
 		ifFalse: [{}]
 ]

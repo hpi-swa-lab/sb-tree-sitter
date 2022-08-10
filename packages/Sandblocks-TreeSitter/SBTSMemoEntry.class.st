@@ -29,7 +29,9 @@ SBTSMemoEntry >> getBlocksOrMarkRecursionFrom: aSymbol stack: aCollection parser
 						ifEmpty: [p blocks first]) slot.
 					(nestedSlot parentThat: [:node | node isTSPrecedence])
 						ifNotNil: [:precedence |
-							(precedence canExpandInStack: aCollection, (p blocks first effectiveChildren ifNotEmpty: [:c | {aSymbol}] ifEmpty: [{}]))
+							(precedence canExpandInStack: aCollection, (p blocks first effectiveChildren
+								ifNotEmpty: [:c | {aSymbol}]
+								ifEmpty: [{}]))
 								ifTrue: [true]
 								ifFalse: [false]]
 						ifNil: [true]]]]
