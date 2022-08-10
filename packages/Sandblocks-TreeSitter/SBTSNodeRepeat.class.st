@@ -208,7 +208,7 @@ SBTSNodeRepeat >> resultsFor: aParser [
 			(delimiter notNil and: [result stream atEnd not]) ifTrue: [
 				result stream nextMatchAll: delimiter.
 				"if skipping the delimiter brought us to the end, mark the block"
-				result stream atEnd ifTrue: [result blocks last lastConstructed: true]].
+				result stream atEnd ifTrue: [result blocks last lastDeepChild lastConstructed: true]].
 			candidates add: result.
 			(multiple and: [result position > lastPosition and: [result atEnd not]]) ifTrue: [queue add: result]]].
 	

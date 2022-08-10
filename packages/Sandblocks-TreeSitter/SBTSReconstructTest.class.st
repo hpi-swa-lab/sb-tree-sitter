@@ -94,7 +94,7 @@ SBTSReconstructTest >> runTests: aPathString language: aLanguage [
 				originalSource := program sourceStringForCompare.
 				block := program smallestBlockEncompassig: (self rangeFrom: change).
 				string := block sourceString.
-				self assert: (string size < 300 or: [block type = #comment]).
+				self assert: (string size < 300 or: [block type = #comment or: [block type = #string]]).
 				string last = $; ifTrue: [string := string allButLast].
 				editor := self editorAndWorldFor: program.
 				block changeToUnknown.
