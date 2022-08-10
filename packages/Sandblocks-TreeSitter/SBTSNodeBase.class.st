@@ -442,7 +442,7 @@ SBTSNodeBase >> transitionRoot [
 
 	| current |
 	current := self.
-	[current parent notNil and: [current parent isTSChoice]] whileTrue: [current := current parent].
+	[current parent notNil and: [current parent isTSChoice or: [current parent isTSSeq and: [current parent elements size = 1]]]] whileTrue: [current := current parent].
 	^ current
 ]
 
