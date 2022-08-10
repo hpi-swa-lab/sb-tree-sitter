@@ -219,7 +219,7 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 
 	aMorph isUnknown ifTrue: [ | validCondition boundary |
 		boundary := aMorph submorphAfter.
-		validCondition := (aMorph submorphAfter ifNotNil: #isTextMorph ifNil: [false])
+		validCondition := (boundary ifNotNil: #isTextMorph ifNil: [false])
 			ifTrue: [[:p | p atEnd or: [p stream next = boundary contents first and: [p stream atEnd]]]]
 			ifFalse: [nil].
 		((SBTSInputParser new
@@ -249,7 +249,7 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 { #category : #reconciliation }
 SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber fullToken: aBoolean [
 
-	| pivot string |
+	| pivot string boundary validCondition |
 	aMorph contents ifNil: [^ {}].
 	pivot := (aMorph orOwnerSuchThat: [:m | m owner = aBlock]) ifNil: [^ {}].
 	
@@ -260,15 +260,23 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 		ifTrue: [pivot contents, aString]
 		ifFalse: [(pivot contents first: aNumber - 1), aString, (pivot contents allButFirst: aNumber - 1)].
 	
+	boundary := pivot owner submorphAfter.
+	validCondition := (boundary ifNotNil: #isTextMorph ifNil: [false])
+		ifTrue: [[:p | p atEnd or: [p stream next = boundary contents first and: [p stream atEnd]]]]
+		ifFalse: [nil].
+	
 	^ (SBTSInputParser new
 		matchFullToken: aBoolean;
+		validCondition: validCondition;
 		optionsFor: pivot owner
 			given: string
 			before: ((aBlock submorphs first: pivot submorphIndex - 1) select: #keepDuringTransform)
-			after: ((aBlock submorphs allButFirst: pivot submorphIndex) select: #keepDuringTransform)) collect: [:blocks |
-		SBReplaceMultipleCommand new
-			target: pivot owner replacers: blocks;
-			shouldMergeWithNext: true]
+			after: ((aBlock submorphs allButFirst: pivot submorphIndex) select: #keepDuringTransform)) collect: [:blocks | | jumpAfterBoundary |
+		jumpAfterBoundary := blocks noneSatisfy: [:b | b isTSBlock and: [b lastConstructedChild notNil]].
+		SBCombinedCommand newWith: {
+			SBReplaceMultipleCommand new
+				target: pivot owner replacers: blocks;
+				shouldMergeWithNext: true}, (jumpAfterBoundary ifTrue: [{SBDoItCommand new do: [boundary]}] ifFalse: [{}])]
 ]
 
 { #category : #reconciliation }
@@ -301,12 +309,12 @@ SBTSInputReconcile >> trySkipLabel: aString in: aBlock from: aMorph at: aNumber 
 SBTSInputReconcile >> tryWrap: aBlock given: aString before: aBoolean [
 
 	| get |
-	get := [:root |
+	get := [:root | 
 		(SBTSInputParser new
 			optionsFor: root
-			given: aString
-			before: (aBoolean ifTrue: [{}] ifFalse: [{root}])
-			after: (aBoolean ifTrue: [{root}] ifFalse: [{}])) collect: [:blocks |
+				given: aString
+				before: (aBoolean ifTrue: [{}] ifFalse: [{root}])
+				after: (aBoolean ifTrue: [{root}] ifFalse: [{}])) collect: [:blocks |
 			SBReplaceMultipleCommand new
 				target: root replacers: blocks;
 				shouldMergeWithNext: true]].

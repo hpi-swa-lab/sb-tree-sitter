@@ -16,6 +16,7 @@ SBTSReconstructTest >> rangeFrom: aChange [
 	| startInset endInset |
 	startInset := aChange typed size - aChange typed withoutLeadingBlanks size.
 	endInset := aChange typed size - aChange typed withoutTrailingBlanks size.
+	aChange typed last = $; ifTrue: [endInset := endInset + 1].
 	^ (SBTSPosition line: aChange line - 1 character: aChange startColumn + startInset) -> (SBTSPosition line: aChange line - 1 character: aChange endColumn - endInset)
 ]
 
@@ -52,7 +53,7 @@ SBTSReconstructTest >> testJsonCommitExpressJS [
 	changes := FileStream
 		readOnlyFileNamed: '/home/tom/Code/squeak/sle2022-partial-parser/express.json'
 		do: [:stream | Json readFrom: stream].
-	((changes allButFirst: 16) first: 30)
+	(changes first: 30)
 		do: [:change |
 			[ | program block string editor originalSource |
 				program := SBJavascript parseToplevel: change fullSourceCode.
@@ -60,6 +61,7 @@ SBTSReconstructTest >> testJsonCommitExpressJS [
 				block := program smallestBlockEncompassig: (self rangeFrom: change).
 				string := block sourceString.
 				self assert: string size < 300.
+				string last = $; ifTrue: [string := string allButLast].
 				editor := self editorAndWorldFor: program.
 				block changeToUnknown.
 				self type: string in: editor.
