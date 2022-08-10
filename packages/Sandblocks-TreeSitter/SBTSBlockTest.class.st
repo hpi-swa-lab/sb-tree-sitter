@@ -920,6 +920,21 @@ SBTSBlockTest >> testMemberInAssign [
 ]
 
 { #category : #'tests - associativity' }
+SBTSBlockTest >> testMemberInObject [
+
+	| program editor |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	program startInputAtEnd.
+	self type: '{a:b.x}' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character arrowDown).
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: '{a:b.x};' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - associativity' }
 SBTSBlockTest >> testNestMultiplication [
 
 	| results |

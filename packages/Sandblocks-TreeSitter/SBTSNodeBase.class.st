@@ -253,6 +253,12 @@ SBTSNodeBase >> isInlined [
 	^ self isSuperType or: [self isBlockInlined or: [self hasParentThat: [:parent | parent isTSAlias and: [parent unwrapsNestedBlock]]]]
 ]
 
+{ #category : #hierarchy }
+SBTSNodeBase >> isSubTypeOf: aSymbol stack: aCollection [
+
+	^ false
+]
+
 { #category : #testing }
 SBTSNodeBase >> isSuperType [
 

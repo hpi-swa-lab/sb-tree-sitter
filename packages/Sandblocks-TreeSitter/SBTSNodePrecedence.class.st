@@ -56,6 +56,7 @@ SBTSNodePrecedence >> canExpandInStack: aCollection [
 
 	SBToggledCode comment: '' active: 0 do: {
 		[((aCollection anySatisfy: [:c | c hasParentThat: [:x | x isTSPrecedence and: [x value = 'call']]]) and: [value = 'member']) ifTrue: [self halt]]}.
+	
 	^ self
 		parentPrecedence: aCollection
 		do: [:parentPrec :isLeftMost :isRightMost | | comp hasActiveRecursion |
@@ -158,8 +159,18 @@ SBTSNodePrecedence >> parentPrecedence: aCollection do: aBlock ifNone: anotherBl
 				isLeftMost := isLeftMost and: [node parent elements first = node].
 				isRightMost := isRightMost and: [node parent elements last = node]].
 			(node isTSSeq and: [potentialConflict not]) ifTrue: [
-				node elements first type ifNotNil: [potentialConflict := node elements first type = self element elements last type].
-				node elements last type ifNotNil: [potentialConflict := node elements last type = self element elements first type]].
+				node elements first type ifNotNil: [
+					potentialConflict := node elements first type = self element elements last type and: [
+						(aCollection last isSubTypeOf: node elements first stack: aCollection reversed) and: [
+							(aCollection before: root ifAbsent: [aCollection last])
+								isSubTypeOf: node elements first
+								stack: aCollection reversed]]].
+				node elements last type ifNotNil: [
+					potentialConflict := node elements last type = self element elements first type and: [
+						(aCollection last isSubTypeOf: node elements last stack: aCollection reversed) and: [
+							(aCollection before: root ifAbsent: [aCollection last])
+								isSubTypeOf: node elements last
+								stack: aCollection reversed]]]].
 			node isTSPrecedence ifTrue: [
 				potentialConflict
 					ifTrue: [^ aBlock value: node value: isLeftMost value: isRightMost]

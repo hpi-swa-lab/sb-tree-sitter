@@ -163,6 +163,18 @@ SBTSNodeSymbol >> isBlockInlinedInParent [
 ]
 
 { #category : #testing }
+SBTSNodeSymbol >> isSubTypeOf: aSymbol stack: aCollection [
+
+	| first |
+	first := aCollection indexOf: self.
+	(aCollection viewFrom: first) do: [:node |
+		node andParentsDo: [:p |
+			p type = aSymbol type ifTrue: [^ true].
+			(p isTSChoice not and: [p isTSSymbol not]) ifTrue: [^ false]]].
+	^ false
+]
+
+{ #category : #testing }
 SBTSNodeSymbol >> isTSSymbol [
 
 	^ true
