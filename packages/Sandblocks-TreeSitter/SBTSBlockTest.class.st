@@ -148,6 +148,17 @@ SBTSBlockTest >> testCanTypeOverKeywordSuggestion [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testClojureAppendParens [
+
+	| program editor |
+	program := SBClojure parseToplevel: '((a))'.
+	editor := self editorAndWorldFor: program.
+	program childSandblocks first childSandblocks first startInputAtEnd.
+	self type: ' (' in: editor.
+	self assert: '((a) ())' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testClojureSymbol [
 
 	| source editor |
@@ -1056,6 +1067,17 @@ SBTSBlockTest >> testPyIfStatement [
 	self tick.
 	editor handle: (self keyboardEvent: Character cr).
 	self assert: 'if_statement' equals: program childSandblocks first type
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testPythonString [
+
+	| program editor |
+	program := SBPython empty.
+	editor := self editorAndWorldFor: program.
+	
+	self type: '''a''' in: editor.
+	self assert: '''a''' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - query' }

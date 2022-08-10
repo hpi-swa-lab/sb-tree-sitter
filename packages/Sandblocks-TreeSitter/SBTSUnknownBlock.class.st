@@ -55,7 +55,7 @@ SBTSUnknownBlock >> placeholderText: aString [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSUnknownBlock >> prefixValidFor: aTextMorph [
+SBTSUnknownBlock >> prefixValidFor: aTextMorph in: aSiblingsCollection [
 
 	^ false
 ]

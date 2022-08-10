@@ -381,8 +381,8 @@ SBTSBlock >> encompasses: aRange [
 
 	range key line > aRange key line ifTrue: [^ false].
 	range value line < aRange value line ifTrue: [^ false].
-	range key column > aRange key column ifTrue: [^ false].
-	range value column < aRange value column ifTrue: [^ false].
+	(range key line = aRange key line and: [range key column > aRange key column]) ifTrue: [^ false].
+	(range value line = aRange value line and: [range value column < aRange value column]) ifTrue: [^ false].
 	^ true
 ]
 
@@ -789,9 +789,11 @@ SBTSBlock >> prefersNoBorder [
 ]
 
 { #category : #testing }
-SBTSBlock >> prefixValidFor: aTextMorph [
+SBTSBlock >> prefixValidFor: aTextMorph in: aSiblingsCollection [
 
-	^ aTextMorph slot firstNode prefixValidFor: aTextMorph contents
+	^ aTextMorph slot firstNode
+		prefixValidFor: aTextMorph contents
+		in: aSiblingsCollection
 ]
 
 { #category : #accessing }
@@ -846,9 +848,9 @@ SBTSBlock >> promptTransition [
 
 	SBTSInputReconcile new
 		explicitAppend: true;
-		for: self
-			input: ''
-			at: (ActiveEvent shiftPressed ifTrue: [1] ifFalse: [SBTSInputReconcile endIndex])
+		for: (self activeTextMorph ifNil: [self])
+		input: ''
+		at: (ActiveEvent shiftPressed ifTrue: [1] ifFalse: [SBTSInputReconcile endIndex])
 ]
 
 { #category : #query }
@@ -1056,7 +1058,7 @@ SBTSBlock >> tryApplyChange: aBlock input: aString [
 		ifEmpty: [SBTSInputReconcile endIndex].
 	aBlock value: textMorph.
 	
-	(self prefixValidFor: textMorph)
+	(self prefixValidFor: textMorph in: self submorphs)
 		ifTrue: [
 			((self factory keywords includes: textMorph contents) and: [(self isMyActiveKeyword: textMorph contents) not]) ifTrue: [
 				textMorph contents: previousContents.
@@ -1133,10 +1135,7 @@ SBTSBlock >> valid [
 
 	self flag: #todo.
 	" cache valid "
-	^ self textMorphs allSatisfy: [:t |
-		t
-			ifNotNil: [t slot firstNode validFor: t contents]
-			ifNil: [true]]
+	^ self textMorphs allSatisfy: [:t | t ifNotNil: [t slot firstNode validFor: t contents in: self submorphs] ifNil: [true]]
 ]
 
 { #category : #'as yet unclassified' }

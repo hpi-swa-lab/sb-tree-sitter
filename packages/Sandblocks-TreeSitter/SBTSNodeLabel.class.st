@@ -158,7 +158,7 @@ SBTSNodeLabel >> needsBlockWrapper [
 ]
 
 { #category : #testing }
-SBTSNodeLabel >> prefixValidFor: aString [
+SBTSNodeLabel >> prefixValidFor: aString in: aSiblingsCollection [
 
 	^ self label beginsWith: aString
 ]
@@ -265,7 +265,7 @@ SBTSNodeLabel >> type [
 ]
 
 { #category : #testing }
-SBTSNodeLabel >> validFor: aString [
+SBTSNodeLabel >> validFor: aString in: aSiblingsCollection [
 
 	^ self label = aString
 ]

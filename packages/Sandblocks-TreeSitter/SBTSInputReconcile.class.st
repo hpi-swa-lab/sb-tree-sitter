@@ -365,7 +365,7 @@ SBTSInputReconcile >> updateChoices [
 		currentChoices := {}.
 		^ self].
 	
-	currentChoices := self findOptionsBlock cull: self cull: self contents.
+	SBTSReconstructTest reportTime: [currentChoices := self findOptionsBlock cull: self cull: self contents] durationToRun.
 	
 	SBToggledCode comment: '' active: 1 do: {
 		[(currentChoices size = 1 and: [insertIndex > 1 or: [currentChoices first isKindOf: SBDoItCommand]]) ifTrue: [self applyCommand: currentChoices anyOne]]}

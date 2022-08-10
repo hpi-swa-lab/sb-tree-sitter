@@ -367,6 +367,12 @@ def a():
 ]
 
 { #category : #'tests - languages' }
+SBTSParseFileTest >> testPythonEmptyTripleString [
+
+	SBPython parseToplevel: ''''''' '''''''
+]
+
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testPythonFunction [
 
 	| source |

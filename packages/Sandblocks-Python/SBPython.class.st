@@ -5149,6 +5149,12 @@ SBPython class >> indentMatch: aBlock [
 	^ aBlock type = 'block'
 ]
 
+{ #category : #'as yet unclassified' }
+SBPython class >> inputTransitionBlackList [
+
+	^ {#'concatenated_string'}
+]
+
 { #category : #'configuration - editing' }
 SBPython class >> isBlockInlined: aSymbol [
 
@@ -5229,7 +5235,7 @@ SBPython class >> preprocessGrammar: aGrammar [
 	
 	aGrammar rules at: 'string' put: (SBTSNodeChoice new
 		factory: aGrammar;
-		alternatives: (#('''' '"' '"""') collect: [:quote |
+		alternatives: (#('''' '"' '"""' '''''''') collect: [:quote |
 			SBTSNodeSeq new
 				factory: aGrammar;
 				elements: {
@@ -5253,7 +5259,7 @@ SBPython class >> preprocessGrammar: aGrammar [
 						label: quote}])).
 	aGrammar rules at: '_string_content' put: (SBTSNodeContextSensitiveText new
 		factory: aGrammar;
-		validCheck: [:parser :character | character ~= parser blocks first slot firstNode label];
+		validCheck: [:siblings :character | siblings notEmpty and: [character asString ~= siblings first slot firstNode label]];
 		regexString: '.*').
 	
 	"causes unambiguous file parses (#testPythonPrint) and we don't need it for our purposes"

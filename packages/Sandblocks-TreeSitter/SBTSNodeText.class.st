@@ -123,7 +123,7 @@ SBTSNodeText >> maxChildren [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSNodeText >> prefixValidFor: aString [
+SBTSNodeText >> prefixValidFor: aString in: aSiblingsCollection [
 
 	^ SBRegexStream tryMatchPrefix: aString regex: regex
 ]
@@ -189,7 +189,7 @@ SBTSNodeText >> resultsFor: aParser [
 		remaining := aParser stream upToEnd.
 		(SBToggledCode comment: '' active: 2 do: {
 			[false].
-			[aParser matchFullToken not and: [(remaining noneSatisfy: [:c | c isMorph]) and: [self prefixValidFor: remaining]]].
+			[aParser matchFullToken not and: [(remaining noneSatisfy: [:c | c isMorph]) and: [self prefixValidFor: remaining in: aParser blocks]]].
 			[plainPrefix beginsWith: remaining]}) ifTrue: [
 			^ {
 				aParser addBlock: (SBTSParseNode kind: #text slot: (SBTSSlot with: self) contents: (String withAll: (plainPrefix size > remaining size
@@ -210,26 +210,16 @@ SBTSNodeText >> resultsForBlocks: aParser [
 				contents: text;
 				slot: (SBTSSlot with: self))}].
 	
-	^ (aParser peekHasText and: [self characterValid: aParser peekText in: aParser])
+	^ (aParser peekHasText and: [self characterValid: aParser peekText in: aParser blocks])
 		ifTrue: [success value: aParser text]
 		ifFalse: [ | uncaptured |
 			uncaptured := aParser peekUncapturedText.
 			uncaptured
 				ifNotEmpty: [
-					(self characterValid: uncaptured in: aParser)
+					(self characterValid: uncaptured in: aParser blocks)
 						ifTrue: [success value: aParser uncapturedText]
 						ifFalse: [{}]]
 				ifEmpty: [(self regex matches: '') ifTrue: [{aParser}] ifFalse: [{}]]]
-]
-
-{ #category : #parsing }
-SBTSNodeText >> takeNodesFrom: aParser [
-
-	^ (aParser atEnd not and: [aParser peek isString and: [self characterValid: aParser peek in: aParser]])
-		ifTrue: [
-			aParser next.
-			{aParser copy addSlot: self}]
-		ifFalse: [(self regex matches: '') ifTrue: [{aParser copy}] ifFalse: [{}]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -241,7 +231,7 @@ SBTSNodeText >> traverseBlocks: aStream do: aBlock [
 ]
 
 { #category : #testing }
-SBTSNodeText >> validFor: aString [
+SBTSNodeText >> validFor: aString in: aSiblingsCollection [
 
 	^ regex matches: aString
 ]

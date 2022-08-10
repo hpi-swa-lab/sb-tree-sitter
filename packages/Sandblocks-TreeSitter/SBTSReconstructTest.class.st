@@ -1,8 +1,45 @@
 Class {
 	#name : #SBTSReconstructTest,
 	#superclass : #SBTest,
+	#classVars : [
+		'Times'
+	],
 	#category : #'Sandblocks-TreeSitter-Tests'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructTest class >> clearTimes [
+
+	Times := nil
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructTest class >> reportTime: aTimeSpan [
+
+	Times ifNil: [Times := OrderedCollection new].
+	Times add: aTimeSpan
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructTest class >> runAllAndCopyToClipboard [
+
+	self clearTimes.
+	self basicNew testJsonCommitExpressJS.
+	self basicNew testJsonCommitOvertoneClojure.
+	self writeTimes
+]
+
+{ #category : #accessing }
+SBTSReconstructTest class >> times [
+
+	^ Times
+]
+
+{ #category : #accessing }
+SBTSReconstructTest class >> writeTimes [
+
+	Clipboard clipboardText: ((self times collect: [:t | t asMicroSeconds]) joinSeparatedBy: String cr)
+]
 
 { #category : #'as yet unclassified' }
 SBTSReconstructTest >> randomBlockIn: aBlock [
@@ -21,7 +58,7 @@ SBTSReconstructTest >> rangeFrom: aChange [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSReconstructTest >> runTestsFor: aLanguage source: aString [
+SBTSReconstructTest >> runRandomTestsFor: aLanguage source: aString [
 
 	| program source editor types |
 	program := aLanguage parseToplevel: aString.
@@ -46,21 +83,18 @@ SBTSReconstructTest >> runTestsFor: aLanguage source: aString [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSReconstructTest >> testJsonCommitExpressJS [
-	<timeout: 100000>
+SBTSReconstructTest >> runTests: aPathString language: aLanguage [
 
 	| changes |
-	changes := FileStream
-		readOnlyFileNamed: '/home/tom/Code/squeak/sle2022-partial-parser/express.json'
-		do: [:stream | Json readFrom: stream].
-	(changes first: 30)
+	changes := FileStream readOnlyFileNamed: aPathString do: [:stream | Json readFrom: stream].
+	((changes first: 30) select: [:change | change typed notEmpty])
 		do: [:change |
 			[ | program block string editor originalSource |
-				program := SBJavascript parseToplevel: change fullSourceCode.
+				program := aLanguage parseToplevel: change fullSourceCode.
 				originalSource := program sourceStringForCompare.
 				block := program smallestBlockEncompassig: (self rangeFrom: change).
 				string := block sourceString.
-				self assert: string size < 300.
+				self assert: (string size < 300 or: [block type = #comment]).
 				string last = $; ifTrue: [string := string allButLast].
 				editor := self editorAndWorldFor: program.
 				block changeToUnknown.
@@ -72,8 +106,31 @@ SBTSReconstructTest >> testJsonCommitExpressJS [
 						self tick.
 						editor handle: (self keyboardEvent: Character cr)]
 					ifNone: [].
-				self assert: originalSource equals: program sourceStringForCompare]
+				SBToggledCode comment: '' active: 2 do: {
+					[originalSource = program sourceStringForCompare ifFalse: [Transcript showln: 'failed: ', string]].
+					[self assert: originalSource equals: program sourceStringForCompare]}]
 				on: SBTSSyntaxError
 				do: []]
-		displayingProgress: 'file'
+		displayingProgress: [:change | change typed]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructTest >> testJsonCommitExpressJS [
+	<timeout: 100000>
+
+	self runTests: '/home/tom/Code/squeak/sle2022-partial-parser/express.json' language: SBJavascript
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructTest >> testJsonCommitFlaskPython [
+	<timeout: 100000>
+
+	self runTests: '/home/tom/Code/squeak/sle2022-partial-parser/flask.json' language: SBPython
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructTest >> testJsonCommitOvertoneClojure [
+	<timeout: 100000>
+
+	self runTests: '/home/tom/Code/squeak/sle2022-partial-parser/overtone.json' language: SBClojure
 ]
