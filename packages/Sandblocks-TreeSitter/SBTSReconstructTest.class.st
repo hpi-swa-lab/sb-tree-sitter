@@ -11,30 +11,22 @@ SBTSReconstructTest >> randomBlockIn: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSReconstructTest >> testJavascript [
+SBTSReconstructTest >> rangeFrom: aChange [
 
-	| program source editor |
-	program := SBJavascript parseToplevel: 'const express = require(''express'');
-const app = express();
-const http = require(''http'');
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server);
+	| startInset endInset |
+	startInset := aChange typed size - aChange typed withoutLeadingBlanks size.
+	endInset := aChange typed size - aChange typed withoutTrailingBlanks size.
+	^ (SBTSPosition line: aChange line - 1 character: aChange startColumn + startInset) -> (SBTSPosition line: aChange line - 1 character: aChange endColumn - endInset)
+]
 
-app.get(''/'', (req, res) => {
-  res.sendFile(__dirname + ''/index.html'');
-});
+{ #category : #'as yet unclassified' }
+SBTSReconstructTest >> runTestsFor: aLanguage source: aString [
 
-io.on(''connection'', (socket) => {
-  console.log(''a user connected'');
-});
-
-server.listen(3000, () => {
-  console.log(''listening on *:3000'');
-});
-'.
+	| program source editor types |
+	program := aLanguage parseToplevel: aString.
 	editor := self editorAndWorldFor: program.
 	source := program sourceStringForCompare.
+	types := Array streamContents: [:stream | program allBlocksDo: [:block | stream nextPut: block type]].
 	
 	10 timesRepeat: [ | target targetSourceString |
 		target := self randomBlockIn: program.
@@ -48,5 +40,38 @@ server.listen(3000, () => {
 				self tick.
 				editor handle: (self keyboardEvent: Character cr)]
 			ifNone: [].
-		self assert: source equals: program sourceStringForCompare]
+		self assert: source equals: program sourceStringForCompare.
+		self assert: (types hasEqualElements: (Array streamContents: [:stream | program allBlocksDo: [:block | stream nextPut: block type]]))]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructTest >> testJsonCommitExpressJS [
+	<timeout: 100000>
+
+	| changes |
+	changes := FileStream
+		readOnlyFileNamed: '/home/tom/Code/squeak/sle2022-partial-parser/express.json'
+		do: [:stream | Json readFrom: stream].
+	(changes first: 30)
+		do: [:change |
+			[ | program block string editor originalSource |
+				program := SBJavascript parseToplevel: change fullSourceCode.
+				originalSource := program sourceStringForCompare.
+				block := program smallestBlockEncompassig: (self rangeFrom: change).
+				string := block sourceString.
+				self assert: string size < 300.
+				editor := self editorAndWorldFor: program.
+				block changeToUnknown.
+				self type: string in: editor.
+				editor
+					allBlocksDetect: [:b | b isKindOf: SBTSInputReconcile]
+					ifFound: [:x |
+						self tick.
+						self tick.
+						editor handle: (self keyboardEvent: Character cr)]
+					ifNone: [].
+				self assert: originalSource equals: program sourceStringForCompare]
+				on: SBTSSyntaxError
+				do: []]
+		displayingProgress: 'file'
 ]

@@ -58,7 +58,7 @@ SBTSNodePrecedence >> canExpandInStack: aCollection [
 	
 	^ self
 		parentPrecedence: aCollection
-		do: [:parentPrec :isLeftMost | | comp hasActiveRecursion |
+		do: [:parentPrec :isLeftMost :isRightMost | | comp hasActiveRecursion |
 			comp := parentPrec compareTo: self ifNotComparable: [-1].
 			
 			hasActiveRecursion := SBToggledCode comment: '' active: 3 do: {
@@ -67,7 +67,7 @@ SBTSNodePrecedence >> canExpandInStack: aCollection [
 				["FIXME: we should probably check if these are involved in this precise precedence contest"
 				(aCollection collect: #type) withoutDuplicates size < aCollection size]}.
 			
-			hasActiveRecursion not or: [comp < 0 or: [comp = 0 and: [self isLeftAssociative and: [isLeftMost]]]]]
+			hasActiveRecursion not or: [comp < 0 or: [comp = 0 and: [(self isLeftAssociative and: [isLeftMost]) or: [parentPrec isRightAssociative and: [isRightMost]]]]]]
 		ifNone: [true]
 ]
 
@@ -127,6 +127,12 @@ SBTSNodePrecedence >> isLeftAssociative [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodePrecedence >> isRightAssociative [
+
+	^ precedence = 'PREC_RIGHT'
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodePrecedence >> isTSPrecedence [
 
 	^ true
@@ -141,18 +147,18 @@ SBTSNodePrecedence >> labelPrintOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSNodePrecedence >> parentPrecedence: aCollection do: aBlock ifNone: anotherBlock [
 
-	| isLeftMost potentialConflict myTypes |
+	| isLeftMost potentialConflict isRightMost |
 	isLeftMost := true.
+	isRightMost := true.
 	potentialConflict := false.
-	myTypes := self element elements collect: [:element | element type] thenSelect: [:element | element notNil]. 
-	myTypes := (myTypes select: [:type | (myTypes occurrencesOf: type) > 1]) asSet.
 	
 	aCollection reverseDo: [:root |
 		root andParentsDo: [:node |
-			(node parent notNil and: [node parent isTSSeq]) ifTrue: [isLeftMost := isLeftMost and: [node parent elements first = node]].
-			(node isTSSeq and: [potentialConflict not]) ifTrue: [
-				potentialConflict := (node elements collect: [:element | element type]) includesAnyOf: myTypes].
-			(node isTSPrecedence and: [potentialConflict]) ifTrue: [^ aBlock value: node value: isLeftMost]]].
+			(node parent notNil and: [node parent isTSSeq]) ifTrue: [
+				isLeftMost := isLeftMost and: [node parent elements first = node].
+				isRightMost := isRightMost and: [node parent elements last = node]].
+			(node isTSSeq and: [potentialConflict not and: [node elements first type notNil]]) ifTrue: [potentialConflict := node elements first type = self element elements last type].
+			(node isTSPrecedence and: [potentialConflict]) ifTrue: [^ aBlock value: node value: isLeftMost value: isRightMost]]].
 	
 	^ anotherBlock value
 ]

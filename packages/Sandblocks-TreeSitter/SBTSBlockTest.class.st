@@ -825,6 +825,17 @@ SBTSBlockTest >> testJsTypeAssignment [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testJsTypeIfWithoutSpace [
+
+	| program editor |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	program startInsertAtEnd.
+	self type: 'if(' in: editor.
+	self assert: #'if_statement' equals: program childSandblocks first type
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testJsTypeImport [
 
 	| module editor import |
@@ -867,6 +878,16 @@ SBTSBlockTest >> testJsTypeObject [
 ]
 
 { #category : #'tests - associativity' }
+SBTSBlockTest >> testMemberInAssign [
+
+	| program editor |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	self type: 'x=x.x' in: editor.
+	self assert: 'x=x.x;' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - associativity' }
 SBTSBlockTest >> testNestMultiplication [
 
 	| results |
@@ -887,6 +908,16 @@ SBTSBlockTest >> testNewStatementAfterTransition [
 	self type: '+3
 12' in: editor.
 	self assert: 3 equals: method childSandblocks size
+]
+
+{ #category : #'tests - associativity' }
+SBTSBlockTest >> testOrInAssign [
+
+	| program editor |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	self type: 'x=x||x' in: editor.
+	self assert: 'x=x||x;' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - paste' }

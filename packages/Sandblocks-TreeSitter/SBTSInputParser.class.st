@@ -295,9 +295,10 @@ SBTSInputParser >> normalizeResults2: aCollection query: aString factory: aFacto
 	hasAnyKeywords := results anySatisfy: [:r | | node block |
 		block := r first firstDeepChild.
 		(node := block slot firstNode) isTSLabel and: [ | index |
-			"only disambiguate keywords if they were terminated with a space, otherwise we may break typing e.g. `forage` because we abort with just one result after typing `for`"
+			"only disambiguate keywords if they were terminated with a non-word character, otherwise we may break typing e.g. `forage` because we abort with just one result after typing `for`"
 			index := aString indexOfSubCollection: node label.
-			index > 0 and: [(aString at: index + node label size ifAbsent: [$x]) = $ ]]].
+			index > 0 and: [(aString at: index + node label size ifAbsent: [$x]) isAlphaNumeric not]]].
+	
 	results := hasAnyKeywords
 		ifTrue: [results select: [:r | r first firstDeepChild slot firstNode isTSLabel]]
 		ifFalse: [results].

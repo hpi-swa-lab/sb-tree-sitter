@@ -314,7 +314,7 @@ SBTSInputReconcile >> tryWrap: aBlock given: aString before: aBoolean [
 	"if we have a left associative parent, we should always also check the owner for options, otherwise we risk committing too early to a local solution. For example, consider _+_ and _++ in e.g. C"
 	considerOwner := aBlock slot firstNode
 		parentPrecedence: aBlock slot nodes
-		do: [:node :isLeftMost | isLeftMost not]
+		do: [:node :isLeftMost :isRightMost | isLeftMost not]
 		ifNone: [false].
 	
 	^ (get value: aBlock), (considerOwner ifTrue: [get value: aBlock owner] ifFalse: [{}])
