@@ -492,7 +492,7 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 	inlinedRules := (aJSONGrammar at: 'inline') collect: #asSymbol.
 	precedences := aJSONGrammar at: 'precedences'.
 	aliasOccurrences := OrderedCollection new.
-	extras := ((aJSONGrammar at: 'extras') select: [:extra | extra type = 'PATTERN']) collect: [:extra | ('({1})*' format: {extra value}) asRegex].
+	extras := ((aJSONGrammar at: 'extras') select: [:extra | extra type = 'PATTERN']) collect: [:extra | ('({1})+' format: {extra value}) asRegex].
 	rules := (aJSONGrammar at: 'rules')
 		collect: [:rule | self buildNodesFor: rule]
 		as: Dictionary.
@@ -689,7 +689,7 @@ SBTSGrammar >> trimExtra: aString [
 
 	| stream |
 	stream := aString readStream.
-	[extras anySatisfy: [:extra | stream atEnd not and: [extra matchesStreamPrefix: stream]]] whileTrue.
+	[stream atEnd not and: [extras anySatisfy: [:extra | extra matchesStreamPrefix: stream]]] whileTrue.
 	^ stream upToEnd
 ]
 

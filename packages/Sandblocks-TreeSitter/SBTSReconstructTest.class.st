@@ -106,7 +106,7 @@ SBTSReconstructTest >> runTests: aPathString language: aLanguage [
 						self tick.
 						editor handle: (self keyboardEvent: Character cr)]
 					ifNone: [].
-				SBToggledCode comment: '' active: 2 do: {
+				SBToggledCode comment: '' active: 1 do: {
 					[originalSource = program sourceStringForCompare ifFalse: [Transcript showln: 'failed: ', string]].
 					[self assert: originalSource equals: program sourceStringForCompare]}]
 				on: SBTSSyntaxError
