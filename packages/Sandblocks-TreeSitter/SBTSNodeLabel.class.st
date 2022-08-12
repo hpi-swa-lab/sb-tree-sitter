@@ -80,9 +80,11 @@ SBTSNodeLabel >> childrenForQueryDo: aBlock [
 { #category : #hierarchy }
 SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
+	aStream atEnd ifTrue: [^ self].
+	
 	self isEditable
 		ifTrue: [
-			(self needsBlockWrapper and: [aStream peek isTSBlock and: [aStream peek slot includesParent: self]]) ifTrue: [aClosure value: (SBCursorSelect new block: aStream next)].
+			(self needsBlockWrapper and: [aStream peek isTSBlock and: [aStream peek slot includesParent: self]]) ifTrue: [^ aClosure value: (SBCursorSelect new block: aStream next)].
 			
 			(aStream peek isTextMorph and: [aStream peek slot includesParent: self]) ifTrue: [ | block |
 				block := aStream next.

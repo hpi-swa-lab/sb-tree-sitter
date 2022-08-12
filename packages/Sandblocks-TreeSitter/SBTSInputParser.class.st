@@ -258,14 +258,15 @@ SBTSInputParser >> memoizeRecursionMarkerAt: aNumber for: aSymbol [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSInputParser >> merge: candidate intoGroups: groups [
+SBTSInputParser >> merge: candidate intoGroups: groups factory: aFactory [
 
-	| new newEntry |
+	| new newEntry typesShouldMerge |
+	typesShouldMerge := [:a :b | a = b or: [aFactory language transitionPairs anySatisfy: [:pair | pair key = a and: [pair value = b]]]].
 	newEntry := OrderedCollection with: candidate.
 	new := candidate lastConstructedChain.
 	groups keys do: [:existing |
-		(existing second = new second and: [self is: new first orderedSupersetOf: existing first]) ifTrue: [^ (groups at: existing) add: candidate].
-		(existing second = new second and: [self is: existing first orderedSupersetOf: new first]) ifTrue: [
+		((typesShouldMerge value: existing second value: new second) and: [self is: new first orderedSupersetOf: existing first]) ifTrue: [^ (groups at: existing) add: candidate].
+		((typesShouldMerge value: new second value: existing second) and: [self is: existing first orderedSupersetOf: new first]) ifTrue: [
 			newEntry addAll: (groups at: existing).
 			groups removeKey: existing]].
 	groups at: new put: newEntry
@@ -280,16 +281,16 @@ SBTSInputParser >> next [
 { #category : #'as yet unclassified' }
 SBTSInputParser >> normalizeResults2: aCollection query: aString factory: aFactory [
 
-	| results transitionPairs hasAnyKeywords groups |
+	| results hasAnyKeywords groups |
 	SBToggledCode comment: '' active: 0 do: {[^ aCollection collect: #blocks]. [self halt]}.
 	groups := Dictionary new.
-	aCollection do: [:candidate | self merge: candidate intoGroups: groups].
+	aCollection do: [:candidate | self merge: candidate intoGroups: groups factory: aFactory].
 	results := groups values collect: [:candidates | | min |
 		min := candidates first.
-		candidates allButFirstDo: [:c | (c sortsBefore: min) ifTrue: [min := c]].
+		candidates allButFirstDo: [:c | (c sortsBefore: min factory: aFactory) ifTrue: [min := c]].
 		min blocks].
 	
-	results ifNotEmpty: [
+	results ifNotEmpty: [ | transitionPairs |
 		transitionPairs := aFactory language transitionPairs.
 		results := results select: [:blocksA | results noneSatisfy: [:blocksB | transitionPairs anySatisfy: [:pair | pair key = blocksB first type and: [pair value = blocksA first type]]]]].
 	
@@ -428,6 +429,7 @@ SBTSInputParser >> rawOptionsForTemplate: aNode given: aString before: aCollecti
 	activeRecursion := Array new: stream originalContents size withAll: nil.
 	symbolStack := OrderedCollection with: aNode.
 	
+	SBTSReconstructExperiment reportLength: stream size.
 	^ (aNode resultsFor: self) select: [:parser | self validCondition value: parser]
 ]
 
@@ -501,13 +503,15 @@ SBTSInputParser >> siblings: aCollection [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSInputParser >> sortsBefore: aParser [
+SBTSInputParser >> sortsBefore: aParser factory: aFactory [
 
 	| comp ours theirs ourLast theirLast |
 	theirLast := aParser lastConstructed.
 	ourLast := self lastConstructed.
 	ours := ((ourLast ifNotNil: [ourLast containingNodeIn: self]) ifNil: [ourLast]) ifNil: [self blocks first].
 	theirs := ((theirLast ifNotNil: [theirLast containingNodeIn: aParser]) ifNil: [theirLast]) ifNil: [aParser blocks first].
+	(aFactory language transitionPairs anySatisfy: [:pair | pair key = ours type and: [pair value = theirs type]]) ifTrue: [^ true].
+	(aFactory language transitionPairs anySatisfy: [:pair | pair key = theirs type and: [pair value = ours type]]) ifTrue: [^ false].
 	"precedence compare doesnt work yet..."
 	self flag: #fixme.
 	comp := SBToggledCode

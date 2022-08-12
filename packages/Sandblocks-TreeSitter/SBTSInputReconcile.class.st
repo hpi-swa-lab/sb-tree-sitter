@@ -160,9 +160,13 @@ SBTSInputReconcile >> positionCursorIn: aCollection [
 								boundary := (all at: stopIndex) containingSandblock.
 								boundary = boundary lastDeepChild containingSandblock and: [boundary slot firstNode isTSLabel]]]]) ifTrue: [block sandblockEditor performForSelection: #moveCursorRight].
 					^ self]]]].
-	aCollection last isSandblock ifTrue: [aCollection last lastDeepChild startInputAtEnd].
+	aCollection last lastCursorPosition ifNotNil: [:position |
+		^ aCollection last sandblockEditor cursor
+			cursorPosition: (position placeAtEnd: true)
+			explicitMove: false
+			axis: #none].
 	aCollection last isTextMorph ifTrue: [
-		aCollection last containingSandblock sandblockEditor
+		^ aCollection last containingSandblock sandblockEditor
 			startInput: aCollection last containingSandblock
 			at: 900000000
 			replacingContents: false
@@ -233,7 +237,7 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 	
 	"recursive stop condition: either our owner is no longer a ts-block or we have already gone two steps. two steps were enough for all valid scenarios we have encountered thus far."
 	aBlock isTSBlock ifFalse: [^ {}].
-	(aMorph ownerChain indexOf: aBlock) > 3 ifTrue: [^ {}].
+	(aMorph ownerChain indexOf: aBlock) > 5 ifTrue: [^ {}].
 	
 	^ aNumber = 1
 		ifTrue: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]

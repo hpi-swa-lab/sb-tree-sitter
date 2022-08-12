@@ -2,6 +2,7 @@ Class {
 	#name : #SBTSReconstructExperiment,
 	#superclass : #SBTest,
 	#classVars : [
+		'Lengths',
 		'Times'
 	],
 	#category : #'Sandblocks-TreeSitter-Tests'
@@ -10,7 +11,15 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSReconstructExperiment class >> clearTimes [
 
-	Times := nil
+	Times := nil.
+	Lengths := nil
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructExperiment class >> reportLength: aNumber [
+
+	Lengths ifNil: [Lengths := OrderedCollection new].
+	Lengths add: aNumber
 ]
 
 { #category : #'as yet unclassified' }
@@ -30,16 +39,18 @@ SBTSReconstructExperiment class >> runAllAndCopyToClipboard [
 	self writeTimes
 ]
 
-{ #category : #accessing }
+{ #category : #'as yet unclassified' }
 SBTSReconstructExperiment class >> times [
 
 	^ Times
 ]
 
-{ #category : #accessing }
+{ #category : #'as yet unclassified' }
 SBTSReconstructExperiment class >> writeTimes [
 
-	Clipboard clipboardText: ((self times collect: [:t | t asMicroSeconds]) joinSeparatedBy: String cr)
+	Clipboard clipboardText: ((self times collect: [:t | t asMicroSeconds]) joinSeparatedBy: String cr).
+	UIManager default confirm: 'next?'.
+	Clipboard clipboardText: (Lengths joinSeparatedBy: String cr)
 ]
 
 { #category : #'as yet unclassified' }
@@ -131,7 +142,9 @@ SBTSReconstructExperiment >> runTests: aPathString language: aLanguage [
 					SBToggledCode comment: '' active: 1 do: {
 						[
 							originalSource = program sourceStringForCompare
-								ifFalse: [Transcript showln: 'failed: ', string]
+								ifFalse: [
+									string = '.' ifTrue: [self halt].
+									Transcript showln: 'failed: ', string]
 								ifTrue: [actualCount := actualCount + 1]].
 						[self assert: originalSource equals: program sourceStringForCompare]}.
 					actualCount = 30 ifTrue: [^ self]]]

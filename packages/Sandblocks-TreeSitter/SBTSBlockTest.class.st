@@ -1021,6 +1021,17 @@ SBTSBlockTest >> testPyAddKeywordToArg [
 	self assert: 'myFunc(arg=123)' equals: program sourceStringForCompare
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testPyCallAndBinary [
+
+	| program editor |
+	program := SBPython empty.
+	editor := self editorAndWorldFor: program.
+	self type: 'x(3)+2' in: editor.
+	
+	self assert: 'x(3)+2' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - deleting' }
 SBTSBlockTest >> testPyDeleteReturnType [
 
