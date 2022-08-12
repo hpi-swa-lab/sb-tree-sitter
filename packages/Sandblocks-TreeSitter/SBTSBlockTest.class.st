@@ -1069,6 +1069,19 @@ SBTSBlockTest >> testPyIfStatement [
 	self assert: 'if_statement' equals: program childSandblocks first type
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlockTest >> testPythonDefAndReturn [
+
+	| program editor |
+	program := SBPython empty.
+	editor := self editorAndWorldFor: program.
+	
+	self type: 'def a
+x' in: editor.
+	self assert: 'def a():
+	x' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testPythonString [
 

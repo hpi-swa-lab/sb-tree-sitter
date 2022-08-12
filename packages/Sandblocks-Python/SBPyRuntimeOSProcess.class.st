@@ -121,6 +121,7 @@ SBPyRuntimeOSProcess >> interpreter [
 SBPyRuntimeOSProcess >> prettyPrint: aString [
 
 	| printer args |
+	SBToggledCode comment: '' active: 1 do: {[^ aString]}.
 	args := #().
 	printer := nil.
 	printer ifNil: [

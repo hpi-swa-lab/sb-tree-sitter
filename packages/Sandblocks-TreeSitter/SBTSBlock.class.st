@@ -532,6 +532,18 @@ SBTSBlock >> insertStatementAbove [
 { #category : #actions }
 SBTSBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 
+	| last found |
+	last := nil.
+	found := false.
+	self containingFloat cursorPositionsDo: [:pos |
+		(pos isInsert and: [pos command isStatementInsert]) ifTrue: [
+			last := pos.
+			(anAboveBoolean not and: [found]) ifTrue: [^ self sandblockEditor do: last command]].
+		pos = self sandblockEditor cursor cursorPosition ifTrue: [
+			found := true.
+			anAboveBoolean ifTrue: [^ self sandblockEditor do: last command]]].
+	true ifTrue: [^ true].
+	
 	(self sandblockEditor cursor mode = #insert and: [self sandblockEditor cursor cursorPosition command element parent isStatementRepeater]) ifTrue: [^ self sandblockEditor do: self sandblockEditor cursor cursorPosition command].
 	
 	self andAllParentSandblocksDo: [:block |

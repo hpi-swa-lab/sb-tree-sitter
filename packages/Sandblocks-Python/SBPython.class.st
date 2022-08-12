@@ -5152,7 +5152,7 @@ SBPython class >> indentMatch: aBlock [
 { #category : #'as yet unclassified' }
 SBPython class >> inputTransitionBlackList [
 
-	^ {#'concatenated_string'}
+	^ {#'concatenated_string'. #'print_statement'}
 ]
 
 { #category : #'configuration - editing' }

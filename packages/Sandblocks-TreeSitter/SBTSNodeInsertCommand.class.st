@@ -143,25 +143,28 @@ SBTSNodeInsertCommand >> title [
 SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 
 	| options |
+	(element parent isStatementRepeater and: [aString = String cr]) ifTrue: [^ true].
+	
 	options := SBTSInputParser new
 		siblings: self container submorphs;
 		optionsForTemplate: element given: aString.
+	
 	options size = 1 ifTrue: [morphs := options first].
 	options size > 1 ifTrue: [continueInputString := aString].
 	
 	"if we cannot match anything here, look to the right of us to see if there is a position that could take the input"
-	options isEmpty ifTrue: [ | newPos |
-		newPos := self container sandblockEditor cursor cursorPosition
+	options isEmpty ifTrue: [
+		(self container sandblockEditor cursor cursorPosition
 			moveHorizontal: 1
-			wordWise: false.
-		newPos isText ifTrue: [
-			SBTSInputReconcile new for: newPos textMorph input: aString at: 1.
-			^ newPos command].
-		newPos isInsert ifTrue: [
-			SBTSInputReconcile new
-				for: self container input: aString at: SBTSInputReconcile endIndex;
-				findOptionsBlock: [:reconcile :string | reconcile optionsForInsert: newPos given: string].
-			^ newPos command]].
+			wordWise: false) ifNotNil: [:newPos |
+			newPos isText ifTrue: [
+				SBTSInputReconcile new for: newPos textMorph input: aString at: 1.
+				^ newPos command].
+			newPos isInsert ifTrue: [
+				SBTSInputReconcile new
+					for: self container input: aString at: SBTSInputReconcile endIndex;
+					findOptionsBlock: [:reconcile :string | reconcile optionsForInsert: newPos given: string].
+				^ newPos command]]].
 	
 	^ options notEmpty
 ]

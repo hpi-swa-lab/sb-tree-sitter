@@ -1,5 +1,5 @@
 Class {
-	#name : #SBTSReconstructTest,
+	#name : #SBTSReconstructExperiment,
 	#superclass : #SBTest,
 	#classVars : [
 		'Times'
@@ -8,47 +8,66 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSReconstructTest class >> clearTimes [
+SBTSReconstructExperiment class >> clearTimes [
 
 	Times := nil
 ]
 
 { #category : #'as yet unclassified' }
-SBTSReconstructTest class >> reportTime: aTimeSpan [
+SBTSReconstructExperiment class >> reportTime: aTimeSpan [
 
 	Times ifNil: [Times := OrderedCollection new].
 	Times add: aTimeSpan
 ]
 
 { #category : #'as yet unclassified' }
-SBTSReconstructTest class >> runAllAndCopyToClipboard [
+SBTSReconstructExperiment class >> runAllAndCopyToClipboard [
 
 	self clearTimes.
-	self basicNew testJsonCommitExpressJS.
-	self basicNew testJsonCommitOvertoneClojure.
+	self basicNew commitExpressJS.
+	self basicNew commitOvertoneClojure.
+	self basicNew commitFlaskPython.
 	self writeTimes
 ]
 
 { #category : #accessing }
-SBTSReconstructTest class >> times [
+SBTSReconstructExperiment class >> times [
 
 	^ Times
 ]
 
 { #category : #accessing }
-SBTSReconstructTest class >> writeTimes [
+SBTSReconstructExperiment class >> writeTimes [
 
 	Clipboard clipboardText: ((self times collect: [:t | t asMicroSeconds]) joinSeparatedBy: String cr)
 ]
 
 { #category : #'as yet unclassified' }
-SBTSReconstructTest >> randomBlockIn: aBlock [
+SBTSReconstructExperiment >> commitExpressJS [
+
+	self runTests: '/home/tom/Code/squeak/sle2022-partial-parser/express.json' language: SBJavascript
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructExperiment >> commitFlaskPython [
+
+	self runTests: '/home/tom/Code/squeak/sle2022-partial-parser/flask.json' language: SBPython
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructExperiment >> commitOvertoneClojure [
+
+	self runTests: '/home/tom/Code/squeak/sle2022-partial-parser/overtone.json' language: SBClojure
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructExperiment >> randomBlockIn: aBlock [
 
 	^ (Array streamContents: [:array | aBlock allBlocksDo: [:b | (b sourceStringForCompare size between: 1 and: 20) ifTrue: [array nextPut: b]]]) atRandom
 ]
 
 { #category : #'as yet unclassified' }
-SBTSReconstructTest >> rangeFrom: aChange [
+SBTSReconstructExperiment >> rangeFrom: aChange [
 
 	| startInset endInset |
 	startInset := aChange typed size - aChange typed withoutLeadingBlanks size.
@@ -58,7 +77,7 @@ SBTSReconstructTest >> rangeFrom: aChange [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSReconstructTest >> runRandomTestsFor: aLanguage source: aString [
+SBTSReconstructExperiment >> runRandomTestsFor: aLanguage source: aString [
 
 	| program source editor types |
 	program := aLanguage parseToplevel: aString.
@@ -83,54 +102,42 @@ SBTSReconstructTest >> runRandomTestsFor: aLanguage source: aString [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSReconstructTest >> runTests: aPathString language: aLanguage [
+SBTSReconstructExperiment >> runTests: aPathString language: aLanguage [
 
-	| changes |
+	| changes actualCount |
 	changes := FileStream readOnlyFileNamed: aPathString do: [:stream | Json readFrom: stream].
-	((changes first: 30) select: [:change | change typed notEmpty])
+	actualCount := 0.
+	((changes first: 100) select: [:change | change typed notEmpty])
 		do: [:change |
 			[ | program block string editor originalSource |
 				program := aLanguage parseToplevel: change fullSourceCode.
 				originalSource := program sourceStringForCompare.
 				block := program smallestBlockEncompassig: (self rangeFrom: change).
-				string := block sourceString.
-				self assert: (string size < 300 or: [block type = #comment or: [block type = #string]]).
-				string last = $; ifTrue: [string := string allButLast].
-				editor := self editorAndWorldFor: program.
-				block changeToUnknown.
-				self type: string in: editor.
-				editor
-					allBlocksDetect: [:b | b isKindOf: SBTSInputReconcile]
-					ifFound: [:x |
-						self tick.
-						self tick.
-						editor handle: (self keyboardEvent: Character cr)]
-					ifNone: [].
-				SBToggledCode comment: '' active: 1 do: {
-					[originalSource = program sourceStringForCompare ifFalse: [Transcript showln: 'failed: ', string]].
-					[self assert: originalSource equals: program sourceStringForCompare]}]
+				"skip comments and python string-comments as they are of little interest"
+				(block type = #comment or: [block type = #string and: [{'"""'. ''''''''} includes: block textMorphs first contents]]) ifFalse: [
+					string := block sourceString.
+					self assert: string size < 300.
+					string last = $; ifTrue: [string := string allButLast].
+					editor := self editorAndWorldFor: program.
+					block changeToUnknown.
+					self type: string in: editor.
+					editor
+						allBlocksDetect: [:b | b isKindOf: SBTSInputReconcile]
+						ifFound: [:x |
+							self tick.
+							self tick.
+							editor handle: (self keyboardEvent: Character cr)]
+						ifNone: [].
+					SBToggledCode comment: '' active: 1 do: {
+						[
+							originalSource = program sourceStringForCompare
+								ifFalse: [Transcript showln: 'failed: ', string]
+								ifTrue: [actualCount := actualCount + 1]].
+						[self assert: originalSource equals: program sourceStringForCompare]}.
+					actualCount = 30 ifTrue: [^ self]]]
 				on: SBTSSyntaxError
 				do: []]
-		displayingProgress: [:change | change typed]
-]
-
-{ #category : #'as yet unclassified' }
-SBTSReconstructTest >> testJsonCommitExpressJS [
-	<timeout: 100000>
-
-	self runTests: '/home/tom/Code/squeak/sle2022-partial-parser/express.json' language: SBJavascript
-]
-
-{ #category : #'as yet unclassified' }
-SBTSReconstructTest >> testJsonCommitFlaskPython [
-	<timeout: 100000>
-
-	self runTests: '/home/tom/Code/squeak/sle2022-partial-parser/flask.json' language: SBPython
-]
-
-{ #category : #'as yet unclassified' }
-SBTSReconstructTest >> testJsonCommitOvertoneClojure [
-	<timeout: 100000>
-
-	self runTests: '/home/tom/Code/squeak/sle2022-partial-parser/overtone.json' language: SBClojure
+		displayingProgress: [:change | change typed].
+	"if we reach here we did not find 30 valid items in the first 100"
+	self assert: false
 ]
