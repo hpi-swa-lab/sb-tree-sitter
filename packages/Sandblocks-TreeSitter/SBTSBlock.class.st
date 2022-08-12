@@ -1156,16 +1156,6 @@ SBTSBlock >> wantsExtraSpace [
 	^ SBToggledCode comment: '' active: 1 do: {[false]. [self slot needsParenthesis: self]}
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSBlock >> wantsInput [
-
-	(self currentTextMorph notNil and: [self contents isEmpty]) ifTrue: [^ true].
-	
-	(self isBlockBody and: [self hasChildSandblocks not]) ifTrue: [^ true].
-	
-	^ false
-]
-
 { #category : #events }
 SBTSBlock >> wasDeselected [
 

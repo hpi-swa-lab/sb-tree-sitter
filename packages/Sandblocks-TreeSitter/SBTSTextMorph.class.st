@@ -310,12 +310,6 @@ SBTSTextMorph >> type [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSTextMorph >> wantsInput [
-
-	^ false
-]
-
-{ #category : #'as yet unclassified' }
 SBTSTextMorph >> wrapOffscreen: anEditor [
 
 	

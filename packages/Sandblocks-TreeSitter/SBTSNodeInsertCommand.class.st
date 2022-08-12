@@ -78,6 +78,12 @@ SBTSNodeInsertCommand >> isInsert [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> isJumpPoint [
+
+	^ element parent multiple and: [(element parent groupsIn: self container) isEmpty]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> isStatementInsert [
 
 	^ element parent isStatementRepeater
@@ -144,6 +150,7 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 
 	| options |
 	(element parent isStatementRepeater and: [aString = String cr]) ifTrue: [^ true].
+	(aString = String tab or: [aString = String cr]) ifTrue: [^ false].
 	
 	options := SBTSInputParser new
 		siblings: self container submorphs;
@@ -158,7 +165,9 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 			moveHorizontal: 1
 			wordWise: false) ifNotNil: [:newPos |
 			newPos isText ifTrue: [
-				SBTSInputReconcile new for: newPos textMorph input: aString at: 1.
+				SBTSInputReconcile new for: newPos textMorph input: aString at: (newPos textMorph contents
+					ifEmpty: [SBTSInputReconcile endIndex]
+					ifNotEmpty: [1]).
 				^ newPos command].
 			newPos isInsert ifTrue: [
 				SBTSInputReconcile new

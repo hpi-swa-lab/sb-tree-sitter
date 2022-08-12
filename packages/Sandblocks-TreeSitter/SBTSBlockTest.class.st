@@ -804,7 +804,7 @@ class {
 }'.
 	editor := self editorFor: program.
 	program childSandblocks first startInputAtStart.
-	editor handle: (self keyboardEvent: Character tab).
+	2 timesRepeat: [editor handle: (self keyboardEvent: Character tab)].
 	self assert: #insert equals: editor cursor mode.
 	editor handle: (self keyboardEvent: $x).
 	self assert: 'a;
@@ -1021,6 +1021,18 @@ SBTSBlockTest >> testPyAddKeywordToArg [
 	self assert: 'myFunc(arg=123)' equals: program sourceStringForCompare
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlockTest >> testPyArrayWithDelimiters [
+
+	| program editor |
+	program := SBPython empty.
+	editor := self editorAndWorldFor: program.
+	
+	self type: '[1,2,3]' in: editor.
+	
+	self assert: '[1,2,3]' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testPyCallAndBinary [
 
@@ -1078,6 +1090,19 @@ SBTSBlockTest >> testPyIfStatement [
 	self tick.
 	editor handle: (self keyboardEvent: Character cr).
 	self assert: 'if_statement' equals: program childSandblocks first type
+]
+
+{ #category : #'tests - cursor position' }
+SBTSBlockTest >> testPyTabToEmptyArguments [
+
+	| program editor |
+	program := SBPython parseToplevel: 'a.b()'.
+	editor := self editorFor: program.
+	program childSandblocks first startInputAtStart.
+	editor handle: (self keyboardEvent: Character tab).
+	self assert: #insert equals: editor cursor mode.
+	editor handle: (self keyboardEvent: $x).
+	self assert: 'a.b(x)' equals: program sourceStringForCompare
 ]
 
 { #category : #'as yet unclassified' }

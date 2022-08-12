@@ -109,8 +109,11 @@ SBTSInputReconcile >> indexOf: aCursor in: aCollectionOfMorphs [
 			childIndex + (((aCursor container submorphs copyFrom: 1 to: aCursor command insertIndex - 1) collect: #recursiveSubmorphCount)
 				inject: 0
 				into: [:s :c | s + c]) + 1]
-		ifFalse: ["if we are in a finished label, just return our index so that the next position will be taken. otherwise, we will likely want to continue typing here, so pretend that we were one index further out"
-		(aCollectionOfMorphs indexOf: aCursor morph) + (aCursor morph slot firstNode isTSLabel ifTrue: [-1] ifFalse: [1])]
+		ifFalse: [
+			"if we are in a finished label, just return our index so that the next position will be taken. otherwise, we will likely want to continue typing here, so pretend that we were one index further out"
+			(aCollectionOfMorphs indexOf: aCursor morph) + ((SBToggledCode comment: '' active: 1 do: {[false]. [aCursor morph slot firstNode isTSLabel]})
+				ifTrue: [-1]
+				ifFalse: [1])]
 ]
 
 { #category : #'initialize-release' }
@@ -138,6 +141,37 @@ SBTSInputReconcile >> positionCursorIn: aCollection [
 
 	| all stopIndex |
 	insertIndex = 1 ifTrue: [^ aCollection first startInputAtStart].
+	true ifTrue: [ | last |
+		last := nil.
+		aCollection reverseDo: [:morph | morph allMorphsDo: [:m | (m valueOfProperty: #lastConstructed ifAbsent: [false]) ifTrue: [last := m]]].
+		last
+			ifNil: [
+				aCollection last lastCursorPosition ifNotNil: [:position |
+					^ aCollection last sandblockEditor cursor
+						cursorPosition: (position placeAtEnd: true)
+						explicitMove: false
+						axis: #none].
+				aCollection last isTextMorph ifTrue: [
+					^ aCollection last containingSandblock sandblockEditor
+						startInput: aCollection last containingSandblock
+						at: 900000000
+						replacingContents: false
+						in: aCollection last]]
+			ifNotNil: [
+				last containingSandblock cursorPositionsDo: [:pos |
+					(pos isText and: [pos textMorph = last]) ifTrue: [
+						pos block sandblockEditor cursorPosition: (pos placeAtEnd: true).
+						"if we are in a construct that is complete, meaning it's either a label or we typed a delimiter afterwards, we want to move to the best spot to facilitate continuing to type"
+						(last slot firstNode isTSLabel or: [self contents notEmpty and: [(last contents includes: self contents last) not]]) ifTrue: [ | next |
+							next := pos block sandblockEditor cursor
+								getMoveHorizontal: 1
+								wordWise: false.
+							"will we stay inside our current expansion? if so, move ahead!"
+							(aCollection anySatisfy: [:morph | next block = morph or: [next block hasOwner: morph]]) ifTrue: [
+								pos block sandblockEditor cursorPosition: next.
+								"if we already expanded something because the slot was required, try and move inside it"
+								(next isInsert and: [next command element parent required]) ifTrue: [pos block sandblockEditor performForSelection: #moveCursorRight]]]]]].
+		^ self].
 	
 	all := Array streamContents: [:s | aCollection do: [:block | block allMorphsPreorderDo: [:m | s nextPut: m]]].
 	stopIndex := all findLast: [:m | m valueOfProperty: #lastConstructed ifAbsent: [false]].
@@ -154,11 +188,14 @@ SBTSInputReconcile >> positionCursorIn: aCollection [
 						explicitMove: false
 						axis: #none.
 					"if we completed a keyword and the input finished at the very boundary of the block, move one to the right to facilitate continuing to type (may be replaced with a post-do action, mostly need in tryFill with separators)"
-					(block sandblockEditor mode ~= #insert and: [
-						self contents notEmpty and: [
-							self contents last = $  and: [ | boundary |
-								boundary := (all at: stopIndex) containingSandblock.
-								boundary = boundary lastDeepChild containingSandblock and: [boundary slot firstNode isTSLabel]]]]) ifTrue: [block sandblockEditor performForSelection: #moveCursorRight].
+					(SBToggledCode comment: '' active: 1 do: {
+						[self contents notEmpty and: [cursor isText and: [(cursor textMorph contents includes: self contents last) not]]].
+						[
+							block sandblockEditor mode ~= #insert and: [
+								self contents notEmpty and: [
+									self contents last = $  and: [ | boundary |
+										boundary := (all at: stopIndex) containingSandblock.
+										boundary = boundary lastDeepChild containingSandblock and: [boundary slot firstNode isTSLabel]]]]]}) ifTrue: [block sandblockEditor performForSelection: #moveCursorRight].
 					^ self]]]].
 	aCollection last lastCursorPosition ifNotNil: [:position |
 		^ aCollection last sandblockEditor cursor
@@ -212,7 +249,7 @@ SBTSInputReconcile >> suggestions [
 SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 
 	self positionsAfter: aBlock from: target do: [:position |
-		(position isText and: [position block wantsInput]) ifTrue: ["TODO: do we want the full reconciliation logic or just reinterpret?"
+		(position isText and: [position textMorph contents isEmpty]) ifTrue: ["TODO: do we want the full reconciliation logic or just reinterpret?"
 		^ self tryReinterpretFrom: position textMorph in: position block given: aString at: self class endIndex].
 		position isInsert ifTrue: [(self optionsForInsert: position given: aString) ifNotEmpty: [:res | ^ res]]].
 	^ {}
@@ -240,7 +277,11 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 	(aMorph ownerChain indexOf: aBlock) > 5 ifTrue: [^ {}].
 	
 	^ aNumber = 1
-		ifTrue: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]
+		ifTrue: [
+			(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean) ifEmpty: [
+				aBoolean
+					ifTrue: [{}]
+					ifFalse: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]]
 		ifFalse: [(self trySeparator: aString in: aBlock) ifEmpty: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner at: aNumber explicitAppend: aBoolean]]]]]
 ]
 
