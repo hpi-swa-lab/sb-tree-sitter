@@ -969,6 +969,21 @@ SBTSBlock >> replaceBlock: aBlock [
 	^ new
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> selectedTextMorph: aMorph [
+
+	super selectedTextMorph: aMorph.
+	self owner ifNotNil: [
+		self owner submorphs
+			from: 1
+			to: self submorphIndex
+			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]].
+	aMorph owner submorphs
+		from: 1
+		to: aMorph submorphIndex
+		do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]
+]
+
 { #category : #accessing }
 SBTSBlock >> semantics [
 
@@ -1181,22 +1196,6 @@ SBTSBlock >> wasSelected [
 
 	super wasSelected.
 	SBTSListener allSubclassesDo: [:listener | (listener matches: self) ifTrue: [listener wasSelected: self]]
-]
-
-{ #category : #'as yet unclassified' }
-SBTSBlock >> wasSelectedFromCursor: aCursorPosition [
-
-	super wasSelectedFromCursor: aCursorPosition.
-	(aCursorPosition block notNil and: [aCursorPosition block owner notNil]) ifTrue: [
-		aCursorPosition block owner submorphs
-			from: 1
-			to: aCursorPosition block submorphIndex
-			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]].
-	aCursorPosition isText ifTrue: [
-		aCursorPosition textMorph owner submorphs
-			from: 1
-			to: aCursorPosition textMorph submorphIndex
-			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]]
 ]
 
 { #category : #actions }
