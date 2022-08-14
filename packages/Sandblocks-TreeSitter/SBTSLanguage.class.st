@@ -13,7 +13,7 @@ Class {
 { #category : #'configuration - layout' }
 SBTSLanguage class >> addIndent: aBlock [
 
-	((aBlock isTextMorph or: [aBlock isStringMorph]) and: [{'{'. '('. '['. '<'} includes: aBlock contentsToDisplay]) ifTrue: [^ true].
+	((aBlock isTextMorph or: [aBlock isStringMorph]) and: [{'{'. '('. '['. '<'} includes: aBlock effectiveContents]) ifTrue: [^ true].
 	^ false
 ]
 
@@ -385,7 +385,7 @@ SBTSLanguage class >> rebuild [
 { #category : #'configuration - layout' }
 SBTSLanguage class >> removeIndent: aBlock [
 
-	((aBlock isTextMorph or: [aBlock isStringMorph]) and: [{'}'. ')'. ']'. '>'} includes: aBlock contents]) ifTrue: [^ true].
+	((aBlock isTextMorph or: [aBlock isStringMorph]) and: [{'}'. ')'. ']'. '>'} includes: aBlock effectiveContents]) ifTrue: [^ true].
 	^ false
 ]
 

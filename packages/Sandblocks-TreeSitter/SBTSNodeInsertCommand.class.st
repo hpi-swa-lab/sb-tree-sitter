@@ -165,7 +165,7 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 			moveHorizontal: 1
 			wordWise: false) ifNotNil: [:newPos |
 			newPos isText ifTrue: [
-				SBTSInputReconcile new for: newPos textMorph input: aString at: (newPos textMorph contents
+				SBTSInputReconcile new for: newPos textMorph input: aString at: (newPos textMorph contentsForEdit
 					ifEmpty: [SBTSInputReconcile endIndex]
 					ifNotEmpty: [1]).
 				^ newPos command].

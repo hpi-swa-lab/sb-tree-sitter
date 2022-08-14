@@ -26,14 +26,14 @@ SBTSBlock >> absorbsInput: anEvent [
 	
 	^ anEvent keyCharacter isPrintable and: [ | text oldContents oldPosition |
 		text := self activeTextMorph.
-		oldContents := text contents.
+		oldContents := text contentsForEdit.
 		
 		anEvent keyCharacter = Character cr ifTrue: [^ (oldContents lineCount <= 1 and: [anEvent commandKeyPressed not]) not].
 		
 		oldPosition := text cursor.
 		[
 			text keyStroke: anEvent.
-			text slot firstNode regex matches: text contents] ensure: [
+			text slot firstNode regex matches: text contentsForEdit] ensure: [
 			text
 				contents: oldContents;
 				basicCursor: oldPosition]]
@@ -217,6 +217,12 @@ SBTSBlock >> compatibleWithType: aString [
 	^ self slot compatibleWithType: aString
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> contentsForEdit [
+
+	^ self contents
+]
+
 { #category : #accessing }
 SBTSBlock >> contentsToDisplay [
 
@@ -365,6 +371,12 @@ SBTSBlock >> drawnColor [
 	^ self prefersNoBorder
 		ifTrue: [super drawnColor alpha: 0]
 		ifFalse: [super drawnColor]
+]
+
+{ #category : #accessing }
+SBTSBlock >> effectiveContents [
+
+	^ self contents
 ]
 
 { #category : #'as yet unclassified' }
@@ -804,7 +816,7 @@ SBTSBlock >> prefersNoBorder [
 SBTSBlock >> prefixValidFor: aTextMorph in: aSiblingsCollection [
 
 	^ aTextMorph slot firstNode
-		prefixValidFor: aTextMorph contents
+		prefixValidFor: aTextMorph effectiveContents
 		in: aSiblingsCollection
 ]
 
@@ -1147,7 +1159,7 @@ SBTSBlock >> valid [
 
 	self flag: #todo.
 	" cache valid "
-	^ self textMorphs allSatisfy: [:t | t ifNotNil: [t slot firstNode validFor: t contents in: self submorphs] ifNil: [true]]
+	^ self textMorphs allSatisfy: [:t | t ifNotNil: [t slot firstNode validFor: t effectiveContents in: self submorphs] ifNil: [true]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1169,6 +1181,22 @@ SBTSBlock >> wasSelected [
 
 	super wasSelected.
 	SBTSListener allSubclassesDo: [:listener | (listener matches: self) ifTrue: [listener wasSelected: self]]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> wasSelectedFromCursor: aCursorPosition [
+
+	super wasSelectedFromCursor: aCursorPosition.
+	(aCursorPosition block notNil and: [aCursorPosition block owner notNil]) ifTrue: [
+		aCursorPosition block owner submorphs
+			from: 1
+			to: aCursorPosition block submorphIndex
+			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]].
+	aCursorPosition isText ifTrue: [
+		aCursorPosition textMorph owner submorphs
+			from: 1
+			to: aCursorPosition textMorph submorphIndex
+			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]]
 ]
 
 { #category : #actions }

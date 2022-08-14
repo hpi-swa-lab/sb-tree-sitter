@@ -34,6 +34,12 @@ SBTSNodeLabel >> buildEmpty [
 { #category : #'as yet unclassified' }
 SBTSNodeLabel >> buildEmptyNodes [
 
+	^ self buildEmptyNodesWithLength: 0
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeLabel >> buildEmptyNodesWithLength: aNumber [
+
 	| slot |
 	slot := SBTSSlot with: self.
 	^ {
@@ -42,12 +48,12 @@ SBTSNodeLabel >> buildEmptyNodes [
 				SBTSParseNode
 					kind: #block
 					slot: (SBTSSlot with: self)
-					contents: {SBTSParseNode kind: #label slot: slot contents: self label}]
+					contents: {SBTSParseNode kind: #editableLabel slot: slot contents: (self label first: aNumber)}]
 			ifFalse: [
 				SBTSParseNode
 					kind: (self isEditable ifTrue: [#editableLabel] ifFalse: [#label])
 					slot: slot
-					contents: self label]}
+					contents: (self isEditable ifTrue: [self label first: aNumber] ifFalse: [self label])]}
 ]
 
 { #category : #build }
@@ -190,11 +196,11 @@ SBTSNodeLabel >> regexString [
 { #category : #parsing }
 SBTSNodeLabel >> resultsFor: aParser [
 
-	| labelStream oldPosition |
+	| labelStream oldPosition typedLength |
 	labelStream := self label readStream.
 	oldPosition := aParser position.
 	
-	(aParser peek isCharacter not and: [(aParser peek isTextMorph or: [aParser peek isStringMorph]) and: [self label = aParser peek contents]]) ifTrue: [ | block |
+	(aParser peek isCharacter not and: [(aParser peek isTextMorph or: [aParser peek isStringMorph]) and: [self label = aParser peek contentsForEdit]]) ifTrue: [ | block |
 		block := aParser next.
 		^ {
 			aParser basicAddBlocks: {SBTSParseNode kind: #blockEmbed slot: (block slot trimNodesToTypeOf: self) contents: block}}].
@@ -203,6 +209,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 		labelStream next = aParser next ifFalse: [
 			aParser position: oldPosition.
 			^ {}]].
+	typedLength := aParser position - oldPosition.
 	
 	SBToggledCode
 		comment: ''
@@ -210,7 +217,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 		do: {[(labelStream atEnd or: [aParser atEnd]) ifFalse: [^ {}]]}.
 	
 	[aParser peek = $ ] whileTrue: [aParser next].
-	^ {aParser addBlock: self buildEmptyNodes first}
+	^ {aParser addBlock: (self buildEmptyNodesWithLength: typedLength) first}
 ]
 
 { #category : #parsing }

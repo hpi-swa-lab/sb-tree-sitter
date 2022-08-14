@@ -162,7 +162,7 @@ SBTSInputReconcile >> positionCursorIn: aCollection [
 					(pos isText and: [pos textMorph = last]) ifTrue: [
 						pos block sandblockEditor cursorPosition: (pos placeAtEnd: true).
 						"if we are in a construct that is complete, meaning it's either a label or we typed a delimiter afterwards, we want to move to the best spot to facilitate continuing to type"
-						(last slot firstNode isTSLabel or: [self contents notEmpty and: [(last contents includes: self contents last) not]]) ifTrue: [ | next |
+						((last slot firstNode isTSLabel and: [last isComplete]) or: [self contents notEmpty and: [(last contents includes: self contents last) not]]) ifTrue: [ | next |
 							next := pos block sandblockEditor cursor
 								getMoveHorizontal: 1
 								wordWise: false.
@@ -302,8 +302,8 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 	aMorph contents = pivot sourceString ifFalse: [^ {}].
 	
 	string := aNumber = self class endIndex
-		ifTrue: [pivot contents, aString]
-		ifFalse: [(pivot contents first: aNumber - 1), aString, (pivot contents allButFirst: aNumber - 1)].
+		ifTrue: [pivot contentsForEdit, aString]
+		ifFalse: [(pivot contentsForEdit first: aNumber - 1), aString, (pivot contentsForEdit allButFirst: aNumber - 1)].
 	
 	boundary := pivot owner submorphAfter.
 	validCondition := (boundary ifNotNil: #isTextMorph ifNil: [false])
@@ -340,12 +340,32 @@ SBTSInputReconcile >> trySeparator: aString in: aBlock [
 { #category : #reconciliation }
 SBTSInputReconcile >> trySkipLabel: aString in: aBlock from: aMorph at: aNumber [
 
-	(aMorph isTextMorph and: [aMorph contents = aString and: [aNumber < (aMorph contents size + 1)]]) ifTrue: [^ {SBDoItCommand new do: [aMorph]}].
+	(aMorph isTextMorph and: [aMorph contents = aString and: [aNumber < (aMorph contents size + 1)]]) ifTrue: [ | currentContent currentFixed |
+		currentContent := aMorph contentsForEdit.
+		currentFixed := aMorph fixedText.
+		^ {
+			SBDoItCommand new
+				do: [
+					aMorph confirmFixedText.
+					aMorph];
+				undo: [
+					aMorph
+						contents: currentContent;
+						fixedText: currentFixed]}].
 	
-	self
-		positionsAfter: aBlock
-		from: aMorph
-		do: [:position | (position isText and: [position textMorph contents = aString and: [position textMorph ~= aMorph]]) ifTrue: [^ {SBDoItCommand new do: [position textMorph]}]].
+	self positionsAfter: aBlock from: aMorph do: [:position |
+		(position isText and: [position textMorph contents = aString and: [position textMorph ~= aMorph]]) ifTrue: [ | currentContent currentFixed |
+			currentContent := position textMorph contentsForEdit.
+			currentFixed := aMorph fixedText.
+			^ {
+				SBDoItCommand new
+					do: [
+						position textMorph confirmFixedText.
+						position textMorph];
+					undo: [
+						position textMorph
+							contents: currentContent;
+							fixedText: currentFixed]}]].
 	
 	^ {}
 ]

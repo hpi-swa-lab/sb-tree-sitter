@@ -42,6 +42,25 @@ SBTSTextMorph >> compatibleWithType: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> confirmFixedText [
+
+	fixedText ifNotNil: [
+		self
+			contents: self fixedText;
+			fixedText: nil]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> contents [
+
+	| fixed |
+	fixed := self fixedText ifNil: [''].
+	^ self contentsForEdit size < fixed size
+		ifTrue: [self contentsForEdit, (fixed allButFirst: self contentsForEdit size)]
+		ifFalse: [self contentsForEdit]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> contents: aString [
 
 	super contents: aString.
@@ -51,15 +70,16 @@ SBTSTextMorph >> contents: aString [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> contentsToDisplay [
 
-	| fixed append |
-	true ifTrue: [^ super contentsToDisplay].
-	self contents ifEmpty: [^ super contentsToDisplay].
-	
+	| fixed |
 	fixed := self fixedText ifNil: [''].
-	append := self contents size < fixed size
-		ifTrue: [(fixed allButFirst: self contents size) asText addAttribute: TextEmphasis italic]
-		ifFalse: [''].
-	^ self contents, append
+	(self contents isEmpty and: [fixed isEmpty]) ifTrue: [^ super contentsToDisplay].
+	
+	^ self contentsForEdit size < fixed size
+		ifTrue: [
+			self contentsForEdit asText, ((fixed allButFirst: self contentsForEdit size) asText
+				addAttribute: TextEmphasis italic;
+				addAttribute: (TextColor color: (self color alpha: 0.7)))]
+		ifFalse: [self contentsForEdit]
 ]
 
 { #category : #'as yet unclassified' }
@@ -80,6 +100,16 @@ SBTSTextMorph >> copyBlock [
 SBTSTextMorph >> drawnColor [
 
 	^ self containingSandblock drawnColor
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> effectiveContents [
+
+	| fixed |
+	fixed := self fixedText ifNil: [''].
+	^ self contents size < fixed size
+		ifTrue: [self contents, (fixed allButFirst: self contents size)]
+		ifFalse: [self contents]
 ]
 
 { #category : #'as yet unclassified' }
@@ -153,6 +183,12 @@ SBTSTextMorph >> highlight: aString [
 	highlight := aString.
 	paragraph := nil.
 	self layoutChanged
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> isComplete [
+
+	^ self fixedText isNil or: [self contentsForEdit size = self fixedText size]
 ]
 
 { #category : #'as yet unclassified' }
@@ -251,6 +287,12 @@ SBTSTextMorph >> repeaterGroup [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> showPlaceholder [
+
+	^ self contents isEmpty and: [self fixedText isNil]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> shownColor [
 
 	^ self containingSandblock shownColor
@@ -281,12 +323,6 @@ SBTSTextMorph >> sourceString [
 SBTSTextMorph >> sourceStringForCompare [
 
 	^ String streamContents: [:s | self writeSourceOn: s indent: 0 forCompare: true]
-]
-
-{ #category : #'as yet unclassified' }
-SBTSTextMorph >> submorphIndex [
-
-	^ self owner submorphs indexOf: self
 ]
 
 { #category : #'as yet unclassified' }

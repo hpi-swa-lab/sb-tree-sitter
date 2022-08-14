@@ -43,7 +43,9 @@ SBTSParseNode >> buildWith: aParser [
 				slot: slot].
 		[#editableLabel] -> [
 			SBTSTextMorph new
-				fixedText: slot firstNode label;
+				fixedText: (contents size < slot firstNode label size
+					ifTrue: [slot firstNode label]
+					ifFalse: [nil]);
 				contents: contents;
 				slot: slot].
 		[#blockEmbed] -> [(aParser copyEmbeds ifTrue: [contents copyBlock] ifFalse: [contents]) slot: slot]}.
@@ -58,7 +60,7 @@ SBTSParseNode >> characterAndBlockCount [
 		caseOf: {
 			[#block] -> [contents inject: 1 into: [:sum :node | sum + node characterAndBlockCount]].
 			[#text] -> [contents size].
-			[#editableLabel] -> [contents size].
+			[#editableLabel] -> [slot firstNode label size].
 			[#label] -> [contents size]}
 		otherwise: [1]
 ]
@@ -83,6 +85,12 @@ SBTSParseNode >> containingNodeIn: aParser [
 SBTSParseNode >> contents [
 
 	^ contents
+]
+
+{ #category : #'as yet unclassified' }
+SBTSParseNode >> contents: anObject [
+
+	contents := anObject
 ]
 
 { #category : #'as yet unclassified' }

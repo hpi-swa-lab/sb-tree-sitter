@@ -23,10 +23,10 @@ SBTSLanguageTests >> testAliasedRootSymbol [
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testCInclude [
 
-	SBC parse: '#include <stdio.h>
+	SBC parseToplevel: '#include <stdio.h>
 '.
 	" fails because tree-sitter reports two \n as the last element of the directive "
-	SBC parse: '#include <stdio.h>
+	SBC parseToplevel: '#include <stdio.h>
 
 '
 ]

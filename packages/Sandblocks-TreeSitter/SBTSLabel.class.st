@@ -29,6 +29,12 @@ SBTSLabel >> compatibleWithType: aSymbol [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> contentsForEdit [
+
+	^ self contents
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> contentsToDisplay [
 
 	^ self contents
@@ -51,6 +57,12 @@ SBTSLabel >> copyBlock [
 SBTSLabel >> drawnColor [
 
 	^ self containingSandblock drawnColor
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLabel >> effectiveContents [
+
+	^ self contents
 ]
 
 { #category : #'as yet unclassified' }
@@ -182,12 +194,6 @@ SBTSLabel >> sourceString [
 SBTSLabel >> sourceStringForCompare [
 
 	^ String streamContents: [:s | self writeSourceOn: s indent: 0 forCompare: true]
-]
-
-{ #category : #'as yet unclassified' }
-SBTSLabel >> submorphIndex [
-
-	^ self owner submorphs indexOf: self
 ]
 
 { #category : #'as yet unclassified' }
