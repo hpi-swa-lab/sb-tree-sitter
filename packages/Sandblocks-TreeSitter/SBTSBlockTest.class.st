@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testJsDeleteStatementsWithEmpty)
+	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testJsDeleteStatementsWithEmpty #testPyTypeBinaryOpInPendingCall)
 ]
 
 { #category : #'tests - adding' }
@@ -552,6 +552,19 @@ SBTSBlockTest >> testJsForOfToForIn [
 ]
 
 { #category : #'tests - input transition' }
+SBTSBlockTest >> testJsFullForLoop [
+
+	| program editor |
+	program := SBJavascript empty.
+	editor := self editorAndWorldFor: program.
+	self type: 'for (let i = 0; i < 5; i++) {' in: editor.
+	self tick.
+	self tick.
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: 'for(let i=0;i<5;i++){};' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testJsIdAdd [
 
 	| program editor |
@@ -780,7 +793,7 @@ SBTSBlockTest >> testJsStatementTerminator [
 	editor := self editorAndWorldFor: program.
 	program startInsertAtEnd.
 	self type: 'x;' in: editor.
-	self assert: 'x;' equals: program sourceStringForCompare
+	self assert: 'x;', Character cr, Character null equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -1021,7 +1034,7 @@ SBTSBlockTest >> testPyAddKeywordToArg [
 	self assert: 'myFunc(arg=123)' equals: program sourceStringForCompare
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testPyArrayWithDelimiters [
 
 	| program editor |
@@ -1042,6 +1055,19 @@ SBTSBlockTest >> testPyCallAndBinary [
 	self type: 'x(3)+2' in: editor.
 	
 	self assert: 'x(3)+2' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testPyDeleteCompInIf [
+
+	| program editor |
+	program := SBPython parseToplevel: 'if a == 3:
+	pass'.
+	editor := self editorAndWorldFor: program.
+	(program queryNode: '(integer)') startInputAtEnd.
+	5 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: 'if a:
+	pass' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - deleting' }
@@ -1105,7 +1131,29 @@ SBTSBlockTest >> testPyTabToEmptyArguments [
 	self assert: 'a.b(x)' equals: program sourceStringForCompare
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testPyTypeBinaryOpInPendingCall [
+
+	| program editor |
+	program := SBPython empty.
+	editor := self editorAndWorldFor: program.
+	
+	self type: 'x(3+3)' in: editor.
+	self assert: 'x(3+3)' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testPyTypeCompInIf [
+
+	| program editor |
+	program := SBPython empty.
+	editor := self editorAndWorldFor: program.
+	self type: 'if a==3' in: editor.
+	self assert: 'if a==3:
+' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
 SBTSBlockTest >> testPythonDefAndReturn [
 
 	| program editor |
@@ -1411,6 +1459,16 @@ SBTSBlockTest >> testStUnaryMessageSend [
 	self type: ' ' in: editor.
 	self type: 'show' in: editor.
 	self assert: #'unary_message' equals: method childSandblocks second type
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testTsForLoopAmbiguous [
+
+	| program editor |
+	program := SBTypescript empty.
+	editor := self editorAndWorldFor: program.
+	self type: 'for(let i=0;i++;' in: editor.
+	self assert: 'for(let i=0;i++;', ')', Character null equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - associativity' }

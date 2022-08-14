@@ -214,13 +214,13 @@ SBTSTextMorph >> isUnknown [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> keepDuringDelete [
 
-	^ self contents anySatisfy: [:c | c isAlphaNumeric]
+	^ self contentsForEdit anySatisfy: [:c | c isAlphaNumeric]
 ]
 
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> keepDuringTransform [
 
-	self contents ifEmpty: [^ false].
+	self contentsForEdit ifEmpty: [^ false].
 	self symmetricSibling ifNotNil: [:sibling |
 		(SBToggledCode
 			comment: ''

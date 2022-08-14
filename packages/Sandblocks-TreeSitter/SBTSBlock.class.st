@@ -268,7 +268,7 @@ SBTSBlock >> deleteBeforeCursor [
 	editor := self sandblockEditor.
 	
 	textMorph := self sandblockEditor currentInputCommand ifNotNil: #textMorph.
-	(textMorph ifNotNil: #contents ifNil: ['']) ifNotEmpty: [
+	(textMorph ifNotNil: #contentsForEdit ifNil: ['']) ifNotEmpty: [
 		super deleteBeforeCursor.
 		(self valid not and: [textMorph contents notEmpty]) ifTrue: [ | currentCursor evalOption |
 			currentCursor := textMorph cursor.
@@ -363,6 +363,21 @@ SBTSBlock >> deleteCommandFor: aBlock [
 			groups := p groupsIn: target owner.
 			(p required not or: [groups size > 1]) ifTrue: [groups do: [:group | (group includes: target) ifTrue: [^ SBCombinedCommand newWith: (group collect: [:block | SBDeleteCommand new target: block])]]]]].
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> deselectedTextMorph: aMorph [
+
+	super deselectedTextMorph: aMorph.
+	self owner ifNotNil: [
+		self owner submorphs
+			from: 1
+			to: self submorphIndex
+			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]].
+	aMorph owner submorphs
+		from: 1
+		to: aMorph submorphIndex
+		do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -871,10 +886,10 @@ SBTSBlock >> promptTransition [
 	<action>
 
 	SBTSInputReconcile new
-		explicitAppend: true;
+		explicitAppend: self isUnknown not;
 		for: (self activeTextMorph ifNil: [self])
-		input: ''
-		at: (ActiveEvent shiftPressed ifTrue: [1] ifFalse: [SBTSInputReconcile endIndex])
+			input: ''
+			at: (ActiveEvent shiftPressed ifTrue: [1] ifFalse: [SBTSInputReconcile endIndex])
 ]
 
 { #category : #query }
@@ -967,21 +982,6 @@ SBTSBlock >> replaceBlock: aBlock [
 	new := aBlock adaptSlotFor: self slot ifFailed: [self error: 'block not compatible'].
 	self replaceBy: new.
 	^ new
-]
-
-{ #category : #'as yet unclassified' }
-SBTSBlock >> selectedTextMorph: aMorph [
-
-	super selectedTextMorph: aMorph.
-	self owner ifNotNil: [
-		self owner submorphs
-			from: 1
-			to: self submorphIndex
-			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]].
-	aMorph owner submorphs
-		from: 1
-		to: aMorph submorphIndex
-		do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]
 ]
 
 { #category : #accessing }

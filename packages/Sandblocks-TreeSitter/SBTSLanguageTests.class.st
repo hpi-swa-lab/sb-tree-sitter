@@ -233,7 +233,8 @@ SBTSLanguageTests >> testPythonInsertLambdaParameter [
 	module := SBPython parseToplevel: 'lambda: x'.
 	e := self editorFor: module.
 	
-	6 timesRepeat: [e performForSelection: #moveCursorRight].
+	module childSandblocks first startInputAtStart.
+	7 timesRepeat: [e performForSelection: #moveCursorRight].
 	e handle: (self keyboardEvent: $a).
 	
 	self assert: 'a' equals: module childSandblocks first childSandblocks first childSandblocks first contents

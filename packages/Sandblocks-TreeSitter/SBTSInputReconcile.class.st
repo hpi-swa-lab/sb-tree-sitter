@@ -270,7 +270,9 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 			SBCombinedCommand newWith: {
 				SBReplaceMultipleCommand new
 					target: aMorph replacers: blocks;
-					shouldMergeWithNext: true}, (jumpAfterBoundary ifTrue: [{SBDoItCommand new do: [boundary]}] ifFalse: [{}])]) ifNotEmpty: [:res | ^ res]].
+					shouldMergeWithNext: true}, (jumpAfterBoundary
+				ifTrue: [{SBTSBoundarySelectCommand new boundary: boundary}]
+				ifFalse: [{}])]) ifNotEmpty: [:res | ^ res]].
 	
 	"recursive stop condition: either our owner is no longer a ts-block or we have already gone two steps. two steps were enough for all valid scenarios we have encountered thus far."
 	aBlock isTSBlock ifFalse: [^ {}].
@@ -321,7 +323,9 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 		SBCombinedCommand newWith: {
 			SBReplaceMultipleCommand new
 				target: pivot owner replacers: blocks;
-				shouldMergeWithNext: true}, (jumpAfterBoundary ifTrue: [{SBDoItCommand new do: [boundary]}] ifFalse: [{}])]
+				shouldMergeWithNext: true}, (jumpAfterBoundary
+			ifTrue: [{SBTSBoundarySelectCommand new boundary: boundary}]
+			ifFalse: [{}])]
 ]
 
 { #category : #reconciliation }
@@ -331,8 +335,17 @@ SBTSInputReconcile >> trySeparator: aString in: aBlock [
 	
 	(aBlock owner slot delimiterBetween: aBlock and: aBlock) ifNotEmpty: [:delimiter | delimiter = aString ifTrue: [^ {(aBlock sandblockEditor cursor positionAfter: aBlock) command}]].
 	
-	aString = aBlock language statementTerminator ifTrue: ["FIXME: might catch too many cases, check for proximity to stmt end morph?"
-	^ {SBDoItCommand new}].
+	aString = aBlock language statementTerminator ifTrue: [
+		aBlock slot allParentsDo: [:node |
+			(node isTSSeq and: [node hasStatementTerminator]) ifTrue: [
+				node.
+				^ {
+					(aBlock cursorPositionAfterThat: [:pos | (pos isInsert and: [(pos command element hasParent: node) not]) or: [pos isText]]) command}]]].
+	
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			aString = aBlock language statementTerminator ifTrue: ["FIXME: might catch too many cases, check for proximity to stmt end morph?"
+			^ {SBDoItCommand new}]]}.
 	
 	^ {}
 ]
@@ -340,18 +353,7 @@ SBTSInputReconcile >> trySeparator: aString in: aBlock [
 { #category : #reconciliation }
 SBTSInputReconcile >> trySkipLabel: aString in: aBlock from: aMorph at: aNumber [
 
-	(aMorph isTextMorph and: [aMorph contents = aString and: [aNumber < (aMorph contents size + 1)]]) ifTrue: [ | currentContent currentFixed |
-		currentContent := aMorph contentsForEdit.
-		currentFixed := aMorph fixedText.
-		^ {
-			SBDoItCommand new
-				do: [
-					aMorph confirmFixedText.
-					aMorph];
-				undo: [
-					aMorph
-						contents: currentContent;
-						fixedText: currentFixed]}].
+	(aMorph isTextMorph and: [aMorph contents = aString and: [aNumber < (aMorph contents size + 1)]]) ifTrue: [^ {SBTSBoundarySelectCommand new boundary: aMorph}].
 	
 	self positionsAfter: aBlock from: aMorph do: [:position |
 		(position isText and: [position textMorph contents = aString and: [position textMorph ~= aMorph]]) ifTrue: [ | currentContent currentFixed |
