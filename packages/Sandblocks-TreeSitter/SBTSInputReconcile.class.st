@@ -284,7 +284,11 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 				aBoolean
 					ifTrue: [{}]
 					ifFalse: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]]
-		ifFalse: [(self trySeparator: aString in: aBlock) ifEmpty: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner at: aNumber explicitAppend: aBoolean]]]]]
+		ifFalse: [
+			(self
+				trySeparator: aString
+				in: aBlock
+				atEnd: aNumber > (aMorph contentsForEdit ifNotNil: [:m | m size] ifNil: [0])) ifEmpty: [(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean) ifEmpty: [(self tryAdjacentTo: aBlock given: aString) ifEmpty: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self tryReconcileFor: aMorph input: aString in: aBlock owner at: aNumber explicitAppend: aBoolean]]]]]
 ]
 
 { #category : #reconciliation }
@@ -318,7 +322,8 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 		optionsFor: pivot owner
 			given: string
 			before: ((aBlock submorphs first: pivot submorphIndex - 1) select: #keepDuringTransform)
-			after: ((aBlock submorphs allButFirst: pivot submorphIndex) select: #keepDuringTransform)) collect: [:blocks | | jumpAfterBoundary |
+			after: ((aBlock submorphs allButFirst: pivot submorphIndex) select: #keepDuringTransform)
+			allowMultiple: false) collect: [:blocks | | jumpAfterBoundary |
 		jumpAfterBoundary := blocks noneSatisfy: [:b | b isTSBlock and: [b lastConstructedChild notNil]].
 		SBCombinedCommand newWith: {
 			SBReplaceMultipleCommand new
@@ -329,8 +334,9 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 ]
 
 { #category : #reconciliation }
-SBTSInputReconcile >> trySeparator: aString in: aBlock [
+SBTSInputReconcile >> trySeparator: aString in: aBlock atEnd: aBoolean [
 
+	aBoolean ifFalse: [^ {}].
 	aBlock owner isTSBlock ifFalse: [^ {}].
 	
 	(aBlock owner slot delimiterBetween: aBlock and: aBlock) ifNotEmpty: [:delimiter | delimiter = aString ifTrue: [^ {(aBlock sandblockEditor cursor positionAfter: aBlock) command}]].

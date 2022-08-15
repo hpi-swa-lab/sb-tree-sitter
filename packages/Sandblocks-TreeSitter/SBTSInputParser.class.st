@@ -356,6 +356,20 @@ SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after
 ]
 
 { #category : #query }
+SBTSInputParser >> optionsFor: aTSBlock given: aString before: aCollection after: anotherCollection allowMultiple: aBoolean [
+
+	| root |
+	root := aTSBlock slot transitionRoot.
+	^ self
+		optionsForTemplate: ((aBoolean and: [root parent notNil and: [root parent isTSRepeat and: [root parent isStatementRepeater not]]])
+			ifTrue: [root parent]
+			ifFalse: [root])
+		given: aString
+		before: aCollection
+		after: anotherCollection
+]
+
+{ #category : #query }
 SBTSInputParser >> optionsForTemplate: aNode given: aString [
 
 	^ self optionsForTemplate: aNode given: aString before: {} after: {}
