@@ -12,6 +12,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSBoundarySelectCommand >> boundary: aMorph [
 
+	self assert: aMorph notNil.
 	boundary := aMorph
 ]
 

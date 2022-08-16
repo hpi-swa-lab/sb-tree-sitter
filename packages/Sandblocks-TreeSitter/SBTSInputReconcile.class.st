@@ -300,7 +300,7 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 { #category : #reconciliation }
 SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: aNumber fullToken: aBoolean [
 
-	| pivot string boundary validCondition |
+	| pivot string boundary validCondition cursorAtEnd |
 	aMorph contents ifNil: [^ {}].
 	pivot := (aMorph orOwnerSuchThat: [:m | m owner = aBlock]) ifNil: [^ {}].
 	
@@ -316,6 +316,7 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 		ifTrue: [[:p | p atEnd or: [p stream next = boundary contents first and: [p stream atEnd]]]]
 		ifFalse: [nil].
 	
+	cursorAtEnd := aNumber >= aMorph contents size.
 	^ (SBTSInputParser new
 		matchFullToken: aBoolean;
 		validCondition: validCondition;
@@ -323,8 +324,8 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 			given: string
 			before: ((aBlock submorphs first: pivot submorphIndex - 1) select: #keepDuringTransform)
 			after: ((aBlock submorphs allButFirst: pivot submorphIndex) select: #keepDuringTransform)
-			allowMultiple: false) collect: [:blocks | | jumpAfterBoundary |
-		jumpAfterBoundary := blocks noneSatisfy: [:b | b isTSBlock and: [b lastConstructedChild notNil]].
+			allowMultiple: cursorAtEnd not) collect: [:blocks | | jumpAfterBoundary |
+		jumpAfterBoundary := boundary notNil and: [blocks noneSatisfy: [:b | b isTSBlock and: [b lastConstructedChild notNil]]].
 		SBCombinedCommand newWith: {
 			SBReplaceMultipleCommand new
 				target: pivot owner replacers: blocks;

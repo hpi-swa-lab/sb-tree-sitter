@@ -1138,8 +1138,8 @@ SBTSBlockTest >> testPyTypeBinaryOpInPendingCall [
 	program := SBPython empty.
 	editor := self editorAndWorldFor: program.
 	
-	self type: 'x(3+3)' in: editor.
-	self assert: 'x(3+3)' equals: program sourceStringForCompare
+	self type: 'x(3+4)' in: editor.
+	self assert: 'x(3+4)' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }

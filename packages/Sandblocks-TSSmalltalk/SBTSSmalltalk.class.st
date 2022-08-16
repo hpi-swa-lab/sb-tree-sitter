@@ -45,7 +45,7 @@ SBTSSmalltalk class >> grammarJson [
 
 	^ '{
   "name": "smalltalk",
-  "word": "keyword",
+  "word": "identifier_or_keyword",
   "rules": {
     "method": {
       "type": "SEQ",
@@ -469,6 +469,22 @@ SBTSSmalltalk class >> grammarJson [
     "binary_operator": {
       "type": "PATTERN",
       "value": "[-+\\\\/*~<>=@,%|&?!]+"
+    },
+    "identifier_or_keyword": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "PATTERN",
+            "value": "[A-Za-z_][A-Za-z0-9_]*"
+          },
+          {
+            "type": "PATTERN",
+            "value": ":?"
+          }
+        ]
+      }
     },
     "statement": {
       "type": "CHOICE",

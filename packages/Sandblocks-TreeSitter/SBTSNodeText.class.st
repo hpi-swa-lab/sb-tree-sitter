@@ -179,7 +179,10 @@ SBTSNodeText >> resultsFor: aParser [
 			contents := aParser stream originalContents
 				copyFrom: start + 1
 				to: aParser position.
-			(contents noneSatisfy: [:c | c isMorph])
+			((contents noneSatisfy: [:c | c isMorph]) and: [
+				self flag: #fixme.
+				"way too strict, we are denying any text node that has the same contents as a keyword. realistically, many languages allow using keywords in places where the corresponding construct does not make sense."
+				self factory isNil or: [(self factory keywords includes: (String withAll: contents)) not]])
 				ifTrue: [
 					[aParser peek = $ ] whileTrue: [aParser next].
 					^ {

@@ -587,7 +587,7 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 	
 	self rules keysAndValuesDo: [:name :rule | self checkStructure: rule].
 	
-	keywords := Array streamContents: [:stream | self allElementsDo: [:element | element isTSLabel ifTrue: [stream nextPut: element label]]]
+	keywords := aJSONGrammar at: 'word' ifPresent: [:worldRule | Array streamContents: [:stream | self allElementsDo: [:element | (element isTSLabel and: [(rules at: (aJSONGrammar at: 'word')) regex matches: element label]) ifTrue: [stream nextPut: element label]]]] ifAbsent: [#()]
 ]
 
 { #category : #accessing }
