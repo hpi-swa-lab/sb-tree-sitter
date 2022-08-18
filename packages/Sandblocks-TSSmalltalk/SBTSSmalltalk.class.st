@@ -12,6 +12,31 @@ SBTSSmalltalk class >> addIndent: aBlock [
 	^ false
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk class >> allSuggestionOptionsFor: aBlock [
+
+	| guessedClass |
+	guessedClass := aBlock type caseOf: {
+		[#number] -> [(aBlock contents includes: $.) ifTrue: [Float] ifFalse: [Integer]].
+		[#string] -> [String].
+		[#'literal_array'] -> [Array].
+		[#'dynamic_array'] -> [Array].
+		[#'byte_array'] -> [ByteArray].
+		[#character] -> [Character].
+		[#assignment] -> [^ self allSuggestionOptionsFor: aBlock childSandblocks last].
+		[#'parenthesized_expression'] -> [^ self allSuggestionOptionsFor: aBlock childSandblocks first].
+		[#self] -> [nil].
+		[#super] -> [nil].
+		[#nil] -> [UndefinedObject].
+		[#thisContext] -> [Context].
+		[#block] -> [BlockClosure].
+		[#identifier] -> [(Symbol lookup: aBlock contents) ifNotNil: [:sym | Smalltalk at: sym ifPresent: [:obj | obj class] ifAbsent: [nil]]]}.
+	
+	^ guessedClass
+		ifNil: [OrderedCollection withAll: Symbol allSymbols]
+		ifNotNil: [Array streamContents: [:stream | guessedClass withAllSuperclassesDo: [:class | stream nextPutAll: class selectors]]]
+]
+
 { #category : #'configuration - declarations' }
 SBTSSmalltalk class >> declarationsInScope: aScopeBlock do: aClosure [
 
@@ -1211,7 +1236,9 @@ SBTSSmalltalk class >> suggestionsFor: aBlock [
 			sortedSuggestions: (OrderedCollection withAll: Symbol allSymbols)
 			for: aBlock textMorphs second contents) collect: [:item | SBSuggestionItem selector: item label: 'symbol']].
 	((aBlock alias = #'unary_identifier' and: [aBlock parentSandblock type = #'unary_message']) or: [aBlock type = #keyword]) ifTrue: [
-		^ (aBlock sortedSuggestions: (OrderedCollection withAll: Symbol allSymbols) for: aBlock contents) collect: [:item |
+		^ (aBlock
+			sortedSuggestions: (self allSuggestionOptionsFor: aBlock parentSandblock childSandblocks first)
+			for: aBlock contents) collect: [:item |
 			SBSuggestionItem
 				selector: (item keywords joinSeparatedBy: (Character value: 1))
 				label: 'send']].
