@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testJsDeleteStatementsWithEmpty #testPyTypeBinaryOpInPendingCall)
+	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testPyTypeBinaryOpInPendingCall)
 ]
 
 { #category : #'tests - adding' }
@@ -205,6 +205,21 @@ SBTSBlockTest >> testCursorPositionsAroundUnknown [
 	self editorFor: module.
 	module childSandblocks first childSandblocks last changeToUnknown.
 	self assert: (Array streamContents: [:stream | module childSandblocks first cursorPositionsDo: [:pos | stream nextPut: pos]]) size >= 5
+]
+
+{ #category : #'tests - deleting' }
+SBTSBlockTest >> testDeleteBlockWithUnrelatedUnknown [
+
+	| method editor |
+	method := SBTSSmalltalk parseToplevel: 'a 1. 2'.
+	editor := self editorAndWorldFor: method.
+	method childSandblocks second changeToUnknown.
+	method startInsertAtEnd.
+	self assert: 'a
+', Character null, '.2' equals: method sourceStringForCompare.
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: 'a
+', Character null, '.2' equals: editor childSandblocks first sourceStringForCompare
 ]
 
 { #category : #'tests - deleting' }

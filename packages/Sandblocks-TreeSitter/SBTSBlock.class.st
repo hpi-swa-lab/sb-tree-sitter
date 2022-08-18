@@ -174,11 +174,10 @@ SBTSBlock >> childrenToKeepDuringDelete [
 	keep := OrderedCollection new.
 	found := false.
 	self cursorPositionsDo: [:c |
-		(c morph owner = self and: [(keep includes: c morph) not and: [found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]]]) ifTrue: [keep add: c morph].
+		(c morph owner = self and: [(keep includes: c morph) not and: [(found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]) or: [c morph slot isStatementIn: c morph owner]]]) ifTrue: [keep add: c morph].
 		c = current ifTrue: [found := true]].
 	
-	SBToggledCode comment: '' active: 0 do: {
-		[(current morph keepDuringDelete not and: [keep notEmpty and: [current morph = keep last]]) ifTrue: [keep remove: current morph ifAbsent: []]]}.
+	((current isText or: [current isSelect]) and: [current morph keepDuringDelete not]) ifTrue: [keep remove: current morph ifAbsent: []].
 	
 	^ keep
 ]
@@ -924,9 +923,9 @@ SBTSBlock >> reinterpretWithoutEmpty [
 			self placeCursorCloseAfterDo: [editor do: c].
 			^ true].
 		^ false].
-	options := SBTSInputParser new optionsFor: self given: '' before: remaining after: #().
 	(remaining hasEqualElements: self submorphs) ifTrue: [^ false].
 	
+	options := SBTSInputParser new optionsFor: self given: '' before: remaining after: #().
 	(options size = 1 and: [options first first sourceStringForCompare ~= self copyBlock sourceStringForCompare]) ifTrue: [
 		self placeCursorCloseAfterDo: [editor do: (SBReplaceMultipleCommand new target: self replacers: options first)].
 		^ true].
