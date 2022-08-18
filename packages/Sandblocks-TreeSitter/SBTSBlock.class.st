@@ -274,7 +274,9 @@ SBTSBlock >> deleteBeforeCursor [
 			currentCursor := textMorph cursor.
 			evalOption := [:options |
 				editor do: options first.
-				editor currentInputCommand ifNotNil: [:c | c textMorph moveCursorTo: currentCursor]].
+				editor currentInputCommand
+					ifNotNil: [:c | c textMorph moveCursorTo: currentCursor]
+					ifNil: [editor selection lastDeepChild startInputAtEnd]].
 			(SBTSInputReconcile new
 				tryReinterpretFrom: textMorph
 				in: self

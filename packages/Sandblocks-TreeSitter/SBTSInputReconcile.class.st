@@ -427,9 +427,8 @@ Here, if we do reinterpret first, the 3 will be stringified. Instead, we want to
 			ifTrue: [aMorph contents first isLetter]
 			ifFalse: [false]].
 	
-	^ (atBorder and: [involvedInExplicitTransition not and: [aString first isLetter not and: [extendsToken not]]])
-		ifTrue: [wrap value ifEmpty: reinterpret]
-		ifFalse: [reinterpret value ifEmpty: wrap]
+	(atBorder and: [involvedInExplicitTransition not and: [aString first isLetter not and: [extendsToken not]]]) ifTrue: [wrap value ifNotEmpty: [:res | ^ res]].
+	^ reinterpret value
 ]
 
 { #category : #callbacks }

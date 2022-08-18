@@ -1162,7 +1162,7 @@ SBTSSmalltalk class >> isImmutableLabel: aLabelNode [
 { #category : #'configuration - editing' }
 SBTSSmalltalk class >> isStatementContainer: aRepeatNode in: aBlock [
 
-	^ aRepeatNode element type = 'statement'
+	^ aRepeatNode element isTSChoice and: [aRepeatNode element alternatives first type = #statement]
 ]
 
 { #category : #configuration }

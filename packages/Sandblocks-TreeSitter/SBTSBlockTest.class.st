@@ -1331,7 +1331,7 @@ SBTSBlockTest >> testSmalltalkKeywordMessage [
 	self assert: 3 equals: insertCount
 ]
 
-{ #category : #'tests - input transition' }
+{ #category : #'tests - deleting' }
 SBTSBlockTest >> testSmalltalkKeywordToUnary [
 
 	| method editor |
@@ -1344,7 +1344,13 @@ SBTSBlockTest >> testSmalltalkKeywordToUnary [
 	editor handle: (self keyboardEvent: Character backspace).
 	editor handle: (self keyboardEvent: Character backspace).
 	editor handle: (self keyboardEvent: Character backspace).
-	self assert: #'unary_message' equals: method childSandblocks second type
+	self assert: #'unary_message' equals: method childSandblocks second type.
+	self assert: 'abc
+a keyword' equals: method sourceStringForCompare.
+	editor handle: (self keyboardEvent: Character backspace).
+	editor handle: (self keyboardEvent: Character backspace).
+	self assert: 'abc
+a keywo' equals: method sourceStringForCompare
 ]
 
 { #category : #'tests - cursor position' }

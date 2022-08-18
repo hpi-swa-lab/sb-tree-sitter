@@ -38,6 +38,7 @@ SBExperimentEditor >> intoWorld: aWorld [
 		res headerAt: 'Access-Control-Allow-Origin' put: '*'.
 		res headerAt: 'Access-Control-Allow-Headers' put: '*'.
 		res headerAt: 'Access-Control-Allow-Methods' put: '*'].
+	Transcript showln: 'hello'.
 	server := WebServer new listenOn: 8000.
 	times := OrderedCollection new.
 	server addService: '/report' action: [:req | | data raw |
@@ -60,6 +61,7 @@ SBExperimentEditor >> intoWorld: aWorld [
 		req method caseOf: {
 			['OPTIONS'] -> [req send200Response: 'application/json' contentType: 'text/plain; charset=utf-8' do: setHeaders].
 			['GET'] -> [
+				Transcript showln: 'open code'.
 				req
 					send200Response: ({'code' -> self childSandblocks first sourceString withUnixLineEndings} as: Dictionary) asJsonString
 					contentType: 'application/json'
