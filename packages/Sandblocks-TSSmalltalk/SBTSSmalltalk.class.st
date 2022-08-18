@@ -1106,6 +1106,7 @@ SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 	(({#statement. #empty. #comment} includes: aBlock slot lastNode type) and: [{#statement. #empty. #comment} includes: anotherBlock slot lastNode type]) ifTrue: [^ true].
 	(({#statement. #empty. #comment} includes: anotherBlock slot lastNode type) and: [(anotherBlock owner submorphs count: [:m | m slot lastNode type = #statement]) > 1]) ifTrue: [^ true].
 	(aBlock parentSandblock ifNotNil: #type) = #method ifTrue: [^ true].
+	((aBlock slot isStatementIn: aBlock parentSandblock) and: [aBlock ~= aBlock parentSandblock childSandblocks last]) ifTrue: [^ true].
 	^ false
 ]
 

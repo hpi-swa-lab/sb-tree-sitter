@@ -561,32 +561,11 @@ SBTSBlock >> insertStatementAbove [
 { #category : #actions }
 SBTSBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 
-	| last found |
-	last := nil.
-	found := false.
-	self containingFloat cursorPositionsDo: [:pos |
-		(pos isInsert and: [pos command isStatementInsert]) ifTrue: [
-			last := pos.
-			(anAboveBoolean not and: [found]) ifTrue: [^ self sandblockEditor do: last command]].
-		pos = self sandblockEditor cursor cursorPosition ifTrue: [
-			found := true.
-			anAboveBoolean ifTrue: [^ self sandblockEditor do: last command]]].
-	true ifTrue: [^ true].
-	
-	(self sandblockEditor cursor mode = #insert and: [self sandblockEditor cursor cursorPosition command element parent isStatementRepeater]) ifTrue: [^ self sandblockEditor do: self sandblockEditor cursor cursorPosition command].
-	
-	self andAllParentSandblocksDo: [:block |
-		block isTSBlock ifTrue: [
-			"look in my template --> insert as child of me"
-			(block slot repeaterThat: [:p | p isStatementRepeater]) ifNotNil: [:repeater |
-				^ block sandblockEditor do: (SBTSNodeInsertCommand new
-					element: (repeater element alternatives detect: [:t | t type = #empty])
-					container: block parentSandblock
-					index: block submorphIndex + (anAboveBoolean ifTrue: [0] ifFalse: [1]))].
-			"look above me --> insert adjacent to me"
-			block
-				cursorPositionsDo: [:cursor | (cursor isInsert and: [cursor command element parent isStatementRepeater]) ifTrue: [^ block sandblockEditor do: cursor command]]
-				shallow: true]]
+	| eval |
+	eval := [:pos | pos isInsert and: [pos command isStatementInsert]].
+	(anAboveBoolean
+		ifFalse: [self cursorPositionAfterThat: eval]
+		ifTrue: [self cursorPositionBeforeThat: eval]) ifNotNil: [:pos | self sandblockEditor do: pos command]
 ]
 
 { #category : #actions }
