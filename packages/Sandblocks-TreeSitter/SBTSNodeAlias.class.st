@@ -51,7 +51,10 @@ SBTSNodeAlias >> bodyTemplate [
 { #category : #blocks }
 SBTSNodeAlias >> buildEmpty [
 
-	^ self element buildEmpty
+	^ {
+		SBTSBlock new
+			slot: (SBTSSlot with: self);
+			addAllMorphs: self bodyTemplate buildEmpty}
 ]
 
 { #category : #'as yet unclassified' }
