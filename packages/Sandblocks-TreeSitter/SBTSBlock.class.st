@@ -786,7 +786,7 @@ SBTSBlock >> placeCursorCloseAfterDo: aBlock [
 							cursorPosition: (c placeAtEnd: true)
 							explicitMove: true
 							axis: #none]]]]].
-	container sandblockEditor selection moveCursorToEnd
+	container sandblockEditor selection lastDeepChild startInputAtEnd
 ]
 
 { #category : #'as yet unclassified' }

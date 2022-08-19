@@ -8,6 +8,9 @@ Class {
 		'insertIndex',
 		'explicitAppend'
 	],
+	#classVars : [
+		'PreferNoPopup'
+	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
@@ -15,6 +18,18 @@ Class {
 SBTSInputReconcile class >> endIndex [
 
 	^ 900000000
+]
+
+{ #category : #'as yet unclassified' }
+SBTSInputReconcile class >> preferNoPopup [
+
+	^ PreferNoPopup ifNil: [false]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSInputReconcile class >> preferNoPopup: aBoolean [
+
+	PreferNoPopup := aBoolean
 ]
 
 { #category : #'reconciliation helper' }
@@ -441,5 +456,5 @@ SBTSInputReconcile >> updateChoices [
 	SBTSReconstructExperiment reportTime: [currentChoices := self findOptionsBlock cull: self cull: self contents] durationToRun.
 	
 	SBToggledCode comment: '' active: 1 do: {
-		[(currentChoices size = 1 and: [insertIndex > 1 or: [currentChoices first isKindOf: SBDoItCommand]]) ifTrue: [self applyCommand: currentChoices anyOne]]}
+		[((currentChoices size = 1 and: [insertIndex > 1 or: [currentChoices first isKindOf: SBDoItCommand]]) or: [self class preferNoPopup and: [currentChoices notEmpty]]) ifTrue: [self applyCommand: currentChoices first]]}
 ]
