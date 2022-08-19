@@ -30,7 +30,8 @@ SBTSSmalltalk class >> allSuggestionOptionsFor: aBlock [
 		[#nil] -> [UndefinedObject].
 		[#thisContext] -> [Context].
 		[#block] -> [BlockClosure].
-		[#identifier] -> [(Symbol lookup: aBlock contents) ifNotNil: [:sym | Smalltalk at: sym ifPresent: [:obj | obj class] ifAbsent: [nil]]]}.
+		[#identifier] -> [(Symbol lookup: aBlock contents) ifNotNil: [:sym | Smalltalk at: sym ifPresent: [:obj | obj class] ifAbsent: [nil]]]}
+	otherwise: [nil].
 	
 	^ guessedClass
 		ifNil: [OrderedCollection withAll: Symbol allSymbols]
