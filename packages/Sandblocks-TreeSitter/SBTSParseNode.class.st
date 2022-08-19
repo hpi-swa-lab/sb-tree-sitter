@@ -59,7 +59,8 @@ SBTSParseNode >> characterAndBlockCount [
 	^ kind
 		caseOf: {
 			[#block] -> [contents inject: 1 into: [:sum :node | sum + node characterAndBlockCount]].
-			[#text] -> [contents size].
+			[#text] -> ["give a small penalty to text nodes such that we prefer label nodes"
+			contents size + 0.5].
 			[#editableLabel] -> [slot firstNode label size].
 			[#label] -> [contents size]}
 		otherwise: [1]

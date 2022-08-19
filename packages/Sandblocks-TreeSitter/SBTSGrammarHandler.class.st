@@ -15,9 +15,8 @@ SBTSGrammarHandler >> startOverrideInput: anEvent in: anEditor [
 
 	(anEditor selection language validPrefixInputs includes: anEvent keyCharacter) ifTrue: [
 		^ SBTSInputReconcile new
-			for: anEditor selection
-			input: anEvent keyCharacter asString
-			at: 1].
+			explicitAppend: true;
+			for: anEditor selection input: anEvent keyCharacter asString at: 1].
 	
 	(anEditor selection language validSuffixIputs includes: anEvent keyCharacter) ifTrue: [
 		^ SBTSInputReconcile new

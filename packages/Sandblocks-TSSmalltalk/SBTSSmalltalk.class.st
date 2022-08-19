@@ -1342,23 +1342,6 @@ SBTSSmalltalk >> softLineBreakBetween: aBlock and: anotherBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSSmalltalk >> suggestionsFor: aBlock [
-
-	((aBlock type = #identifier and: [aBlock parentSandblock type = #'unary_message']) or: [aBlock type = #keyword]) ifTrue: [
-		^ (aBlock sortedSuggestions: (OrderedCollection withAll: Symbol allSymbols) for: aBlock contents) collect: [:item |
-			SBSuggestionItem
-				selector: (item keywords joinSeparatedBy: (Character value: 1))
-				label: 'send']].
-	aBlock type = #identifier ifTrue: [
-		^ aBlock
-			sortedSuggestions: (aBlock contents first isUppercase
-				ifTrue: [self uppercaseSuggestionsFor: aBlock]
-				ifFalse: [self lowercaseSuggestionsFor: aBlock])
-			for: aBlock contents].
-	^ #()
-]
-
-{ #category : #'as yet unclassified' }
 SBTSSmalltalk >> transitionPairs [
 
 	^ {#'unary_message' -> #'keyword_message'}

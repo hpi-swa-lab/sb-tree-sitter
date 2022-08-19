@@ -355,6 +355,20 @@ SBTSBlock >> deleteBeforeCursorOld [
 { #category : #'as yet unclassified' }
 SBTSBlock >> deleteCommandFor: aBlock [
 
+	(self deleteCommandForNoReplace: aBlock) ifNotNil: [:cmd | ^ cmd].
+	
+	^ aBlock newNullBlock convertedFor: aBlock objectInterface do: [:new |
+		new ifNotNil: [
+			SBReplaceCommand new
+				target: aBlock;
+				replacer: new;
+				shouldMergeWithNext: true;
+				yourself]]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> deleteCommandForNoReplace: aBlock [
+
 	| target |
 	target := aBlock.
 	" walk up the chain of nodes, looking for either a repeater that we can delete from or any nodes that would have created other blocks, thus changing our deletion target "
@@ -363,6 +377,7 @@ SBTSBlock >> deleteCommandFor: aBlock [
 		p isTSRepeat ifTrue: [ | groups |
 			groups := p groupsIn: target owner.
 			(p required not or: [groups size > 1]) ifTrue: [groups do: [:group | (group includes: target) ifTrue: [^ SBCombinedCommand newWith: (group collect: [:block | SBDeleteCommand new target: block])]]]]].
+	
 	^ nil
 ]
 
@@ -865,6 +880,14 @@ SBTSBlock >> printTreeOn: aStream indent: aNumber [
 SBTSBlock >> promptTransition [
 	<action>
 
+	(SBTSInputReconcile preferNoPopup and: [self language language = #smalltalk and: [ActiveEvent shiftPressed not]]) ifTrue: [ | message target |
+		target := (self orOwnerSuchThat: [:b | b isTSBlock and: [b slot compatibleWithType: #expression]]) ifNil: [^ self].
+		message := (self language blockFor: #'unary_message') adaptSlotFor: target slot.
+		message childSandblocks first replaceBlock: target.
+		^ self sandblockEditor do: (SBReplaceCommand new
+			target: target replacer: message;
+			selectAfter: message childSandblocks last)].
+	
 	SBTSInputReconcile new
 		explicitAppend: self isUnknown not;
 		for: (self activeTextMorph ifNil: [self])
@@ -919,7 +942,7 @@ SBTSBlock >> reinterpretWithoutEmpty [
 	editor := self sandblockEditor.
 	remaining := self childrenToKeepDuringDelete.
 	remaining ifEmpty: [
-		(self parentSandblock deleteCommandFor: self) ifNotNil: [:c |
+		(self parentSandblock deleteCommandForNoReplace: self) ifNotNil: [:c |
 			self placeCursorCloseAfterDo: [editor do: c].
 			^ true].
 		^ false].

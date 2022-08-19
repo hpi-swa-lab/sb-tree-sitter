@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction)
+	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testStCommitEarlyWithKeywords)
 ]
 
 { #category : #'tests - adding' }
@@ -1421,6 +1421,19 @@ SBTSBlockTest >> testStBinaryToAssignment [
 	editor handle: (self keyboardEvent: $a shift: false command: true).
 	editor handle: (self keyboardEvent: $:).
 	self assert: 'assignment' equals: module childSandblocks second type
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testStCommitEarlyWithKeywords [
+
+	| method editor |
+	method := SBTSSmalltalk empty.
+	editor := self editorAndWorldFor: method.
+	method startInsertAtEnd.
+	self type: 's' in: editor.
+	self assert: #identifier equals: method childSandblocks second type.
+	self type: 'elf' in: editor.
+	self assert: #self equals: method childSandblocks second type
 ]
 
 { #category : #'tests - modify' }
