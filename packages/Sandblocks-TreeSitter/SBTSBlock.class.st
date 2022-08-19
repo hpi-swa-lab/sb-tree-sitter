@@ -33,7 +33,7 @@ SBTSBlock >> absorbsInput: anEvent [
 		oldPosition := text cursor.
 		[
 			text keyStroke: anEvent.
-			text slot firstNode regex matches: text contentsForEdit] ensure: [
+			self prefixValidFor: text in: self submorphs] ensure: [
 			text
 				contents: oldContents;
 				basicCursor: oldPosition]]
@@ -579,7 +579,12 @@ SBTSBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 	eval := [:pos | pos isInsert and: [pos command isStatementInsert]].
 	(anAboveBoolean
 		ifFalse: [self cursorPositionAfterThat: eval]
-		ifTrue: [self cursorPositionBeforeThat: eval]) ifNotNil: [:pos | self sandblockEditor do: pos command]
+		ifTrue: [self cursorPositionBeforeThat: eval]) ifNotNil: [:pos |
+		pos command element isTSChoice ifTrue: [
+			pos command element alternatives
+				detect: [:alt | alt type = #empty]
+				ifFound: [:alt | pos command morphs: alt buildEmpty]].
+		self sandblockEditor do: pos command]
 ]
 
 { #category : #actions }

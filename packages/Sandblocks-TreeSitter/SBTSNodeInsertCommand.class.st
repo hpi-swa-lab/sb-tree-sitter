@@ -149,7 +149,11 @@ SBTSNodeInsertCommand >> title [
 SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 
 	| options |
-	(element parent isStatementRepeater and: [aString = String cr]) ifTrue: [^ true].
+	(element parent isStatementRepeater and: [aString = String cr]) ifTrue: [
+		element alternatives
+			detect: [:alt | alt type = #empty]
+			ifFound: [:alt | self morphs: alt buildEmpty].
+		^ true].
 	(aString = String tab or: [aString = String cr]) ifTrue: [^ false].
 	
 	options := SBTSInputParser new

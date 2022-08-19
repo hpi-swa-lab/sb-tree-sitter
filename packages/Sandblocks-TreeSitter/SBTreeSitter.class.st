@@ -475,6 +475,13 @@ SBTreeSitter >> smalltalk [
 ]
 
 { #category : #'ffi languages' }
+SBTreeSitter >> sql [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_sql () module: 'tree-sitter-sql'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'DerekStride/tree-sitter-sql' name: 'sql' context: thisContext  branch: 'main'
+]
+
+{ #category : #'ffi languages' }
 SBTreeSitter >> supercollider [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_supercollider () module: 'tree-sitter-supercollider'>

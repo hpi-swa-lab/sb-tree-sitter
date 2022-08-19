@@ -675,7 +675,7 @@ SBTSGrammar >> rules [
 SBTSGrammar >> simplifyList: anObject [
 	" make a*? to a* "
 
-	anObject allElementsDo: [:node | (node isTSChoice and: [node elements size = 2 and: [node elements last isTSBlank and: [node elements first isTSRepeat]]]) ifTrue: [node replaceBy: node members first]]
+	anObject allElementsDo: [:node | (node isTSChoice and: [node elements size = 2 and: [node elements last isTSBlank and: [node elements first isTSRepeat]]]) ifTrue: [node replaceBy: node elements first]]
 ]
 
 { #category : #layout }

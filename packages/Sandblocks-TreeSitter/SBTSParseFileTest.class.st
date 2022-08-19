@@ -38,6 +38,16 @@ SBTSParseFileTest >> testCInclude [
 '
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSParseFileTest >> testClojureComments [
+
+	| program |
+	program := SBClojure parseToplevel: ';; a
+a'.
+	self assert: ';; a
+a' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - print' }
 SBTSParseFileTest >> testClojureSpaces [
 
@@ -47,6 +57,17 @@ SBTSParseFileTest >> testClojureSpaces [
 	
 	source := '[re :as re-frame]'.
 	self assert: source equals: (SBTSFileParser new parse: source language: SBClojure) sourceString
+]
+
+{ #category : #'as yet unclassified' }
+SBTSParseFileTest >> testClojureStringWithSpace [
+
+	| program editor |
+	program := SBClojure empty.
+	editor := self editorAndWorldFor: program.
+	program startInsertAtEnd.
+	self type: '"a b"' in: editor.
+	self assert: '"a b"' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - languages' }
