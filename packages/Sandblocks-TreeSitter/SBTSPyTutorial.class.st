@@ -70,7 +70,7 @@ def myFunc():
 				checkCondition: [:editor | (program queryNode: '(block)') childSandblocks size = 2].
 			step
 				addStep: 'Statement-insert will always look for the closest place to insert a new statement. So, to add a statement below the function, first move the cursor out of the function block and only then press <#insertStatementBelow>.'
-				checkCondition: [:editor | program childSandblocks size = 5].
+				checkCondition: [:editor | program childSandblocks size = 4].
 			program firstDeepChild startInputAtStart]
 ]
 
@@ -115,7 +115,7 @@ SBTSPyTutorial class >> stepShortcuts: anEditor [
 [37]
 justNumber=[2.123123]').
 			step
-				addStep: 'To quickly clear the contents of just the selected text field move your cursor into the identifier `nameIdentifier`, press <#clearInput> and change it to a `42`.'
+				addStep: 'To quickly clear the contents of just the selected text field move your cursor into the identifier `nameIdentifier`, press <#moveCursorLarger> to select the block you want to change and start typing a `42`.'
 				checkCondition: [:editor | program childSandblocks first sourceString = 'goodNum=42'].
 			step
 				addStep: 'Copy and paste works as you would expect it to: duplicate the `37` by moving the cursor into the number `37`, pressing <#copyToBuffer>, then moving the cursor right until it becomes a dashed line inside the array and press <#pasteReplace>.'
@@ -144,9 +144,8 @@ Tipp: you can always <#undo> to undo a change.
 
 Shortcuts you learned:
 <#deleteBlockWithCopy>: Delete (and copy) block
-<#clearInput>: empty the contents of a text field
 <#moveCursorLarger>: enlarge your selection
-Shift+Space: insert something before your current selection
+<Shift+Space>: insert something before your current selection
 <#inputNextUnknown>: jump to next (or previous via Shift) position that takes input';
 		setup: anEditor do: [:step | | program |
 			program := step createStep: (SBPython parseToplevel: 'class A:

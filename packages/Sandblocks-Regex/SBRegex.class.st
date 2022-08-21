@@ -736,6 +736,12 @@ SBRegex class >> highlightQuery [
 ] @operator'
 ]
 
+{ #category : #'configuration - layout' }
+SBRegex class >> isBlockInlined: aSymbol [
+
+	^ aSymbol = #term or: [super isBlockInlined: aSymbol]
+]
+
 { #category : #'configuration - editing' }
 SBRegex class >> isStatementContainer: aRepeatNode in: aBlock [
 

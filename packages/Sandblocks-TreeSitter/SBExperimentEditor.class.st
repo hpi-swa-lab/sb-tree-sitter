@@ -31,9 +31,40 @@ SBExperimentEditor class >> openTutorial [
 ]
 
 { #category : #'as yet unclassified' }
+SBExperimentEditor >> clearTimes [
+	<globalAction>
+
+	times := OrderedCollection new
+]
+
+{ #category : #'as yet unclassified' }
 SBExperimentEditor >> collectingKeys [
 
 	^ keyListenerProcess notNil
+]
+
+{ #category : #'as yet unclassified' }
+SBExperimentEditor >> copyData [
+	<globalAction>
+
+	Clipboard clipboardText: (((0 to: 3) gather: [:taskIndex | | relevant sandblocks text |
+		relevant := times select: [:entry | entry taskName notNil and: [entry taskName startsWith: 'task0', taskIndex]].
+		sandblocks := relevant select: [:entry | entry editor = 'sb'].
+		text := relevant select: [:entry | entry editor = 'text'].
+		
+		{sandblocks. text} collect: [:data | | complete start scores |
+			start := data detect: [:entry | entry event = 'start'].
+			complete := data detect: [:entry | entry event = 'complete' and: [entry mode = 'task']].
+			scores := data detect: [:entry | entry event = 'scores'].
+			{complete now - start now}, (complete at: #keys) counts, scores scores, {((complete at: #keys) at: #keys) asJsonString}]]) flatten joinSeparatedBy: String tab)
+]
+
+{ #category : #'as yet unclassified' }
+SBExperimentEditor >> initialize [
+
+	super initialize.
+	
+	scroll scroller layoutInset: (SBEdgeInsets left: 150 right: 150 top: 0 bottom: 0)
 ]
 
 { #category : #'as yet unclassified' }
@@ -86,7 +117,10 @@ SBExperimentEditor >> intoWorld: aWorld [
 						ifEmpty: [
 							SBTutorialStep resetAllProgress.
 							SBTSPyTutorial openIn: self]
-						ifNotEmpty: [self openMorphInView: (language parseToplevel: code)]].
+						ifNotEmpty: [ | block |
+							block := language parseToplevel: code.
+							self openMorphInView: block.
+							(data taskName beginsWith: 'task03') ifTrue: [block applyReplacements]]].
 				req send200Response: '{}' contentType: 'application/json' do: setHeaders]}]
 ]
 
@@ -127,7 +161,10 @@ SBExperimentEditor >> stopCollectKeys [
 
 	| output data |
 	keyListenerProcess sigint.
-	[keyListenerProcess runState == #complete] whileFalse: [(Delay forMilliseconds: 5) wait].
+	[keyListenerProcess runState == #complete] whileFalse: [
+		(Delay forMilliseconds: 50) wait.
+		"have to sometimes hammer the process with signals for it to terminate, maybe the listener thread is eating the signal sometimes?"
+		keyListenerProcess sigint].
 	data := outputPipe upToEnd.
 	keyListenerProcess := nil.
 	
