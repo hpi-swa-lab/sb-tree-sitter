@@ -155,7 +155,7 @@ SBTSInputReconcile >> optionsForInsert: aPosition given: aString [
 SBTSInputReconcile >> positionCursorIn: aCollection [
 
 	| all stopIndex |
-	insertIndex = 1 ifTrue: [^ aCollection first startInputAtStart].
+	insertIndex = 1 ifTrue: [^ (aCollection detect: #isSandblock ifNone: [aCollection first containingSandblock]) startInputAtStart].
 	true ifTrue: [ | last |
 		last := nil.
 		aCollection reverseDo: [:morph | morph allMorphsDo: [:m | (m valueOfProperty: #lastConstructed ifAbsent: [false]) ifTrue: [last := m]]].

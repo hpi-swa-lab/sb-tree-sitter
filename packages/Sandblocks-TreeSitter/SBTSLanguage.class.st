@@ -32,7 +32,7 @@ SBTSLanguage class >> allRuntimes [
 { #category : #'configuration - layout' }
 SBTSLanguage class >> alwaysEnlargeInsets [
 
-	^ true
+	^ false
 ]
 
 { #category : #'instantiate blocks' }
@@ -332,6 +332,12 @@ SBTSLanguage class >> noteUncapturedText [
 ]
 
 { #category : #'instantiate blocks' }
+SBTSLanguage class >> parse: aString [
+
+	^ SBTSFileParser new parse: aString language: self
+]
+
+{ #category : #'instantiate blocks' }
 SBTSLanguage class >> parseExpression: aString [
 
 	| toplevel |
@@ -561,7 +567,7 @@ SBTSLanguage class >> validPrefixInputs [
 { #category : #configuration }
 SBTSLanguage class >> validSuffixIputs [
 
-	^ #($+ $- $+ $/ $% $. $= $< $>)
+	^ #($+ $- $* $/ $% $. $= $< $>)
 ]
 
 { #category : #grammar }

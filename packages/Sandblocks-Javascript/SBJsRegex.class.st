@@ -1,6 +1,6 @@
 Class {
 	#name : #SBJsRegex,
-	#superclass : #SBInlineBlockReplace,
+	#superclass : #SBTSReplacementBlock,
 	#category : #'Sandblocks-Javascript'
 }
 
@@ -12,11 +12,22 @@ SBJsRegex class >> matchJs: aDictionary do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBJsRegex >> build [
+	<lang: #javascript match: '(regex (regex_pattern) @root)' sample: '/abc/'>
+
+	self
+		layoutPolicy: SBAlgebraLayout new;
+		addMorphBack: (self
+			createBinding: [:c | SBRegex parse: (c at: 'root') contents]
+			update: [:c :m | (c at: 'root') contents: m sourceString])
+]
+
+{ #category : #'as yet unclassified' }
 SBJsRegex >> initialize [
 
 	super initialize.
 	
-	self layoutPolicy: SBAlgebraLayout new
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -25,18 +36,4 @@ SBJsRegex >> layoutCommands [
 	^ SBAlgebraCommand container
 		morph: self;
 		data: {self firstSubmorph layoutCommands}
-]
-
-{ #category : #'as yet unclassified' }
-SBJsRegex >> regex: aString [
-
-	self addMorphBack: ((SBRegex parseAndReplace: aString)
-		hResizing: #shrinkWrap;
-		detachDecorators: SBForceMoveDecorator)
-]
-
-{ #category : #'as yet unclassified' }
-SBJsRegex >> writeSourceOn: aStream [
-
-	self firstSubmorph writeSourceOn: aStream
 ]

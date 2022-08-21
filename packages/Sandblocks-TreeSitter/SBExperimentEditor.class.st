@@ -3,7 +3,9 @@ Class {
 	#superclass : #SBBrowserEditor,
 	#instVars : [
 		'server',
-		'times'
+		'times',
+		'keyListenerProcess',
+		'outputPipe'
 	],
 	#category : #'Sandblocks-TreeSitter-Tutorial'
 }
@@ -29,6 +31,12 @@ SBExperimentEditor class >> openTutorial [
 ]
 
 { #category : #'as yet unclassified' }
+SBExperimentEditor >> collectingKeys [
+
+	^ keyListenerProcess notNil
+]
+
+{ #category : #'as yet unclassified' }
 SBExperimentEditor >> intoWorld: aWorld [
 
 	| setHeaders |
@@ -48,6 +56,9 @@ SBExperimentEditor >> intoWorld: aWorld [
 			ifFalse: [
 				raw := req getContent.
 				data := Json readFrom: raw readStream.
+				data event = 'start' ifTrue: [self startCollectKeys].
+				(data event = 'complete' and: [self collectingKeys]) ifTrue: [data at: 'keys' put: self stopCollectKeys].
+				
 				times add: data.
 				FileStream fileNamed: ('experiment-{1}.jsonl' format: {data at: 'runId'}) do: [:stream |
 					stream
@@ -55,25 +66,27 @@ SBExperimentEditor >> intoWorld: aWorld [
 						nextPutAll: raw;
 						cr;
 						flush].
-				req send200Response: 'application/json' contentType: 'text/plain; charset=utf-8' do: setHeaders]].
+				req send200Response: '' contentType: 'text/plain; charset=utf-8' do: setHeaders]].
 	server addService: '/code' action: [:req |
 		Transcript showln: req.
 		req method caseOf: {
-			['OPTIONS'] -> [req send200Response: 'application/json' contentType: 'text/plain; charset=utf-8' do: setHeaders].
+			['OPTIONS'] -> [req send200Response: '' contentType: 'text/plain; charset=utf-8' do: setHeaders].
 			['GET'] -> [
 				Transcript showln: 'open code'.
 				req
 					send200Response: ({'code' -> self childSandblocks first sourceString withUnixLineEndings} as: Dictionary) asJsonString
 					contentType: 'application/json'
 					do: setHeaders].
-			['POST'] -> [ | code |
-				code := (Json readFrom: req getContent readStream) code.
+			['POST'] -> [ | code data language |
+				data := Json readFrom: req getContent readStream.
+				code := data code.
+				language := SBTSFile languageForPath: data taskName.
 				Project current addDeferredUIMessage: [
 					code
 						ifEmpty: [
 							SBTutorialStep resetAllProgress.
 							SBTSPyTutorial openIn: self]
-						ifNotEmpty: [self openMorphInView: (SBPython parseToplevel: code)]].
+						ifNotEmpty: [self openMorphInView: (language parseToplevel: code)]].
 				req send200Response: '{}' contentType: 'application/json' do: setHeaders]}]
 ]
 
@@ -88,6 +101,38 @@ SBExperimentEditor >> outOfWorld: aWorld [
 SBExperimentEditor >> python [
 
 	self openMorphInView: (SBPython parseToplevel: SBTSReconstructExperiment basicNew pythonFlaskBlueprints)
+]
+
+{ #category : #'as yet unclassified' }
+SBExperimentEditor >> server [
+
+	^ server
+]
+
+{ #category : #'as yet unclassified' }
+SBExperimentEditor >> startCollectKeys [
+
+	outputPipe := OSPipe nonBlockingPipe.
+	keyListenerProcess := ExternalUnixOSProcess
+		forkAndExec: (SBTSLanguageRuntime which: 'python3')
+		arguments: {'/home/tom/Code/squeak/chi-2023-gpl-structured-editing/tasks/test-setup/key-count.py'}
+		environment: nil
+		descriptors: {nil. outputPipe writer. nil}
+		workingDir: nil.
+	outputPipe writer close
+]
+
+{ #category : #'as yet unclassified' }
+SBExperimentEditor >> stopCollectKeys [
+
+	| output data |
+	keyListenerProcess sigint.
+	[keyListenerProcess runState == #complete] whileFalse: [(Delay forMilliseconds: 5) wait].
+	data := outputPipe upToEnd.
+	keyListenerProcess := nil.
+	
+	output := Json readFrom: data readStream.
+	^ output
 ]
 
 { #category : #'as yet unclassified' }

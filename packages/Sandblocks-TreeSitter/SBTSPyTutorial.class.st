@@ -15,7 +15,34 @@ SBTSPyTutorial class >> open [
 { #category : #helper }
 SBTSPyTutorial class >> openIn: anEditor [
 
-	self stepIntro: anEditor
+	self perform: self steps first with: anEditor
+]
+
+{ #category : #steps }
+SBTSPyTutorial class >> stepExtending: anEditor [
+
+	SBTutorialStep new
+		toplevelSteps: self steps in: self;
+		title: 'Extending Expressions';
+		addIntroText: 'Just now, we have typed an expression from scratch. Next, we will extend existing expressions.';
+		setup: anEditor do: [:step | | program |
+			program := step createStep: (SBPython parseToplevel: '23*42
+''array member?''
+''a'' + ''b''
+3+0.14').
+			step
+				addStep: 'To extend an expression place your cursor at the end of the `42` in the first row and type `+1` .'
+				checkCondition: [:editor | program sourceString includesSubstring: '23*42+1'].
+			step
+				addStep: 'To wrap the string in the second row in an array move the cursor just before the first quotation mark, type `[`, then <#confirm>.'
+				checkCondition: [:editor | program sourceString includesSubstring: '[''array member?'']'].
+			step
+				addStep: 'To wrap the entire third row in an array, we first have to select it via <#moveCursorLarger>. Then, press `[` and <#confirm>.'
+				checkCondition: [:editor | program sourceString includesSubstring: '[''a''+''b'']'].
+			step
+				addStep: 'So far, we only added a single character in front of an expression. To add larger constructs, select the addition in the last row using <#moveCursorLarger>, press <Shift+Space> to open the "awaiting input"-popup, type `pi=`, then <#confirm>.'
+				checkCondition: [:editor | program sourceString includesSubstring: 'pi=3+0.14'].
+			program firstDeepChild startInputAtStart]
 ]
 
 { #category : #steps }
@@ -28,7 +55,8 @@ SBTSPyTutorial class >> stepInsert: anEditor [
 			program := step createStep: (SBPython parseToplevel: '
 def myFunc():
 	await asyncio.sleep(1)
-"line1line2"').
+
+"str"').
 			step addExplanationStep: 'Sandblocks will display a hint when your cursor is at positions where an element can be inserted.'.
 			step
 				addStep: 'To add an "async" in front of the `def` keep pressing <#moveCursorRight> or <#moveCursorLeft> until the popup indicates "async" and press the first letter of the input, in this case `a`, to confirm.'
@@ -41,39 +69,39 @@ def myFunc():
 				addStep: 'Try moving into the function and pressing <#insertStatementBelow>.'
 				checkCondition: [:editor | (program queryNode: '(block)') childSandblocks size = 2].
 			step
-				addStep: 'Now, create a new statement underneath, outside the function. To do so, you have to move the cursor out of the current statement block via <#moveCursorLarger> and only then press <#insertStatementBelow>.'
-				checkCondition: [:editor | program childSandblocks size = 3].
-			SBToggledCode comment: '' active: 0 do: {
-				[
-					step
-						addStep: 'If you want to create a multiline string, you have to press <#typeNewLine>, as otherwise the <#insertStatementBelow> input would be used to create a new line. Try splitting the lines of the below string.'
-						checkCondition: [:editor | program sourceString includesSubstring: '"line1
-line2"']]}.
+				addStep: 'Statement-insert will always look for the closest place to insert a new statement. So, to add a statement below the function, first move the cursor out of the function block and only then press <#insertStatementBelow>.'
+				checkCondition: [:editor | program childSandblocks size = 5].
 			program firstDeepChild startInputAtStart]
 ]
 
 { #category : #steps }
-SBTSPyTutorial class >> stepIntro: anEditor [
+SBTSPyTutorial class >> stepNavigation: anEditor [
 
 	SBTutorialStep new
 		toplevelSteps: self steps in: self;
-		title: 'Welcome to Sandblocks!';
-		addIntroText: 'This brief tutorial will guide you through the essential things to know for editing code in Sandblocks. We will use Python as our example language.';
-		setup: anEditor do: [:step | | program firstDone |
-			program := step createStep: (SBPython parseToplevel: '').
-			firstDone := false.
-			step
-				addStep: 'Try simply typing in the input at the bottom `print("Hello world")` while ignoring all popups. Sandblocks will automatically dismiss popups as you give it more input.'
-				checkCondition: [:editor |
-					(program sourceString asLowercase includesSubstring: 'print("hello world")')
-						ifTrue: [
-							firstDone := true.
-							true]
-						ifFalse: [false]].
-			step
-				addStep: 'Next, try backspacing until you have an empty program again and note how Sandblocks removes blocks for you as their content is emptied.'
-				checkCondition: [:editor | firstDone and: [program childSandblocks isEmpty]].
-			program startInsertAtEnd]
+		title: 'Navigation';
+		addIntroText: 'Navigation in Sandblocks is designed to be the same as in a text editor. Use the arrow keys to move character-wise, and control+arrow keys to move word-wise.
+
+You can also use the Home/Pos1 and End keys to jump to the start or end of a statement.
+
+Finally, using tab and shift+tab, you can jump between places that are in some way "empty".
+
+Try all three means of navigating the code below, then click the arrow on the right to go to the next step.';
+		setup: anEditor do: [:step | | program |
+			program := step createStep: (SBPython parseToplevel: 'import math
+
+class A:
+	def __init__(self):
+		self.numbers = [3, 67, 1, 4, 8]
+		for num in self.numbers:
+			print(num)
+	def b(self):
+		pass
+
+a = A()
+d = {"key": "value", "weather": "good"}
+emptyList = []').
+			program firstDeepChild startInputAtStart]
 ]
 
 { #category : #steps }
@@ -112,8 +140,14 @@ SBTSPyTutorial class >> stepTryItYourself: anEditor [
 
 For example, try creating a new class named Dog and add an appropriate method with a console.log. Or try adding a loop that iterates over the number list.
 
-Tipp 1: you can use <Tab> to jump to empty statement blocks and holes (blocks with a red border).
-Tipp 2: you can always <#undo> to undo a change.';
+Tipp: you can always <#undo> to undo a change.
+
+Shortcuts you learned:
+<#deleteBlockWithCopy>: Delete (and copy) block
+<#clearInput>: empty the contents of a text field
+<#moveCursorLarger>: enlarge your selection
+Shift+Space: insert something before your current selection
+<#inputNextUnknown>: jump to next (or previous via Shift) position that takes input';
 		setup: anEditor do: [:step | | program |
 			program := step createStep: (SBPython parseToplevel: 'class A:
 	def __init__(self):
@@ -124,35 +158,36 @@ d = {"key": "value", "weather": "good"}').
 ]
 
 { #category : #steps }
-SBTSPyTutorial class >> stepWrapping: anEditor [
+SBTSPyTutorial class >> stepTyping: anEditor [
 
 	SBTutorialStep new
 		toplevelSteps: self steps in: self;
-		title: 'Wrapping Expressions';
-		addIntroText: 'Just now, we have typed an expression from scratch. Next, we will extend existing expressions.';
-		setup: anEditor do: [:step | | program |
-			program := step createStep: (SBPython parseToplevel: '23*42
-12+43
-''array member?''
-3+0.14').
+		title: 'Typing';
+		addIntroText: 'Similarly, typing and deleting code works the same as in a text editor.';
+		setup: anEditor do: [:step | | program firstDone |
+			program := step createStep: (SBPython parseToplevel: '').
+			firstDone := false.
 			step
-				addStep: 'To extend an expression place your cursor at the end of the `42` in the first row and type `+1` .'
-				checkCondition: [:editor | program childSandblocks first sourceString = '23*42+1'].
+				addStep: 'Try simply typing in the input at the bottom `print("Hello world")` while ignoring all popups. Sandblocks will automatically dismiss popups as you give it more input.'
+				checkCondition: [:editor |
+					(program sourceString asLowercase includesSubstring: 'print("hello world")')
+						ifTrue: [
+							firstDone := true.
+							true]
+						ifFalse: [false]].
 			step
-				addStep: 'In the second row, we want to multiply the result of the addition by 5. To do so, move your cursor to the `43` and use <#moveCursorLarger> to select the addition `12+43`. Then press <#promptTransition> and type `*5`.'
-				checkCondition: [:editor | program childSandblocks second sourceString = '(12+43)*5'].
-			step addExplanationStep: '<#promptTransition> wrapped and added new constructs *after* our selection. Using <Shift+Space>, you can add constructs before the selection. '.
+				addStep: 'Next, try backspacing until you have an empty program again and note how Sandblocks removes blocks for you as their content is emptied.'
+				checkCondition: [:editor | firstDone and: [program childSandblocks isEmpty]].
 			step
-				addStep: 'To wrap the string in an array select the string in the thid row, press <#moveCursorLarger> to select the whole string, hit <#promptTransition> and type `[`, then <#confirm>.'
-				checkCondition: [:editor | program childSandblocks third sourceString = '[''array member?'']'].
-			step
-				addStep: 'Finally, you can also insert larger constructs. Select the addition in the last row using <#moveCursorLarger>, press <Shift+Space> and type `pi=`, then <#confirm>.'
-				checkCondition: [:editor | program childSandblocks fourth sourceString = 'pi=3+0.14'].
-			program firstDeepChild startInputAtStart]
+				addStep: 'Finally, type just an `f` and observe what options Sandblocks offers for autocompletion. Select the `for` loop at the bottom, use <Tab> to jump to the next input field, type `num`, use <Tab> again and type `numbers`, and finally use <Tab> and type `print(num)`.'
+				checkCondition: [:editor | firstDone and: [program sourceString = 'for num in numbers:
+	print(num)']].
+			step addExplanationStep: 'Note that you also can continue typing instead of using the popup. Sandblocks will automatically choose an autocompletion as soon as your input is unambiguous.'.
+			program startInsertAtEnd]
 ]
 
 { #category : #steps }
 SBTSPyTutorial class >> steps [
 
-	^ {#stepIntro:. #stepWrapping:. #stepInsert:. #stepShortcuts:. #stepTryItYourself:}
+	^ {#stepNavigation:. #stepTyping:. #stepExtending:. #stepInsert:. #stepShortcuts:. #stepTryItYourself:}
 ]

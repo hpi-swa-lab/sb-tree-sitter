@@ -992,6 +992,14 @@ SBTSBlock >> replaceBlock: aBlock [
 	^ new
 ]
 
+{ #category : #actions }
+SBTSBlock >> selectStartOfStatement [
+	<multiSelectAction>
+	<inputAction>
+
+	(self containingStatement ifNil: [self containingArtefact]) firstDeepChild select
+]
+
 { #category : #accessing }
 SBTSBlock >> semantics [
 

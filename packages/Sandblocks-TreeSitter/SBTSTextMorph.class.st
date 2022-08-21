@@ -214,7 +214,7 @@ SBTSTextMorph >> isUnknown [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> keepDuringDelete [
 
-	^ self contentsForEdit anySatisfy: [:c | c isAlphaNumeric]
+	^ ({''. '}'. ']'. ')'} includes: self contentsForEdit) not
 ]
 
 { #category : #'as yet unclassified' }
