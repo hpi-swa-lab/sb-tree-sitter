@@ -178,10 +178,12 @@ SBTSPyTutorial class >> stepTyping: anEditor [
 				addStep: 'Next, try backspacing until you have an empty program again and note how Sandblocks removes blocks for you as their content is emptied.'
 				checkCondition: [:editor | firstDone and: [program childSandblocks isEmpty]].
 			step
-				addStep: 'Finally, type just an `f` and observe what options Sandblocks offers for autocompletion. Select the `for` loop at the bottom, use <Tab> to jump to the next input field, type `num`, use <Tab> again and type `numbers`, and finally use <Tab> and type `print(num)`.'
+				addStep: 'Type just an `f` and observe what options Sandblocks offers for autocompletion. Select the `for` loop at the bottom, use <Tab> to jump to the next input field, type `num`, use <Tab> again and type `numbers`, and finally use <Tab> and type `print(num)`.'
 				checkCondition: [:editor | firstDone and: [program sourceString = 'for num in numbers:
 	print(num)']].
-			step addExplanationStep: 'Note that you also can continue typing instead of using the popup. Sandblocks will automatically choose an autocompletion as soon as your input is unambiguous.'.
+			step
+				addStep: 'Note that you also can continue typing instead of using the popup. Try pressing <#insertStatementBelow> to create a new line, type `if `, and notice that as soon as you press space, the popup is dimissed.'
+				checkCondition: [:editor | program sourceString includesSubstring: 'if'].
 			program startInsertAtEnd]
 ]
 
