@@ -1085,6 +1085,19 @@ SBTSBlockTest >> testPyDeleteCompInIf [
 	pass' equals: program sourceStringForCompare
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlockTest >> testPyDeletePrint [
+
+	| program editor |
+	program := SBPython empty.
+	editor := self editorAndWorldFor: program.
+	program startInsertAtEnd.
+	
+	self type: 'print("Hello")' in: editor.
+	24 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self assert: '' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - deleting' }
 SBTSBlockTest >> testPyDeleteReturnType [
 

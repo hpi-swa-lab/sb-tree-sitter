@@ -47,6 +47,8 @@ SBExperimentEditor >> collectingKeys [
 SBExperimentEditor >> copyData [
 	<globalAction>
 
+	| demographics |
+	demographics := times detect: [:entry | entry mode = 'demographics'].
 	Clipboard clipboardText: (((0 to: 3) gather: [:taskIndex | | relevant sandblocks text |
 		relevant := times select: [:entry | entry taskName notNil and: [entry taskName startsWith: 'task0', taskIndex]].
 		sandblocks := relevant select: [:entry | entry editor = 'sb'].
@@ -56,7 +58,7 @@ SBExperimentEditor >> copyData [
 			start := data detect: [:entry | entry event = 'start'].
 			complete := data detect: [:entry | entry event = 'complete' and: [entry mode = 'task']].
 			scores := data detect: [:entry | entry event = 'scores'].
-			{complete now - start now}, (complete at: #keys) counts, scores scores, {((complete at: #keys) at: #keys) asJsonString}]]) flatten joinSeparatedBy: String tab)
+			{complete now - start now}, (complete at: #keys) counts, scores scores, {((complete at: #keys) at: #keys) asJsonString}]]) flatten, (demographics at: #values) joinSeparatedBy: String tab)
 ]
 
 { #category : #'as yet unclassified' }
@@ -91,7 +93,7 @@ SBExperimentEditor >> intoWorld: aWorld [
 				(data event = 'complete' and: [self collectingKeys]) ifTrue: [data at: 'keys' put: self stopCollectKeys].
 				
 				times add: data.
-				FileStream fileNamed: ('experiment-{1}.jsonl' format: {data at: 'runId'}) do: [:stream |
+				FileStream fileNamed: ('experiment-{1}.jsonl' format: {data at: 'runNumber'}) do: [:stream |
 					stream
 						setToEnd;
 						nextPutAll: raw;
@@ -128,6 +130,7 @@ SBExperimentEditor >> intoWorld: aWorld [
 SBExperimentEditor >> outOfWorld: aWorld [
 
 	super outOfWorld: aWorld.
+	keyListenerProcess ifNotNil: [keyListenerProcess terminate].
 	server destroy
 ]
 

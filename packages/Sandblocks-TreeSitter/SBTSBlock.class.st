@@ -266,15 +266,20 @@ SBTSBlock >> deleteBeforeCursor [
 	| editor textMorph target |
 	editor := self sandblockEditor.
 	
-	textMorph := self sandblockEditor currentInputCommand ifNotNil: #textMorph.
+	textMorph := editor currentInputCommand ifNotNil: #textMorph.
 	(textMorph ifNotNil: #contentsForEdit ifNil: ['']) ifNotEmpty: [
 		super deleteBeforeCursor.
-		(self valid not and: [textMorph contents notEmpty]) ifTrue: [ | currentCursor evalOption |
+		(self valid not and: [textMorph contents notEmpty]) ifTrue: [ | currentCursor evalOption textMorphIndex |
 			currentCursor := textMorph cursor.
+			textMorphIndex := editor selection textMorphs indexOf: textMorph.
 			evalOption := [:options |
 				editor do: options first.
 				editor currentInputCommand
-					ifNotNil: [:c | c textMorph moveCursorTo: currentCursor]
+					ifNotNil: [:c |
+						c block textMorphs
+							at: textMorphIndex
+							ifPresent: [:other | other ~= c textMorph ifTrue: [editor startInput: editor selection at: currentCursor replacingContents: false in: other] ifFalse: [c textMorph moveCursorTo: currentCursor]]
+							ifAbsent: [c textMorph moveCursorTo: currentCursor]]
 					ifNil: [editor selection lastDeepChild startInputAtEnd]].
 			(SBTSInputReconcile new
 				tryReinterpretFrom: textMorph
