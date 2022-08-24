@@ -49,16 +49,34 @@ SBExperimentEditor >> copyData [
 
 	| demographics |
 	demographics := times detect: [:entry | entry mode = 'demographics'].
-	Clipboard clipboardText: (((0 to: 3) gather: [:taskIndex | | relevant sandblocks text |
+	Clipboard clipboardText: (((0 to: 0) gather: [:taskIndex | | relevant sandblocks text |
 		relevant := times select: [:entry | entry taskName notNil and: [entry taskName startsWith: 'task0', taskIndex]].
 		sandblocks := relevant select: [:entry | entry editor = 'sb'].
 		text := relevant select: [:entry | entry editor = 'text'].
 		
-		{sandblocks. text} collect: [:data | | complete start scores |
+		{sandblocks. text} collect: [:data | | complete start scores firstKey lastKey |
 			start := data detect: [:entry | entry event = 'start'].
 			complete := data detect: [:entry | entry event = 'complete' and: [entry mode = 'task']].
+			firstKey := (((complete at: #keys) at: #keys)
+				detect: [:key | (key first beginsWith: 'CLICK') not]
+				ifNone: [{0. 0}]) second.
+			lastKey := (((complete at: #keys) at: #keys) reversed
+				detect: [:key | (key first beginsWith: 'CLICK') not]
+				ifNone: [{0. 0}]) second.
+			
 			scores := data detect: [:entry | entry event = 'scores'].
-			{complete now - start now}, (complete at: #keys) counts, scores scores, {((complete at: #keys) at: #keys) asJsonString}]]) flatten, (demographics at: #values) joinSeparatedBy: String tab)
+			{lastKey - firstKey}, (complete at: #keys) counts, scores scores, {((complete at: #keys) at: #keys) asJsonString}]]) flatten, (demographics at: #values) joinSeparatedBy: String tab)
+]
+
+{ #category : #'as yet unclassified' }
+SBExperimentEditor >> currentCode [
+
+	| code |
+	code := nil.
+	Project current addDeferredUIMessage: [code := (self childSandblocks detect: [:c | c isTSBlock]) sourceString withUnixLineEndings].
+	World doOneCycleNow.
+	self assert: code notNil.
+	^ code
 ]
 
 { #category : #'as yet unclassified' }
@@ -67,6 +85,12 @@ SBExperimentEditor >> initialize [
 	super initialize.
 	
 	scroll scroller layoutInset: (SBEdgeInsets left: 150 right: 150 top: 0 bottom: 0)
+]
+
+{ #category : #'as yet unclassified' }
+SBExperimentEditor >> insertEmptyCommandRequestNear: aMorph before: aBlock [
+
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -80,10 +104,15 @@ SBExperimentEditor >> intoWorld: aWorld [
 		res headerAt: 'Access-Control-Allow-Headers' put: '*'.
 		res headerAt: 'Access-Control-Allow-Methods' put: '*'].
 	Transcript showln: 'hello'.
-	server := WebServer new listenOn: 8000.
+	server := WebServer new
+		listenOn: 8000;
+		errorHandler: [:ex :req |
+			Transcript showln: ex.
+			req sendResponseCode: 500 content: 'internal error' type: 'text/plain' do: setHeaders.
+			ex signal];
+		yourself.
 	times := OrderedCollection new.
 	server addService: '/report' action: [:req | | data raw |
-		Transcript showln: req.
 		req method = 'OPTIONS'
 			ifTrue: [req send200Response: 'application/json' contentType: 'text/plain; charset=utf-8' do: setHeaders]
 			ifFalse: [
@@ -91,6 +120,7 @@ SBExperimentEditor >> intoWorld: aWorld [
 				data := Json readFrom: raw readStream.
 				data event = 'start' ifTrue: [self startCollectKeys].
 				(data event = 'complete' and: [self collectingKeys]) ifTrue: [data at: 'keys' put: self stopCollectKeys].
+				(data event = 'complete' and: [data editor = 'sb' and: [data mode = 'task']]) ifTrue: [data at: 'code' put: self currentCode].
 				
 				times add: data.
 				FileStream fileNamed: ('experiment-{1}.jsonl' format: {data at: 'runNumber'}) do: [:stream |
@@ -101,13 +131,12 @@ SBExperimentEditor >> intoWorld: aWorld [
 						flush].
 				req send200Response: '' contentType: 'text/plain; charset=utf-8' do: setHeaders]].
 	server addService: '/code' action: [:req |
-		Transcript showln: req.
 		req method caseOf: {
 			['OPTIONS'] -> [req send200Response: '' contentType: 'text/plain; charset=utf-8' do: setHeaders].
 			['GET'] -> [
 				Transcript showln: 'open code'.
 				req
-					send200Response: ({'code' -> self childSandblocks first sourceString withUnixLineEndings} as: Dictionary) asJsonString
+					send200Response: ({'code' -> self currentCode} as: Dictionary) asJsonString
 					contentType: 'application/json'
 					do: setHeaders].
 			['POST'] -> [ | code data language |

@@ -64,13 +64,10 @@ def myFunc():
 			step
 				addStep: 'Next, add an argument called `arg` to the function by again moving into the right spot and typing `arg`.'
 				checkCondition: [:editor | program sourceString includesSubstring: 'def myFunc(arg)'].
-			step addExplanationStep: 'You can create a new statement by pressing <#insertStatementBelow> or <#insertStatementAbove> *anywhere*.'.
+			step addExplanationStep: 'You can create a new statement by pressing <#insertStatementBelow> or <#insertStatementAbove> *anywhere*, the editor will always find the next closest position for a statement.'.
 			step
-				addStep: 'Try moving into the function and pressing <#insertStatementBelow>.'
+				addStep: 'Press <#insertStatementBelow> to add a new empty statement inside the function.'
 				checkCondition: [:editor | (program queryNode: '(block)') childSandblocks size = 2].
-			step
-				addStep: 'Statement-insert will always look for the closest place to insert a new statement. So, to add a statement below the function, first move the cursor out of the function block and only then press <#insertStatementBelow>.'
-				checkCondition: [:editor | program childSandblocks size = 4].
 			program firstDeepChild startInputAtStart]
 ]
 
@@ -86,7 +83,7 @@ You can also use the Home/Pos1 and End keys to jump to the start or end of a sta
 
 Finally, using tab and shift+tab, you can jump between places that are in some way "empty".
 
-Try all three means of navigating the code below, then click the arrow on the right to go to the next step.';
+Click anywhere in the code below to place the cursor, then try all three means of navigating the code below, then click the arrow on the right to go to the next step.';
 		setup: anEditor do: [:step | | program |
 			program := step createStep: (SBPython parseToplevel: 'import math
 
@@ -182,7 +179,7 @@ SBTSPyTutorial class >> stepTyping: anEditor [
 				checkCondition: [:editor | firstDone and: [program sourceString = 'for num in numbers:
 	print(num)']].
 			step
-				addStep: 'Note that you also can continue typing instead of using the popup. Try pressing <#insertStatementBelow> to create a new line, type `if `, and notice that as soon as you press space, the popup is dimissed.'
+				addStep: 'Note that you also can continue typing instead of using the popup. Try pressing <#insertStatementBelow> to create a new line, type `if `, and notice that as soon as you press space, the popup disappears as your input is now clearly the `if` keyword.'
 				checkCondition: [:editor | program sourceString includesSubstring: 'if'].
 			program startInsertAtEnd]
 ]

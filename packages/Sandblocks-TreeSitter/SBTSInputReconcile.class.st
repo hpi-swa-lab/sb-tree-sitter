@@ -140,6 +140,12 @@ SBTSInputReconcile >> initialize [
 		placeholderText: 'Add characters ...')
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSInputReconcile >> objectInterface [
+
+	^ SBInterfaces never
+]
+
 { #category : #'reconciliation helper' }
 SBTSInputReconcile >> optionsForInsert: aPosition given: aString [
 
