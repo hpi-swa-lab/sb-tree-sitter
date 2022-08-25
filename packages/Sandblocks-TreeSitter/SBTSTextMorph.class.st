@@ -186,6 +186,14 @@ SBTSTextMorph >> highlight: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> initialize [
+
+	super initialize.
+	
+	self maxWidth: 400
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> isComplete [
 
 	^ self fixedText isNil or: [self contentsForEdit size = self fixedText size]

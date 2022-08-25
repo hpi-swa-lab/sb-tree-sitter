@@ -22,7 +22,7 @@ SBTSBlock >> absorbsInput: anEvent [
 
 	(anEvent commandKeyPressed or: [anEvent optionKeyPressed or: [anEvent controlKeyPressed]]) ifTrue: [^ false].
 	
-	(anEvent keyCharacter = Character tab and: [anEvent shiftPressed]) ifTrue: [^ false].
+	(anEvent keyCharacter = Character tab and: [SBToggledCode comment: '' active: 1 do: {[true]. [anEvent shiftPressed]}]) ifTrue: [^ false].
 	
 	^ anEvent keyCharacter isPrintable and: [ | text oldContents oldPosition |
 		text := self activeTextMorph.

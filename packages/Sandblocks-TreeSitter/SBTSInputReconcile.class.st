@@ -270,7 +270,7 @@ SBTSInputReconcile >> suggestions [
 SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 
 	self positionsAfter: aBlock from: target do: [:position |
-		(position isText and: [position textMorph contents isEmpty]) ifTrue: ["TODO: do we want the full reconciliation logic or just reinterpret?"
+		(position isText and: [position textMorph contentsForEdit isEmpty]) ifTrue: ["TODO: do we want the full reconciliation logic or just reinterpret?"
 		^ self tryReinterpretFrom: position textMorph in: position block given: aString at: self class endIndex].
 		position isInsert ifTrue: [(self optionsForInsert: position given: aString) ifNotEmpty: [:res | ^ res]]].
 	^ {}
@@ -366,7 +366,6 @@ SBTSInputReconcile >> trySeparator: aString in: aBlock atEnd: aBoolean [
 	aString = aBlock language statementTerminator ifTrue: [
 		aBlock slot allParentsDo: [:node |
 			(node isTSSeq and: [node hasStatementTerminator]) ifTrue: [
-				node.
 				^ {
 					(aBlock cursorPositionAfterThat: [:pos | (pos isInsert and: [(pos command element hasParent: node) not]) or: [pos isText]]) command}]]].
 	
@@ -404,12 +403,12 @@ SBTSInputReconcile >> trySkipLabel: aString in: aBlock from: aMorph at: aNumber 
 SBTSInputReconcile >> tryWrap: aBlock given: aString before: aBoolean [
 
 	| get |
-	get := [:root | 
+	get := [:root |
 		(SBTSInputParser new
 			optionsFor: root
-				given: aString
-				before: (aBoolean ifTrue: [{}] ifFalse: [{root}])
-				after: (aBoolean ifTrue: [{root}] ifFalse: [{}])) collect: [:blocks |
+			given: aString
+			before: (aBoolean ifTrue: [{}] ifFalse: [{root}])
+			after: (aBoolean ifTrue: [{root}] ifFalse: [{}])) collect: [:blocks |
 			SBReplaceMultipleCommand new
 				target: root replacers: blocks;
 				shouldMergeWithNext: true]].
@@ -426,7 +425,10 @@ SBTSInputReconcile >> tryWrap: aBlock given: aString before: aBoolean [
 							parentPrecedence: current slot nodes
 							do: [:node :isLeftMost :isRightMost | node isLeftAssociative and: [isLeftMost not]]
 							ifNone: [false]].
-					considerOwner ifTrue: [stream nextPutAll: (get value: owner)].
+					considerOwner ifTrue: [ | results |
+						results := get value: owner.
+						stream nextPutAll: (results select: [:res | "TODO we want to only add these results if they actually were involved in a precedence conflict; a simple but insufficient approximation is that they changed at all"
+						res morphs size > 1 or: [res morphs first sourceStringForCompare ~= owner sourceStringForCompare]])].
 					owner isTSBlock ifTrue: [current := owner]]]}]
 ]
 

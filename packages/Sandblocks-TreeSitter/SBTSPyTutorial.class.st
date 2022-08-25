@@ -133,23 +133,39 @@ SBTSPyTutorial class >> stepTryItYourself: anEditor [
 	SBTutorialStep new
 		toplevelSteps: self steps in: self;
 		title: 'Try It Yourself';
-		addIntroText: 'Finally, feel free to take some moments to explore the input system by yourself by modifying, deleting or extending the below Python code as you wish.
+		addIntroText: 'Finally, feel free to take some moments to explore the input system by following the prompts in the code comments below.
 
-For example, try creating a new class named Dog and add an appropriate method with a console.log. Or try adding a loop that iterates over the number list.
-
-Tipp: you can always <#undo> to undo a change.
+Tipp: you can always press <#undo> to undo a change.
 
 Shortcuts you learned:
-<#deleteBlockWithCopy>: Delete (and copy) block
 <#moveCursorLarger>: enlarge your selection
 <Shift+Space>: insert something before your current selection
 <#inputNextUnknown>: jump to next (or previous via Shift) position that takes input';
 		setup: anEditor do: [:step | | program |
-			program := step createStep: (SBPython parseToplevel: 'class A:
+			program := step createStep: (SBPython parseToplevel: 'class Nums:
 	def __init__(self):
-		self.numbers = [3, 67, 1, 4, 8]
+		# TODO assign the below array to self.numbers
+		[3, 67, 1, 4, 8]
+		# HINT: use shift+up to select the array, press shift+space, then type `self.numbers=`
 
-d = {"key": "value", "weather": "good"}').
+# TODO add another entry in the below dictionary, "rain": "none"
+d = {"key": "value", "weather": "good"}
+# HINT: move the cursor in the dictionary until it becomes a dashed line, then just type the key and value
+
+headers = {"Content-Type": "application/json", "Authorization": "Bearer a239a2def"}
+# TODO use shift-up to select the dictionary below, then just type the variable `headers` to replace your selection
+request("https://google.com", {"todo-header": "todo"})
+
+n = Nums()
+# TODO try not to use the popup but just simply keep typing as you would in a text editor: replace the call below and create a for-loop that iterates over n.numbers and prints each number
+replaceMe()
+
+
+# TODO create a list comprehension by typing [i ** 2 for i in n.numbers]
+
+# TODO then select the entire list and assign it to the variable `squared`
+# HINT: again, you can simply the expression, then use shift+up to select it and hit shift+space to wrap it in the assignment
+').
 			program firstDeepChild startInputAtStart]
 ]
 
