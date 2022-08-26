@@ -1052,6 +1052,14 @@ SBTSBlock >> statements [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBlock >> stringContents [
+
+	^ self textMorphs detect: [:text | text slot firstNode isTSText] ifFound: [:text |
+		#($' $" $`) do: [:char | ((text contents first = char and: [text contents last = char]) and: [(text slot firstNode regex matches: 'a') not]) ifTrue: [^ text contents viewAllButFirstAndLast joinSeparatedBy: '']].
+		text contents]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock >> suggestAlways [
 
 	^ self language suggestAlwaysFor: self

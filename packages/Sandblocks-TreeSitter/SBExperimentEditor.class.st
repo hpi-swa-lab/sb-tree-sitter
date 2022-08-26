@@ -159,7 +159,7 @@ SBExperimentEditor >> intoWorld: aWorld [
 SBExperimentEditor >> outOfWorld: aWorld [
 
 	super outOfWorld: aWorld.
-	keyListenerProcess ifNotNil: [keyListenerProcess terminate].
+	Smalltalk platformName ~= 'Win32' ifTrue: [keyListenerProcess ifNotNil: [keyListenerProcess terminate]].
 	server destroy
 ]
 
@@ -178,6 +178,10 @@ SBExperimentEditor >> server [
 { #category : #'as yet unclassified' }
 SBExperimentEditor >> startCollectKeys [
 
+	Smalltalk platformName = 'Win32' ifTrue: [
+		keyListenerProcess := ExternalWindowsOSProcess command: ('python {1}\\key-count.py' format: {FileDirectory default fullName}).
+		^ self].
+	
 	outputPipe := OSPipe nonBlockingPipe.
 	keyListenerProcess := ExternalUnixOSProcess
 		forkAndExec: (SBTSLanguageRuntime which: 'python3')
@@ -192,6 +196,11 @@ SBExperimentEditor >> startCollectKeys [
 SBExperimentEditor >> stopCollectKeys [
 
 	| output data |
+	Smalltalk platformName = 'Win32' ifTrue: [
+		ExternalWindowsOSProcess command: ('taskkill /pid {1}' format: {keyListenerProcess pid}).
+		[keyListenerProcess runState == #complete] whileFalse: [(Delay forMilliseconds: 50) wait].
+		^ FileStream readOnlyFileNamed: 'out.txt' do: [:f | Json readFrom: f contents readStream]].
+	
 	keyListenerProcess sigint.
 	[keyListenerProcess runState == #complete] whileFalse: [
 		(Delay forMilliseconds: 50) wait.

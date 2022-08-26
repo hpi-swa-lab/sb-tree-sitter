@@ -51,6 +51,10 @@ SBTSLanguageBox >> buildPython [
 SBTSLanguageBox >> buildSmalltalk [
 	<lang: #smalltalk match: '(keyword_message receiver: (identifier) ="Polyglot" (keyword) ="eval:" (string) @language (keyword) ="string:" (string) @code)' sample: 'a Polyglot eval: ''python'' string: ''2 + 2'''>
 
+	
+	bindings at: 'language' put: (SBTSBindingProxy trimQuotes: (bindings at: 'language')).
+	bindings at: 'code' put: (SBTSBindingProxy trimQuotes: (bindings at: 'code')).
+	
 	self build
 ]
 
