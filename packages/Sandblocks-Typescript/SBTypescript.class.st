@@ -11134,6 +11134,7 @@ SBTypescript class >> softLineBreakBetween: aBlock and: anotherBlock [
 		aBlock contents = '=>' ifTrue: [^ true]].
 	anotherBlock type = #arguments ifTrue: [^ true].
 	(aBlock type = 'jsx_opening_element' or: [anotherBlock type = 'jsx_closing_element']) ifTrue: [^ true].
+	(#('&&' '>') includes: aBlock contents) ifTrue: [^ true].
 	^ super softLineBreakBetween: aBlock and: anotherBlock
 ]
 

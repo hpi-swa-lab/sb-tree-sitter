@@ -387,9 +387,11 @@ SBTSBlock >> deleteCommandForNoReplace: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSBlock >> deselectedTextMorph: aMorph [
+SBTSBlock >> deselectedTextMorph: aMorph for: aNewPosition [
 
-	super deselectedTextMorph: aMorph.
+	super deselectedTextMorph: aMorph for: aNewPosition.
+	(aNewPosition isText and: [aNewPosition block isKindOf: SBTSInputReconcile]) ifTrue: [^ self].
+	
 	self owner ifNotNil: [
 		self owner submorphs
 			from: 1
@@ -1120,7 +1122,7 @@ SBTSBlock >> tryApplyChange: aBlock input: aString [
 
 	| previousContents insertIndex textMorph |
 	textMorph := self activeTextMorph.
-	previousContents := textMorph contents.
+	previousContents := textMorph contentsForEdit.
 	insertIndex := textMorph contents
 		ifNotEmpty: [textMorph cursor]
 		ifEmpty: [SBTSInputReconcile endIndex].

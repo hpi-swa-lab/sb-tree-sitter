@@ -611,6 +611,18 @@ SBTSBlockTest >> testJsIdentifierToAssignment [
 	self assert: #'lexical_declaration' equals: program childSandblocks first type
 ]
 
+{ #category : #'tests - modify' }
+SBTSBlockTest >> testJsLetToConst [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'let a = 5'.
+	editor := self editorAndWorldFor: program.
+	program childSandblocks first startInputAtEnd.
+	3 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	self type: 'co' in: editor.
+	self assert: 'const a=5;' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - input transition' }
 SBTSBlockTest >> testJsMethodCall [
 
@@ -1085,7 +1097,7 @@ SBTSBlockTest >> testPyDeleteCompInIf [
 	pass' equals: program sourceStringForCompare
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - deleting' }
 SBTSBlockTest >> testPyDeletePrint [
 
 	| program editor |

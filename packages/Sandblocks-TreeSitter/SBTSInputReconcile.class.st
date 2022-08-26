@@ -161,10 +161,17 @@ SBTSInputReconcile >> optionsForInsert: aPosition given: aString [
 SBTSInputReconcile >> positionCursorIn: aCollection [
 
 	| all stopIndex |
-	insertIndex = 1 ifTrue: [^ (aCollection detect: #isSandblock ifNone: [aCollection first containingSandblock]) startInputAtStart].
+	insertIndex = 1 ifTrue: [ | block |
+		block := aCollection detect: #isSandblock ifNone: [aCollection first containingSandblock].
+		^ aCollection first containingSandblock sandblockEditor
+			startInput: block
+			at: 900000000
+			replacingContents: false
+			in: block textMorphs first].
 	true ifTrue: [ | last |
 		last := nil.
 		aCollection reverseDo: [:morph | morph allMorphsDo: [:m | (m valueOfProperty: #lastConstructed ifAbsent: [false]) ifTrue: [last := m]]].
+		aCollection do: [:m | m allMorphsDo: [:i | i removeProperty: #lastConstructed]].
 		last
 			ifNil: [
 				aCollection last lastCursorPosition ifNotNil: [:position |
@@ -464,5 +471,5 @@ SBTSInputReconcile >> updateChoices [
 	SBTSReconstructExperiment reportTime: [currentChoices := self findOptionsBlock cull: self cull: self contents] durationToRun.
 	
 	SBToggledCode comment: '' active: 1 do: {
-		[((currentChoices size = 1 and: [insertIndex > 1 or: [currentChoices first isKindOf: SBDoItCommand]]) or: [self class preferNoPopup and: [currentChoices notEmpty]]) ifTrue: [self applyCommand: currentChoices first]]}
+		[((currentChoices size = 1 and: [(insertIndex > 1 or: [currentChoices first isKindOf: SBDoItCommand]) or: [target contentsForEdit isNil or: [target contentsForEdit isEmpty]]]) or: [self class preferNoPopup and: [currentChoices notEmpty]]) ifTrue: [self applyCommand: currentChoices first]]}
 ]
