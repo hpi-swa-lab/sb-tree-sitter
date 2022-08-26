@@ -32,7 +32,6 @@ SBExperimentEditor class >> openTutorial [
 
 { #category : #'as yet unclassified' }
 SBExperimentEditor >> clearTimes [
-	<globalAction>
 
 	times := OrderedCollection new
 ]
@@ -50,7 +49,7 @@ SBExperimentEditor >> copyData [
 	| demographics |
 	demographics := times detect: [:entry | entry mode = 'demographics'].
 	Clipboard clipboardText: (((0 to: 3) gather: [:taskIndex | | relevant sandblocks text |
-		relevant := times select: [:entry | entry taskName notNil and: [entry taskName startsWith: 'task0', taskIndex]].
+		relevant := times select: [:entry | entry taskName notNil and: [entry taskName beginsWith: 'task0', taskIndex]].
 		sandblocks := relevant select: [:entry | entry editor = 'sb'].
 		text := relevant select: [:entry | entry editor = 'text'].
 		
@@ -198,7 +197,10 @@ SBExperimentEditor >> stopCollectKeys [
 	| output data |
 	Smalltalk platformName = 'Win32' ifTrue: [
 		ExternalWindowsOSProcess command: ('taskkill /pid {1}' format: {keyListenerProcess pid}).
-		[keyListenerProcess runState == #complete] whileFalse: [(Delay forMilliseconds: 50) wait].
+		[
+			(keyListenerProcess
+				update: #runState;
+				runState) == #complete] whileFalse: [(Delay forMilliseconds: 50) wait].
 		^ FileStream readOnlyFileNamed: 'out.txt' do: [:f | Json readFrom: f contents readStream]].
 	
 	keyListenerProcess sigint.
