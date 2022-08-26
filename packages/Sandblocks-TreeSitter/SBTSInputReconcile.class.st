@@ -47,8 +47,6 @@ SBTSInputReconcile >> applyCommand: aCommand [
 SBTSInputReconcile >> contentsChanged [
 
 	currentChoices ifNil: [^ self].
-	self contents ifEmpty: [^ self dismiss].
-	
 	self updateChoices
 ]
 
@@ -163,6 +161,7 @@ SBTSInputReconcile >> positionCursorIn: aCollection [
 	| all stopIndex |
 	insertIndex = 1 ifTrue: [ | block |
 		block := aCollection detect: #isSandblock ifNone: [aCollection first containingSandblock].
+		block textMorphs ifEmpty: [^ block select].
 		^ aCollection first containingSandblock sandblockEditor
 			startInput: block
 			at: 900000000
@@ -264,12 +263,9 @@ SBTSInputReconcile >> suggestions [
 	^ ((currentChoices ifNil: [{}]) collect: [:command | SBTSBlockSuggestion new command: command in: self sandblockEditor popup: self]) ifEmpty: [
 		{
 			SBSuggestionItemNonSelectable
-				selector: ('input `{3}` not valid in {1} {2}' format: {
-					target containingSandblock printString first isVowel
-						ifTrue: ['an']
-						ifFalse: ['a'].
-					target containingSandblock printString.
-					self contents})
+				selector: (self contents
+					ifEmpty: ['press <#dismiss> to close' withSBShortcuts]
+					ifNotEmpty: ['input `{1}` not valid here (press <#dismiss> to close)' withSBShortcuts format: {self contents}])
 				label: ''}]
 ]
 
