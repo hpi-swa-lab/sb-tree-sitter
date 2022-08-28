@@ -41,6 +41,15 @@ Morph >> isTSNode [
 ]
 
 { #category : #'*Sandblocks-TreeSitter' }
+Morph >> lastDeepSubmorph [
+
+	| current |
+	current := self.
+	[current submorphs isEmpty] whileFalse: [current := current submorphs last].
+	^ current
+]
+
+{ #category : #'*Sandblocks-TreeSitter' }
 Morph >> recursiveSubmorphCount [
 
 	| i |

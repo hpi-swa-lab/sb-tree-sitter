@@ -189,9 +189,6 @@ SBTSBlockTest >> testClojureWrapInExpr [
 	editor := self editorAndWorldFor: program.
 	program childSandblocks first startInputAtStart.
 	editor handle: (self keyboardEvent: $().
-	self tick.
-	self tick.
-	editor handle: (self keyboardEvent: Character cr).
 	editor handle: (self keyboardEvent: Character arrowRight).
 	editor handle: (self keyboardEvent: $*).
 	self assert: '(* (+ 1 2))' equals: program sourceString
@@ -302,6 +299,22 @@ SBTSBlockTest >> testInsertAddition [
 	program firstDeepChild startInputAtEnd.
 	self type: '+2' in: editor.
 	self assert: '1+2+3+4;' equals: program sourceStringForCompare
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testInsertArgAdjacentBefore [
+
+	| program editor |
+	program := SBJavascript parseToplevel: 'func(a,b)'.
+	editor := self editorAndWorldFor: program.
+	
+	editor
+		startInput: program childSandblocks first
+		at: 1
+		replacingContents: false
+		in: program lastDeepSubmorph.
+	self type: 'x' in: editor.
+	self assert: 'func(a,b,x);' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - deleting' }
@@ -667,9 +680,6 @@ SBTSBlockTest >> testJsNumberToString [
 	editor := self editorAndWorldFor: module.
 	module lastDeepChild startInputAtStart.
 	self type: '''' in: editor.
-	self tick.
-	self tick.
-	editor handle: (self keyboardEvent: Character cr).
 	self assert: '''123'';' equals: module sourceString
 ]
 

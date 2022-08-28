@@ -902,7 +902,7 @@ SBTSBlock >> promptTransition [
 	
 	SBTSInputReconcile new
 		explicitAppend: self isUnknown not;
-		for: (self activeTextMorph ifNil: [self]) input: '' at: ((ActiveEvent shiftPressed or: [ActiveEvent keyCharacter = $e])
+		for: (self activeTextMorph ifNil: [self]) input: '' at: ((ActiveEvent shiftPressed or: [ActiveEvent isKeyboard and: [ActiveEvent keyCharacter = $e]])
 			ifTrue: [1]
 			ifFalse: [SBTSInputReconcile endIndex])
 ]

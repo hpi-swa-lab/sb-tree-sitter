@@ -67,6 +67,12 @@ SBTSInputReconcile >> dismiss [
 ]
 
 { #category : #accessing }
+SBTSInputReconcile >> explicitAppend [
+
+	^ explicitAppend ifNil: [false]
+]
+
+{ #category : #accessing }
 SBTSInputReconcile >> explicitAppend: aBoolean [
 
 	explicitAppend := aBoolean
@@ -82,7 +88,7 @@ SBTSInputReconcile >> findOptionsBlock [
 				input: self contents
 				in: target containingSandblock
 				at: insertIndex
-				explicitAppend: (explicitAppend ifNil: [false])]]
+				explicitAppend: self explicitAppend]]
 ]
 
 { #category : #accessing }
@@ -269,6 +275,22 @@ SBTSInputReconcile >> suggestions [
 				label: ''}]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSInputReconcile >> tryAdjacentBefore: aMorph given: aString [
+
+	| last |
+	aMorph owner isTSBlock ifFalse: [^ self].
+	last := nil.
+	aMorph owner cursorPositionsDo: [:position |
+		(position isText and: [
+			target isTextMorph
+				ifTrue: [position textMorph = target]
+				ifFalse: [position block = target containingSandblock]]) ifTrue: [
+			(last notNil and: [last isInsert]) ifTrue: [(self optionsForInsert: last given: aString) ifNotEmpty: [:res | ^ res]].
+			^ {}].
+		last := position]
+]
+
 { #category : #reconciliation }
 SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 
@@ -305,9 +327,10 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 	^ aNumber = 1
 		ifTrue: [
 			(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean) ifEmpty: [
-				aBoolean
-					ifTrue: [{}]
-					ifFalse: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]]
+				(self tryAdjacentBefore: aMorph given: aString) ifEmpty: [
+					aBoolean
+						ifTrue: [{}]
+						ifFalse: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]]]
 		ifFalse: [
 			(self
 				trySeparator: aString
@@ -467,5 +490,5 @@ SBTSInputReconcile >> updateChoices [
 	SBTSReconstructExperiment reportTime: [currentChoices := self findOptionsBlock cull: self cull: self contents] durationToRun.
 	
 	SBToggledCode comment: '' active: 1 do: {
-		[((currentChoices size = 1 and: [(insertIndex > 1 or: [currentChoices first isKindOf: SBDoItCommand]) or: [target contentsForEdit isNil or: [target contentsForEdit isEmpty]]]) or: [self class preferNoPopup and: [currentChoices notEmpty]]) ifTrue: [self applyCommand: currentChoices first]]}
+		[((currentChoices size = 1 and: [(insertIndex > 1 or: [currentChoices first isKindOf: SBDoItCommand]) or: [target contentsForEdit isNil or: [target contentsForEdit isEmpty or: [self explicitAppend not]]]]) or: [self class preferNoPopup and: [currentChoices notEmpty]]) ifTrue: [self applyCommand: currentChoices first]]}
 ]
