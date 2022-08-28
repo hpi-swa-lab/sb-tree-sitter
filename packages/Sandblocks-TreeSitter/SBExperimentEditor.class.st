@@ -46,8 +46,9 @@ SBExperimentEditor >> collectingKeys [
 SBExperimentEditor >> copyData [
 	<globalAction>
 
-	| demographics |
+	| demographics postSurvey |
 	demographics := times detect: [:entry | entry mode = 'demographics'].
+	postSurvey := times detect: [:entry | entry mode = 'postSurvey'].
 	Clipboard clipboardText: (((0 to: 3) gather: [:taskIndex | | relevant sandblocks text |
 		relevant := times select: [:entry | entry taskName notNil and: [entry taskName beginsWith: 'task0', taskIndex]].
 		sandblocks := relevant select: [:entry | entry editor = 'sb'].
@@ -64,7 +65,7 @@ SBExperimentEditor >> copyData [
 				ifNone: [{0. 0}]) second.
 			
 			scores := data detect: [:entry | entry event = 'scores'].
-			{lastKey - firstKey}, (complete at: #keys) counts, scores scores, {((complete at: #keys) at: #keys) asJsonString}]]) flatten, (demographics at: #values) joinSeparatedBy: String tab)
+			{lastKey - firstKey}, (complete at: #keys) counts, scores scores, {((complete at: #keys) at: #keys) asJsonString}]]) flatten, (demographics at: #values), (postSurvey at: #values) joinSeparatedBy: String tab)
 ]
 
 { #category : #'as yet unclassified' }
