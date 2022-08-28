@@ -406,6 +406,8 @@ SBTSInputReconcile >> trySeparator: aString in: aBlock atEnd: aBoolean [
 { #category : #reconciliation }
 SBTSInputReconcile >> trySkipLabel: aString in: aBlock from: aMorph at: aNumber [
 
+	(aString anySatisfy: [:c | c isAlphaNumeric]) ifTrue: [^ {}].
+	
 	(aMorph isTextMorph and: [aMorph contents = aString and: [aNumber < (aMorph contents size + 1)]]) ifTrue: [^ {SBTSBoundarySelectCommand new boundary: aMorph}].
 	
 	self positionsAfter: aBlock from: aMorph do: [:position |
