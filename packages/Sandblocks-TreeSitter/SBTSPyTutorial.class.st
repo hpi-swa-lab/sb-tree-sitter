@@ -37,10 +37,10 @@ SBTSPyTutorial class >> stepExtending: anEditor [
 				addStep: 'To wrap the string in the second row in an array move the cursor just before the first quotation mark, type `[`, then <#confirm>.'
 				checkCondition: [:editor | program sourceString includesSubstring: '[''array member?'']'].
 			step
-				addStep: 'To wrap the entire third row in an array, we first have to select it via <#moveCursorLarger>. Then, press `[` and <#confirm>.'
+				addStep: 'To wrap the entire third row in an array, we first have to select it by repeatedly pressing <#moveCursorLarger>. Then, press `[` and <#confirm>.'
 				checkCondition: [:editor | program sourceString includesSubstring: '[''a''+''b'']'].
 			step
-				addStep: 'So far, we only added a single character in front of an expression. To add larger constructs, select the addition in the last row using <#moveCursorLarger>, press <Shift+Space> to open the "awaiting input"-popup, type `pi=`, then <#confirm>.'
+				addStep: 'So far, we only added a single character in front of an expression. To add larger constructs, select the addition in the last row by repeatedly pressing <#moveCursorLarger>, press <Shift+Space> or <Ctrl+e> to open the "awaiting input"-popup, type `pi=`, then <#confirm>.'
 				checkCondition: [:editor | program sourceString includesSubstring: 'pi=3+0.14'].
 			program firstDeepChild startInputAtStart]
 ]

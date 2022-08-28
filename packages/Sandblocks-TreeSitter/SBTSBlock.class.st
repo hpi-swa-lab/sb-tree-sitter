@@ -13,7 +13,7 @@ Class {
 SBTSBlock class >> registerShortcuts: aProvider [
 
 	aProvider
-		registerShortcut: Character space do: #promptTransition;
+		registerShortcut: Character space asSandblockShortcut, $e command do: #promptTransition;
 		registerShortcut: Character space shift do: #promptTransition
 ]
 
@@ -902,9 +902,9 @@ SBTSBlock >> promptTransition [
 	
 	SBTSInputReconcile new
 		explicitAppend: self isUnknown not;
-		for: (self activeTextMorph ifNil: [self])
-			input: ''
-			at: (ActiveEvent shiftPressed ifTrue: [1] ifFalse: [SBTSInputReconcile endIndex])
+		for: (self activeTextMorph ifNil: [self]) input: '' at: ((ActiveEvent shiftPressed or: [ActiveEvent keyCharacter = $e])
+			ifTrue: [1]
+			ifFalse: [SBTSInputReconcile endIndex])
 ]
 
 { #category : #query }
