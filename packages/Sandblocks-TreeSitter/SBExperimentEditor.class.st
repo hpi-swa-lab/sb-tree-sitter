@@ -120,6 +120,7 @@ SBExperimentEditor >> intoWorld: aWorld [
 				data := Json readFrom: raw readStream.
 				data event = 'start' ifTrue: [self startCollectKeys].
 				(data event = 'complete' and: [self collectingKeys]) ifTrue: [data at: 'keys' put: self stopCollectKeys].
+				(data event = 'emergencyRestart' and: [self collectingKeys]) ifTrue: [self stopCollectKeys].
 				(data event = 'complete' and: [data editor = 'sb' and: [data mode = 'task']]) ifTrue: [data at: 'code' put: self currentCode].
 				
 				times add: data.
