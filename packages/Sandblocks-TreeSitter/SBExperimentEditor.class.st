@@ -69,6 +69,48 @@ SBExperimentEditor >> copyData [
 ]
 
 { #category : #'as yet unclassified' }
+SBExperimentEditor >> copyDataFromFile: aFileName [
+
+	| demographics postSurvey |
+	times := FileStream
+		readOnlyFileNamed: aFileName
+		do: [:f | f contents lines collect: [:line | Json readFrom: line readStream]].
+	demographics := times detect: [:entry | entry mode = 'demographics'].
+	postSurvey := SBToggledCode comment: '' active: 1 do: {
+		[
+			Dictionary new
+				at: #values put: #(0 0 0);
+				yourself].
+		[times detect: [:entry | entry mode = 'postSurvey']]}.
+	Clipboard clipboardText: (((0 to: 0) gather: [:taskIndex | | relevant sandblocks text |
+		relevant := times select: [:entry | entry taskName notNil and: [entry taskName beginsWith: 'task0', taskIndex]].
+		sandblocks := relevant select: [:entry | entry editor = 'sb'].
+		text := relevant select: [:entry | entry editor = 'text'].
+		
+		{sandblocks. text} collect: [:data | | complete start scores firstKey lastKey |
+			start := data detect: [:entry | entry event = 'start'].
+			complete := data detect: [:entry | entry event = 'complete' and: [entry mode = 'task']].
+			firstKey := SBToggledCode comment: '' active: 2 do: {
+				[start at: #now].
+				[
+					(((complete at: #keys) at: #keys)
+						detect: [:key | (key first beginsWith: 'CLICK') not]
+						ifNone: [{0. 0}]) second]}.
+			lastKey := SBToggledCode comment: '' active: 2 do: {
+				[complete at: #now].
+				[
+					(((complete at: #keys) at: #keys) reversed
+						detect: [:key | (key first beginsWith: 'CLICK') not]
+						ifNone: [{0. 0}]) second]}.
+			
+			scores := data detect: [:entry | entry event = 'scores'].
+			{lastKey - firstKey}, (SBToggledCode comment: '' active: 2 do: {[#()]. [(complete at: #keys) counts]}), scores scores, (SBToggledCode
+				comment: ''
+				active: 2
+				do: {[#()]. [{((complete at: #keys) at: #keys) asJsonString}]})]]) flatten, (demographics at: #values), (postSurvey at: #values) joinSeparatedBy: String tab)
+]
+
+{ #category : #'as yet unclassified' }
 SBExperimentEditor >> currentCode [
 
 	| code |
@@ -127,7 +169,7 @@ SBExperimentEditor >> intoWorld: aWorld [
 				FileStream fileNamed: ('experiment-{1}.jsonl' format: {data at: 'runNumber'}) do: [:stream |
 					stream
 						setToEnd;
-						nextPutAll: raw;
+						nextPutAll: data asJsonString;
 						cr;
 						flush].
 				req send200Response: '' contentType: 'text/plain; charset=utf-8' do: setHeaders]].
