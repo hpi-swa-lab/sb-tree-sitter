@@ -90,7 +90,13 @@ SBTSNodeLabel >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream p
 	
 	self isEditable
 		ifTrue: [
-			(self needsBlockWrapper and: [aStream peek isTSBlock and: [aStream peek slot includesParent: self]]) ifTrue: [^ aClosure value: (SBCursorSelect new block: aStream next)].
+			(self needsBlockWrapper and: [aStream peek isTSBlock and: [aStream peek slot includesParent: self]]) ifTrue: [ | block |
+				block := aStream next.
+				aClosure value: (SBCursorSelect new block: block).
+				aClosure value: (SBCursorText new
+					block: block containingSandblock;
+					currentCommand: (SBTextCommand new textMorph: block firstSubmorph)).
+				^ self].
 			
 			(aStream peek isTextMorph and: [aStream peek slot includesParent: self]) ifTrue: [ | block |
 				block := aStream next.

@@ -82,7 +82,7 @@ SBExperimentEditor >> copyDataFromFile: aFileName [
 				at: #values put: #(0 0 0);
 				yourself].
 		[times detect: [:entry | entry mode = 'postSurvey']]}.
-	Clipboard clipboardText: (((0 to: 0) gather: [:taskIndex | | relevant sandblocks text |
+	Clipboard clipboardText: (((0 to: 3) gather: [:taskIndex | | relevant sandblocks text |
 		relevant := times select: [:entry | entry taskName notNil and: [entry taskName beginsWith: 'task0', taskIndex]].
 		sandblocks := relevant select: [:entry | entry editor = 'sb'].
 		text := relevant select: [:entry | entry editor = 'text'].
