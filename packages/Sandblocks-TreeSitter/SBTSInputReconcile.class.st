@@ -57,6 +57,23 @@ SBTSInputReconcile >> currentTextMorph [
 ]
 
 { #category : #actions }
+SBTSInputReconcile >> deleteBeforeCursor [
+	<action>
+
+	self contents ifNotEmpty: [^ super deleteBeforeCursor].
+	target ifNotNil: [
+		target isTextMorph
+			ifTrue: [
+				self sandblockEditor
+					startInput: target containingSandblock
+					at: insertIndex
+					replacingContents: false
+					in: target]
+			ifFalse: [self sandblockEditor selectNoInput: target]].
+	self delete
+]
+
+{ #category : #actions }
 SBTSInputReconcile >> dismiss [
 	<action>
 
@@ -144,7 +161,7 @@ SBTSInputReconcile >> initialize [
 		placeholderText: 'Add characters ...')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'object interface' }
 SBTSInputReconcile >> objectInterface [
 
 	^ SBInterfaces never
@@ -275,7 +292,7 @@ SBTSInputReconcile >> suggestions [
 				label: ''}]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #reconciliation }
 SBTSInputReconcile >> tryAdjacentBefore: aMorph given: aString [
 
 	| last |
