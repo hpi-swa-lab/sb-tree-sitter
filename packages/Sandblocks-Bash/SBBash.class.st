@@ -2830,6 +2830,12 @@ SBBash class >> inputTransitionBlackList [
 	^ #(#concatenation)
 ]
 
+{ #category : #'as yet unclassified' }
+SBBash class >> isBlockInlined: aSymbol [
+
+	^ aSymbol = #'command_name'
+]
+
 { #category : #'configuration - editing' }
 SBBash class >> isStatementContainer: aRepeatNode in: aBlock [
 

@@ -772,6 +772,12 @@ SBRegex class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aC
 	^ false
 ]
 
+{ #category : #'as yet unclassified' }
+SBRegex class >> validSuffixIputs [
+
+	^ #()
+]
+
 { #category : #palette }
 SBRegex >> highlightFor: aBlock [
 

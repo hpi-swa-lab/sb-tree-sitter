@@ -1,6 +1,6 @@
 Class {
 	#name : #SBRuby,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-Ruby'
 }
 
@@ -6393,6 +6393,12 @@ SBRuby class >> highlightQuery [
 ]
 
 { #category : #'as yet unclassified' }
+SBRuby class >> isStatementContainer: aRepeatNode in: aBlock [
+
+	^ #('program' 'do_block') includes: aBlock type
+]
+
+{ #category : #'as yet unclassified' }
 SBRuby class >> language [
 
 	^ #ruby
@@ -6402,12 +6408,6 @@ SBRuby class >> language [
 SBRuby class >> rootRuleName [
 
 	^ 'program'
-]
-
-{ #category : #'as yet unclassified' }
-SBRuby class >> statementContainerTypes [
-
-	^ #('program' 'do_block')
 ]
 
 { #category : #'as yet unclassified' }

@@ -1,6 +1,6 @@
 Class {
 	#name : #SBJava,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-Java'
 }
 
@@ -6850,6 +6850,14 @@ SBJava class >> grammarJson [
 '
 ]
 
+{ #category : #'as yet unclassified' }
+SBJava class >> hardLineBreakBetween: aBlock and: anotherBlock [
+
+	(aBlock type = '"{"' or: [anotherBlock type = '"}"']) ifTrue: [^ true].
+	(#(#'class_body' #block) includes: anotherBlock type) ifTrue: [^ true].
+	^ super hardLineBreakBetween: aBlock and: anotherBlock
+]
+
 { #category : #properties }
 SBJava class >> highlightQuery [
 	" https://github.com/tree-sitter/tree-sitter-java/blob/master/src/queries/highlights.scm "
@@ -6986,6 +6994,12 @@ SBJava class >> highlightQuery [
 '
 ]
 
+{ #category : #'as yet unclassified' }
+SBJava class >> isStatementContainer: aRepeatNode in: aBlock [
+
+	^ 'block' = aBlock type
+]
+
 { #category : #properties }
 SBJava class >> language [
 
@@ -6996,10 +7010,4 @@ SBJava class >> language [
 SBJava class >> rootRuleName [
 
     ^ 'program'
-]
-
-{ #category : #'as yet unclassified' }
-SBJava class >> statementContainerTypes [
-
-	^ #('block')
 ]
