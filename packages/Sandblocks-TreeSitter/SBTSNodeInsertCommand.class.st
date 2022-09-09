@@ -12,6 +12,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> adjacent [
+
+	^ self container submorphs atPin: self insertIndex
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> container [
 
 	^ container
@@ -165,14 +171,19 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 	
 	"if we cannot match anything here, look to the right of us to see if there is a position that could take the input"
 	options isEmpty ifTrue: [
+		true ifTrue: [
+			self container hasSubmorphs ifTrue: [
+			SBTSInputReconcile new
+				for: self adjacent input: aString at: SBTSInputReconcile endIndex.
+				^ SBDoItCommand new]].
 		(self container sandblockEditor cursor cursorPosition
 			moveHorizontal: 1
 			wordWise: false) ifNotNil: [:newPos |
-			newPos isText ifTrue: [
+			"newPos isText ifTrue: [
 				SBTSInputReconcile new for: newPos textMorph input: aString at: (newPos textMorph contentsForEdit
 					ifEmpty: [SBTSInputReconcile endIndex]
 					ifNotEmpty: [1]).
-				^ newPos command].
+				^ newPos command]."
 			newPos isInsert ifTrue: [
 				SBTSInputReconcile new
 					for: self container input: aString at: SBTSInputReconcile endIndex;

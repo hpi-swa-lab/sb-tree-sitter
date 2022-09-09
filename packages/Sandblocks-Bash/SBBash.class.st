@@ -2825,9 +2825,8 @@ SBBash class >> highlightQuery [
 
 { #category : #'configuration - editing' }
 SBBash class >> inputTransitionBlackList [
-	"return a list of types that should not be considered during transitions, e.g. the typical C comma operator that just chains multiple expressions and thus yields mostly noise"
 
-	^ #(#concatenation)
+	^ #(#concatenation #'function_definition')
 ]
 
 { #category : #'as yet unclassified' }
@@ -2885,7 +2884,7 @@ SBBash class >> rootRuleName [
 { #category : #'configuration - layout' }
 SBBash class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
-	anotherBlock contents ifNotEmpty: [:c | c first = $= ifTrue: [^ false]].
+	(anotherBlock contents notNil and: [anotherBlock contents notEmpty]) ifTrue: [anotherBlock contents first = $= ifTrue: [^ false]].
 	^ aBlock containingSandblock ~= anotherBlock containingSandblock
 ]
 

@@ -1,8 +1,15 @@
 Class {
 	#name : #SBGDScript,
-	#superclass : #SBGrammarLanguage,
+	#superclass : #SBTSLanguage,
 	#category : #'Sandblocks-GDScript'
 }
+
+{ #category : #'as yet unclassified' }
+SBGDScript class >> addIndent: aBlock [
+
+	(super addIndent: aBlock) ifTrue: [^ true].
+	^ (aBlock submorphAfter ifNotNil: #type) = 'body'
+]
 
 { #category : #'as yet unclassified' }
 SBGDScript class >> grammarJson [
@@ -3378,8 +3385,15 @@ SBGDScript class >> grammarJson [
 ]
 
 { #category : #'as yet unclassified' }
+SBGDScript class >> hardLineBreakBetween: aBlock and: anotherBlock [
+
+	(((aBlock isStringMorph or: [aBlock isTextMorph]) and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice' and: [(aBlock parentSandblock ifNotNil: #type) ~= #string]]]]) ifTrue: [^ true].
+	^ super hardLineBreakBetween: aBlock and: anotherBlock
+]
+
+{ #category : #'as yet unclassified' }
 SBGDScript class >> highlightQuery [
-	" https://github.com/tree-sitter/tree-sitter-python/blob/master/queries/highlights.scm "
+	" adapted from https://github.com/tree-sitter/tree-sitter-python/blob/master/queries/highlights.scm "
 
 	^ '; Identifier naming conventions
 
@@ -3505,7 +3519,20 @@ SBGDScript class >> highlightQuery [
   "while"
   "with"
   "yield"
+  "var"
 ] @keyword'
+]
+
+{ #category : #'as yet unclassified' }
+SBGDScript class >> indentMatch: aBlock [
+
+	^ aBlock type = 'body'
+]
+
+{ #category : #'as yet unclassified' }
+SBGDScript class >> isStatementContainer: aRepeatNode in: aBlock [
+
+	^ #('source' 'body') includes: aBlock type
 ]
 
 { #category : #'as yet unclassified' }
@@ -3515,15 +3542,16 @@ SBGDScript class >> language [
 ]
 
 { #category : #'as yet unclassified' }
-SBGDScript class >> rootRuleName [
+SBGDScript class >> removeIndent: aBlock [
 
-	^ 'source'
+	(super removeIndent: aBlock) ifTrue: [^ true].
+	^ (aBlock submorphBefore ifNotNil: #type) = 'body'
 ]
 
 { #category : #'as yet unclassified' }
-SBGDScript class >> statementContainerTypes [
+SBGDScript class >> rootRuleName [
 
-	^ #('source' 'body')
+	^ 'source'
 ]
 
 { #category : #'as yet unclassified' }
