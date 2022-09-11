@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testStCommitEarlyWithKeywords #testReplacementBlockBinding)
+	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testReplacementBlockBinding)
 ]
 
 { #category : #'tests - adding' }
@@ -1501,10 +1501,6 @@ SBTSBlockTest >> testStCreateKeyword [
 	method lastDeepChild startInputAtEnd.
 	
 	editor handle: (self keyboardEvent: $l).
-	self tick.
-	self tick.
-	editor handle: (self keyboardEvent: Character cr).
-	
 	self assert: 'a
 nil' equals: method sourceStringForCompare
 ]

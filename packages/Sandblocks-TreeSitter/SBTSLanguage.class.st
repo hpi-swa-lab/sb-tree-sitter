@@ -32,7 +32,7 @@ SBTSLanguage class >> allRuntimes [
 { #category : #'configuration - layout' }
 SBTSLanguage class >> alwaysEnlargeInsets [
 
-	^ true
+	^ false
 ]
 
 { #category : #'instantiate blocks' }
