@@ -12,26 +12,27 @@ SBTSSmalltalk class >> addIndent: aBlock [
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - suggestions' }
 SBTSSmalltalk class >> allSuggestionOptionsFor: aBlock [
 
 	| guessedClass |
-	guessedClass := aBlock type caseOf: {
-		[#number] -> [(aBlock contents includes: $.) ifTrue: [Float] ifFalse: [Integer]].
-		[#string] -> [String].
-		[#'literal_array'] -> [Array].
-		[#'dynamic_array'] -> [Array].
-		[#'byte_array'] -> [ByteArray].
-		[#character] -> [Character].
-		[#assignment] -> [^ self allSuggestionOptionsFor: aBlock childSandblocks last].
-		[#'parenthesized_expression'] -> [^ self allSuggestionOptionsFor: aBlock childSandblocks first].
-		[#self] -> [nil].
-		[#super] -> [nil].
-		[#nil] -> [UndefinedObject].
-		[#thisContext] -> [Context].
-		[#block] -> [BlockClosure].
-		[#identifier] -> [(Symbol lookup: aBlock contents) ifNotNil: [:sym | Smalltalk at: sym ifPresent: [:obj | obj class] ifAbsent: [nil]]]}
-	otherwise: [nil].
+	guessedClass := aBlock type
+		caseOf: {
+			[#number] -> [(aBlock contents includes: $.) ifTrue: [Float] ifFalse: [Integer]].
+			[#string] -> [String].
+			[#'literal_array'] -> [Array].
+			[#'dynamic_array'] -> [Array].
+			[#'byte_array'] -> [ByteArray].
+			[#character] -> [Character].
+			[#assignment] -> [^ self allSuggestionOptionsFor: aBlock childSandblocks last].
+			[#'parenthesized_expression'] -> [^ self allSuggestionOptionsFor: aBlock childSandblocks first].
+			[#self] -> [nil].
+			[#super] -> [nil].
+			[#nil] -> [UndefinedObject].
+			[#thisContext] -> [Context].
+			[#block] -> [BlockClosure].
+			[#identifier] -> [(Symbol lookup: aBlock contents) ifNotNil: [:sym | Smalltalk at: sym ifPresent: [:obj | obj class] ifAbsent: [nil]]]}
+		otherwise: [nil].
 	
 	^ guessedClass
 		ifNil: [OrderedCollection withAll: Symbol allSymbols]
@@ -41,10 +42,26 @@ SBTSSmalltalk class >> allSuggestionOptionsFor: aBlock [
 { #category : #'configuration - declarations' }
 SBTSSmalltalk class >> declarationsInScope: aScopeBlock do: aClosure [
 
+	(aScopeBlock type = #method and: [aScopeBlock parentSandblock isMethod]) ifTrue: [
+		aScopeBlock parentSandblock methodClass instVarNames do: [:name |
+			aClosure value: (SBTSDeclaration
+				block: ((self blockFor: #identifier)
+					contents: name;
+					yourself)
+				label: 'inst var')]].
+	
 	aScopeBlock childSandblocks do: [:block |
 		block type = #'block_argument' ifTrue: [aClosure value: (SBTSDeclaration block: block selector: block contents allButFirst label: 'block arg')].
 		block type = #temporaries ifTrue: [block childSandblocks do: [:temp | aClosure value: (SBTSDeclaration block: temp label: 'temporary')]].
-		(#(#'binary_selector' #'keyword_selector') includes: block type) ifTrue: [(block childSandblocks select: [:arg | arg type = #identifier]) do: [:arg | aClosure value: (SBTSDeclaration block: arg label: 'argument')]]]
+		(#(#'binary_selector' #'keyword_selector') includes: block type) ifTrue: [(block childSandblocks select: [:arg | arg type = #identifier]) do: [:arg | aClosure value: (SBTSDeclaration block: arg label: 'argument')]]].
+	
+	{
+		self blockFor: #self.
+		self blockFor: #super.
+		self blockFor: #thisContext.
+		self blockFor: #true.
+		self blockFor: #false.
+		self blockFor: #nil} do: [:block | aClosure value: (SBTSDeclaration block: block label: 'keyword')]
 ]
 
 { #category : #configuration }
@@ -1207,6 +1224,12 @@ SBTSSmalltalk class >> lowercaseSuggestionsFor: aBlock [
 			do: [:scope :declarations | declarations do: [:decl | (decl contents sandblockMatch: aBlock contents) ifTrue: [stream nextPut: decl]]]]
 ]
 
+{ #category : #'configuration - editing' }
+SBTSSmalltalk class >> preferNoPopup [
+
+	^ true
+]
+
 { #category : #configuration }
 SBTSSmalltalk class >> rootRuleName [
 
@@ -1223,7 +1246,7 @@ SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SBTSSmalltalk class >> statementTerminator [
 
 	^ '.'
@@ -1255,7 +1278,10 @@ SBTSSmalltalk class >> suggestionsFor: aBlock [
 { #category : #'configuration - editing' }
 SBTSSmalltalk class >> transitionPairs [
 
-	^ {#'unary_message' -> #'keyword_message'. #'cascaded_unary_message' -> #'cascaded_keyword_message'}
+	^ {
+		#'unary_message' -> #'keyword_message'.
+		#'cascaded_unary_message' -> #'cascaded_keyword_message'.
+		#'unary_selector' -> #'keyword_selector'}
 ]
 
 { #category : #'configuration - suggestions' }

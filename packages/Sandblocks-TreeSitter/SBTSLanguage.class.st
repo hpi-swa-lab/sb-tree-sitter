@@ -374,6 +374,12 @@ SBTSLanguage class >> postprocessGrammar: aGrammar [
 		aGrammar rules keysAndValuesDo: [:symbol :body | body allElementsDo: [:node | (node isTSRepeat and: [self isStatementContainer: node in: (SBTSNodeSymbol new type: symbol factory: aGrammar)]) ifTrue: [node transformToStatementRepeater]]]]
 ]
 
+{ #category : #'configuration - editing' }
+SBTSLanguage class >> preferNoPopup [
+
+	^ SBTSInputReconcile preferNoPopup
+]
+
 { #category : #configuration }
 SBTSLanguage class >> preprocessGrammar: aGrammar [
 	"hook for modifying properties of the grammar just before we apply inlining rules etc"

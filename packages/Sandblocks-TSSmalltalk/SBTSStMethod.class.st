@@ -45,6 +45,12 @@ SBTSStMethod >> isArtefact [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSStMethod >> isMethod [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 SBTSStMethod >> layoutCommands [
 
 	^ SBAlgebraCommand container

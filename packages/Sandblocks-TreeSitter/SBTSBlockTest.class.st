@@ -1368,6 +1368,27 @@ SBTSBlockTest >> testSmalltalkInsertKeywordPart [
 	self assert: 'a test:123 abc:234 ab' equals: module childSandblocks second sourceString
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testSmalltalkKeyword [
+
+	| method editor |
+	method := SBTSSmalltalk parseToplevel: 'a'.
+	editor := self editorAndWorldFor: method.
+	method startInsertAtEnd.
+	
+	self type: 's' in: editor.
+	self assert: 's' equals: method childSandblocks last sourceStringForCompare.
+	self assert: #identifier equals: method childSandblocks last type.
+	
+	self type: 'elf' in: editor.
+	self assert: 'self' equals: method childSandblocks last sourceStringForCompare.
+	self assert: #self equals: method childSandblocks last type.
+	
+	self type: 'R' in: editor.
+	self assert: 'selfR' equals: method childSandblocks last sourceStringForCompare.
+	self assert: #identifier equals: method childSandblocks last type
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testSmalltalkKeywordMessage [
 

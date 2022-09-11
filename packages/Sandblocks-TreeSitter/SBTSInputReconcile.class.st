@@ -296,7 +296,7 @@ SBTSInputReconcile >> suggestions [
 SBTSInputReconcile >> tryAdjacentBefore: aMorph given: aString [
 
 	| last |
-	aMorph owner isTSBlock ifFalse: [^ self].
+	aMorph owner isTSBlock ifFalse: [^ {}].
 	last := nil.
 	aMorph owner cursorPositionsDo: [:position |
 		(position isText and: [
@@ -305,7 +305,8 @@ SBTSInputReconcile >> tryAdjacentBefore: aMorph given: aString [
 				ifFalse: [position block = target containingSandblock]]) ifTrue: [
 			(last notNil and: [last isInsert]) ifTrue: [(self optionsForInsert: last given: aString) ifNotEmpty: [:res | ^ res]].
 			^ {}].
-		last := position]
+		last := position].
+	^ {}
 ]
 
 { #category : #reconciliation }
@@ -509,5 +510,5 @@ SBTSInputReconcile >> updateChoices [
 	SBTSReconstructExperiment reportTime: [currentChoices := self findOptionsBlock cull: self cull: self contents] durationToRun.
 	
 	SBToggledCode comment: '' active: 1 do: {
-		[((currentChoices size = 1 and: [(insertIndex > 1 or: [currentChoices first isKindOf: SBDoItCommand]) or: [target contentsForEdit isNil or: [target contentsForEdit isEmpty or: [self explicitAppend not]]]]) or: [self class preferNoPopup and: [currentChoices notEmpty]]) ifTrue: [self applyCommand: currentChoices first]]}
+		[((currentChoices size = 1 and: [(insertIndex > 1 or: [currentChoices first isKindOf: SBDoItCommand]) or: [target contentsForEdit isNil or: [target contentsForEdit isEmpty or: [self explicitAppend not]]]]) or: [target factory language preferNoPopup and: [currentChoices notEmpty]]) ifTrue: [self applyCommand: currentChoices first]]}
 ]

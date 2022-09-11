@@ -892,7 +892,7 @@ SBTSBlock >> printTreeOn: aStream indent: aNumber [
 SBTSBlock >> promptTransition [
 	<action>
 
-	(SBTSInputReconcile preferNoPopup and: [self language language = #smalltalk and: [ActiveEvent shiftPressed not]]) ifTrue: [ | message target |
+	(self language preferNoPopup and: [self language language = #smalltalk and: [ActiveEvent shiftPressed not]]) ifTrue: [ | message target |
 		target := (self orOwnerSuchThat: [:b | b isTSBlock and: [b slot compatibleWithType: #expression]]) ifNil: [^ self].
 		message := (self language blockFor: #'unary_message') adaptSlotFor: target slot.
 		message childSandblocks first replaceBlock: target.
