@@ -181,6 +181,12 @@ SBTSFile >> layoutCommands [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile >> range [
+
+	^ (SBTSPosition line: -1 character: -1) -> (SBTSPosition line: -1 character: -1)
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> restart [
 
 	runCancelBlock ifNotNil: [self toggleRun].
