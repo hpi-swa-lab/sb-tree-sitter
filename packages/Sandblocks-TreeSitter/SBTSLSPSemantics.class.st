@@ -22,6 +22,24 @@ SBTSLSPSemantics >> blockFor: aRange in: aRootBlock [
 	^ nil
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSLSPSemantics >> definitionsOf: aBlock do: aClosure [
+
+	| textDocument semaphore |
+	semaphore := Semaphore new.
+	textDocument := self textDocumentFor: aBlock.
+	client
+		sendRequest: 'textDocument/typeDefinition'
+		params: (Dictionary newFrom: {'textDocument' -> textDocument. 'position' -> aBlock range key forLSP})
+		do: [:response |
+			response ifNotNil: [:definitions |
+				aClosure value: ((((definitions isCollection ifTrue: [definitions] ifFalse: [{definitions}]) select: [:definition | "only handle local definitions for now"
+				definition uri = (textDocument at: 'uri')]) collect: [:definition | self blockFor: (definition at: 'range') in: aBlock containingArtefact root]) select: [:definition | definition notNil])].
+			
+			].
+	semaphore wait
+]
+
 { #category : #notifications }
 SBTSLSPSemantics >> didChange: aTSFile [
 
