@@ -4,8 +4,11 @@ Extension { #name : #SBTSBlock }
 SBTSBlock >> gotoDefinition [
 	<action>
 
-	self semantics
-		definitionsOf: self
-		do: [:definitions | definitions ifNotEmpty: [self sandblockEditor select: definitions first]]
-		blocking: false
+	| definitions |
+	definitions := OrderedCollection streamContents: [:stream |
+		self semantics
+			definitionsOf: self
+			do: [:definition | stream nextPut: definition]
+			blocking: true].
+	self sandblockEditor select: definitions first
 ]
