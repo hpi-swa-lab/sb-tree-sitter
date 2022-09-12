@@ -115,9 +115,10 @@ SBTSLanguageClient >> sendBlockingRequest: aString params: anObject do: aBlock [
 
 	| semaphore |
 	semaphore := Semaphore new.
-	self sendAsyncRequest: aString params: anObject do: [:response |
-		aBlock value: response.
-		semaphore signal].
+	self
+		sendAsyncRequest: aString
+		params: anObject
+		do: [:response | [aBlock value: response] ensure: [semaphore signal]].
 	semaphore wait
 ]
 
