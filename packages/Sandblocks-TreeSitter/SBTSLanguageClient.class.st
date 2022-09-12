@@ -102,6 +102,27 @@ SBTSLanguageClient >> send: aJsonObject [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageClient >> sendAsyncRequest: aString params: anObject do: aBlock [
+
+	| myId |
+	myId := lastRequestId := lastRequestId + 1.
+	pending at: myId put: aBlock.
+	self send: (Dictionary newFrom: {'jsonrpc' -> '2.0'. 'id' -> myId. 'method' -> aString. 'params' -> anObject})
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageClient >> sendBlockingRequest: aString params: anObject do: aBlock [
+
+	| semaphore |
+	semaphore := Semaphore new.
+	self
+		sendAsyncRequest: aString
+		params: anObject
+		do: [:response | [aBlock value: response] ensure: [semaphore signal]].
+	semaphore wait
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageClient >> sendInitialize [
 
 	self
@@ -117,6 +138,7 @@ SBTSLanguageClient >> sendInitialize [
 		do: [:response |
 			Transcript showln: 'Connected to server'.
 			self sendNotification: 'initialized' params: Dictionary new]
+		blocking: false
 ]
 
 { #category : #'as yet unclassified' }
@@ -127,12 +149,11 @@ SBTSLanguageClient >> sendNotification: aString params: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLanguageClient >> sendRequest: aString params: anObject do: aBlock [
+SBTSLanguageClient >> sendRequest: aString params: anObject do: aBlock blocking: aBoolean [
 
-	| myId |
-	myId := lastRequestId := lastRequestId + 1.
-	pending at: myId put: aBlock.
-	self send: (Dictionary newFrom: {'jsonrpc' -> '2.0'. 'id' -> myId. 'method' -> aString. 'params' -> anObject})
+	aBoolean
+		ifTrue: [self sendBlockingRequest: aString params: anObject do: aBlock]
+		ifFalse: [self sendAsyncRequest: aString params: anObject do: aBlock]
 ]
 
 { #category : #'as yet unclassified' }
