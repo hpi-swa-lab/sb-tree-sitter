@@ -12,9 +12,9 @@ SBKotlin class >> fileSuffix [
 
 { #category : #'as yet unclassified' }
 SBKotlin class >> grammarJson [
+	" https://github.com/fwcd/tree-sitter-kotlin/blob/master/src/grammar.json "
 
-    " https://github.com/fwcd/tree-sitter-kotlin/blob/master/src/grammar.json "
-    ^ '{
+	^ '{
   "name": "kotlin",
   "word": "_alpha_identifier",
   "rules": {
@@ -3513,6 +3513,18 @@ SBKotlin class >> grammarJson [
           ]
         },
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": ","
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "STRING",
           "value": ")"
         }
@@ -6267,7 +6279,7 @@ SBKotlin class >> icon [
 { #category : #'as yet unclassified' }
 SBKotlin class >> inputTransitionBlackList [
 
-	^ {#label}
+	^ #(#'infix_expression')
 ]
 
 { #category : #'as yet unclassified' }

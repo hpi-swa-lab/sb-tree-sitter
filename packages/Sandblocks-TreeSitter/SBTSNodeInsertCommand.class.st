@@ -55,7 +55,7 @@ SBTSNodeInsertCommand >> element: aNode container: aBlock index: aNumber [
 { #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> firstTextMorphIn: aCollection [
 
-	aCollection do: [:morph | morph allBlocksDo: [:m | m currentTextMorph ifNotNil: [^ m]]].
+	aCollection do: [:morph | morph isTextMorph ifTrue: [^morph] ifFalse: [morph allBlocksDo: [:m | m currentTextMorph ifNotNil: [^ m]]]].
 	^ nil
 ]
 

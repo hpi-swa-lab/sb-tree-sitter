@@ -39,7 +39,7 @@ SBTSInputReconcile >> applyCommand: aCommand [
 	anyConstructed := false.
 	(aCommand isKindOf: SBTSNodeInsertCommand) ifTrue: [aCommand morphs ifNil: [aCommand morphs: aCommand element buildEmpty]].
 	(aCommand morphs ifNil: [{}]) do: [:p | p allMorphsDo: [:m | (m valueOfProperty: #lastConstructed ifAbsent: [false]) ifTrue: [anyConstructed := true]]].
-	anyConstructed ifTrue: [SBToggledCode comment: '' active: 1 do: {[aCommand selectAfter: #none]}].
+	anyConstructed ifTrue: [aCommand selectAfter: #none].
 	
 	target sandblockEditor do: aCommand.
 	anyConstructed := false.
@@ -227,7 +227,7 @@ SBTSInputReconcile >> positionCursorIn: aCollection [
 								"if we already expanded something because the slot was required, try and move inside it"
 								(next isInsert and: [next command element parent required]) ifTrue: [pos block sandblockEditor performForSelection: #moveCursorRight]]].
 						^ self]]].
-		self halt.
+		aCollection first startInputAtEnd.
 		^ self].
 	
 	all := Array streamContents: [:s | aCollection do: [:block | block allMorphsPreorderDo: [:m | s nextPut: m]]].
@@ -418,7 +418,7 @@ SBTSInputReconcile >> trySeparator: aString in: aBlock atEnd: aBoolean [
 		aBlock slot allParentsDo: [:node |
 			(node isTSSeq and: [node hasStatementTerminator]) ifTrue: [
 				^ {
-					(aBlock cursorPositionAfterThat: [:pos | (pos isInsert and: [(pos command element hasParent: node) not]) or: [pos isText]]) command}]]].
+					SBDoItCommand new postDo: [aBlock sandblockEditor cursorPosition:(aBlock cursorPositionAfterThat: [:pos | (pos isInsert and: [(pos command element hasParent: node) not]) or: [pos isText]])]}]]].
 	
 	SBToggledCode comment: '' active: 0 do: {
 		[

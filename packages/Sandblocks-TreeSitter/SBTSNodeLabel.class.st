@@ -243,7 +243,7 @@ SBTSNodeLabel >> resultsForBlocks: aParser [
 	
 	(aParser peekForLabel: self label) ifTrue: [ | range |
 		range := aParser currentRange.
-		(aParser justEnteredAlias not or: [self parent isTSAlias not or: [self parent named]]) ifTrue: [aParser nextSibling].
+		(aParser justEnteredAlias not or: [self parent notNil and: [self parent isTSAlias not or: [self parent named]]]) ifTrue: [aParser nextSibling].
 		^ success value: range].
 	
 	(aParser justEnteredAlias and: [aParser peekText = self label]) ifTrue: [
@@ -251,6 +251,10 @@ SBTSNodeLabel >> resultsForBlocks: aParser [
 		^ success value: aParser currentRange].
 	
 	aParser peekText = self label ifTrue: [^ success value: aParser currentRange].
+	
+	aParser peekUncapturedText = self label ifTrue: [
+		aParser uncapturedText.
+		^ success value: aParser currentRange].
 	
 	^ {}
 ]

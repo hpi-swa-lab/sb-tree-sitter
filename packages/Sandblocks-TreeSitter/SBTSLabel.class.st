@@ -9,6 +9,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> alias [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> allConnectionsDo: aBlock [
 
 	

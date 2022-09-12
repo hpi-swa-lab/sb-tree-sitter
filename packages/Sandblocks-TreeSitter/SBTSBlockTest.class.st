@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testReplacementBlockBinding)
+	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testReplacementBlockBinding #testJsFullForLoop)
 ]
 
 { #category : #'tests - adding' }
@@ -829,8 +829,10 @@ SBTSBlockTest >> testJsStatementTerminator [
 	program := SBJavascript empty.
 	editor := self editorAndWorldFor: program.
 	program startInsertAtEnd.
-	self type: 'x;' in: editor.
-	self assert: 'x;', Character cr, Character null equals: program sourceStringForCompare
+	self type: 'x;
+x' in: editor.
+	self assert: 'x;
+x;' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }
@@ -1199,7 +1201,7 @@ SBTSBlockTest >> testPyTypeCompInIf [
 	program := SBPython empty.
 	editor := self editorAndWorldFor: program.
 	self type: 'if a==3' in: editor.
-	self assert: 'if a==3:
+	self assert: 'if a == 3:
 ' equals: program sourceStringForCompare
 ]
 

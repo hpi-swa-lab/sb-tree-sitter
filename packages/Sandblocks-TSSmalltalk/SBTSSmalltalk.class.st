@@ -1031,10 +1031,6 @@ SBTSSmalltalk class >> grammarJson [
             },
             {
               "type": "SYMBOL",
-              "name": "pragma_binary_selector"
-            },
-            {
-              "type": "SYMBOL",
               "name": "pragma_keyword_selector"
             }
           ]
@@ -1054,19 +1050,6 @@ SBTSSmalltalk class >> grammarJson [
       "named": true,
       "value": "unary_identifier"
     },
-    "pragma_binary_selector": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "binary_operator"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "expression"
-        }
-      ]
-    },
     "pragma_keyword_selector": {
       "type": "REPEAT1",
       "content": {
@@ -1078,7 +1061,7 @@ SBTSSmalltalk class >> grammarJson [
           },
           {
             "type": "SYMBOL",
-            "name": "expression"
+            "name": "primary"
           }
         ]
       }
@@ -1244,6 +1227,13 @@ SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
 	aBlock field = #receiver ifTrue: [^ true].
 	anotherBlock type = #keyword ifTrue: [^ true].
 	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
+
+	anotherBlock alias = #'unary_identifier' ifTrue: [^ true].
+	^ super spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter
 ]
 
 { #category : #configuration }
