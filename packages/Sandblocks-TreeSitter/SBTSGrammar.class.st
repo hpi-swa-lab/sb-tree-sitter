@@ -242,8 +242,8 @@ SBTSGrammar >> buildRegexString: rule [
 	^ ((s contents copyReplaceAll: '\p{XID_Start}' with: 'A-Za-z')
 		copyReplaceAll: '\p{XID_Continue}'
 		with: 'A-Za-z0-9')
-		copyWithRegex: '[^?]\:'
-		matchesTranslatedUsing: [:match | match first asString, '\:']
+		copyWithRegex: '(?=[^?]\:).'
+		matchesTranslatedUsing: [:match | match first asString, '\']
 ]
 
 { #category : #cleaning }

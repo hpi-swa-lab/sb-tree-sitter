@@ -5259,7 +5259,7 @@ SBPython class >> preprocessGrammar: aGrammar [
 						label: quote}])).
 	aGrammar rules at: '_string_content' put: (SBTSNodeContextSensitiveText new
 		factory: aGrammar;
-		validCheck: [:siblings :character | siblings notEmpty and: [character asString ~= siblings first slot firstNode label]];
+		validCheck: [:siblings :character | siblings notEmpty and: [character ~= siblings first slot firstNode label last]];
 		regexString: '.*').
 	
 	"causes unambiguous file parses (#testPythonPrint) and we don't need it for our purposes"

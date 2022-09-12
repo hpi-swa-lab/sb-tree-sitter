@@ -70,6 +70,8 @@ SBTSNodeChoice >> buildEmptyNodes [
 SBTSNodeChoice >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 	"check if there is an unknown for this choice"
 
+	aStream atEnd ifTrue: [^ self].
+	
 	(aStream peek isTSBlock and: [aStream peek isUnknown and: [aStream peek slot firstNode = self]])
 		ifTrue: [ | block |
 			block := aStream next.

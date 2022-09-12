@@ -36,10 +36,15 @@ SBTSInputReconcile class >> preferNoPopup: aBoolean [
 SBTSInputReconcile >> applyCommand: aCommand [
 
 	| anyConstructed |
-	target sandblockEditor do: aCommand.
-	
 	anyConstructed := false.
-	aCommand morphs do: [:p | p allMorphsDo: [:m | (m valueOfProperty: #lastConstructed ifAbsent: [false]) ifTrue: [anyConstructed := true]]].
+	(aCommand isKindOf: SBTSNodeInsertCommand) ifTrue: [aCommand morphs ifNil: [aCommand morphs: aCommand element buildEmpty]].
+	(aCommand morphs ifNil: [{}]) do: [:p | p allMorphsDo: [:m | (m valueOfProperty: #lastConstructed ifAbsent: [false]) ifTrue: [anyConstructed := true]]].
+	anyConstructed ifTrue: [SBToggledCode comment: '' active: 1 do: {[aCommand selectAfter: #none]}].
+	
+	target sandblockEditor do: aCommand.
+	anyConstructed := false.
+	(aCommand morphs ifNil: [{}]) do: [:p | p allMorphsDo: [:m | (m valueOfProperty: #lastConstructed ifAbsent: [false]) ifTrue: [anyConstructed := true]]].
+	
 	anyConstructed ifTrue: [self positionCursorIn: aCommand morphs]
 ]
 
@@ -220,7 +225,9 @@ SBTSInputReconcile >> positionCursorIn: aCollection [
 							(aCollection anySatisfy: [:morph | next block = morph or: [next block hasOwner: morph]]) ifTrue: [
 								pos block sandblockEditor cursorPosition: next.
 								"if we already expanded something because the slot was required, try and move inside it"
-								(next isInsert and: [next command element parent required]) ifTrue: [pos block sandblockEditor performForSelection: #moveCursorRight]]]]]].
+								(next isInsert and: [next command element parent required]) ifTrue: [pos block sandblockEditor performForSelection: #moveCursorRight]]].
+						^ self]]].
+		self halt.
 		^ self].
 	
 	all := Array streamContents: [:s | aCollection do: [:block | block allMorphsPreorderDo: [:m | s nextPut: m]]].
@@ -372,9 +379,9 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 	"we may only consider owners if they do not introduce additional tokens"
 	aMorph contents = pivot sourceString ifFalse: [^ {}].
 	
-	string := aNumber = self class endIndex
+	string := pivot contentsForEdit ifNil: [aString] ifNotNil: [aNumber = self class endIndex
 		ifTrue: [pivot contentsForEdit, aString]
-		ifFalse: [(pivot contentsForEdit first: aNumber - 1), aString, (pivot contentsForEdit allButFirst: aNumber - 1)].
+		ifFalse: [(pivot contentsForEdit first: aNumber - 1), aString, (pivot contentsForEdit allButFirst: aNumber - 1)]].
 	
 	boundary := pivot owner submorphAfter.
 	validCondition := (boundary ifNotNil: #isTextMorph ifNil: [false])

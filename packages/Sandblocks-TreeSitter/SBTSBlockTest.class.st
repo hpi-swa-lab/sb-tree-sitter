@@ -1238,6 +1238,17 @@ SBTSBlockTest >> testPythonTripleString [
 	self assert: '"""a"""' equals: program sourceStringForCompare
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testPythonWithAs [
+
+	| program editor |
+	program := SBPython empty.
+	editor := self editorAndWorldFor: program.
+	self type: 'with open(filename)as f' in: editor.
+	self assert: 'with open(filename)as f:
+' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - query' }
 SBTSBlockTest >> testQueryBlockInlined [
 

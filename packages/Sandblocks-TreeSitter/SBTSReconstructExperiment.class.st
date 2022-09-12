@@ -154,3 +154,34 @@ SBTSReconstructExperiment >> runTests: aPathString language: aLanguage [
 	"if we reach here we did not find 30 valid items in the first 100"
 	self assert: false
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSReconstructExperiment >> sampleProject: aPath language: aLanguage [
+
+	| candidates random |
+	candidates := (FileDirectory on: aPath) fullNamesOfAllFilesInSubtree select: [:path | path endsWith: aLanguage fileSuffix].
+	
+	random := Random seed: 123.
+	50 timesRepeat: [ | file target editor source original path |
+		path := candidates atRandom: random.
+		file := [(SBTSFile forNoReplace: path) root] on: Error do: [nil].
+		file
+			ifNotNil: [
+				target := (Array streamContents: [:stream | file allBlocksDo: [:b | (b isSingleLine and: [b type ~= #empty]) ifTrue: [stream nextPut: b]]]) atRandom: random.
+				
+				original := file sourceStringForCompare.
+				source := target sourceString.
+				editor := self editorAndWorldFor: file.
+				Transcript showln: {path. source}.
+				target changeToUnknown.
+				self type: source in: editor.
+				editor
+					allBlocksDetect: [:b | b isKindOf: SBTSInputReconcile]
+					ifFound: [:x |
+						self tick.
+						self tick.
+						editor handle: (self keyboardEvent: Character cr)]
+					ifNone: [].
+				self assert: original equals: file sourceStringForCompare]
+			ifNil: [Transcript showln: 'failed to parse: ', path]]
+]

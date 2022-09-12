@@ -36,8 +36,14 @@ SBFileEditor >> initialize [
 	
 	projectSemantics := SBTSLanguageSemantics new.
 	
-	self submorphs second addMorphFront: (fileScroller := ScrollPane new
+	self submorphs second addMorphFront: (SBBlock new
+		attachDecorator: (SBResizableDecorator new edge: #right);
+		addMorphBack: (fileScroller := ScrollPane new
+			hResizing: #spaceFill;
+			vResizing: #spaceFill);
 		vResizing: #spaceFill;
+		changeTableLayout;
+		layoutInset: (SBEdgeInsets right: 4 sbScaled);
 		width: 200).
 	fileScroller scroller addMorphBack: (root := SBFileTree new
 		on: FileSystem disk / 'home';

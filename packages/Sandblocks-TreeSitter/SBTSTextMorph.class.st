@@ -244,6 +244,13 @@ SBTSTextMorph >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> lastConstructedChild [
+
+	self valueOfProperty: #lastConstructed ifPresentDo: [:prop | ^ self].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> ownerWithForegroundColor [
 
 	^ self highlight = #'_sb_none'

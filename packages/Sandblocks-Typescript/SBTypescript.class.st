@@ -11111,7 +11111,7 @@ SBTypescript class >> preprocessGrammar: aGrammar [
 	((aGrammar bodyNodeForRule: #'predefined_type') elements detect: [:node | node label = 'string']) delete.
 	
 	aGrammar rules at: '_template_chars' put: (SBTSNodeText new
-		regexString: '.*';
+		regexString: '[^`]*';
 		factory: aGrammar).
 	
 	"see SBJavascript"

@@ -650,6 +650,12 @@ SBTSBlock >> isPart [
 	^ self highlight notNil and: [self highlight endsWith: '.part']
 ]
 
+{ #category : #'file range' }
+SBTSBlock >> isSingleLine [
+
+	^ range key line = range value line
+]
+
 { #category : #testing }
 SBTSBlock >> isTSBlock [
 
@@ -935,13 +941,13 @@ SBTSBlock >> queryRecursiveFirstMatch: aString capturesDo: aBlock [
 	^ false
 ]
 
-{ #category : #accessing }
+{ #category : #'file range' }
 SBTSBlock >> range [
 
 	^ range
 ]
 
-{ #category : #accessing }
+{ #category : #'file range' }
 SBTSBlock >> range: anAssociation [
 
 	range := anAssociation
