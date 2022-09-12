@@ -7,4 +7,5 @@ SBTSBlock >> gotoDefinition [
 	self semantics
 		definitionsOf: self
 		do: [:definitions | definitions ifNotEmpty: [self sandblockEditor select: definitions first]]
+		blocking: false
 ]

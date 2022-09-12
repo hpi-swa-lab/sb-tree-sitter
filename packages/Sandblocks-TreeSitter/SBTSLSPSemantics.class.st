@@ -23,10 +23,9 @@ SBTSLSPSemantics >> blockFor: aRange in: aRootBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLSPSemantics >> definitionsOf: aBlock do: aClosure [
+SBTSLSPSemantics >> definitionsOf: aBlock do: aClosure blocking: aBoolean [
 
-	| textDocument semaphore |
-	semaphore := Semaphore new.
+	| textDocument |
 	textDocument := self textDocumentFor: aBlock.
 	client
 		sendRequest: 'textDocument/typeDefinition'
@@ -34,10 +33,8 @@ SBTSLSPSemantics >> definitionsOf: aBlock do: aClosure [
 		do: [:response |
 			response ifNotNil: [:definitions |
 				aClosure value: ((((definitions isCollection ifTrue: [definitions] ifFalse: [{definitions}]) select: [:definition | "only handle local definitions for now"
-				definition uri = (textDocument at: 'uri')]) collect: [:definition | self blockFor: (definition at: 'range') in: aBlock containingArtefact root]) select: [:definition | definition notNil])].
-			
-			].
-	semaphore wait
+				definition uri = (textDocument at: 'uri')]) collect: [:definition | self blockFor: (definition at: 'range') in: aBlock containingArtefact root]) select: [:definition | definition notNil])]]
+		blocking: aBoolean
 ]
 
 { #category : #notifications }
@@ -124,4 +121,5 @@ SBTSLSPSemantics >> usagesOf: aBlock do: aClosure [
 		sendRequest: 'textDocument/documentHighlight'
 		params: (Dictionary newFrom: {'textDocument' -> (self textDocumentFor: aBlock). 'position' -> aBlock range key forLSP})
 		do: [:response | response ifNotNil: [:highlights | highlights do: [:highlight | (self blockFor: (highlight at: 'range') in: aBlock containingArtefact root) ifNotNil: [:b | aClosure value: b]]]]
+		blocking: false
 ]
