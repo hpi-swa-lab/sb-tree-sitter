@@ -25,7 +25,7 @@ SBTSLanguageClient >> handleData [
 	data := readBuffer next: length.
 	data size ~= length ifTrue: [^ false].
 	message := Json readFrom: data readStream.
-	Project current addDeferredUIMessage: [self handleMessage: message].
+	self handleMessage: message.
 	buffer := readBuffer upToEnd.
 	^ true
 ]
@@ -37,12 +37,12 @@ SBTSLanguageClient >> handleMessage: aJsonObject [
 		ifTrue: [
 			pending
 				at: aJsonObject id
-				ifPresent: [:block |
+				ifPresent: [:promise |
 					pending removeKey: aJsonObject id.
 					(aJsonObject includesKey: 'error') ifTrue: [^ self error: aJsonObject error].
-					block value: aJsonObject result]
+					promise resolveWith: aJsonObject result]
 				ifAbsent: [Transcript showln: {'unknown message'. aJsonObject}]]
-		ifFalse: [self handleNotification: aJsonObject]
+		ifFalse: [self onUIThread: [self handleNotification: aJsonObject]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -86,6 +86,23 @@ SBTSLanguageClient >> initializeFor: aDirectory onNotificationDo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageClient >> internalSendRequest: aString params: anObject [
+
+	| myId promise |
+	myId := lastRequestId := lastRequestId + 1.
+	promise := Promise new.
+	pending at: myId put: promise.
+	self send: (Dictionary newFrom: {'jsonrpc' -> '2.0'. 'id' -> myId. 'method' -> aString. 'params' -> anObject}).
+	^ promise
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageClient >> onUIThread: aBlock [
+
+	Project current addDeferredUIMessage: aBlock
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageClient >> send: aJsonObject [
 
 	| payload |
@@ -104,22 +121,13 @@ SBTSLanguageClient >> send: aJsonObject [
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> sendAsyncRequest: aString params: anObject do: aBlock [
 
-	| myId |
-	myId := lastRequestId := lastRequestId + 1.
-	pending at: myId put: aBlock.
-	self send: (Dictionary newFrom: {'jsonrpc' -> '2.0'. 'id' -> myId. 'method' -> aString. 'params' -> anObject})
+	(self internalSendRequest: aString params: anObject) then: [:response | self onUIThread: [aBlock value: response]]
 ]
 
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> sendBlockingRequest: aString params: anObject do: aBlock [
 
-	| semaphore |
-	semaphore := Semaphore new.
-	self
-		sendAsyncRequest: aString
-		params: anObject
-		do: [:response | [aBlock value: response] ensure: [semaphore signal]].
-	semaphore wait
+	aBlock value: (self internalSendRequest: aString params: anObject) wait
 ]
 
 { #category : #'as yet unclassified' }
