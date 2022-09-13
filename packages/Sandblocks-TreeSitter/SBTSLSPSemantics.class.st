@@ -33,7 +33,7 @@ SBTSLSPSemantics >> definitionsOf: aBlock do: aClosure blocking: aBoolean [
 		do: [:response |
 			response ifNotNil: [:definitions |
 				((((definitions isCollection ifTrue: [definitions] ifFalse: [{definitions}]) select: [:definition | "only handle local definitions for now"
-				definition uri = (textDocument at: 'uri')]) collect: [:definition | self blockFor: (definition at: 'range') in: aBlock containingArtefact root]) select: [:definition | definition notNil]) do: aBlock]]
+				definition uri = (textDocument at: 'uri')]) collect: [:definition | self blockFor: (definition at: 'range') in: aBlock containingArtefact root]) select: [:definition | definition notNil]) do: aClosure]]
 		blocking: aBoolean
 ]
 
