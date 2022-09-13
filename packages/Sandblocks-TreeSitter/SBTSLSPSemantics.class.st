@@ -99,7 +99,9 @@ SBTSLSPSemantics >> handleNotification: aJsonObject [
 	aJsonObject method
 		caseOf: {
 			['textDocument/publishDiagnostics'] -> [ | file |
-				file := textDocumentVersions keys detect: [:block | ((self textDocumentFor: block) at: 'uri') = aJsonObject params uri].
+				file := textDocumentVersions keys
+					detect: [:block | ((self textDocumentFor: block) at: 'uri') = aJsonObject params uri]
+					ifNone: [^ self].
 				currentDiagnostics at: file ifPresent: [:list | list do: #detach].
 				currentDiagnostics at: file put: OrderedCollection new.
 				aJsonObject params diagnostics do: [:diagnostic |
