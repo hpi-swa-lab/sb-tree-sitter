@@ -5280,6 +5280,13 @@ SBPython class >> rootRuleName [
 	^ 'module'
 ]
 
+{ #category : #'as yet unclassified' }
+SBPython class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
+
+	((anotherBlock isTextMorph or: [aBlock isTextMorph]) and: [aBlock parentSandblock type = #'comparison_operator']) ifTrue: [^ true].
+	^ super spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter
+]
+
 { #category : #'configuration - editing' }
 SBPython class >> transitionPairs [
 

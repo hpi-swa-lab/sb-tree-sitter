@@ -242,6 +242,13 @@ SBTreeSitter >> language: language symbolForName: aString length: aNumber isName
 ]
 
 { #category : #ffi }
+SBTreeSitter >> languageVersion: language [
+
+	<apicall: uint32_t ts_language_version (SBTSLanguageStruct*)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
 SBTreeSitter >> node: aNode childByFieldName: aString length: aNumber [
 
 	<apicall: SBTSNode ts_node_child_by_field_name (SBTSNode char* uint32_t)>
@@ -366,6 +373,7 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 		self parser: parser setLanguage: language.
 		
 		tree := self parser: parser old: nil parseString: currentString length: currentString size.
+		tree isNull ifTrue: [self error: 'tree failed to load, incompatible language version?'].
 		
 		root := self treeRootNode: tree.
 		(self nodeHasError: root) ifTrue: [^ SBTSSyntaxError signal].
@@ -429,11 +437,7 @@ SBTreeSitter >> printTree: aCursor factory: aFactory [
 { #category : #'as yet unclassified' }
 SBTreeSitter >> printTreeFrom: aCursor depth: aNumber [
 
-	Transcript showln: {
-		String streamContents: [:s | aNumber timesRepeat: [s nextPut: Character tab]].
-		aCursor currentFieldName.
-		aCursor type.
-		aCursor text}.
+	Transcript showln: {String streamContents: [:s | aNumber timesRepeat: [s nextPut: Character tab]]. aCursor type}.
 	aCursor gotoFirstChild ifTrue: [
 		[self printTreeFrom: aCursor depth: aNumber + 1] doWhileFalse: [aCursor gotoNextSibling].
 		aCursor gotoParent]

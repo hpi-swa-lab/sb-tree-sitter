@@ -159,7 +159,7 @@ SBTSReconstructExperiment >> runTests: aPathString language: aLanguage [
 SBTSReconstructExperiment >> sampleProject: aPath language: aLanguage [
 
 	| candidates random |
-	candidates := (FileDirectory on: aPath) fullNamesOfAllFilesInSubtree select: [:path | path endsWith: aLanguage fileSuffix].
+	candidates := (FileDirectory on: aPath) fullNamesOfAllFilesInSubtree select: [:path | path endsWith: '.', aLanguage fileSuffix].
 	
 	random := Random seed: 123.
 	50 timesRepeat: [ | file target editor source original path |
@@ -182,6 +182,8 @@ SBTSReconstructExperiment >> sampleProject: aPath language: aLanguage [
 						self tick.
 						editor handle: (self keyboardEvent: Character cr)]
 					ifNone: [].
-				self assert: original equals: file sourceStringForCompare]
+				SBToggledCode comment: '' active: 2 do: {
+					[original ~= file sourceStringForCompare ifTrue: [Transcript showln: '---- failed']].
+					[self assert: original equals: file sourceStringForCompare]}]
 			ifNil: [Transcript showln: 'failed to parse: ', path]]
 ]

@@ -108,7 +108,11 @@ SBTSFile >> filepath: aString language: aLanguageClass collapsed: aCollapsedBool
 	self
 		filepath: aString
 		toplevel: (FileStream readOnlyFileNamed: aString do: [:stream | | toplevel |
-			toplevel := SBTSFileParser new parse: stream contents language: aLanguageClass.
+			toplevel := SBTSFileParser new
+				parse: (aLanguageClass = SBTSSmalltalk
+					ifTrue: [stream contents lines allButFirst joinSeparatedBy: String cr]
+					ifFalse: [stream contents])
+				language: aLanguageClass.
 			aReplaceBoolean ifTrue: [toplevel applyReplacements] ifFalse: [toplevel]])
 		language: aLanguageClass
 		collapsed: aCollapsedBoolean
