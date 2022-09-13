@@ -23,7 +23,13 @@ SBTSLSPSemantics >> blockFor: aRange in: aRootBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLSPSemantics >> definitionsOf: aBlock do: aClosure blocking: aBoolean [
+SBTSLSPSemantics >> choosingLabelFor: definition [
+
+	^ 'some definition on line ', (definition at: 'range') start line
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLSPSemantics >> definitionsOf: aBlock choosing: aChoosingClosure do: aDefinitionClosure blocking: aBoolean [
 
 	| textDocument |
 	textDocument := self textDocumentFor: aBlock.
@@ -31,9 +37,14 @@ SBTSLSPSemantics >> definitionsOf: aBlock do: aClosure blocking: aBoolean [
 		sendRequest: 'textDocument/typeDefinition'
 		params: (Dictionary newFrom: {'textDocument' -> textDocument. 'position' -> aBlock range key forLSP})
 		do: [:response |
-			response ifNotNil: [:definitions |
-				((((definitions isCollection ifTrue: [definitions] ifFalse: [{definitions}]) select: [:definition | "only handle local definitions for now"
-				definition uri = (textDocument at: 'uri')]) collect: [:definition | self blockFor: (definition at: 'range') in: aBlock containingArtefact root]) select: [:definition | definition notNil]) do: aClosure]]
+			response ifNotNil: [:d | | definitions index |
+				definitions := d isCollection ifTrue: [d] ifFalse: [{d}].
+				index := aChoosingClosure value: (definitions collect: [:definition | self choosingLabelFor: definition]).
+				definitions at: index ifPresent: [:definition | | root |
+					root := definition uri = (textDocument at: 'uri')
+						ifTrue: [aBlock root]
+						ifFalse: [(aBlock sandblockEditor openFile: (self fileReferenceFrom: definition uri)) root].
+					(self blockFor: (definition at: 'range') in: root) ifNotNil: aDefinitionClosure]]]
 		blocking: aBoolean
 ]
 
@@ -71,6 +82,15 @@ SBTSLSPSemantics >> didOpen: aTSFile [
 		'textDocument' -> ((self textDocumentFor: aTSFile)
 			addAll: {'languageId' -> aTSFile root language language. 'version' -> 1. 'text' -> aTSFile getSourceStringAndMark};
 			yourself)})
+]
+
+{ #category : #helper }
+SBTSLSPSemantics >> fileReferenceFrom: aString [
+
+	| uri |
+	uri := URI fromString: aString unescapePercents.
+	uri scheme = 'file' ifFalse: [self error: 'can only open file:// uris'].
+	^ FileSystem disk referenceTo: uri absolutePath
 ]
 
 { #category : #helper }

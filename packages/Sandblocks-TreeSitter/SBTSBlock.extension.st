@@ -4,11 +4,9 @@ Extension { #name : #SBTSBlock }
 SBTSBlock >> gotoDefinition [
 	<action>
 
-	| definitions |
-	definitions := OrderedCollection streamContents: [:stream |
-		self semantics
-			definitionsOf: self
-			do: [:definition | stream nextPut: definition]
-			blocking: true].
-	self sandblockEditor select: definitions first
+	self semantics
+		definitionsOf: self
+		choosing: [:definitions | UIManager default chooseFrom: definitions]
+		do: [:definition | definition select]
+		blocking: true
 ]

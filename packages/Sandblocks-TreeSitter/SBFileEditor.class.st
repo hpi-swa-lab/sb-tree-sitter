@@ -61,7 +61,9 @@ SBFileEditor >> openFile: aFile [
 			semantics: projectSemantics;
 			yourself.
 		self openMorphInView: newFile.
-		projectSemantics didOpen: newFile]
+		projectSemantics didOpen: newFile.
+		^ newFile].
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
