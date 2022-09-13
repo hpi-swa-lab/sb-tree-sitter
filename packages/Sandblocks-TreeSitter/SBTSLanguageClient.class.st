@@ -39,7 +39,10 @@ SBTSLanguageClient >> handleMessage: aJsonObject [
 				at: aJsonObject id
 				ifPresent: [:promise |
 					pending removeKey: aJsonObject id.
-					(aJsonObject includesKey: 'error') ifTrue: [^ self error: aJsonObject error].
+					(aJsonObject includesKey: 'error') ifTrue: [ | error |
+						error := aJsonObject at: 'error'.
+						promise rejectWith: error.
+						^ self error: error].
 					promise resolveWith: aJsonObject result]
 				ifAbsent: [Transcript showln: {'unknown message'. aJsonObject}]]
 		ifFalse: [self onUIThread: [self handleNotification: aJsonObject]]
