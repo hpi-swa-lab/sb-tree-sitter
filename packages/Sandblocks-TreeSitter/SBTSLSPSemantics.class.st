@@ -22,26 +22,24 @@ SBTSLSPSemantics >> blockFor: aRange in: aRootBlock [
 	^ nil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #helper }
 SBTSLSPSemantics >> choosingLabelFor: definition [
 
 	^ 'some definition on line ', (definition at: 'range') start line
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #requests }
 SBTSLSPSemantics >> definitionsOf: aBlock choosing: aChoosingClosure do: aDefinitionClosure blocking: aBoolean [
 
-	| textDocument |
-	textDocument := self textDocumentFor: aBlock.
 	client
 		sendRequest: 'textDocument/typeDefinition'
-		params: (Dictionary newFrom: {'textDocument' -> textDocument. 'position' -> aBlock range key forLSP})
+		params: (self textDocumentPositionParamsFor: aBlock)
 		do: [:response |
 			response ifNotNil: [:d | | definitions index |
 				definitions := d isCollection ifTrue: [d] ifFalse: [{d}].
 				index := aChoosingClosure value: (definitions collect: [:definition | self choosingLabelFor: definition]).
 				definitions at: index ifPresent: [:definition | | root |
-					root := definition uri = (textDocument at: 'uri')
+					root := definition uri = ((self textDocumentFor: aBlock) at: 'uri')
 						ifTrue: [aBlock root]
 						ifFalse: [(aBlock sandblockEditor openFile: (self fileReferenceFrom: definition uri)) root].
 					(self blockFor: (definition at: 'range') in: root) ifNotNil: aDefinitionClosure]]]
@@ -137,11 +135,17 @@ SBTSLSPSemantics >> textDocumentFor: aBlock [
 ]
 
 { #category : #requests }
+SBTSLSPSemantics >> textDocumentPositionParamsFor: aBlock [
+
+	^ Dictionary newFrom: {'textDocument' -> (self textDocumentFor: aBlock). 'position' -> aBlock range key forLSP}
+]
+
+{ #category : #requests }
 SBTSLSPSemantics >> usagesOf: aBlock do: aClosure [
 
 	client
 		sendRequest: 'textDocument/documentHighlight'
-		params: (Dictionary newFrom: {'textDocument' -> (self textDocumentFor: aBlock). 'position' -> aBlock range key forLSP})
+		params: (self textDocumentPositionParamsFor: aBlock)
 		do: [:response | response ifNotNil: [:highlights | highlights do: [:highlight | (self blockFor: (highlight at: 'range') in: aBlock containingArtefact root) ifNotNil: [:b | aClosure value: b]]]]
 		blocking: false
 ]
