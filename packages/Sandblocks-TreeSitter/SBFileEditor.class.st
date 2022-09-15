@@ -23,6 +23,16 @@ SBFileEditor >> artefactChanged: aMethodBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBFileEditor >> batchedChangeStep: aBlock [
+
+	| file |
+	super batchedChangeStep: aBlock.
+	file := aBlock containingArtefact.
+	file ifNil: [^ self].
+	file semantics didChange: file
+]
+
+{ #category : #'as yet unclassified' }
 SBFileEditor >> currentFile [
 
 	^ self childSandblocks ifNotEmpty: [:f | f anyOne] ifEmpty: [nil]
