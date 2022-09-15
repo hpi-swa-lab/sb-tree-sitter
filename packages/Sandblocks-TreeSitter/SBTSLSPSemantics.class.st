@@ -33,6 +33,37 @@ SBTSLSPSemantics >> choosingLabelFor: definition [
 	^ '{1} [{2} :{3}:{4}]' format: {line withBlanksTrimmed. file basename. start line + 1. start character + 1}
 ]
 
+{ #category : #helper }
+SBTSLSPSemantics >> completionItemKindToString: aNumber [
+
+	^ (Dictionary newFrom: {
+		1 -> 'text'.
+		2 -> 'method'.
+		3 -> 'function'.
+		4 -> 'constructor'.
+		5 -> 'field'.
+		6 -> 'variable'.
+		7 -> 'class'.
+		8 -> 'interface'.
+		9 -> 'module'.
+		10 -> 'property'.
+		11 -> 'unit'.
+		12 -> 'value'.
+		13 -> 'enum'.
+		14 -> 'keyword'.
+		15 -> 'snippet'.
+		16 -> 'color'.
+		17 -> 'file'.
+		18 -> 'reference'.
+		19 -> 'folder'.
+		20 -> 'enumMember'.
+		21 -> 'constant'.
+		22 -> 'struct'.
+		23 -> 'event'.
+		24 -> 'operator'.
+		25 -> 'typeParameter'}) at: aNumber
+]
+
 { #category : #requests }
 SBTSLSPSemantics >> definitionsOf: aBlock choosing: aChoosingClosure do: aDefinitionClosure blocking: aBoolean [
 
@@ -166,9 +197,9 @@ SBTSLSPSemantics >> suggestionsFor: aBlock do: aClosure blocking: aBoolean [
 			(self
 				filterSuggestions: (response ifNotNil: [:object | object at: 'items' ifAbsent: [object]] ifNil: [{}])
 				by: aBlock) do: [:item |
-				aClosure value: (SBSuggestionItem
-					selector: (item at: 'insertText' ifAbsent: item label)
-					label: (item at: 'detail' ifAbsent: ['']))]]
+				aClosure value: (SBSuggestionItem selector: (item at: 'insertText' ifAbsent: item label) label: (item
+					at: 'detail'
+					ifAbsent: [item at: 'kind' ifPresent: [:kind | self completionItemKindToString: kind] ifAbsent: ['']]))]]
 		blocking: aBoolean
 ]
 
