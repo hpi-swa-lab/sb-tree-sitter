@@ -117,6 +117,17 @@ SBTSLSPSemantics >> handleNotification: aJsonObject [
 		otherwise: [Transcript showln: aJsonObject]
 ]
 
+{ #category : #helper }
+SBTSLSPSemantics >> offset: aPosition byCursor: aNumber in: aString [
+
+	| typed lineOffset |
+	typed := aString take: aNumber - 1.
+	lineOffset := typed lineCount - 1.
+	^ SBTSPosition
+		line: aPosition line + lineOffset
+		character: (lineOffset > 1 ifTrue: [typed lastLine] ifFalse: aPosition character + typed size)
+]
+
 { #category : #'initialize-release' }
 SBTSLSPSemantics >> on: aDirectory [
 
@@ -142,7 +153,10 @@ SBTSLSPSemantics >> textDocumentFor: aBlock [
 { #category : #requests }
 SBTSLSPSemantics >> textDocumentPositionParamsFor: aBlock [
 
-	^ Dictionary newFrom: {'textDocument' -> (self textDocumentFor: aBlock). 'position' -> aBlock range key forLSP}
+	| position |
+	position := aBlock range key.
+	aBlock currentTextMorph ifNotNil: [:text | text cursor > 0 ifTrue: [position := self offset: position byCursor: text cursor in: text contents]].
+	^ Dictionary newFrom: {'textDocument' -> (self textDocumentFor: aBlock). 'position' -> position forLSP}
 ]
 
 { #category : #requests }
