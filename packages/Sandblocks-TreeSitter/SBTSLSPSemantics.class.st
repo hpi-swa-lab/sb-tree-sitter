@@ -151,6 +151,6 @@ SBTSLSPSemantics >> usagesOf: aBlock do: aClosure [
 	client
 		sendRequest: 'textDocument/documentHighlight'
 		params: (self textDocumentPositionParamsFor: aBlock)
-		do: [:response | response ifNotNil: [:highlights | highlights do: [:highlight | (self blockFor: (highlight at: 'range') in: aBlock containingArtefact root) ifNotNil: [:b | aClosure value: b]]]]
+		do: [:response | aBlock containingArtefact ifNotNil: [response ifNotNil: [:highlights | highlights do: [:highlight | (self blockFor: (highlight at: 'range') in: aBlock containingArtefact root) ifNotNil: [:b | aClosure value: b]]]]]
 		blocking: false
 ]
