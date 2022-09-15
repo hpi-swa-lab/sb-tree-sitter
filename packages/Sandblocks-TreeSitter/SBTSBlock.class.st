@@ -1092,7 +1092,7 @@ SBTSBlock >> suggestAlways [
 { #category : #'as yet unclassified' }
 SBTSBlock >> suggestions [
 
-	^ self language suggestionsFor: self
+	^ self semantics suggestionsFor: self
 ]
 
 { #category : #'action helpers' }

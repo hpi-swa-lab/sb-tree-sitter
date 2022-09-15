@@ -97,6 +97,12 @@ SBTSLSPSemantics >> fileReferenceFrom: aString [
 ]
 
 { #category : #helper }
+SBTSLSPSemantics >> filterSuggestions: aCollection by: aBlock [
+
+	^ aCollection select: [:suggestion | (suggestion at: 'filterText' ifAbsent: [suggestion label]) includesSubstring: aBlock contents]
+]
+
+{ #category : #helper }
 SBTSLSPSemantics >> handleNotification: aJsonObject [
 
 	aJsonObject method
@@ -142,6 +148,28 @@ SBTSLSPSemantics >> on: aDirectory [
 SBTSLSPSemantics >> shutdown [
 
 	client stop
+]
+
+{ #category : #requests }
+SBTSLSPSemantics >> suggestionsFor: aBlock [
+
+	^ OrderedCollection streamContents: [:stream | self suggestionsFor: aBlock do: [:suggestion | stream nextPut: suggestion] blocking: true]
+]
+
+{ #category : #requests }
+SBTSLSPSemantics >> suggestionsFor: aBlock do: aClosure blocking: aBoolean [
+
+	client
+		sendRequest: 'textDocument/completion'
+		params: (self textDocumentPositionParamsFor: aBlock)
+		do: [:response |
+			(self
+				filterSuggestions: (response ifNotNil: [:object | object at: 'items' ifAbsent: [object]] ifNil: [{}])
+				by: aBlock) do: [:item |
+				aClosure value: (SBSuggestionItem
+					selector: (item at: 'insertText' ifAbsent: item label)
+					label: (item at: 'detail' ifAbsent: ['']))]]
+		blocking: aBoolean
 ]
 
 { #category : #helper }
