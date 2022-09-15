@@ -25,7 +25,12 @@ SBTSLSPSemantics >> blockFor: aRange in: aRootBlock [
 { #category : #helper }
 SBTSLSPSemantics >> choosingLabelFor: definition [
 
-	^ 'some definition on line ', (definition at: 'range') start line
+	| file start line |
+	file := self fileReferenceFrom: definition uri.
+	start := (definition at: 'range') start.
+	"LSP indices are 0-based"
+	line := file contents lineNumber: start line + 1.
+	^ '{1} [{2} :{3}:{4}]' format: {line withBlanksTrimmed. file basename. start line + 1. start character + 1}
 ]
 
 { #category : #requests }
