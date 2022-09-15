@@ -130,7 +130,7 @@ SBTSLSPSemantics >> fileReferenceFrom: aString [
 { #category : #helper }
 SBTSLSPSemantics >> filterSuggestions: aCollection by: aBlock [
 
-	^ aCollection select: [:suggestion | (suggestion at: 'filterText' ifAbsent: [suggestion label]) includesSubstring: aBlock contents]
+	^ aCollection select: [:suggestion | (suggestion at: 'filterText' ifAbsent: [suggestion label]) sandblockMatch: aBlock contents]
 ]
 
 { #category : #helper }
