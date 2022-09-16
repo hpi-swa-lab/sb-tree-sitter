@@ -134,7 +134,7 @@ SBTSLSPSemantics >> filterSuggestions: aCollection by: aBlock [
 ]
 
 { #category : #helper }
-SBTSLSPSemantics >> handleNotification: aJsonObject [
+SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 
 	aJsonObject method
 		caseOf: {
@@ -172,7 +172,7 @@ SBTSLSPSemantics >> on: aDirectory [
 	currentDiagnostics := Dictionary new.
 	client := SBTSLanguageClient new
 		initializeFor: aDirectory
-		onNotificationDo: [:notification | self handleNotification: notification]
+		onServerMessageDo: [:message | self handleServerMessage: message]
 ]
 
 { #category : #'initialize-release' }

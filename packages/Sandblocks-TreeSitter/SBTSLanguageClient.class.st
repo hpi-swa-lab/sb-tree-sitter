@@ -8,7 +8,7 @@ Class {
 		'projectDirectory',
 		'pending',
 		'buffer',
-		'notificationHandler'
+		'serverMessageHandler'
 	],
 	#category : #'Sandblocks-TreeSitter-Project'
 }
@@ -33,8 +33,9 @@ SBTSLanguageClient >> handleData [
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> handleMessage: aJsonObject [
 
-	(aJsonObject includesKey: 'id')
-		ifTrue: [
+	(aJsonObject includesKey: 'method')
+		ifTrue: [self onUIThread: [self handleServerMessage: aJsonObject]]
+		ifFalse: [
 			pending
 				at: aJsonObject id
 				ifPresent: [:promise |
@@ -45,22 +46,21 @@ SBTSLanguageClient >> handleMessage: aJsonObject [
 						^ self error: error].
 					promise resolveWith: aJsonObject result]
 				ifAbsent: [Transcript showln: {'unknown message'. aJsonObject}]]
-		ifFalse: [self onUIThread: [self handleNotification: aJsonObject]]
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLanguageClient >> handleNotification: aJsonObject [
+SBTSLanguageClient >> handleServerMessage: aJsonObject [
 
-	notificationHandler value: aJsonObject
+	serverMessageHandler value: aJsonObject
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLanguageClient >> initializeFor: aDirectory onNotificationDo: aBlock [
+SBTSLanguageClient >> initializeFor: aDirectory onServerMessageDo: aBlock [
 
 	| outputPipe |
 	super initialize.
 	
-	notificationHandler := aBlock.
+	serverMessageHandler := aBlock.
 	pending := Dictionary new.
 	projectDirectory := aDirectory.
 	lastRequestId := 0.
@@ -103,6 +103,18 @@ SBTSLanguageClient >> internalSendRequest: aString params: anObject [
 SBTSLanguageClient >> onUIThread: aBlock [
 
 	Project current addDeferredUIMessage: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageClient >> respondToRequest: aNumber error: anObject [
+
+	self send: (Dictionary newFrom: {'id' -> aNumber. 'error' -> anObject})
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageClient >> respondToRequest: aNumber result: anObject [
+
+	self send: (Dictionary newFrom: {'id' -> aNumber. 'result' -> anObject})
 ]
 
 { #category : #'as yet unclassified' }
