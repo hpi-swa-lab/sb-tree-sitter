@@ -8,7 +8,7 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SBTSPosition class >> line: aNumber character: anotherNumber [
 
 	^ self new line: aNumber character: anotherNumber
@@ -27,22 +27,22 @@ SBTSPosition >> = anObject [
 	^ self line = anObject line and: [self character = anObject character]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSPosition >> character [
 
 	^ character
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSPosition >> column [
 
 	^ self character
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #converting }
 SBTSPosition >> forLSP [
 
-	^ Dictionary newFrom: {'line' -> line. 'character' -> character}
+	^ Dictionary newFrom: {'line' -> self line. 'character' -> self character}
 ]
 
 { #category : #comparing }
@@ -51,25 +51,25 @@ SBTSPosition >> hash [
 	^ self line hash bitXor: self character hash
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSPosition >> line [
 
 	^ line
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SBTSPosition >> line: aNumber character: anotherNumber [
 
 	line := aNumber.
 	character := anotherNumber
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 SBTSPosition >> printOn: aStream [
 
 	aStream nextPutAll: '(line='.
-	aStream print: line.
+	aStream print: self line.
 	aStream nextPutAll: ',char='.
-	aStream print: character.
+	aStream print: self character.
 	aStream nextPut: $)
 ]
