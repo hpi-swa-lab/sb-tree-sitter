@@ -9,6 +9,22 @@ Class {
 }
 
 { #category : #'instance creation' }
+SBTSPosition class >> fromIndex: aNumber in: aString [
+
+	| lines |
+	"aNumber = 1 is before the first character"
+	lines := (aString take: aNumber - 1) lines.
+	lines ifEmpty: [lines := {''}].
+	^ self line: lines size - 1 character: lines last size
+]
+
+{ #category : #'instance creation' }
+SBTSPosition class >> fromLSP: aJsonObject [
+
+	^ self line: (aJsonObject at: 'line') character: (aJsonObject at: 'character')
+]
+
+{ #category : #'instance creation' }
 SBTSPosition class >> line: aNumber character: anotherNumber [
 
 	^ self new line: aNumber character: anotherNumber
@@ -62,6 +78,14 @@ SBTSPosition >> line: aNumber character: anotherNumber [
 
 	line := aNumber.
 	character := anotherNumber
+]
+
+{ #category : #offsetting }
+SBTSPosition >> offsetBy: aTSPosition [
+
+	^ self class line: self line + aTSPosition line character: (aTSPosition line > 0
+		ifTrue: [aTSPosition character]
+		ifFalse: [self character + aTSPosition character])
 ]
 
 { #category : #printing }
