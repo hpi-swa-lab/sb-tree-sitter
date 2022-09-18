@@ -10,15 +10,57 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSLSPSemantics >> applyChanges: aCollection to: aTSFile [
+SBTSLSPSemantics >> applyChanges: aCollection toFile: aTSFile [
 
-	Transcript show: aCollection
+	SBReplaceCommand new
+		target: aTSFile root;
+		replacer: (SBTSFileParser new
+			parse: (self applyChanges: aCollection toSource: aTSFile root sourceString)
+			language: aTSFile root language);
+		do
+]
+
+{ #category : #helper }
+SBTSLSPSemantics >> applyChanges: aCollection toSource: aString [
+
+	| source changes newSource lineIndex multilineChange line |
+	source := ReadStream on: aString.
+	changes := Dictionary new.
+	aCollection do: [:change | (changes at: (change at: 'range') start line ifAbsentPut: [OrderedCollection new]) add: change].
+	newSource := WriteStream on: ''.
+	lineIndex := 0.
+	multilineChange := nil.
+	line := nil.
+	[line := source nextLine] whileNotNil: [ | restLine character |
+		restLine := line.
+		character := 0.
+		multilineChange ifNotNil: [
+			(multilineChange at: 'range') end line = lineIndex ifTrue: [
+				character := (multilineChange at: 'range') end character.
+				restLine := line copyFrom: character + 1.
+				multilineChange := nil]].
+		multilineChange ifNil: [
+			((changes at: lineIndex ifAbsent: [{}]) sorted: [:a :b | (a at: 'range') start character < (b at: 'range') start character]) do: [:change |
+				newSource
+					nextPutAll: (restLine take: (change at: 'range') start character - character);
+					nextPutAll: change newText.
+				(change at: 'range') end line = lineIndex
+					ifTrue: [
+						restLine := restLine allButFirst: (change at: 'range') end character - character.
+						character := (change at: 'range') end character]
+					ifFalse: [multilineChange := change]]].
+		multilineChange ifNil: [
+			newSource
+				nextPutAll: restLine;
+				crlf].
+		lineIndex := lineIndex + 1].
+	^ newSource contents
 ]
 
 { #category : #'as yet unclassified' }
 SBTSLSPSemantics >> applyEdit: anEdit [
 
-	anEdit changes keysAndValuesDo: [:uri :changes | (self findFileByUri: uri) ifNotNil: [:file | self applyChanges: changes to: file]]
+	anEdit changes keysAndValuesDo: [:uri :changes | (self findFileByUri: uri) ifNotNil: [:file | self applyChanges: changes toFile: file]]
 ]
 
 { #category : #helper }
