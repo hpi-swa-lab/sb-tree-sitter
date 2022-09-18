@@ -33,7 +33,7 @@ SBTSPosition class >> line: aNumber character: anotherNumber [
 { #category : #comparing }
 SBTSPosition >> < aTSPosition [
 
-	self line < aTSPosition line or: [self line = aTSPosition line and: [self character < aTSPosition character]]
+	^ self line < aTSPosition line or: [self line = aTSPosition line and: [self character < aTSPosition character]]
 ]
 
 { #category : #comparing }
