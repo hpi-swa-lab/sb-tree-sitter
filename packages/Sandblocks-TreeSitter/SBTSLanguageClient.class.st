@@ -157,7 +157,8 @@ SBTSLanguageClient >> sendInitialize [
 			'capabilities' -> (Dictionary newFrom: {
 				'textDocument' -> (Dictionary newFrom: {
 					'hover' -> (Dictionary newFrom: {}).
-					'synchronization' -> (Dictionary newFrom: {'dynamicRegistration' -> true})})})})
+					'synchronization' -> (Dictionary newFrom: {'dynamicRegistration' -> true})}).
+				'workspace' -> (Dictionary newFrom: {'applyEdit' -> true. 'workspaceEdit' -> (Dictionary newFrom: {'documentChanges' -> true})})})})
 		do: [:response |
 			Transcript showln: 'Connected to server'.
 			self sendNotification: 'initialized' params: Dictionary new]

@@ -9,6 +9,18 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Project'
 }
 
+{ #category : #'as yet unclassified' }
+SBTSLSPSemantics >> applyChanges: aCollection to: aTSFile [
+
+	Transcript show: aCollection
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLSPSemantics >> applyEdit: anEdit [
+
+	anEdit changes keysAndValuesDo: [:uri :changes | (self findFileByUri: uri) ifNotNil: [:file | self applyChanges: changes to: file]]
+]
+
 { #category : #helper }
 SBTSLSPSemantics >> blockFor: aRange in: aRootBlock [
 
@@ -31,6 +43,22 @@ SBTSLSPSemantics >> choosingLabelFor: definition [
 	"LSP indices are 0-based"
 	line := file contents lineNumber: start line + 1.
 	^ '{1} [{2} :{3}:{4}]' format: {line withBlanksTrimmed. file basename. start line + 1. start character + 1}
+]
+
+{ #category : #requests }
+SBTSLSPSemantics >> codeActionsFor: aBlock choosing: aClosure blocking: aBoolean [
+
+	client
+		sendRequest: 'textDocument/codeAction'
+		params: (Dictionary newFrom: {
+			'textDocument' -> (self textDocumentFor: aBlock).
+			'range' -> (self rangeForLSP: aBlock range).
+			'context' -> (Dictionary newFrom: {'diagnostics' -> {}})})
+		do: [:response | | actions chosenIndex |
+			actions := response ifNil: [{}].
+			chosenIndex := aClosure value: (actions collect: [:action | action title]).
+			actions at: chosenIndex ifPresent: [:action | self runAction: action]]
+		blocking: aBoolean
 ]
 
 { #category : #helper }
@@ -134,14 +162,20 @@ SBTSLSPSemantics >> filterSuggestions: aCollection by: aBlock [
 ]
 
 { #category : #helper }
+SBTSLSPSemantics >> findFileByUri: aUri [
+
+	^ textDocumentVersions keys
+		detect: [:block | ((self textDocumentFor: block) at: 'uri') = aUri]
+		ifNone: [nil]
+]
+
+{ #category : #helper }
 SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 
 	aJsonObject method
 		caseOf: {
 			['textDocument/publishDiagnostics'] -> [ | file |
-				file := textDocumentVersions keys
-					detect: [:block | ((self textDocumentFor: block) at: 'uri') = aJsonObject params uri]
-					ifNone: [^ self].
+				file := (self findFileByUri: aJsonObject params uri) ifNil: [^ self].
 				currentDiagnostics at: file ifPresent: [:list | list do: #detach].
 				currentDiagnostics at: file put: OrderedCollection new.
 				aJsonObject params diagnostics do: [:diagnostic |
@@ -150,7 +184,10 @@ SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 							message: diagnostic message;
 							subtle: true.
 						(currentDiagnostics at: file) add: decorator.
-						block attachDecorator: decorator]]]}
+						block attachDecorator: decorator]]].
+			['workspace/applyEdit'] -> [
+				self applyEdit: aJsonObject params edit.
+				client respondToRequest: aJsonObject id result: (Dictionary newFrom: {'applied' -> false})]}
 		otherwise: [Transcript showln: aJsonObject]
 ]
 
@@ -173,6 +210,28 @@ SBTSLSPSemantics >> on: aDirectory [
 	client := SBTSLanguageClient new
 		initializeFor: aDirectory
 		onServerMessageDo: [:message | self handleServerMessage: message]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLSPSemantics >> rangeForLSP: anAssociation [
+
+	^ Dictionary newFrom: {'start' -> anAssociation key forLSP. 'end' -> anAssociation value forLSP}
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLSPSemantics >> runAction: anAction [
+
+	anAction at: 'edit' ifPresent: [:edit | self applyEdit: edit].
+	anAction
+		at: 'command'
+		ifPresent: [:command | self runCommand: (command isString ifTrue: [anAction] ifFalse: [command])]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLSPSemantics >> runCommand: aCommand [
+	"the response is irrelevant"
+
+	client sendRequest: 'workspace/executeCommand' params: aCommand do: [:response | ] blocking: false
 ]
 
 { #category : #'initialize-release' }
