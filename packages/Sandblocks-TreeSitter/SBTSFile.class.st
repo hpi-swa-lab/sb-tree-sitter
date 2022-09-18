@@ -187,7 +187,9 @@ SBTSFile >> layoutCommands [
 { #category : #'as yet unclassified' }
 SBTSFile >> range [
 
-	^ (SBTSPosition line: -1 character: -1) -> (SBTSPosition line: -1 character: -1)
+	^ SBTSRange
+		start: (SBTSPosition line: -1 character: -1)
+		end: (SBTSPosition line: -1 character: -1)
 ]
 
 { #category : #'as yet unclassified' }

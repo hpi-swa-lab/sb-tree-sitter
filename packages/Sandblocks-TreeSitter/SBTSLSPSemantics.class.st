@@ -66,13 +66,7 @@ SBTSLSPSemantics >> applyEdit: anEdit [
 { #category : #helper }
 SBTSLSPSemantics >> blockFor: aRange in: aRootBlock [
 
-	| line character endCharacter endLine |
-	line := aRange start line.
-	character := aRange start character.
-	endLine := aRange end line.
-	endCharacter := aRange end character.
-	
-	aRootBlock allBlocksDo: [:block | (block range key line = line and: [block range key character = character and: [block range value line = endLine and: [block range value character = endCharacter]]]) ifTrue: [^ block]].
+	aRootBlock allBlocksDo: [:block | block range = aRange ifTrue: [^ block]].
 	^ nil
 ]
 
@@ -94,7 +88,7 @@ SBTSLSPSemantics >> codeActionsFor: aBlock choosing: aClosure blocking: aBoolean
 		sendRequest: 'textDocument/codeAction'
 		params: (Dictionary newFrom: {
 			'textDocument' -> (self textDocumentFor: aBlock).
-			'range' -> (self rangeForLSP: aBlock range).
+			'range' -> aBlock range forLSP.
 			'context' -> (Dictionary newFrom: {'diagnostics' -> {}})})
 		do: [:response | | actions chosenIndex |
 			actions := response ifNil: [{}].
@@ -148,7 +142,7 @@ SBTSLSPSemantics >> definitionsOf: aBlock choosing: aChoosingClosure do: aDefini
 					root := definition uri = ((self textDocumentFor: aBlock) at: 'uri')
 						ifTrue: [aBlock root]
 						ifFalse: [(aBlock sandblockEditor openFile: (self fileReferenceFrom: definition uri)) root].
-					(self blockFor: (definition at: 'range') in: root) ifNotNil: aDefinitionClosure]]]
+					(self blockFor: (SBTSRange fromLSPWithRange: definition) in: root) ifNotNil: aDefinitionClosure]]]
 		blocking: aBoolean
 ]
 
@@ -221,7 +215,7 @@ SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 				currentDiagnostics at: file ifPresent: [:list | list do: #detach].
 				currentDiagnostics at: file put: OrderedCollection new.
 				aJsonObject params diagnostics do: [:diagnostic |
-					(self blockFor: (diagnostic at: 'range') in: file) ifNotNil: [:block | | decorator |
+					(self blockFor: (SBTSRange fromLSPWithRange: diagnostic) in: file) ifNotNil: [:block | | decorator |
 						decorator := SBErrorDecorator new
 							message: diagnostic message;
 							subtle: true.
@@ -233,17 +227,6 @@ SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 		otherwise: [Transcript showln: aJsonObject]
 ]
 
-{ #category : #helper }
-SBTSLSPSemantics >> offset: aPosition byCursor: aNumber in: aString [
-
-	| typed lineOffset |
-	typed := aString take: aNumber - 1.
-	lineOffset := typed lineCount - 1.
-	^ SBTSPosition
-		line: aPosition line + lineOffset
-		character: (lineOffset > 1 ifTrue: [typed lastLine] ifFalse: aPosition character + typed size)
-]
-
 { #category : #'initialize-release' }
 SBTSLSPSemantics >> on: aDirectory [
 
@@ -252,12 +235,6 @@ SBTSLSPSemantics >> on: aDirectory [
 	client := SBTSLanguageClient new
 		initializeFor: aDirectory
 		onServerMessageDo: [:message | self handleServerMessage: message]
-]
-
-{ #category : #'as yet unclassified' }
-SBTSLSPSemantics >> rangeForLSP: anAssociation [
-
-	^ Dictionary newFrom: {'start' -> anAssociation key forLSP. 'end' -> anAssociation value forLSP}
 ]
 
 { #category : #'as yet unclassified' }
@@ -314,8 +291,8 @@ SBTSLSPSemantics >> textDocumentFor: aBlock [
 SBTSLSPSemantics >> textDocumentPositionParamsFor: aBlock [
 
 	| position |
-	position := aBlock range key.
-	aBlock currentTextMorph ifNotNil: [:text | text cursor > 0 ifTrue: [position := self offset: position byCursor: text cursor in: text contents]].
+	position := aBlock range start.
+	aBlock currentTextMorph ifNotNil: [:text | text cursor > 0 ifTrue: [position := position offsetBy: (SBTSPosition fromIndex: text cursor in: text contents)]].
 	^ Dictionary newFrom: {'textDocument' -> (self textDocumentFor: aBlock). 'position' -> position forLSP}
 ]
 
@@ -325,6 +302,6 @@ SBTSLSPSemantics >> usagesOf: aBlock do: aClosure [
 	client
 		sendRequest: 'textDocument/documentHighlight'
 		params: (self textDocumentPositionParamsFor: aBlock)
-		do: [:response | aBlock containingArtefact ifNotNil: [response ifNotNil: [:highlights | highlights do: [:highlight | (self blockFor: (highlight at: 'range') in: aBlock containingArtefact root) ifNotNil: [:b | aClosure value: b]]]]]
+		do: [:response | aBlock containingArtefact ifNotNil: [response ifNotNil: [:highlights | highlights do: [:highlight | (self blockFor: (SBTSRange fromLSPWithRange: highlight) in: aBlock containingArtefact root) ifNotNil: [:b | aClosure value: b]]]]]
 		blocking: false
 ]

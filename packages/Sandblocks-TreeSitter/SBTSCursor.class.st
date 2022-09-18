@@ -223,7 +223,9 @@ SBTSCursor >> range [
 	node := self node.
 	start := library nodeStartPoint: node.
 	end := library nodeEndPoint: node.
-	^ (SBTSPosition line: start row character: start column) -> (SBTSPosition line: end row character: end column)
+	^ SBTSRange
+		start: (SBTSPosition line: start row character: start column)
+		end: (SBTSPosition line: end row character: end column)
 ]
 
 { #category : #'as yet unclassified' }

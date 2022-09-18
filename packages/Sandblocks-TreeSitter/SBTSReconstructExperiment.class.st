@@ -84,7 +84,9 @@ SBTSReconstructExperiment >> rangeFrom: aChange [
 	startInset := aChange typed size - aChange typed withoutLeadingBlanks size.
 	endInset := aChange typed size - aChange typed withoutTrailingBlanks size.
 	aChange typed last = $; ifTrue: [endInset := endInset + 1].
-	^ (SBTSPosition line: aChange line - 1 character: aChange startColumn + startInset) -> (SBTSPosition line: aChange line - 1 character: aChange endColumn - endInset)
+	^ SBTSRange
+		start: (SBTSPosition line: aChange line - 1 character: aChange startColumn + startInset)
+		end: (SBTSPosition line: aChange line - 1 character: aChange endColumn - endInset)
 ]
 
 { #category : #'as yet unclassified' }

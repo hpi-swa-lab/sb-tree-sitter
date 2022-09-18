@@ -254,7 +254,7 @@ SBTSBlock >> copyBlock [
 	| copy |
 	copy := self class new
 		addAllMorphs: (self isUnknown ifTrue: [{}] ifFalse: [self submorphs collect: [:s | s copyBlock]]);
-		range: range key copy -> range value copy;
+		range: range copy;
 		slot: self slot.
 	#(#lastConstructed #copyPlaceholder) do: [:prop | self valueOfProperty: prop ifPresentDo: [:val | copy setProperty: prop toValue: val]].
 	^ copy
@@ -446,14 +446,10 @@ SBTSBlock >> emphasis [
 	^ TextEmphasis normal
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SBTSBlock >> encompasses: aRange [
 
-	range key line > aRange key line ifTrue: [^ false].
-	range value line < aRange value line ifTrue: [^ false].
-	(range key line = aRange key line and: [range key column > aRange key column]) ifTrue: [^ false].
-	(range value line = aRange value line and: [range value column < aRange value column]) ifTrue: [^ false].
-	^ true
+	^ self range encompasses: aRange
 ]
 
 { #category : #'as yet unclassified' }
@@ -583,7 +579,9 @@ SBTSBlock >> initialize [
 
 	super initialize.
 	
-	range := (SBTSPosition line: 0 character: 0) -> (SBTSPosition line: 0 character: 0).
+	range := SBTSRange
+		start: (SBTSPosition line: 0 character: 0)
+		end: (SBTSPosition line: 0 character: 0).
 	
 	self
 		layoutPolicy: SBAlgebraLayout new;
@@ -684,7 +682,7 @@ SBTSBlock >> isPart [
 { #category : #'file range' }
 SBTSBlock >> isSingleLine [
 
-	^ range key line = range value line
+	^ self range isSingleLine
 ]
 
 { #category : #testing }
@@ -979,9 +977,9 @@ SBTSBlock >> range [
 ]
 
 { #category : #'file range' }
-SBTSBlock >> range: anAssociation [
+SBTSBlock >> range: aTSRange [
 
-	range := anAssociation
+	range := aTSRange
 ]
 
 { #category : #'as yet unclassified' }
@@ -1291,14 +1289,18 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 	| parens |
 	self children ifEmpty: [^ self].
 	
-	aStream hasLineInfo ifTrue: [range key line: aStream currentLine character: aStream currentIndexInLine].
+	aStream hasLineInfo ifTrue: [range start line: aStream currentLine character: aStream currentIndexInLine].
 	
 	parens := self parentSandblock notNil and: [self parentSandblock isTSBlock and: [self slot needsParenthesis: self]].
 	(self language indentMatch: self) ifTrue: [aStream tab].
 	parens ifTrue: [aStream nextPut: $(].
 	self children overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.
-		aStream nextPutAll: (self slot separatorBetween: first and: second indent: aNumber lastCharacterOfFirst: (aStream position > 0 ifFalse: [$ ] ifTrue: [aStream last]))].
+		aStream nextPutAll: (self slot
+			separatorBetween: first
+			and: second
+			indent: aNumber
+			lastCharacterOfFirst: (aStream position > 0 ifFalse: [$ ] ifTrue: [aStream last]))].
 	self lastSubmorph
 		writeSourceOn: aStream
 		indent: (self indentFor: self lastSubmorph current: aNumber)
@@ -1306,5 +1308,5 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 	self slot nodes do: [:node | node bodyTemplate andParentsDo: [:type | type hasStatementTerminator ifTrue: [aStream nextPutAll: self language statementTerminator]]].
 	parens ifTrue: [aStream nextPut: $)].
 	
-	aStream hasLineInfo ifTrue: [range value line: aStream currentLine character: aStream currentIndexInLine]
+	aStream hasLineInfo ifTrue: [range end line: aStream currentLine character: aStream currentIndexInLine]
 ]
