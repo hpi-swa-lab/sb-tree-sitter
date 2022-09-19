@@ -22,6 +22,15 @@ SBTSTextMorph >> allConnectionsDo: aBlock [
 	
 ]
 
+{ #category : #decorators }
+SBTSTextMorph >> attachDecorator: aDecorator [
+
+	self parentSandblock submorphCount = 1 ifTrue: [^ self parentSandblock attachDecorator: aDecorator].
+	(self valueOfProperty: #decorators ifAbsentPut: [OrderedCollection new]) add: aDecorator.
+	aDecorator attached: self.
+	self changed
+]
+
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> canBeEmpty [
 
@@ -95,6 +104,46 @@ SBTSTextMorph >> copyBlock [
 		valueOfProperty: #lastConstructed
 		ifPresentDo: [:val | copy setProperty: #lastConstructed toValue: true].
 	^ copy
+]
+
+{ #category : #decorators }
+SBTSTextMorph >> decoratorsDo: aBlock [
+
+	self valueOfProperty: #decorators ifPresentDo: [:decorators | decorators do: aBlock]
+]
+
+{ #category : #decorators }
+SBTSTextMorph >> detachDecorator: aDecorator [
+
+	self
+		valueOfProperty: #decorators
+		ifPresentDo: [:decorators | decorators remove: aDecorator ifAbsent: []].
+	aDecorator detached: self.
+	self changed
+]
+
+{ #category : #drawing }
+SBTSTextMorph >> drawDecoratorsOn: aCanvas during: aBlock [
+
+	self decoratorsDo: [:d | d preDrawOn: aCanvas].
+	
+	aBlock value.
+	
+	^ self decoratorsDo: [:d | d postDrawSelfOn: aCanvas]
+]
+
+{ #category : #drawing }
+SBTSTextMorph >> drawOn: aCanvas [
+
+	self drawDecoratorsOn: aCanvas during: [super drawOn: aCanvas]
+]
+
+{ #category : #drawing }
+SBTSTextMorph >> drawSubmorphsOn: aCanvas [
+
+	super drawSubmorphsOn: aCanvas.
+	
+	self decoratorsDo: [:d | d postDrawOn: aCanvas]
 ]
 
 { #category : #'as yet unclassified' }
