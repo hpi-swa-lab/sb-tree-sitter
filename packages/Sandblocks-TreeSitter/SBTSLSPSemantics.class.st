@@ -74,7 +74,7 @@ SBTSLSPSemantics >> applyEdit: anEdit [
 { #category : #helper }
 SBTSLSPSemantics >> blockFor: aRange in: aRootBlock [
 
-	aRootBlock allBlocksDo: [:block | block range = aRange ifTrue: [^ block]].
+	aRootBlock allMorphsDo: [:block | (block isTSMorph and: [block range = aRange]) ifTrue: [^ block]].
 	^ nil
 ]
 
