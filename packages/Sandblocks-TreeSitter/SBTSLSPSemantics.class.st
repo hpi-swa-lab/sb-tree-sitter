@@ -97,7 +97,8 @@ SBTSLSPSemantics >> codeActionsFor: aBlock choosing: aClosure blocking: aBoolean
 		params: (Dictionary newFrom: {
 			'textDocument' -> (self textDocumentFor: aBlock).
 			'range' -> aBlock range forLSP.
-			'context' -> (Dictionary newFrom: {'diagnostics' -> {}})})
+			'context' -> (Dictionary newFrom: {
+				'diagnostics' -> ((currentDiagnostics at: aBlock containingArtefact ifAbsent: [{}]) collect: [:decorator | decorator diagnostic])})})
 		do: [:response | | actions chosenIndex |
 			actions := response ifNil: [{}].
 			chosenIndex := aClosure value: (actions collect: [:action | action title]).
