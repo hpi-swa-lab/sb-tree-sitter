@@ -14,7 +14,8 @@ SBTSBlock class >> registerShortcuts: aProvider [
 
 	aProvider
 		registerShortcut: Character space asSandblockShortcut, $e command do: #promptTransition;
-		registerShortcut: Character space shift do: #promptTransition
+		registerShortcut: Character space shift do: #promptTransition;
+		registerShortcut: $. command do: #codeAction
 ]
 
 { #category : #'as yet unclassified' }
