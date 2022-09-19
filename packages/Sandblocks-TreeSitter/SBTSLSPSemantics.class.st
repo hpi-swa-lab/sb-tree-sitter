@@ -65,10 +65,18 @@ SBTSLSPSemantics >> applyChanges: aCollection toSource: aString [
 	^ newSource contents
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #helper }
 SBTSLSPSemantics >> applyEdit: anEdit [
 
-	anEdit changes keysAndValuesDo: [:uri :changes | (self findFileByUri: uri) ifNotNil: [:file | self applyChanges: changes toFile: file]]
+	| documentChanges |
+	documentChanges := anEdit at: 'changes' ifAbsent: [Dictionary new].
+	anEdit at: 'documentChanges' ifPresent: [:changes |
+		changes do: [:change |
+			change
+				at: 'textDocument'
+				ifPresent: [:id | documentChanges add: id uri -> change edits]
+				ifAbsent: [self error: 'fs changes not supported yet']]].
+	documentChanges keysAndValuesDo: [:uri :changes | (self findFileByUri: uri) ifNotNil: [:file | self applyChanges: changes toFile: file]]
 ]
 
 { #category : #helper }
