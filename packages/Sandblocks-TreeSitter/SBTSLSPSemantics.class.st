@@ -224,9 +224,9 @@ SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 				currentDiagnostics at: file put: OrderedCollection new.
 				aJsonObject params diagnostics do: [:diagnostic |
 					(self blockFor: (SBTSRange fromLSPWithRange: diagnostic) in: file) ifNotNil: [:block | | decorator |
-						decorator := SBErrorDecorator new
-							message: diagnostic message;
-							subtle: true.
+						decorator := SBTSDiagnosticDecorator new
+							diagnostic: diagnostic;
+							yourself.
 						(currentDiagnostics at: file) add: decorator.
 						block attachDecorator: decorator]]].
 			['workspace/applyEdit'] -> [
