@@ -78,6 +78,20 @@ SBTSNodeInsertCommand >> insertIndex [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeInsertCommand >> insertRange [
+
+	^ SBTSRange
+		start: (self container submorphs
+			at: self index - 1
+			ifPresent: [:morph | morph range end]
+			ifAbsent: [self container range start])
+		end: (self container submorphs
+			at: self index
+			ifPresent: [:morph | morph range start]
+			ifAbsent: [self container range end])
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeInsertCommand >> isInsert [
 
 	^ true
