@@ -38,6 +38,12 @@ SBTSRange >> = anObject [
 ]
 
 { #category : #testing }
+SBTSRange >> contains: aTSPosition [
+
+	^ self start <= aTSPosition and: [self end >= aTSPosition]
+]
+
+{ #category : #testing }
 SBTSRange >> encompasses: aTSRange [
 
 	^ self start <= aTSRange start and: [self end >= aTSRange end]
@@ -68,9 +74,21 @@ SBTSRange >> hash [
 ]
 
 { #category : #testing }
+SBTSRange >> isEmpty [
+
+	^ self start = self end
+]
+
+{ #category : #testing }
 SBTSRange >> isSingleLine [
 
 	^ start line = end line
+]
+
+{ #category : #converting }
+SBTSRange >> map: aBlock [
+
+	^ self class start: (aBlock value: self start) end: (aBlock value: self end)
 ]
 
 { #category : #copying }
@@ -80,6 +98,15 @@ SBTSRange >> postCopy [
 	self
 		start: self start copy;
 		end: self end copy
+]
+
+{ #category : #printing }
+SBTSRange >> printOn: aStream [
+
+	aStream
+		print: self start;
+		nextPutAll: '->';
+		print: self end
 ]
 
 { #category : #accessing }

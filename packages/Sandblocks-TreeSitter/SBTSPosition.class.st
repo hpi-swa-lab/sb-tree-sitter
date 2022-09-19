@@ -43,6 +43,18 @@ SBTSPosition >> = anObject [
 	^ self line = anObject line and: [self character = anObject character]
 ]
 
+{ #category : #converting }
+SBTSPosition >> asIndexIn: aString [
+
+	| index lineIndex |
+	index := 0.
+	lineIndex := 0.
+	aString lineIndicesDo: [:start :endWithoutDelimiters :end |
+		lineIndex < self line ifTrue: [index := end].
+		lineIndex := lineIndex + 1].
+	^ index + (self character + 1)
+]
+
 { #category : #accessing }
 SBTSPosition >> character [
 
@@ -96,4 +108,12 @@ SBTSPosition >> printOn: aStream [
 	aStream nextPutAll: ',char='.
 	aStream print: self character.
 	aStream nextPut: $)
+]
+
+{ #category : #offsetting }
+SBTSPosition >> relativeTo: aTSPosition [
+
+	^ self class line: self line - aTSPosition line character: (self line = aTSPosition line
+		ifTrue: [self character - aTSPosition character]
+		ifFalse: [self character])
 ]
