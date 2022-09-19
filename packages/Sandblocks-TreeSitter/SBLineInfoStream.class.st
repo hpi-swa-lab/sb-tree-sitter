@@ -29,7 +29,7 @@ SBLineInfoStream >> hasLineInfo [
 { #category : #'as yet unclassified' }
 SBLineInfoStream >> nextPut: anObject [
 
-	anObject = Character cr
+	(anObject = Character cr or: [anObject = Character lf and: [self peekLast ~= Character cr]])
 		ifTrue: [
 			currentLine := currentLine + 1.
 			currentIndexInLine := 0]
@@ -40,12 +40,15 @@ SBLineInfoStream >> nextPut: anObject [
 { #category : #'as yet unclassified' }
 SBLineInfoStream >> nextPutAll: aCollection [
 
+	| localLast |
+	localLast := self peekLast.
 	aCollection do: [:char |
-		char = Character cr
+		(char = Character cr or: [char = Character lf and: [localLast ~= Character cr]])
 			ifTrue: [
 				currentLine := currentLine + 1.
 				currentIndexInLine := 0]
-			ifFalse: [currentIndexInLine := currentIndexInLine + 1]].
+			ifFalse: [currentIndexInLine := currentIndexInLine + 1].
+		localLast := char].
 	super nextPutAll: aCollection
 ]
 
