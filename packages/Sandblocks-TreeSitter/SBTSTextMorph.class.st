@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'slot',
 		'highlight',
-		'fixedText'
+		'fixedText',
+		'range'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -190,6 +191,10 @@ SBTSTextMorph >> initialize [
 
 	super initialize.
 	
+	range := SBTSRange
+		start: (SBTSPosition line: 0 character: 0)
+		end: (SBTSPosition line: 0 character: 0).
+	
 	self maxWidth: 400
 ]
 
@@ -275,6 +280,12 @@ SBTSTextMorph >> printOn: aStream [
 
 	super printOn: aStream.
 	aStream print: contents
+]
+
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> range [
+
+	^ range
 ]
 
 { #category : #'as yet unclassified' }
@@ -369,7 +380,9 @@ SBTSTextMorph >> wrapOffscreen: anEditor [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
+	aStream hasLineInfo ifTrue: [range start line: aStream currentLine character: aStream currentIndexInLine].
 	aStream nextPutAll: ((aBoolean and: [self contents isEmpty and: [self canBeEmpty not]])
 		ifTrue: [String value: 0]
-		ifFalse: [self contents])
+		ifFalse: [self contents]).
+	aStream hasLineInfo ifTrue: [range end line: aStream currentLine character: aStream currentIndexInLine]
 ]
