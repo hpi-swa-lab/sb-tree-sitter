@@ -9,15 +9,23 @@ Class {
 	#category : #'Sandblocks-TreeSitter-Project'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #helper }
+SBTSLSPSemantics >> applyChange: change toFile: aTSFile [
+
+	| range block |
+	range := change at: 'range'.
+	block := aTSFile root smallestBlockEncompassig: range.
+	block range = range ifTrue: [block changeToUnknown] ifFalse: [
+		range isEmpty ifFalse: [self error: 'unsupported change'].
+		block sandblockEditor cursorPosition: (self insertPositionIn: block at: range start for: change newText withBlanksCondensed)].
+	self type: change newText in: aTSFile sandblockEditor
+]
+
+{ #category : #helper }
 SBTSLSPSemantics >> applyChanges: aCollection toFile: aTSFile [
 
-	SBReplaceCommand new
-		target: aTSFile root;
-		replacer: (SBTSFileParser new
-			parse: (self applyChanges: aCollection toSource: aTSFile root sourceString)
-			language: aTSFile root language);
-		do
+	aCollection do: [:change | change at: 'range' put: (SBTSRange fromLSPWithRange: change)].
+	(aCollection sorted: [:a :b | (a at: 'range') start >= (b at: 'range') start]) do: [:change | self applyChange: change toFile: aTSFile]
 ]
 
 { #category : #helper }
@@ -227,6 +235,20 @@ SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 		otherwise: [Transcript showln: aJsonObject]
 ]
 
+{ #category : #helper }
+SBTSLSPSemantics >> insertPositionIn: aBlock at: aTSPosition for: aString [
+
+	| block root |
+	block := aBlock.
+	root := aBlock sandblockEditor root.
+	[block ~~ root and: [block range start = aTSPosition or: [block range end = aTSPosition]]] whileTrue: [block := block parentSandblock].
+	block cursorPositionsDo: [:pos |
+		(pos isInsert
+			and: [pos command insertRange contains: aTSPosition]
+			and: [(SBTSInputParser new optionsForTemplate: pos command element given: aString) notEmpty]) ifTrue: [^ pos]].
+	self error: 'weird change'
+]
+
 { #category : #'initialize-release' }
 SBTSLSPSemantics >> on: aDirectory [
 
@@ -294,6 +316,14 @@ SBTSLSPSemantics >> textDocumentPositionParamsFor: aBlock [
 	position := aBlock range start.
 	aBlock currentTextMorph ifNotNil: [:text | text cursor > 0 ifTrue: [position := position offsetBy: (SBTSPosition fromIndex: text cursor in: text contents)]].
 	^ Dictionary newFrom: {'textDocument' -> (self textDocumentFor: aBlock). 'position' -> position forLSP}
+]
+
+{ #category : #helper }
+SBTSLSPSemantics >> type: aString in: anEditor [
+
+	aString withBlanksCondensed do: [:char | | event |
+		event := SBTest keyboardEvent: char.
+		event becomeActiveDuring: [anEditor handle: event]]
 ]
 
 { #category : #requests }
