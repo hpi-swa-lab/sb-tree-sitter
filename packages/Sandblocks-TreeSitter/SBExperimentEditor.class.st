@@ -31,6 +31,26 @@ SBExperimentEditor class >> openTutorial [
 ]
 
 { #category : #'as yet unclassified' }
+SBExperimentEditor class >> replayKeyLog [
+
+	FileStream readOnlyFileNamed: '/home/tom/keys.json' do: [:s | | data down modified char nav delete |
+		down := false.
+		modified := OrderedCollection new.
+		data := Json readFrom: s contents readStream.
+		char := 0.
+		nav := 0.
+		delete := 0.
+		data do: [:key |
+			(key first first = $' and: [down not]) ifTrue: [char := char + 1].
+			(#('Key.left' 'Key.right' 'Key.up' 'Key.down') includes: key first) ifTrue: [nav := nav + 1].
+			(#('Key.backspace') includes: key first) ifTrue: [delete := delete + 1].
+			key first = 'Key.ctrl_l' ifTrue: [down := true].
+			key first = 'RELEASE_Key.ctrl_l' ifTrue: [down := false].
+			(down and: [key first ~= 'Key.ctrl_l']) ifTrue: [modified add: key first]].
+		{char. nav. delete. modified size}]
+]
+
+{ #category : #'as yet unclassified' }
 SBExperimentEditor >> clearTimes [
 
 	times := OrderedCollection new

@@ -486,6 +486,34 @@ SBTSParseInputTest >> testReinterpretUnaryToKeyword [
 	self assert: 'keyword_message' equals: results first first type
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSParseInputTest >> testSkipBlanks [
+
+	self assert: (SBTSInputParser new
+		optionsForTemplate: (SBTypescript instance grammar bodyNodeForRule: #statement)
+		given: 'function newFunction(newLocal: string): any {
+	return console.log(newLocal);
+}') notEmpty
+]
+
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testTrimBlanks [
+
+	self assert: (SBTSInputParser new
+		optionsForTemplate: (SBTypescript instance grammar bodyNodeForRule: #statement)
+		given: '  
+return;
+') notEmpty
+]
+
+{ #category : #'tests - create' }
+SBTSParseInputTest >> testTypeScriptSemicolon [
+
+	self assert: (SBTSInputParser new
+		optionsForTemplate: (SBTypescript instance grammar bodyNodeForRule: #statement)
+		given: 'return;') notEmpty
+]
+
 { #category : #'tests - wrap' }
 SBTSParseInputTest >> testWrapArray [
 
@@ -556,7 +584,7 @@ SBTSParseInputTest >> testWrapKeywordMessageWithGaps [
 			3 timesRepeat: [
 				stream
 					nextPutAll: 'with:';
-					nextPut: (Character value: 1)]])
+					nextPut: SBTSInputParser gapCharacter]])
 		before: {stmt}
 		after: {}.
 	self assert: 1 equals: results size.

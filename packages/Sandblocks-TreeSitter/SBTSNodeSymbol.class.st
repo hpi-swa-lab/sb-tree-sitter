@@ -205,7 +205,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 	| storedBlocks newBlocks |
 	(self language inputTransitionBlackList includes: self type) ifTrue: [^ {}].
 	
-	aParser peek = (Character value: 1) ifTrue: [
+	aParser peek = SBTSInputParser gapCharacter ifTrue: [
 		aParser next.
 		^ {aParser basicAddBlocks: self buildEmptyNodes}].
 	

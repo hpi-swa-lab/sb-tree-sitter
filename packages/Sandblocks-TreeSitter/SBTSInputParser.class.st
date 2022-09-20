@@ -21,6 +21,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSInputParser class >> gapCharacter [
+
+	^ Character value: 5
+]
+
+{ #category : #'as yet unclassified' }
 SBTSInputParser >> adaptSlotsFor: aCollectionOfBlock to: aNode [
 
 	| results |
@@ -438,7 +444,12 @@ SBTSInputParser >> postCopy [
 { #category : #query }
 SBTSInputParser >> rawOptionsForTemplate: aNode given: aString before: aCollection after: anotherCollection [
 
-	stream := SBTSBlockStringStream on: aCollection, aString asArray, anotherCollection.
+	| input |
+	input := aString.
+	(aString anySatisfy: [:c | c isSeparator not]) ifTrue: [aCollection ifEmpty: [input := input withoutLeadingBlanks]].
+	stream := SBTSBlockStringStream on: aCollection, input asArray, anotherCollection.
+	stream atEnd ifTrue: [^ {}].
+	
 	memoizations := (1 to: stream originalContents size) collect: [:i | IdentityDictionary new].
 	activeRecursion := Array new: stream originalContents size withAll: nil.
 	symbolStack := OrderedCollection with: aNode.
@@ -476,6 +487,12 @@ SBTSInputParser >> recursiveNodeCount [
 	^ nodeCountCache := self blocks
 		inject: 0
 		into: [:sum :block | sum + block recursiveNodeCount]
+]
+
+{ #category : #stream }
+SBTSInputParser >> remainingContents [
+
+	^ stream contents viewFrom: self position + 1 to: self limit
 ]
 
 { #category : #stream }
@@ -556,7 +573,7 @@ SBTSInputParser >> trimResults: aCollection [
 { #category : #accessing }
 SBTSInputParser >> validCondition [
 
-	^ validCondition ifNil: [[:p | p atEnd]]
+	^ validCondition ifNil: [[:p | p atEnd or: [p remainingContents allSatisfy: [:c | c isCharacter and: [c isSeparator]]]]]
 ]
 
 { #category : #accessing }

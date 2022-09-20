@@ -1254,7 +1254,7 @@ SBTSSmalltalk class >> suggestionsFor: aBlock [
 			sortedSuggestions: (self allSuggestionOptionsFor: aBlock parentSandblock childSandblocks first)
 			for: aBlock contents) collect: [:item |
 			SBSuggestionItem
-				selector: (item keywords joinSeparatedBy: (Character value: 1))
+				selector: (item keywords joinSeparatedBy: SBTSInputParser gapCharacter)
 				label: 'send']].
 	aBlock type = #identifier ifTrue: [
 		^ aBlock

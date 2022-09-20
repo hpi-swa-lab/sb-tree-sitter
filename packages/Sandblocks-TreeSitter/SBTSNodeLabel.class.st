@@ -222,7 +222,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 		active: 0
 		do: {[(labelStream atEnd or: [aParser atEnd]) ifFalse: [^ {}]]}.
 	
-	[aParser peek = $ ] whileTrue: [aParser next].
+	[aParser peek isCharacter and: [aParser peek isSeparator]] whileTrue: [aParser next].
 	^ {aParser addBlock: (self buildEmptyNodesWithLength: typedLength) first}
 ]
 

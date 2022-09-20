@@ -40,6 +40,29 @@ SBTSReconstructExperiment class >> runAllAndCopyToClipboard [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSReconstructExperiment class >> runLargerSet [
+
+	SBTSReconstructExperiment basicNew
+		sampleProject: '/home/tom/Code/python/flask'
+		language: SBPython.
+	SBTSReconstructExperiment basicNew
+		sampleProject: '/home/tom/Code/clojure/compojure'
+		language: SBClojure.
+	SBTSReconstructExperiment basicNew
+		sampleProject: '/home/tom/Downloads/fenix-main'
+		language: SBKotlin.
+	SBTSReconstructExperiment basicNew
+		sampleProject: '/home/tom/Code/js/vue'
+		language: SBTypescript.
+	SBTSReconstructExperiment basicNew
+		sampleProject: '/home/tom/Code/squeak/metacello'
+		language: SBTSSmalltalk.
+	SBTSReconstructExperiment basicNew
+		sampleProject: '/home/tom/Code/js/express'
+		language: SBJavascript
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReconstructExperiment class >> times [
 
 	^ Times
