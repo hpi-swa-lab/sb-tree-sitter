@@ -292,7 +292,7 @@ SBTSInputParser >> normalizeResults2: aCollection query: aString factory: aFacto
 	
 	results ifNotEmpty: [ | transitionPairs |
 		transitionPairs := aFactory language transitionPairs.
-		results := results select: [:blocksA | results noneSatisfy: [:blocksB | transitionPairs anySatisfy: [:pair | pair key = blocksB first type and: [pair value = blocksA first type]]]]].
+		results := results select: [:blocksA | results noneSatisfy: [:blocksB | transitionPairs anySatisfy: [:pair | pair key = blocksB first typeOrAlias and: [pair value = blocksA first typeOrAlias]]]]].
 	
 	hasAnyKeywords := results anySatisfy: [:r | | node block |
 		block := r first firstDeepChild.

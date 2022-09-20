@@ -148,15 +148,15 @@ SBTSParseNode >> lastDeepChild [
 SBTSParseNode >> parentChainIn: aParser [
 
 	| chain current leaf |
-	leaf := self type.
+	leaf := self typeOrAlias.
 	current := self.
-	[current type isNil and: [current notNil]] whileTrue: [
+	[current typeOrAlias isNil and: [current notNil]] whileTrue: [
 		current := aParser parentOf: current.
 		current ifNil: [^ {{}. ''}].
-		leaf := current type].
+		leaf := current typeOrAlias].
 	
 	chain := OrderedCollection new.
-	[current notNil] whileTrue: [(current := aParser parentOf: current) ifNotNil: [chain add: current type]].
+	[current notNil] whileTrue: [(current := aParser parentOf: current) ifNotNil: [chain add: current typeOrAlias]].
 	SBToggledCode comment: '' active: 0 do: {
 		[
 			[current notNil] whileTrue: [
@@ -217,4 +217,10 @@ SBTSParseNode >> slot: aSlot [
 SBTSParseNode >> type [
 
 	^ slot firstNode type
+]
+
+{ #category : #'as yet unclassified' }
+SBTSParseNode >> typeOrAlias [
+
+	^ self slot type ifNil: [self slot alias]
 ]
