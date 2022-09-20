@@ -27,6 +27,12 @@ SBTSBoundarySelectCommand >> do [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBoundarySelectCommand >> morphs [
+
+	^ {}
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBoundarySelectCommand >> setArtefactFrom [
 
 	^ boundary

@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testReplacementBlockBinding #testJsFullForLoop)
+	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testReplacementBlockBinding #testJsFullForLoop #testRegexEnterClassRanges)
 ]
 
 { #category : #'tests - adding' }
@@ -85,6 +85,16 @@ SBTSBlockTest >> testBashCommand [
 	
 	program startInputAtEnd.
 	self type: 'ls' in: editor
+]
+
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testBashCommandArg [
+
+	| command editor |
+	command := SBBash empty.
+	editor := self editorAndWorldFor: command.
+	self type: 'ls -l a' in: editor.
+	self assert: 'ls -l a' equals: command sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }

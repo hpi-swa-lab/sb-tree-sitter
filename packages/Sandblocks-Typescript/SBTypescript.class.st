@@ -11147,5 +11147,5 @@ SBTypescript class >> statementTerminator [
 { #category : #'configuration - editing' }
 SBTypescript class >> transitionPairs [
 
-	^ {#function -> #'function_declaration'}
+	^ {#function -> #'function_declaration'. #'type_identifier' -> #'nested_type_identifier'}
 ]
