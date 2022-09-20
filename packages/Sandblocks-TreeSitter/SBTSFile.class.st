@@ -185,6 +185,13 @@ SBTSFile >> layoutCommands [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile >> outOfWorld: aWorld [
+
+	super outOfWorld: aWorld.
+	self semantics didClose: self
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> range [
 
 	^ SBTSRange
