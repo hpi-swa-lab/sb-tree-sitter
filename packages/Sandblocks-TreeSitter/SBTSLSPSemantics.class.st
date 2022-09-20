@@ -25,7 +25,7 @@ SBTSLSPSemantics >> applyChange: change toFile: aTSFile [
 SBTSLSPSemantics >> applyChanges: aCollection toFile: aTSFile [
 
 	aCollection do: [:change | change at: 'range' put: (SBTSRange fromLSPWithRange: change)].
-	(aCollection sorted: [:a :b | (a at: 'range') start >= (b at: 'range') start]) do: [:change | self applyChange: change toFile: aTSFile]
+	aTSFile sandblockEditor summarizeActionsDuring: [(aCollection sorted: [:a :b | (a at: 'range') start >= (b at: 'range') start]) do: [:change | self applyChange: change toFile: aTSFile]]
 ]
 
 { #category : #helper }
