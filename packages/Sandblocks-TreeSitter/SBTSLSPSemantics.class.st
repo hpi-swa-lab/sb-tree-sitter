@@ -252,9 +252,12 @@ SBTSLSPSemantics >> insertPositionIn: aBlock at: aTSPosition for: aString [
 	root := aBlock sandblockEditor root.
 	[block ~~ root and: [block range start = aTSPosition or: [block range end = aTSPosition]]] whileTrue: [block := block parentSandblock].
 	block cursorPositionsDo: [:pos |
-		(pos isInsert
-			and: [pos command insertRange contains: aTSPosition]
-			and: [(SBTSInputParser new optionsForTemplate: pos command element given: aString) notEmpty]) ifTrue: [^ pos]].
+		(pos isInsert and: [pos command insertRange contains: aTSPosition] and: [
+			((SBTSInputParser new
+				allowIncomplete: false;
+				yourself)
+				optionsForTemplate: pos command element
+				given: aString) notEmpty]) ifTrue: [^ pos]].
 	self error: 'weird change'
 ]
 
