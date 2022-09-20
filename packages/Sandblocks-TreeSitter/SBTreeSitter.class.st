@@ -465,6 +465,13 @@ SBTreeSitter >> ruby [
 ]
 
 { #category : #'ffi languages' }
+SBTreeSitter >> rust [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_rust () module: 'tree-sitter-rust'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'tree-sitter/tree-sitter-rust' name: 'rust' context: thisContext
+]
+
+{ #category : #'ffi languages' }
 SBTreeSitter >> sexp [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_sexp () module: 'tree-sitter-sexp'>

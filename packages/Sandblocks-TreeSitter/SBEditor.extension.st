@@ -1,6 +1,22 @@
 Extension { #name : #SBEditor }
 
 { #category : #'*Sandblocks-TreeSitter' }
+SBEditor >> importTreeSitterLanguage [
+	<globalAction>
+
+	| url name |
+	url := (UIManager default request: 'Github URL?') ifNil: [^ self].
+	(url beginsWith: 'https://github.com/') ifTrue: [url := url allButFirst: 'https://github.com/' size].
+	name := (url regex: 'tree-sitter-(.+)' matchesCollect: [:m | m allButFirst: 'tree-sitter-' size]) first.
+	'Importing ', name displayProgressFrom: 1 to: 2 during: [:bar |
+		bar value: 1.
+		SBTSLanguage loadLanguage: url name: name branch: 'master'.
+		bar value: 2].
+	
+	self openMorphInView: (Smalltalk at: ('SB', name capitalized) asSymbol) empty
+]
+
+{ #category : #'*Sandblocks-TreeSitter' }
 SBEditor >> newCFile [
 	<addAction>
 
