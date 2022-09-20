@@ -69,8 +69,10 @@ SBTSLanguage class >> compileParserIn: path name: aString root: aRootPath [
 	| filename hasScanner |
 	filename := 'tree-sitter-', aString, '.so'.
 	hasScanner := false.
-	self assert: (OSProcess waitForCommand: ('cd {1}; npm i' format: {aRootPath fullName})) exitStatus = 0.
-	self assert: (OSProcess waitForCommand: ('cd {1}; npx -p tree-sitter-cli tree-sitter generate' format: {path fullName})) exitStatus = 0.
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			self assert: (OSProcess waitForCommand: ('cd {1}; npm i' format: {aRootPath fullName})) exitStatus = 0.
+			self assert: (OSProcess waitForCommand: ('cd {1}; npx -p tree-sitter-cli tree-sitter generate' format: {path fullName})) exitStatus = 0]}.
 	((path / 'src' / 'scanner.c') exists or: [(path / 'src' / 'scanner.cc') exists]) ifTrue: [
 		self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src -fPIC" CFLAGS="-I./src -fPIC" make src/scanner.o' format: {path fullName})) exitStatus = 0.
 		hasScanner := true].
@@ -144,6 +146,15 @@ SBTSLanguage class >> fileSuffix [
 ]
 
 { #category : #'loading - helper' }
+SBTSLanguage class >> firstRuleName [
+
+	| r |
+	r := '"rules"\:[\s\r\n]*{[\s\r\n]*"([A-Za-z_]+)"' asRegex.
+	r matchesIn: self grammarJson do: [:m | ^ r subexpression: 2].
+	self error: 'first rule could not be detected'
+]
+
+{ #category : #'loading - helper' }
 SBTSLanguage class >> generateFFIMethodFor: aName github: aGithubString [
 
 	SBTreeSitter
@@ -177,12 +188,12 @@ SBTSLanguage class >> generateGrammarClassFrom: path name: aString github: anoth
 			compile: ('language
 
     ^ {1}' format: {aString asSymbol storeString})
-			classified: 'properties'.
+			classified: 'configuration'.
 		class class
 			compile: ('rootRuleName
 
-    ^ {1}' format: {'self subclassResponsibility'})
-			classified: 'properties'.
+    ^ {1}' format: {class firstRuleName storeString})
+			classified: 'configuration'.
 		highlightsFile ifNotNil: [:f |
 			class class
 				compile: ('highlightQuery
