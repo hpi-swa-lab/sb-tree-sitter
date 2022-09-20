@@ -181,7 +181,7 @@ SBTSLSPSemantics >> didChange: aTSFile [
 { #category : #notifications }
 SBTSLSPSemantics >> didClose: aTSFile [
 
-	textDocumentVersions removeKey: aTSFile.
+	textDocumentVersions removeKey: aTSFile ifAbsent: [^ self].
 	
 	client
 		sendNotification: 'textDocument/didClose'
