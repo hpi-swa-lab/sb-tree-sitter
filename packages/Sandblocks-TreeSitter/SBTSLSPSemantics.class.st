@@ -244,6 +244,16 @@ SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 		otherwise: [Transcript showln: aJsonObject]
 ]
 
+{ #category : #requests }
+SBTSLSPSemantics >> hoverFor: aBlock do: aClosure blocking: aBoolean [
+
+	client
+		sendRequest: 'textDocument/hover'
+		params: (self textDocumentPositionParamsFor: aBlock)
+		do: [:hover | hover ifNotNil: [aClosure value: (hover at: 'contents')]]
+		blocking: aBoolean
+]
+
 { #category : #helper }
 SBTSLSPSemantics >> insertPositionIn: aBlock at: aTSPosition for: aString [
 
