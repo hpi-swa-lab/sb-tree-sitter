@@ -24,7 +24,7 @@ SBTSLanguageClient >> handleData [
 	(readBuffer nextMatchAll: String lf, String crlf) ifFalse: [^ false].
 	data := readBuffer next: length.
 	data size ~= length ifTrue: [^ false].
-	message := Json readFrom: data readStream.
+	message := Json readFrom: data utf8ToSqueak readStream.
 	self handleMessage: message.
 	buffer := readBuffer upToEnd.
 	^ true
