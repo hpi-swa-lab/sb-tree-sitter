@@ -24,7 +24,7 @@ SBTSDiagnosticDecorator >> color [
 		Color r: 1 g: 0.935 b: 0.0].
 		[3] -> ["Information"
 		Color r: 0.697 g: 1 b: 1].
-		[3] -> ["Hint"
+		[4] -> ["Hint"
 		Color r: 0.81 g: 0.935 b: 1]}
 ]
 

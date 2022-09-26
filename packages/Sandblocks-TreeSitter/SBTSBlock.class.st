@@ -555,6 +555,24 @@ SBTSBlock >> grammarHandler [
 	^ SBTSGrammarHandler new
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> handleMouseEnter: anEvent [
+
+	| hover |
+	super handleMouseEnter: anEvent.
+	self parentSandblock removeAlarm: #showHover.
+	hover := self valueOfProperty: #hover ifAbsent: [^ self addAlarm: #showHover after: 800].
+	hover cancelDelete
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> handleMouseLeave: anEvent [
+
+	super handleMouseLeave: anEvent.
+	self valueOfProperty: #hover ifPresentDo: [:hover | hover deleteSoon].
+	self removeAlarm: #showHover
+]
+
 { #category : #highlight }
 SBTSBlock >> highlight [
 
@@ -1053,6 +1071,22 @@ SBTSBlock >> selectStartOfStatement [
 SBTSBlock >> semantics [
 
 	^ (self containingArtefact ifNotNil: [:a | a semantics]) ifNil: [self language]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> showHover [
+	<action>
+
+	self semantics
+		hoverFor: self
+		do: [:contents |
+			contents ifNotEmpty: [
+				self setProperty: #hover toValue: (SBTSHoverMorph new
+					morph: self;
+					contents: contents;
+					openInWorld;
+					yourself)]]
+		blocking: true
 ]
 
 { #category : #'as yet unclassified' }

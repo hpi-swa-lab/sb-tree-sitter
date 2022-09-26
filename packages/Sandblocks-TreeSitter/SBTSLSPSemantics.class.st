@@ -25,7 +25,7 @@ SBTSLSPSemantics >> applyChange: change toFile: aTSFile [
 SBTSLSPSemantics >> applyChanges: aCollection toFile: aTSFile [
 
 	aCollection do: [:change | change at: 'range' put: (SBTSRange fromLSPWithRange: change)].
-	(aCollection sorted: [:a :b | (a at: 'range') start >= (b at: 'range') start]) do: [:change | self applyChange: change toFile: aTSFile]
+	aTSFile sandblockEditor summarizeActionsDuring: [(aCollection sorted: [:a :b | (a at: 'range') start >= (b at: 'range') start]) do: [:change | self applyChange: change toFile: aTSFile]]
 ]
 
 { #category : #helper }
@@ -242,6 +242,16 @@ SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 				self applyEdit: aJsonObject params edit.
 				client respondToRequest: aJsonObject id result: (Dictionary newFrom: {'applied' -> false})]}
 		otherwise: [Transcript showln: aJsonObject]
+]
+
+{ #category : #requests }
+SBTSLSPSemantics >> hoverFor: aBlock do: aClosure blocking: aBoolean [
+
+	client
+		sendRequest: 'textDocument/hover'
+		params: (self textDocumentPositionParamsFor: aBlock)
+		do: [:hover | hover ifNotNil: [aClosure value: (hover at: 'contents')]]
+		blocking: aBoolean
 ]
 
 { #category : #helper }
