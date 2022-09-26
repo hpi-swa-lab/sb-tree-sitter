@@ -674,6 +674,12 @@ SBTSBlock >> isMyActiveKeyword: aString [
 		ifNil: [false]
 ]
 
+{ #category : #testing }
+SBTSBlock >> isOneStatementPerArtefact [
+
+	^ self language isOneStatementPerArtefactFor: self
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> isPart [
 

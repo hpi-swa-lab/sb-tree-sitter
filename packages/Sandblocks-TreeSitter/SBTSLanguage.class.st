@@ -297,6 +297,12 @@ SBTSLanguage class >> isImmutableLabel: aLabelNode [
 	^ false
 ]
 
+{ #category : #'configuration - editing' }
+SBTSLanguage class >> isOneStatementPerArtefactFor: aBlock [
+
+	^ false
+]
+
 { #category : #'configuration - declarations' }
 SBTSLanguage class >> isScope: aBlock [
 
