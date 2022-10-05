@@ -66,7 +66,6 @@ BaselineOfSBTreeSitter >> baseline: spec [
 	<baseline>
 
 	spec for: #common do: [
-		spec preLoadDoIt: #preload:package:.
 		" smalltalk needed for the tool integration "
 		spec baseline: 'Sandblocks' with: [
 			spec
@@ -138,13 +137,6 @@ BaselineOfSBTreeSitter >> depSqueakSource: aMCRepository name: aString targetRep
 			do: [:ex |
 				Smalltalk isHeadless ifFalse: [ex pass].
 				self error: ex description]]
-]
-
-{ #category : #baseline }
-BaselineOfSBTreeSitter >> preload: loader package: packageSpec [
-
-	(self depSqueakSource: #inbox name: 'Multilingual-ct.259' targetRepository: #trunk) value value.
-	(Installer url: 'https://tmbe.me/c/Regex-Core-tobe.77.mcz') install
 ]
 
 { #category : #baseline }
