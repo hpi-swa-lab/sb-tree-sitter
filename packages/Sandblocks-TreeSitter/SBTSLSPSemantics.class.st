@@ -149,7 +149,7 @@ SBTSLSPSemantics >> completionItemKindToString: aNumber [
 SBTSLSPSemantics >> definitionsOf: aBlock choosing: aChoosingClosure do: aDefinitionClosure blocking: aBoolean [
 
 	client
-		sendRequest: 'textDocument/typeDefinition'
+		sendRequest: 'textDocument/definition'
 		params: (self textDocumentPositionParamsFor: aBlock)
 		do: [:response |
 			response ifNotNil: [:d | | definitions index |
