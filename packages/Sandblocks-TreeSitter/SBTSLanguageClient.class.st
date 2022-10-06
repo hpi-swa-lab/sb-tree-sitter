@@ -43,7 +43,7 @@ SBTSLanguageClient >> handleMessage: aJsonObject [
 					(aJsonObject includesKey: 'error') ifTrue: [ | error |
 						error := aJsonObject at: 'error'.
 						promise rejectWith: error.
-						^ self error: error].
+						^ self onUIThread: [self error: error]].
 					promise resolveWith: aJsonObject result]
 				ifAbsent: [Transcript showln: {'unknown message'. aJsonObject}]]
 ]
