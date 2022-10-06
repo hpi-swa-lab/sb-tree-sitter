@@ -3,6 +3,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'process',
+		'messageProcess',
 		'inputPipe',
 		'lastRequestId',
 		'projectDirectory',
@@ -57,35 +58,14 @@ SBTSLanguageClient >> handleServerMessage: aJsonObject [
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> initializeFor: aDirectory onServerMessageDo: aBlock [
 
-	| outputPipe |
 	super initialize.
 	
 	serverMessageHandler := aBlock.
 	pending := Dictionary new.
 	projectDirectory := aDirectory.
 	lastRequestId := 0.
-	inputPipe := OSPipe blockingPipe.
-	outputPipe := OSPipe nonBlockingPipe.
-	buffer := ''.
 	
-	process := ExternalUnixOSProcess
-		forkAndExec: (SBTSLanguageRuntime which: 'typescript-language-server')
-		arguments: (SBToggledCode comment: '' active: 1 do: {
-			[{'--stdio'}].
-			[{'--stdio'. '--log-level'. '4'. '--tsserver-log-file'. '/home/tom/ts.log'. '--tsserver-log-verbosity'. 'verbose'}]})
-		environment: nil
-		descriptors: {inputPipe ifNotNil: #reader. outputPipe writer. nil}
-		workingDir: aDirectory pathString.
-	outputPipe writer close.
-	inputPipe reader close.
-	
-	[
-		[outputPipe closed not and: [process runState ~= #complete]] whileTrue: [
-			(Delay forMilliseconds: 20) wait.
-			buffer := buffer, outputPipe upToEnd.
-			[self handleData] whileTrue]] fork.
-	
-	self sendInitialize
+	self start
 ]
 
 { #category : #'as yet unclassified' }
@@ -118,10 +98,19 @@ SBTSLanguageClient >> respondToRequest: aNumber result: anObject [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageClient >> restart [
+
+	self
+		stop;
+		start
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageClient >> send: aJsonObject [
 
 	| payload |
 	payload := aJsonObject asJsonString utf8Encoded.
+	inputPipe writer closed ifTrue: [self restart].
 	inputPipe writer
 		nextPutAll: 'Content-Length: ';
 		nextPutAll: payload size asString;
@@ -181,8 +170,37 @@ SBTSLanguageClient >> sendRequest: aString params: anObject do: aBlock blocking:
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageClient >> start [
+
+	| outputPipe |
+	inputPipe := OSPipe blockingPipe.
+	outputPipe := OSPipe nonBlockingPipe.
+	buffer := ''.
+	
+	process := ExternalUnixOSProcess
+		forkAndExec: (SBTSLanguageRuntime which: 'typescript-language-server')
+		arguments: (SBToggledCode comment: '' active: 1 do: {
+			[{'--stdio'}].
+			[{'--stdio'. '--log-level'. '4'. '--tsserver-log-file'. '/home/tom/ts.log'. '--tsserver-log-verbosity'. 'verbose'}]})
+		environment: nil
+		descriptors: {inputPipe ifNotNil: #reader. outputPipe writer. nil}
+		workingDir: projectDirectory pathString.
+	outputPipe writer close.
+	inputPipe reader close.
+	
+	messageProcess := [
+		[outputPipe closed not and: [process runState ~= #complete]] whileTrue: [
+			(Delay forMilliseconds: 20) wait.
+			buffer := buffer, outputPipe upToEnd.
+			[self handleData] whileTrue]] fork.
+	
+	self sendInitialize
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageClient >> stop [
 
+	messageProcess terminate.
 	process sigterm.
 	inputPipe close
 ]
