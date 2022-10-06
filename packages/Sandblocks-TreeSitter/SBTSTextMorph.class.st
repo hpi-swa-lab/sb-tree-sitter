@@ -122,6 +122,16 @@ SBTSTextMorph >> detachDecorator: aDecorator [
 	self changed
 ]
 
+{ #category : #decorators }
+SBTSTextMorph >> detachDecorators: aDecoratorClass [
+
+	self decoratorsDo: [:d | d class = aDecoratorClass ifTrue: [d detached: self]].
+	self
+		valueOfProperty: #decorators
+		ifPresentDo: [:decorators | self setProperty: #decorators toValue: (decorators reject: [:d | d class = aDecoratorClass])].
+	self changed
+]
+
 { #category : #drawing }
 SBTSTextMorph >> drawDecoratorsOn: aCanvas during: aBlock [
 
