@@ -371,6 +371,12 @@ SBTSTextMorph >> repeaterGroup [
 	^ nil
 ]
 
+{ #category : #actions }
+SBTSTextMorph >> select [
+
+	self parentSandblock select
+]
+
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> showPlaceholder [
 
