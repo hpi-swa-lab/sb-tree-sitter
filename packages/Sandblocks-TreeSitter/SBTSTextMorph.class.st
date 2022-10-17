@@ -122,6 +122,16 @@ SBTSTextMorph >> detachDecorator: aDecorator [
 	self changed
 ]
 
+{ #category : #decorators }
+SBTSTextMorph >> detachDecorators: aDecoratorClass [
+
+	self decoratorsDo: [:d | d class = aDecoratorClass ifTrue: [d detached: self]].
+	self
+		valueOfProperty: #decorators
+		ifPresentDo: [:decorators | self setProperty: #decorators toValue: (decorators reject: [:d | d class = aDecoratorClass])].
+	self changed
+]
+
 { #category : #drawing }
 SBTSTextMorph >> drawDecoratorsOn: aCanvas during: aBlock [
 
@@ -359,6 +369,12 @@ SBTSTextMorph >> repeaterGroup [
 		start := myIndex - mySubIndex + 1.
 		^ self owner submorphs copyFrom: start to: start + seq elements size - 1].
 	^ nil
+]
+
+{ #category : #actions }
+SBTSTextMorph >> select [
+
+	self parentSandblock select
 ]
 
 { #category : #'as yet unclassified' }
