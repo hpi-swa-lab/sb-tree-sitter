@@ -149,7 +149,7 @@ SBTSLanguage class >> fileSuffix [
 SBTSLanguage class >> firstRuleName [
 
 	| r |
-	r := '"rules"\:[\s\r\n]*{[\s\r\n]*"([A-Za-z_]+)"' asRegex.
+	r := '"rules"\:[\s\r\n]*\{[\s\r\n]*"([A-Za-z_]+)"' asRegex.
 	r matchesIn: self grammarJson do: [:m | ^ r subexpression: 2].
 	self error: 'first rule could not be detected'
 ]

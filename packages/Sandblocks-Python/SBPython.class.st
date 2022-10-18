@@ -5233,6 +5233,8 @@ SBPython class >> preprocessGrammar: aGrammar [
 		type: '_simple_statement'
 		factory: aGrammar.
 	
+	#('_newline' '_indent' '_dedent') do: [:rule | aGrammar removeRule: rule].
+	
 	aGrammar rules at: 'string' put: (SBTSNodeChoice new
 		factory: aGrammar;
 		alternatives: (#('''' '"' '"""' '''''''') collect: [:quote |

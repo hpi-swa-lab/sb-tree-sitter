@@ -2853,6 +2853,8 @@ SBBash class >> preprocessGrammar: aGrammar [
 
 	super preprocessGrammar: aGrammar.
 	
+	#('_concat' 'variable_name' 'regex' '_empty_value' 'heredoc_start' '_heredoc_body_beginning' 'file_descriptor') do: [:rule | aGrammar removeRule: rule].
+	
 	aGrammar rules at: #'_flag_start' put: (SBTSNodeText new
 		factory: aGrammar;
 		regexString: '-[A-Z0-9a-z\-]+').

@@ -102,7 +102,9 @@ SBTSGrammar >> autofixExternals: aGrammar [
 				yourself)]].
 	
 	externals := externals reject: [:external | rules includesKey: external].
-	externals ifNotEmpty: [:missing | Transcript showln: 'Missing declarations for: ', (missing joinSeparatedBy: ', ')].
+	externals ifNotEmpty: [:missing |
+		Transcript showln: 'Missing declarations for: ', (missing joinSeparatedBy: ', ').
+		missing do: [:name | rules at: name put: (SBTSNodeText new factory: self; regexString: '.*')]].
 	aGrammar externals: externals
 ]
 
@@ -502,7 +504,7 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 	SBToggledCode comment: '' active: 1 do: {[self autofixExternals: aJSONGrammar]}.
 	SBToggledCode
 		comment: ''
-		active: 1
+		active: 0
 		do: {[self rules keysAndValuesDo: [:name :rule | self removeExternals: rule grammar: aJSONGrammar]]}.
 	SBToggledCode
 		comment: ''
@@ -587,7 +589,10 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 	
 	self rules keysAndValuesDo: [:name :rule | self checkStructure: rule].
 	
-	keywords := aJSONGrammar at: 'word' ifPresent: [:worldRule | Array streamContents: [:stream | self allElementsDo: [:element | (element isTSLabel and: [(rules at: (aJSONGrammar at: 'word')) regex matches: element label]) ifTrue: [stream nextPut: element label]]]] ifAbsent: [#()]
+	keywords := aJSONGrammar
+		at: 'word'
+		ifPresent: [:worldRule | Array streamContents: [:stream | self allElementsDo: [:element | (element isTSLabel and: [(rules at: (aJSONGrammar at: 'word')) regex matches: element label]) ifTrue: [stream nextPut: element label]]]]
+		ifAbsent: [#()]
 ]
 
 { #category : #accessing }
