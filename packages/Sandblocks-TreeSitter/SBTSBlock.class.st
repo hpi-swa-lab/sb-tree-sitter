@@ -470,27 +470,6 @@ SBTSBlock >> evaluateExpression [
 	^ result explore
 ]
 
-{ #category : #'as yet unclassified' }
-SBTSBlock >> exportStructure [
-
-	| previous |
-	previous := nil.
-	^ {
-		#children -> (Array streamContents: [:stream |
-			self
-				cursorPositionsDo: [:pos |
-					pos isInsert ifTrue: [stream nextPut: ({#class -> #insert. #horizontal -> pos hasHorizontalLayout. #type -> pos command element type} as: Dictionary)].
-					pos isText ifTrue: [stream nextPut: pos block currentTextMorph exportStructure].
-					(pos isSelect and: [pos block ~= self]) ifTrue: [
-						previous ifNotNil: [(pos block factory hardLineBreakBetween: previous and: pos block) ifTrue: [stream nextPut: ({#class -> #hardLineBreak} as: Dictionary)]].
-						stream nextPut: pos block exportStructure.
-						previous := pos block]]
-				shallow: true]).
-		#class -> #block.
-		#bounds -> (self bounds in: [:r | {r left. r top. r width. r height}]).
-		#type -> self type} as: Dictionary
-]
-
 { #category : #accessing }
 SBTSBlock >> factory [
 
