@@ -224,6 +224,12 @@ SBTSLanguage class >> highlightQuery [
 	^ nil
 ]
 
+{ #category : #'configuration - semantics' }
+SBTSLanguage class >> hoverFor: aBlock do: aClosure blocking: aBoolean [
+
+	
+]
+
 { #category : #configuration }
 SBTSLanguage class >> icon [
 
