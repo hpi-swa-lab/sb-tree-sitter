@@ -83,7 +83,7 @@ SBTSNodeText >> currentTextMorph [
 { #category : #printing }
 SBTSNodeText >> cursorPositionsDo: aClosure shallow: aBoolean blocks: aStream parent: aBlock [
 
-	(aStream peek isTextMorph and: [aStream peek slot includesParent: self]) ifTrue: [ | block |
+	(aStream atEnd not and: [aStream peek isTextMorph and: [aStream peek slot includesParent: self]]) ifTrue: [ | block |
 		block := aStream next.
 		aClosure value: (SBCursorText new
 			block: block containingSandblock;

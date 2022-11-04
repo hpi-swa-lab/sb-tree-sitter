@@ -3542,6 +3542,20 @@ SBGDScript class >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBGDScript class >> preprocessGrammar: aGrammar [
+
+	super preprocessGrammar: aGrammar.
+	(aGrammar bodyNodeForRule: '_statement') elements first
+		type: '_simple_statement'
+		factory: aGrammar.
+	(aGrammar bodyNodeForRule: 'body') alternatives first replaceBy: (SBTSNodeRepeat new
+		multiple: true
+			required: false
+			element: (SBTSNodeSymbol new type: '_simple_statement' factory: aGrammar);
+		factory: aGrammar)
+]
+
+{ #category : #'as yet unclassified' }
 SBGDScript class >> removeIndent: aBlock [
 
 	(super removeIndent: aBlock) ifTrue: [^ true].
@@ -3555,61 +3569,7 @@ SBGDScript class >> rootRuleName [
 ]
 
 { #category : #'as yet unclassified' }
-SBGDScript >> addIndent: aBlock [
+SBGDScript class >> transitionPairs [
 
-	aBlock type = '"("' ifTrue: [^ true].
-	^ (aBlock submorphAfter ifNotNil: #type) = 'body'
-]
-
-{ #category : #'as yet unclassified' }
-SBGDScript >> configure [
-
-	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type']].
-	self blockInline: {'parameters'. 'expression_statement'}
-]
-
-{ #category : #'as yet unclassified' }
-SBGDScript >> hardLineBreakBetween: aBlock and: anotherBlock [
-	"match for TSBlock"
-
-	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
-	((aBlock isStringMorph and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice']]]) ifTrue: [^ true].
-	^ #('else_clause' 'elif_clause') includes: anotherBlock type
-]
-
-{ #category : #'as yet unclassified' }
-SBGDScript >> isImmutableLabel: aLabelNode [
-
-	^ (super isImmutableLabel: aLabelNode) or: [#(':') includes: aLabelNode label]
-]
-
-{ #category : #'as yet unclassified' }
-SBGDScript >> postConfigure [
-
-	blockInline remove: 'body' ifAbsent: []
-]
-
-{ #category : #'as yet unclassified' }
-SBGDScript >> preprocessGrammar [
-
-	self grammar at: 'inline' put: (self grammar at: 'inline'), {'_identifier'}.
-	self grammar rules
-		at: '_string_content'
-		put: (JsonObject fromAssociations: {'type' -> 'PATTERN'. 'value' -> '.*'}).
-	self grammar
-		at: 'externals'
-		put: ((self grammar at: 'externals') reject: [:obj | obj name = '_string_content']).
-	self renameSymbol: '_string_content' to: 'string_content'.
-	(self grammar rules at: '_statement') members first name: '_simple_statement'.
-	self grammar rules
-		at: 'body'
-		put: (self grammar rules at: 'body') members second members second.
-	#('_newline' '_indent' '_dedent') do: [:sym | self removeSymbol: sym]
-]
-
-{ #category : #'as yet unclassified' }
-SBGDScript >> removeIndent: aBlock [
-
-	aBlock type = '")"' ifTrue: [^ true].
-	^ (aBlock submorphBefore ifNotNil: #type) = 'body'
+	^ {#integer -> #float}
 ]

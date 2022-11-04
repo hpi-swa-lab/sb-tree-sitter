@@ -60,34 +60,37 @@ SBEmbeddedRequestTool >> addBodySection: aBody [
 					addMorphBack: (SBStringMorph new contents: 'Body');
 					addMorphBack: (SBJsRequestToolBodyTextBubble new contents: aBody)].
 		
-		
 		].
-"TODO, improve tmpUrl workaround"
-(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url] ifTrue: [tmpUrl := url].
-
-Examples at: tmpUrl, method ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]].
+	"TODO, improve tmpUrl workaround"
+	(url beginsWith: 'http://')
+		ifFalse: [tmpUrl := baseUrl, url]
+		ifTrue: [tmpUrl := url].
+	
+	Examples
+		at: tmpUrl, method
+		ifPresent: [:examples | examples size > 0 ifTrue: [self addExampleSection]]
 ]
 
 { #category : #'as yet unclassified' }
 SBEmbeddedRequestTool >> addExampleSection [
-	
-	showExamples ifTrue: [
-		 | map tmpUrl |
+
+	showExamples ifTrue: [ | map tmpUrl |
+		self addMorphBack: (SBRow new
+			cellGap: cellGapConstant;
+			addMorphBack: (SBStringMorph new contents: 'Examples');
+			addMorphBack: (SBRow new cellGap: cellGapConstant)).
 		
-			self addMorphBack: (SBRow new
-				cellGap: cellGapConstant;
-				addMorphBack: (SBStringMorph new contents: 'Examples');
-				addMorphBack: (SBRow new cellGap: cellGapConstant)).
-			
-			method caseOf: {
-				[#get] -> [exampleMorph := self submorphs fourth].
-				[#post] -> [exampleMorph := self submorphs sixth]}.
-			
-			"TODO, improve tmpUrl workaround"
-			(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url] ifTrue: [tmpUrl := url].
-			
-			map := Examples at: tmpUrl, method asString ifAbsent: [].
-			map ifNotNil: [ map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
+		method caseOf: {
+			[#get] -> [exampleMorph := self submorphs fourth].
+			[#post] -> [exampleMorph := self submorphs sixth]}.
+		
+		"TODO, improve tmpUrl workaround"
+		(url beginsWith: 'http://')
+			ifFalse: [tmpUrl := baseUrl, url]
+			ifTrue: [tmpUrl := url].
+		
+		map := Examples at: tmpUrl, method asString ifAbsent: [].
+		map ifNotNil: [map keysDo: [:key | exampleMorph submorphs second addMorphBack: (map at: key) first]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -133,8 +136,7 @@ SBEmbeddedRequestTool >> addParamAction: key value: value [
 { #category : #'as yet unclassified' }
 SBEmbeddedRequestTool >> addParamSection: aParams [
 
-	
-	params keysDo: [:key | self addParamAction: ((params at: key) key) asString  value:  ((params at: key) value) asString].
+	params keysDo: [:key | self addParamAction: (params at: key) key asString value: (params at: key) value asString].
 	
 	"TODO: revisit"
 	SBToggledCode comment: '' active: 0 do: {
@@ -143,15 +145,15 @@ SBEmbeddedRequestTool >> addParamSection: aParams [
 				k := (params at: key) submorphs first.
 				v := (params at: key) submorphs second.
 				self addParamAction: k contents value: v contents]]}.
-
+	
 	method = #get ifTrue: [ | tmpUrl |
 		"TODO, improve tmpUrl workaround"
 		tmpUrl := baseUrl, url, method.
-		(url startsWith: 'http://') ifFalse: [tmpUrl := baseUrl, url, method] ifTrue: [tmpUrl := url, method].
-	
-		Examples at: tmpUrl
-			ifPresent: [: e |
-			e size > 0 ifTrue: [self addExampleSection]]].
+		(url beginsWith: 'http://')
+			ifFalse: [tmpUrl := baseUrl, url, method]
+			ifTrue: [tmpUrl := url, method].
+		
+		Examples at: tmpUrl ifPresent: [:e | e size > 0 ifTrue: [self addExampleSection]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -254,21 +256,15 @@ SBEmbeddedRequestTool >> promptAddPayload [
 
 { #category : #'as yet unclassified' }
 SBEmbeddedRequestTool >> send [
-	"Delegates to the correct request implementation."
+
 	| paramsString |
-	
+	"Delegates to the correct request implementation."
 	self updatePayloadInObjectInstance.
 	paramsString := self collectParamsString.
-	(url startsWith: 'http://') ifFalse: [url := baseUrl, url].
+	(url beginsWith: 'http://') ifFalse: [url := baseUrl, url].
 	
-
 	method = #get ifTrue: [self performGetRequest: url asString, paramsString].
-	method = #post ifTrue: [
-		isRawData 
-			ifTrue: [self performPostRequest: data url: url asString, paramsString]
-			ifFalse: ["TODO: collect fields and perform request"]
-	
-	"TODO: implement other methods"]
+	method = #post ifTrue: [isRawData ifTrue: [self performPostRequest: data url: url asString, paramsString] ifFalse: []]
 ]
 
 { #category : #'as yet unclassified' }
