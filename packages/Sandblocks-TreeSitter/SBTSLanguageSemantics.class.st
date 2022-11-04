@@ -22,6 +22,12 @@ SBTSLanguageSemantics >> didOpen: aTSFile [
 	
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSLanguageSemantics >> hoverFor: aBlock do: aClosure blocking: aBoolean [
+
+	
+]
+
 { #category : #'initialize-release' }
 SBTSLanguageSemantics >> on: aDirectory [
 
@@ -32,6 +38,12 @@ SBTSLanguageSemantics >> on: aDirectory [
 SBTSLanguageSemantics >> shutdown [
 
 	
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageSemantics >> suggestionsFor: aBlock [
+
+	^ #()
 ]
 
 { #category : #requests }

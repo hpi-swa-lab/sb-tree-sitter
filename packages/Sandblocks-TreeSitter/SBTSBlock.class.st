@@ -1033,7 +1033,9 @@ SBTSBlock >> repeaterGroup [
 SBTSBlock >> replaceBlock: aBlock [
 
 	| new |
-	new := aBlock adaptSlotFor: self slot ifFailed: [self error: 'block not compatible'].
+	new := aBlock
+		adaptSlotFor: self slot
+		ifFailed: [self error: ('block not compatible (replace {1} with {2})' format: {self. aBlock})].
 	self replaceBy: new.
 	^ new
 ]

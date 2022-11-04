@@ -12,6 +12,18 @@ SBGDScript class >> addIndent: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBGDScript class >> defaultRuntimeClass [
+
+	^ SBGodotRuntime
+]
+
+{ #category : #'as yet unclassified' }
+SBGDScript class >> fileSuffix [
+
+	^ 'gd'
+]
+
+{ #category : #'as yet unclassified' }
 SBGDScript class >> grammarJson [
 	" https://github.com/PrestonKnopp/tree-sitter-gdscript/blob/master/grammar.js "
 
@@ -3527,6 +3539,12 @@ SBGDScript class >> highlightQuery [
 SBGDScript class >> indentMatch: aBlock [
 
 	^ aBlock type = 'body'
+]
+
+{ #category : #'as yet unclassified' }
+SBGDScript class >> isExpression: aBlock [
+
+	^ aBlock parent isTSChoice and: [aBlock parent alternatives first type = #'comparison_operator']
 ]
 
 { #category : #'as yet unclassified' }
