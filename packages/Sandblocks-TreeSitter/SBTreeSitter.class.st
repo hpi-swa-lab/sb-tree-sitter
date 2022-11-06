@@ -194,6 +194,13 @@ SBTreeSitter >> gdscript [
 ]
 
 { #category : #'ffi languages' }
+SBTreeSitter >> glsl [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_glsl () module: 'tree-sitter-glsl'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'theHamsta/tree-sitter-glsl' name: 'glsl' context: thisContext
+]
+
+{ #category : #'ffi languages' }
 SBTreeSitter >> html [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_html () module: 'tree-sitter-html'>

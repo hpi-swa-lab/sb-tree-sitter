@@ -362,9 +362,10 @@ SBTSSlot >> updateAllHighlightsFor: aBlock [
 { #category : #highlight }
 SBTSSlot >> updateHighlightFor: aBlock [
 
-	self factory highlightQuery
-		executeAgainst: aBlock
-		capturesDo: [:captures | captures keysAndValuesDo: [:id :block | (block highlight isNil or: [block highlight = #'_sb_none' or: [block highlight size < id size]]) ifTrue: [block highlight: id]]]
+	self factory highlightQuery ifNotNil: [:query |
+		query
+			executeAgainst: aBlock
+			capturesDo: [:captures | captures keysAndValuesDo: [:id :block | (block highlight isNil or: [block highlight = #'_sb_none' or: [block highlight size < id size]]) ifTrue: [block highlight: id]]]]
 ]
 
 { #category : #'as yet unclassified' }

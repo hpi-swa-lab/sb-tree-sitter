@@ -143,6 +143,19 @@ SBTSBlock >> applyReplacements [
 				to: block]]
 ]
 
+{ #category : #actions }
+SBTSBlock >> asForeignLanguage [
+	<action>
+
+	| option options |
+	options := SBTSLanguage allSubclasses.
+	option := UIManager default chooseFrom: options.
+	option = 0 ifTrue: [^ self].
+	self replaceBlock: (SBForeignLanguage new
+		slot: self slot copy;
+		string: self contents language: (options at: option) for: self)
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> asSlider: converter [
 	<convert>
