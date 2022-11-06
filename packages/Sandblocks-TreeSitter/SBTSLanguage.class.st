@@ -79,7 +79,7 @@ SBTSLanguage class >> compileParserIn: path name: aString root: aRootPath [
 	self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src -fPIC" CFLAGS="-I./src  -fPIC" make src/parser.o' format: {path fullName})) exitStatus = 0.
 	self assert: (OSProcess waitForCommand: ('cd {1}; g++ -shared -fPIC -o tree-sitter-{2}.so src/parser.o {3} -fPIC' format: {path fullName. aString. hasScanner ifTrue: [' src/scanner.o'] ifFalse: ['']})) exitStatus = 0.
 	(FileDirectory default / filename) exists ifTrue: [(FileDirectory default / filename) delete].
-	aRootPath / filename copyTo: FileDirectory default.
+	path / filename copyTo: FileDirectory default.
 	^ FileDirectory default / ('tree-sitter-{1}.so' format: {aString})
 ]
 
