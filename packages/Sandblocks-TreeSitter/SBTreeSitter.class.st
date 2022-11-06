@@ -190,7 +190,7 @@ SBTreeSitter >> fetchLibrary: aGithubString language: language andRetry: aBlock 
 SBTreeSitter >> gdscript [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_gdscript () module: 'tree-sitter-gdscript'>
-	^ SBMetaBlockFactory tryPatchLibrary: 'PrestonKnopp/tree-sitter-gdscript' name: 'gdscript' context: thisContext
+	^ SBTSLanguage tryPatchLibrary: 'tom95/tree-sitter-gdscript' name: 'gdscript' context: thisContext branch: 'main' subpath: ''
 ]
 
 { #category : #'ffi languages' }
@@ -435,11 +435,14 @@ SBTreeSitter >> printTree: aCursor factory: aFactory [
 ]
 
 { #category : #'as yet unclassified' }
-SBTreeSitter >> printTreeFrom: aCursor depth: aNumber [
+SBTreeSitter >> printTreeFrom: aCursor depth: aNumber on: aStream [
 
-	Transcript showln: {String streamContents: [:s | aNumber timesRepeat: [s nextPut: Character tab]]. aCursor type}.
+	aNumber timesRepeat: [aStream nextPut: Character tab].
+	aStream
+		nextPutAll: aCursor type;
+		cr.
 	aCursor gotoFirstChild ifTrue: [
-		[self printTreeFrom: aCursor depth: aNumber + 1] doWhileFalse: [aCursor gotoNextSibling].
+		[self printTreeFrom: aCursor depth: aNumber + 1 on: aStream] doWhileFalse: [aCursor gotoNextSibling].
 		aCursor gotoParent]
 ]
 

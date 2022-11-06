@@ -79,7 +79,7 @@ SBTSLanguage class >> compileParserIn: path name: aString root: aRootPath [
 	self assert: (OSProcess waitForCommand: ('cd {1}; CXXFLAGS="-I./src -fPIC" CFLAGS="-I./src  -fPIC" make src/parser.o' format: {path fullName})) exitStatus = 0.
 	self assert: (OSProcess waitForCommand: ('cd {1}; g++ -shared -fPIC -o tree-sitter-{2}.so src/parser.o {3} -fPIC' format: {path fullName. aString. hasScanner ifTrue: [' src/scanner.o'] ifFalse: ['']})) exitStatus = 0.
 	(FileDirectory default / filename) exists ifTrue: [(FileDirectory default / filename) delete].
-	path / filename copyTo: FileDirectory default.
+	aRootPath / filename copyTo: FileDirectory default.
 	^ FileDirectory default / ('tree-sitter-{1}.so' format: {aString})
 ]
 
@@ -441,6 +441,12 @@ SBTSLanguage class >> rootRuleName [
 ]
 
 { #category : #accessing }
+SBTSLanguage class >> rule: aSymbol [
+
+	^ self instance grammar bodyNodeForRule: aSymbol
+]
+
+{ #category : #accessing }
 SBTSLanguage class >> runtime [
 
 	SBTSActiveRuntime value ifNotNil: [:runtime | runtime class language = self ifTrue: [^ runtime]].
@@ -532,7 +538,7 @@ SBTSLanguage class >> tryPatchLibrary: aGithubString name: aString context: aCon
 		aContext method externalLibraryName: 'tree-sitter-', aString, '.so'.
 		^ aContext method externalLibraryFunction invoke].
 	path := self fetchLibrary: aGithubString branch: anotherString.
-	subpath := aPathString ifNotEmpty: [path / aPathString].
+	subpath := aPathString ifNotEmpty: [path / aPathString] ifEmpty: [path].
 	library := self compileParserIn: subpath name: aString root: path.
 	aContext method externalLibraryName: library fullName.
 	^ aContext method externalLibraryFunction invoke

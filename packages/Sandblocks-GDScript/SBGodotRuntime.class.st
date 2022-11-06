@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBGodotRuntime class >> language [
+
+	^ SBGDScript
+]
+
+{ #category : #'as yet unclassified' }
 SBGodotRuntime >> buildWatchSourceFor: aBlock id: aString [
 
 	| watch |

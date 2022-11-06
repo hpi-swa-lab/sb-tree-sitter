@@ -25,7 +25,7 @@ SBGDScript class >> fileSuffix [
 
 { #category : #'as yet unclassified' }
 SBGDScript class >> grammarJson [
-	" https://github.com/PrestonKnopp/tree-sitter-gdscript/blob/master/grammar.js "
+	" https://github.com/tom95/tree-sitter-gdscript/blob/master/grammar.js "
 
 	^ '{
   "name": "gdscript",
@@ -511,7 +511,7 @@ SBGDScript class >> grammarJson [
                   },
                   {
                     "type": "PATTERN",
-                    "value": "[0-9a-zA-Z_/\\- ]*"
+                    "value": "[0-9a-zA-Z_/\\- .]*"
                   },
                   {
                     "type": "CHOICE",
@@ -698,7 +698,7 @@ SBGDScript class >> grammarJson [
       "members": [
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         },
         {
           "type": "SYMBOL",
@@ -741,7 +741,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         }
       ]
     },
@@ -754,7 +754,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         }
       ]
     },
@@ -775,7 +775,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         }
       ]
     },
@@ -946,7 +946,7 @@ SBGDScript class >> grammarJson [
                   "members": [
                     {
                       "type": "SYMBOL",
-                      "name": "_expression"
+                      "name": "expression"
                     },
                     {
                       "type": "REPEAT",
@@ -959,7 +959,7 @@ SBGDScript class >> grammarJson [
                           },
                           {
                             "type": "SYMBOL",
-                            "name": "_expression"
+                            "name": "expression"
                           }
                         ]
                       }
@@ -1083,7 +1083,7 @@ SBGDScript class >> grammarJson [
           "members": [
             {
               "type": "SYMBOL",
-              "name": "_expression"
+              "name": "expression"
             },
             {
               "type": "BLANK"
@@ -1365,7 +1365,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         },
         {
           "type": "STRING",
@@ -1405,7 +1405,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         },
         {
           "type": "STRING",
@@ -1451,7 +1451,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         },
         {
           "type": "STRING",
@@ -1472,7 +1472,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         },
         {
           "type": "STRING",
@@ -1673,7 +1673,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         },
         {
           "type": "STRING",
@@ -1954,7 +1954,7 @@ SBGDScript class >> grammarJson [
         }
       ]
     },
-    "_expression": {
+    "expression": {
       "type": "CHOICE",
       "members": [
         {
@@ -1963,7 +1963,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_primary_expression"
+          "name": "primary_expression"
         },
         {
           "type": "SYMBOL",
@@ -1971,7 +1971,7 @@ SBGDScript class >> grammarJson [
         }
       ]
     },
-    "_primary_expression": {
+    "primary_expression": {
       "type": "CHOICE",
       "members": [
         {
@@ -2048,83 +2048,6 @@ SBGDScript class >> grammarJson [
         }
       ]
     },
-    "_attribute_expression": {
-      "type": "PREC",
-      "value": 17,
-      "content": {
-        "type": "CHOICE",
-        "members": [
-          {
-            "type": "SYMBOL",
-            "name": "binary_operator"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "identifier"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "string"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "integer"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "float"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "true"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "false"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "null"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "unary_operator"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "node_path"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "get_node"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "subscript"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "base_call"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "call"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "array"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "dictionary"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "parenthesized_expression"
-          }
-        ]
-      }
-    },
     "binary_operator": {
       "type": "CHOICE",
       "members": [
@@ -2136,7 +2059,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "CHOICE",
@@ -2153,7 +2076,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2166,7 +2089,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "CHOICE",
@@ -2183,7 +2106,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2196,7 +2119,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2204,7 +2127,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2217,7 +2140,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2225,7 +2148,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2238,7 +2161,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2246,7 +2169,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2259,7 +2182,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2267,7 +2190,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2280,7 +2203,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2288,7 +2211,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2301,7 +2224,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2309,7 +2232,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2322,7 +2245,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2330,7 +2253,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2343,7 +2266,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2351,7 +2274,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2364,7 +2287,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2372,7 +2295,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2385,7 +2308,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2393,7 +2316,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2406,7 +2329,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2414,7 +2337,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2427,7 +2350,7 @@ SBGDScript class >> grammarJson [
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               },
               {
                 "type": "STRING",
@@ -2466,7 +2389,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2483,7 +2406,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2500,7 +2423,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2517,7 +2440,7 @@ SBGDScript class >> grammarJson [
               },
               {
                 "type": "SYMBOL",
-                "name": "_primary_expression"
+                "name": "primary_expression"
               }
             ]
           }
@@ -2532,7 +2455,7 @@ SBGDScript class >> grammarJson [
         "members": [
           {
             "type": "SYMBOL",
-            "name": "_primary_expression"
+            "name": "primary_expression"
           },
           {
             "type": "REPEAT1",
@@ -2578,7 +2501,7 @@ SBGDScript class >> grammarJson [
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "_primary_expression"
+                  "name": "primary_expression"
                 }
               ]
             }
@@ -2591,7 +2514,7 @@ SBGDScript class >> grammarJson [
       "members": [
         {
           "type": "SYMBOL",
-          "name": "_primary_expression"
+          "name": "primary_expression"
         },
         {
           "type": "STRING",
@@ -2599,7 +2522,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         },
         {
           "type": "STRING",
@@ -2640,7 +2563,7 @@ SBGDScript class >> grammarJson [
           },
           {
             "type": "SYMBOL",
-            "name": "_primary_expression"
+            "name": "primary_expression"
           },
           {
             "type": "STRING",
@@ -2657,36 +2580,20 @@ SBGDScript class >> grammarJson [
         "members": [
           {
             "type": "SYMBOL",
-            "name": "_attribute_expression"
+            "name": "primary_expression"
           },
           {
-            "type": "REPEAT1",
-            "content": {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": "."
-                },
-                {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SYMBOL",
-                      "name": "attribute_subscript"
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "attribute_call"
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "identifier"
-                    }
-                  ]
-                }
-              ]
-            }
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "."
+              },
+              {
+                "type": "SYMBOL",
+                "name": "identifier"
+              }
+            ]
           }
         ]
       }
@@ -2699,7 +2606,7 @@ SBGDScript class >> grammarJson [
         "members": [
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "expression"
           },
           {
             "type": "STRING",
@@ -2707,7 +2614,7 @@ SBGDScript class >> grammarJson [
           },
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "expression"
           },
           {
             "type": "STRING",
@@ -2715,7 +2622,7 @@ SBGDScript class >> grammarJson [
           },
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "expression"
           }
         ]
       }
@@ -2732,7 +2639,7 @@ SBGDScript class >> grammarJson [
           },
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "expression"
           },
           {
             "type": "STRING",
@@ -2746,7 +2653,7 @@ SBGDScript class >> grammarJson [
       "members": [
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         },
         {
           "type": "STRING",
@@ -2754,7 +2661,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         }
       ]
     },
@@ -2763,7 +2670,7 @@ SBGDScript class >> grammarJson [
       "members": [
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         },
         {
           "type": "CHOICE",
@@ -2812,7 +2719,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         }
       ]
     },
@@ -2827,7 +2734,7 @@ SBGDScript class >> grammarJson [
               "members": [
                 {
                   "type": "SYMBOL",
-                  "name": "_expression"
+                  "name": "expression"
                 },
                 {
                   "type": "STRING",
@@ -2852,7 +2759,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         }
       ]
     },
@@ -2937,7 +2844,7 @@ SBGDScript class >> grammarJson [
                   "members": [
                     {
                       "type": "SYMBOL",
-                      "name": "_expression"
+                      "name": "expression"
                     },
                     {
                       "type": "REPEAT",
@@ -2950,7 +2857,7 @@ SBGDScript class >> grammarJson [
                           },
                           {
                             "type": "SYMBOL",
-                            "name": "_expression"
+                            "name": "expression"
                           }
                         ]
                       }
@@ -3016,7 +2923,7 @@ SBGDScript class >> grammarJson [
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "expression"
         }
       ]
     },
@@ -3044,7 +2951,7 @@ SBGDScript class >> grammarJson [
           },
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "expression"
           }
         ]
       }
@@ -3277,7 +3184,7 @@ SBGDScript class >> grammarJson [
               "members": [
                 {
                   "type": "SYMBOL",
-                  "name": "_expression"
+                  "name": "expression"
                 },
                 {
                   "type": "REPEAT",
@@ -3290,7 +3197,7 @@ SBGDScript class >> grammarJson [
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "_expression"
+                        "name": "expression"
                       }
                     ]
                   }
@@ -3337,7 +3244,7 @@ SBGDScript class >> grammarJson [
         "members": [
           {
             "type": "SYMBOL",
-            "name": "_primary_expression"
+            "name": "primary_expression"
           },
           {
             "type": "SYMBOL",
@@ -3390,7 +3297,10 @@ SBGDScript class >> grammarJson [
     "_compound_statement",
     "ReferenceError"
   ],
-  "supertypes": []
+  "supertypes": [
+    "expression",
+    "primary_expression"
+  ]
 }
 
 '
@@ -3400,6 +3310,7 @@ SBGDScript class >> grammarJson [
 SBGDScript class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	(((aBlock isStringMorph or: [aBlock isTextMorph]) and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice' and: [(aBlock parentSandblock ifNotNil: #type) ~= #string]]]]) ifTrue: [^ true].
+	(#('else_clause' 'elif_clause') includes: anotherBlock type) ifTrue: [^ true].
 	^ super hardLineBreakBetween: aBlock and: anotherBlock
 ]
 
@@ -3566,11 +3477,32 @@ SBGDScript class >> preprocessGrammar: aGrammar [
 	(aGrammar bodyNodeForRule: '_statement') elements first
 		type: '_simple_statement'
 		factory: aGrammar.
-	(aGrammar bodyNodeForRule: 'body') alternatives first replaceBy: (SBTSNodeRepeat new
+	
+	aGrammar rules at: 'body' put: (SBTSNodeRepeat new
 		multiple: true
 			required: false
-			element: (SBTSNodeSymbol new type: '_simple_statement' factory: aGrammar);
-		factory: aGrammar)
+			element: (SBTSNodeSymbol new type: '_statement' factory: aGrammar);
+		factory: aGrammar).
+	
+	aGrammar rules at: 'string' put: (SBTSNodeChoice new
+		factory: aGrammar;
+		alternatives: (#('''' '"') collect: [:quote |
+			SBTSNodeSeq new
+				factory: aGrammar;
+				elements: {
+					SBTSNodeLabel new
+						factory: aGrammar;
+						label: quote.
+					SBTSNodeRepeat new
+						multiple: true required: false element: (SBTSNodeChoice new
+							factory: aGrammar;
+							alternatives: {
+								SBTSNodeSymbol new type: #'escape_sequence' factory: aGrammar.
+								SBTSNodeSymbol new type: #'_string_content' factory: aGrammar});
+						factory: aGrammar.
+					SBTSNodeLabel new
+						factory: aGrammar;
+						label: quote}]))
 ]
 
 { #category : #'as yet unclassified' }

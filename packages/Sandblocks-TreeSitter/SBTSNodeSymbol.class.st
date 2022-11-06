@@ -39,6 +39,16 @@ SBTSNodeSymbol >> allSuperTypesDo: aBlock [
 	super allSuperTypesDo: aBlock
 ]
 
+{ #category : #parsing }
+SBTSNodeSymbol >> assertResults: results in: aParser [
+
+	results size > 0 ifFalse: [ | tree template |
+		aParser ascend.
+		tree := String streamContents: [:s | aParser cursor library printTreeFrom: aParser cursor depth: 0 on: s].
+		template := self bodyTemplate.
+		self assert: false description: 'could not construct ', type]
+]
+
 { #category : #accessing }
 SBTSNodeSymbol >> bodyTemplate [
 
@@ -264,41 +274,45 @@ SBTSNodeSymbol >> resultsForBlocks: aParser [
 so, as a workaround, we just fall-through if we did not match and try to take the symbol"
 			ret := results]].
 		
-		(ret isNil and: [aParser atEnd not and: [aParser peekForType: self type]]) ifTrue: [ | currentBlocks results range |
-			currentBlocks := aParser blocks.
-			aParser blocks: OrderedCollection new.
-			range := aParser currentRange.
-			aParser descend.
-			results := (self bodyTemplate resultsForBlocks: aParser) select: [:option |
-				option ascend
-					ifTrue: [
-						option nextSibling.
-						true]
-					ifFalse: [false]].
-			results size > 1 ifTrue: [
-				SBToggledCode comment: '' active: 1 do: {
-					[results := {results detectMax: [:r | (r blocks collect: [:b | b recursiveSubmorphCount]) sum]}].
-					[self error: 'should deduplicate here?']}].
-			SBToggledCode
-				comment: ''
-				active: 0
-				do: {[self assert: results size > 0 description: 'could not construct ', type]}.
-			ret := results ifEmpty: [{}] ifNotEmpty: [ | result newBlocks |
-				result := results anyOne.
-				newBlocks := self isBlockInlined
-					ifTrue: [result blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]]]
-					ifFalse: [
-						{
-							SBTSBlock new
-								range: range;
-								addAllMorphs: result blocks;
-								slot: (SBTSSlot with: self)}].
-				{
-					result
-						blocks: currentBlocks, newBlocks;
-						yourself}]].
+		(ret isNil and: [aParser atEnd not and: [aParser peekForType: self type]]) ifTrue: [ret := self resultsForBlocksType: aParser].
 		
 		ret ifNil: [{}]]
+]
+
+{ #category : #parsing }
+SBTSNodeSymbol >> resultsForBlocksType: aParser [
+
+	| currentBlocks range results |
+	currentBlocks := aParser blocks.
+	aParser blocks: OrderedCollection new.
+	range := aParser currentRange.
+	aParser descend.
+	results := (self bodyTemplate resultsForBlocks: aParser) select: [:option |
+		option ascend
+			ifTrue: [
+				option nextSibling.
+				true]
+			ifFalse: [false]].
+	results size > 1 ifTrue: [
+		SBToggledCode comment: '' active: 1 do: {
+			[results := {results detectMax: [:r | (r blocks collect: [:b | b recursiveSubmorphCount]) sum]}].
+			[self error: 'should deduplicate here?']}].
+	SBToggledCode comment: '' active: 1 do: {[self assertResults: results in: aParser]}.
+	
+	^ results ifEmpty: [{}] ifNotEmpty: [ | result newBlocks |
+		result := results anyOne.
+		newBlocks := self isBlockInlined
+			ifTrue: [result blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]]]
+			ifFalse: [
+				{
+					SBTSBlock new
+						range: range;
+						addAllMorphs: result blocks;
+						slot: (SBTSSlot with: self)}].
+		{
+			result
+				blocks: currentBlocks, newBlocks;
+				yourself}]
 ]
 
 { #category : #parsing }

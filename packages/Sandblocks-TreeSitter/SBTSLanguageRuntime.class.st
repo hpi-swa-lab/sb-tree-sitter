@@ -126,7 +126,7 @@ SBTSLanguageRuntime class >> language [
 { #category : #'as yet unclassified' }
 SBTSLanguageRuntime class >> runtimeName [
 
-	^ self subclassResponsibility
+	^ self className
 ]
 
 { #category : #'os process' }
