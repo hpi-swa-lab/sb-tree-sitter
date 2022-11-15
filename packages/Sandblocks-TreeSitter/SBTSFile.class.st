@@ -225,7 +225,9 @@ SBTSFile >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 					aQuickBoolean
 						ifTrue: [self root getSourceStringAndMark]
 						ifFalse: [self root prettySourceString]]}].
-	FileStream forceNewFileNamed: self filepath do: [:stream | stream nextPutAll: source].
+	FileStream
+		forceNewFileNamed: self filepath
+		do: [:stream | stream nextPutAll: source withUnixLineEndings].
 	^ true
 ]
 

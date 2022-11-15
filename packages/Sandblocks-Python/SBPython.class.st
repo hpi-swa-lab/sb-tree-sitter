@@ -5283,6 +5283,14 @@ SBPython class >> rootRuleName [
 ]
 
 { #category : #'as yet unclassified' }
+SBPython class >> softLineBreakBetween: aBlock and: anotherBlock [
+
+	(anotherBlock isTextMorph and: [anotherBlock contents = '.']) ifTrue: [^ true].
+	anotherBlock contents = ')' ifTrue: [^ false].
+	^ super softLineBreakBetween: aBlock and: anotherBlock
+]
+
+{ #category : #'as yet unclassified' }
 SBPython class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
 	((anotherBlock isTextMorph or: [aBlock isTextMorph]) and: [aBlock parentSandblock type = #'comparison_operator']) ifTrue: [^ true].

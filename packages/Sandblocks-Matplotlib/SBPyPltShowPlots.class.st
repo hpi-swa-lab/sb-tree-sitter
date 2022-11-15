@@ -26,7 +26,9 @@ SBPyPltShowPlots >> build [
 
 	image := '' asMorph.
 	self addMorphBack: (SBColumn new
-		addMorphBack: (SBButton new icon: SBIcon iconPlay label: 'show plot' do: [self updateImage]);
+		addMorphBack: (SBStringMorph new
+			contents: 'Preview';
+			bold);
 		addMorphBack: image asMorph)
 ]
 

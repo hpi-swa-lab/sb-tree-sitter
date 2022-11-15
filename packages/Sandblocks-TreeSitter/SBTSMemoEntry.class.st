@@ -23,18 +23,20 @@ SBTSMemoEntry >> getBlocksOrMarkRecursionFrom: aSymbol stack: aCollection parser
 			{}]
 		ifFalse: [
 			(self parsers collect: [:p | p adapt: aParser for: aSymbol]) select: [:p |
-				(aParser isCurrentlyRecursingFor: aSymbol) not or: [ | nestedSlot |
-					nestedSlot := (p blocks first effectiveChildren
+				(aParser isCurrentlyRecursingFor: aSymbol) not or: [ | firstChild |
+					firstChild := p blocks first effectiveChildren
 						ifNotEmpty: [:c | c first]
-						ifEmpty: [p blocks first]) slot.
-					(nestedSlot parentThat: [:node | node isTSPrecedence])
-						ifNotNil: [:precedence |
-							(precedence canExpandInStack: aCollection, (p blocks first effectiveChildren
-								ifNotEmpty: [:c | {aSymbol}]
-								ifEmpty: [{}]))
-								ifTrue: [true]
-								ifFalse: [false]]
-						ifNil: [true]]]]
+						ifEmpty: [p blocks first].
+					(firstChild class = SBTSParseNode or: [firstChild isTSMorph]) and: [ | nestedSlot |
+						nestedSlot := firstChild slot.
+						(nestedSlot parentThat: [:node | node isTSPrecedence])
+							ifNotNil: [:precedence |
+								(precedence canExpandInStack: aCollection, (p blocks first effectiveChildren
+									ifNotEmpty: [:c | {aSymbol}]
+									ifEmpty: [{}]))
+									ifTrue: [true]
+									ifFalse: [false]]
+							ifNil: [true]]]]]
 ]
 
 { #category : #'as yet unclassified' }

@@ -85,6 +85,24 @@ SBWatch2 >> buildSmalltalk [
 ]
 
 { #category : #'as yet unclassified' }
+SBWatch2 >> buildTypescript [
+	<lang: #typescript match: '(call_expression (_ (_ (_ (_ (_ (_ (_ (_ (object (pair key: (_) ="id" (string (_) @id))))))))))) (_) @expression) @root' sample: '((e) => (
+  require("net")
+    .connect(process.env.SQ_WATCH, "localhost")
+    .end(
+      JSON.stringify({
+        id: "8760eb08-6e29-47e6-a1fc-78d5c8bcb9fb",
+        expression: require("util").inspect(e),
+      })
+    ),
+  e
+))(req.path);'>
+
+	self id: (self bindings at: 'id') contents.
+	self addMorphFront: (self createBindingBlock: 'expression')
+]
+
+{ #category : #'as yet unclassified' }
 SBWatch2 >> drawnColor [
 
 	^ self colorPolicy toolColorFor: self
@@ -119,7 +137,7 @@ SBWatch2 >> exampleStopped: anExample [
 { #category : #'as yet unclassified' }
 SBWatch2 >> expression [
 
-	^ self firstSubmorph
+	^ self firstSubmorph firstSubmorph
 ]
 
 { #category : #'as yet unclassified' }

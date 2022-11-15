@@ -13,6 +13,12 @@ SBTypescript class >> addIndent: aBlock [
 	^ super addIndent: aBlock
 ]
 
+{ #category : #'as yet unclassified' }
+SBTypescript class >> defaultRuntimeClass [
+
+	^ SBTSRuntimeOSProcess
+]
+
 { #category : #configuration }
 SBTypescript class >> fileSuffix [
 
@@ -11090,6 +11096,12 @@ SBTypescript class >> icon [
 SBTypescript class >> isBlockInlined: aSymbol [
 
 	^ aSymbol = #'expression_statement' or: [super isBlockInlined: aSymbol]
+]
+
+{ #category : #configuration }
+SBTypescript class >> isExpression: aBlock [
+
+	^ #expression = aBlock type
 ]
 
 { #category : #configuration }

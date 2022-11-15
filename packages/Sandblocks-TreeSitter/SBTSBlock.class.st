@@ -394,6 +394,8 @@ SBTSBlock >> deleteBeforeCursorOld [
 { #category : #'as yet unclassified' }
 SBTSBlock >> deleteCommandFor: aBlock [
 
+	aBlock isTSMorph ifFalse: [^ super deleteCommandFor: aBlock].
+	
 	(self deleteCommandForNoReplace: aBlock) ifNotNil: [:cmd | ^ cmd].
 	
 	^ aBlock newNullBlock convertedFor: aBlock objectInterface do: [:new |
@@ -729,7 +731,7 @@ SBTSBlock >> keepDuringDelete [
 { #category : #testing }
 SBTSBlock >> keepDuringTransform [
 
-	^ self submorphs anySatisfy: [:s | s keepDuringTransform]
+	^ self submorphs anySatisfy: [:s | s isTSMorph not or: [s keepDuringTransform]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -966,6 +968,16 @@ SBTSBlock >> query: aString capturesDo: aBlock [
 ]
 
 { #category : #query }
+SBTSBlock >> queryAll: aString [
+
+	^ Array streamContents: [:stream |
+		self allMorphsDo: [:block |
+			block isTSMorph ifTrue: [ | captures |
+				captures := nil.
+				(SBTSQuery new execute: aString against: block capturesDo: [:cap | captures := cap]) ifTrue: [stream nextPut: captures anyOne]]]]
+]
+
+{ #category : #query }
 SBTSBlock >> queryNode: aString [
 
 	| element |
@@ -1064,7 +1076,7 @@ SBTSBlock >> selectStartOfStatement [
 { #category : #accessing }
 SBTSBlock >> semantics [
 
-	^ (self containingArtefact ifNotNil: [:a | a semantics]) ifNil: [self language]
+	^ (self containingArtefact ifNotNil: [:a | (a respondsTo: #semantics) ifTrue: [a semantics] ifFalse: [self language]]) ifNil: [self language]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1303,11 +1315,15 @@ SBTSBlock >> wasSelected [
 SBTSBlock >> wrapWithWatch [
 	<action>
 
-	self isWatch ifTrue: [^ self sandblockEditor do: (SBReplaceCommand new target: self replacer: self expression copyBlock)].
+	self isWatch ifTrue: [
+		^ self sandblockEditor do: (SBReplaceCommand new
+			target: self
+			replacer: (self expression adaptSlotFor: self parentSandblock slot))].
 	self parentSandblock isWatch ifTrue: [
+		self halt.
 		^ self sandblockEditor do: (SBReplaceCommand new
 			target: self parentSandblock
-			replacer: self parentSandblock expression copyBlock)].
+			replacer: (self parentSandblock expression adaptSlotFor: self parentSandblock slot))].
 	
 	(self orOwnerSuchThat: [:o | o isTSBlock and: [o isExpression]]) ifNotNil: [:expr | self sandblockEditor do: (SBReplaceCommand new target: expr replacer: (SBWatch2 newEmptyFor: expr copyBlock))]
 ]

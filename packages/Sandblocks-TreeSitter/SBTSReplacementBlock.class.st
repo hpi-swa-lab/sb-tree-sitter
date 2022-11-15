@@ -37,6 +37,22 @@ SBTSReplacementBlock class >> match: aBlock against: aTSQuery buildSelector: aSy
 ]
 
 { #category : #'as yet unclassified' }
+SBTSReplacementBlock >> applyReplacements [
+	<action>
+
+	self asCode
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementBlock >> asCode [
+	<action>
+
+	self asCode: (SBConvert new
+		objectInterface: self objectInterface;
+		success: [:object | self sandblockEditor do: (SBReplaceCommand new target: self replacer: object)])
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReplacementBlock >> asCode: converter [
 	<convert>
 
@@ -145,6 +161,12 @@ SBTSReplacementBlock >> createBindingBlock: aNameString [
 				comment: ''
 				active: 0
 				do: {[self replaceBound: aNameString with: m firstSubmorph]}]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementBlock >> createStatic: aBlock contents: aNameString [
+
+	^ aBlock value: (bindings at: aNameString)
 ]
 
 { #category : #'as yet unclassified' }

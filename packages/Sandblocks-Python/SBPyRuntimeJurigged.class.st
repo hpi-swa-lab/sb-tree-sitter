@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBPyRuntimeJurigged class >> runtimeName [
+
+	^ 'jurriged'
+]
+
+{ #category : #'as yet unclassified' }
 SBPyRuntimeJurigged >> interpreter [
 
 	^ self which: 'jurigged'

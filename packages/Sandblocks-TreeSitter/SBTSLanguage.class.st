@@ -392,7 +392,7 @@ SBTSLanguage class >> postprocessGrammar: aGrammar [
 		self emptyLineSymbol ifNotNil: [:sym |
 			aGrammar rules at: sym put: (SBTSNodeText new
 				factory: aGrammar;
-				regexString: '')].
+				regexString: '(?!x)x')].
 		
 		aGrammar rules keysAndValuesDo: [:symbol :body | body allElementsDo: [:node | (node isTSRepeat and: [self isStatementContainer: node in: (SBTSNodeSymbol new type: symbol factory: aGrammar)]) ifTrue: [node transformToStatementRepeater]]]]
 ]
@@ -405,9 +405,10 @@ SBTSLanguage class >> preferNoPopup [
 
 { #category : #configuration }
 SBTSLanguage class >> preprocessGrammar: aGrammar [
+	"after we inline, _statement is no longer present, so check and mark repeats before processing"
 	"hook for modifying properties of the grammar just before we apply inlining rules etc"
 
-	
+	aGrammar allElementsDo: [:node | (node isTSRepeat and: [node element type = #'_statement']) ifTrue: [node transformToStatementRepeater]]
 ]
 
 { #category : #lifecycle }

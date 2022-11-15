@@ -125,6 +125,8 @@ SBTSTextMorph >> detachDecorator: aDecorator [
 { #category : #decorators }
 SBTSTextMorph >> detachDecorators: aDecoratorClass [
 
+	self parentSandblock submorphCount = 1 ifTrue: [^ self parentSandblock detachDecorators: aDecoratorClass].
+	
 	self decoratorsDo: [:d | d class = aDecoratorClass ifTrue: [d detached: self]].
 	self
 		valueOfProperty: #decorators
@@ -243,7 +245,7 @@ SBTSTextMorph >> initialize [
 		start: (SBTSPosition line: 0 character: 0)
 		end: (SBTSPosition line: 0 character: 0).
 	
-	self maxWidth: 400
+	self maxWidth: 400 sbScaled
 ]
 
 { #category : #'as yet unclassified' }

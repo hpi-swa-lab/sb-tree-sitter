@@ -143,7 +143,7 @@ SBTSLanguageRuntime class >> which: aString [
 	^ (self
 		cmd: ExternalUnixOSProcess defaultShellPath
 		arguments: {'-c'. 'which {1}' format: {aString}}
-		env: nil
+		env: OSProcess thisOSProcess environment
 		stdin: aString
 		cancel: [:b | ]) wait value: [:status :stdout :stderr | status = 0 ifTrue: [stdout ifEmpty: [nil]] ifFalse: [nil]]
 ]

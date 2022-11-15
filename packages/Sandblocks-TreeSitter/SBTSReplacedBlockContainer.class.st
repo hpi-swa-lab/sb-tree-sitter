@@ -23,3 +23,9 @@ SBTSReplacedBlockContainer >> layoutCommands [
 		data: {self firstSubmorph layoutCommands};
 		morph: self
 ]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacedBlockContainer >> type [
+
+	^ nil
+]

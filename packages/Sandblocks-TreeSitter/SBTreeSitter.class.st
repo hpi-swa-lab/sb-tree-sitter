@@ -454,6 +454,13 @@ SBTreeSitter >> printTreeFrom: aCursor depth: aNumber on: aStream [
 ]
 
 { #category : #'ffi languages' }
+SBTreeSitter >> prisma [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_prisma () module: 'tree-sitter-prisma'>
+	^ SBMetaBlockFactory tryPatchLibrary: 'victorhqc/tree-sitter-prisma' name: 'prisma' context: thisContext
+]
+
+{ #category : #'ffi languages' }
 SBTreeSitter >> python [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_python () module: 'tree-sitter-python'>

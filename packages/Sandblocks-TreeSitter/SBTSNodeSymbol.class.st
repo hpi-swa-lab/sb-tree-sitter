@@ -44,7 +44,7 @@ SBTSNodeSymbol >> assertResults: results in: aParser [
 
 	results size > 0 ifFalse: [ | tree template |
 		aParser ascend.
-		tree := String streamContents: [:s | aParser cursor library printTreeFrom: aParser cursor depth: 0 on: s].
+		tree := results printTree.
 		template := self bodyTemplate.
 		self assert: false description: 'could not construct ', type]
 ]
@@ -223,7 +223,7 @@ SBTSNodeSymbol >> resultsFor: aParser [
 		ifTrue: [ | block result |
 			result := aParser copy.
 			block := result next.
-			(((block childSandblocks ifNotEmpty: [:c | c first slot] ifEmpty: [self]) parentThat: [:node | node isTSPrecedence])
+			((((block childSandblocks select: #isTSMorph) ifNotEmpty: [:c | c first slot] ifEmpty: [self]) parentThat: [:node | node isTSPrecedence])
 				ifNotNil: [:precedence | precedence canExpandInStack: aParser symbolStack, (block childSandblocks ifNotEmpty: [{self}] ifEmpty: [{}])]
 				ifNil: [true])
 				ifTrue: [

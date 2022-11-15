@@ -279,6 +279,12 @@ SBTSFileParser >> postCopy [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFileParser >> printTree [
+
+	^ String streamContents: [:s | self cursor library printTreeFrom: self cursor depth: 0 on: s]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFileParser >> replaceCurrentSlot: aSlot [
 
 	slots removeLast.

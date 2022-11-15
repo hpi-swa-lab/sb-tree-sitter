@@ -15,6 +15,8 @@ SBForeignLanguage >> layoutCommands [
 { #category : #'as yet unclassified' }
 SBForeignLanguage >> string: aString language: aLanguageClass for: aBlock [
 
-	self addMorphBack: (aLanguageClass parse: aString).
-	self bindings: Dictionary new block: aBlock
+	self bindings: Dictionary new block: aBlock.
+	self addMorphBack: (self
+		createBinding: [:c | aLanguageClass parse: aString]
+		update: [:c :m | (c at: 'root') contents: m sourceString])
 ]
