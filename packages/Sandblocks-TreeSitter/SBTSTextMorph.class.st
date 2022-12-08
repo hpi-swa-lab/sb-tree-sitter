@@ -245,7 +245,7 @@ SBTSTextMorph >> initialize [
 		start: (SBTSPosition line: 0 character: 0)
 		end: (SBTSPosition line: 0 character: 0).
 	
-	self maxWidth: 400 sbScaled
+	self maxWidth: 450 sbScaled
 ]
 
 { #category : #'as yet unclassified' }

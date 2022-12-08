@@ -154,6 +154,12 @@ SBTSLanguage class >> firstRuleName [
 	self error: 'first rule could not be detected'
 ]
 
+{ #category : #'configuration - layout' }
+SBTSLanguage class >> gapBetween: aBlock and: anotherBlock [
+
+	^ true
+]
+
 { #category : #'loading - helper' }
 SBTSLanguage class >> generateFFIMethodFor: aName github: aGithubString [
 

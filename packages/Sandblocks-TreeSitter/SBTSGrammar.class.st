@@ -319,6 +319,12 @@ SBTSGrammar >> flattenSeparatedList: anObject name: aString [
 ]
 
 { #category : #layout }
+SBTSGrammar >> gapBetween: aBlock and: anotherBlock [
+
+	^ self language gapBetween: aBlock and: anotherBlock
+]
+
+{ #category : #layout }
 SBTSGrammar >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	^ self language hardLineBreakBetween: aBlock and: anotherBlock

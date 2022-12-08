@@ -768,7 +768,7 @@ SBTSBlock >> layoutCommands [
 					ifFalse: [
 						(self factory softLineBreakBetween: a and: b)
 							ifTrue: [stream nextPut: (SBAlgebraCommand softLineOrGap withGap: true)]
-							ifFalse: [stream nextPut: SBAlgebraCommand gap]]].
+							ifFalse: [(self factory gapBetween: a and: b) ifTrue: [stream nextPut: SBAlgebraCommand gap]]]].
 			self children ifNotEmpty: [stream nextPut: self lastSubmorph layoutCommands]])
 ]
 
@@ -1320,7 +1320,6 @@ SBTSBlock >> wrapWithWatch [
 			target: self
 			replacer: (self expression adaptSlotFor: self parentSandblock slot))].
 	self parentSandblock isWatch ifTrue: [
-		self halt.
 		^ self sandblockEditor do: (SBReplaceCommand new
 			target: self parentSandblock
 			replacer: (self parentSandblock expression adaptSlotFor: self parentSandblock slot))].
