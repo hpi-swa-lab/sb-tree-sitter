@@ -287,8 +287,8 @@ SBTSTextMorph >> keepDuringTransform [
 	self symmetricSibling ifNotNil: [:sibling |
 		(SBToggledCode
 			comment: ''
-			active: 2
-			do: {[true]. [self submorphIndex > sibling submorphIndex]}) ifTrue: [^ false]].
+			active: 1
+			do: {[false]. [self submorphIndex > sibling submorphIndex]}) ifTrue: [^ false]].
 	^ true
 ]
 

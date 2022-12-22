@@ -14,11 +14,10 @@ Class {
 { #category : #'as yet unclassified' }
 SBWatch2 class >> newEmptyFor: aBlock [
 
-	| source |
-	source := aBlock language runtime
-		buildWatchSourceFor: aBlock
-		id: UUID new asString.
-	^ (source adaptSlotFor: aBlock slot) applyReplacement
+	| source copy |
+	copy := aBlock copyBlock.
+	source := aBlock runtime buildWatchSourceFor: copy id: UUID new asString.
+	^ (source adaptSlotFor: copy slot) applyReplacement
 ]
 
 { #category : #'as yet unclassified' }
@@ -97,6 +96,14 @@ SBWatch2 >> buildTypescript [
     ),
   e
 ))(req.path);'>
+
+	self id: (self bindings at: 'id') contents.
+	self addMorphFront: (self createBindingBlock: 'expression')
+]
+
+{ #category : #'as yet unclassified' }
+SBWatch2 >> buildTypescriptWeb [
+	<lang: #typescript match: '(call_expression (_ (_ (_ (_ (_ (_ (_ (_ (string (_) @id))))))))) (_ (_)) @expression) @root' sample: '(<T>(e: T) => (fetch(`http://localhost:51234/sqReport?id=${"ID"}&expression=${escape(JSON.stringify(e))}`), e))(expr)'>
 
 	self id: (self bindings at: 'id') contents.
 	self addMorphFront: (self createBindingBlock: 'expression')

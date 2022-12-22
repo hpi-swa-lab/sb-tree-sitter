@@ -109,9 +109,7 @@ SBTSFile >> filepath: aString language: aLanguageClass collapsed: aCollapsedBool
 		filepath: aString
 		toplevel: (FileStream readOnlyFileNamed: aString do: [:stream | | toplevel |
 			toplevel := SBTSFileParser new
-				parse: (aLanguageClass = SBTSSmalltalk
-					ifTrue: [stream contents lines allButFirst joinSeparatedBy: String cr]
-					ifFalse: [stream contents])
+				parse: stream contents
 				language: aLanguageClass.
 			aReplaceBoolean ifTrue: [toplevel applyReplacements] ifFalse: [toplevel]])
 		language: aLanguageClass
@@ -210,6 +208,12 @@ SBTSFile >> restart [
 SBTSFile >> root [
 
 	^ root
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile >> runtime [
+
+	^ runtime object new
 ]
 
 { #category : #'as yet unclassified' }

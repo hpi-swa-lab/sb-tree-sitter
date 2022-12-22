@@ -174,6 +174,9 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 			detect: [:alt | alt type = #empty]
 			ifFound: [:alt | self morphs: alt buildEmpty].
 		^ true].
+	aString = ' ' ifTrue: [
+		self morphs: element buildEmpty.
+		^ true].
 	(aString = String tab or: [aString = String cr]) ifTrue: [^ false].
 	
 	options := SBTSInputParser new

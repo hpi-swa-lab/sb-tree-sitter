@@ -123,6 +123,12 @@ SBTSBlock >> applyReplacementCommand [
 	candidates := self allReplacementCandidates.
 	candidates do: [:pragma | | blockClass |
 		blockClass := pragma methodClass.
+		
+		SBToggledCode
+			comment: ''
+			active: 0
+			do: {[pragma selector = #buildTypescriptWeb ifTrue: [self halt]]}.
+		
 		(blockClass
 			match: self
 			against: (SBTSQuery new prepare: pragma arguments second)
@@ -241,7 +247,9 @@ SBTSBlock >> collapsedContent [
 { #category : #'as yet unclassified' }
 SBTSBlock >> colorPolicy [
 
-	^ super colorPolicy copy enlarge: self language alwaysEnlargeInsets
+	| policy |
+	policy := super colorPolicy.
+	^ policy copy enlarge: (self language alwaysEnlargeInsets or: [policy enlarge])
 ]
 
 { #category : #'as yet unclassified' }
@@ -1065,6 +1073,12 @@ SBTSBlock >> replaceBlock: aBlock [
 	^ new
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> runtime [
+
+	^ (self containingArtefact ifNotNil: [:a | a runtime]) ifNil: [self language runtime]
+]
+
 { #category : #actions }
 SBTSBlock >> selectStartOfStatement [
 	<multiSelectAction>
@@ -1324,7 +1338,7 @@ SBTSBlock >> wrapWithWatch [
 			target: self parentSandblock
 			replacer: (self parentSandblock expression adaptSlotFor: self parentSandblock slot))].
 	
-	(self orOwnerSuchThat: [:o | o isTSBlock and: [o isExpression]]) ifNotNil: [:expr | self sandblockEditor do: (SBReplaceCommand new target: expr replacer: (SBWatch2 newEmptyFor: expr copyBlock))]
+	(self orOwnerSuchThat: [:o | o isTSBlock and: [o isExpression]]) ifNotNil: [:expr | self sandblockEditor do: (SBReplaceCommand new target: expr replacer: (SBWatch2 newEmptyFor: expr))]
 ]
 
 { #category : #'as yet unclassified' }

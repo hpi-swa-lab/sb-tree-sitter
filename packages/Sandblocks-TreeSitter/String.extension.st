@@ -12,7 +12,9 @@ String >> parseTreeSitter: convert [
 { #category : #'*Sandblocks-TreeSitter' }
 String >> sbSuggestionLimitedTo: aNumber maxLines: anotherNumber [
 
-	self size > aNumber ifTrue: [^ (self first: (aNumber - 3 clampLow: 1 high: self size)), '...'].
-	self lines size > anotherNumber ifTrue: [^ ((self lines first: anotherNumber) joinSeparatedBy: String cr), '...'].
-	^ self
+	| return |
+	return := self.
+	return size > aNumber ifTrue: [return := (return first: (aNumber - 3 clampLow: 1 high: return size)), '...'].
+	return lines size > anotherNumber ifTrue: [return := ((return lines first: anotherNumber) joinSeparatedBy: String cr), '...'].
+	^ return
 ]

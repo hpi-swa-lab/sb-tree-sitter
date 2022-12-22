@@ -1,35 +1,35 @@
 Class {
-	#name : #SBJsRuntimeWeb,
-	#superclass : #SBJsRuntimeOSProcess,
+	#name : #SBTSRuntimeWeb,
+	#superclass : #SBTSRuntimeOSProcess,
 	#classVars : [
 		'WatchServer'
 	],
-	#category : #'Sandblocks-Javascript'
+	#category : #'Sandblocks-Typescript'
 }
 
 { #category : #'as yet unclassified' }
-SBJsRuntimeWeb class >> runtimeName [
+SBTSRuntimeWeb class >> runtimeName [
 
 	^ 'web browser'
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRuntimeWeb class >> watchServer [
+SBTSRuntimeWeb class >> watchServer [
 
 	^ WatchServer
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRuntimeWeb class >> watchServer: aServer [
+SBTSRuntimeWeb class >> watchServer: aServer [
 
 	WatchServer := aServer
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRuntimeWeb >> buildWatchSourceFor: aBlock id: aString [
+SBTSRuntimeWeb >> buildWatchSourceFor: aBlock id: aString [
 
 	| watch |
-	watch := SBJavascript parseExpression: '((e)=>(fetch(`http://localhost:51234/sqReport?id=${"ID"}&expression=${escape(JSON.stringify(e))}`), e))(expr)'.
+	watch := SBTypescript parseExpression: '((e)=>(fetch(`http://localhost:51234/sqReport?id=${"ID"}&expression=${escape(JSON.stringify(e))}`), e))(expr)'.
 	watch childSandblocks second childSandblocks first replaceBlock: aBlock.
 	self assert: (watch
 		queryRecursiveFirstMatch: '(string_fragment) ="ID" @node'
@@ -38,7 +38,7 @@ SBJsRuntimeWeb >> buildWatchSourceFor: aBlock id: aString [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRuntimeWeb >> evaluateFileAsync: aString cancel: aBlock [
+SBTSRuntimeWeb >> evaluateFileAsync: aString cancel: aBlock [
 	" we cannot actually evaluate the file -- but we can start the watch server "
 
 	self startWatchServer.
@@ -47,7 +47,7 @@ SBJsRuntimeWeb >> evaluateFileAsync: aString cancel: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRuntimeWeb >> startWatchServer [
+SBTSRuntimeWeb >> startWatchServer [
 
 	| server |
 	self class watchServer ifNotNil: [:s | s destroy].
@@ -57,17 +57,17 @@ SBJsRuntimeWeb >> startWatchServer [
 		addService: '/sqReport'
 		action: [:req | | params |
 			params := WebUtils decodeUrlEncodedForm: (Url absoluteFromText: req rawUrl) query.
-			SBTSWatch
+			Project current addDeferredUIMessage: (SBWatch2
 				reportId: (params at: 'id')
 				value: (params at: 'expression')
-				env: SBExecutionEnvironment value.
+				env: SBExecutionEnvironment value).
 			req send200Response: 'ok']
 		methods: #('GET' 'HEAD').
 	self class watchServer: server
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRuntimeWeb >> stopWatchServer [
+SBTSRuntimeWeb >> stopWatchServer [
 
 	self class watchServer ifNotNil: [:s |
 		s destroy.
@@ -75,7 +75,7 @@ SBJsRuntimeWeb >> stopWatchServer [
 ]
 
 { #category : #'as yet unclassified' }
-SBJsRuntimeWeb >> writeWatchSourceOn: aStream watch: aWatch [
+SBTSRuntimeWeb >> writeWatchSourceOn: aStream watch: aWatch [
 
 	aStream
 		nextPutAll: '((e) => (fetch(`http://localhost:51234/sqReport?id=${"';
