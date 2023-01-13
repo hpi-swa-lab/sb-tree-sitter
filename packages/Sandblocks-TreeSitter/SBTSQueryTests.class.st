@@ -85,6 +85,23 @@ SBTSQueryTests >> testJsPairMatchString [
 ]
 
 { #category : #tests }
+SBTSQueryTests >> testMatchAll [
+
+	| q factory array |
+	factory := SBMetaBlockFactory new.
+	array := (SBInlineBlockSymbol new type: 'array' factory: factory)
+		addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory);
+		addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory);
+		addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory).
+	
+	q := SBTSQuery new.
+	q prepare: '(array (identifier) @i)'.
+	self
+		assert: (array submorphs collect: [:i | #i -> i] as: OrderedCollection)
+		equals: (q executeCaptureAgainst: array)
+]
+
+{ #category : #tests }
 SBTSQueryTests >> testMatchAlternativeAnonymousNodesWithCaptures [
 
 	| structure |

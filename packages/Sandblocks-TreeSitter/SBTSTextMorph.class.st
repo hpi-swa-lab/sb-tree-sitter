@@ -306,6 +306,12 @@ SBTSTextMorph >> lastConstructedChild [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> linearizeOn: aStream [
+
+	aStream nextPut: self
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> ownerWithForegroundColor [
 
 	^ self highlight = #'_sb_none'
@@ -328,8 +334,9 @@ SBTSTextMorph >> printLabelOn: aStream [
 { #category : #'as yet unclassified' }
 SBTSTextMorph >> printOn: aStream [
 
-	super printOn: aStream.
-	aStream print: contents
+	aStream nextPutAll: 'tstext'''.
+	aStream nextPutAll: (self contents ifNil: ['']).
+	aStream nextPutAll: ''''
 ]
 
 { #category : #'as yet unclassified' }

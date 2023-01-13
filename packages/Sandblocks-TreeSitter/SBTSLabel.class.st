@@ -146,6 +146,12 @@ SBTSLabel >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLabel >> linearizeOn: aStream [
+
+	aStream nextPut: self
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLabel >> ownerWithForegroundColor [
 
 	^ self highlight = #'_sb_none'

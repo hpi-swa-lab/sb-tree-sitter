@@ -39,7 +39,7 @@ SBTSQueryCapture >> evaluateAgainst: aBlock captures: aDictionary [
 	block := self element evaluateAgainst: aBlock captures: aDictionary.
 	block ifNil: [^ nil].
 	
-	aDictionary at: self contents allButFirst put: block.
+	aDictionary add: self contents allButFirst -> block.
 	^ block
 ]
 

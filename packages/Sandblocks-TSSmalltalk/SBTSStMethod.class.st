@@ -73,7 +73,9 @@ SBTSStMethod >> methodClass [
 { #category : #'as yet unclassified' }
 SBTSStMethod >> object [
 
-	^ self methodClass >> self selector
+	^ (self methodClass ifNil: [^ self])
+		compiledMethodAt: self selector
+		ifAbsent: [self]
 ]
 
 { #category : #'as yet unclassified' }

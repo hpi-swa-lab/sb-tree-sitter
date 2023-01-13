@@ -41,6 +41,27 @@ SBTSQuery >> executeAgainst: aBlock capturesDo: aClosure [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSQuery >> executeCaptureAgainst: aBlock [
+
+	| ret target |
+	target := aBlock.
+	captures := OrderedCollection new.
+	
+	ret := false.
+	expressions do: [:expression | | newCaptures |
+		newCaptures := OrderedCollection new.
+		(expression evaluateAgainst: aBlock captures: newCaptures)
+			ifNotNil: [
+				ret := true.
+				captures addAll: newCaptures]
+			ifNil: [expression isOptional ifTrue: [ret := true]]].
+	
+	predicates do: [:predicate | (predicate verify: captures) ifFalse: [ret := false]].
+	
+	^ ret ifTrue: [captures] ifFalse: [{}]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSQuery >> expressions [
 
 	^ expressions

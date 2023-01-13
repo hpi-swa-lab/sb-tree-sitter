@@ -398,7 +398,7 @@ SBTSLanguage class >> postprocessGrammar: aGrammar [
 		self emptyLineSymbol ifNotNil: [:sym |
 			aGrammar rules at: sym put: (SBTSNodeText new
 				factory: aGrammar;
-				regexString: '(?!x)x')].
+				regexString: '(?!x)x|^$')].
 		
 		aGrammar rules keysAndValuesDo: [:symbol :body | body allElementsDo: [:node | (node isTSRepeat and: [self isStatementContainer: node in: (SBTSNodeSymbol new type: symbol factory: aGrammar)]) ifTrue: [node transformToStatementRepeater]]]]
 ]

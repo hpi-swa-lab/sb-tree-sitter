@@ -465,7 +465,7 @@ SBTSBlock >> effectiveContents [
 SBTSBlock >> emphasis [
 
 	self highlight ifNotNil: [:h |
-		h = 'major_declaration' ifTrue: [^ TextEmphasis bold].
+		(h beginsWith: 'major_declaration') ifTrue: [^ TextEmphasis bold].
 		self type = #comment ifTrue: [^ TextEmphasis italic]].
 	^ TextEmphasis normal
 ]
@@ -778,6 +778,21 @@ SBTSBlock >> layoutCommands [
 							ifTrue: [stream nextPut: (SBAlgebraCommand softLineOrGap withGap: true)]
 							ifFalse: [(self factory gapBetween: a and: b) ifTrue: [stream nextPut: SBAlgebraCommand gap]]]].
 			self children ifNotEmpty: [stream nextPut: self lastSubmorph layoutCommands]])
+]
+
+{ #category : #hierarchy }
+SBTSBlock >> linearizeOn: aStream [
+
+	SBToggledCode
+		comment: ''
+		active: 0
+		do: {[(self submorphCount = 1 and: [self firstSubmorph isTextMorph]) ifTrue: [^ aStream nextPut: self]]}.
+	self submorphs overlappingPairsDo: [:a :b |
+		a linearizeOn: aStream.
+		aStream nextPutAll: (self slot separatorBetween: a and: b indent: 0 lastCharacterOfFirst: (aStream position > 0
+			ifFalse: [$ ]
+			ifTrue: [aStream last isMorph ifTrue: [aStream last contents last] ifFalse: [aStream last]]))].
+	self hasSubmorphs ifTrue: [self lastSubmorph linearizeOn: aStream]
 ]
 
 { #category : #query }
@@ -1170,7 +1185,7 @@ SBTSBlock >> suggestions [
 ]
 
 { #category : #'action helpers' }
-SBTSBlock >> swap: aNumber [
+SBTSBlock >> swap2: aNumber [
 
 	self activeTextMorph ifNotNil: [:text |
 		(#('(' ')' '[' ']' '{' '}') includes: text contents) ifTrue: [ | options list |
@@ -1191,6 +1206,52 @@ SBTSBlock >> swap: aNumber [
 			^ self]].
 	
 	^ super swap: aNumber
+]
+
+{ #category : #'action helpers' }
+SBTSBlock >> swap: aNumber [
+
+	self swapLinearized: aNumber
+]
+
+{ #category : #'action helpers' }
+SBTSBlock >> swapBlocks: aNumber [
+
+	| leafs index container oldIndex pivot |
+	container := self.
+	pivot := self activeTextMorph.
+	SBToggledCode comment: '' active: 0 do: {
+		[(pivot submorphIndex + aNumber = 1 or: [pivot submorphIndex + aNumber = pivot owner submorphCount]) ifTrue: [container := container parentSandblock]]}.
+	
+	leafs := container submorphs copy.
+	index := leafs indexOf: pivot.
+	
+	[
+		oldIndex := index.
+		index := index + aNumber.
+		leafs swap: oldIndex with: index.
+		Transcript showln: leafs.
+		(SBTSInputParser new optionsForTemplate: container slot repeater givenBlocks: leafs) ifNotEmpty: [:results | ^ self sandblockEditor do: (SBReplaceMultipleCommand new target: self replacers: results first)]] doWhileTrue: [index + aNumber between: 1 and: leafs size]
+]
+
+{ #category : #'action helpers' }
+SBTSBlock >> swapLinearized: aNumber [
+
+	| leafs index container oldIndex pivot |
+	container := self parentSandblock.
+	pivot := self activeTextMorph ifNil: [self].
+	(pivot submorphIndex + aNumber = 1 or: [pivot submorphIndex + aNumber = pivot owner submorphCount]) ifTrue: [container := container parentSandblock].
+	
+	leafs := Array streamContents: [:s | container linearizeOn: s].
+	index := leafs indexOf: pivot.
+	
+	[
+		oldIndex := index.
+		index := index + aNumber.
+		leafs swap: oldIndex with: index.
+		Transcript showln: leafs.
+		self halt.
+		(SBTSInputParser new optionsForTemplate: container slot lastNode givenBlocks: leafs) ifNotEmpty: [:results | ^ self sandblockEditor do: (SBReplaceMultipleCommand new target: self replacers: results first)]] doWhileTrue: [index + aNumber between: 1 and: leafs size]
 ]
 
 { #category : #'as yet unclassified' }

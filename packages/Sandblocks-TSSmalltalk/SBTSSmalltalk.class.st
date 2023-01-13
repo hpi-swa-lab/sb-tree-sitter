@@ -1154,12 +1154,16 @@ SBTSSmalltalk class >> highlightQuery [
 (unary_message (_) (unary_identifier) @variable.part)
 (binary_operator) @variable.part
 (keyword) @variable.part
+(keyword_selector) @variable.part
+
+(comment) @comment
 
 ["^" "[" "]" "{" "}"] @important
 
-(keyword_selector (keyword) @major_declaration)
-(binary_selector (binary_operator) @major_declaration)
-(unary_selector (unary_identifier) @major_declaration)'
+(keyword_selector (keyword) @major_declaration.part)
+(binary_selector (binary_operator) @major_declaration.part)
+(unary_selector (unary_identifier) @major_declaration.part)
+(unary_selector) @.part'
 ]
 
 { #category : #configuration }
