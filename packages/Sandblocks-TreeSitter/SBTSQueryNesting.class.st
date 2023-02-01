@@ -2,10 +2,23 @@ Class {
 	#name : #SBTSQueryNesting,
 	#superclass : #SBTSQueryNode,
 	#instVars : [
-		'elements'
+		'elements',
+		'constraint'
 	],
 	#category : #'Sandblocks-TreeSitter-Query'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSQueryNesting >> constraint [
+
+	^ constraint
+]
+
+{ #category : #'as yet unclassified' }
+SBTSQueryNesting >> constraint: aSymbol [
+
+	constraint := aSymbol
+]
 
 { #category : #'as yet unclassified' }
 SBTSQueryNesting >> elements [

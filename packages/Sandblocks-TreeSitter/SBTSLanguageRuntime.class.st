@@ -123,7 +123,13 @@ SBTSLanguageRuntime class >> language [
 	^ self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SBTSLanguageRuntime class >> languages [
+
+	^ {self language}
+]
+
+{ #category : #accessing }
 SBTSLanguageRuntime class >> runtimeName [
 
 	^ self className

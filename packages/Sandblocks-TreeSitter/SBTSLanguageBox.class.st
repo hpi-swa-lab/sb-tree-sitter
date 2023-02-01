@@ -19,7 +19,6 @@ SBTSLanguageBox >> build [
 SBTSLanguageBox >> buildClojure [
 	<lang: #clojure match: '(list_lit (sym_lit) ="polyglot-eval" (str_lit) @language (str_lit) @code)' sample: '(polyglot-eval "js" "some-code")'>
 
-	
 	bindings at: 'language' put: (SBTSBindingProxy trimQuotes: (bindings at: 'language')).
 	bindings at: 'code' put: (SBTSBindingProxy trimQuotes: (bindings at: 'code')).
 	

@@ -116,6 +116,12 @@ SBTSNodeText >> labelPrintOn: aStream [
 	aStream nextPut: $/
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeText >> matchRegexAgainstType: aParser [
+
+	^ aParser atEnd not and: [aParser peekIsNamed not and: [self regex matches: aParser peekType]]
+]
+
 { #category : #accessing }
 SBTSNodeText >> maxChildren [
 
@@ -222,7 +228,13 @@ SBTSNodeText >> resultsForBlocks: aParser [
 					(self characterValid: uncaptured in: aParser blocks)
 						ifTrue: [success value: aParser uncapturedText]
 						ifFalse: [{}]]
-				ifEmpty: [(self regex matches: '') ifTrue: [{aParser}] ifFalse: [{}]]]
+				ifEmpty: [
+					(self matchRegexAgainstType: aParser)
+						ifTrue: [ | ret |
+							ret := success value: aParser peekType.
+							aParser nextSibling.
+							ret]
+						ifFalse: [(self regex matches: '') ifTrue: [{aParser}] ifFalse: [{}]]]]
 ]
 
 { #category : #'as yet unclassified' }

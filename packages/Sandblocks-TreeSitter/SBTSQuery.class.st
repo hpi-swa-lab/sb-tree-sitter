@@ -72,6 +72,9 @@ SBTSQuery >> parseExpression [
 
 	| c expr |
 	c := stream peek.
+	c = $. ifTrue: [
+		stream next.
+		^ SBTSQueryPositionConstraint new constraint: #first].
 	expr := (c = $( or: [c = $[])
 		ifTrue: [self parseSExpression]
 		ifFalse: [self parseLiteral].
@@ -124,12 +127,15 @@ SBTSQuery >> parseSExpression [
 	[stream peek ~= end] whileTrue: [ | next |
 		self skipWhitespaces.
 		next := self parseExpression.
+		self skipWhitespaces.
+		
+		next class = SBTSQueryPositionConstraint ifTrue: [next constraint: (elements size = 1 ifTrue: [#first] ifFalse: [#last])].
+		
 		(elements notEmpty and: [elements last wrapsNext and: [elements last element isNil]])
 			ifTrue: [elements last element: next]
 			ifFalse: [
 				next wrapsPrevious ifTrue: [next element: elements removeLast].
-				elements add: next].
-		self skipWhitespaces].
+				elements add: next]].
 	SBToggledCode comment: ') or ]' active: 1 do: {[stream next]}.
 	
 	(((elements first isKindOf: SBTSQueryCapture) and: [(elements first element isKindOf: SBTSQueryElement) and: [elements first element contents first = $#]]) or: [(elements first isKindOf: SBTSQueryElement) and: [elements first contents first = $#]]) ifTrue: [^ SBTSQueryPredicate new elements: elements].

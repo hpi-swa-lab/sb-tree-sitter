@@ -148,6 +148,12 @@ SBTSQueryTests >> testMatchAnyChild [
 ]
 
 { #category : #tests }
+SBTSQueryTests >> testMatchConsecutive [
+
+	self assert: ((SBJavascript parseExpression: '[1, 2]') matchesQuery: '(array (number) (number))')
+]
+
+{ #category : #tests }
 SBTSQueryTests >> testMatchFieldName [
 
 	| factory |
@@ -384,6 +390,23 @@ SBTSQueryTests >> testParseFields [
 	self assert: element elements second structure: {#class -> SBTSQueryCapture}.
 	self assert: element elements second element structure: {#class -> SBTSQueryField}.
 	self assert: element elements second element element structure: {#class -> SBTSQueryNesting}
+]
+
+{ #category : #tests }
+SBTSQueryTests >> testParsePositionConstraints [
+
+	| element |
+	element := (SBTSQuery new prepare: '(array . (a))') expressions first.
+	self assert: element structure: {#class -> SBTSQueryNesting}.
+	self
+		assert: element elements second
+		structure: {#class -> SBTSQueryPositionConstraint. #constraint -> #first}.
+	self assert: element elements second element structure: {#class -> SBTSQueryNesting}.
+	
+	element := (SBTSQuery new prepare: '(array (a) .)') expressions first.
+	self
+		assert: element elements second
+		structure: {#class -> SBTSQueryPositionConstraint. #constraint -> #last}
 ]
 
 { #category : #tests }

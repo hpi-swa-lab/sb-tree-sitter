@@ -44,7 +44,7 @@ SBTSQuerySequence >> evaluateAgainst: aBlock captures: aDictionary [
 				captures := OrderedCollection new.
 				(expr evaluateAgainst: nextBlock captures: captures) ifNotNil: [
 					localCaptures addAll: captures.
-					blocks remove: nextBlock.
+					SBToggledCode comment: '' active: 0 do: {[blocks remove: nextBlock]}.
 					anyMatch := true]].
 			(anyMatch not and: [expr isOptional not]) ifTrue: [^ nil]]].
 	

@@ -1,6 +1,9 @@
 Class {
 	#name : #SBTSStMethod,
 	#superclass : #SBBlock,
+	#instVars : [
+		'methodClass'
+	],
 	#category : #'Sandblocks-TSSmalltalk'
 }
 
@@ -20,8 +23,9 @@ SBTSStMethod >> browse [
 { #category : #'as yet unclassified' }
 SBTSStMethod >> for: aCompiledMethod [
 
-	self addMorphBack: (SBStClassNameInput new object: aCompiledMethod methodClass).
-	self addMorphBack: (SBTSFileParser new parse: aCompiledMethod getSource asString language: SBTSSmalltalk)
+	methodClass := aCompiledMethod methodClass.
+	self addMorphBack: (SBTSFileParser new parse: aCompiledMethod getSource asString language: SBTSSmalltalk).
+	self method firstSubmorph applyReplacement
 ]
 
 { #category : #'as yet unclassified' }
@@ -35,7 +39,7 @@ SBTSStMethod >> initialize [
 		layoutPolicy: SBAlgebraLayout new;
 		attachDecorator: SBMoveDecorator new;
 		attachDecorator: SBResizableDecorator new;
-		layoutInset: 8
+		layoutInset: 4
 ]
 
 { #category : #'as yet unclassified' }
@@ -61,13 +65,13 @@ SBTSStMethod >> layoutCommands [
 { #category : #'as yet unclassified' }
 SBTSStMethod >> method [
 
-	^ self submorphs second
+	^ self firstSubmorph
 ]
 
 { #category : #'as yet unclassified' }
 SBTSStMethod >> methodClass [
 
-	^ self firstSubmorph object
+	^ self firstSubmorph firstSubmorph class = SBTSSTMethodDeclaration ifTrue: [self firstSubmorph firstSubmorph firstSubmorph object] ifFalse: [methodClass]
 ]
 
 { #category : #'as yet unclassified' }

@@ -11,6 +11,12 @@ SBTSRuntimeOSProcess class >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSRuntimeOSProcess class >> languages [
+
+	^ {SBTypescript. SBTSX}
+]
+
+{ #category : #'as yet unclassified' }
 SBTSRuntimeOSProcess class >> runtimeName [
 
 	^ 'node.js/ts-node'

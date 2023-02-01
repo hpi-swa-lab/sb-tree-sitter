@@ -84,7 +84,7 @@ SBTSSmalltalk class >> fileSuffix [
 
 { #category : #configuration }
 SBTSSmalltalk class >> grammarJson [
-	" https://github.com/smalltalk/blob/master/src/grammar.json "
+	" https://github.com/tom95/tree-sitter-smalltalk/blob/main/src/grammar.json "
 
 	^ '{
   "name": "smalltalk",
@@ -1163,7 +1163,8 @@ SBTSSmalltalk class >> highlightQuery [
 (keyword_selector (keyword) @major_declaration.part)
 (binary_selector (binary_operator) @major_declaration.part)
 (unary_selector (unary_identifier) @major_declaration.part)
-(unary_selector) @.part'
+(unary_selector) @.part
+(method) @.part'
 ]
 
 { #category : #configuration }

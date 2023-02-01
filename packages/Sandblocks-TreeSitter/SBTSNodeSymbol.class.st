@@ -44,7 +44,7 @@ SBTSNodeSymbol >> assertResults: results in: aParser [
 
 	results size > 0 ifFalse: [ | tree template |
 		aParser ascend.
-		tree := results printTree.
+		tree := aParser printTree.
 		template := self bodyTemplate.
 		self assert: false description: 'could not construct ', type]
 ]
@@ -297,7 +297,7 @@ SBTSNodeSymbol >> resultsForBlocksType: aParser [
 		SBToggledCode comment: '' active: 1 do: {
 			[results := {results detectMax: [:r | (r blocks collect: [:b | b recursiveSubmorphCount]) sum]}].
 			[self error: 'should deduplicate here?']}].
-	SBToggledCode comment: '' active: 0 do: {[self assertResults: results in: aParser]}.
+	SBToggledCode comment: '' active: 1 do: {[self assertResults: results in: aParser]}.
 	
 	^ results ifEmpty: [{}] ifNotEmpty: [ | result newBlocks |
 		result := results anyOne.

@@ -137,6 +137,7 @@ SBTSFileParser >> nextSibling [
 	| newPosition t |
 	t := cursor type.
 	newPosition := cursor endByteIndex: cursor node.
+	pendingText := nil.
 	cursor gotoNextSibling ifFalse: [self position: newPosition]
 ]
 

@@ -51,6 +51,20 @@ SBTSFile class >> languageForPath: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile class >> languageForPathAskInstall: aString [
+
+	| ext |
+	ext := FileDirectory extensionFor: aString.
+	^ SBTSLanguage allSubclasses
+		detect: [:lang | lang allFileSuffixes includes: ext]
+		ifNone: [
+			(UIManager default request: ('No languages installed for {1}. Install from Github?' format: {ext})) ifNotNil: [:url | | class |
+				class := SBTSLanguage installFromGitHub: url.
+				class class compile: ('allFileSuffixes ^ \{{1}}' format: {ext storeString}).
+				class]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> artefactChanged: aMethodBlock [
 
 	aMethodBlock = self ifTrue: [ | changed |
@@ -99,7 +113,7 @@ SBTSFile >> filepath [
 { #category : #'as yet unclassified' }
 SBTSFile >> filepath: aString collapsed: aBoolean [
 
-	self filepath: aString language: (self class languageForPath: aString) collapsed: aBoolean replace: true
+	self filepath: aString language: (self class languageForPathAskInstall: aString) collapsed: aBoolean replace: true
 ]
 
 { #category : #'as yet unclassified' }

@@ -2,7 +2,8 @@ Class {
 	#name : #SBTSNodeContextSensitiveText,
 	#superclass : #SBTSNodeText,
 	#instVars : [
-		'validCheck'
+		'validCheck',
+		'typeMatch'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -11,6 +12,13 @@ Class {
 SBTSNodeContextSensitiveText >> characterValid: aCharacter in: aSiblingsCollection [
 
 	^ validCheck value: aSiblingsCollection value: aCharacter
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeContextSensitiveText >> matchRegexAgainstType: aParser [
+
+	typeMatch ifNotNil: [^ aParser atEnd not and: [aParser peekIsNamed not and: [typeMatch value: aParser peekType value: aParser]]].
+	^ super matchRegexAgainstType: aParser
 ]
 
 { #category : #'as yet unclassified' }
@@ -27,6 +35,12 @@ SBTSNodeContextSensitiveText >> resultsFor: aParser [
 	contents := String streamContents: [:stream | [aParser peek isCharacter and: [validCheck value: aParser siblings value: aParser peek]] whileTrue: [stream nextPut: aParser next]].
 	aParser addBlock: (SBTSParseNode kind: #text slot: (SBTSSlot with: self) contents: (String withAll: contents)).
 	^ {aParser}
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeContextSensitiveText >> typeMatch: aBlock [
+
+	typeMatch := aBlock
 ]
 
 { #category : #'as yet unclassified' }

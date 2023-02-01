@@ -26,7 +26,7 @@ SBTSLanguage class >> allFileSuffixes [
 { #category : #accessing }
 SBTSLanguage class >> allRuntimes [
 
-	^ Array streamContents: [:stream | SBTSLanguageRuntime allSubclassesDo: [:cl | cl language = self ifTrue: [stream nextPut: cl]]]
+	^ Array streamContents: [:stream | SBTSLanguageRuntime allSubclassesDo: [:cl | (cl languages includes: self) ifTrue: [stream nextPut: cl]]]
 ]
 
 { #category : #'configuration - layout' }
@@ -265,6 +265,21 @@ SBTSLanguage class >> inputTransitionBlackList [
 	"return a list of types that should not be considered during transitions, e.g. the typical C comma operator that just chains multiple expressions and thus yields mostly noise"
 
 	^ #()
+]
+
+{ #category : #loading }
+SBTSLanguage class >> installFromGitHub: aString [
+
+	| name url |
+	url := aString.
+	(url beginsWith: 'https://github.com/') ifTrue: [url := url allButFirst: 'https://github.com/' size].
+	name := (url regex: 'tree-sitter-(.+)' matchesCollect: [:m | m allButFirst: 'tree-sitter-' size]) first.
+	'Importing ', name displayProgressFrom: 1 to: 2 during: [:bar |
+		bar value: 1.
+		SBTSLanguage loadLanguage: url name: name branch: 'master'.
+		bar value: 2].
+	
+	^ Smalltalk at: ('SB', name capitalized) asSymbol
 ]
 
 { #category : #lifecycle }

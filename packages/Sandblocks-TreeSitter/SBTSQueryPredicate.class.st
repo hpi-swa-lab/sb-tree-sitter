@@ -39,7 +39,7 @@ SBTSQueryPredicate >> predicatesOn: stream [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSQueryPredicate >> verify: aDictionary [
+SBTSQueryPredicate >> verify: aCollection [
 
 	| element argument predicate |
 	predicate := (self elements first isKindOf: SBTSQueryCapture)
@@ -48,14 +48,14 @@ SBTSQueryPredicate >> verify: aDictionary [
 	
 	(#('#match?' '#eq?') includes: predicate) ifTrue: [ | matches key contents |
 		key := self elements first contents allButFirst.
-		element := aDictionary at: key ifAbsent: [^ true].
+		element := (aCollection isDictionary ifTrue: [aCollection associations] ifFalse: [aCollection]) detect: [:pair | pair key = key] ifFound: #value ifNone: [^ true].
 		contents := element contents ifNil: [''].
 		argument := self elements second contents allButFirst allButLast.
 		
 		matches := predicate caseOf: {
 			['#match?'] -> [contents matchesRegex: argument].
 			['#eq?'] -> [contents = argument]}.
-		matches ifFalse: [aDictionary removeKey: key].
+		matches ifFalse: [aCollection isDictionary ifTrue: [aCollection removeKey: key] ifFalse: [aCollection removeAllSuchThat: [:pair | pair key = key]]].
 		^ matches].
 	
 	" unknown predicate, just pass "

@@ -135,14 +135,14 @@ SBTSLanguageTests >> testJavascriptToStringSemicolons [
 SBTSLanguageTests >> testParsePythonFormatString [
 
 	| string |
+	string := SBPython parseExpression: 'f"abc{var1}def{var2}ghi"'.
+	self assert: 'f"abc{var1}def{var2}ghi"' equals: string sourceString.
+	
 	string := SBPython parseExpression: '"abc"'.
 	self assert: 'abc' equals: string contents.
 	
 	string := SBPython parseExpression: 'f"abc"'.
-	self assert: 'abc' equals: string textMorphs second contents.
-	
-	string := SBPython parseExpression: 'f"abc{var1}def{var2}ghi"'.
-	self assert: 'f"abc{var1}def{var2}ghi"' equals: string sourceString
+	self assert: 'abc' equals: string textMorphs second contents
 ]
 
 { #category : #'testing - parse' }

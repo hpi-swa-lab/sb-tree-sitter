@@ -6856,7 +6856,7 @@ SBJavascript class >> preprocessGrammar: aGrammar [
 				label: '';
 				factory: aGrammar)]}.
 	aGrammar rules at: '_template_chars' put: (SBTSNodeText new
-		regexString: '.*';
+		regexString: '[^`]*';
 		factory: aGrammar).
 	
 	"causes unambiguous file parses (#testJsObjectWithReserved) and we don't need it for our purposes"
