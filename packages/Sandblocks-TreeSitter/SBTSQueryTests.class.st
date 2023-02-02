@@ -66,6 +66,7 @@ example
 example = {}
 render() {}
 }'.
+	self assert: (block childSandblocks first childSandblocks second matchesQuery: '(class_body member: (field_definition) member: (method_definition))').
 	self assert: (block matchesQuery: '(program (class_declaration
 name: (identifier)
 (class_body
@@ -220,6 +221,17 @@ SBTSQueryTests >> testMatchOptional [
 			type: 'identifier' factory: factory;
 			yourself)
 		capturesDo: [:c | ])
+]
+
+{ #category : #tests }
+SBTSQueryTests >> testMatchPositioned [
+
+	self assert: ((SBJavascript parseExpression: '["a", 2]') matchesQuery: '(array (number) (string))').
+	self deny: ((SBJavascript parseExpression: '["a", 2]') matchesQuery: '(array . (number) (string))').
+	self assert: ((SBJavascript parseExpression: '[2, "a"]') matchesQuery: '(array . (number) (string))').
+	
+	self deny: ((SBJavascript parseExpression: '["a", 2]') matchesQuery: '(array (number) (string) .)').
+	self assert: ((SBJavascript parseExpression: '[2, "a"]') matchesQuery: '(array (number) (string) .)')
 ]
 
 { #category : #tests }

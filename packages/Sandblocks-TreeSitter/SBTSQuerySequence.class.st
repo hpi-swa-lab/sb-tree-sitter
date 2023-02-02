@@ -34,9 +34,7 @@ SBTSQuerySequence >> evaluateAgainst: aBlock captures: aDictionary [
 		self flag: #todo.
 		((expr isKindOf: SBTSQueryElement) and: [expr contents = '.']) ifFalse: [ | anyMatch |
 			nextBlocks := expr requiresField
-				ifNotNil: [:field | | b |
-					b := blocks detect: [:child | child field = field] ifNone: [^ nil].
-					{b}]
+				ifNotNil: [:field | blocks select: [:child | child field = field]]
 				ifNil: [blocks copy].
 			
 			anyMatch := false.

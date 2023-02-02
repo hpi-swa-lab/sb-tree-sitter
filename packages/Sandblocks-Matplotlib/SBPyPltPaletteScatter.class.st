@@ -17,6 +17,10 @@ SBPyPltPaletteScatter class >> buildOn: aBuilder [
 		as: (SBPython parseKeywordArgument: 'alpha=0.5').
 	
 	aBuilder
+		addBlock: 'Set the color.'
+		as: (SBPython parseKeywordArgument: 'color="blue"') applyReplacements.
+	
+	aBuilder
 		addBlock: 'Set a label that will be displayed in the legend.'
 		as: (SBPython parseKeywordArgument: 'label="category 1"').
 	

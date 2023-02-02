@@ -174,9 +174,6 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 			detect: [:alt | alt type = #empty]
 			ifFound: [:alt | self morphs: alt buildEmpty].
 		^ true].
-	aString = ' ' ifTrue: [
-		self morphs: element buildEmpty.
-		^ true].
 	(aString = String tab or: [aString = String cr]) ifTrue: [^ false].
 	
 	options := SBTSInputParser new
@@ -188,6 +185,9 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 	
 	"if we cannot match anything here, look to the right of us to see if there is a position that could take the input"
 	options isEmpty ifTrue: [
+		aString = ' ' ifTrue: [
+			self morphs: element buildEmpty.
+			^ true].
 		true ifTrue: [
 			self container hasSubmorphs ifTrue: [
 				SBTSInputReconcile new

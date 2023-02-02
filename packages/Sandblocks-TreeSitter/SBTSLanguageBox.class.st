@@ -17,9 +17,9 @@ SBTSLanguageBox >> build [
 
 { #category : #'as yet unclassified' }
 SBTSLanguageBox >> buildClojure [
-	<lang: #clojure match: '(list_lit (sym_lit) ="polyglot-eval" (str_lit) @language (str_lit) @code)' sample: '(polyglot-eval "js" "some-code")'>
+	<lang: #clojure match: '(list_lit (sym_lit) ="polyglot-eval" (kwd_lit) @language (str_lit) @code)' sample: '(polyglot-eval :js "some-code")'>
 
-	bindings at: 'language' put: (SBTSBindingProxy trimQuotes: (bindings at: 'language')).
+	bindings at: 'language' put: (SBTSBindingProxy trimLeading: (bindings at: 'language')).
 	bindings at: 'code' put: (SBTSBindingProxy trimQuotes: (bindings at: 'code')).
 	
 	self build
@@ -30,7 +30,7 @@ SBTSLanguageBox >> buildJs [
 	<lang: #javascript match: '(call_expression
 	(member_expression (identifier) ="Polyglot" property: (_) ="eval")
 	(string (_) @language)
-	[(string (_) @code) (template_string) @code])' sample: 'Polyglot.eval("somelang", `code`)'>
+	[(string (_) @code) (template_string) @code] .)' sample: 'Polyglot.eval("somelang", `code`)'>
 
 	self build
 ]
@@ -40,8 +40,8 @@ SBTSLanguageBox >> buildPython [
 	<lang: #python match: '(call
 	(attribute (identifier) ="polyglot" (identifier) ="eval")
 	(argument_list
-		(keyword_argument (identifier) ="language" (string) @language)
-		(keyword_argument (identifier) ="string" (string) @code)) @x)' sample: 'polyglot.eval(language="somelang", string="""code""")'>
+		. (keyword_argument (identifier) ="language" (string) @language)
+		(keyword_argument (identifier) ="string" (string) @code) .) @x)' sample: 'polyglot.eval(language="somelang", string="""code""")'>
 
 	self build
 ]
@@ -50,7 +50,6 @@ SBTSLanguageBox >> buildPython [
 SBTSLanguageBox >> buildSmalltalk [
 	<lang: #smalltalk match: '(keyword_message receiver: (identifier) ="Polyglot" (keyword) ="eval:" (string) @language (keyword) ="string:" (string) @code)' sample: 'a Polyglot eval: ''python'' string: ''2 + 2'''>
 
-	
 	bindings at: 'language' put: (SBTSBindingProxy trimQuotes: (bindings at: 'language')).
 	bindings at: 'code' put: (SBTSBindingProxy trimQuotes: (bindings at: 'code')).
 	

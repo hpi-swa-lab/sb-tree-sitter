@@ -17,11 +17,21 @@ SBTSBindingProxy class >> getter: aBlock setter: anotherBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSBindingProxy class >> trimLeading: aBlock [
+
+	| leading |
+	leading := aBlock contents first.
+	^ SBTSBindingProxy
+		getter: [aBlock contents allButFirst]
+		setter: [:val | aBlock contents: ('{1}{2}' format: {leading. val})]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBindingProxy class >> trimQuotes: aBlock [
 
 	^ SBTSBindingProxy
 		getter: [aBlock contents allButFirst allButLast]
-		setter: [:val | aBlock contents: ('"{1}"' format: [val])]
+		setter: [:val | aBlock contents: ('"{1}"' format: {val})]
 ]
 
 { #category : #'as yet unclassified' }

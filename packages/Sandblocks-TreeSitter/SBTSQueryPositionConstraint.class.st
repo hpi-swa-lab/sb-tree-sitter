@@ -35,6 +35,8 @@ SBTSQueryPositionConstraint >> element: anObject [
 { #category : #'as yet unclassified' }
 SBTSQueryPositionConstraint >> evaluateAgainst: aBlock captures: aDictionary [
 
+	self constraint = #first ifTrue: [aBlock isFirstChild ifFalse: [^ nil]].
+	self constraint = #last ifTrue: [aBlock isLastChild ifFalse: [^ nil]].
 	^ self element evaluateAgainst: aBlock captures: aDictionary
 ]
 
