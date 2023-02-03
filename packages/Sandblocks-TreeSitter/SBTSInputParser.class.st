@@ -139,6 +139,12 @@ SBTSInputParser >> copyEmbeds: aBoolean [
 	copyEmbeds := aBoolean
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> grammar [
+
+	^ symbolStack first factory
+]
+
 { #category : #'initialize-release' }
 SBTSInputParser >> initialize [
 
@@ -531,6 +537,14 @@ SBTSInputParser >> siblings: aCollection [
 	"can set this for context-sensitive text nodes to gather information"
 
 	siblings := aCollection
+]
+
+{ #category : #'as yet unclassified' }
+SBTSInputParser >> skipExtras [
+
+	| extras |
+	extras := self grammar extras.
+	extras ifNotNil: [[extras anySatisfy: [:extra | extra matches: self peek asString]] whileTrue: [self next]]
 ]
 
 { #category : #'as yet unclassified' }

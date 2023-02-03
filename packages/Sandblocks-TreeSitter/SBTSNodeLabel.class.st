@@ -208,6 +208,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 	
 	(aParser peek isCharacter not and: [(aParser peek isTextMorph or: [aParser peek isStringMorph]) and: [self label = aParser peek contentsForEdit]]) ifTrue: [ | block |
 		block := aParser next.
+		aParser skipExtras.
 		^ {
 			aParser basicAddBlocks: {SBTSParseNode kind: #blockEmbed slot: (block slot trimNodesToTypeOf: self) contents: block}}].
 	
@@ -222,7 +223,7 @@ SBTSNodeLabel >> resultsFor: aParser [
 		active: 0
 		do: {[(labelStream atEnd or: [aParser atEnd]) ifFalse: [^ {}]]}.
 	
-	[aParser peek isCharacter and: [aParser peek isSeparator]] whileTrue: [aParser next].
+	aParser skipExtras.
 	^ {aParser addBlock: (self buildEmptyNodesWithLength: typedLength) first}
 ]
 

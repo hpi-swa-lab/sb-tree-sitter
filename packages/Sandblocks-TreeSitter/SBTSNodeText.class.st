@@ -190,7 +190,7 @@ SBTSNodeText >> resultsFor: aParser [
 				"way too strict, we are denying any text node that has the same contents as a keyword. realistically, many languages allow using keywords in places where the corresponding construct does not make sense."
 				self factory isNil or: [(self factory keywords includes: (String withAll: contents)) not]])
 				ifTrue: [
-					[aParser peek isCharacter and: [aParser peek isSeparator]] whileTrue: [aParser next].
+					aParser skipExtras.
 					^ {
 						aParser addBlock: (SBTSParseNode kind: #text slot: (SBTSSlot with: self) contents: (String withAll: contents))}]
 				ifFalse: [aParser stream position: start]].
@@ -200,6 +200,7 @@ SBTSNodeText >> resultsFor: aParser [
 			[false].
 			[aParser matchFullToken not and: [(remaining noneSatisfy: [:c | c isMorph]) and: [self prefixValidFor: remaining in: aParser blocks]]].
 			[plainPrefix beginsWith: remaining]}) ifTrue: [
+			aParser skipExtras.
 			^ {
 				aParser addBlock: (SBTSParseNode kind: #text slot: (SBTSSlot with: self) contents: (String withAll: (plainPrefix size > remaining size
 					ifTrue: [plainPrefix]

@@ -162,7 +162,11 @@ SBTSNodeSeq >> resultsFor: aParser [
 		newResults := (self elements at: index) resultsFor: parser.
 		index = self elements size
 			ifTrue: [
-				self hasStatementTerminator ifTrue: [newResults do: [:r | (r stream nextMatchAll: self language statementTerminator) ifTrue: [r stream atEnd ifTrue: [r blocks last lastDeepChild lastConstructed: true]]]].
+				self hasStatementTerminator ifTrue: [
+					newResults do: [:r |
+						(r stream nextMatchAll: self language statementTerminator) ifTrue: [
+							r skipExtras.
+							r stream atEnd ifTrue: [r blocks last lastDeepChild lastConstructed: true]]]].
 				results addAll: newResults]
 			ifFalse: [
 				newResults do: [:candidate |
