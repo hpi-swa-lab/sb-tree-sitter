@@ -759,6 +759,26 @@ SBTSBlockTest >> testJsReturn [
 	self assert: 'return 2;' equals: program sourceStringForCompare
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testJsReturnInBlock [
+
+	| program editor |
+	program := SBJavascript parseToplevel: '{}'.
+	editor := self editorFor: program.
+	program childSandblocks first startInputAtStart.
+	editor handle: (self keyboardEvent: Character cr).
+	self assert: '{
+
+}' equals: program sourceStringForCompare.
+	
+	program childSandblocks first startInputAtEnd.
+	editor handle: (self keyboardEvent: Character cr shift: true command: false).
+	self assert: '{
+
+
+}' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - cursor position' }
 SBTSBlockTest >> testJsReturnInString [
 

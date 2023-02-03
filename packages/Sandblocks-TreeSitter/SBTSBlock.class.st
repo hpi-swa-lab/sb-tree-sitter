@@ -639,8 +639,8 @@ SBTSBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 	| eval |
 	eval := [:pos | pos isInsert and: [pos command isStatementInsert]].
 	(anAboveBoolean
-		ifFalse: [self cursorPositionAfterThat: eval]
-		ifTrue: [self cursorPositionBeforeThat: eval]) ifNotNil: [:pos |
+		ifFalse: [self cursorPositionInSelfOrAfterThat: eval]
+		ifTrue: [self cursorPositionsInSelfOrBeforeThat: eval]) ifNotNil: [:pos |
 		pos command element isTSChoice ifTrue: [
 			pos command element alternatives
 				detect: [:alt | alt type = #empty]
