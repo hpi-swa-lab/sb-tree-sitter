@@ -224,7 +224,7 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 			parser := queue removeFirst copy.
 			currentPosition := parser position.
 			wasAtEnd := parser atEnd.
-			(parser peekForLabel: delimiter) ifTrue: [parser nextSibling].
+			parser skipDelimiters: delimiter.
 			self isStatementRepeater ifTrue: [
 				parser numberOfNewLinesToNext - 1 timesRepeat: [parser addBlock: (element alternatives atLast: 2) buildEmpty first].
 				(parser popPendingCommentsFor: element alternatives last) do: [:comment | parser addBlock: comment]].
@@ -232,7 +232,7 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 			results do: [:candidate |
 				"to fix troubles with infinitely repeating matches, we only accept results if they advanced the parser."
 				(candidate position > currentPosition or: [wasAtEnd not and: [candidate atEnd]]) ifTrue: [
-					(candidate peekForLabel: delimiter) ifTrue: [candidate nextSibling].
+					candidate skipDelimiters: delimiter.
 					self isStatementRepeater ifTrue: [(candidate popPendingCommentsFor: element alternatives last) do: [:comment | candidate addBlock: comment]].
 					stream nextPut: candidate.
 					multiple ifTrue: [queue add: candidate]]]]]) ifEmpty: [

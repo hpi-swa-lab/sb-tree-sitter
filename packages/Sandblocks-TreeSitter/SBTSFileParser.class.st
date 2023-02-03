@@ -292,6 +292,12 @@ SBTSFileParser >> replaceCurrentSlot: aSlot [
 	slots add: aSlot
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> skipDelimiters: aString [
+
+	(self peekForLabel: aString) ifTrue: [self nextSibling]
+]
+
 { #category : #accessing }
 SBTSFileParser >> slots [
 

@@ -74,7 +74,7 @@ SBTreeSitter >> c [
 SBTreeSitter >> clojure [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_clojure () module: 'tree-sitter-clojure'>
-	^ SBMetaBlockFactory tryPatchLibrary: 'sogaiu/tree-sitter-clojure' name: 'clojure' context: thisContext
+	^ SBMetaBlockFactory tryPatchLibrary: 'sogaiu/tree-sitter-clojure' name: 'clojure' context: thisContext branch: 'e57c569ae332ca365da623712ae1f50f84daeae2'
 ]
 
 { #category : #'ffi languages' }

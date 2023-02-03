@@ -24,9 +24,9 @@ SBClojure class >> fileSuffix [
 
 { #category : #configuration }
 SBClojure class >> grammarJson [
+	" https://github.com/sogaiu/tree-sitter-clojure/blob/master/src/grammar.json "
 
-    " https://github.com/sogaiu/tree-sitter-clojure/blob/master/src/grammar.json "
-    ^ '{
+	^ '{
   "name": "clojure",
   "rules": {
     "source": {
