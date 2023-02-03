@@ -434,20 +434,21 @@ SBTSBlock >> deleteCommandForNoReplace: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSBlock >> deselectedTextMorph: aMorph for: aNewPosition [
+SBTSBlock >> deselectedTextMorph: aMorph for: aNewPosition cursor: aCursor [
 
-	super deselectedTextMorph: aMorph for: aNewPosition.
+	super deselectedTextMorph: aMorph for: aNewPosition cursor: aCursor.
 	(aNewPosition isText and: [aNewPosition block isKindOf: SBTSInputReconcile]) ifTrue: [^ self].
 	
-	self owner ifNotNil: [
-		self owner submorphs
+	aCursor previousMoveWasExplicit ifTrue: [
+		self owner ifNotNil: [
+			self owner submorphs
+				from: 1
+				to: self submorphIndex
+				do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]].
+		aMorph owner submorphs
 			from: 1
-			to: self submorphIndex
-			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]].
-	aMorph owner submorphs
-		from: 1
-		to: aMorph submorphIndex
-		do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]
+			to: aMorph submorphIndex
+			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]]
 ]
 
 { #category : #'as yet unclassified' }

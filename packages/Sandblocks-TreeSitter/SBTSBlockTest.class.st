@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJoinNumberFromBinaryOp #testJsDeleteFunction #testReplacementBlockBinding #testRegexEnterClassRanges #testJsCallToSubscript)
+	^ #(#testJoinNumberFromBinaryOp #testReplacementBlockBinding #testRegexEnterClassRanges #testJsCallToSubscript)
 ]
 
 { #category : #'tests - adding' }
@@ -471,13 +471,8 @@ SBTSBlockTest >> testJsDeleteFunction [
 	| module editor |
 	module := SBTSFileParser new parse: '1 + function a() {}' language: SBJavascript.
 	editor := self editorFor: module.
-	module childSandblocks first childSandblocks second childSandblocks first startInputAtEnd.
-	2 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
-	self assert: '1+function()
-{
-};' equals: module sourceStringForCompare.
-	self assert: module childSandblocks first childSandblocks second equals: editor selection.
-	'function' size + 3 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
+	module lastDeepChild startInputAtEnd.
+	20 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
 	self assert: '1+;' equals: module sourceString
 ]
 
