@@ -320,7 +320,10 @@ SBTSBlock >> deleteBeforeCursor [
 					ifNotNil: [:c |
 						c block textMorphs
 							at: textMorphIndex
-							ifPresent: [:other | other ~= c textMorph ifTrue: [editor startInput: editor selection at: currentCursor replacingContents: false in: other] ifFalse: [c textMorph moveCursorTo: currentCursor]]
+							ifPresent: [:other |
+								other ~= c textMorph
+									ifTrue: [editor startInput: editor selection at: currentCursor replacingContents: false in: other]
+									ifFalse: [c textMorph moveCursorTo: currentCursor]]
 							ifAbsent: [c textMorph moveCursorTo: currentCursor]]
 					ifNil: [editor selection lastDeepChild startInputAtEnd]].
 			(SBTSInputReconcile new
@@ -867,7 +870,7 @@ SBTSBlock >> placeCursorCloseAfterDo: aBlock [
 			SBToggledCode
 				comment: ''
 				active: 1
-				do: {[self activeTextMorph ~= c morph]. [c block ~= self or: [c isSelect]]}])
+				do: {[self sandblockEditor selection activeTextMorph ~= c morph]. [c block ~= self or: [c isSelect]]}])
 			ifTrue: [c isSelect ifFalse: [index := index + 1]]
 			ifFalse: [found := true]].
 	
