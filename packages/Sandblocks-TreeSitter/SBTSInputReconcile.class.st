@@ -320,8 +320,12 @@ SBTSInputReconcile >> tryAdjacentBefore: aMorph given: aString [
 SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 
 	self positionsAfter: aBlock from: target do: [:position |
-		(position isText and: [position textMorph contentsForEdit isEmpty]) ifTrue: ["TODO: do we want the full reconciliation logic or just reinterpret?"
-		^ self tryReinterpretFrom: position textMorph in: position block given: aString at: self class endIndex].
+		position isText ifTrue: [
+			^ position textMorph contentsForEdit
+				ifEmpty: ["TODO: do we want the full reconciliation logic or just reinterpret?"
+				self tryReinterpretFrom: position textMorph in: position block given: aString at: self class endIndex]
+				ifNotEmpty: ["if we would go past a filled text morph, abort"
+				{}]].
 		position isInsert ifTrue: [(self optionsForInsert: position given: aString) ifNotEmpty: [:res | ^ res]]].
 	^ {}
 ]
