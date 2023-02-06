@@ -45,7 +45,7 @@ SBTSNodeLabel >> buildEmptyNodesWithLength: aNumber class: aClass [
 	^ {
 		self needsBlockWrapper
 			ifTrue: [
-				SBTSParseNode
+				aClass
 					kind: #block
 					slot: (SBTSSlot with: self)
 					contents: {aClass kind: #editableLabel slot: slot contents: (self label first: aNumber)}]
