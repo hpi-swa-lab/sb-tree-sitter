@@ -34,11 +34,11 @@ SBTSNodeLabel >> buildEmpty [
 { #category : #'as yet unclassified' }
 SBTSNodeLabel >> buildEmptyNodes [
 
-	^ self buildEmptyNodesWithLength: 0
+	^ self buildEmptyNodesWithLength: 0 class: SBTSParseNode
 ]
 
 { #category : #'as yet unclassified' }
-SBTSNodeLabel >> buildEmptyNodesWithLength: aNumber [
+SBTSNodeLabel >> buildEmptyNodesWithLength: aNumber class: aClass [
 
 	| slot |
 	slot := SBTSSlot with: self.
@@ -48,9 +48,9 @@ SBTSNodeLabel >> buildEmptyNodesWithLength: aNumber [
 				SBTSParseNode
 					kind: #block
 					slot: (SBTSSlot with: self)
-					contents: {SBTSParseNode kind: #editableLabel slot: slot contents: (self label first: aNumber)}]
+					contents: {aClass kind: #editableLabel slot: slot contents: (self label first: aNumber)}]
 			ifFalse: [
-				SBTSParseNode
+				aClass
 					kind: (self isEditable ifTrue: [#editableLabel] ifFalse: [#label])
 					slot: slot
 					contents: (self isEditable ifTrue: [self label first: aNumber] ifFalse: [self label])]}
@@ -224,23 +224,16 @@ SBTSNodeLabel >> resultsFor: aParser [
 		do: {[(labelStream atEnd or: [aParser atEnd]) ifFalse: [^ {}]]}.
 	
 	aParser skipExtras.
-	^ {aParser addBlock: (self buildEmptyNodesWithLength: typedLength) first}
+	^ {aParser addBlock: (self buildEmptyNodesWithLength: typedLength class: SBTSParseNode) first}
 ]
 
 { #category : #parsing }
 SBTSNodeLabel >> resultsForBlocks: aParser [
 
 	| success |
-	success := [:range | | block |
-		block := (self isEditable ifTrue: [SBTSTextMorph] ifFalse: [SBTSLabel]) new
-			contents: self label;
-			slot: (SBTSSlot with: self).
-		self needsBlockWrapper ifTrue: [
-			block := SBTSBlock new
-				range: range;
-				addMorphBack: block;
-				slot: block slot].
-		{aParser addBlock: block}].
+	success := [:range |
+		{
+			aParser addBlock: ((self buildEmptyNodesWithLength: self label size class: SBTSFileParseNode) first range: range)}].
 	
 	(aParser peekForLabel: self label) ifTrue: [ | range |
 		range := aParser currentRange.

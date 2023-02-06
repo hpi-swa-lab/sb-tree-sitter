@@ -226,7 +226,7 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 			wasAtEnd := parser atEnd.
 			parser skipDelimiters: delimiter.
 			self isStatementRepeater ifTrue: [
-				parser numberOfNewLinesToNext - 1 timesRepeat: [parser addBlock: (element alternatives atLast: 2) buildEmpty first].
+				parser numberOfNewLinesToNext - 1 timesRepeat: [parser addBlock: (SBTSFileParseNode kind: #block slot: (SBTSSlot with: (element alternatives atLast: 2)) contents: {})].
 				(parser popPendingCommentsFor: element alternatives last) do: [:comment | parser addBlock: comment]].
 			results := self element resultsForBlocks: parser.
 			results do: [:candidate |

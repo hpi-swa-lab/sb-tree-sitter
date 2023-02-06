@@ -17,7 +17,7 @@ Class {
 { #category : #blocks }
 SBTSFileParser >> addBlock: aBlock [
 
-	self assert: aBlock isTSMorph.
+	self assert: (aBlock isKindOf: SBTSParseNode).
 	blocks add: aBlock
 ]
 
@@ -62,6 +62,12 @@ SBTSFileParser >> blocks: aCollection [
 SBTSFileParser >> contentsSize [
 
 	^ stream originalContents size
+]
+
+{ #category : #testing }
+SBTSFileParser >> copyEmbeds [
+
+	^ false
 ]
 
 { #category : #accessing }
@@ -172,7 +178,7 @@ SBTSFileParser >> parse: aString language: aLanguage [
 			factory: language grammar) resultsForBlocks: self.
 		self assert: results size = 1.
 		self assert: results anyOne blocks size = 1.
-		results anyOne blocks anyOne]
+		results anyOne blocks anyOne buildWith: self]
 ]
 
 { #category : #'as yet unclassified' }
@@ -253,10 +259,11 @@ SBTSFileParser >> peekUncapturedText [
 SBTSFileParser >> popPendingCommentsFor: anElement [
 
 	^ cursor popComments collect: [:pair |
-		anElement buildEmpty first
-			contents: pair first;
-			range: pair second;
-			yourself]
+		(SBTSFileParseNode kind: #block slot: (SBTSSlot with: anElement) contents: {
+			SBTSFileParseNode
+				kind: #text
+				slot: (SBTSSlot with: anElement bodyTemplate)
+				contents: pair first}) range: pair second]
 ]
 
 { #category : #stream }
@@ -275,7 +282,7 @@ SBTSFileParser >> position: aNumber [
 SBTSFileParser >> postCopy [
 
 	super postCopy.
-	blocks := blocks collect: [:block | block copyBlock].
+	blocks := blocks collect: [:block | block copy].
 	cursor := cursor copy
 ]
 

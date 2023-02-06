@@ -214,11 +214,7 @@ SBTSNodeText >> resultsFor: aParser [
 SBTSNodeText >> resultsForBlocks: aParser [
 
 	| success |
-	success := [:text |
-		{
-			aParser addBlock: (SBTSTextMorph new
-				contents: text;
-				slot: (SBTSSlot with: self))}].
+	success := [:text | {aParser addBlock: (SBTSFileParseNode kind: #text slot: (SBTSSlot with: self) contents: text)}].
 	
 	^ (aParser peekHasText and: [self characterValid: aParser peekText in: aParser blocks])
 		ifTrue: [success value: aParser text]

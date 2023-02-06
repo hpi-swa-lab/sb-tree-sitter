@@ -180,11 +180,7 @@ SBTSNodeAlias >> resultsForBlocks: aParser [
 					result nextSibling.
 					true]
 				ifFalse: [false]]) collect: [:result | | blocks |
-			blocks := {
-				SBTSBlock new
-					range: range;
-					addAllMorphs: result blocks;
-					slot: (SBTSSlot with: self)}.
+			blocks := {(SBTSFileParseNode kind: #block slot: (SBTSSlot with: self) contents: result blocks) range: range}.
 			result
 				blocks: currentBlocks, blocks;
 				yourself]].

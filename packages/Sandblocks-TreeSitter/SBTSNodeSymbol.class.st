@@ -295,7 +295,7 @@ SBTSNodeSymbol >> resultsForBlocksType: aParser [
 			ifFalse: [false]].
 	results size > 1 ifTrue: [
 		SBToggledCode comment: '' active: 1 do: {
-			[results := {results detectMax: [:r | (r blocks collect: [:b | b recursiveSubmorphCount]) sum]}].
+			[results := {results detectMax: [:r | (r blocks collect: [:b | b recursiveNodeCount]) sum]}].
 			[self error: 'should deduplicate here?']}].
 	SBToggledCode comment: '' active: 0 do: {[self assertResults: results in: aParser]}.
 	
@@ -303,12 +303,7 @@ SBTSNodeSymbol >> resultsForBlocksType: aParser [
 		result := results anyOne.
 		newBlocks := self isBlockInlined
 			ifTrue: [result blocks do: [:b | (self isBlockInlinedInParent not or: [b slot includesRepeat not]) ifTrue: [b slot: (b slot addNode: self)]]]
-			ifFalse: [
-				{
-					SBTSBlock new
-						range: range;
-						addAllMorphs: result blocks;
-						slot: (SBTSSlot with: self)}].
+			ifFalse: [{(SBTSFileParseNode kind: #block slot: (SBTSSlot with: self) contents: result blocks) range: range}].
 		{
 			result
 				blocks: currentBlocks, newBlocks;
