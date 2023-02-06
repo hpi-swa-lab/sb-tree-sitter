@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'slot',
 		'highlight',
-		'range'
+		'range',
+		'valid'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -212,6 +213,13 @@ SBTSBlock >> chooseFrom: aCollection [
 		otherwise: [UIManager default chooseFrom: aCollection]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> clearCacheSelf [
+
+	valid := nil.
+	super clearCacheSelf
+]
+
 { #category : #'*Sandblocks-TreeSitter-Project' }
 SBTSBlock >> codeAction [
 	<action>
@@ -256,6 +264,13 @@ SBTSBlock >> colorPolicy [
 SBTSBlock >> compatibleWithType: aString [
 
 	^ self slot compatibleWithType: aString
+]
+
+{ #category : #testing }
+SBTSBlock >> computeIsBlockBody [
+
+	self slot firstNode bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [node isStatementRepeater]) ifTrue: [^ true]].
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -449,6 +464,18 @@ SBTSBlock >> deselectedTextMorph: aMorph for: aNewPosition cursor: aCursor [
 			from: 1
 			to: aMorph submorphIndex
 			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]]
+]
+
+{ #category : #drawing }
+SBTSBlock >> drawBackgroundOn: aCanvas [
+
+	| policy |
+	policy := self colorPolicy.
+	^ aCanvas
+		frameAndFillRectangle: self bounds
+		fillColor: Color transparent
+		borderWidth: (policy borderWidthForBlock: self)
+		borderColor: (policy borderColorForBlock: self)
 ]
 
 { #category : #'as yet unclassified' }
@@ -673,8 +700,7 @@ SBTSBlock >> insertStatementHasCandidate [
 { #category : #testing }
 SBTSBlock >> isBlockBody [
 
-	self slot firstNode bodyTemplate allChildrenDo: [:node | (node isTSRepeat and: [node isStatementRepeater]) ifTrue: [^ true]].
-	^ false
+	^ self valueOfProperty: #isBlockBody ifAbsentPut: [self computeIsBlockBody]
 ]
 
 { #category : #testing }
@@ -1364,9 +1390,7 @@ SBTSBlock >> useSuggestion: anItem [
 { #category : #'as yet unclassified' }
 SBTSBlock >> valid [
 
-	self flag: #todo.
-	" cache valid "
-	^ self textMorphs allSatisfy: [:t | t ifNotNil: [t slot firstNode validFor: t effectiveContents in: self submorphs] ifNil: [true]]
+	^ valid ifNil: [valid := self textMorphs allSatisfy: [:t | t ifNotNil: [t slot firstNode validFor: t effectiveContents in: self submorphs] ifNil: [true]]]
 ]
 
 { #category : #'as yet unclassified' }

@@ -67,7 +67,7 @@ SBFileEditor >> openFile: aFile [
 
 	self currentFile ifNotNil: [:currentFile | projectSemantics didClose: currentFile].
 	aFile isDirectory ifFalse: [ | newFile |
-		newFile := (SBTSFile for: aFile pathString)
+		newFile := (SBTSFile forNoReplace: aFile pathString)
 			semantics: projectSemantics;
 			yourself.
 		self openMorphInView: newFile.
