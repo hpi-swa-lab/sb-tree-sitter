@@ -172,6 +172,20 @@ SBTSBlock >> asSlider: converter [
 		do: [self language sourceForSlider: self]
 ]
 
+{ #category : #layout }
+SBTSBlock >> cellGap: aNumber [
+	"noop to prevent creating layout props"
+
+	
+]
+
+{ #category : #layout }
+SBTSBlock >> cellPositioning: aNumber [
+	"noop to prevent creating layout props"
+
+	
+]
+
 { #category : #accessing }
 SBTSBlock >> children [
 
@@ -588,6 +602,16 @@ SBTSBlock >> grammarHandler [
 	^ SBTSGrammarHandler new
 ]
 
+{ #category : #layout }
+SBTSBlock >> hResizing [
+
+	self layoutPolicy ifNil: [^ #rigid].
+	
+	(self layoutPolicy isLayoutRoot: self) ifFalse: [^ #shrinkWrap].
+	
+	^ self floating ifTrue: [#rigid] ifFalse: [#spaceFill]
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> handleMouseEnter: anEvent [
 
@@ -635,12 +659,7 @@ SBTSBlock >> initialize [
 		start: (SBTSPosition line: 0 character: 0)
 		end: (SBTSPosition line: 0 character: 0).
 	
-	self
-		layoutPolicy: SBAlgebraLayout new;
-		layoutInset: 0;
-		cellGap: 2 sbScaled;
-		hResizing: #shrinkWrap;
-		vResizing: #shrinkWrap
+	self layoutPolicy: SBTSLayout new
 ]
 
 { #category : #'as yet unclassified' }
@@ -791,6 +810,23 @@ SBTSBlock >> lastConstructedChild [
 	^ nil
 ]
 
+{ #category : #layout }
+SBTSBlock >> layout: aLayoutState [
+
+	submorphs do: [:m |
+		(m isTextMorph or: [m isStringMorph])
+			ifTrue: [m setFinalBounds: (aLayoutState place: m)]
+			ifFalse: [
+				m owner isBlockBody ifTrue: [aLayoutState nextIsBreak: true].
+				(aLayoutState shouldRelayout: m) ifTrue: [
+					m hasSubmorphs
+						ifTrue: [
+							m layout: aLayoutState.
+							m setFinalBounds: m submorphBounds.
+							m layoutPolicy bottomRightLayoutState: aLayoutState bottomRight]
+						ifFalse: [m setFinalBounds: (aLayoutState place: m)]]]]
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> layoutCommands [
 
@@ -808,6 +844,13 @@ SBTSBlock >> layoutCommands [
 							ifTrue: [stream nextPut: (SBAlgebraCommand softLineOrGap withGap: true)]
 							ifFalse: [(self factory gapBetween: a and: b) ifTrue: [stream nextPut: SBAlgebraCommand gap]]]].
 			self children ifNotEmpty: [stream nextPut: self lastSubmorph layoutCommands]])
+]
+
+{ #category : #layout }
+SBTSBlock >> layoutInset: aNumber [
+	"noop to prevent creating layout props"
+
+	
 ]
 
 { #category : #hierarchy }
@@ -1385,6 +1428,12 @@ SBTSBlock >> useSuggestion: anItem [
 		allBlocksDetect: [:b | b isUnknown]
 		ifFound: [:b | b startInput]
 		ifNone: []
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> vResizing [
+
+	^ #shrinkWrap
 ]
 
 { #category : #'as yet unclassified' }

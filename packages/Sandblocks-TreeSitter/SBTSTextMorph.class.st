@@ -233,7 +233,7 @@ SBTSTextMorph >> highlight: aString [
 
 	highlight := aString.
 	paragraph := nil.
-	self layoutChanged
+	"self layoutChanged"
 ]
 
 { #category : #'as yet unclassified' }

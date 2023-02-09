@@ -175,7 +175,7 @@ SBTSFile >> initialize [
 	
 	self
 		layoutInset: 4;
-		useAlgebraLayout;
+		layoutPolicy: TableLayout new;
 		attachDecorator: SBResizableDecorator new;
 		attachDecorator: SBForceMoveDecorator new
 ]
@@ -189,11 +189,7 @@ SBTSFile >> isArtefact [
 { #category : #'as yet unclassified' }
 SBTSFile >> layoutCommands [
 
-	^ SBAlgebraCommand container
-		morph: self;
-		data: (self submorphs
-			collect: [:s | s layoutCommands]
-			separatedBy: [SBAlgebraCommand hardLine withGap: true])
+	^ SBAlgebraCommand morph data: self
 ]
 
 { #category : #'as yet unclassified' }
