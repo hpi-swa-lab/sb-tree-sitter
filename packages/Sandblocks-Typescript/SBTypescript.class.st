@@ -11110,6 +11110,20 @@ SBTypescript class >> language [
     ^ #typescript
 ]
 
+{ #category : #'as yet unclassified' }
+SBTypescript class >> postprocessGrammar: aGrammar [
+
+	| alts |
+	super postprocessGrammar: aGrammar.
+	alts := (aGrammar rules at: #class_body) elements second element elements.
+	
+	alts third hasStatementTerminator: true.
+	alts third elements second delete.
+	
+	alts fourth hasStatementTerminator: true.
+	alts fourth elements second delete
+]
+
 { #category : #configuration }
 SBTypescript class >> preprocessGrammar: aGrammar [
 

@@ -589,6 +589,14 @@ SBTSParseFileTest >> testTSXDashedAttrName [
 ]
 
 { #category : #'tests - languages' }
+SBTSParseFileTest >> testTsClassMember [
+
+	SBTypescript parseToplevel: 'class {
+	a
+}'
+]
+
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testTypescriptTernary [
 	"https://github.com/tree-sitter/tree-sitter-typescript/issues/200"
 
