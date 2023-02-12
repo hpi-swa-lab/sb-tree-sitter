@@ -165,6 +165,12 @@ SBTSNodeChoice >> traverseBlocks: aStream do: aBlock [
 				ifFound: [:alt | alt traverseBlocks: aStream do: aBlock]]
 ]
 
+{ #category : #testing }
+SBTSNodeChoice >> validFor: aString in: aSiblingsCollection [
+
+	^ alternatives anySatisfy: [:alt | alt validFor: aString in: aSiblingsCollection]
+]
+
 { #category : #printing }
 SBTSNodeChoice >> writeSourceOn: aStream indent: aNumber [
 

@@ -226,7 +226,11 @@ SBTSNodeRepeat >> resultsForBlocks: aParser [
 			wasAtEnd := parser atEnd.
 			parser skipDelimiters: delimiter.
 			self isStatementRepeater ifTrue: [
-				parser numberOfNewLinesToNext - 1 timesRepeat: [parser addBlock: (SBTSFileParseNode kind: #block slot: (SBTSSlot with: (element alternatives atLast: 2)) contents: {})].
+				parser numberOfNewLinesToNext - 1 timesRepeat: [
+					parser addBlock: (SBTSFileParseNode
+						kind: #block
+						slot: (SBTSSlot with: (element alternatives detect: [:e | e type = #empty]))
+						contents: {})].
 				(parser popPendingCommentsFor: element alternatives last) do: [:comment | parser addBlock: comment]].
 			results := self element resultsForBlocks: parser.
 			results do: [:candidate |

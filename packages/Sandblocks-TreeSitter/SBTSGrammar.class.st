@@ -704,10 +704,15 @@ SBTSGrammar >> softLineBreakBetween: aBlock and: anotherBlock [
 { #category : #helper }
 SBTSGrammar >> trimExtra: aString [
 
-	| stream |
+	| stream prefix last |
 	stream := aString readStream.
 	[stream atEnd not and: [extras anySatisfy: [:extra | extra matchesStreamPrefix: stream]]] whileTrue.
-	^ stream upToEnd
+	
+	prefix := stream upToEnd.
+	last := prefix size.
+	[last > 0 and: [extras anySatisfy: [:extra | extra matchesPrefix: (prefix at: last) asString]]] whileTrue: [last := last - 1].
+	
+	^ prefix copyFrom: 1 to: last
 ]
 
 { #category : #helper }

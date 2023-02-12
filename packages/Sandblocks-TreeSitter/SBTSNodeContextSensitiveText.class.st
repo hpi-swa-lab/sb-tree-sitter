@@ -9,6 +9,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSNodeContextSensitiveText >> canBeEmpty [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeContextSensitiveText >> characterValid: aCharacter in: aSiblingsCollection [
 
 	^ validCheck value: aSiblingsCollection value: aCharacter

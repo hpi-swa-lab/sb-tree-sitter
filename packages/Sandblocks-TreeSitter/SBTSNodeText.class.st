@@ -49,6 +49,12 @@ SBTSNodeText >> buildMorphWith: aString slot: aSlot [
 		slot: aSlot
 ]
 
+{ #category : #testing }
+SBTSNodeText >> canBeEmpty [
+
+	^ true
+]
+
 { #category : #'as yet unclassified' }
 SBTSNodeText >> characterValid: aCharacter in: aParser [
 
@@ -231,7 +237,10 @@ SBTSNodeText >> resultsForBlocks: aParser [
 							ret := success value: aParser peekType.
 							aParser nextSibling.
 							ret]
-						ifFalse: [(self regex matches: '') ifTrue: [{aParser}] ifFalse: [{}]]]]
+						ifFalse: [
+							(self canBeEmpty and: [self regex matches: ''])
+								ifTrue: [{aParser}]
+								ifFalse: [{}]]]]
 ]
 
 { #category : #'as yet unclassified' }
