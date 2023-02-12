@@ -37,7 +37,7 @@ SBTSFile class >> forNoReplace: aFilepathString [
 
 	^ self new
 		filepath: aFilepathString
-		language: (self languageForPath: aFilepathString)
+		language: (self languageForPathAskInstall: aFilepathString)
 		collapsed: false
 		replace: false
 ]

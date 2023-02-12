@@ -367,6 +367,12 @@ SBTSGrammar >> isBlockInlinedInParent: aTypeString [
 ]
 
 { #category : #testing }
+SBTSGrammar >> isComment: aType [
+
+	^ language commentSymbols includes: aType
+]
+
+{ #category : #testing }
 SBTSGrammar >> isExtra: aString [
 
 	^ extras anySatisfy: [:regex | regex matches: aString]

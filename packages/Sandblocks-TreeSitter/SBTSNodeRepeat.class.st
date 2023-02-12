@@ -282,13 +282,10 @@ SBTSNodeRepeat >> transformToStatementRepeater [
 				SBTSNodeSymbol new
 					type: sym factory: self factory;
 					hidden: true}]
-		ifNil: [{}]), (lang commentSymbol
-		ifNotNil: [:sym |
-			{
-				SBTSNodeSymbol new
-					type: sym factory: self factory;
-					hidden: true}]
-		ifNil: [{}]).
+		ifNil: [{}]), (lang commentSymbols collect: [:sym |
+			SBTSNodeSymbol new
+				type: sym factory: self factory;
+				hidden: true]).
 	choice alternatives: alts
 ]
 

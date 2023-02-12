@@ -58,9 +58,9 @@ SBTSLanguage class >> canParse: aString [
 ]
 
 { #category : #configuration }
-SBTSLanguage class >> commentSymbol [
+SBTSLanguage class >> commentSymbols [
 
-	^ #comment
+	^ {#comment}
 ]
 
 { #category : #'loading - helper' }
@@ -409,7 +409,7 @@ SBTSLanguage class >> parseToplevel: aString [
 SBTSLanguage class >> postprocessGrammar: aGrammar [
 	"hook for modifying properties of the grammar just after we apply inlining rules etc"
 
-	(self emptyLineSymbol notNil or: [self commentSymbol notNil]) ifNotNil: [
+	(self emptyLineSymbol notNil or: [self commentSymbols notEmpty]) ifNotNil: [
 		self emptyLineSymbol ifNotNil: [:sym |
 			aGrammar rules at: sym put: (SBTSNodeText new
 				factory: aGrammar;

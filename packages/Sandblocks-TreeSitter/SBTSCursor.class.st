@@ -283,7 +283,7 @@ SBTSCursor >> shouldSkipParsedNode: aNode [
 
 	| type |
 	type := library nodeType: aNode.
-	type = #comment ifTrue: [
+	(type includesSubstring: #comment) ifTrue: [
 		comments add: {(library textForNode: aNode) withoutTrailingBlanks. self range}.
 		^ true].
 	^ factory language statementTerminator = type
