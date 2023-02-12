@@ -129,6 +129,17 @@ SBTSNodeChoice >> resultsFor: aParser [
 SBTSNodeChoice >> resultsForBlocks: aParser [
 
 	^ Array streamContents: [:stream | self alternatives do: [:alt | (alt resultsForBlocks: aParser copy) do: [:result | stream nextPut: result]]]
+	"this version would work if we had ordered choice. for example, python patterns are rougly defined as
+		identifier ',' | (identifier ',')+
+	so given an input such as a,b=... the first choice successfully parses the input but when descending realize that we did not consume all input
+	| results |
+	results := OrderedCollection new: 1.
+	self alternatives do: [:alt | | currentPosition |
+		currentPosition := aParser position.
+		(alt resultsForBlocks: aParser copy) do: [:result |
+			results add: result.
+			result position > currentPosition ifTrue: [^ results]]].
+	^ results"
 ]
 
 { #category : #parsing }

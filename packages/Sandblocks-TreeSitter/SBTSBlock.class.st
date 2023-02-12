@@ -472,8 +472,9 @@ SBTSBlock >> drawBackgroundOn: aCanvas [
 	| policy |
 	policy := self colorPolicy.
 	^ aCanvas
-		frameAndFillRectangle: self bounds
-		fillColor: Color transparent
+		frameAndFillRoundRect: self bounds
+		radius: policy cornerRadius
+		fillStyle: Color transparent
 		borderWidth: (policy borderWidthForBlock: self)
 		borderColor: (policy borderColorForBlock: self)
 ]
@@ -999,13 +1000,13 @@ SBTSBlock >> printTreeOn: aStream indent: aNumber [
 SBTSBlock >> promptTransition [
 	<action>
 
-	(self language preferNoPopup and: [self language language = #smalltalk and: [ActiveEvent shiftPressed not]]) ifTrue: [ | message target |
+	"(self language preferNoPopup and: [self language language = #smalltalk and: [ActiveEvent shiftPressed not]]) ifTrue: [ | message target |
 		target := (self orOwnerSuchThat: [:b | b isTSBlock and: [b slot compatibleWithType: #expression]]) ifNil: [^ self].
 		message := (self language blockFor: #'unary_message') adaptSlotFor: target slot.
 		message childSandblocks first replaceBlock: target.
 		^ self sandblockEditor do: (SBReplaceCommand new
 			target: target replacer: message;
-			selectAfter: message childSandblocks last)].
+			selectAfter: message childSandblocks last)]."
 	
 	SBTSInputReconcile new
 		explicitAppend: self isUnknown not;

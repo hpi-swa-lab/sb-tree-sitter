@@ -53,7 +53,7 @@ SBTSSmalltalk class >> declarationsInScope: aScopeBlock do: aClosure [
 	aScopeBlock childSandblocks do: [:block |
 		block type = #'block_argument' ifTrue: [aClosure value: (SBTSDeclaration block: block selector: block contents allButFirst label: 'block arg')].
 		block type = #temporaries ifTrue: [block childSandblocks do: [:temp | aClosure value: (SBTSDeclaration block: temp label: 'temporary')]].
-		(#(#'binary_selector' #'keyword_selector') includes: block type) ifTrue: [(block childSandblocks select: [:arg | arg type = #identifier]) do: [:arg | aClosure value: (SBTSDeclaration block: arg label: 'argument')]]].
+		(#(#'binary_selector' #'keyword_selector') includes: block type) ifTrue: [(block allBlocksSelect: [:arg | arg isTSMorph and: [arg type = #identifier]]) do: [:arg | aClosure value: (SBTSDeclaration block: arg label: 'argument')]]].
 	
 	{
 		self blockFor: #self.

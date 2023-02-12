@@ -509,6 +509,9 @@ SBTSLanguage class >> softLineBreakBetween: aBlock and: anotherBlock [
 	self flag: #fixme.
 	"what we want to do is check whether they belong to the same repeater but are of different instances of the repeat"
 	(firstRepeater notNil and: [firstRepeater = secondRepeater and: [firstRepeater element isTSSymbol or: [firstRepeater element isTSChoice]]]) ifTrue: [^ true].
+	
+	anotherBlock submorphIndex > 2 ifTrue: [^ true].
+	
 	^ false
 ]
 

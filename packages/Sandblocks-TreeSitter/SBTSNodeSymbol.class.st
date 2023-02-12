@@ -264,12 +264,14 @@ SBTSNodeSymbol >> resultsForBlocks: aParser [
 	^ aParser memoizedAt: aParser position for: self ifNone: [ | ret |
 		ret := nil.
 		(self isSuperType or: [aParser justEnteredAlias]) ifTrue: [ | currentBlocks |
+			aParser level: aParser level + 1.
 			currentBlocks := aParser blocks.
 			aParser justEnteredAlias: false.
 			aParser blocks: OrderedCollection new.
 			((self bodyTemplate resultsForBlocks: aParser) collect: [:res |
 				res blocks do: [:b | b slot: (b slot addNode: self)].
 				res blocks: currentBlocks, res blocks.
+				res level: res level - 1.
 				res]) ifNotEmpty: [:results | "haven't found a good way yet to distinguish between just-entered-alias applying or not. e.g., in named_imports it should not apply to identifier.
 so, as a workaround, we just fall-through if we did not match and try to take the symbol"
 			ret := results]].
@@ -293,10 +295,7 @@ SBTSNodeSymbol >> resultsForBlocksType: aParser [
 				option nextSibling.
 				true]
 			ifFalse: [false]].
-	results size > 1 ifTrue: [
-		SBToggledCode comment: '' active: 1 do: {
-			[results := {results detectMax: [:r | (r blocks collect: [:b | b recursiveNodeCount]) sum]}].
-			[self error: 'should deduplicate here?']}].
+	results size > 1 ifTrue: [results := {results detectMax: [:r | (r blocks collect: [:b | b recursiveNodeCount]) sum]}].
 	SBToggledCode comment: '' active: 0 do: {[self assertResults: results in: aParser]}.
 	
 	^ results ifEmpty: [{}] ifNotEmpty: [ | result newBlocks |

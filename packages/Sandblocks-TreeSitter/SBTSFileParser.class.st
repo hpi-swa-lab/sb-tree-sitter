@@ -9,7 +9,8 @@ Class {
 		'memoizations',
 		'pendingText',
 		'justEnteredAlias',
-		'position'
+		'position',
+		'level'
 	],
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
@@ -30,6 +31,7 @@ SBTSFileParser >> addSlot: aNode [
 { #category : #'as yet unclassified' }
 SBTSFileParser >> ascend [
 
+	level := level - 1.
 	^ pendingText
 		ifNotNil: [
 			pendingText := nil.
@@ -91,7 +93,8 @@ SBTSFileParser >> cursor [
 { #category : #'as yet unclassified' }
 SBTSFileParser >> descend [
 
-	cursor gotoFirstChild ifFalse: [pendingText := cursor text]
+	cursor gotoFirstChild ifFalse: [pendingText := cursor text].
+	level := level + 1
 ]
 
 { #category : #'as yet unclassified' }
@@ -103,7 +106,8 @@ SBTSFileParser >> initialize [
 	blocks := OrderedCollection new.
 	memoizations := Dictionary new.
 	justEnteredAlias := false.
-	position := 0
+	position := 0.
+	level := 0
 ]
 
 { #category : #'as yet unclassified' }
@@ -116,6 +120,18 @@ SBTSFileParser >> justEnteredAlias [
 SBTSFileParser >> justEnteredAlias: aBoolean [
 
 	justEnteredAlias := aBoolean
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> level [
+
+	^ level
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> level: aNumber [
+
+	level := aNumber
 ]
 
 { #category : #memo }
@@ -204,7 +220,7 @@ SBTSFileParser >> peekForLabel: aString [
 { #category : #'as yet unclassified' }
 SBTSFileParser >> peekForType: aString [
 
-	self peekUncapturedText ifNotEmpty: [^ false].
+	self peekUncapturedText isEmpty ifFalse: [^ false].
 	^ self peekIsNamed and: [self peekType = aString]
 ]
 
