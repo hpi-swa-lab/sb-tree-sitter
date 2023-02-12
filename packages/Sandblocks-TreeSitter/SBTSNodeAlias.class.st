@@ -166,7 +166,10 @@ SBTSNodeAlias >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeAlias >> resultsForBlocks: aParser [
 
-	(aParser atEnd not and: [named ifTrue: [aParser peekForType: self alias] ifFalse: [aParser peekForLabel: self alias]]) ifTrue: [ | currentBlocks results range |
+	(aParser atEnd not and: [
+		named
+			ifTrue: [(aParser peekForType: self alias) or: [aParser justEnteredAlias]]
+			ifFalse: [aParser peekForLabel: self alias]]) ifTrue: [ | currentBlocks results range aliasedResults |
 		currentBlocks := aParser blocks.
 		aParser blocks: OrderedCollection new.
 		aParser descend.
@@ -174,7 +177,14 @@ SBTSNodeAlias >> resultsForBlocks: aParser [
 		range := aParser currentRange.
 		results := self bodyTemplate resultsForBlocks: aParser.
 		aParser justEnteredAlias: false.
-		^ (results select: [:result |
+		
+		aliasedResults := results groupBy: [:result | | node |
+			"nested alias, we can't ascend again because we just did. However, 
+we need to add all aliases to the slot"
+			node := result blocks anyOne slot lastNode.
+			node ~= self and: [node isTSAlias]].
+		
+		^ (((aliasedResults at: false ifAbsent: {}) select: [:result |
 			result ascend
 				ifTrue: [
 					result nextSibling.
@@ -183,7 +193,9 @@ SBTSNodeAlias >> resultsForBlocks: aParser [
 			blocks := {(SBTSFileParseNode kind: #block slot: (SBTSSlot with: self) contents: result blocks) range: range}.
 			result
 				blocks: currentBlocks, blocks;
-				yourself]].
+				yourself]), ((aliasedResults at: true ifAbsent: {}) collect: [:result |
+			result blocks anyOne slot addNode: self.
+			result])].
 	^ {}
 ]
 

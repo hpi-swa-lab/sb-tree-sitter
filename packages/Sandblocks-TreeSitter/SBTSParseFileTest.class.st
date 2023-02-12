@@ -583,6 +583,12 @@ SBTSParseFileTest >> testStSymbol [
 ]
 
 { #category : #'tests - languages' }
+SBTSParseFileTest >> testTSXDashedAttrName [
+
+	SBTSX parseToplevel: '<a a-a="a"/>'
+]
+
+{ #category : #'tests - languages' }
 SBTSParseFileTest >> testTypescriptTernary [
 	"https://github.com/tree-sitter/tree-sitter-typescript/issues/200"
 

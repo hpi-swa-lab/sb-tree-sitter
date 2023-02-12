@@ -8839,6 +8839,15 @@ SBTSX class >> grammarJson [
               {
                 "type": "SYMBOL",
                 "name": "this"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "predefined_type"
+                },
+                "named": true,
+                "value": "identifier"
               }
             ]
           }
@@ -10836,6 +10845,16 @@ SBTSX class >> grammarJson [
       {
         "type": "SYMBOL",
         "name": "expression"
+      }
+    ],
+    [
+      {
+        "type": "SYMBOL",
+        "name": "type_query"
+      },
+      {
+        "type": "SYMBOL",
+        "name": "_type_query_subscript_expression"
       }
     ],
     [

@@ -555,7 +555,7 @@ SBTreeSitter >> tsq [
 SBTreeSitter >> tsx [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_tsx () module: 'tree-sitter-tsx'>
-	^ SBTSLanguage tryPatchLibrary: 'tree-sitter/tree-sitter-typescript' name: 'tsx' context: thisContext branch: 'master' subpath: 'tsx'
+	^ SBTSLanguage tryPatchLibrary: 'tom95/tree-sitter-typescript' name: 'tsx' context: thisContext branch: 'ternary-range-200' subpath: 'tsx'
 ]
 
 { #category : #'ffi languages' }

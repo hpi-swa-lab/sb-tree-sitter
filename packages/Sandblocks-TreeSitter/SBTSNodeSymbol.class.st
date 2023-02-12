@@ -42,9 +42,10 @@ SBTSNodeSymbol >> allSuperTypesDo: aBlock [
 { #category : #parsing }
 SBTSNodeSymbol >> assertResults: results in: aParser [
 
-	results size > 0 ifFalse: [ | tree template |
+	results size > 0 ifFalse: [ | tree template text |
 		aParser ascend.
 		tree := aParser printTree.
+		text := aParser cursor text.
 		template := self bodyTemplate.
 		self assert: false description: 'could not construct ', type]
 ]
