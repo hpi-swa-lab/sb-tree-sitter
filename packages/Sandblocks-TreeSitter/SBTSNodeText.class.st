@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'regexString',
 		'regex',
-		'plainPrefix'
+		'plainPrefix',
+		'fullMatchRegex'
 	],
 	#category : #'Sandblocks-TreeSitter-Nodes'
 }
@@ -58,7 +59,7 @@ SBTSNodeText >> canBeEmpty [
 { #category : #'as yet unclassified' }
 SBTSNodeText >> characterValid: aCharacter in: aParser [
 
-	^ self regex matches: aCharacter
+	^ fullMatchRegex matches: aCharacter
 ]
 
 { #category : #query }
@@ -168,6 +169,8 @@ SBTSNodeText >> regexString: aString [
 	self example: [SBTSNodeText new] args: [{'\$'}] label: 'special prefix'.
 	regexString := aString.
 	regex := aString asRegex.
+	fullMatchRegex := (aString, '$') asRegex.
+	
 	"extract all leading elements of the regex that are just plain characters -- used for early feedback during matching"
 	link := regex instVarNamed: #matcher.
 	plainPrefix := String streamContents: [:s |

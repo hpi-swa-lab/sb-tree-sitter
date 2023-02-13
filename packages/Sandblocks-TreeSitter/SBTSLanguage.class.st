@@ -414,7 +414,7 @@ SBTSLanguage class >> postprocessGrammar: aGrammar [
 			aGrammar rules at: sym put: (SBTSNodeContextSensitiveText new
 				factory: aGrammar;
 				regexString: '(?!x)x|^$';
-				validCheck: [:s :c | true];
+				validCheck: [:s :c | false];
 				typeMatch: [:type :parser | false])].
 		
 		aGrammar rules keysAndValuesDo: [:symbol :body | body allElementsDo: [:node | (node isTSRepeat and: [self isStatementContainer: node in: (SBTSNodeSymbol new type: symbol factory: aGrammar)]) ifTrue: [node transformToStatementRepeater]]]]
@@ -439,6 +439,12 @@ SBTSLanguage class >> rebuild [
 
 	self invalidate.
 	^ self instance
+]
+
+{ #category : #lifecycle }
+SBTSLanguage class >> rebuildAll [
+
+	self allSubclassesDo: [:c | [c rebuild] on: Error do: []]
 ]
 
 { #category : #'configuration - layout' }
