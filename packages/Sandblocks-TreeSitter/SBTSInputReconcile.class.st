@@ -6,7 +6,8 @@ Class {
 		'currentChoices',
 		'findOptionsBlock',
 		'insertIndex',
-		'explicitAppend'
+		'explicitAppend',
+		'cursorPosition'
 	],
 	#classVars : [
 		'PreferNoPopup'
@@ -59,6 +60,12 @@ SBTSInputReconcile >> contentsChanged [
 SBTSInputReconcile >> currentTextMorph [
 
 	^ self firstSubmorph
+]
+
+{ #category : #accessing }
+SBTSInputReconcile >> cursorPosition: aPosition [
+
+	cursorPosition := aPosition
 ]
 
 { #category : #actions }
@@ -275,6 +282,7 @@ SBTSInputReconcile >> positionsAfter: aBlock from: aSourceBlock do: aClosure [
 	aBlock owner isTSBlock ifFalse: [^ self].
 	aBlock owner cursorPositionsDo: [:position |
 		(foundSelf and: [position isInsert or: [position isText]]) ifTrue: [aClosure value: position].
+		(cursorPosition notNil and: [cursorPosition isInsert and: [position isInsert and: [cursorPosition = position]]]) ifTrue: [foundSelf := true].
 		(position isText and: [
 			aSourceBlock isTextMorph
 				ifTrue: [position textMorph = aSourceBlock]

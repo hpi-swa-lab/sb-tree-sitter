@@ -192,6 +192,7 @@ SBTSNodeInsertCommand >> tryExpandWithInput: aString [
 			self container hasSubmorphs ifTrue: [
 				SBTSInputReconcile new
 					explicitAppend: true;
+					cursorPosition: self container sandblockEditor cursor cursorPosition;
 					for: self adjacent input: aString at: SBTSInputReconcile endIndex.
 				^ SBDoItCommand new]].
 		(self container sandblockEditor cursor cursorPosition

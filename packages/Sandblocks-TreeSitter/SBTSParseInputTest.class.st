@@ -38,6 +38,18 @@ SBTSParseInputTest >> statement: aTypeString with: aContentsString [
 	^ stmt
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSParseInputTest >> testAdjacentInsert [
+
+	| method editor |
+	method := SBTSSmalltalk parseToplevel: 'a []'.
+	editor := self editorAndWorldFor: method.
+	editor lastDeepChild startInsertAtStart.
+	self type: '^a' in: editor.
+	self assert: 'a
+[^a]' equals: method sourceStringForCompare
+]
+
 { #category : #'tests - wrap' }
 SBTSParseInputTest >> testAssignmentPattern [
 
