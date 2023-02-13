@@ -11,7 +11,7 @@ Class {
 		'buffer',
 		'serverMessageHandler'
 	],
-	#category : #'Sandblocks-TreeSitter-Project'
+	#category : #'Sandblocks-TreeSitter-LanguageClient'
 }
 
 { #category : #'as yet unclassified' }

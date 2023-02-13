@@ -5,7 +5,7 @@ Class {
 		'morph',
 		'container'
 	],
-	#category : #'Sandblocks-TreeSitter-Project'
+	#category : #'Sandblocks-TreeSitter-LanguageClient'
 }
 
 { #category : #contents }

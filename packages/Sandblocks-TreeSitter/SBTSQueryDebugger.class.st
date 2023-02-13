@@ -10,7 +10,7 @@ Class {
 		'syntaxInvalid',
 		'sourceTree'
 	],
-	#category : #'Sandblocks-TreeSitter-Tools'
+	#category : #'Sandblocks-TreeSitter-Replacements'
 }
 
 { #category : #'as yet unclassified' }

@@ -1,5 +1,5 @@
 Class {
 	#name : #SBTSActiveRuntime,
 	#superclass : #DynamicVariable,
-	#category : #'Sandblocks-TreeSitter'
+	#category : #'Sandblocks-TreeSitter-Files'
 }

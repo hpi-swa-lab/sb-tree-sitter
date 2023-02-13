@@ -1,7 +1,7 @@
 Class {
 	#name : #SBTSRuntimeChooser,
 	#superclass : #SBComboBox,
-	#category : #'Sandblocks-TreeSitter'
+	#category : #'Sandblocks-TreeSitter-Files'
 }
 
 { #category : #'as yet unclassified' }

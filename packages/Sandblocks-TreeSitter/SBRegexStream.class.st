@@ -5,7 +5,7 @@ Class {
 		'maxReadPosition',
 		'maxPeekPosition'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Utils'
 }
 
 { #category : #'as yet unclassified' }

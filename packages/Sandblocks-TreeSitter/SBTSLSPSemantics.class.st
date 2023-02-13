@@ -6,7 +6,7 @@ Class {
 		'textDocumentVersions',
 		'currentDiagnostics'
 	],
-	#category : #'Sandblocks-TreeSitter-Project'
+	#category : #'Sandblocks-TreeSitter-LanguageClient'
 }
 
 { #category : #helper }

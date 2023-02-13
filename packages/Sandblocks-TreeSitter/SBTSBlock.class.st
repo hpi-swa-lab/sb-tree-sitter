@@ -7,7 +7,7 @@ Class {
 		'range',
 		'valid'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-UI'
 }
 
 { #category : #'as yet unclassified' }

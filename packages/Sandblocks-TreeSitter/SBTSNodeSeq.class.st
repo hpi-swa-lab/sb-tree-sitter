@@ -5,7 +5,7 @@ Class {
 		'elements',
 		'hasStatementTerminator'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #'as yet unclassified' }

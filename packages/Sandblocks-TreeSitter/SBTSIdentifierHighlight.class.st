@@ -1,7 +1,7 @@
 Class {
 	#name : #SBTSIdentifierHighlight,
 	#superclass : #SBTSListener,
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Utils'
 }
 
 { #category : #'as yet unclassified' }

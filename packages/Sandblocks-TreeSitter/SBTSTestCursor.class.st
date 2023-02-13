@@ -7,7 +7,7 @@ Class {
 		'indices',
 		'factory'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Tests'
 }
 
 { #category : #'as yet unclassified' }

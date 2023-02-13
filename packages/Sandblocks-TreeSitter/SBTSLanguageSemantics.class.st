@@ -1,7 +1,7 @@
 Class {
 	#name : #SBTSLanguageSemantics,
 	#superclass : #Object,
-	#category : #'Sandblocks-TreeSitter-Project'
+	#category : #'Sandblocks-TreeSitter-LanguageClient'
 }
 
 { #category : #notifications }

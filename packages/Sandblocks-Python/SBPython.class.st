@@ -5332,15 +5332,6 @@ SBPython >> browseImplementorsFor: aBlock [
 	^ method
 ]
 
-{ #category : #'as yet unclassified' }
-SBPython >> configure [
-
-	self noteUncapturedText: #('string').
-	self blockInlineInParent: #('parameters').
-	self blockInline: #('expression_statement').
-	self hardLineBreakMatcher: [:b | ((b isKindOf: SBInlineBlockLabel) and: [b label = ':']) and: [(b submorphAfter ifNotNil: #type) ~= 'type' and: [(b parentSandblock ifNotNil: #type) ~= 'pair']]]
-]
-
 { #category : #semantics }
 SBPython >> declarationsInScope: aScopeBlock do: aClosure [
 

@@ -1,7 +1,7 @@
 Class {
 	#name : #SBTSReplacementBlockTest,
 	#superclass : #SBTest,
-	#category : #'Sandblocks-TreeSitter-Replacements'
+	#category : #'Sandblocks-TreeSitter-Tests'
 }
 
 { #category : #'as yet unclassified' }

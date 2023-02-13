@@ -1,7 +1,7 @@
 Class {
 	#name : #SBTSNodeBlank,
 	#superclass : #SBTSNodeBase,
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #'as yet unclassified' }

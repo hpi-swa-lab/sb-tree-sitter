@@ -11,7 +11,7 @@ Class {
 		'autoRestart',
 		'sematics'
 	],
-	#category : #'Sandblocks-TreeSitter'
+	#category : #'Sandblocks-TreeSitter-Files'
 }
 
 { #category : #'as yet unclassified' }

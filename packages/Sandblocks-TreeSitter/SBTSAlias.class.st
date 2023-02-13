@@ -6,7 +6,7 @@ Class {
 		'object',
 		'parentType'
 	],
-	#category : #'Sandblocks-TreeSitter'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #'as yet unclassified' }

@@ -7,7 +7,7 @@ Class {
 	#classInstVars : [
 		'instance'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #'configuration - layout' }

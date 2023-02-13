@@ -6,7 +6,7 @@ Class {
 		'factory',
 		'parent'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #accessing }

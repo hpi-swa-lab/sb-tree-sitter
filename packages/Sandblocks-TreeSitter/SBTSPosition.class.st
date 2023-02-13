@@ -5,7 +5,7 @@ Class {
 		'line',
 		'character'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-LanguageClient'
 }
 
 { #category : #'instance creation' }

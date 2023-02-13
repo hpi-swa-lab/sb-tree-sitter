@@ -7,31 +7,22 @@ Class {
 { #category : #tests }
 SBTSQueryTests >> testCaptureOptional [
 
-	| factory |
-	factory := SBMetaBlockFactory new.
 	self assert: (SBTSQuery new
-		execute: '((comment) (identifier (test))? @id)'
-		against: (SBInlineBlockSequence new addAllMorphsBack: {
-			SBInlineBlockSymbol new type: 'comment' factory: factory.
-			SBInlineBlockSymbol new type: 'identifier' factory: factory})
+		execute: '((number) (identifier (test))? @id)'
+		against: (SBJavascript parseToplevel: '2; a')
 		capturesDo: [:c | self assert: (c includesKey: 'id') not]).
 	self assert: (SBTSQuery new
-		execute: '((comment) (identifier)? @id)'
-		against: (SBInlineBlockSequence new addAllMorphsBack: {
-			SBInlineBlockSymbol new type: 'comment' factory: factory.
-			SBInlineBlockSymbol new type: 'test' factory: factory.
-			SBInlineBlockSymbol new type: 'identifier' factory: factory})
+		execute: '((number) (identifier)? @id)'
+		against: (SBJavascript parseToplevel: '2; ''a''; a')
 		capturesDo: [:c | self assert: 'identifier' equals: (c at: 'id') type])
 ]
 
 { #category : #tests }
 SBTSQueryTests >> testDoesNotCaptureMismatches [
 
-	| factory |
-	factory := SBMetaBlockFactory new.
 	SBTSQuery new
-		execute: '(array (identifier) @a)'
-		against: ((SBInlineBlockSymbol new type: 'not_array' factory: factory) addMorphBack: (SBInlineBlockRepeat new addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory)))
+		execute: '(not_array (identifier) @a)'
+		against: (SBJavascript parseToplevel: '[a]') childSandblocks first
 		capturesDo: [:c | self assert: c isEmpty]
 ]
 
@@ -39,7 +30,7 @@ SBTSQueryTests >> testDoesNotCaptureMismatches [
 SBTSQueryTests >> testIgnoresComments [
 
 	| structure |
-	structure := SBInlineBlockSymbol new type: 'identifier' factory: nil.
+	structure := SBJavascript parseExpression: 'a'.
 	self assert: (SBTSQuery new
 		execute: '(identifier) @id
 ; comment
@@ -88,17 +79,13 @@ SBTSQueryTests >> testJsPairMatchString [
 { #category : #tests }
 SBTSQueryTests >> testMatchAll [
 
-	| q factory array |
-	factory := SBMetaBlockFactory new.
-	array := (SBInlineBlockSymbol new type: 'array' factory: factory)
-		addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory);
-		addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory);
-		addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory).
+	| q array |
+	array := SBJavascript parseExpression: '[a, a, a]'.
 	
 	q := SBTSQuery new.
 	q prepare: '(array (identifier) @i)'.
 	self
-		assert: (array submorphs collect: [:i | #i -> i] as: OrderedCollection)
+		assert: (array childSandblocks collect: [:i | #i -> i] as: OrderedCollection)
 		equals: (q executeCaptureAgainst: array)
 ]
 
@@ -106,7 +93,9 @@ SBTSQueryTests >> testMatchAll [
 SBTSQueryTests >> testMatchAlternativeAnonymousNodesWithCaptures [
 
 	| structure |
-	structure := SBInlineBlockLabel new label: 'a'.
+	structure := SBTSTextMorph new
+		contents: 'a';
+		slot: (SBTSSlot with: (SBTSNodeLabel new label: 'a')).
 	self assert: (SBTSQuery new execute: '["a" "b" "c"] @keyword' against: structure capturesDo: [:c |
 		self assert: (c includesKey: 'keyword').
 		self assert: structure equals: (c at: 'keyword')])
@@ -117,34 +106,35 @@ SBTSQueryTests >> testMatchAlternativeSymbols [
 
 	self assert: (SBTSQuery new
 		execute: '[(identifier) (number)]'
-		against: (SBInlineBlockSymbol new type: 'number' factory: nil)
+		against: (SBJavascript parseExpression: '1')
 		capturesDo: [:c | ]).
 	self assert: (SBTSQuery new
 		execute: '[(identifier) (number)]'
-		against: (SBInlineBlockSymbol new type: 'identifier' factory: nil)
+		against: (SBJavascript parseExpression: 'a')
 		capturesDo: [:c | ]).
 	self deny: (SBTSQuery new
 		execute: '[(identifier) (number)]'
-		against: (SBInlineBlockSymbol new type: 'string' factory: nil)
+		against: (SBJavascript parseExpression: '''a''')
 		capturesDo: [:c | ])
 ]
 
 { #category : #tests }
 SBTSQueryTests >> testMatchAnonymousNode [
 
-	self assert: (SBTSQuery new execute: '"a"' against: (SBInlineBlockLabel new label: 'a') capturesDo: [:c | ])
+	self assert: (SBTSQuery new
+		execute: '"a"'
+		against: (SBTSTextMorph new
+			contents: 'a';
+			slot: (SBTSSlot with: (SBTSNodeLabel new label: 'a')))
+		capturesDo: [:c | ])
 ]
 
 { #category : #tests }
 SBTSQueryTests >> testMatchAnyChild [
 
-	| factory |
-	factory := SBMetaBlockFactory new.
 	self assert: (SBTSQuery new
 		execute: '(array (identifier))'
-		against: ((SBInlineBlockSymbol new type: 'array' factory: factory)
-			addMorphBack: (SBInlineBlockSymbol new type: 'number' factory: factory);
-			addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory))
+		against: (SBJavascript parseExpression: '[2, a]')
 		capturesDo: [:c | ])
 ]
 
@@ -157,13 +147,9 @@ SBTSQueryTests >> testMatchConsecutive [
 { #category : #tests }
 SBTSQueryTests >> testMatchFieldName [
 
-	| factory |
-	factory := SBMetaBlockFactory new.
 	self assert: (SBTSQuery new
-		execute: '(call function: (identifier))'
-		against: ((SBInlineBlockSymbol new type: 'call' factory: factory) addMorphBack: (SBInlineBlockSymbol new
-			type: 'identifier' factory: factory;
-			field: 'function'))
+		execute: '(call_expression function: (identifier))'
+		against: (SBJavascript parseExpression: 'a()')
 		capturesDo: [:c | ])
 ]
 
@@ -171,7 +157,7 @@ SBTSQueryTests >> testMatchFieldName [
 SBTSQueryTests >> testMatchMultiple [
 
 	| structure |
-	structure := SBInlineBlockSymbol new type: 'identifier' factory: nil.
+	structure := SBJavascript parseExpression: 'a'.
 	self assert: (SBTSQuery new execute: '(identifier) @id (number) @num' against: structure capturesDo: [:c |
 		self assert: (c includesKey: 'id').
 		self assert: structure equals: (c at: 'id').
@@ -181,45 +167,36 @@ SBTSQueryTests >> testMatchMultiple [
 { #category : #tests }
 SBTSQueryTests >> testMatchNestedSymbols [
 
-	| factory |
-	factory := SBMetaBlockFactory new.
 	self assert: (SBTSQuery new
 		execute: '(array (identifier))'
-		against: ((SBInlineBlockSymbol new type: 'array' factory: factory) addMorphBack: (SBInlineBlockRepeat new addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory)))
+		against: (SBJavascript parseToplevel: '[a]') childSandblocks first
 		capturesDo: [:c | ]).
 	self deny: (SBTSQuery new
 		execute: '(array (identifier))'
-		against: ((SBInlineBlockSymbol new type: 'array' factory: factory) addMorphBack: (SBInlineBlockRepeat new addMorphBack: (SBInlineBlockSymbol new type: 'number' factory: factory)))
+		against: (SBJavascript parseToplevel: '[1]') childSandblocks first
 		capturesDo: [:c | ])
 ]
 
 { #category : #tests }
 SBTSQueryTests >> testMatchNestedSymbolsWithCaptures [
 
-	| factory structure |
-	factory := SBMetaBlockFactory new.
-	structure := (SBInlineBlockSymbol new type: 'array' factory: factory) addMorphBack: (SBInlineBlockRepeat new addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory)).
+	| structure |
+	structure := (SBJavascript parseToplevel: '[a]') childSandblocks first.
 	self assert: (SBTSQuery new execute: '(array (identifier) @i) @a' against: structure capturesDo: [:c |
 		self assert: structure equals: (c at: 'a').
-		self assert: structure firstSubmorph firstSubmorph equals: (c at: 'i')])
+		self assert: structure childSandblocks first equals: (c at: 'i')])
 ]
 
 { #category : #tests }
 SBTSQueryTests >> testMatchOptional [
 
-	| factory |
-	factory := SBMetaBlockFactory new.
 	self assert: (SBTSQuery new
 		execute: '(identifier)?'
-		against: (SBInlineBlockSymbol new
-			type: 'abc' factory: factory;
-			yourself)
+		against: (SBJavascript parseExpression: '''a''')
 		capturesDo: [:c | ]).
 	self assert: (SBTSQuery new
 		execute: '(identifier)?'
-		against: (SBInlineBlockSymbol new
-			type: 'identifier' factory: factory;
-			yourself)
+		against: (SBJavascript parseExpression: 'a')
 		capturesDo: [:c | ])
 ]
 
@@ -237,55 +214,40 @@ SBTSQueryTests >> testMatchPositioned [
 { #category : #tests }
 SBTSQueryTests >> testMatchPredicate [
 
-	| factory |
-	factory := SBMetaBlockFactory new.
 	self assert: (SBTSQuery new
 		execute: '(identifier) @a (#match? @a "a")'
-		against: (SBInlineBlockSymbol new
-			type: 'identifier' factory: factory block: (SBInlineBlockText new regexString: 'a'; contents: 'a');
-			yourself)
+		against: (SBJavascript parseExpression: 'a')
 		capturesDo: [:c | ]).
 	self deny: (SBTSQuery new
 		execute: '(identifier) @a (#match? @a "a")'
-		against: (SBInlineBlockSymbol new
-			type: 'identifier' factory: factory block: (SBInlineBlockText new regexString: 'b'; contents: 'b');
-			yourself)
+		against: (SBJavascript parseExpression: 'b')
 		capturesDo: [:c | ])
 ]
 
 { #category : #tests }
 SBTSQueryTests >> testMatchRequiresField [
 
-	| factory |
-	factory := SBMetaBlockFactory new.
 	self deny: (SBTSQuery new
-		execute: '(call function: (identifier))'
-		against: ((SBInlineBlockSymbol new type: 'call' factory: factory) addMorphBack: (SBInlineBlockSymbol new type: 'identifier' factory: factory))
+		execute: '(call_expression functionXX: (identifier))'
+		against: (SBJavascript parseExpression: 'a()')
 		capturesDo: [:c | ])
 ]
 
 { #category : #tests }
 SBTSQueryTests >> testMatchSequence [
 
-	| factory |
-	factory := SBMetaBlockFactory new.
 	self assert: (SBTSQuery new
-		execute: '((comment) (identifier))'
-		against: (SBInlineBlockSequence new addAllMorphsBack: {
-			SBInlineBlockSymbol new type: 'comment' factory: factory.
-			SBInlineBlockSymbol new type: 'identifier' factory: factory})
+		execute: '((identifier) (number))'
+		against: (SBJavascript parseToplevel: 'a; 2')
 		capturesDo: [:c | ])
 ]
 
 { #category : #tests }
 SBTSQueryTests >> testMatchSequenceWithCaptures [
 
-	| structure factory |
-	factory := SBMetaBlockFactory new.
-	structure := SBInlineBlockSequence new addAllMorphsBack: {
-		SBInlineBlockSymbol new type: 'comment' factory: factory.
-		SBInlineBlockSymbol new type: 'identifier' factory: factory}.
-	self assert: (SBTSQuery new execute: '((comment) @c (identifier) @i)' against: structure capturesDo: [:c |
+	| structure |
+	structure := SBJavascript parseToplevel: 'a; 2'.
+	self assert: (SBTSQuery new execute: '((identifier) @c (number) @i)' against: structure capturesDo: [:c |
 		self assert: (c includesKey: 'c').
 		self assert: structure firstSubmorph equals: (c at: 'c').
 		self assert: (c includesKey: 'i')])
@@ -296,7 +258,7 @@ SBTSQueryTests >> testMatchSkipCaptures [
 
 	self assert: (SBTSQuery new
 		execute: '[(identifier) (number)] (identifier) @tag'
-		against: (SBInlineBlockSymbol new type: 'number' factory: nil)
+		against: (SBJavascript parseExpression: '12')
 		capturesDo: [:c | self assert: c isEmpty])
 ]
 
@@ -305,15 +267,17 @@ SBTSQueryTests >> testMatchSymbol [
 
 	self assert: (SBTSQuery new
 		execute: '(identifier)'
-		against: (SBInlineBlockSymbol new type: 'identifier' factory: nil)
+		against: (SBJavascript parseExpression: 'a')
 		capturesDo: [:c | ]).
 	self deny: (SBTSQuery new
 		execute: '(identifier1)'
-		against: (SBInlineBlockSymbol new type: 'identifier' factory: nil)
+		against: (SBJavascript parseExpression: 'a')
 		capturesDo: [:c | ]).
 	self deny: (SBTSQuery new
 		execute: '(identifier1)'
-		against: (SBInlineBlockLabel new label: 'label')
+		against: (SBTSTextMorph new
+			contents: 'a';
+			slot: (SBTSSlot with: (SBTSNodeLabel new label: 'a')))
 		capturesDo: [:c | ])
 ]
 
@@ -321,7 +285,7 @@ SBTSQueryTests >> testMatchSymbol [
 SBTSQueryTests >> testMatchSymbolWithCapture [
 
 	| structure |
-	structure := SBInlineBlockSymbol new type: 'identifier' factory: nil.
+	structure := SBJavascript parseExpression: 'a'.
 	self assert: (SBTSQuery new execute: '(identifier) @id' against: structure capturesDo: [:c |
 		self assert: (c includesKey: 'id').
 		self assert: structure equals: (c at: 'id')])
@@ -330,11 +294,8 @@ SBTSQueryTests >> testMatchSymbolWithCapture [
 { #category : #tests }
 SBTSQueryTests >> testMatchWildcard [
 
-	| factory structure |
-	factory := SBMetaBlockFactory new.
-	structure := (SBInlineBlockSymbol new type: 'pair' factory: factory) addMorphBack: (SBInlineBlockSymbol new
-		type: 'identifier' factory: factory;
-		field: 'key').
+	| structure |
+	structure := (SBJavascript parseExpression: '{a: 1}') childSandblocks first.
 	self assert: (SBTSQuery new
 		execute: '(pair
   key: (_) @keyword)'
@@ -345,14 +306,9 @@ SBTSQueryTests >> testMatchWildcard [
 { #category : #tests }
 SBTSQueryTests >> testMatchWithAlias [
 
-	| factory |
-	factory := SBMetaBlockFactory new.
 	self assert: (SBTSQuery new
 		execute: '(property_identifier)'
-		against: (SBInlineBlockSymbol new
-			type: 'identifier' factory: factory;
-			alias: 'property_identifier';
-			yourself)
+		against: (SBJavascript parseToplevel: '{a: 1}') firstDeepChild
 		capturesDo: [:c | ])
 ]
 
@@ -361,11 +317,11 @@ SBTSQueryTests >> testMatchWithStringCompare [
 
 	self assert: (SBTSQuery new
 		execute: '(identifier) ="id" @a'
-		against: ((SBInlineBlockSymbol new type: 'identifier' factory: nil) addMorphBack: (SBInlineBlockText new regexString: 'id'; contents: 'id'))
+		against: (SBJavascript parseExpression: 'id')
 		capturesDo: [:c | self assert: 'id' equals: (c at: 'a') contents]).
 	self deny: (SBTSQuery new
 		execute: '(identifier) ="id" @a'
-		against: ((SBInlineBlockSymbol new type: 'identifier' factory: nil) addMorphBack: (SBInlineBlockText new regexString: 'ida'; contents: 'ida'))
+		against: (SBJavascript parseExpression: 'ida')
 		capturesDo: [:c | self assert: c isEmpty])
 ]
 

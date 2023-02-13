@@ -5,7 +5,7 @@ Class {
 		'start',
 		'end'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Utils'
 }
 
 { #category : #'instance creation' }

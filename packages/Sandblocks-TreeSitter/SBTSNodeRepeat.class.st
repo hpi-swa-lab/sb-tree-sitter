@@ -8,7 +8,7 @@ Class {
 		'delimiter',
 		'isStatementRepeater'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #blocks }

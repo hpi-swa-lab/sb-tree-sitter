@@ -5,30 +5,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBTSGrammarTests >> testBlockInlineDetect [
-
-	| factory |
-	factory := SBMetaBlockFactory new grammar: (Json readFrom: '{"supertypes":[],"inline":[]}' readStream).
-	factory at: 'expr' putTemplate: (SBInlineBlockChoice new alternatives: {
-		SBInlineBlockSequence new elements: {
-			SBInlineBlockSymbol new type: 'expr' factory: factory.
-			SBInlineBlockLabel new label: '+'.
-			SBInlineBlockSymbol new type: 'expr' factory: factory}.
-		SBInlineBlockText new regexString: '[0-9]+'}).
-	factory at: 'arguments' putTemplate: (SBInlineBlockSequence new elements: {
-		SBInlineBlockLabel new label: '('.
-		SBInlineBlockSymbol new type: 'expr' factory: factory.
-		SBInlineBlockLabel new label: ')'}).
-	factory at: 'call' putTemplate: (SBInlineBlockSequence new elements: {
-		SBInlineBlockSymbol new type: 'expr' factory: factory.
-		SBInlineBlockSymbol new type: 'arguments' factory: factory}).
-	
-	factory findBlockInlineCandidates.
-	
-	self assert: (factory shouldBlockInline: 'arguments')
-]
-
-{ #category : #'as yet unclassified' }
 SBTSGrammarTests >> testResolveAlias [
 
 	| resolved |

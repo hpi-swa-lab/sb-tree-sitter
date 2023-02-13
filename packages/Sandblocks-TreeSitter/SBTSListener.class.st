@@ -1,7 +1,7 @@
 Class {
 	#name : #SBTSListener,
 	#superclass : #Object,
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Utils'
 }
 
 { #category : #'as yet unclassified' }

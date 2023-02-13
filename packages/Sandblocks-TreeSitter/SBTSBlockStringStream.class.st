@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'characterMode'
 	],
-	#category : #'Sandblocks-TreeSitter-Parser'
+	#category : #'Sandblocks-TreeSitter-Utils'
 }
 
 { #category : #'as yet unclassified' }

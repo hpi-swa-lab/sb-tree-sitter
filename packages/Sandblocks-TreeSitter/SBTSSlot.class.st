@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'nodes'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #'as yet unclassified' }

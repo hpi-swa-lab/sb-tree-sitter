@@ -6,7 +6,7 @@ Class {
 		'named',
 		'element'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #accessing }

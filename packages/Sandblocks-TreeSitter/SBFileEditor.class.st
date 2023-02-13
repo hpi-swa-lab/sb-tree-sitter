@@ -5,7 +5,7 @@ Class {
 		'root',
 		'projectSemantics'
 	],
-	#category : #'Sandblocks-TreeSitter-Project'
+	#category : #'Sandblocks-TreeSitter-Files'
 }
 
 { #category : #'as yet unclassified' }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'alternatives'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #accessing }

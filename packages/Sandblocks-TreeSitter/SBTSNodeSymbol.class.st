@@ -5,7 +5,7 @@ Class {
 		'type',
 		'hidden'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #hierarchy }

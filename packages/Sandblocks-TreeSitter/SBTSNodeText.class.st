@@ -7,7 +7,7 @@ Class {
 		'plainPrefix',
 		'fullMatchRegex'
 	],
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Grammar'
 }
 
 { #category : #'as yet unclassified' }

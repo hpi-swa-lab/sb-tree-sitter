@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'factory'
 	],
-	#category : #'Sandblocks-TreeSitter'
+	#category : #'Sandblocks-TreeSitter-Files'
 }
 
 { #category : #accessing }

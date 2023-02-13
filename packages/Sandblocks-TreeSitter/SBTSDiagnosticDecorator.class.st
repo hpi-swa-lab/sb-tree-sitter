@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'diagnostic'
 	],
-	#category : #'Sandblocks-TreeSitter-Project'
+	#category : #'Sandblocks-TreeSitter-LanguageClient'
 }
 
 { #category : #callbacks }

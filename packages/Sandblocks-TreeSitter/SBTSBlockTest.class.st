@@ -1,13 +1,13 @@
 Class {
 	#name : #SBTSBlockTest,
 	#superclass : #SBTest,
-	#category : #'Sandblocks-TreeSitter-Nodes'
+	#category : #'Sandblocks-TreeSitter-Tests'
 }
 
 { #category : #failures }
 SBTSBlockTest >> expectedFailures [
 
-	^ #(#testJoinNumberFromBinaryOp #testReplacementBlockBinding #testRegexEnterClassRanges #testJsCallToSubscript)
+	^ #(#testJoinNumberFromBinaryOp #testReplacementBlockBinding #testJsCallToSubscript)
 ]
 
 { #category : #'tests - adding' }
@@ -552,7 +552,7 @@ SBTSBlockTest >> testJsForOf [
 	| program editor |
 	program := SBJavascript parseToplevel: ''.
 	editor := self editorAndWorldFor: program.
-	self type: 'for ' in: editor.
+	self type: 'for (' in: editor.
 	self tick.
 	self tick.
 	editor handle: (self keyboardEvent: Character arrowDown).

@@ -57,7 +57,7 @@ SBJsRuntimeWeb >> startWatchServer [
 		addService: '/sqReport'
 		action: [:req | | params |
 			params := WebUtils decodeUrlEncodedForm: (Url absoluteFromText: req rawUrl) query.
-			SBTSWatch
+			SBWatch2
 				reportId: (params at: 'id')
 				value: (params at: 'expression')
 				env: SBExecutionEnvironment value.
