@@ -3471,6 +3471,14 @@ SBGDScript class >> language [
 ]
 
 { #category : #'as yet unclassified' }
+SBGDScript class >> lspTransportFor: aDirectoryString [
+
+	^ SBLSPTCPTransport new
+		host: '127.0.0.1';
+		port: 6008
+]
+
+{ #category : #'as yet unclassified' }
 SBGDScript class >> preprocessGrammar: aGrammar [
 
 	super preprocessGrammar: aGrammar.
@@ -3502,7 +3510,13 @@ SBGDScript class >> preprocessGrammar: aGrammar [
 						factory: aGrammar.
 					SBTSNodeLabel new
 						factory: aGrammar;
-						label: quote}]))
+						label: quote}])).
+	
+	aGrammar rules at: '_string_content' put: (SBTSNodeContextSensitiveText new
+		factory: aGrammar;
+		validCheck: [:siblings :character | siblings notEmpty and: [character ~= siblings first slot firstNode label last]];
+		typeMatch: [:type :parser | parser blocks first contents last ~= type first];
+		regexString: '.*')
 ]
 
 { #category : #'as yet unclassified' }

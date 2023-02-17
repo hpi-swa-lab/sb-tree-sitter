@@ -9,26 +9,17 @@ Class {
 		'projectDirectory',
 		'pending',
 		'buffer',
-		'serverMessageHandler'
+		'serverMessageHandler',
+		'transport',
+		'serverCapabilities'
 	],
 	#category : #'Sandblocks-TreeSitter-LanguageClient'
 }
 
 { #category : #'as yet unclassified' }
-SBTSLanguageClient >> handleData [
+SBTSLanguageClient >> close [
 
-	| length message data readBuffer |
-	readBuffer := buffer readStream.
-	(readBuffer nextMatchAll: 'Content-Length: ') ifFalse: [^ false].
-	(readBuffer peekDuring: [readBuffer skipTo: Character cr]) ifFalse: [^ false].
-	length := (readBuffer upTo: Character cr) asNumber.
-	(readBuffer nextMatchAll: String lf, String crlf) ifFalse: [^ false].
-	data := readBuffer next: length.
-	data size ~= length ifTrue: [^ false].
-	message := Json readFrom: data utf8ToSqueak readStream.
-	self handleMessage: message.
-	buffer := readBuffer upToEnd.
-	^ true
+	self stop
 ]
 
 { #category : #'as yet unclassified' }
@@ -56,16 +47,18 @@ SBTSLanguageClient >> handleServerMessage: aJsonObject [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLanguageClient >> initializeFor: aDirectory onServerMessageDo: aBlock [
+SBTSLanguageClient >> initializeFor: aDirectory onServerMessageDo: aBlock onReady: anotherBlock transport: aTransport [
 
 	super initialize.
 	
+	transport := aTransport languageClient: self.
 	serverMessageHandler := aBlock.
 	pending := Dictionary new.
 	projectDirectory := aDirectory.
 	lastRequestId := 0.
 	
-	self start
+	transport start.
+	self sendInitializeDo: anotherBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -100,26 +93,13 @@ SBTSLanguageClient >> respondToRequest: aNumber result: anObject [
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> restart [
 
-	self
-		stop;
-		start
+	transport restart
 ]
 
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> send: aJsonObject [
 
-	| payload |
-	payload := aJsonObject asJsonString utf8Encoded.
-	inputPipe writer closed ifTrue: [self restart].
-	inputPipe writer
-		nextPutAll: 'Content-Length: ';
-		nextPutAll: payload size asString;
-		cr;
-		lf;
-		cr;
-		lf;
-		nextPutAll: payload;
-		flush
+	transport send: aJsonObject
 ]
 
 { #category : #'as yet unclassified' }
@@ -135,7 +115,7 @@ SBTSLanguageClient >> sendBlockingRequest: aString params: anObject do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLanguageClient >> sendInitialize [
+SBTSLanguageClient >> sendInitializeDo: aBlock [
 
 	self
 		sendRequest: 'initialize'
@@ -149,8 +129,10 @@ SBTSLanguageClient >> sendInitialize [
 					'synchronization' -> (Dictionary newFrom: {'dynamicRegistration' -> true})}).
 				'workspace' -> (Dictionary newFrom: {'applyEdit' -> true. 'workspaceEdit' -> (Dictionary newFrom: {'documentChanges' -> true})})})})
 		do: [:response |
+			serverCapabilities := response at: 'capabilities'.
 			Transcript showln: 'Connected to server'.
-			self sendNotification: 'initialized' params: Dictionary new]
+			self sendNotification: 'initialized' params: Dictionary new.
+			aBlock value]
 		blocking: false
 ]
 
@@ -170,37 +152,13 @@ SBTSLanguageClient >> sendRequest: aString params: anObject do: aBlock blocking:
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLanguageClient >> start [
+SBTSLanguageClient >> serverSupportsDocumentHighlight [
 
-	| outputPipe |
-	inputPipe := OSPipe blockingPipe.
-	outputPipe := OSPipe nonBlockingPipe.
-	buffer := ''.
-	
-	process := ExternalUnixOSProcess
-		forkAndExec: (SBTSLanguageRuntime which: 'typescript-language-server')
-		arguments: (SBToggledCode comment: '' active: 1 do: {
-			[{'--stdio'}].
-			[{'--stdio'. '--log-level'. '4'. '--tsserver-log-file'. '/home/tom/ts.log'. '--tsserver-log-verbosity'. 'verbose'}]})
-		environment: nil
-		descriptors: {inputPipe ifNotNil: #reader. outputPipe writer. nil}
-		workingDir: projectDirectory pathString.
-	outputPipe writer close.
-	inputPipe reader close.
-	
-	messageProcess := [
-		[outputPipe closed not and: [process runState ~= #complete]] whileTrue: [
-			(Delay forMilliseconds: 20) wait.
-			buffer := buffer, outputPipe upToEnd.
-			[self handleData] whileTrue]] fork.
-	
-	self sendInitialize
+	^ (serverCapabilities at: 'documentHighlightProvider' ifAbsent: [false]) ~~ false
 ]
 
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> stop [
 
-	messageProcess terminate.
-	process sigterm.
-	inputPipe close
+	transport stop
 ]

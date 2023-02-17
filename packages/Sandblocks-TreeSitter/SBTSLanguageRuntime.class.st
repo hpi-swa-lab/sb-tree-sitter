@@ -218,7 +218,7 @@ SBTSLanguageRuntime >> handleConnection: aSocket [
 { #category : #'runtime interface' }
 SBTSLanguageRuntime >> prettyPrint: aString [
 
-	^ self subclassResponsibility
+	^ aString
 ]
 
 { #category : #'helper os process' }

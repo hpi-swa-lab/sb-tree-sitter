@@ -4,6 +4,12 @@ Class {
 	#category : #'Sandblocks-TreeSitter-LanguageClient'
 }
 
+{ #category : #'as yet unclassified' }
+SBTSLanguageSemantics >> close [
+
+	
+]
+
 { #category : #notifications }
 SBTSLanguageSemantics >> didChange: aTSFile [
 

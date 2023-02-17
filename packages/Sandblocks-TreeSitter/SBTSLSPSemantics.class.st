@@ -97,6 +97,12 @@ SBTSLSPSemantics >> choosingLabelFor: definition [
 	^ '{1} [{2} :{3}:{4}]' format: {line withBlanksTrimmed. file basename. start line + 1. start character + 1}
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSLSPSemantics >> close [
+
+	client close
+]
+
 { #category : #requests }
 SBTSLSPSemantics >> codeActionsFor: aBlock choosing: aClosure blocking: aBoolean [
 
@@ -241,7 +247,7 @@ SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 			['workspace/applyEdit'] -> [
 				self applyEdit: aJsonObject params edit.
 				client respondToRequest: aJsonObject id result: (Dictionary newFrom: {'applied' -> false})]}
-		otherwise: [Transcript showln: aJsonObject]
+		otherwise: [Transcript showln: ('unhandled message: {1}' format: {aJsonObject method})]
 ]
 
 { #category : #requests }
@@ -250,7 +256,7 @@ SBTSLSPSemantics >> hoverFor: aBlock do: aClosure blocking: aBoolean [
 	client
 		sendRequest: 'textDocument/hover'
 		params: (self textDocumentPositionParamsFor: aBlock)
-		do: [:hover | hover ifNotNil: [aClosure value: (hover at: 'contents')]]
+		do: [:hover | hover ifNotNil: [aClosure value: (self markdownToText: (hover at: 'contents'))]]
 		blocking: aBoolean
 ]
 
@@ -271,14 +277,32 @@ SBTSLSPSemantics >> insertPositionIn: aBlock at: aTSPosition for: aString [
 	self error: 'weird change'
 ]
 
+{ #category : #helper }
+SBTSLSPSemantics >> markdownToText: anObject [
+	"for now, just strip the extraneous newlines"
+
+	anObject ifNil: [^ nil].
+	anObject ifEmpty: [^ {}].
+	anObject isArray ifTrue: [^ anObject collect: [:s | self markdownToText: s]].
+	
+	(anObject at: 'kind') = 'plaintext' ifTrue: [^ anObject at: 'value'].
+	self assert: (anObject at: 'kind') = 'markdown'.
+	
+	^ (((anObject at: 'value') copyWithRegex: '(?<!\n)\n(?!\n)' matchesReplacedWith: '')
+		copyWithRegex: '\n\n+'
+		matchesReplacedWith: String cr, String cr) withBlanksTrimmed asText
+]
+
 { #category : #'initialize-release' }
-SBTSLSPSemantics >> on: aDirectory [
+SBTSLSPSemantics >> on: aDirectory for: aLanguage onReady: aBlock [
 
 	textDocumentVersions := Dictionary new.
 	currentDiagnostics := Dictionary new.
 	client := SBTSLanguageClient new
 		initializeFor: aDirectory
 		onServerMessageDo: [:message | self handleServerMessage: message]
+		onReady: aBlock
+		transport: (aLanguage lspTransportFor: aDirectory pathString)
 ]
 
 { #category : #'as yet unclassified' }
@@ -317,11 +341,15 @@ SBTSLSPSemantics >> suggestionsFor: aBlock do: aClosure blocking: aBoolean [
 		params: (self textDocumentPositionParamsFor: aBlock)
 		do: [:response |
 			(self
-				filterSuggestions: (response ifNotNil: [:object | object at: 'items' ifAbsent: [object]] ifNil: [{}])
+				filterSuggestions: (response isArray
+					ifTrue: [response]
+					ifFalse: [response ifNotNil: [:object | object at: 'items' ifAbsent: [object]] ifNil: [{}]])
 				by: aBlock) do: [:item |
-				aClosure value: (SBSuggestionItem selector: (item at: 'insertText' ifAbsent: item label) label: (item
-					at: 'detail'
-					ifAbsent: [item at: 'kind' ifPresent: [:kind | self completionItemKindToString: kind] ifAbsent: ['']]))]]
+				aClosure value: (SBSuggestionItem
+					selector: ((item at: 'insertText' ifAbsent: [item label]) ifEmpty: [item label])
+					label: (item
+						at: 'detail'
+						ifAbsent: [item at: 'kind' ifPresent: [:kind | self completionItemKindToString: kind] ifAbsent: ['']]))]]
 		blocking: aBoolean
 ]
 
@@ -351,6 +379,8 @@ SBTSLSPSemantics >> type: aString in: anEditor [
 { #category : #requests }
 SBTSLSPSemantics >> usagesOf: aBlock do: aClosure [
 
+	client serverSupportsDocumentHighlight ifFalse: [^ self].
+	
 	client
 		sendRequest: 'textDocument/documentHighlight'
 		params: (self textDocumentPositionParamsFor: aBlock)

@@ -24,6 +24,7 @@ SBTSHoverMorph >> addString: aString [
 		layoutInset: 10 @ 4 * self scalingFactor;
 		yourself.
 	background addMorphBack: (SBMultilineOwnTextMorph new
+		maxWidth: 600;
 		contents: aString;
 		yourself).
 	container addMorphBack: background
@@ -38,7 +39,7 @@ SBTSHoverMorph >> cancelDelete [
 { #category : #contents }
 SBTSHoverMorph >> contents: anObject [
 
-	anObject isString ifTrue: [^ self addString: anObject].
+	(anObject isString or: [anObject isText]) ifTrue: [^ self addString: anObject].
 	anObject isDictionary ifTrue: [^ self addString: (anObject at: 'value')].
 	anObject do: [:content | self contents: content]
 ]

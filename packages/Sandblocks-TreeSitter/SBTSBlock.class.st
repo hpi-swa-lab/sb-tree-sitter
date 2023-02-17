@@ -1146,7 +1146,7 @@ SBTSBlock >> showHover [
 	self semantics
 		hoverFor: self
 		do: [:contents |
-			contents ifNotEmpty: [
+			(contents notNil and: [contents notEmpty]) ifTrue: [
 				self setProperty: #hover toValue: (SBTSHoverMorph new
 					morph: self;
 					contents: contents;

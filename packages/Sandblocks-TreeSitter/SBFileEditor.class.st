@@ -98,8 +98,21 @@ SBFileEditor >> root [
 ]
 
 { #category : #'as yet unclassified' }
-SBFileEditor >> useTypescriptLSP [
+SBFileEditor >> semantics [
+
+	^ projectSemantics
+]
+
+{ #category : #'as yet unclassified' }
+SBFileEditor >> startLSP [
 	<globalAction>
 
-	projectSemantics := SBTSLSPSemantics new on: self root directory
+	projectSemantics ifNotNil: [:p | p close].
+	projectSemantics := SBTSLSPSemantics new
+		on: self root directory
+		for: self currentFile language
+		onReady: [
+			self currentFile ifNotNil: [:f |
+				projectSemantics didOpen: f.
+				f semantics: projectSemantics]]
 ]

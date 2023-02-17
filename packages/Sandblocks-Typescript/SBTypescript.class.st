@@ -11110,6 +11110,15 @@ SBTypescript class >> language [
     ^ #typescript
 ]
 
+{ #category : #'configuration - semantics' }
+SBTypescript class >> lspTransportFor: aDirectoryString [
+
+	^ SBLSPStdioTransport new
+		command: (SBTSLanguageRuntime which: 'typescript-language-server');
+		arguments: {'--stdio'};
+		workingDirectory: aDirectoryString
+]
+
 { #category : #'as yet unclassified' }
 SBTypescript class >> postprocessGrammar: aGrammar [
 

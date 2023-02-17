@@ -369,6 +369,12 @@ SBTSLanguage class >> loadLanguage: aGithubString name: aString branch: anotherS
 	self generateFFIMethodFor: aString github: aGithubString
 ]
 
+{ #category : #'configuration - semantics' }
+SBTSLanguage class >> lspTransportFor: aDirectoryString [
+
+	^ self subclassResponsibility
+]
+
 { #category : #'configuration - layout' }
 SBTSLanguage class >> noteUncapturedText [
 

@@ -165,7 +165,7 @@ SBTSFile >> filepath: aString toplevel: aBlock language: aLanguageClass collapse
 { #category : #'as yet unclassified' }
 SBTSFile >> getSourceStringAndMark [
 
-	^ self root getSourceStringAndMark
+	^ self root getSourceStringAndMark withUnixLineEndings
 ]
 
 { #category : #'as yet unclassified' }
@@ -184,6 +184,12 @@ SBTSFile >> initialize [
 SBTSFile >> isArtefact [
 
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile >> language [
+
+	^ self root language
 ]
 
 { #category : #'as yet unclassified' }
@@ -259,6 +265,13 @@ SBTSFile >> semantics [
 SBTSFile >> semantics: aLanguageSemantics [
 
 	sematics := aLanguageSemantics
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFile >> startLSP [
+	<action>
+
+	self sandblockEditor startLSP
 ]
 
 { #category : #'as yet unclassified' }
