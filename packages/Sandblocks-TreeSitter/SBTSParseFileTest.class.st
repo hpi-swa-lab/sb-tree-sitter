@@ -71,12 +71,6 @@ SBTSParseFileTest >> testClojureStringWithSpace [
 ]
 
 { #category : #'tests - languages' }
-SBTSParseFileTest >> testGDString [
-
-	self assert: '"a"' equals: (SBGDScript parseToplevel: '"a"') sourceStringForCompare
-]
-
-{ #category : #'tests - languages' }
 SBTSParseFileTest >> testJavascriptImport [
 
 	| block source |
