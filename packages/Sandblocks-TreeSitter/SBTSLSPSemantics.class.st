@@ -284,11 +284,12 @@ SBTSLSPSemantics >> markdownToText: anObject [
 	anObject ifNil: [^ nil].
 	anObject ifEmpty: [^ {}].
 	anObject isArray ifTrue: [^ anObject collect: [:s | self markdownToText: s]].
+	anObject isDictionary ifTrue: [
+		(anObject at: 'kind') = 'plaintext' ifTrue: [^ anObject at: 'value'].
+		self assert: (anObject at: 'kind') = 'markdown'.
+		^ self markdownToText: (anObject at: 'value')].
 	
-	(anObject at: 'kind') = 'plaintext' ifTrue: [^ anObject at: 'value'].
-	self assert: (anObject at: 'kind') = 'markdown'.
-	
-	^ (((anObject at: 'value') copyWithRegex: '(?<!\n)\n(?!\n)' matchesReplacedWith: '')
+	^ ((anObject copyWithRegex: '(?<!\n)\n(?!\n)' matchesReplacedWith: '')
 		copyWithRegex: '\n\n+'
 		matchesReplacedWith: String cr, String cr) withBlanksTrimmed asText
 ]
@@ -296,13 +297,19 @@ SBTSLSPSemantics >> markdownToText: anObject [
 { #category : #'initialize-release' }
 SBTSLSPSemantics >> on: aDirectory for: aLanguage onReady: aBlock [
 
+	self on: aDirectory transport: (aLanguage lspTransportFor: aDirectory pathString) onReady: aBlock
+]
+
+{ #category : #'initialize-release' }
+SBTSLSPSemantics >> on: aDirectory transport: aTransport onReady: aBlock [
+
 	textDocumentVersions := Dictionary new.
 	currentDiagnostics := Dictionary new.
 	client := SBTSLanguageClient new
 		initializeFor: aDirectory
 		onServerMessageDo: [:message | self handleServerMessage: message]
 		onReady: aBlock
-		transport: (aLanguage lspTransportFor: aDirectory pathString)
+		transport: aTransport
 ]
 
 { #category : #'as yet unclassified' }

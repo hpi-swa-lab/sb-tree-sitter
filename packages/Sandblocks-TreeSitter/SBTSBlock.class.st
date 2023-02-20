@@ -1136,7 +1136,8 @@ SBTSBlock >> selectStartOfStatement [
 { #category : #accessing }
 SBTSBlock >> semantics [
 
-	^ (self containingArtefact ifNotNil: [:a | (a respondsTo: #semantics) ifTrue: [a semantics] ifFalse: [self language]]) ifNil: [self language]
+	self sandblockEditor runtimesDo: [:r | (r responsibleFor: self) ifTrue: [^ r semantics]].
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }

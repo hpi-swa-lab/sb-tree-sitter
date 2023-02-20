@@ -155,7 +155,7 @@ SBTSNodeChoice >> takeNodesFrom: aParser [
 { #category : #hierarchy }
 SBTSNodeChoice >> traverseBlocks: aStream do: aBlock [
 
-	(aStream peek isTSBlock and: [aStream peek isUnknown and: [aStream peek slot firstNode = self]])
+	(aStream peek isTSBlock and: [aStream peek isUnknown and: [aStream peek slot includesParent: self]])
 		ifTrue: [ | block |
 			block := aStream next.
 			aBlock value: block]

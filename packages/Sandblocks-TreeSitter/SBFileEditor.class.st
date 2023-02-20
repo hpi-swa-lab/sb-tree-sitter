@@ -3,7 +3,8 @@ Class {
 	#superclass : #SBBrowserEditor,
 	#instVars : [
 		'root',
-		'projectSemantics'
+		'projectSemantics',
+		'commandBar'
 	],
 	#category : #'Sandblocks-TreeSitter-Files'
 }
@@ -17,9 +18,15 @@ SBFileEditor class >> openProject: aPath [
 ]
 
 { #category : #'as yet unclassified' }
+SBFileEditor >> addRuntime: aRuntime [
+
+	commandBar addMorphBack: aRuntime
+]
+
+{ #category : #'as yet unclassified' }
 SBFileEditor >> artefactChanged: aMethodBlock [
 
-	aMethodBlock = self currentFile ifTrue: [projectSemantics didChange: self currentFile]
+	aMethodBlock = self currentFile ifTrue: [self runtimesDo: [:r | r didChange: self currentFile]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -44,7 +51,22 @@ SBFileEditor >> initialize [
 	| fileScroller |
 	super initialize.
 	
-	projectSemantics := SBTSLanguageSemantics new.
+	self addMorphBack: (commandBar := SBRow new
+		changeTableLayout;
+		hResizing: #spaceFill;
+		cellGap: 4;
+		layoutInset: 4;
+		addMorphBack: (SBButton new
+			icon: SBIcon iconSearch
+				shortcut: nil
+				do: [SBPreferences largeInsets: SBPreferences largeInsets not];
+			balloonText: 'Toggle Block Palette');
+		addMorphBack: (SBButton new
+			icon: SBIcon iconColumns shortcut: nil do: [self togglePalette];
+			balloonText: 'Toggle Block Palette');
+		addMorphBack: (SBButton new
+			icon: SBIcon iconFilesO shortcut: nil do: [self toggleFileBrowser];
+			balloonText: 'Toggle File Browser')).
 	
 	self submorphs second addMorphFront: (SBBlock new
 		attachDecorator: (SBResizableDecorator new edge: #right);
@@ -65,13 +87,11 @@ SBFileEditor >> initialize [
 { #category : #'as yet unclassified' }
 SBFileEditor >> openFile: aFile [
 
-	self currentFile ifNotNil: [:currentFile | projectSemantics didClose: currentFile].
+	self currentFile ifNotNil: [:currentFile | self runtimesDo: [:r | r didClose: currentFile]].
 	aFile isDirectory ifFalse: [ | newFile |
-		newFile := (SBTSFile forNoReplace: aFile pathString)
-			semantics: projectSemantics;
-			yourself.
+		newFile := SBTSFile forNoReplace: aFile pathString.
 		self openMorphInView: newFile.
-		projectSemantics didOpen: newFile.
+		self runtimesDo: [:r | r didOpen: newFile].
 		^ newFile].
 	^ nil
 ]
@@ -80,7 +100,9 @@ SBFileEditor >> openFile: aFile [
 SBFileEditor >> openProject: aStringPath [
 
 	root on: (FileSystem disk referenceTo: aStringPath).
-	root toggleExpand
+	root toggleExpand.
+	
+	SBTSLanguageRuntime allSubclassesDo: [:runtimeClass | runtimeClass activateFor: root file do: [:runtime | self addRuntime: runtime]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -88,7 +110,7 @@ SBFileEditor >> outOfWorld: aWorld [
 
 	super outOfWorld: aWorld.
 	
-	projectSemantics shutdown
+	self runtimesDo: [:r | r shutdown]
 ]
 
 { #category : #'as yet unclassified' }
@@ -98,21 +120,7 @@ SBFileEditor >> root [
 ]
 
 { #category : #'as yet unclassified' }
-SBFileEditor >> semantics [
+SBFileEditor >> runtimesDo: aBlock [
 
-	^ projectSemantics
-]
-
-{ #category : #'as yet unclassified' }
-SBFileEditor >> startLSP [
-	<globalAction>
-
-	projectSemantics ifNotNil: [:p | p close].
-	projectSemantics := SBTSLSPSemantics new
-		on: self root directory
-		for: self currentFile language
-		onReady: [
-			self currentFile ifNotNil: [:f |
-				projectSemantics didOpen: f.
-				f semantics: projectSemantics]]
+	commandBar submorphsDo: [:s | (s isKindOf: SBTSLanguageRuntime) ifTrue: [aBlock value: s]]
 ]

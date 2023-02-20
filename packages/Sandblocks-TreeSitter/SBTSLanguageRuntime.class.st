@@ -1,11 +1,19 @@
 Class {
 	#name : #SBTSLanguageRuntime,
-	#superclass : #Object,
+	#superclass : #SBBlock,
 	#instVars : [
-		'factory'
+		'factory',
+		'root',
+		'semantics'
 	],
 	#category : #'Sandblocks-TreeSitter-Files'
 }
+
+{ #category : #accessing }
+SBTSLanguageRuntime class >> activateFor: aFile do: aBlock [
+
+	
+]
 
 { #category : #accessing }
 SBTSLanguageRuntime class >> available [
@@ -187,6 +195,24 @@ SBTSLanguageRuntime >> contentFromSocket: aSocket [
 	^ data
 ]
 
+{ #category : #semantics }
+SBTSLanguageRuntime >> didChange: aFile [
+
+	self semantics didChange: aFile
+]
+
+{ #category : #semantics }
+SBTSLanguageRuntime >> didClose: aFile [
+
+	self semantics didClose: aFile
+]
+
+{ #category : #semantics }
+SBTSLanguageRuntime >> didOpen: aFile [
+
+	self semantics didOpen: aFile
+]
+
 { #category : #'runtime interface' }
 SBTSLanguageRuntime >> evaluate: aString [
 
@@ -215,10 +241,60 @@ SBTSLanguageRuntime >> handleConnection: aSocket [
 	Project current addDeferredUIMessage: [SBWatch2 reportId: data id value: data expression env: env]
 ]
 
+{ #category : #'initialize-release' }
+SBTSLanguageRuntime >> initialize [
+
+	super initialize.
+	
+	self
+		changeTableLayout;
+		hResizing: #shrinkWrap;
+		vResizing: #shrinkWrap;
+		cellGap: 4;
+		layoutInset: 4;
+		addMorphBack: self language iconMorph
+]
+
+{ #category : #accessing }
+SBTSLanguageRuntime >> language [
+
+	^ self class language
+]
+
 { #category : #'runtime interface' }
 SBTSLanguageRuntime >> prettyPrint: aString [
 
 	^ aString
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageRuntime >> responsibleFor: aBlock [
+
+	^ self root contains: aBlock containingArtefact file
+]
+
+{ #category : #accessing }
+SBTSLanguageRuntime >> root [
+
+	^ root
+]
+
+{ #category : #accessing }
+SBTSLanguageRuntime >> root: aFile [
+
+	root := aFile
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageRuntime >> semantics [
+
+	^ semantics ifNil: [semantics := self startSemantics]
+]
+
+{ #category : #'initialize-release' }
+SBTSLanguageRuntime >> shutdown [
+
+	self stopSemantics
 ]
 
 { #category : #'helper os process' }
@@ -241,6 +317,18 @@ SBTSLanguageRuntime >> spawnWatchDuring: aBlock [
 	[ret := aBlock value: listener localPort] ensure: [listener destroy].
 	
 	^ ret
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageRuntime >> startSemantics [
+
+	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageRuntime >> stopSemantics [
+
+	semantics ifNotNil: [:s | s close]
 ]
 
 { #category : #'helper os process' }

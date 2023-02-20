@@ -96,7 +96,7 @@ SBTSUnknownBlock >> suggestions [
 { #category : #'as yet unclassified' }
 SBTSUnknownBlock >> valid [
 
-	^ false
+	^ (self ownerSatisfying: [:o | o isKindOf: SBPaletteBuilder]) notNil
 ]
 
 { #category : #'as yet unclassified' }

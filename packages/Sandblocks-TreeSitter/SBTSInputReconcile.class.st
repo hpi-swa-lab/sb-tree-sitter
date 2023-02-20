@@ -341,29 +341,15 @@ SBTSInputReconcile >> tryAdjacentTo: aBlock given: aString [
 { #category : #reconciliation }
 SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNumber explicitAppend: aBoolean [
 
-	aMorph isUnknown ifTrue: [ | validCondition boundary |
-		boundary := aMorph submorphAfter.
-		validCondition := (boundary ifNotNil: #isTextMorph ifNil: [false])
-			ifTrue: [[:p | p atEnd or: [p stream next = boundary contents first and: [p stream atEnd]]]]
-			ifFalse: [nil].
-		((SBTSInputParser new
-			validCondition: validCondition;
-			optionsForTemplate: aMorph slot firstNode given: aString) collect: [:blocks | | jumpAfterBoundary |
-			jumpAfterBoundary := blocks noneSatisfy: [:b | b lastConstructedChild notNil].
-			SBCombinedCommand newWith: {
-				SBReplaceMultipleCommand new
-					target: aMorph replacers: blocks;
-					shouldMergeWithNext: true}, (jumpAfterBoundary
-				ifTrue: [{SBTSBoundarySelectCommand new boundary: boundary}]
-				ifFalse: [{}])]) ifNotEmpty: [:res | ^ res]].
+	aMorph isUnknown ifTrue: [(self tryUnknown: aMorph input: aString) ifNotEmpty: [:res | ^ res]].
 	
-	"recursive stop condition: either our owner is no longer a ts-block or we have already gone two steps. two steps were enough for all valid scenarios we have encountered thus far."
+	"recursive stop condition: either our owner is no longer a ts-block or we have already gone until our limit of steps (empirically determined...)"
 	aBlock isTSBlock ifFalse: [^ {}].
 	(aMorph ownerChain indexOf: aBlock) > 5 ifTrue: [^ {}].
 	
 	^ aNumber = 1
 		ifTrue: [
-			(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: aBoolean) ifEmpty: [
+			(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: false) ifEmpty: [
 				(self tryAdjacentBefore: aMorph given: aString) ifEmpty: [
 					aBoolean
 						ifTrue: [{}]
@@ -462,6 +448,26 @@ SBTSInputReconcile >> trySkipLabel: aString in: aBlock from: aMorph at: aNumber 
 							fixedText: currentFixed]}]].
 	
 	^ {}
+]
+
+{ #category : #reconciliation }
+SBTSInputReconcile >> tryUnknown: aMorph input: aString [
+
+	| boundary validCondition |
+	boundary := aMorph submorphAfter.
+	validCondition := (boundary ifNotNil: #isTextMorph ifNil: [false])
+		ifTrue: [[:p | p atEnd or: [p stream next = boundary contents first and: [p stream atEnd]]]]
+		ifFalse: [nil].
+	^ (SBTSInputParser new
+		validCondition: validCondition;
+		optionsForTemplate: aMorph slot firstNode given: aString) collect: [:blocks | | jumpAfterBoundary |
+		jumpAfterBoundary := blocks noneSatisfy: [:b | b lastConstructedChild notNil].
+		SBCombinedCommand newWith: {
+			SBReplaceMultipleCommand new
+				target: aMorph replacers: blocks;
+				shouldMergeWithNext: true}, (jumpAfterBoundary
+			ifTrue: [{SBTSBoundarySelectCommand new boundary: boundary}]
+			ifFalse: [{}])]
 ]
 
 { #category : #reconciliation }

@@ -411,6 +411,15 @@ SBTSLanguage class >> parseToplevel: aString [
 	^ toplevel
 ]
 
+{ #category : #'instantiate blocks' }
+SBTSLanguage class >> parseWithPlaceholders: aString [
+
+	| expr |
+	expr := self parseExpression: aString.
+	expr allBlocksDo: [:block | block contents = '_' ifTrue: [block replaceBy: block newNullBlock]].
+	^ expr
+]
+
 { #category : #configuration }
 SBTSLanguage class >> postprocessGrammar: aGrammar [
 	"hook for modifying properties of the grammar just after we apply inlining rules etc"
