@@ -157,6 +157,13 @@ SBTSLanguage class >> firstRuleName [
 { #category : #'configuration - layout' }
 SBTSLanguage class >> gapBetween: aBlock and: anotherBlock [
 
+	(aBlock contents = '(' and: [anotherBlock contents = ')']) ifTrue: [^ true].
+	aBlock contents = '.' ifTrue: [^ false].
+	anotherBlock contents = '.' ifTrue: [^ false].
+	(aBlock isTextMorph and: [aBlock contents]) = '(' ifTrue: [^ false].
+	(anotherBlock isTextMorph and: [anotherBlock contents = '(']) ifTrue: [^ false].
+	anotherBlock contents = ')' ifTrue: [^ false].
+	
 	^ true
 ]
 
@@ -167,7 +174,7 @@ SBTSLanguage class >> generateFFIMethodFor: aName github: aGithubString [
 		compile: ('{1}
 
 	<apicall: SBTSLanguageStruct* tree_sitter_{1} () module: ''tree-sitter-{1}''>
-	^ SBMetaBlockFactory tryPatchLibrary: {2} name: ''{1}'' context: thisContext' format: {aName. aGithubString storeString})
+	^ SBTSLanguage tryPatchLibrary: {2} name: ''{1}'' context: thisContext branch: ''master'' subpath: ''''' format: {aName. aGithubString storeString})
 		classified: 'ffi languages'
 ]
 
@@ -339,7 +346,7 @@ SBTSLanguage class >> isScope: aBlock [
 { #category : #'configuration - editing' }
 SBTSLanguage class >> isStatementContainer: aRepeatNode in: aBlock [
 
-	^ aRepeatNode element type = 'statement'
+	^ aRepeatNode element type = 'statement' or: [aRepeatNode element type = '_statement']
 ]
 
 { #category : #configuration }
@@ -432,7 +439,7 @@ SBTSLanguage class >> postprocessGrammar: aGrammar [
 				validCheck: [:s :c | false];
 				typeMatch: [:type :parser | false])].
 		
-		aGrammar rules keysAndValuesDo: [:symbol :body | body allElementsDo: [:node | (node isTSRepeat and: [self isStatementContainer: node in: (SBTSNodeSymbol new type: symbol factory: aGrammar)]) ifTrue: [node transformToStatementRepeater]]]]
+		self transformStatements: aGrammar]
 ]
 
 { #category : #'configuration - editing' }
@@ -446,7 +453,7 @@ SBTSLanguage class >> preprocessGrammar: aGrammar [
 	"after we inline, _statement is no longer present, so check and mark repeats before processing"
 	"hook for modifying properties of the grammar just before we apply inlining rules etc"
 
-	aGrammar allElementsDo: [:node | (node isTSRepeat and: [node element type = #'_statement']) ifTrue: [node transformToStatementRepeater]]
+	self transformStatements: aGrammar
 ]
 
 { #category : #lifecycle }
@@ -569,6 +576,12 @@ SBTSLanguage class >> suggestionsFor: aBlock [
 SBTSLanguage class >> suggestionsForInsert: aCommand [
 
 	^ #()
+]
+
+{ #category : #configuration }
+SBTSLanguage class >> transformStatements: aGrammar [
+
+	aGrammar rules keysAndValuesDo: [:symbol :body | body allElementsDo: [:node | (node isTSRepeat and: [self isStatementContainer: node in: (SBTSNodeSymbol new type: symbol factory: aGrammar)]) ifTrue: [node transformToStatementRepeater]]]
 ]
 
 { #category : #'configuration - editing' }

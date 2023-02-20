@@ -3469,6 +3469,12 @@ SBGDScript class >> isBlockInlined: aSymbol [
 ]
 
 { #category : #'as yet unclassified' }
+SBGDScript class >> isBlockInlinedInParent: aSymbol [
+
+	^ aSymbol = 'argument_list'
+]
+
+{ #category : #'as yet unclassified' }
 SBGDScript class >> isExpression: aBlock [
 
 	^ aBlock parent notNil and: [aBlock parent isTSChoice and: [aBlock parent alternatives first type = #'comparison_operator']]

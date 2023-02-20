@@ -13,18 +13,16 @@ SBTSHoverMorph >> addString: aString [
 
 	| backgroundColor background |
 	backgroundColor := Color r: 1 g: 1 b: 1.
-	container submorphCount = 0
-		ifTrue: [backgroundColor := Color r: 0.0 g: 0.0 b: 1]
-		ifFalse: [container addMorphBack: SBDivider new].
+	container hasSubmorphs ifTrue: [container addMorphBack: SBDivider new].
 	background := Morph new
 		color: backgroundColor;
 		changeTableLayout;
 		hResizing: #spaceFill;
 		vResizing: #shrinkWrap;
-		layoutInset: 10 @ 4 * self scalingFactor;
+		layoutInset: (10 @ 4) sbScaled;
 		yourself.
 	background addMorphBack: (SBMultilineOwnTextMorph new
-		maxWidth: 600;
+		maxWidth: 800;
 		contents: aString;
 		yourself).
 	container addMorphBack: background
@@ -53,8 +51,9 @@ SBTSHoverMorph >> delete [
 
 { #category : #deleting }
 SBTSHoverMorph >> deleteSoon [
+	"essentially just the next tick: the user needs to be able to have moved their mouse on to the popup"
 
-	self addAlarm: #delete after: 300
+	self addAlarm: #delete after: 1
 ]
 
 { #category : #'events-processing' }
@@ -68,7 +67,7 @@ SBTSHoverMorph >> handleMouseEnter: anEvent [
 SBTSHoverMorph >> handleMouseLeave: anEvent [
 
 	super handleMouseLeave: anEvent.
-	self deleteSoon
+	self delete
 ]
 
 { #category : #initialization }
@@ -99,6 +98,7 @@ SBTSHoverMorph >> morph: aMorph [
 { #category : #positioning }
 SBTSHoverMorph >> reposition [
 
+	self height: (230 min: container height + 2).
 	self bottomLeft: morph positionInWorld
 ]
 

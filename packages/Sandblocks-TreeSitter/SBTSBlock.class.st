@@ -172,6 +172,14 @@ SBTSBlock >> asSlider: converter [
 		do: [self language sourceForSlider: self]
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> blockAtLine: aNumber column: anotherNumber [
+
+	| pos |
+	pos := SBTSPosition line: aNumber character: anotherNumber.
+	^ self smallestBlockEncompassig: (SBTSRange start: pos end: pos)
+]
+
 { #category : #accessing }
 SBTSBlock >> children [
 
@@ -806,7 +814,10 @@ SBTSBlock >> layoutCommands [
 					ifTrue: [stream nextPut: (SBAlgebraCommand hardLine withGap: true)]
 					ifFalse: [
 						(self factory softLineBreakBetween: a and: b)
-							ifTrue: [stream nextPut: (SBAlgebraCommand softLineOrGap withGap: true)]
+							ifTrue: [
+								stream nextPut: (((self factory gapBetween: a and: b)
+									ifTrue: [SBAlgebraCommand softLineOrGap]
+									ifFalse: [SBAlgebraCommand softLine]) withGap: true)]
 							ifFalse: [(self factory gapBetween: a and: b) ifTrue: [stream nextPut: SBAlgebraCommand gap]]]].
 			self children ifNotEmpty: [stream nextPut: self lastSubmorph layoutCommands]])
 ]
@@ -1154,6 +1165,7 @@ SBTSBlock >> showHover [
 					morph: self;
 					contents: contents;
 					openInWorld;
+					reposition;
 					yourself)]]
 		blocking: true
 ]

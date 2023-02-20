@@ -89,6 +89,8 @@ SBFileEditor >> initialize [
 { #category : #'as yet unclassified' }
 SBFileEditor >> openFile: aFile [
 
+	(self currentFile notNil and: [self currentFile file = aFile]) ifTrue: [^ self currentFile].
+	
 	self currentFile ifNotNil: [:currentFile | self runtimesDo: [:r | r didClose: currentFile]].
 	aFile isDirectory ifFalse: [ | newFile |
 		newFile := SBTSFile forNoReplace: aFile pathString.

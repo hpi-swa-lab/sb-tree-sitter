@@ -13,6 +13,8 @@ SBTSIdentifierHighlight class >> matches: aBlock [
 { #category : #'as yet unclassified' }
 SBTSIdentifierHighlight class >> wasDeselected: aBlock [
 
+	aBlock sandblockEditor ifNil: [^ self].
+	
 	aBlock semantics
 		usagesOf: aBlock
 		do: [:usage | usage detachDecorators: SBHighlightDecorator]

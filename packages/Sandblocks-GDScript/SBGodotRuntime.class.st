@@ -53,8 +53,8 @@ SBGodotRuntime >> handleWatchConnection: aSocket [
 	^ Project current addDeferredUIMessage: [
 		(data includesKey: #openFile)
 			ifTrue: [
-				self sandblockEditor openFile: data openFile asReference.
-				self sandblockEditor containingWindow beKeyWindow]
+				self sandblockEditor containingWindow beKeyWindow.
+				(self sandblockEditor openFile: data openFile asReference) ifNotNil: [:file | (file root blockAtLine: data line column: data col) ifNotNil: [:b | b select]]]
 			ifFalse: [SBWatch2 reportId: data id value: data expression env: nil]]
 ]
 
