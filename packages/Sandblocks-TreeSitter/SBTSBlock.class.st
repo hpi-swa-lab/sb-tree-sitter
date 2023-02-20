@@ -1137,13 +1137,15 @@ SBTSBlock >> selectStartOfStatement [
 SBTSBlock >> semantics [
 
 	self sandblockEditor runtimesDo: [:r | (r responsibleFor: self) ifTrue: [^ r semantics]].
-	^ nil
+	^ SBTSLanguageSemantics new
 ]
 
 { #category : #'as yet unclassified' }
 SBTSBlock >> showHover [
 	<action>
 
+	self isInWorld ifFalse: [^ self].
+	
 	self semantics
 		hoverFor: self
 		do: [:contents |

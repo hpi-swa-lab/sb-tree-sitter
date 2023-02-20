@@ -51,6 +51,8 @@ SBFileEditor >> initialize [
 	| fileScroller |
 	super initialize.
 	
+	paletteContainer removeDropShadow.
+	
 	self addMorphBack: (commandBar := SBRow new
 		changeTableLayout;
 		hResizing: #spaceFill;

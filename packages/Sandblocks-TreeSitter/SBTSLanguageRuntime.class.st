@@ -270,7 +270,9 @@ SBTSLanguageRuntime >> prettyPrint: aString [
 { #category : #'as yet unclassified' }
 SBTSLanguageRuntime >> responsibleFor: aBlock [
 
-	^ self root contains: aBlock containingArtefact file
+	| artefact |
+	artefact := aBlock containingArtefact.
+	^ (artefact respondsTo: #file) and: [self root contains: artefact file]
 ]
 
 { #category : #accessing }
