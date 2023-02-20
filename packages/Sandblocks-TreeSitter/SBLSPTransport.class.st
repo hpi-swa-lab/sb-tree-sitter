@@ -20,7 +20,7 @@ SBLSPTransport >> handleData [
 	data := readBuffer next: length.
 	data size ~= length ifTrue: [^ false].
 	message := Json readFrom: data utf8ToSqueak readStream.
-	Transcript showln: {'<'. message}.
+	languageClient log: {'>'. message}.
 	languageClient handleMessage: message.
 	buffer := readBuffer upToEnd.
 	^ true
@@ -43,7 +43,6 @@ SBLSPTransport >> readFrom: aString [
 { #category : #'as yet unclassified' }
 SBLSPTransport >> restart [
 
-	self halt.
 	self stop.
 	self start
 ]
@@ -52,7 +51,7 @@ SBLSPTransport >> restart [
 SBLSPTransport >> send: aJsonObject [
 
 	| payload |
-	Transcript showln: {'>'. aJsonObject}.
+	languageClient log: {'<'. aJsonObject}.
 	
 	payload := aJsonObject asJsonString utf8Encoded.
 	self writer

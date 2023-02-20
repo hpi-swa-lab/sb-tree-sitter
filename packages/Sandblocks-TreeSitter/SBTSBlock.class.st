@@ -211,7 +211,7 @@ SBTSBlock >> childrenToKeepDuringDelete [
 	^ keep
 ]
 
-{ #category : #'*Sandblocks-TreeSitter-Project' }
+{ #category : #'*Sandblocks-TreeSitter-LanguageClient' }
 SBTSBlock >> chooseFrom: aCollection [
 
 	^ aCollection size
@@ -228,7 +228,7 @@ SBTSBlock >> clearCacheSelf [
 	super clearCacheSelf
 ]
 
-{ #category : #'*Sandblocks-TreeSitter-Project' }
+{ #category : #'*Sandblocks-TreeSitter-LanguageClient' }
 SBTSBlock >> codeAction [
 	<action>
 
@@ -474,6 +474,14 @@ SBTSBlock >> deselectedTextMorph: aMorph for: aNewPosition cursor: aCursor [
 			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]]
 ]
 
+{ #category : #events }
+SBTSBlock >> doubleClick: evt [
+
+	super doubleClick: evt.
+	
+	self gotoDefinition
+]
+
 { #category : #drawing }
 SBTSBlock >> drawBackgroundOn: aCanvas [
 
@@ -580,7 +588,7 @@ SBTSBlock >> getSourceStringAndMark [
 	^ stream contents
 ]
 
-{ #category : #'*Sandblocks-TreeSitter-Project' }
+{ #category : #'*Sandblocks-TreeSitter-LanguageClient' }
 SBTSBlock >> gotoDefinition [
 	<action>
 
@@ -803,6 +811,8 @@ SBTSBlock >> lastConstructedChild [
 { #category : #'as yet unclassified' }
 SBTSBlock >> layoutCommands [
 
+	self hasSubmorphs ifFalse: [^ SBAlgebraCommand morph data: self].
+	
 	^ SBAlgebraCommand container
 		morph: self;
 		data: (Array streamContents: [:stream |
@@ -819,7 +829,7 @@ SBTSBlock >> layoutCommands [
 									ifTrue: [SBAlgebraCommand softLineOrGap]
 									ifFalse: [SBAlgebraCommand softLine]) withGap: true)]
 							ifFalse: [(self factory gapBetween: a and: b) ifTrue: [stream nextPut: SBAlgebraCommand gap]]]].
-			self children ifNotEmpty: [stream nextPut: self lastSubmorph layoutCommands]])
+			self submorphs ifNotEmpty: [stream nextPut: self lastSubmorph layoutCommands]])
 ]
 
 { #category : #hierarchy }
@@ -841,6 +851,12 @@ SBTSBlock >> linearizeOn: aStream [
 SBTSBlock >> matchesQuery: aString [
 
 	^ SBTSQuery new execute: aString against: self capturesDo: [:b | ]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> minExtent [
+
+	^ super minExtent max: 0 @ TextStyle defaultFont height
 ]
 
 { #category : #'as yet unclassified' }

@@ -1,6 +1,6 @@
 Extension { #name : #SBTSBlock }
 
-{ #category : #'*Sandblocks-TreeSitter-Project' }
+{ #category : #'*Sandblocks-TreeSitter-LanguageClient' }
 SBTSBlock >> chooseFrom: aCollection [
 
 	^ aCollection size
@@ -10,7 +10,7 @@ SBTSBlock >> chooseFrom: aCollection [
 		otherwise: [UIManager default chooseFrom: aCollection]
 ]
 
-{ #category : #'*Sandblocks-TreeSitter-Project' }
+{ #category : #'*Sandblocks-TreeSitter-LanguageClient' }
 SBTSBlock >> codeAction [
 	<action>
 
@@ -20,7 +20,7 @@ SBTSBlock >> codeAction [
 		blocking: true
 ]
 
-{ #category : #'*Sandblocks-TreeSitter-Project' }
+{ #category : #'*Sandblocks-TreeSitter-LanguageClient' }
 SBTSBlock >> gotoDefinition [
 	<action>
 

@@ -14,12 +14,14 @@ Class {
 SBLSPTCPTransport >> handleDataFrom: aStream [
 
 	| length message data |
-	[aStream upToAll: 'Content-Length: '] on: SocketPrimitiveFailed do: [:e | ^ self].
-
+	[aStream upToAll: 'Content-Length: ']
+		on: SocketPrimitiveFailed
+		do: [:e | ^ self].
+	
 	length := (aStream upToAll: String crlfcrlf) asNumber.
 	data := (aStream next: length) utf8ToSqueak.
-	Transcript showln: {'<'. length. data}.
 	message := Json readFrom: data readStream.
+	languageClient log: {'>'. data}.
 	languageClient handleMessage: message
 ]
 

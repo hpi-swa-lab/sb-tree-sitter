@@ -13,8 +13,24 @@ Class {
 		'transport',
 		'serverCapabilities'
 	],
+	#classVars : [
+		'LogLanguageServerCommunication'
+	],
 	#category : #'Sandblocks-TreeSitter-LanguageClient'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageClient class >> logLanguageServerCommunication [
+	<preference: 'Log Language Server communication' category: 'Sandblocks' description: '' type: #Boolean>
+
+	^ LogLanguageServerCommunication ifNil: [false]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageClient class >> logLanguageServerCommunication: aBoolean [
+
+	LogLanguageServerCommunication := aBoolean
+]
 
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> close [
@@ -37,7 +53,7 @@ SBTSLanguageClient >> handleMessage: aJsonObject [
 						promise rejectWith: error.
 						^ self onUIThread: [self error: error]].
 					promise resolveWith: aJsonObject result]
-				ifAbsent: [Transcript showln: {'unknown message'. aJsonObject}]]
+				ifAbsent: [self log: {'unknown message'. aJsonObject}]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -70,6 +86,12 @@ SBTSLanguageClient >> internalSendRequest: aString params: anObject [
 	pending at: myId put: promise.
 	self send: (Dictionary newFrom: {'jsonrpc' -> '2.0'. 'id' -> myId. 'method' -> aString. 'params' -> anObject}).
 	^ promise
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageClient >> log: anObject [
+
+	self class logLanguageServerCommunication ifTrue: [Transcript showln: anObject]
 ]
 
 { #category : #'as yet unclassified' }
@@ -130,7 +152,7 @@ SBTSLanguageClient >> sendInitializeDo: aBlock [
 				'workspace' -> (Dictionary newFrom: {'applyEdit' -> true. 'workspaceEdit' -> (Dictionary newFrom: {'documentChanges' -> true})})})})
 		do: [:response |
 			serverCapabilities := response at: 'capabilities'.
-			Transcript showln: 'Connected to server'.
+			self log: 'Connected to server'.
 			self sendNotification: 'initialized' params: Dictionary new.
 			aBlock value]
 		blocking: false
