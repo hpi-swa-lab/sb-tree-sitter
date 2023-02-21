@@ -39,6 +39,12 @@ SBTSLanguageClient >> close [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageClient >> connected [
+
+	^ transport connected
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageClient >> handleMessage: aJsonObject [
 
 	(aJsonObject includesKey: 'method')
@@ -68,13 +74,15 @@ SBTSLanguageClient >> initializeFor: aDirectory onServerMessageDo: aBlock onRead
 	super initialize.
 	
 	transport := aTransport languageClient: self.
+	serverCapabilities := Dictionary new.
 	serverMessageHandler := aBlock.
 	pending := Dictionary new.
 	projectDirectory := aDirectory.
 	lastRequestId := 0.
 	
 	transport start.
-	self sendInitializeDo: anotherBlock
+	
+	transport connected ifTrue: [self sendInitializeDo: anotherBlock]
 ]
 
 { #category : #'as yet unclassified' }

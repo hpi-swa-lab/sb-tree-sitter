@@ -47,7 +47,7 @@ else:
 	aBuilder addBlock: 'while' as: (SBGDScript parseWithPlaceholders: 'while _:
 	_').
 	aBuilder addBlock: 'match' as: (SBGDScript parseWithPlaceholders: 'match _:
-	_:
+	_condition:
 		pass').
 	aBuilder addBlock: 'return' as: (SBGDScript parseWithPlaceholders: 'return _').
 	aBuilder addBlock: 'break' as: (SBGDScript parseWithPlaceholders: 'break').
@@ -65,12 +65,25 @@ SBGDPalette class >> buildDataOn: aBuilder [
 ]
 
 { #category : #'as yet unclassified' }
+SBGDPalette class >> buildExampleOn: aBuilder [
+
+	aBuilder addSectionHeader: 'Example'.
+	
+	(SBGDFunctionCall signatures at: 'KinematicBody2D') do: [:method |
+		method name first ~= $_ ifTrue: [
+			aBuilder
+				addBlock: method name
+				as: (SBGDScript parseWithPlaceholders: ('{1}({2})' format: {method name. (method arguments collect: [:arg | '_', arg name]) joinSeparatedBy: ', '})) applyReplacement]]
+]
+
+{ #category : #'as yet unclassified' }
 SBGDPalette class >> buildOn: aBuilder [
 
 	aBuilder addHeader: 'Godot'.
 	self buildDataOn: aBuilder.
 	self buildAbstractionsOn: aBuilder.
-	self buildControlFlowOn: aBuilder
+	self buildControlFlowOn: aBuilder.
+	self buildExampleOn: aBuilder
 ]
 
 { #category : #'as yet unclassified' }

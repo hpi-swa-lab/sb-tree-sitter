@@ -9,6 +9,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBLSPTransport >> connected [
+
+	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
 SBLSPTransport >> handleData [
 
 	| length message data readBuffer |

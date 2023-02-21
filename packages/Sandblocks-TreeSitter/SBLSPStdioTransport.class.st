@@ -26,6 +26,12 @@ SBLSPStdioTransport >> command: aString [
 ]
 
 { #category : #'as yet unclassified' }
+SBLSPStdioTransport >> connected [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 SBLSPStdioTransport >> start [
 
 	super start.

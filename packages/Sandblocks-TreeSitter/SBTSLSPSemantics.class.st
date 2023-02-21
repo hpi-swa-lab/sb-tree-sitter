@@ -173,6 +173,8 @@ SBTSLSPSemantics >> definitionsOf: aBlock choosing: aChoosingClosure do: aDefini
 SBTSLSPSemantics >> didChange: aTSFile [
 
 	| version |
+	client connected ifFalse: [^ self].
+	
 	version := textDocumentVersions
 		at: aTSFile
 		put: (textDocumentVersions at: aTSFile) + 1.
@@ -187,6 +189,8 @@ SBTSLSPSemantics >> didChange: aTSFile [
 { #category : #notifications }
 SBTSLSPSemantics >> didClose: aTSFile [
 
+	client connected ifFalse: [^ self].
+
 	textDocumentVersions removeKey: aTSFile ifAbsent: [^ self].
 	
 	client
@@ -197,6 +201,8 @@ SBTSLSPSemantics >> didClose: aTSFile [
 { #category : #notifications }
 SBTSLSPSemantics >> didOpen: aTSFile [
 
+	client connected ifFalse: [^ self].
+	
 	textDocumentVersions at: aTSFile put: 1.
 	
 	client sendNotification: 'textDocument/didOpen' params: (Dictionary newFrom: {
@@ -253,6 +259,8 @@ SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 { #category : #requests }
 SBTSLSPSemantics >> hoverFor: aBlock do: aClosure blocking: aBoolean [
 
+	client connected ifFalse: [^ self].
+	
 	client
 		sendRequest: 'textDocument/hover'
 		params: (self textDocumentPositionParamsFor: aBlock)
@@ -343,6 +351,8 @@ SBTSLSPSemantics >> suggestionsFor: aBlock [
 { #category : #requests }
 SBTSLSPSemantics >> suggestionsFor: aBlock do: aClosure blocking: aBoolean [
 
+	client connected ifFalse: [^ self].
+	
 	client
 		sendRequest: 'textDocument/completion'
 		params: (self textDocumentPositionParamsFor: aBlock)

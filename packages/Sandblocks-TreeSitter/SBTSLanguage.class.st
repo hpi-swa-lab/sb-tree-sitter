@@ -158,8 +158,8 @@ SBTSLanguage class >> firstRuleName [
 SBTSLanguage class >> gapBetween: aBlock and: anotherBlock [
 
 	(aBlock contents = '(' and: [anotherBlock contents = ')']) ifTrue: [^ true].
-	aBlock contents = '.' ifTrue: [^ false].
-	anotherBlock contents = '.' ifTrue: [^ false].
+	(aBlock isTextMorph and: [aBlock contents = '.']) ifTrue: [^ false].
+	(anotherBlock isTextMorph and: [anotherBlock contents = '.']) ifTrue: [^ false].
 	(aBlock isTextMorph and: [aBlock contents]) = '(' ifTrue: [^ false].
 	(anotherBlock isTextMorph and: [anotherBlock contents = '(']) ifTrue: [^ false].
 	anotherBlock contents = ')' ifTrue: [^ false].
@@ -423,7 +423,11 @@ SBTSLanguage class >> parseWithPlaceholders: aString [
 
 	| expr |
 	expr := self parseExpression: aString.
-	expr allBlocksDo: [:block | block contents = '_' ifTrue: [block replaceBy: block newNullBlock]].
+	expr allBlocksDo: [:block |
+		(block contents notNil and: [block contents beginsWith: '_']) ifTrue: [ | null |
+			null := SBTSPlaceholderBlock new slot: (SBTSSlot with: block slot lastNode).
+			block replaceBy: null.
+			block contents allButFirst ifNotEmpty: [:label | null placeholderText: label]]].
 	^ expr
 ]
 

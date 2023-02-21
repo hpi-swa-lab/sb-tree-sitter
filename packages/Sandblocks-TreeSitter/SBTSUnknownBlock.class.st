@@ -49,9 +49,17 @@ SBTSUnknownBlock >> keepDuringTransform [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSUnknownBlock >> placeholderLengthLimit [
+
+	^ 15
+]
+
+{ #category : #'as yet unclassified' }
 SBTSUnknownBlock >> placeholderText: aString [
 
-	self firstSubmorph placeholderText: (aString size < 15 ifTrue: [aString] ifFalse: [(aString first: 12), '...'])
+	self firstSubmorph placeholderText: (aString size < self placeholderLengthLimit
+		ifTrue: [aString]
+		ifFalse: [(aString first: self placeholderLengthLimit - 3), '...'])
 ]
 
 { #category : #'as yet unclassified' }

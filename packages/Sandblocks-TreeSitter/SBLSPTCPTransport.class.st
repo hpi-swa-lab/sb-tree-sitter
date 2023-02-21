@@ -11,6 +11,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBLSPTCPTransport >> connected [
+
+	^ stream notNil and: [stream isConnected]
+]
+
+{ #category : #'as yet unclassified' }
 SBLSPTCPTransport >> handleDataFrom: aStream [
 
 	| length message data |
@@ -42,9 +48,7 @@ SBLSPTCPTransport >> start [
 
 	super start.
 	
-	socket := Socket newTCP.
-	socket connectTo: (NetNameResolver addressFromString: '127.0.0.1') port: port.
-	stream := SocketStream on: socket.
+	stream := [SocketStream openConnectionToHostNamed: '127.0.0.1' port: port] on: ConnectionRefused do: [:e | ^ self].
 	stream timeout: 100000.
 	
 	[[stream atEnd] whileFalse: [self handleDataFrom: stream]] fork
@@ -53,8 +57,7 @@ SBLSPTCPTransport >> start [
 { #category : #'as yet unclassified' }
 SBLSPTCPTransport >> stop [
 
-	[stream close] on: Error do: [:error | ].
-	[socket close] on: Error do: [:error | ]
+	[stream close] on: Error do: [:error | ]
 ]
 
 { #category : #'as yet unclassified' }

@@ -27,7 +27,7 @@ SBTSReplacementBlock class >> match: aBlock against: aTSQuery buildSelector: aSy
 		success ifTrue: [ | block restore |
 			block := self new bindings: captures block: aBlock.
 			restore := SBRestoreCommand new
-				morphs: captures values commonOwner: block root;
+				morphs: block restore commonOwner: block root;
 				notePositions;
 				yourself.
 			(block perform: aSymbol) ifNotNil: [:b | | replaceCmd |
@@ -57,6 +57,19 @@ SBTSReplacementBlock >> asCode: converter [
 	<convert>
 
 	converter do: [self updateDuring: [self root copyBlock]]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementBlock >> bindBlock: aBlock [
+
+	| container |
+	container := SBTSReplacedBlockContainer new.
+	aBlock replaceBy: (SBTSReplacementPlaceholder new
+		setProperty: #tsReplacementPlaceholder toValue: container;
+		yourself).
+	^ container
+		addMorph: aBlock;
+		yourself
 ]
 
 { #category : #'as yet unclassified' }
@@ -146,21 +159,11 @@ SBTSReplacementBlock >> createBinding: aBuilderClosure update: anUpdateClosure [
 { #category : #'as yet unclassified' }
 SBTSReplacementBlock >> createBindingBlock: aNameString [
 
-	^ self
-		createBinding: [:c | | block container |
-			container := SBTSReplacedBlockContainer new.
-			block := self bindings at: aNameString.
-			block replaceBy: (SBTSReplacementPlaceholder new
-				setProperty: #tsReplacementPlaceholder toValue: container;
-				yourself).
-			container
-				addMorph: block;
-				yourself]
-		update: [:c :m |
-			SBToggledCode
-				comment: ''
-				active: 0
-				do: {[self replaceBound: aNameString with: m firstSubmorph]}]
+	^ self createBinding: [:c | self bindBlock: (self bindings at: aNameString)] update: [:c :m |
+		SBToggledCode
+			comment: ''
+			active: 0
+			do: {[self replaceBound: aNameString with: m firstSubmorph]}]
 ]
 
 { #category : #'as yet unclassified' }
@@ -231,6 +234,12 @@ SBTSReplacementBlock >> replaceBound: aString with: aBlock [
 	aBlock slot: new slot.
 	(bindings at: aString) owner ifNotNil: [(bindings at: aString) replaceBy: aBlock].
 	bindings at: aString put: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementBlock >> restore [
+
+	^ bindings values
 ]
 
 { #category : #'as yet unclassified' }
