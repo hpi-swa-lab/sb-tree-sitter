@@ -87,6 +87,12 @@ SBFileEditor >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+SBFileEditor >> objectInterfaceForInsert: aCommand [
+
+	^ SBInterfaces never
+]
+
+{ #category : #'as yet unclassified' }
 SBFileEditor >> openFile: aFile [
 
 	(self currentFile notNil and: [self currentFile file = aFile]) ifTrue: [^ self currentFile].

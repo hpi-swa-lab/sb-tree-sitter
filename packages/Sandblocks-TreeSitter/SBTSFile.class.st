@@ -208,6 +208,12 @@ SBTSFile >> layoutCommands [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile >> objectInterface [
+
+	^ SBInterfaces never
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> outOfWorld: aWorld [
 
 	super outOfWorld: aWorld.
