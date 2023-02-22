@@ -73,6 +73,24 @@ SBTSDragAndDropTests >> testDragInsertPyStatementToArgument [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSDragAndDropTests >> testGDNameToExpr [
+
+	| program editor |
+	program := SBGDScript parseToplevel: 'b = 12'.
+	editor := self editorAndWorldFor: program.
+	
+	program width: 200.
+	program fullBounds.
+	
+	self class
+		dropAt: program firstDeepChild positionInWorld + 1
+		with: (SBGDScript parseToplevel: 'var a') firstDeepChild
+		in: editor.
+	self assert: 'a=12' equals: program sourceStringForCompare.
+	self assert: 'identifier' equals: program firstDeepChild type
+]
+
+{ #category : #'as yet unclassified' }
 SBTSDragAndDropTests >> testRegexInsertInPattern [
 
 	| module editor |

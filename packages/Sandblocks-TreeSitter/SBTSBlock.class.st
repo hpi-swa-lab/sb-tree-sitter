@@ -47,7 +47,7 @@ SBTSBlock >> actionProviders [
 	^ {self language}, super actionProviders
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #converting }
 SBTSBlock >> adaptSlot: aConverter [
 	<convert>
 
@@ -163,7 +163,7 @@ SBTSBlock >> asForeignLanguage [
 		string: self contents language: (options at: option) for: self)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #converting }
 SBTSBlock >> asSlider: converter [
 	<convert>
 
@@ -303,6 +303,12 @@ SBTSBlock >> copyBlock [
 		slot: self slot.
 	#(#lastConstructed #copyPlaceholder) do: [:prop | self valueOfProperty: prop ifPresentDo: [:val | copy setProperty: prop toValue: val]].
 	^ copy
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> copyOnDrag [
+
+	^ self language copyOnDrag: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -888,7 +894,9 @@ SBTSBlock >> objectInterface [
 { #category : #'as yet unclassified' }
 SBTSBlock >> objectInterfaceForChild: aBlock [
 
-	^ aBlock isTSBlock ifTrue: [{SBTSObjectInterface new slot: aBlock slot}] ifFalse: [SBInterfaces never]
+	^ aBlock isTSBlock
+		ifTrue: [{SBTSObjectInterface new slot: aBlock slot}]
+		ifFalse: [SBInterfaces never]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1090,6 +1098,31 @@ SBTSBlock >> range [
 SBTSBlock >> range: aTSRange [
 
 	range := aTSRange
+]
+
+{ #category : #converting }
+SBTSBlock >> reinterpretString: aConverter [
+	<convert>
+
+	aConverter
+		if: [
+			((aConverter objectInterface first isKindOf: SBTSObjectInterface) and: [self submorphCount = 1 and: [self currentTextMorph notNil]])
+				ifTrue: [
+					(SBTSInputParser new
+						allowIncomplete: false;
+						rawOptionsForTemplate: aConverter objectInterface first slot transitionRoot
+							given: self contents
+							before: #()
+							after: #()) notEmpty]
+				ifFalse: [false]]
+		do: [ | parser |
+			parser := SBTSInputParser new.
+			(parser
+				allowIncomplete: false;
+				rawOptionsForTemplate: aConverter objectInterface first slot transitionRoot
+					given: self contents
+					before: #()
+					after: #()) anyOne blocks anyOne buildWith: parser]
 ]
 
 { #category : #'as yet unclassified' }

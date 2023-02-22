@@ -83,6 +83,12 @@ SBTSLanguage class >> compileParserIn: path name: aString root: aRootPath [
 	^ FileDirectory default / ('tree-sitter-{1}.so' format: {aString})
 ]
 
+{ #category : #'configuration - editing' }
+SBTSLanguage class >> copyOnDrag: aBlock [
+
+	^ false
+]
+
 { #category : #'configuration - declarations' }
 SBTSLanguage class >> declarationsInScope: aScopeBlock do: aClosure [
 

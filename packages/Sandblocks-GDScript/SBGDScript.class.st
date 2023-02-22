@@ -12,6 +12,12 @@ SBGDScript class >> addIndent: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBGDScript class >> copyOnDrag: aBlock [
+
+	^ aBlock type = 'name'
+]
+
+{ #category : #'as yet unclassified' }
 SBGDScript class >> defaultRuntimeClass [
 
 	^ SBGodotRuntime
