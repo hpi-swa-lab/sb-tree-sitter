@@ -10,4 +10,5 @@ SBTreeSitter new
 	typescript;
 	tsx;
 	regex;
+	gdscript;
 	parserNew.
