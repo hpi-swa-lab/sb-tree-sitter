@@ -49,7 +49,7 @@ SBTSLanguageSemantics >> shutdown [
 { #category : #'as yet unclassified' }
 SBTSLanguageSemantics >> suggestionsFor: aBlock [
 
-	^ #()
+	^ aBlock language suggestionsFor: aBlock
 ]
 
 { #category : #requests }
