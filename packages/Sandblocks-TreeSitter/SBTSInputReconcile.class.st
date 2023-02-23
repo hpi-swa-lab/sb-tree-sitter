@@ -349,8 +349,8 @@ SBTSInputReconcile >> tryReconcileFor: aMorph input: aString in: aBlock at: aNum
 	
 	^ aNumber = 1
 		ifTrue: [
-			(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: false) ifEmpty: [
-				(self tryAdjacentBefore: aMorph given: aString) ifEmpty: [
+			(self tryAdjacentBefore: aMorph given: aString) ifEmpty: [
+				(self tryWrapOrReinterpret: aBlock from: aMorph given: aString at: aNumber explicitAppend: false) ifEmpty: [
 					aBoolean
 						ifTrue: [{}]
 						ifFalse: [(self trySkipLabel: aString in: aBlock from: aMorph at: aNumber) ifEmpty: [self trySkipLabel: aString in: aBlock owner from: aMorph at: aNumber]]]]]
@@ -377,9 +377,10 @@ SBTSInputReconcile >> tryReinterpretFrom: aMorph in: aBlock given: aString at: a
 	"we may only consider owners if they do not introduce additional tokens"
 	aMorph contents = pivot sourceString ifFalse: [^ {}].
 	
-	string := pivot contentsForEdit ifNil: [aString] ifNotNil: [aNumber = self class endIndex
-		ifTrue: [pivot contentsForEdit, aString]
-		ifFalse: [(pivot contentsForEdit first: aNumber - 1), aString, (pivot contentsForEdit allButFirst: aNumber - 1)]].
+	string := pivot contentsForEdit ifNil: [aString] ifNotNil: [
+		aNumber = self class endIndex
+			ifTrue: [pivot contentsForEdit, aString]
+			ifFalse: [(pivot contentsForEdit first: aNumber - 1), aString, (pivot contentsForEdit allButFirst: aNumber - 1)]].
 	
 	boundary := pivot owner submorphAfter.
 	validCondition := (boundary ifNotNil: #isTextMorph ifNil: [false])

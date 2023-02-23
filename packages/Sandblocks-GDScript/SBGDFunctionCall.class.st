@@ -47,8 +47,10 @@ SBGDFunctionCall class >> iconDictionary [
 { #category : #'as yet unclassified' }
 SBGDFunctionCall class >> iconMorphForType: aString [
 
-	| form |
-	form := self perform: ('icon', aString) asSymbol.
+	| form message |
+	message := ('icon', aString) asSymbol.
+	(self respondsTo: message) ifFalse: [message := #iconObject].
+	form := self perform: message.
 	^ form asMorph
 		balloonText: aString;
 		yourself
@@ -260,12 +262,14 @@ SBGDFunctionCall >> layoutCommands [
 					self submorphs first layoutCommands.
 					SBAlgebraCommand gap.
 					self submorphs second layoutCommands.
-					self submorphs third layoutCommands.
-					SBAlgebraCommand indent data: {SBAlgebraCommand softLine withGap: true}, ((self submorphs viewAllButFirst: 3 andLast: 1)
-						collect: [:s | s layoutCommands]
-						separatedBy: [SBAlgebraCommand softLineOrGap withGap: true]).
-					SBAlgebraCommand softLine withGap: true.
-					self lastSubmorph layoutCommands}]}.
+					self submorphs third layoutCommands}, (self submorphCount > 4
+					ifTrue: [
+						{
+							SBAlgebraCommand indent data: {SBAlgebraCommand softLine withGap: true}, ((self submorphs viewAllButFirst: 3 andLast: 1)
+								collect: [:s | s layoutCommands]
+								separatedBy: [SBAlgebraCommand softLineOrGap withGap: true]).
+							SBAlgebraCommand softLine withGap: true}]
+					ifFalse: [{}]), {self lastSubmorph layoutCommands}]}.
 	^ SBAlgebraCommand morph data: self
 ]
 

@@ -81,9 +81,17 @@ SBGDPalette class >> buildOn: aBuilder [
 
 	aBuilder addHeader: 'Godot'.
 	self buildDataOn: aBuilder.
+	self buildPrimitivesOn: aBuilder.
 	self buildAbstractionsOn: aBuilder.
 	self buildControlFlowOn: aBuilder.
 	self buildExampleOn: aBuilder
+]
+
+{ #category : #'as yet unclassified' }
+SBGDPalette class >> buildPrimitivesOn: aBuilder [
+
+	aBuilder addSectionHeader: 'Primitives'.
+	aBuilder addBlock: 'Vector2' as: (SBGDScript parseWithPlaceholders: 'Vector2(_x, _y)')
 ]
 
 { #category : #'as yet unclassified' }

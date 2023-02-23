@@ -300,6 +300,23 @@ SBTSBlockTest >> testForwardToAdjacentStatement [
 ()=>;' equals: module sourceString
 ]
 
+{ #category : #'tests - input transition' }
+SBTSBlockTest >> testGDCompletedCall [
+
+	| program editor |
+	program := SBGDScript parseToplevel: 'a()'.
+	editor := self editorAndWorldFor: program.
+	
+	editor
+		startInput: program childSandblocks first
+		at: 1
+		replacingContents: false
+		in: program lastDeepSubmorph.
+	self type: 'ab' in: editor.
+	
+	self assert: 'a(ab)' equals: program sourceStringForCompare
+]
+
 { #category : #'tests - associativity' }
 SBTSBlockTest >> testInsertAddition [
 

@@ -168,6 +168,13 @@ SBTSFile >> filepath: aString toplevel: aBlock language: aLanguageClass collapse
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile >> floating [
+	"pretend that we are floating, independent of location so that cursor movement is constrained to this morph"
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> getSourceStringAndMark [
 
 	^ self root getSourceStringAndMark withUnixLineEndings

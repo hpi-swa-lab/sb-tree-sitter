@@ -285,6 +285,33 @@ SBTSLSPSemantics >> insertPositionIn: aBlock at: aTSPosition for: aString [
 	self error: 'weird change'
 ]
 
+{ #category : #requests }
+SBTSLSPSemantics >> loadSuggestionsFor: aBlock [
+
+	| promise |
+	client connected ifFalse: [^ self].
+	
+	promise := Promise new.
+	
+	client
+		sendRequest: 'textDocument/completion'
+		params: (self textDocumentPositionParamsFor: aBlock)
+		do: [:response |
+			promise resolveWith: ((self
+				filterSuggestions: (response isArray
+					ifTrue: [response]
+					ifFalse: [response ifNotNil: [:object | object at: 'items' ifAbsent: [object]] ifNil: [{}]])
+				by: aBlock) collect: [:item |
+				SBSuggestionItem
+					selector: ((item at: 'insertText' ifAbsent: [item label]) ifEmpty: [item label])
+					label: (item
+						at: 'detail'
+						ifAbsent: [item at: 'kind' ifPresent: [:kind | self completionItemKindToString: kind] ifAbsent: ['']])])]
+		blocking: false.
+	
+	^ promise
+]
+
 { #category : #helper }
 SBTSLSPSemantics >> markdownToText: anObject [
 	"for now, just strip the extraneous newlines"
@@ -345,29 +372,10 @@ SBTSLSPSemantics >> shutdown [
 { #category : #requests }
 SBTSLSPSemantics >> suggestionsFor: aBlock [
 
-	^ OrderedCollection streamContents: [:stream | self suggestionsFor: aBlock do: [:suggestion | stream nextPut: suggestion] blocking: true]
-]
-
-{ #category : #requests }
-SBTSLSPSemantics >> suggestionsFor: aBlock do: aClosure blocking: aBoolean [
-
-	client connected ifFalse: [^ self].
-	
-	client
-		sendRequest: 'textDocument/completion'
-		params: (self textDocumentPositionParamsFor: aBlock)
-		do: [:response |
-			(self
-				filterSuggestions: (response isArray
-					ifTrue: [response]
-					ifFalse: [response ifNotNil: [:object | object at: 'items' ifAbsent: [object]] ifNil: [{}]])
-				by: aBlock) do: [:item |
-				aClosure value: (SBSuggestionItem
-					selector: ((item at: 'insertText' ifAbsent: [item label]) ifEmpty: [item label])
-					label: (item
-						at: 'detail'
-						ifAbsent: [item at: 'kind' ifPresent: [:kind | self completionItemKindToString: kind] ifAbsent: ['']]))]]
-		blocking: aBoolean
+	^ aBlock sandblockEditor suggestionMenu
+		delayedUpdateFor: aBlock
+		filterCurrent: [:list | list]
+		suggestionsPromise: (self loadSuggestionsFor: aBlock)
 ]
 
 { #category : #helper }
