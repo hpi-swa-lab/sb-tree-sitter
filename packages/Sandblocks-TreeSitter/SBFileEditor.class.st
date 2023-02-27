@@ -59,16 +59,24 @@ SBFileEditor >> initialize [
 		cellGap: 4;
 		layoutInset: 4;
 		addMorphBack: (SBButton new
+			icon: SBIcon iconUndo shortcut: nil do: [self undo];
+			balloonText: 'Undo');
+		addMorphBack: (SBButton new
+			icon: SBIcon iconRepeat shortcut: nil do: [self redo];
+			balloonText: 'Redo');
+		addMorphBack: self spacer;
+		addMorphBack: (SBButton new
 			icon: SBIcon iconSearch
 				shortcut: nil
 				do: [SBPreferences largeInsets: SBPreferences largeInsets not];
-			balloonText: 'Toggle Block Palette');
+			balloonText: 'Toggle Large/Small Blocks');
 		addMorphBack: (SBButton new
 			icon: SBIcon iconColumns shortcut: nil do: [self togglePalette];
 			balloonText: 'Toggle Block Palette');
 		addMorphBack: (SBButton new
 			icon: SBIcon iconFilesO shortcut: nil do: [self toggleFileBrowser];
-			balloonText: 'Toggle File Browser')).
+			balloonText: 'Toggle File Browser');
+		addMorphBack: self spacer).
 	
 	self submorphs second addMorphFront: (SBBlock new
 		attachDecorator: (SBResizableDecorator new edge: #right);
@@ -79,11 +87,13 @@ SBFileEditor >> initialize [
 		changeTableLayout;
 		layoutInset: (SBEdgeInsets right: 4 sbScaled);
 		width: 200).
-	fileScroller scroller addMorphBack: (root := SBFileTree new
-		on: FileSystem disk / 'home';
-		layoutInset: (SBEdgeInsets right: 12);
-		toggleExpand;
-		when: #open send: #openFile: to: self)
+	fileScroller scroller
+		changeTableLayout;
+		addMorphBack: (root := SBFileTree new
+			on: FileSystem disk / 'home';
+			layoutInset: (SBEdgeInsets right: 12);
+			toggleExpand;
+			when: #open send: #openFile: to: self)
 ]
 
 { #category : #'as yet unclassified' }
@@ -99,7 +109,7 @@ SBFileEditor >> openFile: aFile [
 	
 	self currentFile ifNotNil: [:currentFile | self runtimesDo: [:r | r didClose: currentFile]].
 	aFile isDirectory ifFalse: [ | newFile |
-		newFile := SBTSFile forNoReplace: aFile pathString.
+		newFile := (SBTSFile forNoReplace: aFile pathString) ifNil: [^ nil].
 		self openMorphInView: newFile.
 		self runtimesDo: [:r | r didOpen: newFile].
 		^ newFile].
@@ -133,4 +143,14 @@ SBFileEditor >> root [
 SBFileEditor >> runtimesDo: aBlock [
 
 	commandBar submorphsDo: [:s | (s isKindOf: SBTSLanguageRuntime) ifTrue: [aBlock value: s]]
+]
+
+{ #category : #'as yet unclassified' }
+SBFileEditor >> spacer [
+
+	^ Morph new
+		extent: 8 sbScaled @ 0;
+		vResizing: #spaceFill;
+		hResizing: #rigid;
+		color: Color white
 ]

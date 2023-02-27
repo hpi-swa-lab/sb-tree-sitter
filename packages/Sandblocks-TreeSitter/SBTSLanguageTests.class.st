@@ -7,7 +7,7 @@ Class {
 { #category : #failures }
 SBTSLanguageTests >> expectedFailures [
 
-	^ #(#testCInclude)
+	^ #()
 ]
 
 { #category : #'testing - parse' }
@@ -37,6 +37,13 @@ SBTSLanguageTests >> testCReturn [
 	| source |
 	source := 'return 2;'.
 	self assert: source equals: (SBC parseToplevel: source) sourceString
+]
+
+{ #category : #'testing - parse' }
+SBTSLanguageTests >> testCppConstructor [
+
+	SBCpp parseToplevel: 'A::A() {
+}'
 ]
 
 { #category : #'testing - parse' }

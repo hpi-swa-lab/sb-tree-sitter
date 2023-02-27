@@ -245,9 +245,15 @@ SBTSFileParser >> peekText [
 { #category : #stream }
 SBTSFileParser >> peekType [
 
-	self peekIsNamed ifFalse: [" for e.g. python f-strings, the type is aliased to just the quote, so if we find an unnamed we may be better served to always return the node's full content "
-	^ cursor text].
-	^ cursor type
+	| t |
+	t := cursor type.
+	" FIXME the below breaks for just whitespaces, as in for example the C preproc_include "
+	(t allSatisfy: #isSeparator) ifTrue: [^ t].
+	
+	" for e.g. python f-strings, the type is aliased to just the quote, so if we find an unnamed we may be better served to always return the node's full content "
+	self peekIsNamed ifFalse: [^ cursor text].
+	
+	^ t
 ]
 
 { #category : #'as yet unclassified' }

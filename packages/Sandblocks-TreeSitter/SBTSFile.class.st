@@ -36,7 +36,7 @@ SBTSFile class >> forNoReplace: aFilepathString [
 
 	^ self new
 		filepath: aFilepathString
-		language: (self languageForPathAskInstall: aFilepathString)
+		language: ((self languageForPathAskInstall: aFilepathString) ifNil: [^ nil])
 		collapsed: false
 		replace: false
 ]
@@ -57,10 +57,10 @@ SBTSFile class >> languageForPathAskInstall: aString [
 	^ SBTSLanguage allSubclasses
 		detect: [:lang | lang allFileSuffixes includes: ext]
 		ifNone: [
-			(UIManager default request: ('No languages installed for {1}. Install from Github?' format: {ext})) ifNotNil: [:url | | class |
+			(UIManager default request: ('No languages installed for {1}. Install from Github?' format: {ext})) ifNotEmpty: [:url | | class |
 				class := SBTSLanguage installFromGitHub: url.
 				class class compile: ('allFileSuffixes ^ \{{1}}' format: {ext storeString}).
-				class]]
+				class] ifEmpty: [nil]]
 ]
 
 { #category : #'as yet unclassified' }

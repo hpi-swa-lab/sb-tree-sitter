@@ -8,6 +8,33 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBFileTree >> childNamed: aString [
+
+	^ self submorphs second submorphs detect: [:entry | entry name = aString]
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> createFile [
+
+	| name |
+	name := UIManager default request: 'File name?'.
+	(self directory / name) ensureFile.
+	self isExpanded ifFalse: [self toggleExpand] ifTrue: [self reload].
+	(self childNamed: name) open
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> createFolder [
+
+	| name |
+	name := UIManager default request: 'Folder name?'.
+	(self directory / name) ensureDirectory.
+	self reload.
+	
+	(self childNamed: name) toggleExpand
+]
+
+{ #category : #'as yet unclassified' }
 SBFileTree >> directory [
 
 	^ file
@@ -32,12 +59,53 @@ SBFileTree >> file [
 ]
 
 { #category : #'as yet unclassified' }
+SBFileTree >> handlesMouseOver: evt [
+
+	^ SBWatch report: true for: 619305281
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> isDirectory [
+
+	^ file isDirectory
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> isExpanded [
+
+	^ self submorphCount > 1
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> mouseEnter: evt [
+
+	super mouseEnter: evt.
+	
+	self toggleActions: true
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> mouseLeave: evt [
+
+	super mouseLeave: evt.
+	
+	self toggleActions: false
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> name [
+
+	^ file basename
+]
+
+{ #category : #'as yet unclassified' }
 SBFileTree >> on: aFile [
 
 	self removeAllMorphs.
 	file := aFile.
 	self
 		addMorphBack: (SBRow new
+			hResizing: #spaceFill;
 			cellPositioning: #center;
 			cellGap: 8;
 			addMorphBack: (aFile isDirectory
@@ -47,7 +115,7 @@ SBFileTree >> on: aFile [
 		color: Color transparent;
 		on: #click send: #open to: self;
 		listDirection: #topToBottom;
-		layoutPolicy: SBVerticalLayout new;
+		layoutPolicy: TableLayout new;
 		cellPositioning: #left;
 		hResizing: #spaceFill;
 		vResizing: #shrinkWrap
@@ -56,21 +124,46 @@ SBFileTree >> on: aFile [
 { #category : #'as yet unclassified' }
 SBFileTree >> open [
 
-	file isDirectory ifTrue: [self toggleExpand].
+	self isDirectory ifTrue: [self toggleExpand].
 	(self ownerSatisfying: [:o | (o ownerThatIsA: self class) isNil])
 		triggerEvent: #open
 		with: file
 ]
 
 { #category : #'as yet unclassified' }
+SBFileTree >> reload [
+
+	self toggleExpand.
+	self toggleExpand
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> toggleActions: aBoolean [
+
+	self isDirectory ifFalse: [^ self].
+	
+	(aBoolean and: [(self valueOfProperty: #actions ifAbsent: nil) isNil]) ifTrue: [
+		^ self firstSubmorph addMorphBack: (self setProperty: #actions toValue: (SBRow new
+			hResizing: #spaceFill;
+			listCentering: #bottomRight;
+			addMorphBack: (SBIcon iconFile on: #click send: #createFile to: self);
+			addMorphBack: (SBIcon iconFolder on: #click send: #createFolder to: self)))].
+	aBoolean not ifTrue: [
+		self valueOfProperty: #actions ifPresentDo: [:a | a delete].
+		self removeProperty: #actions]
+]
+
+{ #category : #'as yet unclassified' }
 SBFileTree >> toggleExpand [
 
 	| list |
-	self submorphCount > 1 ifTrue: [
+	self isExpanded ifTrue: [
 		self firstSubmorph firstSubmorph changeIconName: #iconAngleRight.
 		^ self lastSubmorph delete].
 	self firstSubmorph firstSubmorph changeIconName: #iconAngleDown.
-	self addMorphBack: (list := SBColumn new layoutInset: (SBEdgeInsets left: 16)).
+	self addMorphBack: (list := SBColumn new
+		layoutInset: (SBEdgeInsets left: 16);
+		hResizing: #spaceFill).
 	file children
 		ifNotEmpty: [
 			(file children sort: [:a :b | | fa fb |

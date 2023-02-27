@@ -173,7 +173,7 @@ SBTSNodeAlias >> resultsForBlocks: aParser [
 		currentBlocks := aParser blocks.
 		aParser blocks: OrderedCollection new.
 		aParser descend.
-		aParser justEnteredAlias: true.
+		aParser justEnteredAlias: self element isTSSymbol not.
 		range := aParser currentRange.
 		results := self bodyTemplate resultsForBlocks: aParser.
 		aParser justEnteredAlias: false.
