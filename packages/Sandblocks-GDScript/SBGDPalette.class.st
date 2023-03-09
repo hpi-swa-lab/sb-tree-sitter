@@ -5,6 +5,17 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBGDPalette class >> build2On: aBuilder [
+
+	aBuilder addHeader: 'Godot'.
+	self buildDataOn: aBuilder.
+	self buildPrimitivesOn: aBuilder.
+	self buildAbstractionsOn: aBuilder.
+	self buildControlFlowOn: aBuilder.
+	self buildExampleOn: aBuilder
+]
+
+{ #category : #'as yet unclassified' }
 SBGDPalette class >> buildAbstractionsOn: aBuilder [
 
 	aBuilder addSectionHeader: 'Abstractions'.
@@ -79,12 +90,7 @@ SBGDPalette class >> buildExampleOn: aBuilder [
 { #category : #'as yet unclassified' }
 SBGDPalette class >> buildOn: aBuilder [
 
-	aBuilder addHeader: 'Godot'.
-	self buildDataOn: aBuilder.
-	self buildPrimitivesOn: aBuilder.
-	self buildAbstractionsOn: aBuilder.
-	self buildControlFlowOn: aBuilder.
-	self buildExampleOn: aBuilder
+	aBuilder addAllMorphs: ((GDData select: [:class | class base_class isEmpty]) collect: [:class | SBGDPaletteContainer new on: class])
 ]
 
 { #category : #'as yet unclassified' }

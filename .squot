@@ -17,5 +17,6 @@ OrderedDictionary {
 	'packages/Sandblocks-Matplotlib' : #SquotTonelSerializer,
 	'packages/Sandblocks-Clojure' : #SquotTonelSerializer,
 	'packages/Sandblocks-Typescript' : #SquotTonelSerializer,
-	'packages/Sandblocks-Kotlin' : #SquotTonelSerializer
+	'packages/Sandblocks-Kotlin' : #SquotTonelSerializer,
+	'packages/Sandblocks-Cpp' : #SquotTonelSerializer
 }
