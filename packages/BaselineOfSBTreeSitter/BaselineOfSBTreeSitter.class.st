@@ -95,7 +95,6 @@ BaselineOfSBTreeSitter >> baseline: spec [
 			package: 'Sandblocks-Regex' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Json' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-C' with: [spec requires: #('Sandblocks-TreeSitter')];
-			package: 'Sandblocks-Cpp' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Vhdl' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-TSSmalltalk' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Bash' with: [spec requires: #('Sandblocks-TreeSitter')];
@@ -108,7 +107,7 @@ BaselineOfSBTreeSitter >> baseline: spec [
 		
 		spec
 			group: 'default'
-			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Cpp' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-Clojure' 'Sandblocks-TSSmalltalk' 'Sandblocks-Typescript' 'Sandblocks-Matplotlib' 'Sandblocks-RequestsTool' 'Sandblocks-Kotlin' 'Sandblocks-GDScript')]
+			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-Clojure' 'Sandblocks-TSSmalltalk' 'Sandblocks-Typescript' 'Sandblocks-Matplotlib' 'Sandblocks-RequestsTool' 'Sandblocks-Kotlin' 'Sandblocks-GDScript')]
 ]
 
 { #category : #baseline }
