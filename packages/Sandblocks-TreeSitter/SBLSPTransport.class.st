@@ -17,14 +17,23 @@ SBLSPTransport >> connected [
 { #category : #'as yet unclassified' }
 SBLSPTransport >> handleData [
 
-	| length message data readBuffer |
+	| readBuffer header headers continue length data message |
 	readBuffer := buffer readStream.
-	(readBuffer nextMatchAll: 'Content-Length: ') ifFalse: [^ false].
-	(readBuffer peekDuring: [readBuffer skipTo: Character cr]) ifFalse: [^ false].
-	length := (readBuffer upTo: Character cr) asNumber.
-	(readBuffer nextMatchAll: String lf, String crlf) ifFalse: [^ false].
+	buffer ifEmpty: [^ false].
+	
+	headers := Dictionary new.
+	continue := true.
+	[
+		header := readBuffer upToAll: String crlf.
+		readBuffer last = Character lf ifFalse: [^ false].
+		header isEmpty
+			ifFalse: [ | parts |
+				parts := header splitBy: ': '.
+				headers at: parts first asLowercase put: parts second]
+			ifTrue: [continue := false]] doWhileTrue: [continue].
+	length := (headers at: 'content-length' ifAbsent: [^ false]) asNumber.
 	data := readBuffer next: length.
-	data size ~= length ifTrue: [^ false].
+	data size = length ifFalse: [^ false].
 	message := Json readFrom: data utf8ToSqueak readStream.
 	languageClient log: {'>'. message}.
 	languageClient handleMessage: message.

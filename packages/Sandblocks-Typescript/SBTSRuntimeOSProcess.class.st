@@ -93,18 +93,6 @@ SBTSRuntimeOSProcess >> prettyPrint: aString [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSRuntimeOSProcess >> root [
-
-	^ root
-]
-
-{ #category : #'as yet unclassified' }
-SBTSRuntimeOSProcess >> root: aFile [
-
-	root := aFile
-]
-
-{ #category : #'as yet unclassified' }
 SBTSRuntimeOSProcess >> startSemantics [
 
 	^ SBTSLSPSemantics new

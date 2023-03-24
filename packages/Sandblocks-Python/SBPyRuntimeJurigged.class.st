@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBPyRuntimeJurigged class >> activateFor: aFile do: aBlock [
+
+	
+]
+
+{ #category : #'as yet unclassified' }
 SBPyRuntimeJurigged class >> runtimeName [
 
 	^ 'jurriged'

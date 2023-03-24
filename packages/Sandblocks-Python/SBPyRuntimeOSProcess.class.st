@@ -8,6 +8,14 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess class >> activateFor: aFile do: aBlock [
+
+	aFile children
+		detect: [:file | file basename = 'requirements.txt' or: [file basename endsWith: '.py']]
+		ifFound: [:f | aBlock value: (self new root: aFile)]
+]
+
+{ #category : #'as yet unclassified' }
 SBPyRuntimeOSProcess class >> defaultPythonPath [
 
 	^ (self pythonPath ifNil: [self which: 'python3']) ifNil: [self selectPath]
@@ -146,4 +154,16 @@ SBPyRuntimeOSProcess >> selectPath [
 	self class pythonPath: (UIManager default
 		request: 'Path to python executable?'
 		initialAnswer: (self class pythonPath ifNil: [self which: 'python3']))
+]
+
+{ #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess >> startSemantics [
+
+	^ SBTSLSPSemantics new
+		on: self root
+		transport: (SBLSPStdioTransport new
+			command: (self class which: 'pylsp');
+			arguments: {};
+			workingDirectory: self root asString)
+		onReady: []
 ]
