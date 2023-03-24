@@ -1,8 +1,19 @@
 Class {
 	#name : #SBTSRuntimeOSProcess,
 	#superclass : #SBTSLanguageRuntime,
+	#classInstVars : [
+		'root'
+	],
 	#category : #'Sandblocks-Typescript'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSRuntimeOSProcess class >> activateFor: aFile do: aBlock [
+
+	aFile children
+		detect: [:file | file basename = 'tsconfig.json']
+		ifFound: [:f | aBlock value: (self new root: aFile)]
+]
 
 { #category : #'as yet unclassified' }
 SBTSRuntimeOSProcess class >> language [
@@ -79,4 +90,28 @@ SBTSRuntimeOSProcess >> prettyPrint: aString [
 	prettier ifNil: [^ aString].
 	
 	^ self checkedCmd: prettier arguments: {'--stdin-filepath'. 'file.ts'} env: nil stdin: aString
+]
+
+{ #category : #'as yet unclassified' }
+SBTSRuntimeOSProcess >> root [
+
+	^ root
+]
+
+{ #category : #'as yet unclassified' }
+SBTSRuntimeOSProcess >> root: aFile [
+
+	root := aFile
+]
+
+{ #category : #'as yet unclassified' }
+SBTSRuntimeOSProcess >> startSemantics [
+
+	^ SBTSLSPSemantics new
+		on: self root
+		transport: (SBLSPStdioTransport new
+			command: (SBTSLanguageRuntime which: 'typescript-language-server');
+			arguments: {'--stdio'};
+			workingDirectory: self root asString)
+		onReady: []
 ]

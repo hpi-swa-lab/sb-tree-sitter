@@ -6661,6 +6661,16 @@ SBC class >> grammarJson [
 '
 ]
 
+{ #category : #'configuration - layout' }
+SBC class >> hardLineBreakBetween: aBlock and: anotherBlock [
+
+	anotherBlock type = #'compound_statement' ifTrue: [^ true].
+	anotherBlock type = #'field_declaration_list' ifTrue: [^ true].
+	aBlock contents = '{' ifTrue: [^ true].
+	anotherBlock contents = '}' ifTrue: [^ true].
+	^ super hardLineBreakBetween: aBlock and: anotherBlock
+]
+
 { #category : #configuration }
 SBC class >> highlightQuery [
 
@@ -6749,10 +6759,16 @@ SBC class >> highlightQuery [
 '
 ]
 
+{ #category : #'configuration - layout' }
+SBC class >> indentMatch: aBlock [
+
+	^ aBlock type = #'compound_statement'
+]
+
 { #category : #'configuration - editing' }
 SBC class >> isStatementContainer: aRepeatNode in: aBlock [
 
-	^ aBlock type = #'compound_statement' or: [aBlock type = #'translation_unit']
+	^ aBlock type = #'compound_statement' or: [aBlock type = #'translation_unit' or: [aBlock type = #'field_declaration_list']]
 ]
 
 { #category : #configuration }

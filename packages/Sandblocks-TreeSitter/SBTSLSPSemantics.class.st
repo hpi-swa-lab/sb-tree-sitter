@@ -321,8 +321,8 @@ SBTSLSPSemantics >> markdownToText: anObject [
 	anObject isArray ifTrue: [^ anObject collect: [:s | self markdownToText: s]].
 	anObject isDictionary ifTrue: [
 		(anObject at: 'kind') = 'plaintext' ifTrue: [^ anObject at: 'value'].
-		self assert: (anObject at: 'kind') = 'markdown'.
-		^ self markdownToText: (anObject at: 'value')].
+		(anObject at: 'kind') = 'markdown' ifTrue: [^ self markdownToText: (anObject at: 'value')].
+		^ anObject at: 'value'].
 	
 	^ ((anObject copyWithRegex: '(?<!\n)\n(?!\n)' matchesReplacedWith: '')
 		copyWithRegex: '\n\n+'

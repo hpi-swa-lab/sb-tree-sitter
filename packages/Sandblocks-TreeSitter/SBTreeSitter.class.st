@@ -47,6 +47,13 @@ SBTreeSitter >> cpp [
 	^ SBTSLanguage tryPatchLibrary: 'tree-sitter/tree-sitter-cpp' name: 'cpp' context: thisContext branch: 'master' subpath: ''
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> css [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_css () module: 'tree-sitter-css'>
+	^ SBTSLanguage tryPatchLibrary: 'tree-sitter/tree-sitter-css' name: 'css' context: thisContext branch: 'master' subpath: ''
+]
+
 { #category : #ffi }
 SBTreeSitter >> cursor: aCursor reset: aNode [
 
