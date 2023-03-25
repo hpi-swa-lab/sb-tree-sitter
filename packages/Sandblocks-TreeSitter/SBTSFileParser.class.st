@@ -33,10 +33,14 @@ SBTSFileParser >> ascend [
 
 	level := level - 1.
 	
-	" parsed a leaf? "
-	^ (blocks size = 1 and: [blocks first kind = #text])
-		ifTrue: [true]
-		ifFalse: [ | success |
+	" parsed a leaf "
+	(blocks size = 1 and: [blocks first kind = #text]) ifTrue: [^ true].
+	
+	^ pendingText
+		ifNotNil: [
+			pendingText := nil.
+			true]
+		ifNil: [ | success |
 			success := cursor atEnd.
 			cursor gotoParent.
 			success]

@@ -139,6 +139,12 @@ SBTSLanguageTests >> testJavascriptToStringSemicolons [
 ]
 
 { #category : #'testing - parse' }
+SBTSLanguageTests >> testJsonString [
+
+	SBJson parse: '"abc"'
+]
+
+{ #category : #'testing - parse' }
 SBTSLanguageTests >> testParsePythonFormatString [
 
 	| string |
