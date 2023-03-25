@@ -140,8 +140,10 @@ SBTSBlockTest >> testCTypeCall [
 	
 	editor handle: (self keyboardEvent: $().
 	
-	self assert: 'int main(){call();
-}' equals: unit sourceStringForCompare
+	self assert: 'int main()
+	{
+	call();
+	}' equals: unit sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }

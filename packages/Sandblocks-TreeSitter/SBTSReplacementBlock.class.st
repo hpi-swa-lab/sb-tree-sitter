@@ -23,6 +23,7 @@ SBTSReplacementBlock class >> match: aBlock against: aTSQuery [
 { #category : #'as yet unclassified' }
 SBTSReplacementBlock class >> match: aBlock against: aTSQuery buildSelector: aSymbol [
 
+	aBlock isTSReplacement ifTrue: [^ nil].
 	aTSQuery executeAgainst: aBlock capturesDo: [:captures :success |
 		success ifTrue: [ | block restore |
 			block := self new bindings: captures block: aBlock.

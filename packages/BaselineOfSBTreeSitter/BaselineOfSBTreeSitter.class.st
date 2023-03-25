@@ -103,12 +103,13 @@ BaselineOfSBTreeSitter >> baseline: spec [
 			package: 'Sandblocks-RequestsTool' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Clojure' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Typescript' with: [spec requires: #('Sandblocks-TreeSitter')];
+			package: 'Sandblocks-Json' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-Kotlin' with: [spec requires: #('Sandblocks-TreeSitter')];
 			package: 'Sandblocks-GDScript' with: [spec requires: #('Sandblocks-TreeSitter')].
 		
 		spec
 			group: 'default'
-			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Cpp' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-Clojure' 'Sandblocks-TSSmalltalk' 'Sandblocks-Typescript' 'Sandblocks-Matplotlib' 'Sandblocks-RequestsTool' 'Sandblocks-Kotlin' 'Sandblocks-GDScript')]
+			with: #('Sandblocks-TreeSitter' 'Sandblocks-Javascript' 'Sandblocks-Python' 'Sandblocks-Regex' 'Sandblocks-Json' 'Sandblocks-C' 'Sandblocks-Cpp' 'Sandblocks-Vhdl' 'Sandblocks-Bash' 'Sandblocks-Clojure' 'Sandblocks-TSSmalltalk' 'Sandblocks-Typescript' 'Sandblocks-Matplotlib' 'Sandblocks-RequestsTool' 'Sandblocks-Kotlin' 'Sandblocks-Json' 'Sandblocks-GDScript')]
 ]
 
 { #category : #baseline }

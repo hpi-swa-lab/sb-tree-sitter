@@ -203,7 +203,7 @@ SBTSBlock >> childrenToKeepDuringDelete [
 	keep := OrderedCollection new.
 	found := false.
 	self cursorPositionsDo: [:c |
-		(c morph owner = self and: [(keep includes: c morph) not and: [(found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]) or: [c morph slot isStatementIn: c morph owner]]]) ifTrue: [keep add: c morph].
+		(c morph parentSandblock = self and: [(keep includes: c morph) not and: [(found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]) or: [c morph slot isStatementIn: c morph owner]]]) ifTrue: [keep add: c morph].
 		c = current ifTrue: [found := true]].
 	
 	((current isText or: [current isSelect]) and: [current morph keepDuringDelete not]) ifTrue: [keep remove: current morph ifAbsent: []].

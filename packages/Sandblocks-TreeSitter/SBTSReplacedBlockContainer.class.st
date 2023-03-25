@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSReplacedBlockContainer >> colorPolicy [
+
+	^ self firstSubmorph colorPolicy
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReplacedBlockContainer >> initialize [
 
 	super initialize.

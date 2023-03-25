@@ -32,11 +32,11 @@ SBTSFileParser >> addSlot: aNode [
 SBTSFileParser >> ascend [
 
 	level := level - 1.
-	^ pendingText
-		ifNotNil: [
-			pendingText := nil.
-			true]
-		ifNil: [ | success |
+	
+	" parsed a leaf? "
+	^ (blocks size = 1 and: [blocks first kind = #text])
+		ifTrue: [true]
+		ifFalse: [ | success |
 			success := cursor atEnd.
 			cursor gotoParent.
 			success]
@@ -348,8 +348,11 @@ SBTSFileParser >> stream: aStream [
 { #category : #'as yet unclassified' }
 SBTSFileParser >> text [
 
+	| ret |
 	self position: position + pendingText size.
-	^ pendingText
+	ret := pendingText.
+	pendingText := nil.
+	^ ret
 ]
 
 { #category : #'as yet unclassified' }
