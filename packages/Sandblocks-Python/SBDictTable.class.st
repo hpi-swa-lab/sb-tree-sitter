@@ -25,6 +25,7 @@ SBDictTable >> buildCellFor: aBlock [
 
 { #category : #'as yet unclassified' }
 SBDictTable >> buildPython [
+	<manual>
 	<lang: #python match: '(dictionary) @root' sample: '{''a'': 2, ''b'': 3}'>
 
 	self changeTableLayout.
@@ -37,8 +38,8 @@ SBDictTable >> buildPython [
 	(bindings at: 'root') childSandblocks collect: [:pair | | key value |
 		value := pair childSandblocks second.
 		key := pair childSandblocks first.
-		self addMorphBack: ((self buildCellFor: (self bindBlock: key)) width: self keyCellWidth).
-		self addMorphBack: ((self buildCellFor: (self bindBlock: value)) width: self valueCellWidth)]
+		self addMorphBack: ((self buildCellFor: (self createBindingNestedBlock: key)) width: self keyCellWidth).
+		self addMorphBack: ((self buildCellFor: (self createBindingNestedBlock: value)) width: self valueCellWidth)]
 ]
 
 { #category : #'as yet unclassified' }

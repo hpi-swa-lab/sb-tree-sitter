@@ -222,6 +222,14 @@ SBTSNodeBase >> hasStatementTerminator [
 	^ false
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSNodeBase >> hasTypeRightMost: aSymbol [
+
+	self elements ifEmpty: [^ false].
+	self elements last type = aSymbol ifTrue: [^ true].
+	^ self elements last hasTypeRightMost: aSymbol
+]
+
 { #category : #accessing }
 SBTSNodeBase >> hidden [
 

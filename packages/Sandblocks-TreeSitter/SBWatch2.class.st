@@ -66,11 +66,9 @@ SBWatch2 >> buildJavascript [
 { #category : #'as yet unclassified' }
 SBWatch2 >> buildPython [
 	<lang: #python match: '(subscript (call (parenthesized_expression (lambda (_ (_ (_
-	(lambda (tuple (call (argument_list (call (attribute (parenthesized_expression (binary_operator (binary_operator (string) @string)))))))))))))) (argument_list (_) @expression))) @watch' sample: 'print(
-        (lambda e: ((lambda s: (s.connect(("localhost", int(__import__("os").environ["SQ_WATCH"]))), s.send(
-    ("{\"id\":\"08cd4b51-8b2d-4d6a-8a2b-c1728c42cd3a\",\"expression\":"+str(e)+"}").encode()), s.close()))(__import__("socket").socket()), e))(2)[1])+2'>
+	(lambda (tuple (call (argument_list (call (attribute (call (argument_list (dictionary (pair (string) ="id" (_) @id))))))))))))))) (argument_list (_) @expression))) @watch' sample: '(lambda e:((lambda s:(s.connect(("localhost",int(__import__("os").environ["SQ_WATCH"]))),s.send(__import__("json").dumps({"id":"myid","expression":str(e)}).encode()),s.close()))(__import__("socket").socket()),e))(3)[1]'>
 
-	self id: ((((self bindings at: 'string') sourceString allRegexMatches: '\\"id\\"\:\\"([^\\]+)\\"') first allButFirst: 9) allButLast: 2).
+	self id: (self bindings at: 'id') contents.
 	
 	self addMorphFront: (self createBindingBlock: 'expression')
 ]

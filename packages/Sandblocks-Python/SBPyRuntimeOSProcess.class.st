@@ -65,12 +65,11 @@ SBPyRuntimeOSProcess >> buildWatchSourceFor: aBlock id: aString [
 		example: [SBPyRuntimeOSProcess new]
 		args: [{SBPython parseExpression: '3'. 'myid'}]
 		label: 'example'.
-	watch := SBPython parseExpression: '(lambda e:
-            ((lambda s: (s.connect(("localhost", int(__import__("os").environ["SQ_WATCH"]))), s.send(("PAYLOAD_START"+str(e)+"\"}").encode()), s.close()))(__import__("socket").socket()), e))(e)[1]'.
+	watch := SBPython parseExpression: '(lambda e: ((lambda s: (s.connect(("localhost", int(__import__("os").environ["SQ_WATCH"]))), s.send(__import__("json").dumps({"id":"ID","expression":e},default=str).encode()), s.close()))(__import__("socket").socket()), e))(e)[1]'.
 	watch childSandblocks first childSandblocks second childSandblocks first replaceBlock: aBlock.
 	self assert: (watch
-		queryRecursiveFirstMatch: '(string) ="PAYLOAD_START" @node'
-		capturesDo: [:c | (c at: 'node') contents: '{\"id\":\"', aString, '\",\"expression\":\"']).
+		queryRecursiveFirstMatch: '(string) ="ID" @node'
+		capturesDo: [:c | (c at: 'node') contents: aString]).
 	^ watch
 ]
 
@@ -82,7 +81,19 @@ SBPyRuntimeOSProcess >> evaluate: aString [
 	
 	^ self
 		tmpFile: aString
-		do: [:path | self spawnWatchDuring: [:port | self checkedCmd: python arguments: {path} env: {'SQ_WATCH' -> port} stdin: nil]]
+		do: [:path | self spawnWatchDuring: [:port | self checkedCmd: python arguments: {path} env: {'SQ_WATCH' -> port asString} stdin: nil]]
+]
+
+{ #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess >> evaluate: aString in: aFolder [
+
+	| python |
+	python := self class defaultPythonPath ifNil: [^ nil].
+	
+	^ self
+		file: (aFolder / self tmpFileName) asString
+		contents: aString
+		do: [:path | self spawnWatchDuring: [:port | self checkedCmd: python arguments: {path} env: {'SQ_WATCH' -> port asString} stdin: nil]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -166,4 +177,10 @@ SBPyRuntimeOSProcess >> startSemantics [
 			arguments: {};
 			workingDirectory: self root asString)
 		onReady: []
+]
+
+{ #category : #'as yet unclassified' }
+SBPyRuntimeOSProcess >> tmpFileName [
+
+	^ '_', (super tmpFileName copyReplaceAll: '-' with: '_')
 ]

@@ -27,10 +27,7 @@ SBTSReplacementBlock class >> match: aBlock against: aTSQuery buildSelector: aSy
 	aTSQuery executeAgainst: aBlock capturesDo: [:captures :success |
 		success ifTrue: [ | block restore |
 			block := self new bindings: captures block: aBlock.
-			restore := SBRestoreCommand new
-				morphs: block restore commonOwner: block root;
-				notePositions;
-				yourself.
+			restore := SBTSRestoreCommand new source: aBlock; target: block.
 			(block perform: aSymbol) ifNotNil: [:b | | replaceCmd |
 				replaceCmd := SBReplaceCommand new target: b root replacer: b.
 				^ SBCombinedCommand newWith: {restore}, (b root owner ifNotNil: [{replaceCmd}] ifNil: [{SBDoItCommand new do: [b]}])]]].
@@ -64,7 +61,7 @@ SBTSReplacementBlock >> asCode: converter [
 SBTSReplacementBlock >> bindBlock: aBlock [
 
 	| container |
-	container := SBTSReplacedBlockContainer new.
+	container := SBTSReplacedBlockContainer new block: aBlock.
 	aBlock replaceBy: (SBTSReplacementPlaceholder new
 		setProperty: #tsReplacementPlaceholder toValue: container;
 		yourself).
@@ -168,6 +165,16 @@ SBTSReplacementBlock >> createBindingBlock: aNameString [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSReplacementBlock >> createBindingNestedBlock: aBlock [
+
+	| block |
+	block := self createBinding: [:c | self bindBlock: aBlock] update: [:c :m | ].
+	"make sure our block is found in the bindings because these are used to know what to restore"
+	bindings at: block put: aBlock.
+	^ block
+]
+
+{ #category : #'as yet unclassified' }
 SBTSReplacementBlock >> createStatic: aBlock contents: aNameString [
 
 	^ aBlock value: (bindings at: aNameString)
@@ -177,6 +184,19 @@ SBTSReplacementBlock >> createStatic: aBlock contents: aNameString [
 SBTSReplacementBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 
 	self basicCursorPositionsDo: aBlock shallow: aBoolean
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementBlock >> drawBackgroundOn: aCanvas [
+
+	| policy |
+	policy := self colorPolicy.
+	^ aCanvas
+		frameAndFillRoundRect: self bounds
+		radius: policy cornerRadius
+		fillStyle: self drawnColor
+		borderWidth: (policy borderWidthForBlock: self)
+		borderColor: (policy borderColorForBlock: self)
 ]
 
 { #category : #'as yet unclassified' }

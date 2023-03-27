@@ -251,7 +251,7 @@ SBTSFile >> root [
 { #category : #'as yet unclassified' }
 SBTSFile >> runtime [
 
-	^ runtime object new
+	^ runtime object new factory: self root language
 ]
 
 { #category : #'as yet unclassified' }

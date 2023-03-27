@@ -1,8 +1,23 @@
 Class {
 	#name : #SBTSReplacedBlockContainer,
 	#superclass : #Morph,
+	#instVars : [
+		'block'
+	],
 	#category : #'Sandblocks-TreeSitter-Replacements'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSReplacedBlockContainer >> block [
+
+	^ block
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacedBlockContainer >> block: aBlock [
+
+	block := aBlock
+]
 
 { #category : #'as yet unclassified' }
 SBTSReplacedBlockContainer >> colorPolicy [
@@ -19,7 +34,7 @@ SBTSReplacedBlockContainer >> initialize [
 		layoutPolicy: SBAlgebraLayout new;
 		hResizing: #shrinkWrap;
 		vResizing: #shrinkWrap;
-		color: Color transparent
+		color: Color white
 ]
 
 { #category : #'as yet unclassified' }

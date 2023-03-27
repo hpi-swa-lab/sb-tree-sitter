@@ -6,7 +6,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBDictMapper >> buildPython [
-	<lang: #python match: '(subscript value: (dictionary) @dict subscript: (_) @expr) @root' sample: '{''a'': 2, ''b'': 3}[''a'']'>
+	<manual>
+	<lang: #python match: '(subscript value: (dictionary) @dict subscript: (_) @expr)' sample: '{''a'': 2, ''b'': 3}[''a'']'>
 
 	| table |
 	self
@@ -20,6 +21,6 @@ SBDictMapper >> buildPython [
 		addMorphBack: (SBRow new
 			addMorphBack: (SBStringMorph new contents: 'Given ');
 			addMorphBack: (self createBindingBlock: 'expr');
-			addMorphBack: (SBStringMorph new contents: ' map to ...'));
+			addMorphBack: (SBStringMorph new contents: ' map ... to ...'));
 		addMorphBack: table
 ]

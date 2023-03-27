@@ -245,6 +245,14 @@ SBTSParseFileTest >> testParensJsBinaryOp [
 ]
 
 { #category : #'tests - print parentheses' }
+SBTSParseFileTest >> testParensPythonCall [
+
+	| source |
+	source := 'a()[1]'.
+	self assert: source equals: (SBPython parseToplevel: source) sourceStringForCompare
+]
+
+{ #category : #'tests - print parentheses' }
 SBTSParseFileTest >> testParensStBinaryAndUnary [
 
 	| source module |

@@ -36,6 +36,14 @@ SBPython class >> fileSuffix [
 	^ 'py'
 ]
 
+{ #category : #'as yet unclassified' }
+SBPython class >> gapBetween: aBlock and: anotherBlock [
+
+	(aBlock owner ifNotNil: #type) = #subscript ifTrue: [^ false].
+	(aBlock owner ifNotNil: #type) = #string ifTrue: [^ false].
+	^ super gapBetween: aBlock and: anotherBlock
+]
+
 { #category : #configuration }
 SBPython class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-python/blob/master/src/grammar.json "
@@ -4999,7 +5007,7 @@ SBPython class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
 	aBlock type = 'decorator' ifTrue: [^ true].
-	(((aBlock isStringMorph or: [aBlock isTextMorph]) and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice' and: [(aBlock parentSandblock ifNotNil: #type) ~= #string]]]]) ifTrue: [^ true].
+	(((aBlock isStringMorph or: [aBlock isTextMorph]) and: [aBlock contents = ':']) and: [anotherBlock type ~= 'type' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'pair' and: [(aBlock parentSandblock ifNotNil: #type) ~= 'slice' and: [(aBlock parentSandblock ifNotNil: #type) ~= #string and: [(aBlock parentSandblock ifNotNil: #type) ~= #lambda]]]]]) ifTrue: [^ true].
 	^ #('else_clause' 'elif_clause') includes: anotherBlock type
 ]
 
@@ -5287,7 +5295,10 @@ SBPython class >> rootRuleName [
 SBPython class >> softLineBreakBetween: aBlock and: anotherBlock [
 
 	(anotherBlock isTextMorph and: [anotherBlock contents = '.']) ifTrue: [^ true].
+	anotherBlock contents = '"' ifTrue: [^ false].
 	anotherBlock contents = ')' ifTrue: [^ false].
+	anotherBlock contents = '[' ifTrue: [^ true].
+	(aBlock contents = '[' or: [anotherBlock contents = ']']) ifTrue: [^ false].
 	^ super softLineBreakBetween: aBlock and: anotherBlock
 ]
 

@@ -324,9 +324,13 @@ SBTSLSPSemantics >> markdownToText: anObject [
 		(anObject at: 'kind') = 'markdown' ifTrue: [^ self markdownToText: (anObject at: 'value')].
 		^ anObject at: 'value'].
 	
-	^ ((anObject copyWithRegex: '(?<!\n)\n(?!\n)' matchesReplacedWith: '')
+	^ ((((anObject copyWithRegex: '(?<!\n)\n(?!\n|-|\*)' matchesReplacedWith: '')
 		copyWithRegex: '\n\n+'
-		matchesReplacedWith: String cr, String cr) withBlanksTrimmed asText
+		matchesReplacedWith: String cr, String cr)
+		copyReplaceAll: '\*'
+		with: '*')
+		copyReplaceAll: '\_'
+		with: '_') withBlanksTrimmed asText
 ]
 
 { #category : #'initialize-release' }

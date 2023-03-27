@@ -186,13 +186,17 @@ SBTSSlot >> needsParenthesis: aBlock [
 
 	| mine parent recursiveType parentSlot cmp |
 	aBlock parentSandblock isTSBlock ifFalse: [^ false].
+	
 	"FIXME: drop this and fix it propper"
 	aBlock type = #'parenthesized_expression' ifTrue: [^ false].
+	
 	parentSlot := aBlock parentSandblock slot.
 	recursiveType := (self lastCommonAncestorWith: parentSlot) ifNil: [^ false].
 	self flag: #todo.
 	"should only occur if the recursive type is at a border position (e.g. not in parentheses) "
 	((parentSlot firstNode bodyTemplate countType: recursiveType type) > 1 and: [(self firstNode bodyTemplate countType: recursiveType type) > 0]) ifFalse: [^ false].
+	
+	(parentSlot firstNode bodyTemplate hasTypeRightMost: recursiveType) ifFalse: [^ false].
 	
 	mine := self precedenceAround: aBlock firstSubmorph.
 	parent := parentSlot precedenceAround: aBlock.

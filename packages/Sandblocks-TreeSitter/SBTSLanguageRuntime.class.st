@@ -232,6 +232,14 @@ SBTSLanguageRuntime >> factory: aFactory [
 ]
 
 { #category : #'helper os process' }
+SBTSLanguageRuntime >> file: aString contents: anotherString do: aBlock [
+
+	^ [
+		FileStream forceNewFileNamed: aString do: [:tmpFile | tmpFile nextPutAll: anotherString].
+		aBlock value: aString] ensure: [FileDirectory deleteFilePath: aString]
+]
+
+{ #category : #'helper os process' }
 SBTSLanguageRuntime >> handleConnection: aSocket [
 
 	| data env |
@@ -336,11 +344,13 @@ SBTSLanguageRuntime >> stopSemantics [
 { #category : #'helper os process' }
 SBTSLanguageRuntime >> tmpFile: aString do: aBlock [
 
-	| path |
-	path := '/tmp/', (UUID new asString, '.', self factory fileSuffix).
-	^ [
-		FileStream forceNewFileNamed: path do: [:tmpFile | tmpFile nextPutAll: aString].
-		aBlock value: path] ensure: [FileDirectory deleteFilePath: path]
+	^ self file: '/tmp/', self tmpFileName contents: aString do: aBlock
+]
+
+{ #category : #'helper os process' }
+SBTSLanguageRuntime >> tmpFileName [
+
+	^ UUID new asString, '.', self factory fileSuffix
 ]
 
 { #category : #'helper os process' }

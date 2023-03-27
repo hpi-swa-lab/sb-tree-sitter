@@ -33,8 +33,7 @@ SBEditor >> newCppFile [
 { #category : #'*Sandblocks-TreeSitter' }
 SBEditor >> newFileFor: aLanguage [
 
-	SBTSLanguageRuntime new
-		factory: aLanguage;
+	aLanguage runtime
 		tmpFile: '' do: [:path | | file |
 			file := SBTSFile for: path.
 			self createArtefactInView: file.

@@ -106,22 +106,34 @@ SBTSBlock >> alias [
 ]
 
 { #category : #replacements }
-SBTSBlock >> allReplacementCandidates [
+SBTSBlock >> allReplacementCandidates: aCollection [
 
-	^ SBTSReplacementBlock allSubclasses gather: [:class | (Pragma allNamed: #lang:match: in: class), (Pragma allNamed: #lang:match:sample: in: class)]
+	^ aCollection gather: [:class | (Pragma allNamed: #lang:match: in: class), (Pragma allNamed: #lang:match:sample: in: class)]
 ]
 
 { #category : #replacements }
 SBTSBlock >> applyReplacement [
 
-	^ self applyReplacementCommand do
+	^ self applyReplacement: nil
+]
+
+{ #category : #replacements }
+SBTSBlock >> applyReplacement: aClass [
+
+	^ (self applyReplacementCommand: aClass) do
 ]
 
 { #category : #replacements }
 SBTSBlock >> applyReplacementCommand [
 
+	^ self applyReplacementCommand: nil
+]
+
+{ #category : #replacements }
+SBTSBlock >> applyReplacementCommand: aClass [
+
 	| candidates |
-	candidates := self allReplacementCandidates.
+	candidates := self allReplacementCandidates: (aClass ifNil: [SBTSReplacementBlock allSubclasses] ifNotNil: [{aClass}]).
 	candidates do: [:pragma | | blockClass |
 		blockClass := pragma methodClass.
 		
@@ -142,7 +154,7 @@ SBTSBlock >> applyReplacements [
 	<action>
 
 	| candidates |
-	candidates := self allReplacementCandidates.
+	candidates := self allReplacementCandidates: SBTSReplacementBlock allSubclasses.
 	self allBlocksDo: [:block |
 		(block isTSBlock and: [block isTSReplacement not]) ifTrue: [
 			self
@@ -203,7 +215,7 @@ SBTSBlock >> childrenToKeepDuringDelete [
 	keep := OrderedCollection new.
 	found := false.
 	self cursorPositionsDo: [:c |
-		(c morph parentSandblock = self and: [(keep includes: c morph) not and: [(found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]) or: [c morph slot isStatementIn: c morph owner]]]) ifTrue: [keep add: c morph].
+		(c morph isTSBlock not or: [c morph parentSandblock = self and: [(keep includes: c morph) not and: [(found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]) or: [c morph slot isStatementIn: c morph owner]]]]) ifTrue: [keep add: c morph].
 		c = current ifTrue: [found := true]].
 	
 	((current isText or: [current isSelect]) and: [current morph keepDuringDelete not]) ifTrue: [keep remove: current morph ifAbsent: []].
@@ -314,7 +326,7 @@ SBTSBlock >> copyOnDrag [
 { #category : #'as yet unclassified' }
 SBTSBlock >> currentTextMorph [
 
-	self submorphsDo: [:m | (m isTextMorph and: [m symmetricSibling isNil]) ifTrue: [^ m]].
+	self submorphsDo: [:m | (m isTSMorph and: [m isTextMorph and: [m symmetricSibling isNil]]) ifTrue: [^ m]].
 	self submorphsDo: [:m | m isTextMorph ifTrue: [^ m]].
 	^ nil
 ]
@@ -473,11 +485,11 @@ SBTSBlock >> deselectedTextMorph: aMorph for: aNewPosition cursor: aCursor [
 			self owner submorphs
 				from: 1
 				to: self submorphIndex
-				do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]].
+				do: [:m | (m isTSMorph and: [m isTextMorph]) ifTrue: [m confirmFixedText]]].
 		aMorph owner submorphs
 			from: 1
 			to: aMorph submorphIndex
-			do: [:m | m isTextMorph ifTrue: [m confirmFixedText]]]
+			do: [:m | (m isTSMorph and: [m isTextMorph]) ifTrue: [m confirmFixedText]]]
 ]
 
 { #category : #events }
@@ -980,9 +992,9 @@ SBTSBlock >> prefersNoBorder [
 { #category : #testing }
 SBTSBlock >> prefixValidFor: aTextMorph in: aSiblingsCollection [
 
-	^ aTextMorph slot firstNode
+	^ aTextMorph isTSMorph not or: [aTextMorph slot firstNode
 		prefixValidFor: aTextMorph effectiveContents
-		in: aSiblingsCollection
+		in: aSiblingsCollection]
 ]
 
 { #category : #accessing }
@@ -1395,13 +1407,15 @@ SBTSBlock >> tryApplyReplacements: aCollection to: aBlock [
 
 	^ aCollection do: [:pragma | | blockClass |
 		blockClass := pragma methodClass.
-		(blockClass
-			match: aBlock
-			against: (SBTSQuery new prepare: pragma arguments second)
-			buildSelector: pragma selector) ifNotNil: [:cmd |
-			^ self sandblockEditor
-				ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
-				ifNil: [cmd do]]]
+		
+		(pragma method pragmas noneSatisfy: [:p | p keyword = #manual]) ifTrue: [
+			(blockClass
+				match: aBlock
+				against: (SBTSQuery new prepare: pragma arguments second)
+				buildSelector: pragma selector) ifNotNil: [:cmd |
+				^ self sandblockEditor
+					ifNotNil: [:e | e do: (cmd shouldMergeWithNext: true)]
+					ifNil: [cmd do]]]]
 ]
 
 { #category : #'as yet unclassified' }

@@ -5,8 +5,15 @@ String >> parseTreeSitter: convert [
 	<convert>
 
 	convert
-		if: [convert objectInterface first = #isInlineBlock and: [convert objectInterface third factory class canParse: self]]
-		do: [convert objectInterface third factory class parseElement: self]
+		if: [
+			(convert objectInterface first isKindOf: SBTSObjectInterface)
+				ifTrue: [ | parsed |
+					parsed := convert objectInterface first slot language parseExpression: self.
+					(parsed adaptSlotFor: convert objectInterface first slot ifFailed: [false]) ~~ false]
+				ifFalse: [false]]
+		do: [ | parsed |
+			parsed := convert objectInterface first slot language parseExpression: self.
+			parsed adaptSlotFor: convert objectInterface first slot ifFailed: [false]]
 ]
 
 { #category : #'*Sandblocks-TreeSitter' }

@@ -8,6 +8,13 @@ Class {
 SBJson class >> allFileSuffixes [ ^ {'json'}
 ]
 
+{ #category : #'as yet unclassified' }
+SBJson class >> gapBetween: aBlock and: anotherBlock [
+
+	aBlock contents = ':' ifTrue: [^ true].
+	^ false
+]
+
 { #category : #properties }
 SBJson class >> grammarJson [
 
