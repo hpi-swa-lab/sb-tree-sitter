@@ -215,7 +215,7 @@ SBTSBlock >> childrenToKeepDuringDelete [
 	keep := OrderedCollection new.
 	found := false.
 	self cursorPositionsDo: [:c |
-		(c morph isTSBlock not or: [c morph parentSandblock = self and: [(keep includes: c morph) not and: [(found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]) or: [c morph slot isStatementIn: c morph owner]]]]) ifTrue: [keep add: c morph].
+		(c morph isTSMorph not or: [c morph parentSandblock = self and: [(keep includes: c morph) not and: [(found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]) or: [c morph slot isStatementIn: c morph owner]]]]) ifTrue: [keep add: c morph].
 		c = current ifTrue: [found := true]].
 	
 	((current isText or: [current isSelect]) and: [current morph keepDuringDelete not]) ifTrue: [keep remove: current morph ifAbsent: []].
@@ -992,9 +992,10 @@ SBTSBlock >> prefersNoBorder [
 { #category : #testing }
 SBTSBlock >> prefixValidFor: aTextMorph in: aSiblingsCollection [
 
-	^ aTextMorph isTSMorph not or: [aTextMorph slot firstNode
-		prefixValidFor: aTextMorph effectiveContents
-		in: aSiblingsCollection]
+	^ aTextMorph isTSMorph not or: [
+		aTextMorph slot firstNode
+			prefixValidFor: aTextMorph effectiveContents
+			in: aSiblingsCollection]
 ]
 
 { #category : #accessing }
