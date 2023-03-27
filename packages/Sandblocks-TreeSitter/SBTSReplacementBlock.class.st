@@ -62,9 +62,7 @@ SBTSReplacementBlock >> bindBlock: aBlock [
 
 	| container |
 	container := SBTSReplacedBlockContainer new block: aBlock.
-	aBlock replaceBy: (SBTSReplacementPlaceholder new
-		setProperty: #tsReplacementPlaceholder toValue: container;
-		yourself).
+	aBlock replaceBy: (SBTSReplacementPlaceholder new replaces: container).
 	^ container
 		addMorph: aBlock;
 		yourself
@@ -275,8 +273,8 @@ SBTSReplacementBlock >> updateDuring: aBlock [
 	| restore |
 	restore := OrderedCollection new.
 	self root allMorphsDo: [:m |
-		m valueOfProperty: #tsReplacementPlaceholder ifPresentDo: [:original | | block |
-			block := original firstSubmorph.
+		m class = SBTSReplacementPlaceholder ifTrue: [ | block |
+			block := m replaces firstSubmorph.
 			m swapWith: block.
 			restore add: m -> block]].
 	updaters do: [:pair | pair value value: bindings value: pair key].

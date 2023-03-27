@@ -11,6 +11,7 @@ SBPyMensaExample class >> buildOn: aBuilder [
 	aBuilder
 		addBlock: 'example'
 		as: ((SBPython parseExpression: '{"_sb_example": "example", "args": lambda: []}') applyReplacement: SBExample2).
+	aBuilder addBlock: 'memoize' as: (SBMemoize2 pythonFor: 'expr').
 	
 	aBuilder addSectionHeader: 'Schemas'.
 	aBuilder addText: 'Mensa'.
@@ -21,7 +22,7 @@ SBPyMensaExample class >> buildOn: aBuilder [
 	aBuilder addText: 'Meal'.
 	aBuilder
 		addBlock: 'meal schema'
-		as: ((SBPython parseWithPlaceholders: '{"name": _name, "ingredients": _ingredients, "price": _prices}') applyReplacement: SBDictTable).
+		as: (((SBPython parseWithPlaceholders: '{"name": _name, "ingredients": _ingredients, "price": _prices}') applyReplacement: SBDictTable) valueCellWidth: 150).
 	
 	aBuilder addText: 'Price'.
 	aBuilder

@@ -795,6 +795,12 @@ SBTSBlock >> isTSReplacement [
 	^ false
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSBlock >> isTopLevel [
+
+	^ self type = self language rootRuleName
+]
+
 { #category : #testing }
 SBTSBlock >> keepDuringDelete [
 

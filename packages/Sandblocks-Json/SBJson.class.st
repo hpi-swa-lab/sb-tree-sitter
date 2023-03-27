@@ -764,3 +764,11 @@ SBJson class >> rootRuleName [
 
     ^ 'document'
 ]
+
+{ #category : #'as yet unclassified' }
+SBJson class >> softLineBreakBetween: aBlock and: anotherBlock [
+
+	aBlock parentSandblock type = #'string_content' ifTrue: [^ false].
+	
+	^ super softLineBreakBetween: aBlock and: anotherBlock
+]

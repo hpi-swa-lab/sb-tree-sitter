@@ -1,6 +1,9 @@
 Class {
 	#name : #SBTSReplacementPlaceholder,
 	#superclass : #Morph,
+	#instVars : [
+		'replaces'
+	],
 	#category : #'Sandblocks-TreeSitter-Replacements'
 }
 
@@ -14,6 +17,18 @@ SBTSReplacementPlaceholder >> contents [
 SBTSReplacementPlaceholder >> language [
 
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementPlaceholder >> replaces [
+
+	^ replaces
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementPlaceholder >> replaces: aBlock [
+
+	replaces := aBlock
 ]
 
 { #category : #'as yet unclassified' }
