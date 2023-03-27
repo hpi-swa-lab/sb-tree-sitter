@@ -7,10 +7,17 @@ Class {
 		'atEnd',
 		'factory',
 		'previousSiblings',
-		'comments'
+		'comments',
+		'position'
 	],
 	#category : #'Sandblocks-TreeSitter-FFI'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSCursor >> advance: aNumber [
+
+	self position: position + aNumber
+]
 
 { #category : #'as yet unclassified' }
 SBTSCursor >> atEnd [
@@ -96,11 +103,13 @@ SBTSCursor >> gotoNextSibling [
 
 	| ret |
 	previousSiblings atLast: 1 put: self node.
+	self position: (self endByteIndex: self node).
 	ret := SBToggledCode
 		comment: ''
 		active: 1
 		do: {[cursor gotoNextSibling]. [library cursorGotoNextSibling: cursor]}.
 	[ret and: [self shouldSkipParsedNode: self node]] whileTrue: [
+		self position: (self endByteIndex: self node).
 		previousSiblings atLast: 1 put: self node.
 		ret := SBToggledCode
 			comment: ''
@@ -129,7 +138,8 @@ SBTSCursor >> initialize [
 	super initialize.
 	atEnd := false.
 	previousSiblings := OrderedCollection with: nil.
-	comments := OrderedCollection new
+	comments := OrderedCollection new.
+	position := 0
 ]
 
 { #category : #'as yet unclassified' }
@@ -174,6 +184,12 @@ SBTSCursor >> node [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursor >> parent [
+
+	^ library nodeParent: self node
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursor >> parentType [
 
 	| parent |
@@ -192,8 +208,15 @@ SBTSCursor >> popComments [
 
 { #category : #'as yet unclassified' }
 SBTSCursor >> position [
+	"0-based byte index"
 
-	^ self createRestorePoint
+	^ position
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCursor >> position: aNumber [
+
+	position := aNumber
 ]
 
 { #category : #'as yet unclassified' }
@@ -305,6 +328,18 @@ SBTSCursor >> text [
 SBTSCursor >> textBetween: aNode and: anEndNode [
 
 	^ library textBetween: aNode and: anEndNode
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCursor >> textBetweenIndex: aNumber and: anotherNumber [
+
+	^ library textBetweenIndex: aNumber and: anotherNumber
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCursor >> textBetweenIndex: aNumber andNode: anEndNode [
+
+	^ library textBetweenIndex: aNumber and: (library nodeStartByte: anEndNode)
 ]
 
 { #category : #'as yet unclassified' }

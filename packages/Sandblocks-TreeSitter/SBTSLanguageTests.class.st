@@ -145,6 +145,14 @@ SBTSLanguageTests >> testJsonString [
 ]
 
 { #category : #'testing - parse' }
+SBTSLanguageTests >> testJsonStringWithEscape [
+
+	| source |
+	source := '"ToGo-Schale 1,00€\/Stk."'.
+	self assert: source equals: (SBJson parseToplevel: source) sourceString
+]
+
+{ #category : #'testing - parse' }
 SBTSLanguageTests >> testParsePythonFormatString [
 
 	| string |

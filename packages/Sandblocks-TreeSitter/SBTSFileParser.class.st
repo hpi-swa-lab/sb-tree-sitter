@@ -9,7 +9,6 @@ Class {
 		'memoizations',
 		'pendingText',
 		'justEnteredAlias',
-		'position',
 		'level'
 	],
 	#category : #'Sandblocks-TreeSitter-Parser'
@@ -110,7 +109,6 @@ SBTSFileParser >> initialize [
 	blocks := OrderedCollection new.
 	memoizations := Dictionary new.
 	justEnteredAlias := false.
-	position := 0.
 	level := 0
 ]
 
@@ -160,11 +158,10 @@ SBTSFileParser >> memoizedAt: aNumber for: aSymbol ifNone: aBlock [
 { #category : #'as yet unclassified' }
 SBTSFileParser >> nextSibling [
 
-	| newPosition t |
+	| t |
 	t := cursor type.
-	newPosition := cursor endByteIndex: cursor node.
 	pendingText := nil.
-	cursor gotoNextSibling ifFalse: [self position: newPosition]
+	cursor gotoNextSibling
 ]
 
 { #category : #'as yet unclassified' }
@@ -180,7 +177,7 @@ SBTSFileParser >> numberOfNewLinesToNext [
 			previous := cursor previousNode: current.
 			previous ifNil: [^ 0]].
 	
-	position > (cursor endByteIndex: previous) ifTrue: [^ 0].
+	cursor position > (cursor endByteIndex: previous) ifTrue: [^ 0].
 	text := cursor textBetween: previous and: current.
 	^ text occurrencesOf: Character lf
 ]
@@ -263,22 +260,11 @@ SBTSFileParser >> peekType [
 { #category : #'as yet unclassified' }
 SBTSFileParser >> peekUncapturedText [
 
-	| current previous text |
-	cursor atEnd
-		ifTrue: [
-			current := nil.
-			previous := cursor node]
-		ifFalse: [
-			current := cursor node.
-			previous := cursor previousNode: current.
-			previous ifNil: [
-				position >= ((cursor startByteIndex: current) - 1) ifTrue: [^ ''].
-				^ cursor factory trimExtra: (cursor textBetween: nil and: current)]].
+	(cursor atEnd not and: [cursor position > ((cursor startByteIndex: cursor node) - 1)]) ifTrue: [^ ''].
 	
-	position > (cursor endByteIndex: previous) ifTrue: [^ ''].
-	text := cursor textBetween: previous and: current.
-	text := cursor factory trimExtra: text.
-	^ text
+	^ cursor factory trimExtra: (cursor textBetweenIndex: cursor position + 1 and: (cursor atEnd
+		ifTrue: [cursor endByteIndex: cursor parent]
+		ifFalse: [cursor startByteIndex: cursor node]))
 ]
 
 { #category : #'as yet unclassified' }
@@ -292,16 +278,10 @@ SBTSFileParser >> popPendingCommentsFor: anElement [
 				contents: pair first}) range: pair second]
 ]
 
-{ #category : #stream }
+{ #category : #accessing }
 SBTSFileParser >> position [
 
-	^ position
-]
-
-{ #category : #stream }
-SBTSFileParser >> position: aNumber [
-
-	position := aNumber
+	^ cursor position
 ]
 
 { #category : #'as yet unclassified' }
@@ -328,7 +308,7 @@ SBTSFileParser >> replaceCurrentSlot: aSlot [
 { #category : #'as yet unclassified' }
 SBTSFileParser >> skipDelimiters: aString [
 
-	(self peekForLabel: aString) ifTrue: [self nextSibling]
+	aString ifNotNil: [(self peekForLabel: aString) ifTrue: [self nextSibling]]
 ]
 
 { #category : #accessing }
@@ -353,7 +333,10 @@ SBTSFileParser >> stream: aStream [
 SBTSFileParser >> text [
 
 	| ret |
-	self position: position + pendingText size.
+	"advance cursor position?"
+	self flag: #todo.
+	cursor advance: pendingText utf8Encoded size.
+	
 	ret := pendingText.
 	pendingText := nil.
 	^ ret
@@ -363,7 +346,9 @@ SBTSFileParser >> text [
 SBTSFileParser >> uncapturedText [
 
 	| text |
+	"advance cursor position?"
+	self flag: #todo.
 	text := self peekUncapturedText.
-	self position: position + text size.
+	cursor advance: text utf8Encoded size.
 	^ text
 ]
