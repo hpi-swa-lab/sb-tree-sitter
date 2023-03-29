@@ -16,9 +16,8 @@ SBTSCollapsed >> block: aBlock [
 	self slot: aBlock slot.
 	
 	self removeAllMorphs.
-	self addMorphBack: (SBStringMorph new contents: '...').
 	self addMorphBack: (SBStringMorph new
-		contents: aBlock collapsedContent;
+		contents: (self language collapsedLabel: aBlock);
 		opacity: 0.7;
 		italic)
 ]
@@ -41,7 +40,7 @@ SBTSCollapsed >> initialize [
 	super initialize.
 	
 	self
-		layoutInset: 4;
+		layoutInset: 2;
 		changeTableLayout;
 		cellGap: 4
 ]
@@ -63,5 +62,7 @@ SBTSCollapsed >> type [
 SBTSCollapsed >> uncollapseBlock [
 	<action>
 
-	self sandblockEditor do: (SBReplaceCommand new target: self replacer: block)
+	| cmd |
+	cmd := SBReplaceCommand new target: self replacer: block.
+	self sandblockEditor ifNil: [cmd do] ifNotNil: [:e | e do: cmd]
 ]

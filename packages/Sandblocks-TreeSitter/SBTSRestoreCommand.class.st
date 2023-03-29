@@ -36,9 +36,6 @@ SBTSRestoreCommand >> target: aBlock [
 { #category : #'as yet unclassified' }
 SBTSRestoreCommand >> undo [
 
-	source allMorphsDo: [:m |
-		m valueOfProperty: #tsReplacementPlaceholder ifPresentDo: [:original | | block |
-			block := original firstSubmorph.
-			m swapWith: block]].
+	source allMorphsDo: [:m | m class = SBTSReplacementPlaceholder ifTrue: [m swapWith: m replaces block]].
 	^ source
 ]

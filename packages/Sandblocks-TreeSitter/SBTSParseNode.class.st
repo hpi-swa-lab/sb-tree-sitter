@@ -24,13 +24,13 @@ SBTSParseNode >> allChildrenDo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSParseNode >> buildWith: aParser [
+SBTSParseNode >> buildCopyEmbeds: aBoolean [
 
 	| morph |
 	morph := kind caseOf: {
 		[#block] -> [
 			SBTSBlock new
-				addAllMorphs: (contents collect: [:b | b buildWith: aParser]);
+				addAllMorphs: (contents collect: [:b | b buildCopyEmbeds: aBoolean]);
 				slot: slot].
 		[#unknown] -> [SBTSUnknownBlock new slot: slot].
 		[#label] -> [
@@ -48,9 +48,15 @@ SBTSParseNode >> buildWith: aParser [
 					ifFalse: [nil]);
 				contents: contents;
 				slot: slot].
-		[#blockEmbed] -> [(aParser copyEmbeds ifTrue: [contents copyBlock] ifFalse: [contents]) slot: slot]}.
+		[#blockEmbed] -> [(aBoolean ifTrue: [contents copyBlock] ifFalse: [contents]) slot: slot]}.
 	self lastConstructed ifTrue: [morph setProperty: #lastConstructed toValue: true].
 	^ morph
+]
+
+{ #category : #'as yet unclassified' }
+SBTSParseNode >> buildWith: aParser [
+
+	^ self buildCopyEmbeds: aParser copyEmbeds
 ]
 
 { #category : #'as yet unclassified' }

@@ -4,6 +4,35 @@ Class {
 	#category : #'Sandblocks-Javascript'
 }
 
+{ #category : #'as yet unclassified' }
+SBJavascript class >> addIndent: aBlock [
+
+	aBlock type = #'jsx_opening_element' ifTrue: [^ true].
+	
+	^ super addIndent: aBlock
+]
+
+{ #category : #configuration }
+SBJavascript class >> allFileSuffixes [
+
+	^ {'jsx'. 'js'}
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript class >> collapseAll: aBlock [
+	<action>
+
+	aBlock allMorphsDepthFirstDo: [:m | (m isTSBlock and: [{#'jsx_element'} includes: m type]) ifTrue: [m replaceBy: (SBTSCollapsed new block: m)]].
+	^ aBlock
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript class >> collapsedLabel: aBlock [
+
+	aBlock type = #'jsx_element' ifTrue: [^ '<{1}>' format: {((aBlock get: 'open_tag') get: 'name') sourceString}].
+	^ super collapsedLabel: aBlock
+]
+
 { #category : #'configuration - declarations' }
 SBJavascript class >> declarationsInScope: aScopeBlock do: aClosure [
 
@@ -19,10 +48,18 @@ SBJavascript class >> defaultRuntimeClass [
 	^ SBJsRuntimeOSProcess
 ]
 
-{ #category : #configuration }
-SBJavascript class >> fileSuffix [
+{ #category : #'as yet unclassified' }
+SBJavascript class >> gapBetween: aBlock and: anotherBlock [
 
-	^ 'js'
+	aBlock contents = '<' ifTrue: [^ false].
+	anotherBlock contents = '>' ifTrue: [^ false].
+	
+	aBlock parentSandblock type = #'jsx_closing_element' ifTrue: [^ false].
+	aBlock parentSandblock type = #'jsx_namespace_name' ifTrue: [^ false].
+	aBlock parentSandblock type = #'jsx_attribute' ifTrue: [^ false].
+	aBlock parentSandblock type = #string ifTrue: [^ false].
+	
+	^ super gapBetween: aBlock and: anotherBlock
 ]
 
 { #category : #configuration }
@@ -6556,6 +6593,7 @@ SBJavascript class >> hardLineBreakBetween: aBlock and: anotherBlock [
 	aBlock parentSandblock type = #'class_body' ifTrue: [^ true].
 	anotherBlock type = #'else_clause' ifTrue: [^ true].
 	(aBlock contentsToDisplay = '{' and: [aBlock parentSandblock type = #'statement_block']) ifTrue: [^ true].
+	(anotherBlock contents = '}' and: [anotherBlock parentSandblock type = #'jsx_expression']) ifTrue: [^ false].
 	^ #(#'statement_block' #'class_body') includes: anotherBlock type
 ]
 
@@ -6823,6 +6861,25 @@ SBJavascript class >> language [
 	^ #javascript
 ]
 
+{ #category : #'as yet unclassified' }
+SBJavascript class >> loop: aBlock [
+	<action>
+
+	| all label loop target |
+	target := aBlock.
+	target type = #'jsx_opening_element' ifTrue: [target := aBlock parentSandblock].
+	all := target parentSandblock childSandblocks select: [:b | b type = #'jsx_element'].
+	label := ((target get: 'open_tag') get: 'name') sourceString.
+	loop := (self parseWithPlaceholders: ('<>\{_list.map(({1}) => nested)\}</>' format: {label})) childSandblocks first adaptSlotFor: target slot.
+	loop childSandblocks first applyReplacement: SBMapList.
+	
+	target sandblockEditor do: (SBCombinedCommand newWith: {
+		SBWrapCommand new
+			outer: loop;
+			inner: target;
+			wrap: [:l :b | (l allBlocksDetect: [:n | n contents = 'nested']) replaceBlock: target]}, (all allButFirst collect: [:m | SBDeleteCommand new target: m]))
+]
+
 { #category : #'configuration - editing' }
 SBJavascript class >> noteUncapturedText [
 
@@ -6863,10 +6920,36 @@ SBJavascript class >> preprocessGrammar: aGrammar [
 	aGrammar removeRule: #'_reserved_identifier'
 ]
 
+{ #category : #'as yet unclassified' }
+SBJavascript class >> removeIndent: aBlock [
+
+	aBlock type = #'jsx_closing_element' ifTrue: [^ true].
+	
+	^ super removeIndent: aBlock
+]
+
 { #category : #configuration }
 SBJavascript class >> rootRuleName [
 
 	^ 'program'
+]
+
+{ #category : #configuration }
+SBJavascript class >> shouldSkipParsing: aTypeString cursor: aCursor [
+
+	^ (super shouldSkipParsing: aTypeString cursor: aCursor) or: [aTypeString = 'jsx_text' and: [aCursor text allSatisfy: [:c | c isSeparator]]]
+]
+
+{ #category : #'as yet unclassified' }
+SBJavascript class >> softLineBreakBetween: aBlock and: anotherBlock [
+
+	aBlock type = #'jsx_opening_element' ifTrue: [^ true].
+	anotherBlock contents = ')' ifTrue: [^ false].
+	aBlock contents = '=>' ifTrue: [^ false].
+	anotherBlock contents = '=>' ifTrue: [^ false].
+	(anotherBlock contents = '}' and: [anotherBlock parentSandblock type = #'jsx_expression']) ifTrue: [^ false].
+	
+	^ super softLineBreakBetween: aBlock and: anotherBlock
 ]
 
 { #category : #'configuration - layout' }
@@ -6993,12 +7076,6 @@ SBJavascript >> preprocessGrammar [
 SBJavascript >> removeIndent: aBlock [
 
 	^ super removeIndent: aBlock
-]
-
-{ #category : #testing }
-SBJavascript >> shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor [
-
-	^ (super shouldSkipParsing: aTypeString in: aParentTypeString cursor: aCursor) or: [aTypeString = 'jsx_text' and: [aCursor text allSatisfy: [:c | c isSeparator]]]
 ]
 
 { #category : #'configuration helpers' }

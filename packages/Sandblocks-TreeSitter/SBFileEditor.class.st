@@ -76,7 +76,15 @@ SBFileEditor >> initialize [
 		addMorphBack: (SBButton new
 			icon: SBIcon iconFilesO shortcut: nil do: [self toggleFileBrowser];
 			balloonText: 'Toggle File Browser');
-		addMorphBack: self spacer).
+		addMorphBack: self spacer;
+		addMorphBack: (SBButton new
+			icon: SBIcon iconClone
+			label: 'Mark as Loop'
+			do: [SBJavascript loop: self selection]);
+		addMorphBack: (SBButton new
+			icon: SBIcon iconSearchPlus
+			label: 'Show Value'
+			do: [self selection wrapWithWatch])).
 	
 	self submorphs second addMorphFront: (SBBlock new
 		attachDecorator: (SBResizableDecorator new edge: #right);
@@ -109,7 +117,10 @@ SBFileEditor >> openFile: aFile [
 	
 	self currentFile ifNotNil: [:currentFile | self runtimesDo: [:r | r didClose: currentFile]].
 	aFile isDirectory ifFalse: [ | newFile |
-		newFile := (SBTSFile forNoReplace: aFile pathString) ifNil: [^ nil].
+		newFile := (SBToggledCode
+			comment: ''
+			active: 2
+			do: {[SBTSFile forNoReplace: aFile pathString]. [SBTSFile for: aFile pathString]}) ifNil: [^ nil].
 		self openMorphInView: newFile.
 		self runtimesDo: [:r | r didOpen: newFile].
 		^ newFile].

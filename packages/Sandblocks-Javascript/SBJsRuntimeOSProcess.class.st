@@ -49,7 +49,9 @@ SBJsRuntimeOSProcess >> buildWatchSourceFor: aBlock id: aString [
 		example: [SBJsRuntimeOSProcess new]
 		args: [{SBJavascript parseExpression: '3'. 'myid'}]
 		label: 'example'.
-	watch := SBJavascript parseExpression: '((e) => (require("net").connect(process.env.SQ_WATCH, "localhost").end(JSON.stringify({id:"ID",expression: require("util").inspect(e)})), e))(expr)'.
+	watch := SBToggledCode comment: '' active: 2 do: {
+		[SBJavascript parseExpression: '((e) => (require("net").connect(process.env.SQ_WATCH, "localhost").end(JSON.stringify({id:"ID",expression: e})), e))(expr)'].
+		[SBJavascript parseExpression: '((e) => (require("net").connect(process.env.SQ_WATCH, "localhost").end(JSON.stringify({id:"ID",expression: require("util").inspect(e)})), e))(expr)']}.
 	watch childSandblocks second replaceBlock: aBlock.
 	self assert: (watch
 		queryRecursiveFirstMatch: '(string_fragment) ="ID" @node'
@@ -77,7 +79,7 @@ SBJsRuntimeOSProcess >> evaluateFileAsync: aString cancel: aBlock [
 	node ifNil: [^ self error: 'node executable not found'].
 	
 	ret := Promise new.
-	[self spawnWatchDuring: [:port | ret resolveWith: (self cmd: node arguments: {aString} env: {'SQ_WATCH' -> port} stdin: nil cancel: aBlock) wait]] fork.
+	[self spawnWatchDuring: [:port | ret resolveWith: (self cmd: node arguments: {aString} env: {'SQ_WATCH' -> port asString} stdin: nil cancel: aBlock) wait]] fork.
 	^ ret
 ]
 

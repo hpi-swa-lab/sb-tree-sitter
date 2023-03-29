@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBMemoize2 class >> pythonFor: anExpressionString [
 
-	^ (SBPython parseExpression: ('(lambda i, x, e: __import__("pickle").loads(__import__("pathlib").Path(i).read_bytes()) if __import__("os.path", fromlist=["isfile"]).isfile(i) else (lambda _r: (__import__("pathlib").Path(i).write_bytes(__import__("pickle").dumps(_r)), _r)[-1])(e()))("memoize", "{1}", lambda: {2})' format: {UUID new asString, '.pickle'. anExpressionString})) applyReplacement: self
+	^ (SBPython parseExpression: ('(lambda x, i, e: __import__("pickle").loads(__import__("pathlib").Path(i).read_bytes()) if __import__("os.path", fromlist=["isfile"]).isfile(i) else (lambda _r: (__import__("pathlib").Path(i).write_bytes(__import__("pickle").dumps(_r)), _r)[-1])(e()))("memoize", "{1}", lambda: {2})' format: {'.', UUID new asString, '.pickle'. anExpressionString})) applyReplacement: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -33,4 +33,11 @@ SBMemoize2 >> layoutCommands [
 	^ SBAlgebraCommand container
 		data: {(self submorphs at: 1) layoutCommands. SBAlgebraCommand gap. (self submorphs at: 2) layoutCommands};
 		morph: self
+]
+
+{ #category : #'as yet unclassified' }
+SBMemoize2 >> resetMemo [
+	<action>
+
+	(FileDirectory on: ThisOSProcess thisOSProcess getCwd) deleteFileNamed: (bindings at: 'id') contents
 ]

@@ -5,6 +5,30 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBMapList >> access [
+
+	^ self submorphs second firstSubmorph
+]
+
+{ #category : #'as yet unclassified' }
+SBMapList >> buildJS [
+	<lang: #javascript match: '(call_expression
+	function: (member_expression object: (_) @list (property_identifier) ="map")
+	(arrow_function . (identifier) @iterator body: (_) @body))' sample: 'list.map((a) => 1)'>
+
+	self
+		useAlgebraLayout;
+		hResizing: #shrinkWrap;
+		vResizing: #shrinkWrap;
+		addMorphBack: (SBStringMorph new contents: 'bind ');
+		addMorphBack: ((self createBindingBlock: 'list') layoutInset: 2 sbScaled);
+		addMorphBack: (SBStringMorph new contents: ' as ');
+		addMorphBack: ((self createBindingBlock: 'iterator') layoutInset: 2 sbScaled);
+		addMorphBack: (SBStringMorph new contents: ': ');
+		addMorphBack: ((self createBindingBlock: 'body') layoutInset: 2 sbScaled)
+]
+
+{ #category : #'as yet unclassified' }
 SBMapList >> buildPython [
 	<lang: #python match: '(call function: (identifier) ="list" (argument_list
 	. (call function: (identifier) ="map" (argument_list

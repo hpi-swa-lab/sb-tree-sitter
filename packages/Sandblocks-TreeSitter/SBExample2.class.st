@@ -22,11 +22,11 @@ SBExample2 >> buildPython [
 
 	self
 		layoutInset: 8;
-		changeTableLayout;
+		layoutPolicy: SBAlgebraLayout new;
 		listDirection: #leftToRight;
 		cellPositioning: #center;
 		vResizing: #shrinkWrap;
-		hResizing: #spaceFill;
+		hResizing: #shrinkWrap;
 		minimumWidth: 200 sbScaled;
 		cellGap: 4 sbScaled.
 	
@@ -41,7 +41,7 @@ SBExample2 >> buildPython [
 		addMorphBack: ((self createBindingBlock: 'arguments')
 			color: (Color r: 1 g: 1 b: 1);
 			layoutInset: 4 sbScaled;
-			hResizing: #spaceFill;
+			hResizing: #shrinkWrap;
 			wrapCentering: #leftToRight)
 ]
 
@@ -49,4 +49,12 @@ SBExample2 >> buildPython [
 SBExample2 >> drawnColor [
 
 	^ Color veryDarkGray
+]
+
+{ #category : #'as yet unclassified' }
+SBExample2 >> layoutCommands [
+
+	^ SBAlgebraCommand container
+		morph: self;
+		data: (self submorphs collect: #layoutCommands separatedBy: [SBAlgebraCommand gap])
 ]

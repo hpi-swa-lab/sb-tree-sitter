@@ -133,6 +133,15 @@ SBTSSlot >> includesRepeat [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSSlot >> indent: aNumber on: aStream [
+
+	aNumber timesRepeat: [
+		self language tabsToSpaces
+			ifTrue: [aStream nextPutAll: '    ']
+			ifFalse: [aStream tab]]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSSlot >> initialize [
 
 	nodes := OrderedCollection new: 1
@@ -313,7 +322,7 @@ SBTSSlot >> separatorBetween: aBlock and: anotherBlock indent: aNumber lastChara
 	(self factory hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [
 		^ String streamContents: [:s |
 			s cr.
-			aNumber timesRepeat: [s tab]]].
+			self indent: aNumber on: s]].
 	(self factory language
 		spaceBetween: aBlock
 		and: anotherBlock

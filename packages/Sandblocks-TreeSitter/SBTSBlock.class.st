@@ -215,7 +215,7 @@ SBTSBlock >> childrenToKeepDuringDelete [
 	keep := OrderedCollection new.
 	found := false.
 	self cursorPositionsDo: [:c |
-		(c morph isTSMorph not or: [c morph parentSandblock = self and: [(keep includes: c morph) not and: [(found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]) or: [c morph slot isStatementIn: c morph owner]]]]) ifTrue: [keep add: c morph].
+		(c morph isTSMorph and: [c morph parentSandblock = self and: [(keep includes: c morph) not and: [(found ifTrue: [c morph keepDuringDelete] ifFalse: [c morph keepDuringTransform]) or: [c morph slot isStatementIn: c morph owner]]]]) ifTrue: [keep add: c morph].
 		c = current ifTrue: [found := true]].
 	
 	((current isText or: [current isSelect]) and: [current morph keepDuringDelete not]) ifTrue: [keep remove: current morph ifAbsent: []].
@@ -257,19 +257,12 @@ SBTSBlock >> collapseBlock [
 	| collapsed command |
 	collapsed := SBTSCollapsed new.
 	command := SBWrapCommand new
-		selectAfter: collapsed;
 		outer: collapsed;
 		inner: self;
 		wrap: [:collapse :block | collapse block: block];
 		selectAfter: collapsed.
 	self sandblockEditor ifNotNil: [:e | e do: command] ifNil: [command do].
 	^ collapsed
-]
-
-{ #category : #accessing }
-SBTSBlock >> collapsedContent [
-
-	^ self type
 ]
 
 { #category : #'as yet unclassified' }
@@ -497,7 +490,7 @@ SBTSBlock >> doubleClick: evt [
 
 	super doubleClick: evt.
 	
-	self gotoDefinition
+	SBToggledCode comment: '' active: 1 do: {[self collapseBlock]. [self gotoDefinition]}
 ]
 
 { #category : #drawing }
@@ -804,7 +797,7 @@ SBTSBlock >> isTopLevel [
 { #category : #testing }
 SBTSBlock >> keepDuringDelete [
 
-	^ self submorphs anySatisfy: [:s | s keepDuringDelete]
+	^ self submorphs anySatisfy: [:s | s isTSMorph not or: [s keepDuringDelete]]
 ]
 
 { #category : #testing }
@@ -913,7 +906,11 @@ SBTSBlock >> objectInterface [
 SBTSBlock >> objectInterfaceForChild: aBlock [
 
 	^ aBlock isTSBlock
-		ifTrue: [{SBTSObjectInterface new slot: aBlock slot}]
+		ifTrue: [
+			{
+				SBTSObjectInterface new
+					slot: aBlock slot;
+					at: (SBCursorSelect new block: aBlock)}]
 		ifFalse: [SBInterfaces never]
 ]
 
@@ -922,7 +919,14 @@ SBTSBlock >> objectInterfaceForInsert: aCommand [
 
 	(aCommand isKindOf: SBTSNodeInsertCommand) ifFalse: [^ SBInterfaces never].
 	
-	^ {SBTSObjectInterface new slot: (SBTSSlot with: aCommand element)}
+	^ {
+		SBTSObjectInterface new
+			slot: (SBTSSlot with: aCommand element);
+			at: (SBCursorInsert new
+				command: aCommand;
+				before: false;
+				adjacent: nil;
+				container: aCommand container)}
 ]
 
 { #category : #highlight }
@@ -1196,6 +1200,16 @@ SBTSBlock >> replaceBlock: aBlock [
 		ifFailed: [self error: ('block not compatible (replace {1} with {2})' format: {self. aBlock})].
 	self replaceBy: new.
 	^ new
+]
+
+{ #category : #accessing }
+SBTSBlock >> replaceBlockCommandWith: aBlock [
+
+	| new |
+	new := aBlock
+		adaptSlotFor: self slot
+		ifFailed: [self error: ('block not compatible (replace {1} with {2})' format: {self. aBlock})].
+	^ SBReplaceCommand new target: self replacer: new
 ]
 
 { #category : #'as yet unclassified' }
@@ -1531,7 +1545,7 @@ SBTSBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 	aStream hasLineInfo ifTrue: [range start line: aStream currentLine character: aStream currentIndexInLine].
 	
 	parens := self parentSandblock notNil and: [self parentSandblock isTSBlock and: [self slot needsParenthesis: self]].
-	(self language indentMatch: self) ifTrue: [aStream tab].
+	(self language indentMatch: self) ifTrue: [self slot indent: 1 on: aStream].
 	parens ifTrue: [aStream nextPut: $(].
 	self children overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.

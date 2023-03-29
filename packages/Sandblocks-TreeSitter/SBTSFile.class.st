@@ -153,6 +153,7 @@ SBTSFile >> filepath: aString toplevel: aBlock language: aLanguageClass collapse
 	root := aBlock
 		hResizing: #spaceFill;
 		minHeight: TextStyle defaultFont height.
+	(aBlock hasSubmorphsGreaterThan: 300) ifTrue: [aLanguageClass collapseAll: aBlock].
 	aBoolean ifFalse: [self addMorphBack: root].
 	
 	(self root language runtime notNil and: [aBoolean not]) ifTrue: [

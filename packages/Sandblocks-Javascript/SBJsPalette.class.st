@@ -7,39 +7,20 @@ Class {
 { #category : #'as yet unclassified' }
 SBJsPalette class >> buildOn: aBuilder [
 
-	aBuilder addHeader: 'Javascript'.
+	aBuilder addHeader: 'IVU'.
 	
-	aBuilder addSectionHeader: 'Fetch'.
-	
-	aBuilder addBlock: 'POST' as: (SBRequestTool new
-		factory: SBJavascript new;
-		url: 'http://localhost:8080'
-			method: #post
-			headers: (Dictionary newFrom: {'Content-Type' -> 'application/json'})
-			data: '{"key" : "value"}').
-			
-	aBuilder addBlock: 'GET' as: (SBRequestTool new
-		factory: SBJavascript new;
-		url: 'http://localhost:8080/'
-			method: #get
-			headers: (Dictionary newFrom: {'Content-Type' -> 'text/html'})
-			data: '{"key" : "value"}').
-			
-	aBuilder addBlock: 'Small GET' as: (SBJsEmbeddedExpressGet new
-		factory: SBJavascript new;
-			url: 'http://localhost:8080/user'
-			headers: (Dictionary newFrom: {'Content-Type' -> 'text/plain'})
-			data: nil).
-			
-	aBuilder addBlock: 'Small POST' as: (SBJsEmbeddedExpressPost new
-		factory: SBJavascript new;
-			url: 'http://localhost:8080/example'
-			headers: (Dictionary newFrom: {'Content-Type' -> 'text/plain'})
-			data: '{"key" : "value"}').
+	aBuilder addSectionHeader: 'Tracks'.
+	aBuilder addBlock: 'get rail tracks' as: (SBJavascript parseExpression: 'IVU.railGetTracks()').
+	aBuilder
+		addBlock: 'get rail tracks'
+		as: (SBJavascript parseExpression: 'IVU.railGetTrackCapacity()').
+	aBuilder
+		addBlock: 'geo filter'
+		as: (SBJavascript parseWithPlaceholders: 'IVU.GeoFilter(_latlng, _radius)')
 ]
 
 { #category : #'as yet unclassified' }
 SBJsPalette class >> language [
 
-	^ #javascript
+	^ SBJavascript
 ]

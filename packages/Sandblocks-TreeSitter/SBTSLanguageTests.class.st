@@ -181,7 +181,7 @@ SBTSLanguageTests >> testPythonDecorators [
 	source := '@staticmethod
 @abc
 def a():
-	pass'.
+    pass'.
 	self assert: source equals: (SBPython parseToplevel: source) sourceString
 ]
 
@@ -208,13 +208,13 @@ SBTSLanguageTests >> testPythonIf [
 
 	| source |
 	source := 'if a:
-	b
+    b
 elif c:
-	d
+    d
 elif f:
-	g
+    g
 else:
-	e'.
+    e'.
 	self assert: source equals: (SBPython parseToplevel: source) sourceString
 ]
 
@@ -234,16 +234,16 @@ SBTSLanguageTests >> testPythonIndent [
 
 	| source |
 	source := 'if a:
-	if b:
-		pass'.
+    if b:
+        pass'.
 	self assert: source equals: (SBPython parseToplevel: source) sourceString.
 	
 	source := 'if a:
-	print("a")
-	print("b")
+    print("a")
+    print("b")
 else:
-	print("c")
-	print("d")'.
+    print("c")
+    print("d")'.
 	self assert: source equals: (SBPython parseToplevel: source) sourceString
 ]
 

@@ -1145,12 +1145,12 @@ SBTSBlockTest >> testPyDeleteCompInIf [
 
 	| program editor |
 	program := SBPython parseToplevel: 'if a == 3:
-	pass'.
+    pass'.
 	editor := self editorAndWorldFor: program.
 	(program queryNode: '(integer)') startInputAtEnd.
 	5 timesRepeat: [editor handle: (self keyboardEvent: Character backspace)].
 	self assert: 'if a:
-	pass' equals: program sourceStringForCompare
+    pass' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - deleting' }
@@ -1171,11 +1171,11 @@ SBTSBlockTest >> testPyDeleteReturnType [
 
 	| program |
 	program := SBTSFileParser new parse: 'def a() -> int:
-	pass' language: SBPython.
+    pass' language: SBPython.
 	self editorFor: program.
 	program childSandblocks first childSandblocks second select; deleteBlock.
 	self assert: 'def a():
-	pass' equals: program sourceString
+    pass' equals: program sourceString
 ]
 
 { #category : #'tests - deleting' }
@@ -1259,7 +1259,7 @@ SBTSBlockTest >> testPythonDefAndReturn [
 	self type: 'def a
 x' in: editor.
 	self assert: 'def a():
-	x' equals: program sourceStringForCompare
+    x' equals: program sourceStringForCompare
 ]
 
 { #category : #'tests - input transition' }

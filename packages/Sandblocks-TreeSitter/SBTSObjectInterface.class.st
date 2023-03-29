@@ -2,10 +2,23 @@ Class {
 	#name : #SBTSObjectInterface,
 	#superclass : #Object,
 	#instVars : [
-		'slot'
+		'slot',
+		'at'
 	],
 	#category : #'Sandblocks-TreeSitter-Utils'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSObjectInterface >> at [
+
+	^ at
+]
+
+{ #category : #'as yet unclassified' }
+SBTSObjectInterface >> at: aCursor [
+
+	at := aCursor
+]
 
 { #category : #'as yet unclassified' }
 SBTSObjectInterface >> slot [

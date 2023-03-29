@@ -389,7 +389,7 @@ SBTSParseFileTest >> testPythonDecorators [
 	source := '@staticmethod
 @abc
 def a():
-	pass'.
+    pass'.
 	self
 		assert: source
 		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
@@ -406,7 +406,7 @@ SBTSParseFileTest >> testPythonFunction [
 
 	| source |
 	source := 'def a(b,c):
-	pass'.
+    pass'.
 	self
 		assert: source
 		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString
@@ -427,13 +427,13 @@ SBTSParseFileTest >> testPythonIf [
 
 	| source |
 	source := 'if a:
-	b
+    b
 elif c:
-	d
+    d
 elif f:
-	g
+    g
 else:
-	e'.
+    e'.
 	self
 		assert: source
 		equals: (SBTSFileParser new parse: source language: SBPython instance) sourceString

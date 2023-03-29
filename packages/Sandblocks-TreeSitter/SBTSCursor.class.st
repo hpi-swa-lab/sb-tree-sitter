@@ -309,7 +309,7 @@ SBTSCursor >> shouldSkipParsedNode: aNode [
 	(type includesSubstring: #comment) ifTrue: [
 		comments add: {(library textForNode: aNode) withoutTrailingBlanks. self range}.
 		^ true].
-	^ factory language statementTerminator = type
+	^ factory language shouldSkipParsing: type cursor: self
 ]
 
 { #category : #'as yet unclassified' }

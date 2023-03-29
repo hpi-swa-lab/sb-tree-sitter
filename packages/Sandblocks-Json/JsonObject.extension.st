@@ -4,5 +4,5 @@ Extension { #name : #JsonObject }
 JsonObject >> asJsonSource: converter [
 	<convert>
 
-	converter do: [SBJson parse: self asJsonString]
+	converter do: [SBJson collapseAll: (SBJson parse: self asJsonString)]
 ]

@@ -15,6 +15,12 @@ SBPython class >> addIndent: aBlock [
 	^ (aBlock submorphAfter ifNotNil: #type) = 'block'
 ]
 
+{ #category : #'configuration - layout' }
+SBPython class >> copyOnDrag: aBlock [
+
+	^ aBlock type = #identifier and: [aBlock field = 'name']
+]
+
 { #category : #'configuration - editing' }
 SBPython class >> defaultChoiceDuringInputFor: aChoiceNode [
 
@@ -5205,7 +5211,7 @@ SBPython class >> parseExpression: aString [
 	| expr |
 	expr := super parseExpression: aString.
 	"_statement and _simple_statement are also in the slot if we just simply parse"
-	expr slot nodes removeLast: 2.
+	expr slot nodes removeAllSuchThat: [:node | node type = #'expression_statement' or: [node type = #'_simple_statement']].
 	^ expr
 ]
 
@@ -5299,6 +5305,7 @@ SBPython class >> softLineBreakBetween: aBlock and: anotherBlock [
 	anotherBlock contents = ')' ifTrue: [^ false].
 	anotherBlock contents = '[' ifTrue: [^ true].
 	(aBlock contents = '[' or: [anotherBlock contents = ']']) ifTrue: [^ false].
+	aBlock parentSandblock type = 'function_definition' ifTrue: [^ false].
 	^ super softLineBreakBetween: aBlock and: anotherBlock
 ]
 
@@ -5307,6 +5314,12 @@ SBPython class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: a
 
 	((anotherBlock isTextMorph or: [aBlock isTextMorph]) and: [aBlock parentSandblock type = #'comparison_operator']) ifTrue: [^ true].
 	^ super spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter
+]
+
+{ #category : #configuration }
+SBPython class >> tabsToSpaces [
+
+	^ true
 ]
 
 { #category : #'configuration - editing' }

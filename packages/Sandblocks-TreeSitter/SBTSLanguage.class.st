@@ -58,6 +58,22 @@ SBTSLanguage class >> canParse: aString [
 ]
 
 { #category : #configuration }
+SBTSLanguage class >> collapseAll: aBlock [
+	"can be implemented by the respective languages"
+
+	
+]
+
+{ #category : #configuration }
+SBTSLanguage class >> collapsedLabel: aBlock [
+
+	^ '{1} ({2} {3})' format: {
+		aBlock type.
+		aBlock childSandblocks size.
+		aBlock childSandblocks size = 1 ifTrue: ['child'] ifFalse: ['children']}
+]
+
+{ #category : #configuration }
 SBTSLanguage class >> commentSymbols [
 
 	^ {#comment}
@@ -528,6 +544,12 @@ SBTSLanguage class >> scopesAround: aBlock do: aClosure [
 		current := current parentSandblock]
 ]
 
+{ #category : #configuration }
+SBTSLanguage class >> shouldSkipParsing: aTypeString cursor: aCursor [
+
+	^ self statementTerminator = aTypeString
+]
+
 { #category : #'configuration - semantics' }
 SBTSLanguage class >> showHelpFor: aBlock [
 
@@ -587,6 +609,12 @@ SBTSLanguage class >> suggestionsFor: aBlock [
 SBTSLanguage class >> suggestionsForInsert: aCommand [
 
 	^ #()
+]
+
+{ #category : #configuration }
+SBTSLanguage class >> tabsToSpaces [
+
+	^ false
 ]
 
 { #category : #configuration }

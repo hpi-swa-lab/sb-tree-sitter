@@ -9,6 +9,16 @@ SBJson class >> allFileSuffixes [ ^ {'json'}
 ]
 
 { #category : #'as yet unclassified' }
+SBJson class >> collapseAll: aBlock [
+	<action>
+
+	aBlock allMorphsDepthFirstDo: [:m |
+		(m isTSBlock and: [m type = 'pair']) ifTrue: [m applyReplacement: SBJsonDraggableKey].
+		(m isTSBlock and: [{#array. #object} includes: m type]) ifTrue: [m replaceBy: (SBTSCollapsed new block: m)]].
+	^ aBlock
+]
+
+{ #category : #'as yet unclassified' }
 SBJson class >> gapBetween: aBlock and: anotherBlock [
 
 	aBlock contents = ':' ifTrue: [^ true].

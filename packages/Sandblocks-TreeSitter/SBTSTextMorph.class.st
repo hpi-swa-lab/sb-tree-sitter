@@ -134,6 +134,12 @@ SBTSTextMorph >> detachDecorators: aDecoratorClass [
 	self changed
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSTextMorph >> doubleClick: evt [
+
+	self owner doubleClick: evt
+]
+
 { #category : #drawing }
 SBTSTextMorph >> drawDecoratorsOn: aCanvas during: aBlock [
 
