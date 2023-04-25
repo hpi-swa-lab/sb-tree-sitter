@@ -46,6 +46,12 @@ SBPyMensaExample class >> buildOn: aBuilder [
 ]
 
 { #category : #'as yet unclassified' }
+SBPyMensaExample class >> context [
+
+	^ SBInterfaces never
+]
+
+{ #category : #'as yet unclassified' }
 SBPyMensaExample class >> language [
 
 	^ SBPython

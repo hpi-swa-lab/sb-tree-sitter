@@ -16,6 +16,17 @@ SBPyPltShowPlots >> artefactSaved: anArtefact [
 ]
 
 { #category : #'initialize-release' }
+SBPyPltShowPlots >> basicBuild [
+
+	image := '' asMorph.
+	self addMorphBack: (SBColumn new
+		addMorphBack: (SBStringMorph new
+			contents: 'Preview';
+			bold);
+		addMorphBack: image asMorph)
+]
+
+{ #category : #'initialize-release' }
 SBPyPltShowPlots >> build [
 	<lang: #python match: '(call
 	function: (attribute
@@ -24,12 +35,14 @@ SBPyPltShowPlots >> build [
     )
 )' sample: 'plt.show()'>
 
-	image := '' asMorph.
-	self addMorphBack: (SBColumn new
-		addMorphBack: (SBStringMorph new
-			contents: 'Preview';
-			bold);
-		addMorphBack: image asMorph)
+	self basicBuild
+]
+
+{ #category : #'initialize-release' }
+SBPyPltShowPlots >> buildReplaced [
+	<lang: #python match: '(call (_ (lambda (tuple . (call (attribute (identifier) ="fig" (identifier) ="set_dpi"))))))' sample: '(lambda b:(fig.set_dpi(60),fig.set_size_inches(3,3),plt.savefig(b,format="png"),b.seek(0),__import__("sys").stdout.buffer.write(__import__("base64").b64encode(b.read())),b.close()))(__import__("io").BytesIO())'>
+
+	self basicBuild
 ]
 
 { #category : #accessing }

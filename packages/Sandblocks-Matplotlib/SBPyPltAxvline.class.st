@@ -17,15 +17,23 @@ SBPyPltAxvline >> build [
         	arguments: (argument_list) @args
         )' sample: 'ax.axvline(Y)'>
 
-	self addMorphBack: (SBRow new
+	self
+		layoutPolicy: SBAlgebraLayout new;
 		addMorphBack: (SBColumn new
 			hResizing: #shrinkWrap;
 			cellPositioning: #center;
 			layoutInset: 2;
 			addMorphBack: (SBStringMorph new contents: 'vertical line:');
 			addMorphBack: SBPyPltImage axvline);
-		addMorphBack: (self createBindingBlock: 'args');
-		cellGap: 4)
+		addMorphBack: (self createBindingBlock: 'args')
+]
+
+{ #category : #'as yet unclassified' }
+SBPyPltAxvline >> layoutCommands [
+
+	^ SBAlgebraCommand container
+		morph: self;
+		data: (self submorphs collect: #layoutCommands separatedBy: [SBAlgebraCommand softLineOrGap])
 ]
 
 { #category : #accessing }
