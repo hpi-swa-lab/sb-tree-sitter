@@ -185,6 +185,15 @@ SBWingCost >> editableNumInvocations [
 		initial: 100
 ]
 
+{ #category : #parameters }
+SBWingCost >> entrypoint [
+
+	^ SBWingParameterStatic new
+		icon: SBIcon iconArrowRight;
+		name: #entrypoint;
+		label: 'Entrypoint' asText allBold
+]
+
 { #category : #accessing }
 SBWingCost >> get: aParameter [
 
@@ -313,8 +322,8 @@ SBWingCost >> parameters [
 							inject: 0
 							into: [:sum :insert | sum + (insert numberOfInvocations * (insert get: #averageRecordSize))]];
 					label: [:v | 'Storage: adding {1} Bytes each month' format: {v}]}].
-		{'cloud.Api'. 'get'} -> [{self editableNumInvocations. self averageRequestResponseSize}].
-		{'cloud.Api'. 'post'} -> [{self editableNumInvocations. self averageRequestResponseSize}]}
+		{'cloud.Api'. 'get'} -> [{self entrypoint. self editableNumInvocations. self averageRequestResponseSize}].
+		{'cloud.Api'. 'post'} -> [{self entrypoint. self editableNumInvocations. self averageRequestResponseSize}]}
 ]
 
 { #category : #accessing }
