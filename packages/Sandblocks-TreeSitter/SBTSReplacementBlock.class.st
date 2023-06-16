@@ -14,7 +14,7 @@ SBTSReplacementBlock class >> buildFor: aLanguage with: aDictionary [
 
 	| replace |
 	replace := Dictionary newFrom: aDictionary.
-	^ (Pragma allNamed: #lang:match:sample: in: self)
+	^ (Pragma allNamed: #lang:match:sample: in: self), (Pragma allNamed: #lang:match:sample:keyword: in: self)
 		detect: [:pragma | pragma arguments first = aLanguage language]
 		ifFound: [:pragma | | replacement |
 			replacement := aLanguage parseExpression: pragma arguments third.
@@ -22,6 +22,15 @@ SBTSReplacementBlock class >> buildFor: aLanguage with: aDictionary [
 			replace at: 'wrap' ifPresent: [:wrap | replacement := replacement adaptSlotFor: wrap slot].
 			replacement applyReplacement: self]
 		ifNone: [self error: ('No implementation for replacement of class {1} in this language' format: {self name})]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSReplacementBlock class >> keywordReplacementsDo: aBlock [
+
+	self allSubclassesDo: [:class |
+		Pragma
+			withPragmasIn: class
+			do: [:pragma | pragma keyword = #lang:match:sample:keyword: ifTrue: [aBlock value: pragma]]]
 ]
 
 { #category : #'as yet unclassified' }

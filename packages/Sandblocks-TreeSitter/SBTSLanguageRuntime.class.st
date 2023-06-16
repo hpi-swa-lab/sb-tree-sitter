@@ -137,6 +137,15 @@ SBTSLanguageRuntime class >> languages [
 	^ {self language}
 ]
 
+{ #category : #'instance creation' }
+SBTSLanguageRuntime class >> newFor: aLanguage [
+
+	^ self basicNew
+		factory: aLanguage;
+		initialize;
+		yourself
+]
+
 { #category : #accessing }
 SBTSLanguageRuntime class >> runtimeName [
 
@@ -266,7 +275,7 @@ SBTSLanguageRuntime >> initialize [
 { #category : #accessing }
 SBTSLanguageRuntime >> language [
 
-	^ self class language
+	^ factory ifNil: [self class language]
 ]
 
 { #category : #'runtime interface' }

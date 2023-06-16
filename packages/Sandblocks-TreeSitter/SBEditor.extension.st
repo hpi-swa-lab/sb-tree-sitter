@@ -72,8 +72,7 @@ SBEditor >> newRegexFile [
 SBEditor >> newSmalltalkFile [
 	<addAction>
 
-	SBTSLanguageRuntime new
-		factory: SBTSSmalltalk;
+	(SBTSLanguageRuntime newFor: SBTSSmalltalk)
 		tmpFile: 'method' do: [:path | | file |
 			file := SBTSFile for: path.
 			self createArtefactInView: file.

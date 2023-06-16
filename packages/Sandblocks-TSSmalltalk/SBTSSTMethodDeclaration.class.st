@@ -6,7 +6,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBTSSTMethodDeclaration >> build [
-	<lang: #smalltalk match: '[(keyword_selector) (unary_selector)] @root' sample: 'test: aNumber'>
+"disabled"
+	<lang: #smalltalk match: '[(keyword__selector) (unary__selector)] @root' sample: 'test: aNumber'>
 
 	self layoutPolicy: SBAlgebraLayout new.
 	self addMorphBack: (SBStClassNameInput new

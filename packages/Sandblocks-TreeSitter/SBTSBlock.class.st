@@ -108,7 +108,11 @@ SBTSBlock >> alias [
 { #category : #replacements }
 SBTSBlock >> allReplacementCandidates: aCollection [
 
-	^ aCollection gather: [:class | (Pragma allNamed: #lang:match: in: class), (Pragma allNamed: #lang:match:sample: in: class)]
+	^ Array streamContents: [:s |
+		aCollection do: [:class |
+			Pragma
+				withPragmasIn: class
+				do: [:pragma | (#(#lang:match: #lang:match:sample: #lang:match:sample:keyword:) includes: pragma keyword) ifTrue: [s nextPut: pragma]]]]
 ]
 
 { #category : #replacements }
@@ -1317,7 +1321,19 @@ SBTSBlock >> suggestAlways [
 { #category : #'as yet unclassified' }
 SBTSBlock >> suggestions [
 
-	^ self semantics suggestionsFor: self
+	^ (self isExpression
+		ifTrue: [
+			Array streamContents: [:stream |
+				SBTSReplacementBlock keywordReplacementsDo: [:pragma | | keyword |
+					keyword := pragma arguments fourth.
+					(self language language = pragma arguments first and: [keyword sandblockMatch: self contents]) ifTrue: [
+						stream nextPut: (SBTSBlockSuggestion new
+							command: (SBReplaceMultipleCommand new
+									target: self
+									replacers: {pragma methodClass buildFor: self language with: Dictionary new})
+								in: self sandblockEditor;
+							selector: keyword label: 'replacement')]]]]
+		ifFalse: [{}]), (self semantics suggestionsFor: self)
 ]
 
 { #category : #'action helpers' }

@@ -1,5 +1,5 @@
 Class {
-	#name : #SBStColor,
+	#name : #SBTSColor,
 	#superclass : #SBTSReplacementBlock,
 	#instVars : [
 		'previousColor'
@@ -8,18 +8,32 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SBStColor >> build [
+SBTSColor >> buildPyParam [
+	<lang: #python match: '(keyword_argument (identifier) ="color" (string) @color @root)' sample: 'ax.plot(color="red")'>
+
+	self
+		layoutInset: 4;
+		addMorphBack: (self
+			createBinding: [:c |
+				Morph new
+					extent: 16 asPoint;
+					color: (Color fromCSS2String: (c at: 'color') contents);
+					yourself]
+			update: [:c :m | (c at: 'color') contents: m color asHTMLColor])
+]
+
+{ #category : #'as yet unclassified' }
+SBTSColor >> buildSmalltalk [
 	<lang: #smalltalk match: '[(unary_message
 	(identifier) ="Color"
-	(identifier) @selector)
+	(unary_identifier) @selector)
 (keyword_message
 	(identifier) ="Color"
 	(number) @r
 	(number) @g
 	(number) @b)
-]@root' sample: 'a
-	Color red.
-	Color r: 2 g: 4 b: 6'>
+]' sample: 'a
+	Color red' keyword: 'Color'>
 
 	self
 		layoutInset: 4;
@@ -37,29 +51,14 @@ SBStColor >> build [
 ]
 
 { #category : #'as yet unclassified' }
-SBStColor >> buildPyParam [
-	<lang: #python match: '(keyword_argument (identifier) ="color" (string) @color @root)' sample: 'ax.plot(color="red")'>
-
-	self
-		layoutInset: 4;
-		addMorphBack: (self
-			createBinding: [:c |
-				Morph new
-					extent: 16 asPoint;
-					color: (Color fromCSS2String: (c at: 'color') contents);
-					yourself]
-			update: [:c :m | (c at: 'color') contents: m color asHTMLColor])
-]
-
-{ #category : #'as yet unclassified' }
-SBStColor >> colorContentsUpdate: aColor [
+SBTSColor >> colorContentsUpdate: aColor [
 
 	self firstSubmorph color: aColor.
 	self batchedChangeStep
 ]
 
 { #category : #'as yet unclassified' }
-SBStColor >> doubleClick: anEvent [
+SBTSColor >> doubleClick: anEvent [
 
 	previousColor := self firstSubmorph color.
 	(NewColorPickerMorph
@@ -74,7 +73,7 @@ SBStColor >> doubleClick: anEvent [
 ]
 
 { #category : #'as yet unclassified' }
-SBStColor >> saveColor [
+SBTSColor >> saveColor [
 
 	self sandblockEditor do: (SBMutatePropertyCommand new
 		target: self firstSubmorph;
