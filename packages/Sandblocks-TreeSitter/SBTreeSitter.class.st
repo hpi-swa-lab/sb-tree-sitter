@@ -397,7 +397,7 @@ SBTreeSitter >> parserNew [
 ]
 
 { #category : #helper }
-SBTreeSitter >> printTree: aCursor factory: aFactory [
+SBTreeSitter >> printTree: aCursor [
 
 	| node type |
 	node := aCursor currentNode.
@@ -406,8 +406,8 @@ SBTreeSitter >> printTree: aCursor factory: aFactory [
 	Transcript showln: type.
 	
 	aCursor gotoFirstChild ifTrue: [
-		self printTree: aCursor factory: aFactory.
-		[aCursor gotoNextSibling] whileTrue: [self printTree: aCursor factory: aFactory].
+		self printTree: aCursor.
+		[aCursor gotoNextSibling] whileTrue: [self printTree: aCursor].
 		aCursor gotoParent]
 ]
 
@@ -558,4 +558,11 @@ SBTreeSitter >> vhdl [
 
 	<apicall: SBTSLanguageStruct* tree_sitter_vhdl () module: 'tree-sitter-vhdl'>
 	^ SBTSLanguage tryPatchLibrary: 'alemuller/tree-sitter-vhdl' name: 'vhdl' context: thisContext branch: 'main' subpath: ''
+]
+
+{ #category : #'ffi languages' }
+SBTreeSitter >> wing [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_wing () module: 'tree-sitter-wing'>
+	^ SBTSLanguage tryPatchLibrary: 'winglang/wing' name: 'wing' context: thisContext branch: 'main' subpath: 'libs/tree-sitter-wing'
 ]

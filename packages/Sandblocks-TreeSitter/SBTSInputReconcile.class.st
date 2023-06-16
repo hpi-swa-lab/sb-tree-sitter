@@ -432,7 +432,7 @@ SBTSInputReconcile >> trySkipLabel: aString in: aBlock from: aMorph at: aNumber 
 
 	(aString anySatisfy: [:c | c isAlphaNumeric]) ifTrue: [^ {}].
 	
-	(aMorph isTextMorph and: [aMorph contents = aString and: [aNumber < (aMorph contents size + 1) or: [aMorph contentsForEdit isEmpty]]]) ifTrue: [^ {SBTSBoundarySelectCommand new boundary: aMorph}].
+	(aMorph isTextMorph and: [aMorph contents first = aString first and: [aNumber < (aMorph contents size + 1) or: [aMorph contentsForEdit isEmpty]]]) ifTrue: [^ {SBTSBoundarySelectCommand new boundary: aMorph}].
 	
 	self positionsAfter: aBlock from: aMorph do: [:position |
 		(position isText and: [position textMorph contents = aString and: [position textMorph ~= aMorph]]) ifTrue: [ | currentContent currentFixed |

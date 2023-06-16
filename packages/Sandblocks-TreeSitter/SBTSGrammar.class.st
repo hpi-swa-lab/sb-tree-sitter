@@ -292,7 +292,7 @@ SBTSGrammar >> flattenSeparatedList: anObject name: aString [
 			ifFalse: [obj]) label].
 	looksLikeSepList := [:obj |
 		obj isTSSeq and: [
-			obj elements size = 2 and: [ | second |
+			obj elements size >= 2 and: [ | second |
 				second := obj elements second.
 				second isTSRepeat and: [second element isTSSeq and: [(obj elements first hasEqualStructure: obj elements second element elements second) and: [second required not]]]]]].
 	looksLikeOptionalSep := [:obj | obj isTSChoice and: [obj alternatives second isTSBlank and: [obj alternatives first isTSLabel]]].
@@ -503,7 +503,7 @@ SBTSGrammar >> prepareGrammar: aJSONGrammar [
 		args: [{Json readFrom: SBJavascript grammarJson readStream}]
 		label: 'example'.
 	supertypes := (aJSONGrammar at: 'supertypes') collect: #asSymbol.
-	inlinedRules := (aJSONGrammar at: 'inline') collect: #asSymbol.
+	inlinedRules := (aJSONGrammar at: 'inline') collect: #asSymbol as: OrderedCollection.
 	precedences := aJSONGrammar at: 'precedences'.
 	aliasOccurrences := OrderedCollection new.
 	extras := ((aJSONGrammar at: 'extras') select: [:extra | extra type = 'PATTERN']) collect: [:extra | ('({1})+' format: {extra value}) asRegex].
@@ -657,7 +657,8 @@ SBTSGrammar >> removeMarkedDelimiters: anObject [
 { #category : #cleaning }
 SBTSGrammar >> removeRule: aSymbol [
 
-	rules keysAndValuesDo: [:name :rule | rule allElementsDo: [:node | (node isTSSymbol and: [node type = aSymbol and: [node parent notNil]]) ifTrue: [node parent isTSAlias ifTrue: [node parent delete] ifFalse: [node delete]]]]
+	rules keysAndValuesDo: [:name :rule |
+		rule allElementsDo: [:node | (node isTSSymbol and: [node type = aSymbol and: [node parent notNil]]) ifTrue: [node parent isTSAlias ifTrue: [node parent delete] ifFalse: [node delete]]]]
 ]
 
 { #category : #cleaning }

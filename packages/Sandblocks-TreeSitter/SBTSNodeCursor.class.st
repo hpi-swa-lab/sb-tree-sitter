@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'current',
-		'library'
+		'library',
+		'cursor'
 	],
 	#category : #'Sandblocks-TreeSitter-FFI'
 }
@@ -11,42 +12,37 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSNodeCursor >> currentNode [
 
-	^ current
+	^ library cursorCurrentNode: cursor
 ]
 
 { #category : #'as yet unclassified' }
 SBTSNodeCursor >> gotoFirstChild [
 
-	| new |
-	new := library nodeChild: current at: 0.
-	^ (library nodeIsNull: new) ifTrue: [false] ifFalse: [
-		current := new.
-		true]
+	^ library cursorGotoFirstChild: cursor
 ]
 
 { #category : #'as yet unclassified' }
 SBTSNodeCursor >> gotoNextSibling [
 
-	| new |
-	new := library nodeNextSibling: current.
-	^ (library nodeIsNull: new) ifTrue: [false] ifFalse: [
-		current := new.
-		true]
+	^ library cursorGotoNextSibling: cursor
 ]
 
 { #category : #'as yet unclassified' }
 SBTSNodeCursor >> gotoParent [
 
-	| new |
-	new := library nodeParent: current.
-	^ (library nodeIsNull: new) ifTrue: [false] ifFalse: [
-		current := new.
-		true]
+	^ library cursorGotoParent: cursor
 ]
 
 { #category : #'as yet unclassified' }
 SBTSNodeCursor >> on: aNode library: aLibrary [
 
+	cursor := aLibrary cursorNew: aNode.
 	current := aNode.
 	library := aLibrary
+]
+
+{ #category : #'as yet unclassified' }
+SBTSNodeCursor >> postCopy [
+
+	cursor := library cursorCopy: cursor
 ]

@@ -14,10 +14,10 @@ Class {
 { #category : #'as yet unclassified' }
 SBWatch2 class >> newEmptyFor: aBlock [
 
-	| source copy |
-	copy := aBlock copyBlock.
-	source := aBlock runtime buildWatchSourceFor: copy id: UUID new asString.
-	^ (source adaptSlotFor: copy slot) applyReplacement
+	^ SBWatch2 buildFor: aBlock language with: (Dictionary new
+		at: 'id' put: UUID new asString;
+		at: 'wrap' put: aBlock;
+		yourself)
 ]
 
 { #category : #'as yet unclassified' }
@@ -52,12 +52,12 @@ SBWatch2 >> buildJavascript [
     .connect(process.env.SQ_WATCH, "localhost")
     .end(
       JSON.stringify({
-        id: "8760eb08-6e29-47e6-a1fc-78d5c8bcb9fb",
+        id: "__id__",
         expression: require("util").inspect(e),
       })
     ),
   e
-))(req.path);'>
+))(__wrap__);'>
 
 	self id: (self bindings at: 'id') contents.
 	self addMorphFront: (self createBindingBlock: 'expression')
@@ -66,7 +66,7 @@ SBWatch2 >> buildJavascript [
 { #category : #'as yet unclassified' }
 SBWatch2 >> buildPython [
 	<lang: #python match: '(subscript (call (parenthesized_expression (lambda (_ (_ (_
-	(lambda (tuple (call (argument_list (call (attribute (call (argument_list (dictionary (pair (string) ="id" (_) @id))))))))))))))) (argument_list (_) @expression))) @watch' sample: '(lambda e:((lambda s:(s.connect(("localhost",int(__import__("os").environ["SQ_WATCH"]))),s.send(__import__("json").dumps({"id":"myid","expression":str(e)}).encode()),s.close()))(__import__("socket").socket()),e))(3)[1]'>
+	(lambda (tuple (call (argument_list (call (attribute (call (argument_list (dictionary (pair (string) ="id" (_) @id))))))))))))))) (argument_list (_) @expression))) @watch' sample: '(lambda e:((lambda s:(s.connect(("localhost",int(__import__("os").environ["SQ_WATCH"]))),s.send(__import__("json").dumps({"id":"__id__","expression":str(e)}).encode()),s.close()))(__import__("socket").socket()),e))(__wrap__)[1]'>
 
 	self id: (self bindings at: 'id') contents.
 	
@@ -75,25 +75,26 @@ SBWatch2 >> buildPython [
 
 { #category : #'as yet unclassified' }
 SBWatch2 >> buildSmalltalk [
-	<lang: #smalltalk match: '(keyword_message (identifier) ="SBWatch2" (expression) @expression (string) @id)' sample: 'a SBTSWatch report: x for: ''y'''>
+	<lang: #smalltalk match: '(keyword_message (identifier) ="SBWatch2" (expression) @expression (string) @id)' sample: 'a SBWatch2 report: __wrap__ for: ''__id__'''>
 
-	self id: (self bindings at: 'id') textMorphs second contents.
+	self halt.
+	self id: (self bindings at: 'id') contents.
 	self addMorphFront: (self createBindingBlock: 'expression')
 ]
 
 { #category : #'as yet unclassified' }
 SBWatch2 >> buildTypescript [
-	<lang: #typescript match: '(call_expression (_ (_ (_ (_ (_ (_ (_ (_ (object (pair key: (_) ="id" (string (_) @id))))))))))) (_) @expression) @root' sample: '((e) => (
+	<lang: #typescript match: '(call_expression (_ (_ (_ (_ (_ (_ (_ (_ (object (pair key: (_) ="id" (string (_) @id))))))))))) (_) @expression)' sample: '((e) => (
   require("net")
     .connect(process.env.SQ_WATCH, "localhost")
     .end(
       JSON.stringify({
-        id: "8760eb08-6e29-47e6-a1fc-78d5c8bcb9fb",
+        id: "__id__",
         expression: require("util").inspect(e),
       })
     ),
   e
-))(req.path);'>
+))(__wrap__);'>
 
 	self id: (self bindings at: 'id') contents.
 	self addMorphFront: (self createBindingBlock: 'expression')
@@ -101,7 +102,7 @@ SBWatch2 >> buildTypescript [
 
 { #category : #'as yet unclassified' }
 SBWatch2 >> buildTypescriptWeb [
-	<lang: #typescript match: '(call_expression (_ (_ (_ (_ (_ (_ (_ (_ (string (_) @id))))))))) (_ (_)) @expression) @root' sample: '(<T>(e: T) => (fetch(`http://localhost:51234/sqReport?id=${"ID"}&expression=${escape(JSON.stringify(e))}`), e))(expr)'>
+	<lang: #typescript match: '(call_expression (_ (_ (_ (_ (_ (_ (_ (_ (string (_) @id))))))))) (_ (_) @expression))' sample: '(<T>(e: T) => (fetch(`http://localhost:51234/sqReport?id=${"__id__"}&expression=${escape(JSON.stringify(e))}`), e))(__wrap__)'>
 
 	self id: (self bindings at: 'id') contents.
 	self addMorphFront: (self createBindingBlock: 'expression')

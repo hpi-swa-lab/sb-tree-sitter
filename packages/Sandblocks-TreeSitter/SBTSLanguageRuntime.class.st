@@ -344,7 +344,7 @@ SBTSLanguageRuntime >> stopSemantics [
 { #category : #'helper os process' }
 SBTSLanguageRuntime >> tmpFile: aString do: aBlock [
 
-	^ self file: '/tmp/', self tmpFileName contents: aString do: aBlock
+	^ self file: self language tmpFilePath contents: aString do: aBlock
 ]
 
 { #category : #'helper os process' }

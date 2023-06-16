@@ -136,6 +136,18 @@ SBTSFile >> filepath: aString language: aLanguageClass collapsed: aCollapsedBool
 ]
 
 { #category : #'as yet unclassified' }
+SBTSFile >> filepath: aString source: anotherString language: aLanguageClass collapsed: aCollapsedBoolean replace: aReplaceBoolean [
+
+	self
+		filepath: aString
+		toplevel: (anotherString in: [:source | | toplevel |
+			toplevel := SBTSFileParser new parse: source language: aLanguageClass.
+			aReplaceBoolean ifTrue: [toplevel applyReplacements] ifFalse: [toplevel]])
+		language: aLanguageClass
+		collapsed: aCollapsedBoolean
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFile >> filepath: aString toplevel: aBlock language: aLanguageClass collapsed: aBoolean [
 
 	filepath := aString.

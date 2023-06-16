@@ -13,7 +13,7 @@ SBTSSTMethodDeclaration >> build [
 		object: self root parentSandblock parentSandblock methodClass;
 		bordered: false).
 	self addMorphBack: (SBStringMorph new contents: '>>').
-	Project current addDeferredUIMessage: [self addMorphBack: (bindings at: 'root')]
+	self addMorphBack: (self createBindingBlock: 'root')
 ]
 
 { #category : #'as yet unclassified' }

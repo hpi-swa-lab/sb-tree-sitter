@@ -97,7 +97,7 @@ SBTSNodeRepeat >> groupsIn: aContainerBlock [
 
 	| candidates |
 	^ Array streamContents: [:stream | | stop |
-		candidates := (aContainerBlock submorphs select: [:m | m slot includesParent: self]) readStream.
+		candidates := (aContainerBlock submorphs select: [:m | m isTSMorph and: [m slot includesParent: self]]) readStream.
 		stop := false.
 		[candidates atEnd not and: [stop not]] whileTrue: [
 			(Array streamContents: [:groupStream | element traverseBlocks: candidates do: [:block | groupStream nextPut: block]])

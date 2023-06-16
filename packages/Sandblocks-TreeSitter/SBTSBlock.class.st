@@ -120,6 +120,8 @@ SBTSBlock >> applyReplacement [
 { #category : #replacements }
 SBTSBlock >> applyReplacement: aClass [
 
+	(self isTSReplacement and: [self class = aClass]) ifTrue: [^ self].
+	
 	^ (self applyReplacementCommand: aClass) do
 ]
 
@@ -526,7 +528,7 @@ SBTSBlock >> emphasis [
 	self highlight ifNotNil: [:h |
 		(h beginsWith: 'major_declaration') ifTrue: [^ TextEmphasis bold].
 		self type = #comment ifTrue: [^ TextEmphasis italic]].
-	^ TextEmphasis normal
+	^ self colorPolicy defaultEmphasis
 ]
 
 { #category : #testing }
@@ -1092,11 +1094,17 @@ SBTSBlock >> queryAll: aString [
 { #category : #query }
 SBTSBlock >> queryNode: aString [
 
+	^ self queryNode: aString ifFound: [:e | e] ifNone: [self error: 'query did not match']
+]
+
+{ #category : #query }
+SBTSBlock >> queryNode: aString ifFound: aSuccessBlock ifNone: aBlock [
+
 	| element |
 	(self
 		queryRecursiveFirstMatch: aString
-		capturesDo: [:captures :block | element := captures ifEmpty: [block] ifNotEmpty: [captures anyOne]]) ifFalse: [^ self error: 'query did not match'].
-	^ element
+		capturesDo: [:captures :block | element := captures ifEmpty: [block] ifNotEmpty: [captures anyOne]]) ifFalse: [^ aBlock value].
+	^ aSuccessBlock value: element
 ]
 
 { #category : #query }
@@ -1397,9 +1405,9 @@ SBTSBlock >> textMorphs [
 { #category : #'as yet unclassified' }
 SBTSBlock >> toplevel [
 
-	^ (self type = self language rootRuleName and: [self owner isTSBlock not])
+	^ (self type = self language rootRuleName and: [self owner isNil or: [self owner isTSBlock not]])
 		ifTrue: [self]
-		ifFalse: [self owner toplevel]
+		ifFalse: [(self ownerThatIsA: SBTSBlock) toplevel]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1515,6 +1523,17 @@ SBTSBlock >> wasSelected [
 ]
 
 { #category : #actions }
+SBTSBlock >> wrapWithToggle [
+	<action>
+
+	| target |
+	target := self orOwnerSuchThat: #isExpression.
+	self sandblockEditor do: (SBReplaceCommand new
+		target: target
+		replacer: (SBToggle buildFor: self language with: {'wrap' -> self}))
+]
+
+{ #category : #actions }
 SBTSBlock >> wrapWithWatch [
 	<action>
 
@@ -1527,7 +1546,10 @@ SBTSBlock >> wrapWithWatch [
 			target: self parentSandblock
 			replacer: (self parentSandblock expression adaptSlotFor: self parentSandblock slot))].
 	
-	(self orOwnerSuchThat: [:o | o isTSBlock and: [o isExpression]]) ifNotNil: [:expr | self sandblockEditor do: (SBReplaceCommand new target: expr replacer: (SBWatch2 newEmptyFor: expr))]
+	(self orOwnerSuchThat: [:o | o isTSBlock and: [o isExpression]]) ifNotNil: [:expr |
+		self sandblockEditor do: (SBReplaceCommand new
+			target: expr
+			replacer: (SBWatch2 buildFor: self language with: {'id' -> UUID new asString. 'wrap' -> self}))]
 ]
 
 { #category : #'as yet unclassified' }

@@ -338,7 +338,7 @@ SBTSLanguage class >> isBlockInlinedInParent: aSymbol [
 { #category : #configuration }
 SBTSLanguage class >> isExpression: aBlock [
 
-	^ false
+	^ #expression = aBlock type
 ]
 
 { #category : #'configuration - declarations' }
@@ -394,7 +394,7 @@ SBTSLanguage class >> loadLanguage: aGithubString name: aString branch: anotherS
 	path := self fetchLibrary: aGithubString branch: anotherString.
 	subpath := path / aPathString.
 	self compileParserIn: subpath name: aString root: path.
-	self generateGrammarClassFrom: path name: aString github: aGithubString.
+	self generateGrammarClassFrom: subpath name: aString github: aGithubString.
 	self generateFFIMethodFor: aString github: aGithubString
 ]
 
@@ -417,14 +417,31 @@ SBTSLanguage class >> parse: aString [
 ]
 
 { #category : #'instantiate blocks' }
+SBTSLanguage class >> parseAsFile: aString [
+
+	^ SBTSFile new
+		filepath: self tmpFilePath
+		source: aString
+		language: (self ifNil: [^ nil])
+		collapsed: false
+		replace: false
+]
+
+{ #category : #'instantiate blocks' }
 SBTSLanguage class >> parseExpression: aString [
 
-	| toplevel |
+	| toplevel expr candidates |
 	toplevel := SBTSFileParser new parse: aString language: self.
+	candidates := toplevel childSandblocks size > 1
+		ifTrue: [toplevel childSandblocks select: #isExpression]
+		ifFalse: [toplevel childSandblocks].
 	self
-		assert: toplevel childSandblocks size = 1
+		assert: candidates size = 1
 		description: 'More than one child was returned from the parsed expression. Consider using parse: instead.'.
-	^ toplevel childSandblocks first
+	
+	expr := candidates first.
+	toplevel removeMorph: expr.
+	^ expr
 ]
 
 { #category : #'instantiate blocks' }
@@ -617,6 +634,12 @@ SBTSLanguage class >> tabsToSpaces [
 	^ false
 ]
 
+{ #category : #'loading - helper' }
+SBTSLanguage class >> tmpFilePath [
+
+	^ '/tmp/', (UUID new asString, '.', self fileSuffix)
+]
+
 { #category : #configuration }
 SBTSLanguage class >> transformStatements: aGrammar [
 
@@ -676,6 +699,12 @@ SBTSLanguage class >> updateFrom: aGithubString branch: aString [
 		highlightsFile ifNotNil: #close].
 	self rebuild.
 	UIManager default notify: 'restart squeak to make sure the shared library is reloaded as well'
+]
+
+{ #category : #'configuration - declarations' }
+SBTSLanguage class >> usagesOf: aBlock [
+
+	^ Array streamContents: [:s | self usagesOf: aBlock do: [:u | s nextPut: u]]
 ]
 
 { #category : #'configuration - declarations' }

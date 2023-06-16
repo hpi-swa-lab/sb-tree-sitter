@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'rangeMin',
 		'rangeMax',
-		'floatSteps'
+		'floatSteps',
+		'suffix'
 	],
 	#category : #'Sandblocks-Matplotlib'
 }
@@ -97,6 +98,18 @@ SBPyNumberWithPrefix >> stopEditing: aCommand [
 "called after the number has changed"
 	super stopEditing: aCommand.
 	self triggerEvent: #edited
+]
+
+{ #category : #'as yet unclassified' }
+SBPyNumberWithPrefix >> suffix: aString [
+
+	suffix := aString
+]
+
+{ #category : #'as yet unclassified' }
+SBPyNumberWithPrefix >> symbols [
+
+	^ {prefix. suffix}
 ]
 
 { #category : #flagging }

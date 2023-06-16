@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 SBTSIdentifierHighlight class >> matches: aBlock [
 
-	^ aBlock type = 'identifier'
+	^ aBlock language isIdentifier: aBlock
 ]
 
 { #category : #'as yet unclassified' }
