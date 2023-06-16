@@ -18,5 +18,6 @@ OrderedDictionary {
 	'packages/Sandblocks-Clojure' : #SquotTonelSerializer,
 	'packages/Sandblocks-Typescript' : #SquotTonelSerializer,
 	'packages/Sandblocks-Kotlin' : #SquotTonelSerializer,
-	'packages/Sandblocks-Cpp' : #SquotTonelSerializer
+	'packages/Sandblocks-Cpp' : #SquotTonelSerializer,
+	'packages/Sandblocks-Wing' : #SquotTonelSerializer
 }
