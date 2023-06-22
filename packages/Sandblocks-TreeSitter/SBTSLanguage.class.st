@@ -426,6 +426,15 @@ SBTSLanguage class >> parseAsFile: aString [
 		replace: false
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSLanguage class >> parseBuiltIn: aString [
+
+	^ (SBTSInputParser new
+		allowIncomplete: false;
+		optionsForTemplate: (SBTSNodeSymbol new type: self rootRuleName factory: self instance grammar) transitionRoot
+			given: aString) first first
+]
+
 { #category : #'instantiate blocks' }
 SBTSLanguage class >> parseExpression: aString [
 

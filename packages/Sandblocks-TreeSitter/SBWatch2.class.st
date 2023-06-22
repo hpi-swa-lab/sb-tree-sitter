@@ -49,11 +49,11 @@ SBWatch2 class >> watches [
 SBWatch2 >> buildJavascript [
 	<lang: #javascript match: '(call_expression (parenthesized_expression (arrow_function (parenthesized_expression (sequence_expression (call_expression (call_expression (object (pair key: (_) ="id" (string (_) @id))))))))) (_) @expression) @root' sample: '((e) => (
   require("net")
-    .connect(process.env.SQ_WATCH, "localhost")
+    .connect(process.env.SQ_WATCH, "127.0.0.1")
     .end(
       JSON.stringify({
         id: "__id__",
-        expression: require("util").inspect(e),
+        expression: e,
       })
     ),
   e
@@ -77,7 +77,6 @@ SBWatch2 >> buildPython [
 SBWatch2 >> buildSmalltalk [
 	<lang: #smalltalk match: '(keyword_message (identifier) ="SBWatch2" (expression) @expression (string) @id)' sample: 'a SBWatch2 report: __wrap__ for: ''__id__'''>
 
-	self halt.
 	self id: (self bindings at: 'id') contents.
 	self addMorphFront: (self createBindingBlock: 'expression')
 ]

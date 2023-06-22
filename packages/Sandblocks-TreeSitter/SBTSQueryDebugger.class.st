@@ -8,7 +8,8 @@ Class {
 		'program',
 		'inline',
 		'syntaxInvalid',
-		'sourceTree'
+		'sourceTree',
+		'keyword'
 	],
 	#category : #'Sandblocks-TreeSitter-Replacements'
 }
@@ -25,6 +26,7 @@ SBTSQueryDebugger >> asInlineFor: aPragma [
 	inline := true.
 	query contents: aPragma arguments second contents.
 	aPragma arguments size >= 3 ifTrue: [source contents: aPragma arguments third contents].
+	aPragma arguments size >= 4 ifTrue: [keyword contents: aPragma arguments fourth contents].
 	language object: (SBTSLanguage allSubclasses detect: [:class | class language = aPragma arguments first contents]).
 	self firstSubmorph contents: 'Query Match'
 ]
@@ -70,6 +72,9 @@ SBTSQueryDebugger >> initialize [
 		addMorphBack: (SBStringMorph new contents: 'Query:');
 		addMorphBack: (query := SBTextBubble multiLine
 			placeholderText: '(program (...';
+			hResizing: #spaceFill);
+		addMorphBack: (keyword := SBTextBubble new
+			placeholderText: 'keyword';
 			hResizing: #spaceFill);
 		addMorphBack: (SBStringMorph new contents: 'Preview (save to update):')
 ]
@@ -117,5 +122,8 @@ SBTSQueryDebugger >> writeSourceOn: aStream [
 	source contents ifNotEmpty: [
 		aStream nextPutAll: ' sample: '.
 		aStream store: source contents].
+	keyword contents ifNotEmpty: [
+		aStream nextPutAll: ' keyword: '.
+		aStream store: keyword contents].
 	aStream nextPutAll: '>'
 ]

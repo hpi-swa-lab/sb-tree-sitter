@@ -237,7 +237,7 @@ SBTSReplacementBlock >> createRepeatBindingFor: aString childQuery: anotherStrin
 { #category : #'as yet unclassified' }
 SBTSReplacementBlock >> createStatic: aBlock contents: aNameString [
 
-	^ aBlock value: (bindings at: aNameString)
+	^ aBlock value: (bindings at: aNameString) contents
 ]
 
 { #category : #'as yet unclassified' }

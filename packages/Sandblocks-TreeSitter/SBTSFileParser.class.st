@@ -11,8 +11,23 @@ Class {
 		'justEnteredAlias',
 		'level'
 	],
+	#classVars : [
+		'UseBuiltIn'
+	],
 	#category : #'Sandblocks-TreeSitter-Parser'
 }
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser class >> useBuiltIn [
+
+	^ UseBuiltIn ifNil: [false]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser class >> useBuiltIn: aBoolean [
+
+	UseBuiltIn := aBoolean
+]
 
 { #category : #blocks }
 SBTSFileParser >> addBlock: aBlock [
@@ -186,6 +201,8 @@ SBTSFileParser >> numberOfNewLinesToNext [
 SBTSFileParser >> parse: aString language: aLanguage [
 
 	| api language |
+	self class useBuiltIn ifTrue: [^ aLanguage parseBuiltIn: aString].
+	
 	api := SBTreeSitter new.
 	language := aLanguage isBehavior ifTrue: [aLanguage instance] ifFalse: [aLanguage].
 	^ api parseAsCursor: aString language: language class language do: [:cursorObj | | results |

@@ -19,7 +19,7 @@ SBFormRequest >> build [
 		addMorphBack: (self
 			createStatic: [:c |
 				SBStringMorph new
-					contents: 'Post', (c contents copyReplaceAll: '/' with: ' ');
+					contents: 'Post', (c copyReplaceAll: '/' with: ' ');
 					bold]
 			contents: 'path');
 		cellGap: 4 sbScaled.

@@ -6,6 +6,6 @@ SBStPragma >> asQueryDebugger: converter [
 	<automatic>
 
 	converter
-		if: [{#lang:match:. #lang:match:sample:} includes: self keyword]
+		if: [{#lang:match:. #lang:match:sample:. #lang:match:sample:keyword:} includes: self keyword]
 		do: [SBTSQueryDebugger new asInlineFor: self]
 ]

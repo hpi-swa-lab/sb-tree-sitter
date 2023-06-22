@@ -57,7 +57,9 @@ SBWingCost >> allResourceUses [
 { #category : #accessing }
 SBWingCost >> apiCallName [
 
-	^ (bindings at: 'function') contents
+	^ ((bindings includesKey: 'function')
+		ifTrue: [bindings at: 'function']
+		ifFalse: [bindings at: 'static_function']) contents
 ]
 
 { #category : #'as yet unclassified' }
@@ -151,12 +153,7 @@ SBWingCost >> closureParameters [
 			name: #averageDuration;
 			suffix: ' sec';
 			initial: 0.1.
-		SBWingParameterNumber new
-			icon: SBIcon iconCompass;
-			name: #cores;
-			suffix: ' cores';
-			initial: 2.
-		self costPerMonth: [(self get: #cores) * (self get: #averageDuration) * (self get: #memory) * self numberOfInvocations * 0.0001]}
+		self costPerMonth: [(self get: #averageDuration) * ((self get: #memory) / 1024) * self numberOfInvocations * 1.66667e-5 + (self numberOfInvocations / 1.0e6 * 0.2)]}
 ]
 
 { #category : #parameters }
@@ -172,7 +169,7 @@ SBWingCost >> costPerMonth: aBlock [
 		icon: SBIcon iconMoney;
 		name: #cost;
 		value: aBlock;
-		label: [:v | '${1} / month' format: {v printShowingDecimalPlaces: 2}]
+		label: [:v | '${1} / month' format: {(v * 100) rounded / 100 printShowingDecimalPlaces: 2}]
 ]
 
 { #category : #parameters }
@@ -198,6 +195,12 @@ SBWingCost >> entrypoint [
 SBWingCost >> get: aParameter [
 
 	^ self parameterMorphs detect: [:param | param name = aParameter] ifFound: #value ifNone: [0]
+]
+
+{ #category : #parameters }
+SBWingCost >> globalGet: aSymbol [
+
+	^ (self toplevel allBlocksDetect: [:b | b class = self class and: [b isStaticCall and: [b apiCallName = 'report']]]) get: aSymbol
 ]
 
 { #category : #initialization }
@@ -281,9 +284,26 @@ SBWingCost >> parameterMorphs [
 SBWingCost >> parameters [
 
 	^ Dictionary newFrom: {
-		{'log'} -> [{self numInvocationsNamed: 'logs'. self costPerInvocation: 0.02}].
+		{'log'} -> [
+			{
+				self numInvocationsNamed: 'logs'.
+				self averageRecordSize.
+				SBWingParameterNumber new
+					icon: SBIcon iconCalendarTimesO;
+					name: #monthsLogRetention;
+					suffix: ' months log retention';
+					initial: 1.
+				self costPerMonth: [ | sizePerMonth compressionRatio |
+					sizePerMonth := (self get: #averageRecordSize) / 1.0e9 * (self get: #numberOfInvocations).
+					compressionRatio := 0.15.
+					sizePerMonth * 0.63 + (sizePerMonth * (self get: #monthsLogRetention) * compressionRatio * 0.0324)]}].
 		{'report'} -> [
 			{
+				SBWingParameterNumber new
+					icon: SBIcon iconCalendarTimesO;
+					name: #monthsPassedSinceDeployment;
+					suffix: ' months passed since deployment';
+					initial: 1.
 				self costPerMonth: [
 					(Array streamContents: [:s | self toplevel allMorphsDo: [:b | (b class = SBWingParameterCost and: [b owner ~= self]) ifTrue: [s nextPut: b]]])
 						inject: 0
@@ -300,8 +320,21 @@ SBWingCost >> parameters [
 							into: [:sum :endpoint | sum + (endpoint numberOfInvocations * (endpoint get: #averageRequestResponseSize))]];
 					label: [:v | '{1}B bandwidth use / month' format: {v}].
 				self costPerMonth: [(self get: #bandwidthUse) * 0.003]}].
-		{'cloud.Table'. 'insert'} -> [{self averageRecordSize. self numInvocationsNamed: 'writes'. self costPerInvocation: 0.01}].
-		{'cloud.Table'. 'list'} -> [{self averageRecordSize. self numInvocationsNamed: 'reads'. self costPerInvocation: 0.01}].
+		{'cloud.Table'. 'insert'} -> [
+			{
+				self averageRecordSize.
+				self numInvocationsNamed: 'writes'.
+				self costPerMonth: [ | writeRequestUnits |
+					writeRequestUnits := ((self get: #averageRecordSize) / 1024) ceiling.
+					writeRequestUnits * (self get: #numberOfInvocations) * 1.525e-6]}].
+		{'cloud.Table'. 'list'} -> [
+			{
+				self averageRecordSize.
+				self numInvocationsNamed: 'reads'.
+				self costPerMonth: [ | readRequestsUnits |
+					readRequestsUnits := ((self get: #averageRecordSize) / (1024 * 4)) ceiling.
+					"halfed for eventually-consistent reads"
+					readRequestsUnits * (0.5 * (self get: #numberOfInvocations)) * 3.05e-7]}].
 		{'cloud.Table'. 'on'} -> [
 			{
 				SBWingParameterDerived new
@@ -312,6 +345,24 @@ SBWingCost >> parameters [
 							inject: 0
 							into: [:sum :insert | sum + insert numberOfInvocations]];
 					label: [:v | '{1} triggers' format: {v}]}].
+		{'cloud.Website'} -> [
+			{
+				SBWingParameterNumber new
+					icon: SBIcon iconFile;
+					name: #averageRequestResponseSize;
+					suffix: ' Byte average request plus response size';
+					initial: 500.
+				SBWingParameterNumber new
+					icon: SBIcon iconFile;
+					name: #numberOfRequests;
+					suffix: ' Number of Requests / month';
+					initial: 10000.
+				SBWingParameterDerived new
+					icon: SBIcon iconFile;
+					name: #dataTransferOutToInternet;
+					value: [(self get: #averageRequestResponseSize) * (self get: #numberOfRequests) / 1.0e9];
+					label: [:v | 'Data Transfer out to internet per month {1} GB' format: {v}].
+				self costPerMonth: [(self get: #dataTransferOutToInternet) * 0.09 + ((self get: #numberOfRequests) * (0.009 / 10000))]}].
 		{'cloud.Table'} -> [
 			{
 				SBWingParameterDerived new
@@ -321,7 +372,8 @@ SBWingCost >> parameters [
 						(self allResourceUses select: [:use | use apiCallName = 'insert'])
 							inject: 0
 							into: [:sum :insert | sum + (insert numberOfInvocations * (insert get: #averageRecordSize))]];
-					label: [:v | 'Storage: adding {1} Bytes each month' format: {v}]}].
+					label: [:v | 'Storage: adding {1} Bytes each month' format: {v}].
+				self costPerMonth: [(self get: #insertBytesPerMonth) * (self globalGet: #monthsPassedSinceDeployment) / 1.0e9 * 0.306]}].
 		{'cloud.Api'. 'get'} -> [{self entrypoint. self editableNumInvocations. self averageRequestResponseSize}].
 		{'cloud.Api'. 'post'} -> [{self entrypoint. self editableNumInvocations. self averageRequestResponseSize}]}
 ]

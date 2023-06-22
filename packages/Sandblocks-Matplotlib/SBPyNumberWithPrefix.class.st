@@ -66,6 +66,12 @@ SBPyNumberWithPrefix >> mouseMove: anEvent [
 		self batchedChangeStep]
 ]
 
+{ #category : #flagging }
+SBPyNumberWithPrefix >> preferredColorIn: aColorPolicy [
+
+	^ aColorPolicy default
+]
+
 { #category : #accessing }
 SBPyNumberWithPrefix >> prefix [
 	^ prefix

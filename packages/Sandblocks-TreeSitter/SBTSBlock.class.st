@@ -1565,7 +1565,7 @@ SBTSBlock >> wrapWithWatch [
 	(self orOwnerSuchThat: [:o | o isTSBlock and: [o isExpression]]) ifNotNil: [:expr |
 		self sandblockEditor do: (SBReplaceCommand new
 			target: expr
-			replacer: (SBWatch2 buildFor: self language with: {'id' -> UUID new asString. 'wrap' -> self}))]
+			replacer: (SBWatch2 buildFor: self language with: {'id' -> UUID new asString. 'wrap' -> expr}))]
 ]
 
 { #category : #'as yet unclassified' }

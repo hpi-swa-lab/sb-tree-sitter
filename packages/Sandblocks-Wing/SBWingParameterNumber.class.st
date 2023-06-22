@@ -20,11 +20,7 @@ SBWingParameterNumber >> initialize [
 
 	super initialize.
 	
-	self addMorphBack: (textField := SBPyNumberWithPrefix new).
-	SBToggledCode
-		comment: ''
-		active: 0
-		do: {[textField when: #edited send: #updateAll to: self]}
+	self addMorphBack: (textField := SBPyNumberWithPrefix new)
 ]
 
 { #category : #'as yet unclassified' }
