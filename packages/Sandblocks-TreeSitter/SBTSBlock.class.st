@@ -11,6 +11,40 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSBlock class >> diffSourceExample [
+
+	| oldRoot newRoot oldSource newSource |
+	oldRoot := SBPython parse: 'def a():
+	aa
+3+5'.
+	newRoot := SBPython parse: 'def a():
+	aa
+3+54'.
+	oldSource := (oldRoot queryNode: '(_) ="5" @') parentSandblock.
+	newSource := (newRoot queryNode: '(_) ="54" @') parentSandblock.
+	^ oldSource undamagedParentWith: newSource do: [:old :new | | isoMorph |
+		SBWatch report: old type for: 370389481.
+		SBWatch report: new type for: 26606019.
+		isoMorph := OrderedCollection new.
+		old allBlocksBreadthFirstDo: [:oldBlock |
+			new allBlocksBreadthFirstDo: [:newBlock |
+				((isoMorph noneSatisfy: [:pair | (oldBlock hasParent: pair key) or: [newBlock hasParent: pair value]]) and: oldBlock sourceString = newBlock sourceString)
+					ifTrue: [
+						isoMorph add: oldBlock -> newBlock.
+						true]
+					ifFalse: [false]]].
+		SBWatch report: isoMorph for: 182060115.
+		new allBlocksDo: [:n | n attachDecorator: SBErrorDecorator new].
+		SBToggledCode
+			comment: ''
+			active: 1
+			do: {[isoMorph do: [:pair | pair value replaceBy: pair key]]}.
+		old childSandblocks copy do: [:s | s delete].
+		old addAllMorphs: new childSandblocks.
+		SBWatch report: oldRoot for: 471971832]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSBlock class >> registerShortcuts: aProvider [
 
 	aProvider
@@ -1475,6 +1509,37 @@ SBTSBlock >> typeNewLine [
 	<inputAction>
 
 	self sandblockEditor cursor cursorPosition textMorph insertString: String cr
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> undamagedParentWith: anotherBlock do: aClosure [
+
+	| oldStart newStart |
+	oldStart := self.
+	newStart := anotherBlock.
+	
+	[oldStart sourceString = newStart sourceString] whileTrue: [
+		oldStart := oldStart parentSandblock.
+		newStart := newStart parentSandblock].
+	
+	oldStart andAllParentSandblocksDo: [:oldParent | newStart andAllParentSandblocksDo: [:newParent | (oldParent type = newParent type and: [oldParent localNestingDepth = newParent localNestingDepth and: [oldParent undamagedParentWithRec: newParent]]) ifTrue: [^ aClosure value: oldParent value: newParent]]]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSBlock >> undamagedParentWithRec: anotherBlock [
+
+	| oldChild newChild |
+	oldChild := self.
+	newChild := anotherBlock.
+	self parentSandblock with: anotherBlock parentSandblock parentsDo: [:oldParent :newParent |
+		oldParent type = newParent type ifFalse: [^ false].
+		oldParent childSandblocks size = newParent childSandblocks size ifFalse: [^ false].
+		oldParent childSandblocks
+			with: newParent childSandblocks
+			do: [:old :new | old sourceString = new sourceString ifFalse: [(old ~= oldChild and: [new ~= newChild]) ifTrue: [^ false]]].
+		oldChild := oldParent.
+		newChild := newParent].
+	^ true
 ]
 
 { #category : #highlight }
