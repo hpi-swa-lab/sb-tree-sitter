@@ -123,7 +123,7 @@ SBRePalette class >> groups [
 { #category : #properties }
 SBRePalette class >> language [
 
-	^ self factory language
+	^ SBRegex
 ]
 
 { #category : #categories }
@@ -140,7 +140,7 @@ SBRePalette class >> quantifier [
 { #category : #categories }
 SBRePalette class >> rules [
 
-	^ self factory grammarJsonObject rules keys select: [:type | (SBRegex instance bodyNodeForRule: type ifAbsent: [nil]) notNil]
+	^ self factory instance grammar rules keys select: [:type | (SBRegex instance grammar bodyNodeForRule: type ifAbsent: [nil]) notNil]
 ]
 
 { #category : #categories }

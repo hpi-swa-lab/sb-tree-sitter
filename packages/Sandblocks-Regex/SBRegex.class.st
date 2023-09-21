@@ -13,6 +13,12 @@ Class {
 	#category : #'Sandblocks-Regex'
 }
 
+{ #category : #'as yet unclassified' }
+SBRegex class >> gapBetween: aBlock and: anotherBlock [
+
+	^ false
+]
+
 { #category : #configuration }
 SBRegex class >> grammarJson [
 	" https://github.com/tree-sitter/tree-sitter-regex/blob/master/grammar.js "
@@ -770,6 +776,18 @@ SBRegex class >> softLineBreakBetween: aBlock and: anotherBlock [
 SBRegex class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
 	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBRegex class >> unknownFor: aSymbol [
+
+	| morphs |
+	morphs := (self rule: aSymbol) buildEmpty.
+	(morphs size = 1 and: [morphs first isUnknown]) ifTrue: [^ morphs anyOne].
+	^ SBTSBlock new
+		slot: (SBTSSlot new addNode: (SBTSNodeSymbol new type: aSymbol factory: self instance grammar));
+		addAllMorphs: morphs;
+		yourself
 ]
 
 { #category : #'as yet unclassified' }

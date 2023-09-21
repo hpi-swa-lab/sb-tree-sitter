@@ -316,7 +316,10 @@ SBTSFile >> toggleRun [
 			runCancelBlock := nil]
 		ifNil: [
 			((runtime object new
-				evaluateFileAsync: self filepath
+				evaluateFileAsync: (SBToggledCode
+					comment: ''
+					active: 1
+					do: {[self filepath]. [(self filepath asFile parent / 'server-build' / 'index.js') asString]})
 				cancel: [:b | runCancelBlock := b]) then: [:b |
 				b value: [:status :stdout :stderr |
 					SBToggledCode comment: '' active: 1 do: {[Transcript showln: {status. stdout. stderr}]}.

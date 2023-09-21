@@ -159,8 +159,14 @@ SBTSBlock >> applyReplacementCommand: aClass [
 SBTSBlock >> applyReplacements [
 	<action>
 
+	self applyReplacements: SBTSReplacementBlock allSubclasses
+]
+
+{ #category : #'action helpers' }
+SBTSBlock >> applyReplacements: aCollection [
+
 	| candidates |
-	candidates := self allReplacementCandidates: SBTSReplacementBlock allSubclasses.
+	candidates := self allReplacementCandidates: aCollection.
 	self allBlocksDo: [:block |
 		(block isTSBlock and: [block isTSReplacement not]) ifTrue: [
 			self

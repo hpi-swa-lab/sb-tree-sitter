@@ -27,8 +27,8 @@ SBReEncodedReplacement class >> newAround: aBlock [
 	| regex command |
 	regex := (SBTSFileParser new
 		parse: ('(?:(?:{1}:)\{0\}(?:x))' format: {self name})
-		language: SBRegex) childSandblocks first childSandblocks first.
-	command := SBCombinedCommand newWith: (aBlock owner ifNotNil: {SBReplaceCommand new target: aBlock replacer: regex} ifNil: [{}]), {SBReplaceCommand new target: regex lastDeepChild replacer: aBlock. regex applyReplacementCommand}.
+		language: SBRegex) childSandblocks first.
+	command := SBCombinedCommand newWith: (aBlock owner ifNotNil: [{SBReplaceCommand new target: aBlock replacer: regex}] ifNil: [{}]), {SBReplaceCommand new target: regex lastDeepChild replacer: aBlock. regex applyReplacementCommand}.
 	^ aBlock sandblockEditor
 		ifNotNil: [aBlock sandblockEditor do: command]
 		ifNil: [command do]
@@ -47,7 +47,7 @@ SBReEncodedReplacement class >> subclassForAnnotation: aString [
 SBReEncodedReplacement >> build [
 	<lang: #regex match: '(non_capturing_group
 	(pattern
-		(term
+		.
 			(non_capturing_group
 				(pattern) @annotation
 			)
@@ -55,9 +55,9 @@ SBReEncodedReplacement >> build [
 			(non_capturing_group
 				(pattern) @pattern
 			)
-		)
+		
 	)
-) @block' sample: '(?:(?:annotation){0}(?:pattern))'>
+) @block' sample: '(?:(?:SBReComment){0}(?:x))'>
 
 	^ (self class subclassForAnnotation: (bindings at: 'annotation') sourceString) ifNotNil: [:class |
 		class new

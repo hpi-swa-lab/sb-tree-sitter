@@ -16,11 +16,9 @@ SBReOptional class >> newEmpty [
 { #category : #initialization }
 SBReOptional >> build [
 	<lang: #regex match: '(optional
-	"?"
 	"?"? @lazy
-) @optional'>
+) @optional' sample: 'a?'>
 
-	
 	self
 		addMorphBack: (SBStringMorph new contents: 'optional');
 		buildLazyToggle

@@ -86,5 +86,6 @@ SBPyPltPaletteOverview class >> buildOnPlots: aBuilder [
 
 { #category : #'as yet unclassified' }
 SBPyPltPaletteOverview class >> language [
-	^ #python
+
+	^ SBPython
 ]

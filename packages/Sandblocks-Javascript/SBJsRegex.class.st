@@ -18,7 +18,7 @@ SBJsRegex >> build [
 	self
 		layoutPolicy: SBAlgebraLayout new;
 		addMorphBack: (self
-			createBinding: [:c | SBRegex parse: (c at: 'root') contents]
+			createBinding: [:c | SBRegex parse: (c at: 'root') sourceString]
 			update: [:c :m | (c at: 'root') contents: m sourceString])
 ]
 

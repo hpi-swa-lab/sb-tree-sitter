@@ -17,7 +17,7 @@ Class {
 { #category : #matchers }
 SBReCharacterClassEscape class >> newEmpty [
 
-	^ (SBRegex parseExpression: '\d') childSandblocks first applyReplacement
+	^ (SBRegex parseExpression: '\d') applyReplacement
 ]
 
 { #category : #accessing }

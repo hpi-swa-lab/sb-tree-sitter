@@ -11,10 +11,13 @@ Class {
 { #category : #'as yet unclassified' }
 SBWingCost class >> replaceAllIn: aBlock [
 
-	| map |
-	map := Dictionary new.
+	| map params |
+	aBlock applyReplacements: {SBWingCallback}.
 	
-	(aBlock queryAll: '(call (reference_identifier) @function)') do: [:function | (#('log' 'report') includes: function contents) ifTrue: [(function parentSandblock applyReplacement: SBWingCost) buildParameters]].
+	map := Dictionary new.
+	params := self basicNew parameters keys.
+	
+	(aBlock queryAll: '(call (reference_identifier) @function)') do: [:function | (params includes: {function contents}) ifTrue: [(function parentSandblock applyReplacement: SBWingCost) buildParameters]].
 	
 	(aBlock queryAll: '(new_expression) @') do: [:resource | | mappedResource p |
 		p := resource parentSandblock.
@@ -92,8 +95,7 @@ SBWingCost >> averageRequestResponseSize [
 SBWingCost >> buildParameters [
 
 	self relevantParameters do: [:parameter |
-		self addMorph: (parameter from: self) inFrontOf: self lastSubmorph.
-		parameter update]
+		self addMorph: (parameter from: self) inFrontOf: self lastSubmorph]
 ]
 
 { #category : #queries }
@@ -191,6 +193,12 @@ SBWingCost >> entrypoint [
 		label: 'Entrypoint' asText allBold
 ]
 
+{ #category : #'as yet unclassified' }
+SBWingCost >> explicitInvocations: aString [
+
+	^ ((self toplevel allBlocksSelect: [:b | b class = SBWingCallback and: [(b bindings at: 'route') contents = aString]]) collect: [:c | c childSandblocks first])
+]
+
 { #category : #accessing }
 SBWingCost >> get: aParameter [
 
@@ -248,7 +256,9 @@ SBWingCost >> numInvocationsNamed: aString [
 { #category : #accessing }
 SBWingCost >> numberOfInvocations [
 
-	self isAPICall ifTrue: [((self resourceName = 'cloud.Api' and: [#('post' 'get') includes: self apiCallName]) or: [self resourceName = 'cloud.Table' and: [#('on' 'get') includes: self apiCallName]]) ifTrue: [^ self get: #numberOfInvocations]].
+	self isAPICall ifTrue: [((self resourceName = 'cloud.Api' and: [#('post' 'get') includes: self apiCallName]) or: [(self resourceName = 'cloud.Table' and: [#('on' 'get') includes: self apiCallName]) or: [(self resourceName = 'cloud.Schedule' and: [self apiCallName = 'onTick']) or: [(self resourceName = 'cloud.Bucket' and: [self apiCallName = 'onCreate']) or: [self resourceName = 'cloud.Queue' and: [self apiCallName = 'pop']]]]]) ifTrue: [^ self get: #numberOfInvocations]].
+	
+	(self ownerSatisfying: [:o | o isTSBlock and: [o type = #'if_let_statement']]) ifNotNil: [:if | ^ (if get: 'value') numberOfInvocations].
 	
 	^ (Array streamContents: [:s | (self orOwnerSuchThat: [:o | o isTSBlock and: [o type = #'inflight_closure']]) ifNotNil: [:closure | self numberOfInvocations: closure parentSandblock on: s]])
 		inject: 0
@@ -297,6 +307,16 @@ SBWingCost >> parameters [
 					sizePerMonth := (self get: #averageRecordSize) / 1.0e9 * (self get: #numberOfInvocations).
 					compressionRatio := 0.15.
 					sizePerMonth * 0.63 + (sizePerMonth * (self get: #monthsLogRetention) * compressionRatio * 0.0324)]}].
+		{'httpPost'} -> [
+			{
+				self numInvocationsNamed: 'calls'.
+				SBWingParameterNumber new
+					icon: SBIcon iconMoney;
+					name: #averageCostPerInvocation;
+					suffix: '$ average cost per invocation';
+					initial: 0.01;
+					useFloat.
+				self costPerMonth: [(self get: #numberOfInvocations) * (self get: #averageCostPerInvocation)]}].
 		{'report'} -> [
 			{
 				SBWingParameterNumber new
@@ -319,7 +339,7 @@ SBWingCost >> parameters [
 							inject: 0
 							into: [:sum :endpoint | sum + (endpoint numberOfInvocations * (endpoint get: #averageRequestResponseSize))]];
 					label: [:v | '{1}B bandwidth use / month' format: {v}].
-				self costPerMonth: [(self get: #bandwidthUse) * 0.003]}].
+				self costPerMonth: [(self get: #bandwidthUse) / 1.0e9 * 0.003]}].
 		{'cloud.Table'. 'insert'} -> [
 			{
 				self averageRecordSize.
@@ -374,8 +394,70 @@ SBWingCost >> parameters [
 							into: [:sum :insert | sum + (insert numberOfInvocations * (insert get: #averageRecordSize))]];
 					label: [:v | 'Storage: adding {1} Bytes each month' format: {v}].
 				self costPerMonth: [(self get: #insertBytesPerMonth) * (self globalGet: #monthsPassedSinceDeployment) / 1.0e9 * 0.306]}].
+		{'cloud.Bucket'} -> [
+			{
+				SBWingParameterDerived new
+					icon: SBIcon iconFile;
+					name: #insertBytesPerMonth;
+					value: [
+						(self allResourceUses select: [:use | use apiCallName = 'put'])
+							inject: 0
+							into: [:sum :insert | sum + (insert numberOfInvocations * (insert get: #averageRecordSize))]];
+					label: [:v | 'Storage: adding {1} Bytes each month' format: {v}].
+				self costPerMonth: [(self get: #insertBytesPerMonth) * (self globalGet: #monthsPassedSinceDeployment) / 1.0e9 * 0.0245]}].
+		{'cloud.Bucket'. 'put'} -> [
+			{
+				self averageRecordSize.
+				self numInvocationsNamed: 'writes'.
+				self costPerMonth: [(self get: #numberOfInvocations) * 5.4e-6]}].
+		{'cloud.Bucket'. 'onCreate'} -> [
+			{
+				SBWingParameterDerived new
+					icon: SBIcon iconHashtag;
+					name: #numberOfInvocations;
+					value: [
+						(self resource allResourceUses select: [:use | use apiCallName = 'put'])
+							inject: 0
+							into: [:sum :insert | sum + insert numberOfInvocations]];
+					label: [:v | '{1} triggers' format: {v}]}].
 		{'cloud.Api'. 'get'} -> [{self entrypoint. self editableNumInvocations. self averageRequestResponseSize}].
-		{'cloud.Api'. 'post'} -> [{self entrypoint. self editableNumInvocations. self averageRequestResponseSize}]}
+		{'cloud.Api'. 'post'} -> [ | route explicit |
+			route := ((bindings at: 'function') parentSandblock parentSandblock get: 'args') childSandblocks first contents.
+			explicit := self explicitInvocations: route.
+			explicit
+				ifNotEmpty: [
+					{
+						self averageRequestResponseSize.
+						SBWingParameterDerived new
+							icon: SBIcon iconHashtag;
+							name: #numberOfInvocations;
+							value: [((self explicitInvocations: route) collect: [:i | i get: #numberOfInvocations]) sum];
+							label: [:v | '{1} calls' format: {v}]}]
+				ifEmpty: [{self entrypoint. self editableNumInvocations. self averageRequestResponseSize}]].
+		{'cloud.Queue'. 'pop'} -> [
+			{
+				SBWingParameterDerived new
+					icon: SBIcon iconHashtag;
+					name: #numberOfInvocations;
+					value: [
+						(self resource allResourceUses select: [:use | use apiCallName = 'push'])
+							inject: 0
+							into: [:sum :insert | sum + insert numberOfInvocations]];
+					label: [:v | '{1} pushes' format: {v}].
+				self costPerInvocation: 5.0e-7}].
+		{'cloud.Queue'. 'push'} -> [{self numInvocationsNamed: 'calls'. self costPerInvocation: 5.0e-7}].
+		{'cloud.Schedule'. 'onTick'} -> [
+			{
+				SBWingParameterDerived new
+					icon: SBIcon iconHashtag;
+					name: #numberOfInvocations;
+					value: [ | rateSeconds |
+						"FIXME dont assume seconds"
+						rateSeconds := [(self resource queryNode: '(number) @') contents asNumber]
+							on: NumberParserError
+							do: [:e | 0].
+						rateSeconds > 0 ifTrue: [(4 weeks asSeconds / rateSeconds) floor] ifFalse: [0]];
+					label: [:v | '{1} triggers' format: {v}]}]}
 ]
 
 { #category : #accessing }

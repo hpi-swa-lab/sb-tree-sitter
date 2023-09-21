@@ -18,21 +18,36 @@ Class {
 SBReComment >> build [
 
 	self
-		addMorphBack: (self createBindingBlock: 'pattern');
+		layoutPolicy: SBAlgebraLayout new;
 		addMorphBack: (comment := self
 			createBindingFor: 'annotation'
 			build: [:annotation |
 				SBTextBubble multiLine
+					italic;
 					placeholderText: 'comment';
 					contents: annotation]
 			update: [:c :m | m contents]);
 		addMorphBack: (SBButton new
+			makeSmall;
 			balloonText: 'collapse';
-			icon: SBIcon iconMinus shortcut: nil do: [self collapseBlock])
+			icon: SBIcon iconMinus shortcut: nil do: [self collapseBlock]);
+		addMorphBack: (self createBindingBlock: 'pattern')
 ]
 
 { #category : #accessing }
 SBReComment >> collapsedContent [
 
 	^ comment contents
+]
+
+{ #category : #'as yet unclassified' }
+SBReComment >> layoutCommands [
+
+	^ SBAlgebraCommand container
+		data: {
+			self submorphs first layoutCommands.
+			self submorphs second layoutCommands.
+			SBAlgebraCommand hardLine.
+			self submorphs third layoutCommands};
+		morph: self
 ]

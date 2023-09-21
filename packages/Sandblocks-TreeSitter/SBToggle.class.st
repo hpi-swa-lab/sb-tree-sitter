@@ -41,8 +41,19 @@ SBToggle >> buildChild: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SBToggle >> buildPython [
+	<lang: #python match: '(call (subscript (list) @array (integer) @index))' sample: '[lambda: __wrap__][0]()' keyword: 'toggle'>
+
+	self
+		createRepeatBindingFor: 'array'
+		childQuery: '(lambda body: (_) @)'
+		new: 'lambda: _expr'
+		build: [:e | self buildChild: e]
+]
+
+{ #category : #'as yet unclassified' }
 SBToggle >> buildTypeScript [
-	<lang: #typescript match: '(call_expression (subscript_expression (array) @array (number) @index))' sample: '[() => __wrap__][0]()'>
+	<lang: #typescript match: '(call_expression (subscript_expression (array) @array (number) @index))' sample: '[() => __wrap__][0]()' keyword: 'toggle'>
 
 	self
 		createRepeatBindingFor: 'array'
