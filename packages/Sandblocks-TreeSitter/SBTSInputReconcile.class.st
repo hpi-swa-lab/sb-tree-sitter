@@ -140,10 +140,10 @@ SBTSInputReconcile >> for: aTextMorph input: aString at: aNumber [
 		moveCursorToEnd;
 		queueUpdateSuggestionsFocused: true.
 	
-	aNumber = 1 ifTrue: [self topRight: aTextMorph position] ifFalse: [
+	aNumber = 1 ifTrue: [self topRight: aTextMorph boundsInEditor topLeft] ifFalse: [
 		aTextMorph sourceString
-			ifEmpty: [self topLeft: aTextMorph topLeft]
-			ifNotEmpty: [self topLeft: aTextMorph topRight]].
+			ifEmpty: [self topLeft: aTextMorph boundsInEditor topLeft]
+			ifNotEmpty: [self topLeft: aTextMorph boundsInEditor topRight]].
 	
 	self updateChoices
 ]
