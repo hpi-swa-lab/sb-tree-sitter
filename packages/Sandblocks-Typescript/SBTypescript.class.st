@@ -11161,6 +11161,12 @@ SBTypescript class >> rootRuleName [
 ]
 
 { #category : #configuration }
+SBTypescript class >> shouldCollapse: aBlock [
+
+	^ aBlock type = #'statement_block'
+]
+
+{ #category : #configuration }
 SBTypescript class >> softLineBreakBetween: aBlock and: anotherBlock [
 
 	aBlock isTextMorph ifTrue: [

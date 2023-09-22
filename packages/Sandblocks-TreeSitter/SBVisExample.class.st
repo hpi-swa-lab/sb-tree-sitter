@@ -6,7 +6,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SBVisExample >> build [
-	<lang: #typescript match: '(call_expression (arguments . (expression) @render (string (string_fragment) @color)))' sample: 'visualize(random_points(), "red")' keyword: 'visualize'>
+	<lang: #typescript match: '(call_expression (identifier) ="random_points" (arguments . (expression) @render (string (string_fragment) @color)))' sample: 'visualize(random_points(), "red")' keyword: 'visualize'>
 
 	self layoutInset: 4.
 	self addMorphBack: (self createBindingBlock: 'render').

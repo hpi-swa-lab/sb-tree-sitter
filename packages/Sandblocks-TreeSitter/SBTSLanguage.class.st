@@ -59,9 +59,10 @@ SBTSLanguage class >> canParse: aString [
 
 { #category : #configuration }
 SBTSLanguage class >> collapseAll: aBlock [
-	"can be implemented by the respective languages"
+	<action>
 
-	
+	aBlock allMorphsDepthFirstDo: [:m | (m isTSBlock and: [m class ~= SBTSCollapsed and: [self shouldCollapse: m]]) ifTrue: [m replaceBy: (SBTSCollapsed new block: m)]].
+	^ aBlock
 ]
 
 { #category : #configuration }
@@ -567,6 +568,12 @@ SBTSLanguage class >> scopesAround: aBlock do: aClosure [
 				value: current
 				value: (Array streamContents: [:stream | self declarationsInScope: current do: [:decl | stream nextPut: decl]])].
 		current := current parentSandblock]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguage class >> shouldCollapse: aBlock [
+
+	^ false
 ]
 
 { #category : #configuration }

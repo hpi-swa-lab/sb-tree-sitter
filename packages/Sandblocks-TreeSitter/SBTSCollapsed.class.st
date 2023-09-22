@@ -25,7 +25,7 @@ SBTSCollapsed >> block: aBlock [
 { #category : #'as yet unclassified' }
 SBTSCollapsed >> color [
 
-	^ block color
+	^ self parentSandblock drawnColor
 ]
 
 { #category : #'as yet unclassified' }
@@ -41,8 +41,16 @@ SBTSCollapsed >> initialize [
 	
 	self
 		layoutInset: 2;
-		changeTableLayout;
+		layoutPolicy: SBAlgebraLayout new;
 		cellGap: 4
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCollapsed >> layoutCommands [
+
+	^ SBAlgebraCommand container
+		data: {self firstSubmorph layoutCommands};
+		morph: self
 ]
 
 { #category : #'as yet unclassified' }

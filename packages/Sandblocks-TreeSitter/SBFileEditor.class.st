@@ -10,6 +10,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBFileEditor class >> for: aPath [
+
+	self openProject: aPath
+]
+
+{ #category : #'as yet unclassified' }
 SBFileEditor class >> openProject: aPath [
 
 	self new
@@ -119,7 +125,7 @@ SBFileEditor >> openFile: aFile [
 	aFile isDirectory ifFalse: [ | newFile |
 		newFile := (SBToggledCode
 			comment: ''
-			active: 2
+			active: 1
 			do: {[SBTSFile forNoReplace: aFile pathString]. [SBTSFile for: aFile pathString]}) ifNil: [^ nil].
 		self openMorphInView: newFile.
 		self runtimesDo: [:r | r didOpen: newFile].
