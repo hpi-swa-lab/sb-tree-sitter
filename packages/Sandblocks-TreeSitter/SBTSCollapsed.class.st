@@ -49,7 +49,7 @@ SBTSCollapsed >> initialize [
 SBTSCollapsed >> printOn: aStream [
 
 	aStream nextPutAll: 'collapsed '.
-	aStream nextPutAll: self type
+	aStream nextPutAll: (self type ifNil: [''])
 ]
 
 { #category : #'as yet unclassified' }
