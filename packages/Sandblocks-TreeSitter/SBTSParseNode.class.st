@@ -31,7 +31,8 @@ SBTSParseNode >> buildCopyEmbeds: aBoolean [
 		[#block] -> [
 			SBTSBlock new
 				addAllMorphs: (contents collect: [:b | b buildCopyEmbeds: aBoolean]);
-				slot: slot].
+				slot: slot;
+				range: self range].
 		[#unknown] -> [SBTSUnknownBlock new slot: slot].
 		[#label] -> [
 			SBTSLabel new
@@ -197,6 +198,12 @@ SBTSParseNode >> printOn: aStream [
 	aStream nextPut: $(.
 	aStream nextPutAll: (self type ifNil: ['']).
 	aStream nextPut: $)
+]
+
+{ #category : #'as yet unclassified' }
+SBTSParseNode >> range [
+
+	^ SBTSRange start: (SBTSPosition line: 0 character: 0) end: (SBTSPosition line: 0 character: 0)
 ]
 
 { #category : #'as yet unclassified' }

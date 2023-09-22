@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SBTSFileParseNode >> range [
+
+	^ range ifNil: [super range]
+]
+
+{ #category : #'as yet unclassified' }
 SBTSFileParseNode >> range: aRange [
 
 	range := aRange

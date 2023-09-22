@@ -32,9 +32,21 @@ SBLSPTCPTransport >> handleDataFrom: aStream [
 ]
 
 { #category : #'as yet unclassified' }
+SBLSPTCPTransport >> host [
+
+	^ host
+]
+
+{ #category : #'as yet unclassified' }
 SBLSPTCPTransport >> host: aString [
 
 	host := aString
+]
+
+{ #category : #'as yet unclassified' }
+SBLSPTCPTransport >> port [
+
+	^ port
 ]
 
 { #category : #'as yet unclassified' }
@@ -48,7 +60,7 @@ SBLSPTCPTransport >> start [
 
 	super start.
 	
-	stream := [SocketStream openConnectionToHostNamed: '127.0.0.1' port: port] on: ConnectionRefused do: [:e | ^ self].
+	stream := [SocketStream openConnectionToHostNamed: host port: port] on: ConnectionRefused do: [:e | ^ self].
 	stream timeout: 100000.
 	
 	[[stream atEnd] whileFalse: [self handleDataFrom: stream]] fork

@@ -3,7 +3,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'stream',
-		'captures',
 		'expressions',
 		'predicates'
 	],
@@ -20,7 +19,7 @@ SBTSQuery >> execute: aString against: aBlock capturesDo: aClosure [
 { #category : #'as yet unclassified' }
 SBTSQuery >> executeAgainst: aBlock capturesDo: aClosure [
 
-	| ret target |
+	| ret target captures |
 	target := aBlock.
 	captures := Dictionary new.
 	
@@ -43,7 +42,7 @@ SBTSQuery >> executeAgainst: aBlock capturesDo: aClosure [
 { #category : #'as yet unclassified' }
 SBTSQuery >> executeCaptureAgainst: aBlock [
 
-	| ret target |
+	| ret target captures |
 	target := aBlock.
 	captures := OrderedCollection new.
 	

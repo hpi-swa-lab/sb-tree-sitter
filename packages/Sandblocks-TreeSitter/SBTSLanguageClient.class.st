@@ -45,9 +45,15 @@ SBTSLanguageClient >> connected [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSLanguageClient >> formatRequest: aString params: anObject seq: myId [
+
+	^ Dictionary newFrom: {'jsonrpc' -> '2.0'. 'id' -> myId. 'method' -> aString. 'params' -> anObject}
+]
+
+{ #category : #'as yet unclassified' }
 SBTSLanguageClient >> handleMessage: aJsonObject [
 
-	(aJsonObject includesKey: 'method')
+	(aJsonObject includesKey: 'event')
 		ifTrue: [self onUIThread: [self handleServerMessage: aJsonObject]]
 		ifFalse: [
 			pending
@@ -69,31 +75,44 @@ SBTSLanguageClient >> handleServerMessage: aJsonObject [
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLanguageClient >> initializeFor: aDirectory onServerMessageDo: aBlock onReady: anotherBlock transport: aTransport [
+SBTSLanguageClient >> initialize [
 
 	super initialize.
 	
-	transport := aTransport languageClient: self.
 	serverCapabilities := Dictionary new.
-	serverMessageHandler := aBlock.
 	pending := Dictionary new.
-	projectDirectory := aDirectory.
-	lastRequestId := 0.
-	
-	transport start.
-	
-	transport connected ifTrue: [self sendInitializeDo: anotherBlock]
+	lastRequestId := 0
 ]
 
 { #category : #'as yet unclassified' }
-SBTSLanguageClient >> internalSendRequest: aString params: anObject [
+SBTSLanguageClient >> initializeFor: aDirectory onServerMessageDo: aBlock onReady: anotherBlock transport: aTransport [
+
+	transport := aTransport languageClient: self.
+	serverMessageHandler := aBlock.
+	projectDirectory := aDirectory.
+	
+	transport start.
+	
+	transport connected
+		ifTrue: [self sendInitializeDo: anotherBlock]
+		ifFalse: [self error: 'Could not connect']
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageClient >> internalSend: aBlock [
 
 	| myId promise |
 	myId := lastRequestId := lastRequestId + 1.
 	promise := Promise new.
 	pending at: myId put: promise.
-	self send: (Dictionary newFrom: {'jsonrpc' -> '2.0'. 'id' -> myId. 'method' -> aString. 'params' -> anObject}).
+	self send: (aBlock value: myId).
 	^ promise
+]
+
+{ #category : #'as yet unclassified' }
+SBTSLanguageClient >> internalSendRequest: aString params: anObject [
+
+	^ self internalSend: [:myId | self formatRequest: aString params: anObject seq: myId]
 ]
 
 { #category : #'as yet unclassified' }
@@ -135,13 +154,15 @@ SBTSLanguageClient >> send: aJsonObject [
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> sendAsyncRequest: aString params: anObject do: aBlock [
 
-	(self internalSendRequest: aString params: anObject) then: [:response | self onUIThread: [aBlock value: response]]
+	^ (self internalSendRequest: aString params: anObject) then: [:response |
+		self onUIThread: [aBlock value: response].
+		response]
 ]
 
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> sendBlockingRequest: aString params: anObject do: aBlock [
 
-	aBlock value: (self internalSendRequest: aString params: anObject) wait
+	^ aBlock value: (self internalSendRequest: aString params: anObject) wait
 ]
 
 { #category : #'as yet unclassified' }
@@ -176,7 +197,7 @@ SBTSLanguageClient >> sendNotification: aString params: anObject [
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> sendRequest: aString params: anObject do: aBlock blocking: aBoolean [
 
-	aBoolean
+	^ aBoolean
 		ifTrue: [self sendBlockingRequest: aString params: anObject do: aBlock]
 		ifFalse: [self sendAsyncRequest: aString params: anObject do: aBlock]
 ]
