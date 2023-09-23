@@ -339,12 +339,11 @@ SBTSBlock >> currentTextMorph [
 { #category : #'as yet unclassified' }
 SBTSBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
 
+	| stream |
+	stream := (SBTSCursorStream on: self children) cursorDo: aBlock.
 	aBlock value: (SBCursorSelect new block: self).
-	self template
-		cursorPositionsDo: aBlock
-		shallow: aBoolean
-		blocks: self children readStream
-		parent: self
+	self template cursorPositionsDo: aBlock shallow: aBoolean blocks: stream parent: self.
+	stream flush
 ]
 
 { #category : #'as yet unclassified' }
@@ -747,6 +746,12 @@ SBTSBlock >> isBlockBody [
 SBTSBlock >> isEditor [
 
 	^ true
+]
+
+{ #category : #testing }
+SBTSBlock >> isError [
+
+	^ self slot isError
 ]
 
 { #category : #testing }

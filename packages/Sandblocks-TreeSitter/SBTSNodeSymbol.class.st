@@ -262,6 +262,13 @@ SBTSNodeSymbol >> resultsFor: aParser [
 { #category : #parsing }
 SBTSNodeSymbol >> resultsForBlocks: aParser [
 
+	aParser peekType = 'ERROR' ifTrue: [
+		^ aParser consumeError
+			ifNotNil: [:text |
+				{
+					aParser addBlock: ((SBTSFileParseNode kind: #error slot: (SBTSSlot with: self root) contents: text) range: aParser currentRange)}]
+			ifNil: [{}]].
+	
 	^ aParser memoizedAt: aParser position for: self ifNone: [ | ret |
 		ret := nil.
 		(self isSuperType or: [aParser justEnteredAlias]) ifTrue: [ | currentBlocks |

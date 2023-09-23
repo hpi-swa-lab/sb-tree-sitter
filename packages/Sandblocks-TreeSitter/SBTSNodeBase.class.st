@@ -402,6 +402,12 @@ SBTSNodeBase >> precedence [
 	^ self parentThat: [:p | p isTSPrecedence]
 ]
 
+{ #category : #testing }
+SBTSNodeBase >> prefixValidFor: aString in: aSiblingsCollection [
+
+	^ false
+]
+
 { #category : #hierarchy }
 SBTSNodeBase >> replaceBy: aNode [
 
@@ -464,6 +470,12 @@ SBTSNodeBase >> traverseBlocks: aStream do: aBlock [
 SBTSNodeBase >> type [
 
 	^ nil
+]
+
+{ #category : #testing }
+SBTSNodeBase >> validFor: aString in: aSiblingsCollection [
+
+	^ false
 ]
 
 { #category : #'as yet unclassified' }

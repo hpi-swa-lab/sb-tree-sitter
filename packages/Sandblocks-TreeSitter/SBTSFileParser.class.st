@@ -78,6 +78,18 @@ SBTSFileParser >> blocks: aCollection [
 	blocks := aCollection
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> consumeError [
+
+	| text |
+	cursor position > (cursor startByteIndex: cursor node) ifTrue: [^ nil].
+	text := cursor text.
+	
+	self nextSibling.
+	
+	^ text
+]
+
 { #category : #stream }
 SBTSFileParser >> contentsSize [
 
@@ -207,6 +219,7 @@ SBTSFileParser >> parse: aString language: aLanguage [
 	language := aLanguage isBehavior ifTrue: [aLanguage instance] ifFalse: [aLanguage].
 	^ api parseAsCursor: aString language: language class language do: [:cursorObj | | results |
 		cursor := SBTSCursor new library: api cursor: cursorObj factory: language grammar.
+		
 		results := (SBTSNodeSymbol new
 			type: language class rootRuleName
 			factory: language grammar) resultsForBlocks: self.
@@ -246,6 +259,12 @@ SBTSFileParser >> peekForType: aString [
 SBTSFileParser >> peekHasText [
 
 	^ pendingText notNil
+]
+
+{ #category : #'as yet unclassified' }
+SBTSFileParser >> peekIsMissing [
+
+	^ cursor isMissing
 ]
 
 { #category : #stream }

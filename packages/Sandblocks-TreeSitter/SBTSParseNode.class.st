@@ -42,6 +42,13 @@ SBTSParseNode >> buildCopyEmbeds: aBoolean [
 			SBTSTextMorph new
 				contents: contents;
 				slot: slot].
+		[#error] -> [
+			SBTSBlock new
+				addMorph: (SBTSTextMorph new
+					contents: contents;
+					slot: (slot isError: true));
+				slot: (slot isError: true);
+				range: self range].
 		[#editableLabel] -> [
 			SBTSTextMorph new
 				fixedText: (contents size < slot firstNode label size

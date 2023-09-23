@@ -285,11 +285,14 @@ SBTSGrammar >> extras: aCollection [
 SBTSGrammar >> flattenSeparatedList: anObject name: aString [
 
 	| looksLikeSepList looksLikeOptionalSep labelFromSeparator |
-	labelFromSeparator := [:obj |
-		(obj isTSChoice
+	labelFromSeparator := [:obj | | separator |
+		separator := obj isTSChoice
 			ifTrue: ["in e.g. typescript both , and ; are allowed as separators in object types. it may not always be an interchangeable semantic though FIXME"
 			obj elements anyOne]
-			ifFalse: [obj]) label].
+			ifFalse: [obj].
+		separator isTSLabel
+			ifTrue: [separator label]
+			ifFalse: [separator bodyTemplate label]].
 	looksLikeSepList := [:obj |
 		obj isTSSeq and: [
 			obj elements size >= 2 and: [ | second |

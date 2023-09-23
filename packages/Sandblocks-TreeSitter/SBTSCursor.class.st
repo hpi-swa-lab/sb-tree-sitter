@@ -155,6 +155,12 @@ SBTSCursor >> isAlias [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursor >> isMissing [
+
+	^ library nodeIsMissing: self node
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursor >> isNamed [
 
 	^ library nodeIsNamed: self node

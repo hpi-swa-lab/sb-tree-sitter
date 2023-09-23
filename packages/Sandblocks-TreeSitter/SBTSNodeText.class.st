@@ -225,7 +225,7 @@ SBTSNodeText >> resultsForBlocks: aParser [
 	| success |
 	success := [:text | {aParser addBlock: (SBTSFileParseNode kind: #text slot: (SBTSSlot with: self) contents: text)}].
 	
-	^ (aParser peekHasText and: [self characterValid: aParser peekText in: aParser blocks])
+	^ (aParser peekHasText and: [(self characterValid: aParser peekText in: aParser blocks) or: [aParser cursor isMissing]])
 		ifTrue: [success value: aParser text]
 		ifFalse: [ | uncaptured |
 			uncaptured := aParser peekUncapturedText.

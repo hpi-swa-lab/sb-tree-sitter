@@ -240,6 +240,13 @@ SBTreeSitter >> nodeChild: aNode at: aNumber [
 ]
 
 { #category : #ffi }
+SBTreeSitter >> nodeChildCount: aNode [
+
+	<apicall: uint32_t ts_node_child_count (SBTSNode)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
 SBTreeSitter >> nodeEndByte: aNode [
 
 	<apicall: uint32_t ts_node_end_byte (SBTSNode)>
@@ -257,6 +264,13 @@ SBTreeSitter >> nodeEndPoint: aNode [
 SBTreeSitter >> nodeHasError: aNode [
 
 	<apicall: bool ts_node_has_error (SBTSNode)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
+SBTreeSitter >> nodeIsMissing: aNode [
+
+	<apicall: bool ts_node_is_missing (SBTSNode)>
 	^ self externalCallFailed
 ]
 
@@ -353,7 +367,10 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 		tree isNull ifTrue: [self error: 'tree failed to load, incompatible language version?'].
 		
 		root := self treeRootNode: tree.
-		(self nodeHasError: root) ifTrue: [^ SBTSSyntaxError signal].
+		SBToggledCode
+			comment: ''
+			active: 0
+			do: {[(self nodeHasError: root) ifTrue: [^ SBTSSyntaxError signal]]}.
 		cursor := SBTSNodeCursor new on: root library: self.
 		
 		aBlock value: cursor] ensure: [
@@ -397,18 +414,30 @@ SBTreeSitter >> parserNew [
 ]
 
 { #category : #helper }
-SBTreeSitter >> printTree: aCursor [
+SBTreeSitter >> printTree: cursor [
 
-	| node type |
-	node := aCursor currentNode.
-	type := self nodeType: node.
-	
-	Transcript showln: type.
-	
-	aCursor gotoFirstChild ifTrue: [
-		self printTree: aCursor.
-		[aCursor gotoNextSibling] whileTrue: [self printTree: aCursor].
-		aCursor gotoParent]
+	| indent visitedChildren |
+	indent := 0.
+	visitedChildren := false.
+	[ | display |
+		display := (self nodeIsMissing: cursor node)
+			ifTrue: ['MISSING']
+			ifFalse: [cursor type].
+		visitedChildren
+			ifTrue: [
+				cursor gotoNextSibling ifTrue: [visitedChildren := false] ifFalse: [
+					cursor gotoParent
+						ifTrue: [
+							visitedChildren := true.
+							indent := indent - 1]
+						ifFalse: [^ self]]]
+			ifFalse: [
+				Transcript showln: display.
+				cursor gotoFirstChild
+					ifTrue: [
+						indent := indent + 1.
+						visitedChildren := false]
+					ifFalse: [visitedChildren := true]]] repeat
 ]
 
 { #category : #'as yet unclassified' }
@@ -416,11 +445,42 @@ SBTreeSitter >> printTreeFrom: aCursor depth: aNumber on: aStream [
 
 	aNumber timesRepeat: [aStream nextPut: Character tab].
 	aStream
-		nextPutAll: aCursor type;
+		nextPutAll: ((self nodeIsMissing: aCursor node)
+			ifTrue: ['MISSING']
+			ifFalse: [aCursor type]);
 		cr.
 	aCursor gotoFirstChild ifTrue: [
 		[self printTreeFrom: aCursor depth: aNumber + 1 on: aStream] doWhileFalse: [aCursor gotoNextSibling].
 		aCursor gotoParent]
+]
+
+{ #category : #helper }
+SBTreeSitter >> printTreeRaw: cursor [
+
+	| indent visitedChildren |
+	indent := 0.
+	visitedChildren := false.
+	[ | display |
+		display := (self nodeIsMissing: (self cursorCurrentNode: cursor))
+			ifTrue: ['MISSING']
+			ifFalse: [self nodeType: (self cursorCurrentNode: cursor)].
+		visitedChildren
+			ifTrue: [
+				(self cursorGotoNextSibling: cursor)
+					ifTrue: [visitedChildren := false]
+					ifFalse: [
+						(self cursorGotoParent: cursor)
+							ifTrue: [
+								visitedChildren := true.
+								indent := indent - 1]
+							ifFalse: [^ self]]]
+			ifFalse: [
+				Transcript showln: display.
+				(self cursorGotoFirstChild: cursor)
+					ifTrue: [
+						indent := indent + 1.
+						visitedChildren := false]
+					ifFalse: [visitedChildren := true]]] repeat
 ]
 
 { #category : #'ffi languages' }

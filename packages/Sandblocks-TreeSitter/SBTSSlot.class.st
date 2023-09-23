@@ -2,7 +2,8 @@ Class {
 	#name : #SBTSSlot,
 	#superclass : #Object,
 	#instVars : [
-		'nodes'
+		'nodes',
+		'isError'
 	],
 	#category : #'Sandblocks-TreeSitter-Grammar'
 }
@@ -60,6 +61,12 @@ SBTSSlot >> allParentsDo: aBlock [
 SBTSSlot >> allSuperTypesDo: aBlock [
 
 	nodes do: [:node | node allSuperTypesDo: aBlock]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> basicIsError: aBoolean [
+
+	isError := aBoolean
 ]
 
 { #category : #'as yet unclassified' }
@@ -144,7 +151,22 @@ SBTSSlot >> indent: aNumber on: aStream [
 { #category : #'as yet unclassified' }
 SBTSSlot >> initialize [
 
-	nodes := OrderedCollection new: 1
+	nodes := OrderedCollection new: 1.
+	isError := false
+]
+
+{ #category : #'as yet unclassified' }
+SBTSSlot >> isError [
+
+	^ isError
+]
+
+{ #category : #mutating }
+SBTSSlot >> isError: aBoolean [
+
+	^ self copy
+		basicIsError: aBoolean;
+		yourself
 ]
 
 { #category : #'as yet unclassified' }

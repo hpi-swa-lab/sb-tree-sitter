@@ -303,5 +303,5 @@ SBTSLanguageTests >> testRegexResumeInput [
 { #category : #'testing - parse' }
 SBTSLanguageTests >> testSyntaxError [
 
-	self should: [SBPython parseToplevel: '"abc"('] raise: SBTSSyntaxError
+	self shouldnt: [SBPython parseToplevel: '"abc"('] raise: SBTSSyntaxError
 ]
