@@ -327,6 +327,12 @@ DCBlock >> isBlockBody [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> isPart [
+
+	^ self highlight notNil and: [self highlight endsWith: '.part']
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> isTSBlock [
 
 	^ true
@@ -421,6 +427,12 @@ DCBlock >> pairMap [
 DCBlock >> preferredColorIn: aColorPolicy [
 
 	^ self slot preferredColorIn: aColorPolicy for: self highlight
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> prefersNoBorder [
+
+	^ self isPart
 ]
 
 { #category : #'as yet unclassified' }

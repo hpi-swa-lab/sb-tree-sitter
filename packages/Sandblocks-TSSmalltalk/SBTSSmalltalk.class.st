@@ -39,6 +39,12 @@ SBTSSmalltalk class >> allSuggestionOptionsFor: aBlock [
 		ifNotNil: [Array streamContents: [:stream | guessedClass withAllSuperclassesDo: [:class | stream nextPutAll: class selectors]]]
 ]
 
+{ #category : #'configuration - editing' }
+SBTSSmalltalk class >> blockBodyTypes [
+
+	^ {#block. #method}
+]
+
 { #category : #'configuration - declarations' }
 SBTSSmalltalk class >> declarationsInScope: aScopeBlock do: aClosure [
 
@@ -82,13 +88,12 @@ SBTSSmalltalk class >> fileSuffix [
 	^ 'st'
 ]
 
-{ #category : #configuration }
+{ #category : #properties }
 SBTSSmalltalk class >> grammarJson [
-	" https://github.com/tom95/tree-sitter-smalltalk/blob/main/src/grammar.json "
 
-	^ '{
+    " https://github.com/smalltalk/blob/master/src/grammar.json "
+    ^ '{
   "name": "smalltalk",
-  "word": "identifier_or_keyword",
   "rules": {
     "method": {
       "type": "SEQ",
@@ -333,7 +338,7 @@ SBTSSmalltalk class >> grammarJson [
     },
     "assignment": {
       "type": "PREC_LEFT",
-      "value": -10,
+      "value": -5,
       "content": {
         "type": "SEQ",
         "members": [
@@ -1136,11 +1141,11 @@ SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 	^ false
 ]
 
-{ #category : #configuration }
+{ #category : #properties }
 SBTSSmalltalk class >> highlightQuery [
-	" https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
 
-	^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
+    " https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
+    ^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
 
 (number) @number
 
@@ -1154,17 +1159,13 @@ SBTSSmalltalk class >> highlightQuery [
 (unary_message (_) (unary_identifier) @variable.part)
 (binary_operator) @variable.part
 (keyword) @variable.part
-(keyword_selector) @variable.part
-
-(comment) @comment
 
 ["^" "[" "]" "{" "}"] @important
 
-(keyword_selector (keyword) @major_declaration.part)
-(binary_selector (binary_operator) @major_declaration.part)
-(unary_selector (unary_identifier) @major_declaration.part)
-(unary_selector) @.part
-(method) @.part'
+(keyword_selector (keyword) @major_declaration)
+(binary_selector (binary_operator) @major_declaration)
+(unary_selector (unary_identifier) @major_declaration)
+'
 ]
 
 { #category : #configuration }
