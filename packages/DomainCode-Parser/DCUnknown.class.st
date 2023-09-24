@@ -15,3 +15,9 @@ DCUnknown >> initialize [
 		contents: '';
 		range: SBTSRange null)
 ]
+
+{ #category : #'as yet unclassified' }
+DCUnknown >> prefersNoBorder [
+
+	^ true
+]

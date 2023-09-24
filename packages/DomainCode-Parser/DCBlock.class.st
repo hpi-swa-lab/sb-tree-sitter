@@ -24,7 +24,9 @@ DCBlock class >> fromCursor: aCursor language: aLanguage [
 			
 			aCursor gotoFirstChild
 				ifTrue: [
-					[node addMorphBack: (self fromCursor: aCursor language: aLanguage)] doWhileFalse: [aCursor gotoNextSibling].
+					[
+						aCursor numberOfNewLinesToNext - 1 timesRepeat: [node addMorphBack: (DCUnknown new language: aLanguage)].
+						node addMorphBack: (self fromCursor: aCursor language: aLanguage)] doWhileFalse: [aCursor gotoNextSibling].
 					aCursor gotoParent]
 				ifFalse: [
 					aCursor text ifNotEmpty: [:text |
@@ -96,7 +98,7 @@ DCBlock >> deleteBeforeCursor [
 								before contents: before contents, m contents.
 								m contents: '']
 							ifFalse: [before contents ifNotEmpty: [before contents: before contents allButLast]]]]
-				ifFalse: [m deleteBeforeCursor]]
+				ifFalse: [m contents ifEmpty: [self deleteBlock] ifNotEmpty: [m deleteBeforeCursor]]]
 		input: Character backspace asString
 ]
 
@@ -162,7 +164,9 @@ DCBlock >> handleInsertEvent: anEvent in: textMorph [
 	input := anEvent keyCharacter asString.
 	pairMap at: input ifPresent: [:complete |
 		"do not autocomplete quotes in words"
-		(textMorph contents notEmpty and: [complete = '''']) ifTrue: [^ textMorph insertString: input].
+		((textMorph characterBeforeCursor
+			ifNotNil: #isAlphaNumeric
+			ifNil: [false]) and: [complete = '''']) ifTrue: [^ textMorph insertString: input].
 		
 		"do not autocomplete after backslash"
 		textMorph characterBeforeCursor = $\ ifTrue: [^ textMorph insertString: input].
@@ -280,6 +284,12 @@ DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 			before: anAboveBoolean
 			in: adjacent owner
 			morph: (DCUnknown new language: self language))]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> insertStatementHasCandidate [
+
+	^ true
 ]
 
 { #category : #'as yet unclassified' }

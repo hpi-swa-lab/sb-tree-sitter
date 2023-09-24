@@ -182,6 +182,23 @@ SBTSCursorRaw >> node [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursorRaw >> numberOfNewLinesToNext [
+
+	| current previous text |
+	self atEnd
+		ifTrue: [
+			current := nil.
+			previous := self node]
+		ifFalse: [
+			current := self node.
+			previous := self previousNode: current.
+			previous ifNil: [^ 0]].
+	self position > (self endByteIndex: previous) ifTrue: [^ 0].
+	text := self textBetween: previous and: current.
+	^ text occurrencesOf: Character lf
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursorRaw >> parent [
 
 	^ library nodeParent: self node

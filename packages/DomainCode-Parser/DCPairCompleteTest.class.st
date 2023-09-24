@@ -22,6 +22,18 @@ DCPairCompleteTest >> testDeleteInPair [
 ]
 
 { #category : #'as yet unclassified' }
+DCPairCompleteTest >> testDontSkipInsertQuoteAfterSpace [
+
+	| program editor |
+	program := DCBlock parse: 'a' language: SBJavascript.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self type: ' ''' in: editor.
+	self assert: 'a
+''''' equals: editor childSandblocks first sourceString
+]
+
+{ #category : #'as yet unclassified' }
 DCPairCompleteTest >> testIgnoreAfterBackslash [
 
 	| program editor |
