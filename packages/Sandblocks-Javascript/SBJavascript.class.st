@@ -18,6 +18,12 @@ SBJavascript class >> allFileSuffixes [
 	^ {'jsx'. 'js'}
 ]
 
+{ #category : #configuration }
+SBJavascript class >> blockBodyTypes [
+
+	^ {#'class_body'. #program. #'statement_block'}
+]
+
 { #category : #'as yet unclassified' }
 SBJavascript class >> collapseAll: aBlock [
 	<action>
@@ -6590,7 +6596,7 @@ SBJavascript class >> grammarJson [
 SBJavascript class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
-	aBlock parentSandblock type = #'class_body' ifTrue: [^ true].
+	({#'class_body'. #program. #'statement_block'} includes: aBlock parentSandblock type) ifTrue: [^ true].
 	anotherBlock type = #'else_clause' ifTrue: [^ true].
 	(aBlock contentsToDisplay = '{' and: [aBlock parentSandblock type = #'statement_block']) ifTrue: [^ true].
 	(anotherBlock contents = '}' and: [anotherBlock parentSandblock type = #'jsx_expression']) ifTrue: [^ false].
@@ -6998,14 +7004,6 @@ SBJavascript >> declarationsInScope: aScopeBlock do: aClosure [
 		self declarationsInScope: (aScopeBlock get: 'body') do: aClosure].
 	
 	(aScopeBlock type = 'statement_block' or: [aScopeBlock type = 'program']) ifTrue: [aScopeBlock childSandblocksDo: [:statement | statement type = 'lexical_declaration' ifTrue: [statement childSandblocksDo: [:declarator | aClosure value: (SBTSDeclaration block: (declarator get: 'name') label: 'lexical decl')]]]]
-]
-
-{ #category : #'configuration helpers' }
-SBJavascript >> hardLineBreakBetween: aBlock and: anotherBlock [
-
-	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
-	anotherBlock type = 'else_clause' ifTrue: [^ true].
-	^ #('statement_block' 'class_body') includes: anotherBlock type
 ]
 
 { #category : #'configuration helpers' }

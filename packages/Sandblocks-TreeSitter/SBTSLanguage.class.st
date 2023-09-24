@@ -35,6 +35,12 @@ SBTSLanguage class >> alwaysEnlargeInsets [
 	^ false
 ]
 
+{ #category : #configuration }
+SBTSLanguage class >> blockBodyTypes [
+
+	^ {}
+]
+
 { #category : #'instantiate blocks' }
 SBTSLanguage class >> blockFor: aSymbol [
 

@@ -5,7 +5,7 @@ Class {
 		'line',
 		'character'
 	],
-	#category : #'Sandblocks-TreeSitter-LanguageClient'
+	#category : #'Sandblocks-TreeSitter-Utils'
 }
 
 { #category : #'instance creation' }
@@ -28,6 +28,20 @@ SBTSPosition class >> fromLSP: aJsonObject [
 SBTSPosition class >> line: aNumber character: anotherNumber [
 
 	^ self new line: aNumber character: anotherNumber
+]
+
+{ #category : #mutating }
+SBTSPosition >> + aNumber [
+	"advance the character index, does not consider line breaks"
+
+	^ self copy line: line character: character + aNumber
+]
+
+{ #category : #converting }
+SBTSPosition >> - aPosition [
+
+	self assert: aPosition line = self line.
+	^ self character - aPosition character
 ]
 
 { #category : #comparing }
@@ -65,6 +79,12 @@ SBTSPosition >> character [
 SBTSPosition >> column [
 
 	^ self character
+]
+
+{ #category : #converting }
+SBTSPosition >> end [
+
+	^ self
 ]
 
 { #category : #converting }
@@ -116,4 +136,10 @@ SBTSPosition >> relativeTo: aTSPosition [
 	^ self class line: self line - aTSPosition line character: (self line = aTSPosition line
 		ifTrue: [self character - aTSPosition character]
 		ifFalse: [self character])
+]
+
+{ #category : #converting }
+SBTSPosition >> start [
+
+	^ self
 ]

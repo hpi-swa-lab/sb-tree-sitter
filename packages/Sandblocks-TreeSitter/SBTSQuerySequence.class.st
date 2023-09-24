@@ -25,7 +25,7 @@ SBTSQuerySequence >> evaluateAgainst: aBlock captures: aDictionary [
 
 	| exprs blocks localCaptures |
 	exprs := self elements readStream.
-	blocks := OrderedCollection withAll: (aBlock childrenForQuery select: [:c | c language = aBlock language]).
+	blocks := OrderedCollection withAll: (aBlock submorphs select: [:c | c isTSMorph and: [c language = aBlock language]]).
 	localCaptures := OrderedCollection new.
 	
 	[exprs atEnd] whileFalse: [ | expr nextBlocks |
@@ -49,7 +49,7 @@ SBTSQuerySequence >> evaluateAgainst: aBlock captures: aDictionary [
 	exprs atEnd ifFalse: [^ nil].
 	aDictionary addAll: localCaptures.
 	
-	^ aBlock childrenForQuery ifNotEmpty: [:l | l first] ifEmpty: [nil]
+	^ aBlock submorphs ifNotEmpty: [:l | l first] ifEmpty: [nil]
 ]
 
 { #category : #'as yet unclassified' }

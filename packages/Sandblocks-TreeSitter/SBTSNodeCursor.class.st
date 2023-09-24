@@ -16,6 +16,12 @@ SBTSNodeCursor >> currentNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSNodeCursor >> fieldName [
+
+	^ library cursorCurrentFieldName: cursor
+]
+
+{ #category : #'as yet unclassified' }
 SBTSNodeCursor >> gotoFirstChild [
 
 	^ library cursorGotoFirstChild: cursor
