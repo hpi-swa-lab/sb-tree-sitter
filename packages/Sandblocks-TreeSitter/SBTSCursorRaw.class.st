@@ -261,9 +261,10 @@ SBTSCursorRaw >> range [
 	node := self node.
 	start := library nodeStartPoint: node.
 	end := library nodeEndPoint: node.
+	"FIXME: utf8?"
 	^ SBTSRange
-		start: (SBTSPosition line: start row character: start column)
-		end: (SBTSPosition line: end row character: end column)
+		start: (SBTSPosition line: start row character: start column index: (library nodeStartByte: node))
+		end: (SBTSPosition line: end row character: end column index: (library nodeEndByte: node))
 ]
 
 { #category : #'as yet unclassified' }

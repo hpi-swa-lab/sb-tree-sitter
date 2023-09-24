@@ -70,9 +70,7 @@ DCText >> initialize [
 
 	super initialize.
 	
-	range := SBTSRange
-		start: (SBTSPosition line: 0 character: 0)
-		end: (SBTSPosition line: 0 character: 0)
+	range := SBTSRange null
 ]
 
 { #category : #'as yet unclassified' }
@@ -134,9 +132,13 @@ DCText >> slot [
 { #category : #'as yet unclassified' }
 DCText >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
-	aStream hasLineInfo ifTrue: [range start line: aStream currentLine character: aStream currentIndexInLine].
+	aStream hasLineInfo ifTrue: [
+		range start
+			line: aStream currentLine
+			character: aStream currentIndexInLine
+			index: aStream position].
 	aStream nextPutAll: ((aBoolean and: [self contents isEmpty and: [self canBeEmpty not]])
 		ifTrue: [String value: 0]
 		ifFalse: [self contents]).
-	aStream hasLineInfo ifTrue: [range end line: aStream currentLine character: aStream currentIndexInLine]
+	aStream hasLineInfo ifTrue: [range end line: aStream currentLine character: aStream currentIndexInLine index: aStream position]
 ]

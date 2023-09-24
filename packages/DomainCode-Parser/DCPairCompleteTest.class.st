@@ -25,12 +25,11 @@ DCPairCompleteTest >> testDeleteInPair [
 DCPairCompleteTest >> testDontSkipInsertQuoteAfterSpace [
 
 	| program editor |
-	program := DCBlock parse: 'a' language: SBJavascript.
+	program := DCBlock parse: '"a' language: SBJavascript.
 	editor := self editorAndWorldFor: program.
 	program lastDeepChild startInputAtEnd.
 	self type: ' ''' in: editor.
-	self assert: 'a
-''''' equals: editor childSandblocks first sourceString
+	self assert: '"a ''''' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }

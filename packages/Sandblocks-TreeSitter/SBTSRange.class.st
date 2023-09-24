@@ -25,7 +25,7 @@ SBTSRange class >> fromLSPWithRange: aJsonObject [
 { #category : #'as yet unclassified' }
 SBTSRange class >> null [
 
-	^ SBTSRange start: (SBTSPosition line: 0 character: 0) end: (SBTSPosition line: 0 character: 0)
+	^ SBTSRange start: SBTSPosition null end: SBTSPosition null
 ]
 
 { #category : #'instance creation' }
@@ -34,6 +34,14 @@ SBTSRange class >> start: aTSPosition end: anotherTSPosition [
 	^ self new
 		start: aTSPosition;
 		end: anotherTSPosition
+]
+
+{ #category : #'instance creation' }
+SBTSRange class >> start: aNumber size: anotherNumber [
+
+	^ self new
+		start: (SBTSPosition line: nil character: nil index: aNumber);
+		end: (SBTSPosition line: nil character: nil index: aNumber + anotherNumber)
 ]
 
 { #category : #comparing }
@@ -118,8 +126,7 @@ SBTSRange >> printOn: aStream [
 { #category : #accessing }
 SBTSRange >> size [
 
-	self assert: self start line = self end line.
-	^ self end - self start
+	^ self end index - self start index
 ]
 
 { #category : #accessing }

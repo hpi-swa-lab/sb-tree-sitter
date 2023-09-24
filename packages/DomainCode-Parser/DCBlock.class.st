@@ -66,6 +66,19 @@ DCBlock >> alias [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> allTextMorphsDo: aBlock [
+
+	self allMorphsDo: [:m | m isTextMorph ifTrue: [aBlock value: m]]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> blockFor: aRange [
+
+	self allMorphsDo: [:block | (block isTSMorph and: [block range = aRange]) ifTrue: [^ block]].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> compatibleWithType: aSymbol [
 
 	^ self type = aSymbol
@@ -88,18 +101,25 @@ DCBlock >> currentTextMorph [
 DCBlock >> deleteBeforeCursor [
 	<action>
 
-	self
-		tryApplyChange: [:m |
-			(m cursor = 1 and: [m contents notEmpty])
-				ifTrue: [
-					(m previousMorphThat: [:t | t isTextMorph]) ifNotNil: [:before |
-						(self language spaceBetween: before and: m lastCharacterOfFirst: before contents last)
-							ifTrue: [
-								before contents: before contents, m contents.
-								m contents: '']
-							ifFalse: [before contents ifNotEmpty: [before contents: before contents allButLast]]]]
-				ifFalse: [m contents ifEmpty: [self deleteBlock] ifNotEmpty: [m deleteBeforeCursor]]]
-		input: Character backspace asString
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply | apply value: (self deleteFrom: source at: cursorIndex) value: cursorIndex - 1].
+	SBToggledCode comment: '' active: 0 do: {
+		[
+			self tryApplyChange: [:m |
+				(m cursor = 1 and: [m contents notEmpty])
+					ifTrue: [
+						(m previousMorphThat: [:t | t isTextMorph]) ifNotNil: [:before |
+							(self language spaceBetween: before and: m lastCharacterOfFirst: before contents last)
+								ifTrue: [
+									before contents: before contents, m contents.
+									m contents: '']
+								ifFalse: [before contents ifNotEmpty: [before contents: before contents allButLast]]]]
+					ifFalse: [m contents ifEmpty: [self deleteBlock] ifNotEmpty: [m deleteBeforeCursor]]]]}
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> deleteFrom: aString at: aNumber [
+
+	^ (aString first: aNumber - 1), (aString allButFirst: aNumber)
 ]
 
 { #category : #'as yet unclassified' }
@@ -269,6 +289,14 @@ DCBlock >> inputClosestTextMorphTo: cursorPosition [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> insert: aString in: aContainerString at: aNumber [
+
+	^ (aNumber > aContainerString size or: [aContainerString isEmpty])
+		ifTrue: [aContainerString, aString]
+		ifFalse: [(aContainerString first: aNumber - 1), aString, (aContainerString allButFirst: aNumber - 1)]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 
 	self isBlockBody ifTrue: [
@@ -313,9 +341,23 @@ DCBlock >> isTSMorph [
 { #category : #'as yet unclassified' }
 DCBlock >> keyStroke: anEvent [
 
-	self
-		tryApplyChange: [:textMorph | self handleInsertEvent: anEvent in: textMorph]
-		input: anEvent keyCharacter asString
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | input insert |
+		input := anEvent keyCharacter asString.
+		insert := [:str | apply value: (self insert: str in: source at: cursorIndex + 1) value: cursorIndex + 1].
+		(input first isPrintable and: [anEvent commandKeyPressed not]) ifTrue: [
+			self pairMap at: input ifPresent: [:complete |
+				"do not autocomplete quotes in words"
+				(complete = '''' and: [source at: cursorIndex ifPresent: #isAlphaNumeric ifAbsent: [false]]) ifTrue: [^ insert value: input].
+				
+				"do not autocomplete after backslash"
+				textMorph characterBeforeCursor = $\ ifTrue: [^ insert value: input].
+				
+				^ insert value: input, complete].
+			
+			"for separators, don't re-parse immediately, as those get discarded during parse"
+			^ input first isSeparator
+				ifTrue: [textMorph keyStroke: anEvent]
+				ifFalse: [insert value: input]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -415,9 +457,100 @@ DCBlock >> smallestBlockEncompassig: aRange [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> startInputAtSourceIndex: aNumber [
+
+	self allTextMorphsDo: [:m |
+		m range end index >= aNumber ifTrue: [
+			^ aNumber <= m range end index
+				ifTrue: [
+					"we're now inside!"
+					self sandblockEditor
+						startInput: m containingSandblock
+						at: aNumber - m range start index + 1
+						replacingContents: false
+						in: m]
+				ifFalse: [
+					"we just went past"
+					self sandblockEditor
+						startInput: m containingSandblock
+						at: 1
+						replacingContents: false
+						in: m]]]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> startInputCommandIn: aTextMorph [
 
 	^ aTextMorph ifNotNil: [SBTextCommand new textMorph: aTextMorph] ifNil: [nil]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> statements [
+
+	^ self childSandblocks
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> swap: aNumber [
+
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | pivot outerPivot |
+		pivot := (self sandblockEditor mode = #input
+			ifTrue: [textMorph]
+			ifFalse: [self]) orOwnerSuchThat: [:morph | morph owner submorphCount > 1].
+		outerPivot := pivot orOwnerSuchThat: [:morph |
+			(aNumber > 0
+				ifTrue: [morph morphAfterThat: #isSandblock]
+				ifFalse: [morph morphBeforeThat: #isSandblock]) notNil].
+		outerPivot ifNotNil: [ | target startIndex |
+			target := aNumber > 0
+				ifTrue: [outerPivot morphAfterThat: #isSandblock]
+				ifFalse: [outerPivot morphBeforeThat: #isSandblock].
+			startIndex := target range start index + (aNumber > 0 ifTrue: [target range size - pivot range size] ifFalse: [0]).
+			apply value: (self swap: pivot range with: target range in: source) value: (SBToggledCode
+				comment: ''
+				active: 1
+				do: {[SBTSRange start: startIndex size: pivot range size]. [startIndex]})]]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> swap: aRange with: anotherRange in: aString [
+
+	| first second |
+	self
+		example: [DCBlock new]
+		args: [
+			{
+				SBTSRange
+					start: (SBTSPosition line: 0 character: 8 index: 8)
+					end: (SBTSPosition line: 0 character: 9 index: 9).
+				SBTSRange
+					start: (SBTSPosition line: 0 character: 2 index: 2)
+					end: (SBTSPosition line: 0 character: 5 index: 5).
+				'1234567890'}]
+		label: 'example'.
+	first := aRange start index < anotherRange start index
+		ifTrue: [aRange]
+		ifFalse: [anotherRange].
+	second := aRange start index < anotherRange start index
+		ifTrue: [anotherRange]
+		ifFalse: [aRange].
+	
+	^ (SBExampleWatch
+		report: (aString first: first start index)
+		for: 540329478
+		modifying: [:result | result]), (SBExampleWatch
+		report: (aString copyFrom: second start index + 1 to: second end index)
+		for: 153401999
+		modifying: [:result | result]), (SBExampleWatch
+		report: (aString copyFrom: first end index + 1 to: second start index)
+		for: 554040495
+		modifying: [:result | result]), (SBExampleWatch
+		report: (aString copyFrom: first start index + 1 to: first end index)
+		for: 568840718
+		modifying: [:result | result]), (SBExampleWatch
+		report: (aString allButFirst: second end index)
+		for: 481875392
+		modifying: [:result | result])
 ]
 
 { #category : #'as yet unclassified' }
@@ -440,55 +573,34 @@ DCBlock >> textMorphs [
 ]
 
 { #category : #'as yet unclassified' }
-DCBlock >> tryApplyChange: aClosure input: aString [
+DCBlock >> tryApplyChange: aClosure [
 
-	| oldContents newTree oldTree oldCursorOffset newCursorOffset |
-	oldContents := self activeTextMorph contents.
-	oldCursorOffset := self activeTextMorph cursor.
+	| newTree oldTree oldCursorOffset oldSource |
+	oldCursorOffset := self activeTextMorph ifNotNil: #cursor.
 	oldTree := self containingFloat.
+	oldSource := oldTree getSourceStringAndMark.
 	
-	aClosure value: self activeTextMorph.
-	
-	(aString allSatisfy: #isSeparator) ifTrue: ["if we get a separator, wait reparsing, since separators are not shown in the tree"
-	"TODO: replace with match against extras"
-	^ self].
-	self activeTextMorph ifNil: ["FIXME cursor was moved out"
-	^ self].
-	
-	newTree := DCBlock parse: oldTree getSourceStringAndMark language: self language.
-	newCursorOffset := self activeTextMorph cursor.
-	
-	SBToggledCode comment: '' active: 1 do: {
-		[ | cursorPosition |
-			self activeTextMorph contents: oldContents.
-			self activeTextMorph cursor: oldCursorOffset.
-			
-			cursorPosition := self activeTextMorph range start + (newCursorOffset - 1).
+	aClosure
+		value: oldSource
+		value: self activeTextMorph
+		value: (self activeTextMorph ifNotNil: [self activeTextMorph range start index + (oldCursorOffset - 1)])
+		value: [:newSource :newIndex |
+			newTree := (DCBlock parse: newSource language: self language)
+				position: self containingFloat position;
+				width: self containingFloat width.
 			self sandblockEditor do: (SBReplaceCommand new
-				target: self containingFloat replacer: (newTree
-					position: self containingFloat position;
-					width: self containingFloat width);
+				target: oldTree replacer: newTree;
 				shouldMergeWithNext: true).
-			
-			(newTree textMorphForPosition: cursorPosition)
-				ifNotNil: [:newTextMorph |
-					newTree sandblockEditor
-						startInput: newTextMorph containingSandblock
-						at: cursorPosition - newTextMorph range start + 1
-						replacingContents: false
-						in: newTextMorph]
-				ifNil: [newTree inputClosestTextMorphTo: cursorPosition]].
-		[
-			self activeTextMorph contents: oldContents.
-			self diff: oldTree to: newTree].
-		[
-			(SBTSInputParser new optionsForTemplate: self template given: self contents) ifEmpty: [
-				self activeTextMorph contents: previousContents.
-				SBTSInputParser new
-					optionsForTemplate: self parentSandblock template
-					given: self contents
-					before: {self}
-					after: {}]]}
+			newIndex isNumber ifTrue: [newTree startInputAtSourceIndex: newIndex] ifFalse: [ | target |
+				target := newTree blockFor: newIndex.
+				target isTextMorph
+					ifTrue: [
+						newTree sandblockEditor
+							startInput: target containingSandblock
+							at: 1
+							replacingContents: false
+							in: target]
+					ifFalse: [newTree sandblockEditor selectNoInput: target]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -526,9 +638,13 @@ DCBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
 	| parens |
 	self submorphs ifEmpty: [^ self].
-	aStream hasLineInfo ifTrue: [range start line: aStream currentLine character: aStream currentIndexInLine].
 	parens := self parentSandblock notNil and: [self parentSandblock isTSBlock and: [self slot needsParenthesis: self]].
 	(self language indentMatch: self) ifTrue: [self slot indent: 1 on: aStream].
+	aStream hasLineInfo ifTrue: [
+		range start
+			line: aStream currentLine
+			character: aStream currentIndexInLine
+			index: aStream position].
 	parens ifTrue: [aStream nextPut: $(].
 	self submorphs overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.
@@ -544,5 +660,5 @@ DCBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 	SBToggledCode comment: '' active: 0 do: {
 		[self slot nodes do: [:node | node bodyTemplate andParentsDo: [:type | type hasStatementTerminator ifTrue: [aStream nextPutAll: self language statementTerminator]]]]}.
 	parens ifTrue: [aStream nextPut: $)].
-	aStream hasLineInfo ifTrue: [range end line: aStream currentLine character: aStream currentIndexInLine]
+	aStream hasLineInfo ifTrue: [range end line: aStream currentLine character: aStream currentIndexInLine index: aStream position]
 ]

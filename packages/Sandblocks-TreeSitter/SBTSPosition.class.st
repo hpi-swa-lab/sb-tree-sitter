@@ -3,7 +3,8 @@ Class {
 	#superclass : #Magnitude,
 	#instVars : [
 		'line',
-		'character'
+		'character',
+		'index'
 	],
 	#category : #'Sandblocks-TreeSitter-Utils'
 }
@@ -15,7 +16,7 @@ SBTSPosition class >> fromIndex: aNumber in: aString [
 	"aNumber = 1 is before the first character"
 	lines := (aString take: aNumber - 1) lines.
 	lines ifEmpty: [lines := {''}].
-	^ self line: lines size - 1 character: lines last size
+	^ self line: lines size - 1 character: lines last size index: aNumber
 ]
 
 { #category : #'instance creation' }
@@ -30,11 +31,23 @@ SBTSPosition class >> line: aNumber character: anotherNumber [
 	^ self new line: aNumber character: anotherNumber
 ]
 
+{ #category : #'instance creation' }
+SBTSPosition class >> line: aNumber character: anotherNumber index: aThirdNumber [
+
+	^ self new line: aNumber character: anotherNumber index: aThirdNumber
+]
+
+{ #category : #'as yet unclassified' }
+SBTSPosition class >> null [
+
+	^ self line: 0 character: 0 index: 0
+]
+
 { #category : #mutating }
 SBTSPosition >> + aNumber [
 	"advance the character index, does not consider line breaks"
 
-	^ self copy line: line character: character + aNumber
+	^ self copy line: line character: character + aNumber index: index + aNumber
 ]
 
 { #category : #converting }
@@ -54,6 +67,7 @@ SBTSPosition >> < aTSPosition [
 SBTSPosition >> = anObject [
 
 	self species == anObject species ifFalse: [^ false].
+	(self index notNil and: [anObject index notNil]) ifTrue: [^ self index = anObject index].
 	^ self line = anObject line and: [self character = anObject character]
 ]
 
@@ -100,6 +114,12 @@ SBTSPosition >> hash [
 ]
 
 { #category : #accessing }
+SBTSPosition >> index [
+
+	^ index
+]
+
+{ #category : #accessing }
 SBTSPosition >> line [
 
 	^ line
@@ -110,6 +130,14 @@ SBTSPosition >> line: aNumber character: anotherNumber [
 
 	line := aNumber.
 	character := anotherNumber
+]
+
+{ #category : #accessing }
+SBTSPosition >> line: aNumber character: anotherNumber index: aThirdNumber [
+
+	line := aNumber.
+	character := anotherNumber.
+	index := aThirdNumber
 ]
 
 { #category : #offsetting }
@@ -127,6 +155,9 @@ SBTSPosition >> printOn: aStream [
 	aStream print: self line.
 	aStream nextPutAll: ',char='.
 	aStream print: self character.
+	index ifNotNil: [
+		aStream nextPutAll: ',index='.
+		aStream print: self index].
 	aStream nextPut: $)
 ]
 
