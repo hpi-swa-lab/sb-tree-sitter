@@ -18,7 +18,7 @@ DCGreedySubtreeMatcher >> handleAmbiguousMappings: aCollection for: aMapping [
 	aCollection do: [:entry | | candidates |
 		candidates := Array streamContents: [:s | entry first do: [:src | entry second do: [:dest | s nextPut: {src. dest}]]].
 		
-		(candidates sort: [:m1 :m2 | comparator compare: m1 with: m2]) do: [:mapping | (aMapping areBothUnmappedSrc: mapping first dest: mapping second) ifTrue: [aMapping addRecursiveMappingFrom: mapping first to: mapping second]]]
+		(candidates sort: [:m1 :m2 | (comparator compare: m1 with: m2) <= 0]) do: [:mapping | (aMapping areBothUnmappedSrc: mapping first dest: mapping second) ifTrue: [aMapping addRecursiveMappingFrom: mapping first to: mapping second]]]
 ]
 
 { #category : #'as yet unclassified' }

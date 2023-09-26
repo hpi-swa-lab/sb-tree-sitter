@@ -62,13 +62,12 @@ DCMappingComparator >> compare: aMapping with: anotherMapping [
 
 { #category : #'as yet unclassified' }
 DCMappingComparator >> distanceAbsoluteCompare: aMapping with: anotherMapping [
-	"TODO compare the post-order position in the tree of the mapping, between src and dest"
 
-	^ SBToggledCode comment: '' active: 1 do: {
-		[0].
-		[
-			distance := [:mapping | (mapping first range start index - mapping second range start index) abs + (mapping first range end index - mapping second range end index) abs].
-			((distance value: anotherMapping) - (distance value: aMapping)) sign]}
+	| position distance |
+	"compare the post-order position in the tree of the mapping, between src and dest"
+	position := [:tree | tree rootBlock absolutePositionOf: tree].
+	distance := [:mapping | ((position value: mapping first) - (position value: mapping second)) abs].
+	^ ((distance value: anotherMapping) - (distance value: aMapping)) sign
 ]
 
 { #category : #'as yet unclassified' }
@@ -95,17 +94,17 @@ DCMappingComparator >> initialize [
 DCMappingComparator >> longestCommonSubsequenceWith: aCollection and: anotherCollection [
 
 	| lengths x y indices |
-	lengths := Matrix rows: aCollection size + 1 columns: anotherCollection size + 1.
-	1 to: aCollection size + 1 do: [:i |
-		1 to: anotherCollection size + 1 do: [:j |
+	lengths := Matrix rows: aCollection size + 1 columns: anotherCollection size + 1 element: 0.
+	1 to: aCollection size do: [:i |
+		1 to: anotherCollection size do: [:j |
 			(aCollection at: i) type = (anotherCollection at: j) type
 				ifTrue: [lengths at: i + 1 at: j + 1 put: (lengths at: i at: j)]
 				ifFalse: [lengths at: i + 1 at: j + 1 put: ((lengths at: i + 1 at: j) max: (lengths at: i at: j + 1))]]].
 	
 	indices := OrderedCollection new.
-	x := aCollection size.
-	y := anotherCollection size.
-	[x ~= 0 and: [y ~= 0]] whileTrue: [
+	x := aCollection size + 1.
+	y := anotherCollection size + 1.
+	[x > 1 and: [y > 1]] whileTrue: [
 		(lengths at: x at: y) = (lengths at: x - 1 at: y)
 			ifTrue: [x := x - 1]
 			ifFalse: [
@@ -142,7 +141,7 @@ DCMappingComparator >> numberOfCommonDescendantsIn: src and: dest [
 { #category : #'as yet unclassified' }
 DCMappingComparator >> numberOfCommonParentsIn: src and: dest [
 
-	
+	^ (self longestCommonSubsequenceWith: (srcAncestors at: src) and: (destAncestors at: dest)) size
 ]
 
 { #category : #'as yet unclassified' }
@@ -158,12 +157,12 @@ DCMappingComparator >> similarityParentsCompare: aMapping with: anotherMapping [
 	
 	s1 := self class
 		diceCoefficientCommon: (self numberOfCommonParentsIn: aMapping first and: aMapping second)
-		left: (srcAncestors at: aMapping first) recursiveSubmorphCount
-		right: (destAncestors at: aMapping second) recursiveSubmorphCount.
+		left: (srcAncestors at: aMapping first) size
+		right: (destAncestors at: aMapping second) size.
 	s2 := self class
 		diceCoefficientCommon: (self numberOfCommonParentsIn: anotherMapping first and: anotherMapping second)
-		left: (srcAncestors at: anotherMapping first) recursiveSubmorphCount
-		right: (destAncestors at: anotherMapping second) recursiveSubmorphCount.
+		left: (srcAncestors at: anotherMapping first) size
+		right: (destAncestors at: anotherMapping second) size.
 	
 	^ (s2 - s1) sign
 ]
@@ -172,12 +171,13 @@ DCMappingComparator >> similarityParentsCompare: aMapping with: anotherMapping [
 DCMappingComparator >> similarityPositionInParentsCompare: aMapping with: anotherMapping [
 
 	| indicesInOwnerSubmorphs distance |
-	indicesInOwnerSubmorphs := [:src | | current |
-		indicesInOwnerSubmorphs := OrderedCollection new.
+	indicesInOwnerSubmorphs := [:src | | current indices |
+		indices := OrderedCollection new.
 		current := src.
 		[current notNil and: [current owner notNil]] whileTrue: [
-			indicesInOwnerSubmorphs add: current submorphIndex.
-			current := current owner]].
+			indices add: current submorphIndex.
+			current := current owner].
+		indices].
 	distance := [:mapping | | indicesVec1 indicesVec2 sum |
 		indicesVec1 := indicesInOwnerSubmorphs value: mapping first.
 		indicesVec2 := indicesInOwnerSubmorphs value: mapping second.
@@ -197,12 +197,12 @@ DCMappingComparator >> similaritySiblingsCompare: aMapping with: anotherMapping 
 	
 	s1 := self class
 		diceCoefficientCommon: (self numberOfCommonDescendantsIn: aMapping first owner and: aMapping second owner)
-		left: (srcDescendants at: aMapping first owner) recursiveSubmorphCount
-		right: (destDescendants at: aMapping second owner) recursiveSubmorphCount.
+		left: (srcDescendants at: aMapping first owner) size
+		right: (destDescendants at: aMapping second owner) size.
 	s2 := self class
 		diceCoefficientCommon: (self numberOfCommonDescendantsIn: anotherMapping first owner and: anotherMapping second owner)
-		left: (srcDescendants at: anotherMapping first owner) recursiveSubmorphCount
-		right: (destDescendants at: anotherMapping second owner) recursiveSubmorphCount.
+		left: (srcDescendants at: anotherMapping first owner) size
+		right: (destDescendants at: anotherMapping second owner) size.
 	
 	^ (s2 - s1) sign
 ]

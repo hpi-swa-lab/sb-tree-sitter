@@ -247,6 +247,13 @@ SBTreeSitter >> nodeChildCount: aNode [
 ]
 
 { #category : #ffi }
+SBTreeSitter >> nodeEdit: aNode edit: anEdit [
+
+	<apicall: void ts_node_edit (SBTSNode *, SBTSInputEdit *)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
 SBTreeSitter >> nodeEndByte: aNode [
 
 	<apicall: uint32_t ts_node_end_byte (SBTSNode)>
@@ -351,7 +358,7 @@ SBTreeSitter >> nodeType: aNode [
 	^ self externalCallFailed
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #helper }
 SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 
 	| parser root tree cursor wasFreed |
@@ -440,7 +447,7 @@ SBTreeSitter >> printTree: cursor [
 					ifFalse: [visitedChildren := true]]] repeat
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #helper }
 SBTreeSitter >> printTreeFrom: aCursor depth: aNumber on: aStream [
 
 	aNumber timesRepeat: [aStream nextPut: Character tab].
@@ -571,6 +578,13 @@ SBTreeSitter >> textForNode: aNode [
 
 	self assert: (aNode isNull not and: [aNode tree isNull not]).
 	^ (currentString copyFrom: (self nodeStartByte: aNode) + 1 to: (self nodeEndByte: aNode)) utf8Decoded
+]
+
+{ #category : #ffi }
+SBTreeSitter >> treeEdit: aTree edit: anEdit [ 
+
+	<apicall: void 'ts_tree_edit' (void*, SBTSInputEdit*)>
+	^ self externalCallFailed
 ]
 
 { #category : #ffi }

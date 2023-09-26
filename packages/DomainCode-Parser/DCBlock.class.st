@@ -66,6 +66,17 @@ DCBlock class >> parseBlock: aString language: aLanguage [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> absolutePositionOf: aMorph [
+
+	| n |
+	n := 0.
+	self allMorphsDo: [:m |
+		n := n + 1.
+		m = aMorph ifTrue: [^ n]].
+	^ self assert: false
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> alias [
 
 	^ nil
@@ -470,6 +481,20 @@ DCBlock >> range: aRange [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> replace: oldTree with: newTree [
+
+	^ SBToggledCode comment: '' active: 1 do: {
+		[
+			DCMatcher new matchFrom: oldTree to: newTree do: [:op :args | ].
+			oldTree].
+		[
+			self sandblockEditor do: (SBReplaceCommand new
+				target: oldTree replacer: newTree;
+				shouldMergeWithNext: true).
+			newTree]}
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> rootBlock [
 
 	self owner ifNil: [^ self].
@@ -650,12 +675,9 @@ DCBlock >> tryApplyChange: aClosure [
 		value: self activeTextMorph
 		value: (self activeTextMorph ifNotNil: [self activeTextMorph range start index + (oldCursorOffset - 1)])
 		value: [:newSource :newIndex |
-			newTree := (DCBlock parse: newSource language: self language)
+			newTree := self replace: oldTree with: ((DCBlock parse: newSource language: self language)
 				position: oldTree position;
-				width: oldTree width.
-			self sandblockEditor do: (SBReplaceCommand new
-				target: oldTree replacer: newTree;
-				shouldMergeWithNext: true).
+				width: oldTree width).
 			newIndex isNumber ifTrue: [newTree startInputAtSourceIndex: newIndex] ifFalse: [ | target |
 				target := newTree blockFor: newIndex.
 				target isTextMorph

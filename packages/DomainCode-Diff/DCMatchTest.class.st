@@ -9,11 +9,12 @@ DCMatchTest >> testSimple [
 
 	| src dest mappings |
 	Transcript clear.
-	src := DCBlock parseBlock: 'ab + 22' language: SBJavascript.
-	dest := DCBlock parseBlock: 'abc + 2' language: SBJavascript.
+	src := DCBlock parseBlock: 'a+1' language: SBJavascript.
+	dest := DCBlock parseBlock: '[a+1]' language: SBJavascript.
 	mappings := DCMappingStore new.
 	DCGreedySubtreeMatcher new matchFrom: src to: dest in: mappings.
 	DCGreedyBottomUpMatcher new matchFrom: src to: dest in: mappings.
+	self halt.
 	Transcript showln: (Array streamContents: [:stream |
 		DCChawatheScriptGenerator new
 			generateFrom: src
