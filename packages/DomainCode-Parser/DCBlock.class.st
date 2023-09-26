@@ -477,6 +477,17 @@ DCBlock >> rootBlock [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> shallowCopyBlock [
+
+	^ DCBlock new
+		type: type;
+		language: language;
+		range: range;
+		field: field;
+		highlight: highlight
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> slot [
 
 	^ DCMockSlot new for: self

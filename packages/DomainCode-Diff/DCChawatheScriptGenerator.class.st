@@ -51,11 +51,10 @@ DCChawatheScriptGenerator >> findPosition: aTree dest: destInorder in: aMapping 
 { #category : #'as yet unclassified' }
 DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping do: aBlock [
 
-	| actions srcInOrder destInOrder |
-	actions := DCEditScript new.
-	
+	| srcInOrder destInOrder inserted |
 	srcInOrder := Set new.
 	destInOrder := Set new.
+	inserted := Set new.
 	
 	dest allMorphsBreadthFirstDo: [:x | | y z w |
 		w := nil.
@@ -65,7 +64,8 @@ DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping do: aBlock 
 			ifFalse: [ | k |
 				k := self findPosition: x dest: destInOrder in: aMapping.
 				aBlock value: #insert value: {x. z. k}.
-				w := x copy.
+				w := x shallowCopyBlock.
+				inserted add: w.
 				z addMorph: w asElementNumber: k.
 				aMapping addMappingFrom: w to: x]
 			ifTrue: [
@@ -86,7 +86,7 @@ DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping do: aBlock 
 		destInOrder add: x.
 		self alignChildrenSrc: w dest: x srcInOrder: srcInOrder destInOrder: destInOrder in: aMapping do: aBlock].
 	
-	src allMorphsDo: [:w | (aMapping isSrcMapped: w) ifFalse: [aBlock value: #delete value: {w}]]
+	src allMorphsDo: [:w | ((aMapping isSrcMapped: w) not and: [(inserted includes: w) not]) ifTrue: [aBlock value: #delete value: {w}]]
 ]
 
 { #category : #'as yet unclassified' }

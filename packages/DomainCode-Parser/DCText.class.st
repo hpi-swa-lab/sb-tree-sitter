@@ -124,6 +124,16 @@ DCText >> rootBlock [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> shallowCopyBlock [
+
+	^ DCText new
+		range: range;
+		contents: contents;
+		highlight: highlight;
+		field: field
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> shownColor [
 
 	^ self containingSandblock shownColor

@@ -11,7 +11,6 @@ Class {
 { #category : #'as yet unclassified' }
 DCMappingStore >> addMappingFrom: src to: dest [
 
-	SBToggledCode comment: '' active: 0 do: {[src contents = 'abc' ifTrue: [self halt]]}.
 	self assert: src rootBlock ~= dest rootBlock.
 	srcToDest at: src put: dest.
 	destToSrc at: dest put: src
