@@ -46,12 +46,7 @@ DCBlock class >> fromCursor: aCursor language: aLanguage [
 { #category : #'as yet unclassified' }
 DCBlock class >> parse: aString language: aLanguage [
 
-	| api |
-	api := SBTreeSitter new.
-	^ (api parseAsCursor: aString language: aLanguage language do: [:cursor |
-		self
-			fromCursor: (SBTSCursorRaw new library: api cursor: cursor factory: aLanguage instance grammar)
-			language: aLanguage])
+	^ (self parseBlock: aString language: aLanguage)
 		layoutInset: 4;
 		hResizing: #rigid;
 		attachDecorator: SBResizableDecorator new;
@@ -60,9 +55,29 @@ DCBlock class >> parse: aString language: aLanguage [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock class >> parseBlock: aString language: aLanguage [
+
+	| api |
+	api := SBTreeSitter new.
+	^ api parseAsCursor: aString language: aLanguage language do: [:cursor |
+		self
+			fromCursor: (SBTSCursorRaw new library: api cursor: cursor factory: aLanguage instance grammar)
+			language: aLanguage]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> alias [
 
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> allParents [
+
+	^ Array streamContents: [:s |
+		self ownerSatisfying: [:o |
+			s nextPut: o.
+			o = self rootBlock]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -306,12 +321,13 @@ DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 			in: self
 			morph: (DCUnknown new language: self language))].
 	
-	(self orOwnerSuchThat: [:morph | morph isTSBlock and: [morph isStatement]]) ifNotNil: [:adjacent |
-		self sandblockEditor do: (SBRelInsertCommand new
-			near: adjacent
-			before: anAboveBoolean
-			in: adjacent owner
-			morph: (DCUnknown new language: self language))]
+	(self orOwnerSuchThat: [:morph | morph isTSBlock and: [morph isStatement]]) ifNotNil: [:statement | | target |
+		target := (statement morphBeforeOrAfter: anAboveBoolean) contents = self language statementTerminator
+			ifTrue: [statement morphBeforeOrAfter: anAboveBoolean]
+			ifFalse: [statement].
+		self sandblockEditor do: (SBRelInsertCommand new near: target before: anAboveBoolean in: statement owner morph: (DCUnknown new
+			language: self language;
+			contents: self language statementTerminator))]
 ]
 
 { #category : #'as yet unclassified' }
@@ -454,6 +470,13 @@ DCBlock >> range: aRange [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> rootBlock [
+
+	self owner ifNil: [^ self].
+	^ self ownerSatisfying: [:o | o isTSBlock and: [o type = self language rootRuleName]]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> slot [
 
 	^ DCMockSlot new for: self
@@ -585,11 +608,30 @@ DCBlock >> textMorphs [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> treeHash [
+
+	self hasSubmorphs ifFalse: [^ self treeHashChildren: 0].
+	^ self treeHashChildren: (self submorphs inject: 0 into: [:hash :morph | hash bitXor: morph treeHash])
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> treeHashChildren: anotherNumber [
+
+	^ ((self type hash bitXor: 'ENTER' hash) bitXor: anotherNumber) bitXor: 'LEAVE' hash
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> treeLabel [
+
+	^ ''
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> tryApplyChange: aClosure [
 
 	| newTree oldTree oldCursorOffset oldSource |
 	oldCursorOffset := self activeTextMorph ifNotNil: #cursor.
-	oldTree := self containingFloat.
+	oldTree := self rootBlock.
 	oldSource := oldTree getSourceStringAndMark.
 	
 	aClosure
@@ -598,8 +640,8 @@ DCBlock >> tryApplyChange: aClosure [
 		value: (self activeTextMorph ifNotNil: [self activeTextMorph range start index + (oldCursorOffset - 1)])
 		value: [:newSource :newIndex |
 			newTree := (DCBlock parse: newSource language: self language)
-				position: self containingFloat position;
-				width: self containingFloat width.
+				position: oldTree position;
+				width: oldTree width.
 			self sandblockEditor do: (SBReplaceCommand new
 				target: oldTree replacer: newTree;
 				shouldMergeWithNext: true).

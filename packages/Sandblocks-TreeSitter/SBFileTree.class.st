@@ -61,7 +61,13 @@ SBFileTree >> file [
 { #category : #'as yet unclassified' }
 SBFileTree >> handlesMouseOver: evt [
 
-	^ SBWatch report: true for: 619305281
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> hovered [
+
+	^ (self valueOfProperty: #actions ifAbsent: nil) notNil
 ]
 
 { #category : #'as yet unclassified' }
@@ -81,6 +87,7 @@ SBFileTree >> mouseEnter: evt [
 
 	super mouseEnter: evt.
 	
+	self firstSubmorph color: (Color gray: 0.9).
 	self toggleActions: true
 ]
 
@@ -89,7 +96,8 @@ SBFileTree >> mouseLeave: evt [
 
 	super mouseLeave: evt.
 	
-	self toggleActions: false
+	self toggleActions: false.
+	self firstSubmorph color: (Color gray alpha: 0)
 ]
 
 { #category : #'as yet unclassified' }
@@ -107,7 +115,9 @@ SBFileTree >> on: aFile [
 		addMorphBack: (SBRow new
 			hResizing: #spaceFill;
 			cellPositioning: #center;
-			cellGap: 8;
+			cellGap: 4;
+			on: #mouseEnter send: #mouseEnter: to: self;
+			on: #mouseLeave send: #mouseLeave: to: self;
 			addMorphBack: (aFile isDirectory
 				ifTrue: [SBIcon iconAngleRight on: #click send: #toggleExpand to: self]
 				ifFalse: [((SBTSFile languageForPath: aFile name) ifNil: [SBTSLanguage]) iconMorph]);
@@ -125,9 +135,7 @@ SBFileTree >> on: aFile [
 SBFileTree >> open [
 
 	self isDirectory ifTrue: [self toggleExpand].
-	(self ownerSatisfying: [:o | (o ownerThatIsA: self class) isNil])
-		triggerEvent: #open
-		with: file
+	self rootDirectory triggerEvent: #open with: file
 ]
 
 { #category : #'as yet unclassified' }
@@ -135,6 +143,12 @@ SBFileTree >> reload [
 
 	self toggleExpand.
 	self toggleExpand
+]
+
+{ #category : #'as yet unclassified' }
+SBFileTree >> rootDirectory [
+
+	^ self ownerSatisfying: [:o | (o ownerThatIsA: self class) isNil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -163,6 +177,7 @@ SBFileTree >> toggleExpand [
 	self firstSubmorph firstSubmorph changeIconName: #iconAngleDown.
 	self addMorphBack: (list := SBColumn new
 		layoutInset: (SBEdgeInsets left: 16);
+		cellGap: 1;
 		hResizing: #spaceFill).
 	file children
 		ifNotEmpty: [

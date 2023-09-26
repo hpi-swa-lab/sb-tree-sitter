@@ -118,6 +118,12 @@ DCText >> range: aRange [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> rootBlock [
+
+	^ self owner rootBlock
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> shownColor [
 
 	^ self containingSandblock shownColor
@@ -127,6 +133,24 @@ DCText >> shownColor [
 DCText >> slot [
 
 	^ DCMockSlot new for: self
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> treeHash [
+
+	^ (self contents hash bitXor: 'LABEL_ENTER' hash) bitXor: 'LABEL_LEAVE' hash
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> treeLabel [
+
+	^ self contents
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> type [
+
+	^ ''
 ]
 
 { #category : #'as yet unclassified' }

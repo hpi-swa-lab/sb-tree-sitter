@@ -18,6 +18,36 @@ b;' language: SBJavascript.
 ]
 
 { #category : #'as yet unclassified' }
+DCEditTest >> testInsertsStatementTerminator [
+
+	| program editor |
+	program := DCBlock parse: 'a
+b.
+c.' language: SBTSSmalltalk.
+	editor := self editorAndWorldFor: program.
+	program childSandblocks second startInputAtEnd.
+	self type: '
+x' in: editor.
+	self assert: 'a
+b.
+x.
+c.' equals: editor childSandblocks first sourceString
+]
+
+{ #category : #'as yet unclassified' }
+DCEditTest >> testSmalltalkAssignmentKeywordMethod [
+
+	| program editor |
+	program := DCBlock parse: 'a: arg
+x := 3' language: SBTSSmalltalk.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self type: '4' in: editor.
+	self assert: 'a:arg
+x := 34' equals: editor childSandblocks first sourceString
+]
+
+{ #category : #'as yet unclassified' }
 DCEditTest >> testSwapBinaryAddition [
 
 	| program editor |

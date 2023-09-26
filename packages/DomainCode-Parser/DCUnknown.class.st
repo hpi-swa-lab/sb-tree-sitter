@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCUnknown >> contents: aString [
+
+	self firstSubmorph contents: aString
+]
+
+{ #category : #'as yet unclassified' }
 DCUnknown >> initialize [
 
 	super initialize.

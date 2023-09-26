@@ -13,6 +13,12 @@ SBTypescript class >> addIndent: aBlock [
 	^ super addIndent: aBlock
 ]
 
+{ #category : #configuration }
+SBTypescript class >> blockBodyTypes [
+
+	^ {#'class_body'. #program. #'statement_block'}
+]
+
 { #category : #'as yet unclassified' }
 SBTypescript class >> defaultRuntimeClass [
 
@@ -11036,6 +11042,7 @@ SBTypescript class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
 	aBlock parentSandblock type = #'class_body' ifTrue: [^ true].
+	({#'class_body'. #program. #'statement_block'} includes: aBlock parentSandblock type) ifTrue: [^ true].
 	anotherBlock type = #'else_clause' ifTrue: [^ true].
 	(aBlock contents = '{' and: [aBlock parentSandblock type = #'statement_block']) ifTrue: [^ true].
 	^ #(#'statement_block' #'class_body') includes: anotherBlock type

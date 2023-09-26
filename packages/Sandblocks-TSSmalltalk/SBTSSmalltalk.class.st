@@ -1134,9 +1134,14 @@ SBTSSmalltalk class >> grammarJson [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
+	(anotherBlock contents = '.' and: [aBlock contents ~= '.']) ifTrue: [^ false].
 	(({#statement. #empty. #comment} includes: aBlock slot lastNode type) and: [{#statement. #empty. #comment} includes: anotherBlock slot lastNode type]) ifTrue: [^ true].
 	(({#statement. #empty. #comment} includes: anotherBlock slot lastNode type) and: [(anotherBlock owner submorphs count: [:m | m slot lastNode type = #statement]) > 1]) ifTrue: [^ true].
-	(aBlock parentSandblock ifNotNil: #type) = #method ifTrue: [^ true].
+	SBToggledCode
+		comment: ''
+		active: 0
+		do: {[(aBlock parentSandblock ifNotNil: #type) = #method ifTrue: [^ true]]}.
+	(#(#'keyword_selector' #'unary_selector' #'binary_selector') includes: aBlock type) ifTrue: [^ true].
 	((aBlock slot isStatementIn: aBlock parentSandblock) and: [aBlock ~= aBlock parentSandblock childSandblocks last]) ifTrue: [^ true].
 	^ false
 ]
@@ -1238,6 +1243,7 @@ SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
 { #category : #'as yet unclassified' }
 SBTSSmalltalk class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
+	(aBlock contents = ':=' or: [anotherBlock contents = ':=']) ifTrue: [^ true].
 	anotherBlock alias = #'unary_identifier' ifTrue: [^ true].
 	^ super spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter
 ]

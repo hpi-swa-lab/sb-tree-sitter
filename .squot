@@ -20,5 +20,7 @@ OrderedDictionary {
 	'packages/Sandblocks-Kotlin' : #SquotTonelSerializer,
 	'packages/Sandblocks-Cpp' : #SquotTonelSerializer,
 	'packages/Sandblocks-Wing' : #SquotTonelSerializer,
-	'packages/DomainCode-Parser' : #SquotTonelSerializer
+	'packages/DomainCode-Parser' : #SquotTonelSerializer,
+	'packages/DomainCode-Core' : #SquotTonelSerializer,
+	'packages/DomainCode-Diff' : #SquotTonelSerializer
 }

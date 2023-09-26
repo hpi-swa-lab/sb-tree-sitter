@@ -14,6 +14,12 @@ Morph >> containingInlineBlock [
 ]
 
 { #category : #'*Sandblocks-TreeSitter' }
+Morph >> descendantsPreOrder [
+
+	^ Array streamContents: [:s | self submorphs do: [:p | p allMorphsPreorderDo: [:m | s nextPut: m]]]
+]
+
+{ #category : #'*Sandblocks-TreeSitter' }
 Morph >> firstDeepSubmorph [
 
 	| current |
@@ -56,4 +62,11 @@ Morph >> recursiveSubmorphCount [
 	i := 0.
 	self allMorphsDo: [:m | i := i + 1].
 	^ i
+]
+
+{ #category : #'*Sandblocks-TreeSitter' }
+Morph >> treeHeight [
+
+	self hasSubmorphs ifFalse: [^ 0].
+	^ (self submorphs collect: [:m | m treeHeight]) max + 1
 ]
