@@ -94,7 +94,7 @@ DCBlock class >> parse: aString old: oldBlock edit: anEdit language: aLanguage [
 				toValue: aString;
 			yourself.
 		
-		{block. changedRanges}]
+		{block. changedRanges. self findChangeRangeFrom: (oldBlock valueOfProperty: #tsSource) to: aString}]
 ]
 
 { #category : #'as yet unclassified' }
@@ -224,6 +224,23 @@ DCBlock >> field [
 DCBlock >> field: aString [
 
 	field := aString
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> findLastMatchingAncesors: aCollection oldTree: aBlock [
+
+	| oldCurrent |
+	oldCurrent := aBlock.
+	aCollection allButLast reverseDo: [:newCurrent |
+		oldCurrent := oldCurrent submorphs at: newCurrent submorphIndex ifAbsent: [
+			self assert: oldCurrent type = newCurrent owner type.
+			^ {oldCurrent. newCurrent owner}].
+		oldCurrent type = newCurrent type ifFalse: [
+			self assert: oldCurrent owner type = newCurrent owner type.
+			^ {oldCurrent owner. newCurrent owner}]].
+	
+	self assert: aCollection first type = oldCurrent type.
+	^ {aCollection first. oldCurrent}
 ]
 
 { #category : #'as yet unclassified' }
@@ -435,6 +452,9 @@ DCBlock >> keyStroke: anEvent [
 				at: cursorIndex + 1
 				do: [:new :edit | apply value: new value: edit value: cursorIndex + 1]].
 		(input first isPrintable and: [anEvent commandKeyPressed not]) ifTrue: [
+			"do not place closing pair characters if they are coming up right after"
+			(self pairMap keyAtValue: input ifAbsent: nil) ifNotNil: [:openChar | (source at: cursorIndex + 1 ifPresent: [:char | input first = char] ifAbsent: [false]) ifTrue: [^ self owner startInputAtSourceIndex: cursorIndex + 1]].
+			
 			self pairMap at: input ifPresent: [:complete |
 				"do not autocomplete quotes in words"
 				(complete = '''' and: [source at: cursorIndex ifPresent: #isAlphaNumeric ifAbsent: [false]]) ifTrue: [^ insert value: input].
@@ -504,7 +524,7 @@ DCBlock >> ownerWithForegroundColor [
 { #category : #'as yet unclassified' }
 DCBlock >> pairMap [
 
-	^ Dictionary newFrom: {'(' -> ')'. '''' -> ''''. '"' -> '"'. '`' -> '`'. '{' -> '}'. '<' -> '>'. '[' -> ']'}
+	^ Dictionary newFrom: {'(' -> ')'. '''' -> ''''. '"' -> '"'. '`' -> '`'. '{' -> '}'. '[' -> ']'}
 ]
 
 { #category : #'as yet unclassified' }
@@ -602,7 +622,7 @@ DCBlock >> smallestBlockEncompassig: aRange [
 
 	| min |
 	min := self.
-	self allBlocksDo: [:block | (block encompasses: aRange) ifTrue: [min recursiveSubmorphCount > block recursiveSubmorphCount ifTrue: [min := block]]].
+	self allBlocksDo: [:block | (block encompasses: aRange) ifTrue: [min range size > block range size ifTrue: [min := block]]].
 	^ min
 ]
 
@@ -746,12 +766,14 @@ DCBlock >> tryApplyChange: aClosure [
 		value: (self activeTextMorph ifNotNil: [self activeTextMorph range start index + (oldCursorOffset - 1)])
 		value: [:newSource :edit :newIndex |
 			newTree := DCBlock parse: newSource old: oldTree edit: edit language: self language.
-			self replace: oldTree with: newTree first.
-			self placeCursorIn: oldTree at: newIndex.
 			
-			newTree second ifNotEmpty: [:changedRanges | | contained |
-				contained := oldTree smallestBlockEncompassig: (SBTSRange merging: changedRanges).
-				contained attachDecorator: SBFlashDecorator new]]
+			newTree second ifNotEmpty: [:changedRanges | | change newContained |
+				change := SBTSRange merging: changedRanges.
+				newContained := newTree first smallestBlockEncompassig: change.
+				self findLastMatchingAncesors: {newContained}, newContained allParents oldTree: oldTree].
+			
+			self replace: oldTree with: newTree first.
+			self placeCursorIn: oldTree at: newIndex]
 ]
 
 { #category : #'as yet unclassified' }

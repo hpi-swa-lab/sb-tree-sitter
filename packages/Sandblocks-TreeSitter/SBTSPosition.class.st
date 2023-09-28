@@ -47,7 +47,10 @@ SBTSPosition class >> null [
 SBTSPosition >> + aNumber [
 	"advance the character index, does not consider line breaks"
 
-	^ self copy line: line character: character + aNumber index: index + aNumber
+	^ self copy
+		line: line
+		character: (character ifNotNil: [character + aNumber])
+		index: index + aNumber
 ]
 
 { #category : #converting }

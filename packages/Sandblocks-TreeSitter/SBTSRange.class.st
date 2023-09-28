@@ -53,6 +53,12 @@ SBTSRange class >> start: aNumber size: anotherNumber [
 		end: (SBTSPosition line: nil character: nil index: aNumber + anotherNumber)
 ]
 
+{ #category : #converting }
+SBTSRange >> + aDelta [
+
+	^ self class start: self start + aDelta end: self end + aDelta
+]
+
 { #category : #comparing }
 SBTSRange >> = anObject [
 

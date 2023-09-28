@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 DCPairCompleteTest >> expectedFailures [
 
-	^ #(#testDeleteInPair #testJumpAfterClosedPair #testSkipClosedBracket)
+	^ #(#testDeleteInPair #testJumpAfterClosedPair)
 ]
 
 { #category : #'as yet unclassified' }
@@ -117,4 +117,15 @@ DCPairCompleteTest >> testSkipInsertQuoteWhenInWord [
 	program lastDeepChild startInputAtEnd.
 	self type: '''' in: editor.
 	self assert: 'a''' equals: editor childSandblocks first sourceString
+]
+
+{ #category : #'as yet unclassified' }
+DCPairCompleteTest >> testSkipStringInString [
+
+	| program editor |
+	program := DCBlock parse: 'a' language: SBJavascript.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self type: '("a"' in: editor.
+	self assert: 'a("a")' equals: editor childSandblocks first sourceString
 ]
