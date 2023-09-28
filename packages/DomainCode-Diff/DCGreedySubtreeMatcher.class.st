@@ -11,9 +11,9 @@ DCGreedySubtreeMatcher >> handleAmbiguousMappings: aCollection for: aMapping [
 	comparator := DCMappingComparator new mappingStore: aMapping.
 	
 	aCollection sort: [:m1 :m2 | | s1 s2 |
-		s1 := m1 detectMax: [:t | t recursiveSubmorphCount].
-		s2 := m2 detectMax: [:t | t recursiveSubmorphCount].
-		s1 < s2].
+		s1 := m1 first detectMax: [:t | t recursiveSubmorphCount].
+		s2 := m2 first detectMax: [:t | t recursiveSubmorphCount].
+		s1 recursiveSubmorphCount < s2 recursiveSubmorphCount].
 	
 	aCollection do: [:entry | | candidates |
 		candidates := Array streamContents: [:s | entry first do: [:src | entry second do: [:dest | s nextPut: {src. dest}]]].

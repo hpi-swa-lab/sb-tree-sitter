@@ -5,20 +5,23 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-DCMatchTest >> testSimple [
+DCMatchTest >> testAppendBinary [
 
-	| src dest mappings |
+	| src dest |
 	Transcript clear.
-	src := DCBlock parseBlock: 'a+1' language: SBJavascript.
-	dest := DCBlock parseBlock: '[a+1]' language: SBJavascript.
-	mappings := DCMappingStore new.
-	DCGreedySubtreeMatcher new matchFrom: src to: dest in: mappings.
-	DCGreedyBottomUpMatcher new matchFrom: src to: dest in: mappings.
-	self halt.
-	Transcript showln: (Array streamContents: [:stream |
-		DCChawatheScriptGenerator new
-			generateFrom: src
-			to: dest
-			in: mappings
-			do: [:op :args | stream nextPut: {op. args}]])
+	src := DCBlock parseBlock: 'a' language: SBJavascript.
+	dest := DCBlock parseBlock: 'a+' language: SBJavascript.
+	DCMatcher new matchFrom: src to: dest.
+	self assert: 'a+' equals: src sourceString
+]
+
+{ #category : #'as yet unclassified' }
+DCMatchTest >> testSplitBinary [
+
+	| src dest |
+	Transcript clear.
+	src := DCBlock parseBlock: 'a2' language: SBJavascript.
+	dest := DCBlock parseBlock: 'a+2' language: SBJavascript.
+	DCMatcher new matchFrom: src to: dest.
+	self assert: 'a+2' equals: src sourceString
 ]

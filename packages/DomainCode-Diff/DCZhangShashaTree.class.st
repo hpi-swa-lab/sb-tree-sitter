@@ -25,16 +25,16 @@ DCZhangShashaTree >> for: aTree [
 	aTree allMorphsDo: [:n |
 		tmpData at: n put: index.
 		labels at: index put: n.
-		llds at: index put: (tmpData at: n firstDeepSubmorph).
+		llds at: index put: (tmpData at: n firstDeepSubmorph) - 1.
 		n hasSubmorphs ifFalse: [leafCount := leafCount + 1].
 		index := index + 1].
 	
-	keyRoots := Array new: nodeCount + 1.
+	keyRoots := Array new: leafCount + 1.
 	visited := Array new: nodeCount + 1 withAll: false.
-	k := nodeCount.
+	k := leafCount.
 	nodeCount to: 1 by: -1 do: [:i |
 		(visited at: (self lldAt: i)) ifFalse: [
-			keyRoots at: k put: i.
+			keyRoots at: k + 1 put: i.
 			visited at: (self lldAt: i) put: true.
 			k := k - 1]]
 ]
@@ -54,7 +54,7 @@ DCZhangShashaTree >> keyRoots [
 { #category : #'as yet unclassified' }
 DCZhangShashaTree >> lldAt: i [
 
-	^ llds at: i
+	^ (llds at: i) + 1
 ]
 
 { #category : #'as yet unclassified' }

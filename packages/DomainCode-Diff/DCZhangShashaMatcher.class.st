@@ -7,46 +7,51 @@ Class {
 { #category : #'as yet unclassified' }
 DCZhangShashaMatcher >> computeForestDistFrom: zsSrc at: i to: zsDest at: j in: forestDist treeDist: treeDist [
 
-	forestDist at: (zsSrc lldAt: i) at: (zsDest lldAt: j) put: 0.
+	forestDist at0: (zsSrc lldAt: i) - 1 at0: (zsDest lldAt: j) - 1 put: 0.
 	(zsSrc lldAt: i) to: i do: [:di | | costDeletion |
 		costDeletion := self deletionCostOf: (zsSrc treeAt: di).
 		forestDist
-			at: di + 1
-			at: (zsDest lldAt: j)
-			put: (forestDist at: di at: (zsDest lldAt: j)) + costDeletion.
+			at0: di
+			at0: (zsDest lldAt: j) - 1
+			put: (forestDist at0: di - 1 at0: (zsDest lldAt: j) - 1) + costDeletion.
 		(zsDest lldAt: j) to: j do: [:dj | | constInsertion |
 			constInsertion := self insertionCostOf: (zsDest lldAt: dj).
 			forestDist
-				at: (zsSrc lldAt: i)
-				at: dj + 1
-				put: (forestDist at: (zsSrc lldAt: i) at: dj) + constInsertion.
+				at0: (zsSrc lldAt: i) - 1
+				at0: dj
+				put: (forestDist at0: (zsSrc lldAt: i) - 1 at0: dj - 1) + constInsertion.
 			((zsSrc lldAt: di) = (zsSrc lldAt: i) and: [(zsDest lldAt: dj) = (zsDest lldAt: j)])
 				ifTrue: [ | costUpdate cost |
+					1.
 					costUpdate := self updateCostFrom: (zsSrc treeAt: di) to: (zsDest treeAt: dj).
 					cost := {
-						(forestDist at: di at: dj + 1) + costDeletion.
-						(forestDist at: di + 1 at: dj) + constInsertion.
-						(forestDist at: di at: dj) + costUpdate} min.
-					forestDist at: di + 1 at: dj + 1 put: cost.
-					treeDist at: di + 1 at: dj + 1 put: cost]
+						(forestDist at0: di - 1 at0: dj) + costDeletion.
+						(forestDist at0: di at0: dj - 1) + constInsertion.
+						(forestDist at0: di - 1 at0: dj - 1) + costUpdate} min.
+					forestDist at0: di at0: dj put: cost.
+					treeDist at0: di at0: dj put: cost]
 				ifFalse: [
-					forestDist at: di + 1 at: dj + 1 put: {
-						(forestDist at: di at: dj + 1) + costDeletion.
-						(forestDist at: di + 1 at: dj) + constInsertion.
-						(forestDist at: (zsSrc lldAt: di) at: (zsDest lldAt: dj)) + (treeDist at: di + 1 at: dj + 1)} min]]]
+					forestDist at0: di at0: dj put: {
+						(forestDist at0: di - 1 at0: dj) + costDeletion.
+						(forestDist at0: di at0: dj - 1) + constInsertion.
+						(forestDist at0: (zsSrc lldAt: di) - 1 at0: (zsDest lldAt: dj) - 1) + (treeDist at0: di at0: dj)} min]]]
 ]
 
 { #category : #'as yet unclassified' }
-DCZhangShashaMatcher >> computeTreeDistFrom: zsSrc to: zsDest [
+DCZhangShashaMatcher >> computeTreeDistFrom: zsSrc to: zsDest treeDist: treeDist [
 
-	| treeDist forestDist |
-	treeDist := Matrix rows: zsSrc nodeCount + 1 columns: zsDest nodeCount + 1.
+	| forestDist |
 	forestDist := Matrix rows: zsSrc nodeCount + 1 columns: zsDest nodeCount + 1.
 	
-	1 to: zsSrc keyRoots size - 1 do: [:i |
-		1
-			to: zsDest keyRoots size - 1
-			do: [:j | self computeForestDistFrom: zsSrc at: i to: zsDest at: j in: forestDist treeDist: treeDist]].
+	2 to: zsSrc keyRoots size do: [:i |
+		2 to: zsDest keyRoots size do: [:j |
+			self
+				computeForestDistFrom: zsSrc
+				at: (zsSrc keyRoots at: i)
+				to: zsDest
+				at: (zsDest keyRoots at: j)
+				in: forestDist
+				treeDist: treeDist]].
 	
 	^ forestDist
 ]
@@ -88,11 +93,12 @@ DCZhangShashaMatcher >> levenshteinDistanceFrom: aString to: anotherString [
 { #category : #'as yet unclassified' }
 DCZhangShashaMatcher >> matchFrom: src to: dest in: aMappingStore [
 
-	| zsSrc zsDest treePairQueue rootNodePair forestDist |
+	| zsSrc zsDest treePairQueue rootNodePair forestDist treeDist |
 	zsSrc := DCZhangShashaTree new for: src.
 	zsDest := DCZhangShashaTree new for: dest.
 	
-	forestDist := self computeTreeDistFrom: zsSrc to: zsDest.
+	treeDist := Matrix rows: zsSrc nodeCount + 1 columns: zsDest nodeCount + 1.
+	forestDist := self computeTreeDistFrom: zsSrc to: zsDest treeDist: treeDist.
 	rootNodePair := true.
 	
 	treePairQueue := OrderedCollection with: {zsSrc nodeCount. zsDest nodeCount}.
@@ -101,8 +107,11 @@ DCZhangShashaMatcher >> matchFrom: src to: dest in: aMappingStore [
 		lastRow := treePair first.
 		lastCol := treePair second.
 		
-		rootNodePair ifTrue: [rootNodePair := false] ifFalse: ["need to recalc tree/forestDist?"
-		self flag: #todo].
+		rootNodePair ifTrue: [rootNodePair := false] ifFalse: [
+			"need to recalc tree/forestDist?"
+			self flag: #todo.
+			SBToggledCode comment: '' active: 0 do: {
+				[self computeForestDistFrom: zsSrc at: lastRow to: zsDest at: lastCol in: forestDist treeDist: treeDist]}].
 		
 		firstRow := (zsSrc lldAt: lastRow) - 1.
 		firstCol := (zsDest lldAt: lastCol) - 1.

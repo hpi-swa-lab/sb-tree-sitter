@@ -60,6 +60,8 @@ SBTSPosition >> - aPosition [
 { #category : #comparing }
 SBTSPosition >> < aTSPosition [
 
+	(self index notNil and: [aTSPosition index notNil]) ifTrue: [^ self index < aTSPosition index].
+	
 	^ self line < aTSPosition line or: [self line = aTSPosition line and: [self character < aTSPosition character]]
 ]
 

@@ -33,6 +33,17 @@ SBTreeSitter >> c [
 	^ SBTSLanguage tryPatchLibrary: 'tree-sitter/tree-sitter-c' name: 'c' context: thisContext branch: 'master' subpath: ''
 ]
 
+{ #category : #helper }
+SBTreeSitter >> changedRangesFrom: anOldTree to: aNewTree [
+
+	| lengthPtr rangesPtr ranges |
+	lengthPtr := IntegerArray new: 1 withAll: 5.
+	rangesPtr := self treeGetChangedRangesOld: anOldTree new: aNewTree outLength: lengthPtr.
+	ranges := (0 to: lengthPtr first - 1) collect: [:offset | (SBTSFFIRange fromHandle: rangesPtr getHandle + (rangesPtr byteSize * offset)) asRange].
+	rangesPtr free.
+	^ ranges
+]
+
 { #category : #'ffi languages' }
 SBTreeSitter >> clojure [
 
@@ -361,6 +372,12 @@ SBTreeSitter >> nodeType: aNode [
 { #category : #helper }
 SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 
+	^ self parseAsCursor: aString language: aSymbol oldTree: nil do: aBlock
+]
+
+{ #category : #helper }
+SBTreeSitter >> parseAsCursor: aString language: aSymbol oldTree: aTree do: aBlock [
+
 	| parser root tree cursor wasFreed |
 	wasFreed := false.
 	currentString := aString withUnixLineEndings utf8Encoded.
@@ -370,7 +387,7 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 		parser := self parserNew.
 		self parser: parser setLanguage: language.
 		
-		tree := self parser: parser old: nil parseString: currentString length: currentString size.
+		tree := self parser: parser old: aTree parseString: currentString length: currentString size.
 		tree isNull ifTrue: [self error: 'tree failed to load, incompatible language version?'].
 		
 		root := self treeRootNode: tree.
@@ -380,7 +397,7 @@ SBTreeSitter >> parseAsCursor: aString language: aSymbol do: aBlock [
 			do: {[(self nodeHasError: root) ifTrue: [^ SBTSSyntaxError signal]]}.
 		cursor := SBTSNodeCursor new on: root library: self.
 		
-		aBlock value: cursor] ensure: [
+		aBlock cull: cursor cull: tree] ensure: [
 		" there were problems with double-free when debugging "
 		wasFreed ifFalse: [
 			wasFreed := true.
@@ -584,6 +601,13 @@ SBTreeSitter >> textForNode: aNode [
 SBTreeSitter >> treeEdit: aTree edit: anEdit [ 
 
 	<apicall: void 'ts_tree_edit' (void*, SBTSInputEdit*)>
+	^ self externalCallFailed
+]
+
+{ #category : #ffi }
+SBTreeSitter >> treeGetChangedRangesOld: aTree new: anothTree outLength: anIntPtr [ 
+
+	<apicall: SBTSFFIRange* 'ts_tree_get_changed_ranges' (void*, void*, uint32_t*)>
 	^ self externalCallFailed
 ]
 

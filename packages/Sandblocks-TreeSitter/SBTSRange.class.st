@@ -23,6 +23,15 @@ SBTSRange class >> fromLSPWithRange: aJsonObject [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSRange class >> merging: aCollection [
+
+	| min max |
+	min := (aCollection detectMin: [:range | range start index]) start index.
+	max := (aCollection detectMin: [:range | range end index]) end index.
+	^ SBTSRange start: min size: max - min
+]
+
+{ #category : #'as yet unclassified' }
 SBTSRange class >> null [
 
 	^ SBTSRange start: SBTSPosition null end: SBTSPosition null

@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-DCChawatheScriptGenerator >> alignChildrenSrc: w dest: x srcInOrder: srcInOrder destInOrder: destInOrder in: aMapping do: aBlock [
+DCChawatheScriptGenerator >> alignChildrenSrc: w dest: x srcInOrder: srcInOrder destInOrder: destInOrder in: aMapping [
 
 	| s1 s2 lcs |
 	w submorphs do: [:c | srcInOrder remove: c ifAbsent: []].
@@ -23,33 +23,43 @@ DCChawatheScriptGenerator >> alignChildrenSrc: w dest: x srcInOrder: srcInOrder 
 		s1 do: [:a |
 			(aMapping includes: {a. b}) ifFalse: [ | k |
 				"FIXME delete first or find position first?"
-				a delete.
 				k := self findPosition: b dest: destInOrder in: aMapping.
-				aBlock value: #move value: {a. w. k}.
-				w addMorph: a asElementNumber: k.
+				self move: a to: w at: k.
 				srcInOrder add: a.
-				srcInOrder add: b]]]
+				destInOrder add: b]]]
+]
+
+{ #category : #actions }
+DCChawatheScriptGenerator >> delete: aMorph [
+
+	aMorph delete
 ]
 
 { #category : #'as yet unclassified' }
-DCChawatheScriptGenerator >> findPosition: aTree dest: destInorder in: aMapping [
+DCChawatheScriptGenerator >> findPosition: aTree dest: destInOrder in: aMapping [
 
 	| siblings v u |
 	siblings := aTree owner submorphs.
-	siblings do: [:c | (destInorder includes: c) ifTrue: [c = aTree ifTrue: [^ 1]]].
+	siblings do: [:c | (destInOrder includes: c) ifTrue: [c = aTree ifTrue: [^ 1]]].
 	
 	v := nil.
-	(siblings viewFirst: aTree submorphIndex) do: [:c | (destInorder includes: c) ifTrue: [v := c]].
+	(siblings viewFirst: aTree submorphIndex) do: [:c | (destInOrder includes: c) ifTrue: [v := c]].
 	
 	v ifNil: [^ 1].
 	
 	u := aMapping srcForDest: v.
 	
-	^ u submorphIndex
+	^ u submorphIndex + 1
 ]
 
 { #category : #'as yet unclassified' }
-DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping do: aBlock [
+DCChawatheScriptGenerator >> flashChanges [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
+DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping [
 
 	| srcInOrder destInOrder inserted |
 	srcInOrder := Set new.
@@ -61,32 +71,30 @@ DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping do: aBlock 
 		y := x owner.
 		z := aMapping srcForDest: y.
 		(aMapping isDestMapped: x)
-			ifFalse: [ | k |
-				k := self findPosition: x dest: destInOrder in: aMapping.
-				aBlock value: #insert value: {x. z. k}.
+			ifFalse: [
 				w := x shallowCopyBlock.
 				inserted add: w.
-				z addMorph: w asElementNumber: k.
+				self insert: w at: (self findPosition: x dest: destInOrder in: aMapping) in: z.
 				aMapping addMappingFrom: w to: x]
 			ifTrue: [
 				w := aMapping srcForDest: x.
+				w range: x range.
 				x = dest ifFalse: [ | v |
 					v := w owner.
-					w treeLabel = x treeLabel ifFalse: [
-						self assert: (w isTextMorph and: [x isTextMorph]).
-						w contents: x contents.
-						aBlock value: #update value: {w. x contents}].
-					z = v ifFalse: [ | k |
-						k := self findPosition: x dest: destInOrder in: aMapping.
-						aBlock value: #move value: {w. z. k}.
-						w delete.
-						z addMorph: w asElementNumber: k]]].
+					w treeLabel = x treeLabel ifFalse: [self update: w with: x contents].
+					z = v ifFalse: [self move: w to: z at: (self findPosition: x dest: destInOrder in: aMapping)]]].
 		
 		srcInOrder add: w.
 		destInOrder add: x.
-		self alignChildrenSrc: w dest: x srcInOrder: srcInOrder destInOrder: destInOrder in: aMapping do: aBlock].
+		self alignChildrenSrc: w dest: x srcInOrder: srcInOrder destInOrder: destInOrder in: aMapping].
 	
-	src allMorphsDo: [:w | ((aMapping isSrcMapped: w) not and: [(inserted includes: w) not]) ifTrue: [aBlock value: #delete value: {w}]]
+	src allMorphsDo: [:w | ((aMapping isSrcMapped: w) not and: [(inserted includes: w) not]) ifTrue: [self delete: w]]
+]
+
+{ #category : #actions }
+DCChawatheScriptGenerator >> insert: aMorph at: aNumber in: anOwnerMorph [
+
+	anOwnerMorph addMorph: aMorph asElementNumber: aNumber
 ]
 
 { #category : #'as yet unclassified' }
@@ -116,4 +124,22 @@ DCChawatheScriptGenerator >> lcsWith: x and: y in: aMapping [
 					ifFalse: [jy := jy + 1]]].
 	
 	^ lcs
+]
+
+{ #category : #'as yet unclassified' }
+DCChawatheScriptGenerator >> maybeAttachFlash: aMorph [
+
+	self flashChanges ifTrue: [aMorph containingSandblock attachDecorator: SBFlashDecorator new]
+]
+
+{ #category : #actions }
+DCChawatheScriptGenerator >> move: aMorph to: anOwnerMorph at: aNumber [
+
+	anOwnerMorph addMorph: aMorph asElementNumber: aNumber
+]
+
+{ #category : #actions }
+DCChawatheScriptGenerator >> update: aMorph with: aString [
+
+	aMorph contents: aString
 ]

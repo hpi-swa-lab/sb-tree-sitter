@@ -12,6 +12,24 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCBlock class >> findChangeRangeFrom: original to: new [
+
+	| start end maxSize |
+	start := 1.
+	[start <= (original size min: new size) and: [(original at: start) = (new at: start)]] whileTrue: [start := start + 1].
+	
+	end := 1.
+	maxSize := original size min: new size.
+	[end <= maxSize and: [maxSize - (end - 1) >= start and: [(original atLast: end) = (new atLast: end)]]] whileTrue: [end := end + 1].
+	
+	^ SBTSInputEdit new
+		startByte: start - 1;
+		oldEndByte: original size - (end - 1);
+		newEndByte: new size - (end - 1);
+		bytesToPointsIn: original new: new
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock class >> fromCursor: aCursor language: aLanguage [
 
 	^ aCursor isNamed
@@ -55,14 +73,44 @@ DCBlock class >> parse: aString language: aLanguage [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock class >> parse: aString old: oldBlock edit: anEdit language: aLanguage [
+
+	| api oldTree |
+	api := SBTreeSitter new.
+	oldTree := (oldBlock valueOfProperty: #tsTree) ifNotNil: [:tsTree |
+		tsTree isNull ifTrue: [nil] ifFalse: [
+			api
+				treeEdit: tsTree
+				edit: (self findChangeRangeFrom: (oldBlock valueOfProperty: #tsSource) to: aString).
+			tsTree]].
+	^ api parseAsCursor: aString language: aLanguage language oldTree: oldTree do: [:cursor :newTree | | block changedRanges |
+		changedRanges := oldTree ifNotNil: [api changedRangesFrom: oldTree to: newTree] ifNil: [{}].
+		block := (self
+			fromCursor: (SBTSCursorRaw new library: api cursor: cursor factory: aLanguage instance grammar)
+			language: aLanguage)
+			setProperty: #tsTree
+				toValue: newTree;
+			setProperty: #tsSource
+				toValue: aString;
+			yourself.
+		
+		{block. changedRanges}]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock class >> parseBlock: aString language: aLanguage [
 
 	| api |
 	api := SBTreeSitter new.
-	^ api parseAsCursor: aString language: aLanguage language do: [:cursor |
-		self
+	^ api parseAsCursor: aString language: aLanguage language do: [:cursor :tree |
+		(self
 			fromCursor: (SBTSCursorRaw new library: api cursor: cursor factory: aLanguage instance grammar)
-			language: aLanguage]
+			language: aLanguage)
+			setProperty: #tsTree
+				toValue: tree;
+			setProperty: #tsSource
+				toValue: aString;
+			yourself]
 ]
 
 { #category : #'as yet unclassified' }
@@ -127,25 +175,23 @@ DCBlock >> currentTextMorph [
 DCBlock >> deleteBeforeCursor [
 	<action>
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply | apply value: (self deleteFrom: source at: cursorIndex) value: cursorIndex - 1].
-	SBToggledCode comment: '' active: 0 do: {
-		[
-			self tryApplyChange: [:m |
-				(m cursor = 1 and: [m contents notEmpty])
-					ifTrue: [
-						(m previousMorphThat: [:t | t isTextMorph]) ifNotNil: [:before |
-							(self language spaceBetween: before and: m lastCharacterOfFirst: before contents last)
-								ifTrue: [
-									before contents: before contents, m contents.
-									m contents: '']
-								ifFalse: [before contents ifNotEmpty: [before contents: before contents allButLast]]]]
-					ifFalse: [m contents ifEmpty: [self deleteBlock] ifNotEmpty: [m deleteBeforeCursor]]]]}
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+		self
+			deleteFrom: source
+			at: cursorIndex
+			do: [:new :edit | apply value: new value: edit value: cursorIndex - 1]]
 ]
 
 { #category : #'as yet unclassified' }
-DCBlock >> deleteFrom: aString at: aNumber [
+DCBlock >> deleteFrom: aString at: aNumber do: aBlock [
 
-	^ (aString first: aNumber - 1), (aString allButFirst: aNumber)
+	| new |
+	new := (aString first: aNumber - 1), (aString allButFirst: aNumber).
+	^ aBlock value: new value: (SBTSInputEdit new
+		startByte: aNumber - 1;
+		oldEndByte: aNumber;
+		newEndByte: aNumber - 1;
+		bytesToPointsIn: aString new: new)
 ]
 
 { #category : #'as yet unclassified' }
@@ -315,11 +361,17 @@ DCBlock >> inputClosestTextMorphTo: cursorPosition [
 ]
 
 { #category : #'as yet unclassified' }
-DCBlock >> insert: aString in: aContainerString at: aNumber [
+DCBlock >> insert: aString in: aContainerString at: aNumber do: aBlock [
 
-	^ (aNumber > aContainerString size or: [aContainerString isEmpty])
+	| new |
+	new := (aNumber > aContainerString size or: [aContainerString isEmpty])
 		ifTrue: [aContainerString, aString]
-		ifFalse: [(aContainerString first: aNumber - 1), aString, (aContainerString allButFirst: aNumber - 1)]
+		ifFalse: [(aContainerString first: aNumber - 1), aString, (aContainerString allButFirst: aNumber - 1)].
+	aBlock value: new value: (SBTSInputEdit new
+		startByte: aNumber - 1;
+		oldEndByte: aNumber - 1;
+		newEndByte: aNumber - 1 + aString size;
+		bytesToPointsIn: aContainerString new: new)
 ]
 
 { #category : #'as yet unclassified' }
@@ -333,7 +385,7 @@ DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 			morph: (DCUnknown new language: self language))].
 	
 	(self orOwnerSuchThat: [:morph | morph isTSBlock and: [morph isStatement]]) ifNotNil: [:statement | | target |
-		target := (statement morphBeforeOrAfter: anAboveBoolean) contents = self language statementTerminator
+		target := ((statement morphBeforeOrAfter: anAboveBoolean) ifNotNil: #treeLabel) = self language statementTerminator
 			ifTrue: [statement morphBeforeOrAfter: anAboveBoolean]
 			ifFalse: [statement].
 		self sandblockEditor do: (SBRelInsertCommand new near: target before: anAboveBoolean in: statement owner morph: (DCUnknown new
@@ -376,7 +428,12 @@ DCBlock >> keyStroke: anEvent [
 
 	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | input insert |
 		input := anEvent keyCharacter asString.
-		insert := [:str | apply value: (self insert: str in: source at: cursorIndex + 1) value: cursorIndex + 1].
+		insert := [:str |
+			self
+				insert: str
+				in: source
+				at: cursorIndex + 1
+				do: [:new :edit | apply value: new value: edit value: cursorIndex + 1]].
 		(input first isPrintable and: [anEvent commandKeyPressed not]) ifTrue: [
 			self pairMap at: input ifPresent: [:complete |
 				"do not autocomplete quotes in words"
@@ -451,6 +508,21 @@ DCBlock >> pairMap [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> placeCursorIn: newTree at: newIndex [
+
+	^ newIndex isNumber ifTrue: [newTree startInputAtSourceIndex: newIndex] ifFalse: [ | target |
+		target := newTree blockFor: newIndex.
+		target isTextMorph
+			ifTrue: [
+				newTree sandblockEditor
+					startInput: target containingSandblock
+					at: 1
+					replacingContents: false
+					in: target]
+			ifFalse: [newTree sandblockEditor selectNoInput: target]]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> preferredColorIn: aColorPolicy [
 
 	^ self slot preferredColorIn: aColorPolicy for: self highlight
@@ -484,14 +556,21 @@ DCBlock >> range: aRange [
 DCBlock >> replace: oldTree with: newTree [
 
 	^ SBToggledCode comment: '' active: 1 do: {
-		[
-			DCMatcher new matchFrom: oldTree to: newTree do: [:op :args | ].
+		[ | editor |
+			editor := self sandblockEditor.
+			DCMatcher new doCommandForEditsIn: newTree to: oldTree in: editor.
+			editor history noMoreMerge.
+			oldTree setProperty: #tsTree toValue: (newTree valueOfProperty: #tsTree).
+			oldTree setProperty: #tsSource toValue: (newTree valueOfProperty: #tsSource).
 			oldTree].
 		[
 			self sandblockEditor do: (SBReplaceCommand new
 				target: oldTree replacer: newTree;
 				shouldMergeWithNext: true).
-			newTree]}
+			newTree
+				position: oldTree position;
+				width: oldTree width;
+				yourself]}
 ]
 
 { #category : #'as yet unclassified' }
@@ -577,16 +656,17 @@ DCBlock >> swap: aNumber [
 				ifTrue: [outerPivot morphAfterThat: #isSandblock]
 				ifFalse: [outerPivot morphBeforeThat: #isSandblock].
 			startIndex := target range start index + (aNumber > 0 ifTrue: [target range size - pivot range size] ifFalse: [0]).
-			apply value: (self swap: pivot range with: target range in: source) value: (SBToggledCode
-				comment: ''
-				active: 1
-				do: {[SBTSRange start: startIndex size: pivot range size]. [startIndex]})]]
+			self swap: pivot range with: target range in: source do: [:new :edit |
+				apply value: new value: edit value: (SBToggledCode
+					comment: ''
+					active: 1
+					do: {[SBTSRange start: startIndex size: pivot range size]. [startIndex]})]]]
 ]
 
 { #category : #'as yet unclassified' }
-DCBlock >> swap: aRange with: anotherRange in: aString [
+DCBlock >> swap: aRange with: anotherRange in: aString do: aBlock [
 
-	| first second |
+	| first second new |
 	self
 		example: [DCBlock new]
 		args: [
@@ -605,23 +685,13 @@ DCBlock >> swap: aRange with: anotherRange in: aString [
 	second := aRange start index < anotherRange start index
 		ifTrue: [anotherRange]
 		ifFalse: [aRange].
+	new := (aString first: first start index), (aString copyFrom: second start index + 1 to: second end index), (aString copyFrom: first end index + 1 to: second start index), (aString copyFrom: first start index + 1 to: first end index), (aString allButFirst: second end index).
 	
-	^ (SBExampleWatch
-		report: (aString first: first start index)
-		for: 540329478
-		modifying: [:result | result]), (SBExampleWatch
-		report: (aString copyFrom: second start index + 1 to: second end index)
-		for: 153401999
-		modifying: [:result | result]), (SBExampleWatch
-		report: (aString copyFrom: first end index + 1 to: second start index)
-		for: 554040495
-		modifying: [:result | result]), (SBExampleWatch
-		report: (aString copyFrom: first start index + 1 to: first end index)
-		for: 568840718
-		modifying: [:result | result]), (SBExampleWatch
-		report: (aString allButFirst: second end index)
-		for: 481875392
-		modifying: [:result | result])
+	^ aBlock value: new value: (SBTSInputEdit new
+		startByte: first start index;
+		oldEndByte: second end index;
+		newEndByte: second end index;
+		bytesToPointsIn: aString new: new)
 ]
 
 { #category : #'as yet unclassified' }
@@ -674,20 +744,14 @@ DCBlock >> tryApplyChange: aClosure [
 		value: oldSource
 		value: self activeTextMorph
 		value: (self activeTextMorph ifNotNil: [self activeTextMorph range start index + (oldCursorOffset - 1)])
-		value: [:newSource :newIndex |
-			newTree := self replace: oldTree with: ((DCBlock parse: newSource language: self language)
-				position: oldTree position;
-				width: oldTree width).
-			newIndex isNumber ifTrue: [newTree startInputAtSourceIndex: newIndex] ifFalse: [ | target |
-				target := newTree blockFor: newIndex.
-				target isTextMorph
-					ifTrue: [
-						newTree sandblockEditor
-							startInput: target containingSandblock
-							at: 1
-							replacingContents: false
-							in: target]
-					ifFalse: [newTree sandblockEditor selectNoInput: target]]]
+		value: [:newSource :edit :newIndex |
+			newTree := DCBlock parse: newSource old: oldTree edit: edit language: self language.
+			self replace: oldTree with: newTree first.
+			self placeCursorIn: oldTree at: newIndex.
+			
+			newTree second ifNotEmpty: [:changedRanges | | contained |
+				contained := oldTree smallestBlockEncompassig: (SBTSRange merging: changedRanges).
+				contained attachDecorator: SBFlashDecorator new]]
 ]
 
 { #category : #'as yet unclassified' }

@@ -47,7 +47,6 @@ DCGreedyBottomUpMatcher >> matchFrom: src to: dest in: aMapping [
 				self lastChanceMatchFrom: t to: dest in: aMapping]
 			ifFalse: [
 				((aMapping isSrcMapped: t) not or: [t hasSubmorphs not]) ifTrue: [
-					"TODO similarity threshold 0.5"
 					(((self destCandidatesFor: t in: aMapping) select: [:candidate | (DCMappingComparator diceSimilarityFrom: t to: candidate in: aMapping) >= self similarityThreshold]) detectMax: [:candidate | DCMappingComparator diceSimilarityFrom: t to: candidate in: aMapping]) ifNotNil: [:best |
 						self lastChanceMatchFrom: t to: best in: aMapping.
 						aMapping addMappingFrom: t to: best]]]]
