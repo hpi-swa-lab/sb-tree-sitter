@@ -44,6 +44,7 @@ DCCommandScriptGenerator >> insert: aMorph at: aNumber in: anOwnerMorph [
 		index: aNumber;
 		container: anOwnerMorph;
 		morph: aMorph).
+	self maybeAttachFlash: aMorph.
 	self logChanges ifTrue: [Transcript showln: {#insert. anOwnerMorph. aNumber. aMorph}]
 ]
 
@@ -61,6 +62,7 @@ DCCommandScriptGenerator >> move: aMorph to: anOwnerMorph at: aNumber [
 		container: anOwnerMorph;
 		morph: aMorph;
 		index: aNumber).
+	self maybeAttachFlash: aMorph.
 	self logChanges ifTrue: [Transcript showln: {#move. anOwnerMorph. aNumber. aMorph}]
 ]
 
@@ -76,5 +78,6 @@ DCCommandScriptGenerator >> update: aMorph with: aString [
 				target: aMorph;
 				selector: #contents;
 				value: aString)].
+	self maybeAttachFlash: aMorph.
 	self logChanges ifTrue: [Transcript showln: {#update. aMorph. aString}]
 ]

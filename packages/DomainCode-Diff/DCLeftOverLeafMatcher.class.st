@@ -1,5 +1,5 @@
 Class {
-	#name : #DCGreedySubtreeMatcher,
+	#name : #DCLeftOverLeafMatcher,
 	#superclass : #Object,
 	#instVars : [
 		'rootSrc',
@@ -9,7 +9,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-DCGreedySubtreeMatcher >> handleAmbiguousMappings: aCollection for: aMapping [
+DCLeftOverLeafMatcher >> handleAmbiguousMappings: aCollection for: aMapping [
 
 	| comparator |
 	comparator := DCMappingComparator new
@@ -28,32 +28,37 @@ DCGreedySubtreeMatcher >> handleAmbiguousMappings: aCollection for: aMapping [
 ]
 
 { #category : #'as yet unclassified' }
-DCGreedySubtreeMatcher >> matchFrom: src to: dest in: aMapping [
+DCLeftOverLeafMatcher >> matchFrom: src to: dest in: aMapping [
 
 	| ambiguousMappings srcTrees destTrees |
 	rootSrc := src.
 	rootDest := dest.
 	
 	ambiguousMappings := OrderedCollection new.
-	srcTrees := DCPriorityTreeQueue new add: src.
-	destTrees := DCPriorityTreeQueue new add: dest.
+	srcTrees := DCPriorityTreeQueue new
+		minimumHeight: 0;
+		addAll: (Array streamContents: [:s | src allMorphsDo: [:k | (aMapping isSrcMapped: k) ifFalse: [s nextPut: k]]]).
+	destTrees := DCPriorityTreeQueue new
+		minimumHeight: 0;
+		addAll: (Array streamContents: [:s | dest allMorphsDo: [:k | (aMapping isDestMapped: k) ifFalse: [s nextPut: k]]]).
+	
 	[
 		self synchronizePriority: srcTrees with: destTrees.
 		srcTrees notEmpty and: [destTrees notEmpty]] whileTrue: [ | mapper |
 		mapper := DCHashBasedMapper new.
 		srcTrees removeHighest do: [:t | mapper addSrc: t].
 		destTrees removeHighest do: [:t | mapper addDest: t].
-		
 		mapper uniqueEntries do: [:entry | aMapping addRecursiveMappingFrom: entry first anyOne to: entry second anyOne].
 		ambiguousMappings addAll: mapper ambiguousEntries.
 		mapper unmappedEntries do: [:entry |
 			entry first do: [:t | srcTrees addTree: t].
 			entry second do: [:t | destTrees addTree: t]]].
+	
 	self handleAmbiguousMappings: ambiguousMappings for: aMapping
 ]
 
 { #category : #'as yet unclassified' }
-DCGreedySubtreeMatcher >> synchronizePriority: aQueue with: anotherQueue [
+DCLeftOverLeafMatcher >> synchronizePriority: aQueue with: anotherQueue [
 
 	[(aQueue notEmpty and: [anotherQueue notEmpty]) and: [aQueue first treeHeight ~= anotherQueue first treeHeight]] whileTrue: [
 		aQueue first treeHeight > anotherQueue first treeHeight

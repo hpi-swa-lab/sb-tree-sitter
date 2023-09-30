@@ -16,6 +16,12 @@ DCText >> alias [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> allParentsUpTo: aBlock [
+
+	^ {self}, (self containingSandblock allParentsUpTo: aBlock)
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> compatibleWithType: aSymbol [
 
 	^ false
@@ -25,6 +31,12 @@ DCText >> compatibleWithType: aSymbol [
 DCText >> effectiveContents [
 
 	^ self contents
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> ensureLayouted [
+
+	self owner ensureLayouted
 ]
 
 { #category : #'as yet unclassified' }

@@ -5,6 +5,18 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCEditTest >> testAcceptJS [
+	<timeout: 9000>
+
+	| src editor |
+	src := 'function() {}'.
+	editor := self editorFor: (DCBlock parseBlock: src first asString language: SBJavascript).
+	src allButFirst
+		do: [:char | editor handle: (self keyboardEvent: char)]
+		displayingProgress: 'a'
+]
+
+{ #category : #'as yet unclassified' }
 DCEditTest >> testDeleteEmptyLine [
 
 	| program editor |

@@ -1,6 +1,10 @@
 Class {
 	#name : #DCGreedyBottomUpMatcher,
 	#superclass : #Object,
+	#instVars : [
+		'rootDest',
+		'sizeThreshold'
+	],
 	#category : #'DomainCode-Diff'
 }
 
@@ -20,7 +24,7 @@ DCGreedyBottomUpMatcher >> destCandidatesFor: src in: aMapping [
 			parent := current owner.
 			parent notNil and: [(visited includes: parent) not]] whileTrue: [
 			visited add: parent.
-			(parent type = src type and: [((aMapping isDestMapped: parent) or: [parent = parent rootBlock]) not]) ifTrue: [candidates add: parent].
+			(parent type = src type and: [((aMapping isDestMapped: parent) or: [parent = rootDest]) not]) ifTrue: [candidates add: parent].
 			current := parent]].
 	
 	^ candidates
@@ -38,8 +42,8 @@ DCGreedyBottomUpMatcher >> lastChanceMatchFrom: src to: dest in: aMapping [
 
 { #category : #'as yet unclassified' }
 DCGreedyBottomUpMatcher >> matchFrom: src to: dest in: aMapping [
-	"post-order"
 
+	rootDest := dest.
 	src allMorphsDo: [:t |
 		src = t
 			ifTrue: [
@@ -61,5 +65,11 @@ DCGreedyBottomUpMatcher >> similarityThreshold [
 { #category : #'as yet unclassified' }
 DCGreedyBottomUpMatcher >> sizeThreshold [
 
-	^ 1000
+	^ sizeThreshold ifNil: [5]
+]
+
+{ #category : #'as yet unclassified' }
+DCGreedyBottomUpMatcher >> sizeThreshold: aNumber [
+
+	sizeThreshold := aNumber
 ]

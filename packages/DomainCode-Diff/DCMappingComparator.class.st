@@ -6,7 +6,9 @@ Class {
 		'destDescendants',
 		'mappingStore',
 		'srcAncestors',
-		'destAncestors'
+		'destAncestors',
+		'rootSrc',
+		'rootDest'
 	],
 	#category : #'DomainCode-Diff'
 }
@@ -65,9 +67,9 @@ DCMappingComparator >> distanceAbsoluteCompare: aMapping with: anotherMapping [
 
 	| position distance |
 	"compare the post-order position in the tree of the mapping, between src and dest"
-	position := [:tree | tree rootBlock absolutePositionOf: tree].
-	distance := [:mapping | ((position value: mapping first) - (position value: mapping second)) abs].
-	^ ((distance value: anotherMapping) - (distance value: aMapping)) sign
+	position := [:tree :root | root absolutePositionOf: tree].
+	distance := [:mapping | ((position value: mapping first value: rootSrc) - (position value: mapping second value: rootDest)) abs].
+	^ ((distance value: aMapping) - (distance value: anotherMapping)) sign
 ]
 
 { #category : #'as yet unclassified' }
@@ -76,7 +78,7 @@ DCMappingComparator >> distanceTextualCompare: aMapping with: anotherMapping [
 	| distance |
 	"compares how far each mapping moved from src to dest in terms of its textual start and end indices"
 	distance := [:mapping | (mapping first range start index - mapping second range start index) abs + (mapping first range end index - mapping second range end index) abs].
-	^ ((distance value: anotherMapping) - (distance value: aMapping)) sign
+	^ ((distance value: aMapping) - (distance value: anotherMapping)) sign
 ]
 
 { #category : #'as yet unclassified' }
@@ -145,15 +147,26 @@ DCMappingComparator >> numberOfCommonParentsIn: src and: dest [
 ]
 
 { #category : #'as yet unclassified' }
+DCMappingComparator >> rootSrc: aBlock rootDest: anotherBlock [
+
+	rootSrc := aBlock.
+	rootDest := anotherBlock
+]
+
+{ #category : #'as yet unclassified' }
 DCMappingComparator >> similarityParentsCompare: aMapping with: anotherMapping [
 
 	| s1 s2 |
 	(aMapping first owner = anotherMapping first owner and: [aMapping second owner = anotherMapping second owner]) ifTrue: [^ 0].
 	
-	srcAncestors at: aMapping first ifAbsentPut: aMapping first allParents.
-	destAncestors at: aMapping second ifAbsentPut: aMapping second allParents.
-	srcAncestors at: anotherMapping first ifAbsentPut: anotherMapping first allParents.
-	destAncestors at: anotherMapping second ifAbsentPut: anotherMapping second allParents.
+	srcAncestors at: aMapping first ifAbsentPut: (aMapping first allParentsUpTo: rootSrc).
+	destAncestors at: aMapping second ifAbsentPut: (aMapping second allParentsUpTo: rootDest).
+	srcAncestors
+		at: anotherMapping first
+		ifAbsentPut: (anotherMapping first allParentsUpTo: rootSrc).
+	destAncestors
+		at: anotherMapping second
+		ifAbsentPut: (anotherMapping second allParentsUpTo: rootDest).
 	
 	s1 := self class
 		diceCoefficientCommon: (self numberOfCommonParentsIn: aMapping first and: aMapping second)
@@ -164,7 +177,7 @@ DCMappingComparator >> similarityParentsCompare: aMapping with: anotherMapping [
 		left: (srcAncestors at: anotherMapping first) size
 		right: (destAncestors at: anotherMapping second) size.
 	
-	^ (s2 - s1) sign
+	^ (s1 - s2) sign
 ]
 
 { #category : #'as yet unclassified' }
@@ -186,7 +199,7 @@ DCMappingComparator >> similarityPositionInParentsCompare: aMapping with: anothe
 			to: (indicesVec1 size min: indicesVec2 size)
 			do: [:index | sum := sum + ((indicesVec1 at: index) - (indicesVec2 at: index)) squared].
 		sum sqrt].
-	^ ((distance value: anotherMapping) - (distance value: aMapping)) sign
+	^ ((distance value: aMapping) - (distance value: anotherMapping)) sign
 ]
 
 { #category : #'as yet unclassified' }
@@ -204,5 +217,5 @@ DCMappingComparator >> similaritySiblingsCompare: aMapping with: anotherMapping 
 		left: (srcDescendants at: anotherMapping first owner) size
 		right: (destDescendants at: anotherMapping second owner) size.
 	
-	^ (s2 - s1) sign
+	^ (s1 - s2) sign
 ]

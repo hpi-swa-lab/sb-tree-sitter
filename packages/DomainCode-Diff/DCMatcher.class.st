@@ -14,11 +14,66 @@ DCMatcher >> applyEditsIn: aDest to: aSrc [
 ]
 
 { #category : #'as yet unclassified' }
+DCMatcher >> commonAncestorOf: aCollection root: aTree [
+
+	| current |
+	aCollection ifEmpty: [^ nil].
+	
+	current := aCollection first owner.
+	[current ~= aTree] whileTrue: [
+		(aCollection allSatisfy: [:t | t = current or: [t hasOwner: current]]) ifTrue: [^ current].
+		current := current owner].
+	
+	^ aTree
+]
+
+{ #category : #'as yet unclassified' }
 DCMatcher >> doCommandForEditsIn: aDest to: aSrc in: anEditor [
 
 	DCCommandScriptGenerator new
 		editor: anEditor;
 		generateFrom: aSrc to: aDest in: (self matchFrom: aSrc to: aDest)
+]
+
+{ #category : #'as yet unclassified' }
+DCMatcher >> fineGrainedMatch2From: src to: dest in: aMapping [
+
+	| topSrc topDest |
+	topSrc := self
+		commonAncestorOf: (Array streamContents: [:s | src allMorphsDo: [:k | (aMapping isSrcMapped: k) ifFalse: [s nextPut: k]]])
+		root: src.
+	topDest := self
+		commonAncestorOf: (Array streamContents: [:s | dest allMorphsDo: [:k | (aMapping isDestMapped: k) ifFalse: [s nextPut: k]]])
+		root: dest.
+	(topSrc notNil and: [topDest notNil]) ifTrue: [
+		SBToggledCode
+			comment: ''
+			active: 0
+			do: {[self assert: (aMapping destForSrc: topSrc owner) = topDest owner]}.
+		DCGreedyBottomUpMatcher new
+			sizeThreshold: 900000000;
+			lastChanceMatchFrom: topSrc to: topDest in: aMapping]
+]
+
+{ #category : #'as yet unclassified' }
+DCMatcher >> fineGrainedMatchFrom: src to: dest in: aMapping [
+
+	| topSrc topDest |
+	topSrc := (Array streamContents: [:s | src allMorphsDo: [:k | (aMapping isSrcMapped: k) ifFalse: [s nextPut: k]]]) detectMax: #treeHeight.
+	topDest := (Array streamContents: [:s | dest allMorphsDo: [:k | (aMapping isDestMapped: k) ifFalse: [s nextPut: k]]]) detectMax: #treeHeight.
+	
+	self halt.
+	topSrc ifNotNil: [
+		self assert: (aMapping destForSrc: topSrc owner) = topDest owner.
+		DCGreedyBottomUpMatcher new
+			sizeThreshold: 900000000;
+			lastChanceMatchFrom: topSrc to: topDest in: aMapping]
+]
+
+{ #category : #'as yet unclassified' }
+DCMatcher >> largestUnmappedFor: aTree isSrc: aBoolean in: aMapping [
+
+	^ (Array streamContents: [:s | aTree allMorphsDo: [:k | (aBoolean ifTrue: [aMapping isSrcMapped: k] ifFalse: [aMapping isDestMapped: k]) ifFalse: [s nextPut: k]]]) detectMax: #treeHeight
 ]
 
 { #category : #'as yet unclassified' }
@@ -28,5 +83,11 @@ DCMatcher >> matchFrom: src to: dest [
 	mappings := DCMappingStore new.
 	DCGreedySubtreeMatcher new matchFrom: src to: dest in: mappings.
 	DCGreedyBottomUpMatcher new matchFrom: src to: dest in: mappings.
+	SBToggledCode
+		comment: ''
+		active: 0
+		do: {[DCLeftOverLeafMatcher new matchFrom: src to: dest in: mappings]}.
+	self fineGrainedMatch2From: src to: dest in: mappings.
+	
 	^ mappings
 ]

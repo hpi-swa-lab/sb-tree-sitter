@@ -11,7 +11,7 @@ Class {
 { #category : #'as yet unclassified' }
 DCMappingStore >> addMappingFrom: src to: dest [
 
-	self assert: src rootBlock ~= dest rootBlock.
+	SBToggledCode comment: '' active: 0 do: {[src treeLabel = 'function' ifTrue: [self halt]]}.
 	srcToDest at: src put: dest.
 	destToSrc at: dest put: src
 ]
@@ -39,6 +39,12 @@ DCMappingStore >> areBothUnmappedSrc: src dest: dest [
 DCMappingStore >> destForSrc: t [
 
 	^ srcToDest at: t ifAbsent: [nil]
+]
+
+{ #category : #'as yet unclassified' }
+DCMappingStore >> destToSrc [
+
+	^ destToSrc
 ]
 
 { #category : #'as yet unclassified' }
@@ -72,4 +78,10 @@ DCMappingStore >> keysAndValuesDo: aBlock [
 DCMappingStore >> srcForDest: t [
 
 	^ destToSrc at: t ifAbsent: [nil]
+]
+
+{ #category : #'as yet unclassified' }
+DCMappingStore >> srcToDest [
+
+	^ srcToDest
 ]

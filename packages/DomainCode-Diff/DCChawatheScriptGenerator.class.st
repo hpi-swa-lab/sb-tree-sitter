@@ -88,7 +88,7 @@ DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping [
 		destInOrder add: x.
 		self alignChildrenSrc: w dest: x srcInOrder: srcInOrder destInOrder: destInOrder in: aMapping].
 	
-	src allMorphsDo: [:w | ((aMapping isSrcMapped: w) not and: [(inserted includes: w) not]) ifTrue: [self delete: w]]
+	(Array streamContents: [:s | src allMorphsDo: [:w | ((aMapping isSrcMapped: w) not and: [(inserted includes: w) not]) ifTrue: [s nextPut: w]]]) do: [:w | self delete: w]
 ]
 
 { #category : #actions }

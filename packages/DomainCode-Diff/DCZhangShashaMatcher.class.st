@@ -24,17 +24,14 @@ DCZhangShashaMatcher >> computeForestDistFrom: zsSrc at: i to: zsDest at: j in: 
 				ifTrue: [ | costUpdate cost |
 					1.
 					costUpdate := self updateCostFrom: (zsSrc treeAt: di) to: (zsDest treeAt: dj).
-					cost := {
-						(forestDist at0: di - 1 at0: dj) + costDeletion.
-						(forestDist at0: di at0: dj - 1) + constInsertion.
-						(forestDist at0: di - 1 at0: dj - 1) + costUpdate} min.
+					cost := ((forestDist at0: di at0: dj - 1) + constInsertion min: (forestDist at0: di - 1 at0: dj - 1) + costUpdate) min: (forestDist at0: di - 1 at0: dj) + costDeletion.
 					forestDist at0: di at0: dj put: cost.
 					treeDist at0: di at0: dj put: cost]
 				ifFalse: [
-					forestDist at0: di at0: dj put: {
-						(forestDist at0: di - 1 at0: dj) + costDeletion.
-						(forestDist at0: di at0: dj - 1) + constInsertion.
-						(forestDist at0: (zsSrc lldAt: di) - 1 at0: (zsDest lldAt: dj) - 1) + (treeDist at0: di at0: dj)} min]]]
+					forestDist
+						at0: di
+						at0: dj
+						put: (((forestDist at0: di - 1 at0: dj) + costDeletion min: (forestDist at0: (zsSrc lldAt: di) - 1 at0: (zsDest lldAt: dj) - 1) + (treeDist at0: di at0: dj)) min: (forestDist at0: di at0: dj - 1) + constInsertion)]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -94,6 +91,7 @@ DCZhangShashaMatcher >> levenshteinDistanceFrom: aString to: anotherString [
 DCZhangShashaMatcher >> matchFrom: src to: dest in: aMappingStore [
 
 	| zsSrc zsDest treePairQueue rootNodePair forestDist treeDist |
+	SBToggledCode comment: '' active: 0 do: {[Transcript showln: {src. dest}]}.
 	zsSrc := DCZhangShashaTree new for: src.
 	zsDest := DCZhangShashaTree new for: dest.
 	
@@ -110,7 +108,7 @@ DCZhangShashaMatcher >> matchFrom: src to: dest in: aMappingStore [
 		rootNodePair ifTrue: [rootNodePair := false] ifFalse: [
 			"need to recalc tree/forestDist?"
 			self flag: #todo.
-			SBToggledCode comment: '' active: 0 do: {
+			SBToggledCode comment: '' active: 1 do: {
 				[self computeForestDistFrom: zsSrc at: lastRow to: zsDest at: lastCol in: forestDist treeDist: treeDist]}].
 		
 		firstRow := (zsSrc lldAt: lastRow) - 1.

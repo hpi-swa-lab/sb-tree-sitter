@@ -133,10 +133,18 @@ DCBlock >> alias [
 { #category : #'as yet unclassified' }
 DCBlock >> allParents [
 
+	^ self allParentsUpTo: self rootBlock
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> allParentsUpTo: aBlock [
+
+	self = aBlock ifTrue: [^ #()].
+	
 	^ Array streamContents: [:s |
-		self ownerSatisfying: [:o |
+		self assert: (self ownerSatisfying: [:o |
 			s nextPut: o.
-			o = self rootBlock]]
+			o = aBlock]) notNil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -165,10 +173,28 @@ DCBlock >> contentsToDisplay [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> copyRangesFrom: newTree to: oldTree [
+
+	oldTree range: newTree range.
+	newTree submorphs with: oldTree submorphs do: [:a :b | self copyRangesFrom: a to: b]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> currentTextMorph [
 
 	self submorphsDo: [:m | m isTextMorph ifTrue: [^ m]].
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> deleteAfterCursor [
+	<action>
+
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+		self
+			deleteFrom: source
+			at: cursorIndex + 1
+			do: [:new :edit | apply value: new value: edit value: cursorIndex]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -240,7 +266,7 @@ DCBlock >> findLastMatchingAncesors: aCollection oldTree: aBlock [
 			^ {oldCurrent owner. newCurrent owner}]].
 	
 	self assert: aCollection first type = oldCurrent type.
-	^ {aCollection first. oldCurrent}
+	^ {oldCurrent. aCollection first}
 ]
 
 { #category : #'as yet unclassified' }
@@ -580,8 +606,6 @@ DCBlock >> replace: oldTree with: newTree [
 			editor := self sandblockEditor.
 			DCMatcher new doCommandForEditsIn: newTree to: oldTree in: editor.
 			editor history noMoreMerge.
-			oldTree setProperty: #tsTree toValue: (newTree valueOfProperty: #tsTree).
-			oldTree setProperty: #tsSource toValue: (newTree valueOfProperty: #tsSource).
 			oldTree].
 		[
 			self sandblockEditor do: (SBReplaceCommand new
@@ -767,12 +791,29 @@ DCBlock >> tryApplyChange: aClosure [
 		value: [:newSource :edit :newIndex |
 			newTree := DCBlock parse: newSource old: oldTree edit: edit language: self language.
 			
-			newTree second ifNotEmpty: [:changedRanges | | change newContained |
-				change := SBTSRange merging: changedRanges.
-				newContained := newTree first smallestBlockEncompassig: change.
-				self findLastMatchingAncesors: {newContained}, newContained allParents oldTree: oldTree].
+			SBToggledCode comment: '' active: 1 do: {
+				[self replace: oldTree with: newTree first].
+				[
+					newTree second
+						ifNotEmpty: [:changedRanges | | change newContained pair |
+							change := SBTSRange merging: changedRanges.
+							newContained := newTree first smallestBlockEncompassig: change.
+							pair := self findLastMatchingAncesors: {newContained}, newContained allParents oldTree: oldTree.
+							self replace: pair first with: pair second]
+						ifEmpty: [ | pair |
+							"empty change means no structures were changed, only contents"
+							pair := self
+								findLastMatchingAncesors: {
+									self sandblockEditor currentInputCommand ifNotNil: #textMorph.
+									self sandblockEditor currentInputCommand ifNotNil: #block}, (self sandblockEditor currentInputCommand ifNotNil: #block) allParents
+								oldTree: newTree first.
+							pair second contents: pair first contents].
+					self copyRangesFrom: newTree first to: oldTree]}.
 			
-			self replace: oldTree with: newTree first.
+			oldTree
+				setProperty: #tsTree toValue: (newTree first valueOfProperty: #tsTree);
+				setProperty: #tsSource toValue: (newTree first valueOfProperty: #tsSource).
+			
 			self placeCursorIn: oldTree at: newIndex]
 ]
 

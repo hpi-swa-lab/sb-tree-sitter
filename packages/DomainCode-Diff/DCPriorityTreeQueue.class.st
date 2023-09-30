@@ -2,7 +2,8 @@ Class {
 	#name : #DCPriorityTreeQueue,
 	#superclass : #Object,
 	#instVars : [
-		'collection'
+		'collection',
+		'minimumHeight'
 	],
 	#category : #'DomainCode-Diff'
 }
@@ -11,6 +12,12 @@ Class {
 DCPriorityTreeQueue >> add: tree [
 
 	tree treeHeight >= self minimumHeight ifTrue: [collection add: tree]
+]
+
+{ #category : #'as yet unclassified' }
+DCPriorityTreeQueue >> addAll: aCollection [
+
+	aCollection do: [:tree | self add: tree]
 ]
 
 { #category : #'as yet unclassified' }
@@ -42,7 +49,13 @@ DCPriorityTreeQueue >> isEmpty [
 { #category : #'as yet unclassified' }
 DCPriorityTreeQueue >> minimumHeight [
 
-	^ 1
+	^ minimumHeight ifNil: [0]
+]
+
+{ #category : #'as yet unclassified' }
+DCPriorityTreeQueue >> minimumHeight: aNumber [
+
+	minimumHeight := aNumber
 ]
 
 { #category : #'as yet unclassified' }
