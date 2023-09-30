@@ -114,6 +114,17 @@ DCBlock class >> parseBlock: aString language: aLanguage [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock class >> registerShortcuts: aProvider [
+
+	aProvider cmdShortcut: $( do: #wrapInRoundParenthesis.
+	aProvider cmdShortcut: ${ do: #wrapInCurlyBraces.
+	aProvider cmdShortcut: $[ do: #wrapInSquareBrackets.
+	aProvider cmdShortcut: $' do: #wrapInSingleQuotes.
+	aProvider cmdShortcut: $" do: #wrapInDoubleQuotes.
+	aProvider cmdShortcut: $` do: #wrapInBackticks
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> absolutePositionOf: aMorph [
 
 	| n |
@@ -208,7 +219,7 @@ DCBlock >> deleteBeforeCursor [
 			do: [:new :edit | apply value: new value: edit value: cursorIndex - 1]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'text modify' }
 DCBlock >> deleteFrom: aString at: aNumber do: aBlock [
 
 	| new |
@@ -403,7 +414,7 @@ DCBlock >> inputClosestTextMorphTo: cursorPosition [
 			in: best]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'text modify' }
 DCBlock >> insert: aString in: aContainerString at: aNumber do: aBlock [
 
 	| new |
@@ -556,8 +567,10 @@ DCBlock >> pairMap [
 { #category : #'as yet unclassified' }
 DCBlock >> placeCursorIn: newTree at: newIndex [
 
+	newIndex ifNil: [^ self].
+	
 	^ newIndex isNumber ifTrue: [newTree startInputAtSourceIndex: newIndex] ifFalse: [ | target |
-		target := newTree blockFor: newIndex.
+		target := (newTree blockFor: newIndex) ifNil: [^ self].
 		target isTextMorph
 			ifTrue: [
 				newTree sandblockEditor
@@ -707,7 +720,7 @@ DCBlock >> swap: aNumber [
 					do: {[SBTSRange start: startIndex size: pivot range size]. [startIndex]})]]]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'text modify' }
 DCBlock >> swap: aRange with: anotherRange in: aString do: aBlock [
 
 	| first second new |
@@ -839,6 +852,69 @@ DCBlock >> updateAllHighlights [
 DCBlock >> valid [
 
 	^ self type ~= 'ERROR'
+]
+
+{ #category : #'text modify' }
+DCBlock >> wrap: aRange in: aString open: anotherString close: aThirdString [
+
+	self
+		example: [DCBlock new]
+		args: [{SBTSRange start: 3 size: 3. 'abcdefghi'. '('. ')'}]
+		label: 'example'.
+	
+	^ (aString first: aRange start index), anotherString, (aString copyFrom: aRange start index + 1 to: aRange end index), aThirdString, (aString allButFirst: aRange end index)
+]
+
+{ #category : #'action helpers' }
+DCBlock >> wrapIn: aString [
+
+	^ self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+		apply
+			value: (self wrap: self range in: source open: aString close: (self pairMap at: aString))
+			value: nil
+			value: self range]
+]
+
+{ #category : #actions }
+DCBlock >> wrapInBackticks [
+	<action>
+
+	self wrapIn: '`'
+]
+
+{ #category : #actions }
+DCBlock >> wrapInCurlyBraces [
+	<action>
+
+	self wrapIn: '{'
+]
+
+{ #category : #actions }
+DCBlock >> wrapInDoubleQuotes [
+	<action>
+
+	self wrapIn: '"'
+]
+
+{ #category : #actions }
+DCBlock >> wrapInRoundParenthesis [
+	<action>
+
+	self wrapIn: '('
+]
+
+{ #category : #actions }
+DCBlock >> wrapInSingleQuotes [
+	<action>
+
+	self wrapIn: ''''
+]
+
+{ #category : #actions }
+DCBlock >> wrapInSquareBrackets [
+	<action>
+
+	self wrapIn: '['
 ]
 
 { #category : #'as yet unclassified' }

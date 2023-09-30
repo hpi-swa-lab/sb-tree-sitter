@@ -46,13 +46,13 @@ DCMatcher >> fineGrainedMatch2From: src to: dest in: aMapping [
 		commonAncestorOf: (Array streamContents: [:s | dest allMorphsDo: [:k | (aMapping isDestMapped: k) ifFalse: [s nextPut: k]]])
 		root: dest.
 	(topSrc notNil and: [topDest notNil]) ifTrue: [
-		SBToggledCode
-			comment: ''
-			active: 0
-			do: {[self assert: (aMapping destForSrc: topSrc owner) = topDest owner]}.
-		DCGreedyBottomUpMatcher new
-			sizeThreshold: 900000000;
-			lastChanceMatchFrom: topSrc to: topDest in: aMapping]
+		"see if we can answer quickly, otherwise we accept a worse diff result"
+		[
+			DCGreedyBottomUpMatcher new
+				sizeThreshold: 900000000;
+				lastChanceMatchFrom: topSrc to: topDest in: aMapping]
+			valueWithin: 400 milliSeconds
+			onTimeout: []]
 ]
 
 { #category : #'as yet unclassified' }
