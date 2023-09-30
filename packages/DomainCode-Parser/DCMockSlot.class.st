@@ -78,15 +78,22 @@ DCMockSlot >> parentThat: aBlock [
 
 { #category : #'as yet unclassified' }
 DCMockSlot >> preferredColorIn: aColorPolicy for: aHighlightString [
+	" specific "
 
-	^ aHighlightString
+	aHighlightString
+		caseOf: {
+			['variable.part'] -> [^ aColorPolicy default].
+			['variable.builtin'] -> [^ aColorPolicy identifier]}
+		otherwise: [].
+	
+	" general "
+	^ (aHighlightString copyUpTo: $.)
 		caseOf: {
 			['keyword'] -> [aColorPolicy keyword].
 			['function'] -> [aColorPolicy identifier].
 			['comment'] -> [aColorPolicy defaultLight].
+			['punctuation'] -> [aColorPolicy defaultLight].
 			['variable'] -> [aColorPolicy identifier].
-			['variable.part'] -> [aColorPolicy default].
-			['variable.builtin'] -> [aColorPolicy identifier].
 			['type'] -> [aColorPolicy keyword].
 			['number'] -> [aColorPolicy literal].
 			['string'] -> [aColorPolicy literal].
@@ -146,15 +153,13 @@ DCMockSlot >> type [
 DCMockSlot >> updateAllHighlightsFor: aBlock [
 
 	morph language instance grammar hasHighlight ifFalse: [^ #'_sb_none'].
-	aBlock allMorphsDo: [:m |
-		m isTSMorph ifTrue: [
-			m highlight: #'_sb_none'.
-			m slot updateHighlightFor: m]].
+	aBlock allMorphsDo: [:m | m isTSMorph ifTrue: [m highlight: #'_sb_none']].
+	aBlock allMorphsBreadthFirstDo: [:m | m isTSMorph ifTrue: [m slot updateHighlightFor: m]].
 	^ aBlock highlight
 ]
 
 { #category : #'as yet unclassified' }
 DCMockSlot >> updateHighlightFor: aBlock [
 
-	morph language instance grammar highlightQuery ifNotNil: [:query | (query executeCaptureAgainst: aBlock) do: [:pair | (pair value highlight isNil or: [pair value highlight = #'_sb_none' or: [pair value highlight size < pair key size]]) ifTrue: [pair value highlight: pair key]]]
+	morph language instance grammar highlightQuery ifNotNil: [:query | (query executeCaptureAgainst: aBlock) do: [:pair | (pair value highlight isNil or: [pair value highlight = #'_sb_none' or: [(pair value highlight occurrencesOf: '.') < (pair key highlight occurrencesOf: '.')]]) ifTrue: [pair value highlight: pair key]]]
 ]

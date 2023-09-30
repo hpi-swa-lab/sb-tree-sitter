@@ -12,6 +12,22 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCBlock class >> addUncapturedTextTo: aNode in: aCursor language: aLanguage isLeaf: aBoolean [
+
+	| text |
+	text := aCursor textToNext.
+	(text occurrencesOf: Character lf) - 1 timesRepeat: [aNode addMorphBack: (DCUnknown new language: aLanguage)].
+	
+	aBoolean ifTrue: [text := aLanguage instance grammar trimExtra: aCursor uncapturedText].
+
+	(aLanguage instance grammar trimExtra: text) ifNotEmpty: [:t |
+		aNode addMorphBack: (DCText new
+			contents: t;
+			field: aCursor fieldName;
+			range: aCursor range)]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock class >> findChangeRangeFrom: original to: new [
 
 	| start end maxSize |
@@ -43,16 +59,11 @@ DCBlock class >> fromCursor: aCursor language: aLanguage [
 			aCursor gotoFirstChild
 				ifTrue: [
 					[
-						aCursor numberOfNewLinesToNext - 1 timesRepeat: [node addMorphBack: (DCUnknown new language: aLanguage)].
+						self addUncapturedTextTo: node in: aCursor language: aLanguage isLeaf: false.
 						node addMorphBack: (self fromCursor: aCursor language: aLanguage)] doWhileFalse: [aCursor gotoNextSibling].
+					self addUncapturedTextTo: node in: aCursor language: aLanguage isLeaf: false.
 					aCursor gotoParent]
-				ifFalse: [
-					aCursor text ifNotEmpty: [:text |
-						node addMorphBack: (DCText new
-							contents: text;
-							field: aCursor fieldName;
-							range: aCursor range)]].
-			
+				ifFalse: [self addUncapturedTextTo: node in: aCursor language: aLanguage isLeaf: true].
 			node]
 		ifFalse: [
 			DCText new
@@ -133,6 +144,32 @@ DCBlock >> absolutePositionOf: aMorph [
 		n := n + 1.
 		m = aMorph ifTrue: [^ n]].
 	^ self assert: false
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent [
+	"do not place closing pair characters if they are coming up right after"
+
+	(self pairMap keyAtValue: input ifAbsent: nil) ifNotNil: [:openChar |
+		(source at: cursorIndex + 1 ifPresent: [:char | input first = char] ifAbsent: [false]) ifTrue: [
+			self owner startInputAtSourceIndex: cursorIndex + 1.
+			^ '']].
+	
+	self pairMap at: input ifPresent: [:complete |
+		"do not autocomplete quotes in words"
+		(complete = '''' and: [source at: cursorIndex ifPresent: #isAlphaNumeric ifAbsent: [false]]) ifTrue: [^ input].
+		
+		"do not autocomplete after backslash"
+		textMorph characterBeforeCursor = $\ ifTrue: [^ input].
+		
+		^ input, complete].
+	
+	"for separators, don't re-parse immediately, as those get discarded during parse"
+	^ input first isSeparator
+		ifTrue: [
+			textMorph keyStroke: anEvent.
+			'']
+		ifFalse: [input]
 ]
 
 { #category : #'as yet unclassified' }
@@ -243,6 +280,15 @@ DCBlock >> drawnColor [
 	^ self prefersNoBorder
 		ifTrue: [super drawnColor alpha: 0]
 		ifFalse: [super drawnColor]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> emphasis [
+
+	self highlight ifNotNil: [:h |
+		(h beginsWith: 'major_declaration') ifTrue: [^ TextEmphasis bold].
+		self type = #comment ifTrue: [^ TextEmphasis italic]].
+	^ self colorPolicy defaultEmphasis
 ]
 
 { #category : #'as yet unclassified' }
@@ -439,12 +485,12 @@ DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 			morph: (DCUnknown new language: self language))].
 	
 	(self orOwnerSuchThat: [:morph | morph isTSBlock and: [morph isStatement]]) ifNotNil: [:statement | | target |
-		target := ((statement morphBeforeOrAfter: anAboveBoolean) ifNotNil: #treeLabel) = self language statementTerminator
-			ifTrue: [statement morphBeforeOrAfter: anAboveBoolean]
+		target := (anAboveBoolean not and: [(statement submorphAfter ifNotNil: #treeLabel) = self language statementTerminator])
+			ifTrue: [statement submorphAfter]
 			ifFalse: [statement].
 		self sandblockEditor do: (SBRelInsertCommand new near: target before: anAboveBoolean in: statement owner morph: (DCUnknown new
 			language: self language;
-			contents: self language statementTerminator))]
+			contents: (SBToggledCode comment: '' active: 1 do: {['']. [self language statementTerminator]})))]
 ]
 
 { #category : #'as yet unclassified' }
@@ -480,31 +526,15 @@ DCBlock >> isTSMorph [
 { #category : #'as yet unclassified' }
 DCBlock >> keyStroke: anEvent [
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | input insert |
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | input |
 		input := anEvent keyCharacter asString.
-		insert := [:str |
-			self
-				insert: str
-				in: source
-				at: cursorIndex + 1
-				do: [:new :edit | apply value: new value: edit value: cursorIndex + 1]].
 		(input first isPrintable and: [anEvent commandKeyPressed not]) ifTrue: [
-			"do not place closing pair characters if they are coming up right after"
-			(self pairMap keyAtValue: input ifAbsent: nil) ifNotNil: [:openChar | (source at: cursorIndex + 1 ifPresent: [:char | input first = char] ifAbsent: [false]) ifTrue: [^ self owner startInputAtSourceIndex: cursorIndex + 1]].
-			
-			self pairMap at: input ifPresent: [:complete |
-				"do not autocomplete quotes in words"
-				(complete = '''' and: [source at: cursorIndex ifPresent: #isAlphaNumeric ifAbsent: [false]]) ifTrue: [^ insert value: input].
-				
-				"do not autocomplete after backslash"
-				textMorph characterBeforeCursor = $\ ifTrue: [^ insert value: input].
-				
-				^ insert value: input, complete].
-			
-			"for separators, don't re-parse immediately, as those get discarded during parse"
-			^ input first isSeparator
-				ifTrue: [textMorph keyStroke: anEvent]
-				ifFalse: [insert value: input]]]
+			(self adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent) ifNotEmpty: [:text |
+				self
+					insert: text
+					in: source
+					at: cursorIndex + 1
+					do: [:new :edit | apply value: new value: edit value: cursorIndex + 1]]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -545,9 +575,11 @@ DCBlock >> layoutCommands [
 { #category : #'as yet unclassified' }
 DCBlock >> layoutInset [
 
+	self isBlockBody ifTrue: [^ 2 @ 2].
+	
 	^ (self type = 'ERROR' and: [self childSandblocks notEmpty])
 		ifTrue: [0]
-		ifFalse: [super layoutInset]
+		ifFalse: [2 @ (self submorphCount > 3 ifTrue: [1] ifFalse: [0])]
 ]
 
 { #category : #'as yet unclassified' }
@@ -594,9 +626,28 @@ DCBlock >> prefersNoBorder [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> prettySourceString [
+
+	self allBlocksDo: [:b | b valid ifFalse: [^ self sourceString]].
+	^ self language runtime
+		ifNotNil: [:r | r prettyPrint: self sourceString]
+		ifNil: [self sourceString]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> printOn: aStream [
 
 	aStream nextPutAll: self type
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> queryAll: aString [
+
+	^ Array streamContents: [:stream |
+		self allMorphsDo: [:block |
+			block isTSMorph ifTrue: [ | captures |
+				captures := nil.
+				(SBTSQuery new execute: aString against: block capturesDo: [:cap | captures := cap]) ifTrue: [stream nextPut: captures anyOne]]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -780,7 +831,7 @@ DCBlock >> treeHash [
 { #category : #'as yet unclassified' }
 DCBlock >> treeHashChildren: anotherNumber [
 
-	^ ((self type hash bitXor: 'ENTER' hash) bitXor: anotherNumber) bitXor: 'LEAVE' hash
+	^ (((self type hash bitXor: 'ENTER' hash) bitXor: anotherNumber) bitXor: self submorphIndex hash) bitXor: 'LEAVE' hash
 ]
 
 { #category : #'as yet unclassified' }

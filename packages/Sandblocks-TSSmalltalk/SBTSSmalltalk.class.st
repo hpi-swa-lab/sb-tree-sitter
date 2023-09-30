@@ -88,6 +88,13 @@ SBTSSmalltalk class >> fileSuffix [
 	^ 'st'
 ]
 
+{ #category : #'configuration - layout' }
+SBTSSmalltalk class >> gapBetween: aBlock and: anotherBlock [
+
+	anotherBlock type = 'ERROR' ifTrue: [^ false].
+	^ super gapBetween: aBlock and: anotherBlock
+]
+
 { #category : #properties }
 SBTSSmalltalk class >> grammarJson [
 
@@ -1134,8 +1141,12 @@ SBTSSmalltalk class >> grammarJson [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
-	(anotherBlock contents = '.' and: [aBlock contents ~= '.']) ifTrue: [^ false].
+	aBlock contents = '.' ifTrue: [^ true].
+	anotherBlock type = 'ERROR' ifTrue: [^ false].
+	anotherBlock contents = '.' ifTrue: [^ false].
 	(({#statement. #empty. #comment} includes: aBlock slot lastNode type) and: [{#statement. #empty. #comment} includes: anotherBlock slot lastNode type]) ifTrue: [^ true].
+	aBlock contents = ';' ifTrue: [^ true].
+	aBlock contents = '[' ifTrue: [^ false].
 	(({#statement. #empty. #comment} includes: anotherBlock slot lastNode type) and: [(anotherBlock owner submorphs count: [:m | m slot lastNode type = #statement]) > 1]) ifTrue: [^ true].
 	SBToggledCode
 		comment: ''
@@ -1143,14 +1154,18 @@ SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 		do: {[(aBlock parentSandblock ifNotNil: #type) = #method ifTrue: [^ true]]}.
 	(#(#'keyword_selector' #'unary_selector' #'binary_selector') includes: aBlock type) ifTrue: [^ true].
 	((aBlock slot isStatementIn: aBlock parentSandblock) and: [aBlock ~= aBlock parentSandblock childSandblocks last]) ifTrue: [^ true].
+	(aBlock field = 'receiver' and: [
+		aBlock parentSandblock
+			ifNotNil: [:p | p parentSandblock ifNotNil: [:p2 | p2 type = #cascade]]
+			ifNil: [false]]) ifTrue: [^ true].
 	^ false
 ]
 
 { #category : #properties }
 SBTSSmalltalk class >> highlightQuery [
+	" https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
 
-    " https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
-    ^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
+	^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
 
 (number) @number
 
@@ -1161,16 +1176,21 @@ SBTSSmalltalk class >> highlightQuery [
 (identifier) @variable
 (block_argument) @variable
 
+";" @punctuation
+"." @punctuation
+
 (unary_message (_) (unary_identifier) @variable.part)
 (binary_operator) @variable.part
 (keyword) @variable.part
 
 ["^" "[" "]" "{" "}"] @important
 
-(keyword_selector (keyword) @major_declaration)
-(binary_selector (binary_operator) @major_declaration)
-(unary_selector (unary_identifier) @major_declaration)
-'
+(keyword_selector (keyword) @major_declaration.part) @structure.part
+(binary_selector (binary_operator) @major_declaration.part) @structure.part
+(unary_selector (unary_identifier) @major_declaration.part) @structure.part
+
+(temporaries) @punctuation.part
+(temporaries (identifier) @punctuation)'
 ]
 
 { #category : #configuration }
@@ -1233,16 +1253,23 @@ SBTSSmalltalk class >> rootRuleName [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
 
+	anotherBlock type = 'ERROR' ifTrue: [^ false].
 	aBlock type = #'block_argument' ifTrue: [^ false].
+	anotherBlock contents = '.' ifTrue: [^ false].
+	anotherBlock contents = ';' ifTrue: [^ false].
+	aBlock treeLabel = '[' ifTrue: [^ false].
+	anotherBlock contents = ']' ifTrue: [^ false].
+	aBlock type = #keyword ifTrue: [^ false].
 	(super softLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
 	aBlock field = #receiver ifTrue: [^ true].
 	anotherBlock type = #keyword ifTrue: [^ true].
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'configuration - layout' }
 SBTSSmalltalk class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
+	anotherBlock type = 'ERROR' ifTrue: [^ false].
 	(aBlock contents = ':=' or: [anotherBlock contents = ':=']) ifTrue: [^ true].
 	anotherBlock alias = #'unary_identifier' ifTrue: [^ true].
 	^ super spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter
@@ -1315,15 +1342,6 @@ SBTSSmalltalk >> declarationsInScope: aScopeBlock do: aClosure [
 		block type = #'block_argument' ifTrue: [aClosure value: (SBTSDeclaration block: block selector: block contents allButFirst label: 'block arg')].
 		block type = #temporaries ifTrue: [block childSandblocks do: [:temp | aClosure value: (SBTSDeclaration block: temp label: 'temporary')]].
 		(#(#'binary_selector' #'keyword_selector') includes: block type) ifTrue: [(block childSandblocks select: [:arg | arg type = #identifier]) do: [:arg | aClosure value: (SBTSDeclaration block: arg label: 'argument')]]]
-]
-
-{ #category : #'as yet unclassified' }
-SBTSSmalltalk >> hardLineBreakBetween: aBlock and: anotherBlock [
-
-	aBlock parentSandblock type = 'block' ifTrue: [^ aBlock parentSandblock childSandblocks size > 1 and: [anotherBlock contents ~= ']']].
-	aBlock contents = ';' ifTrue: [^ true].
-	(super hardLineBreakBetween: aBlock and: anotherBlock) ifTrue: [^ true].
-	^ false
 ]
 
 { #category : #'as yet unclassified' }

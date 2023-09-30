@@ -359,6 +359,22 @@ SBTSCursorRaw >> textBetweenIndex: aNumber andNode: anEndNode [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSCursorRaw >> textToNext [
+
+	| current previous |
+	self atEnd
+		ifTrue: [
+			current := nil.
+			previous := self node]
+		ifFalse: [
+			current := self node.
+			previous := self previousNode: current.
+			previous ifNil: [^ '']].
+	self position > (self endByteIndex: previous) ifTrue: [^ ''].
+	^ self textBetween: previous and: current
+]
+
+{ #category : #'as yet unclassified' }
 SBTSCursorRaw >> type [
 
 	^ library nodeType: self node
@@ -399,4 +415,12 @@ SBTSCursorRaw >> unaliasedType [
 	" does the entry actually exist? apparently aliases can be reused as proper symbol names as part of the symbolNames table. (_import_export_specifier in JS) "
 	"factory bodyNodeForRule: type ifAbsent: [^ library nodeType: n]."
 	^ type
+]
+
+{ #category : #'as yet unclassified' }
+SBTSCursorRaw >> uncapturedText [
+
+	^ self textBetweenIndex: self position + 1 and: (self atEnd
+		ifTrue: [self endByteIndex: self parent]
+		ifFalse: [self endByteIndex: self node])
 ]

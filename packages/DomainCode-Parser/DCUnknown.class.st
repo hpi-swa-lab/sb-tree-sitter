@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCUnknown >> adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent [
+
+	^ (super adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent), self language statementTerminator
+]
+
+{ #category : #'as yet unclassified' }
 DCUnknown >> contents: aString [
 
 	self firstSubmorph contents: aString

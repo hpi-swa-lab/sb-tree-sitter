@@ -435,6 +435,12 @@ SBTSTextMorph >> symmetricSibling [
 ]
 
 { #category : #'as yet unclassified' }
+SBTSTextMorph >> treeLabel [
+
+	^ self contents
+]
+
+{ #category : #'as yet unclassified' }
 SBTSTextMorph >> type [
 
 	^ self slot type

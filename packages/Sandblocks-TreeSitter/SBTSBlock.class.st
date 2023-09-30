@@ -1437,6 +1437,12 @@ SBTSBlock >> toplevel [
 		ifFalse: [(self ownerThatIsA: SBTSBlock) toplevel]
 ]
 
+{ #category : #accessing }
+SBTSBlock >> treeLabel [
+
+	^ ''
+]
+
 { #category : #'as yet unclassified' }
 SBTSBlock >> tryApplyChange: aBlock input: aString [
 

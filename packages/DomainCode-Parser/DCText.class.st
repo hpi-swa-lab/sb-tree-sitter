@@ -34,6 +34,12 @@ DCText >> effectiveContents [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> emphasis [
+
+	^ #derive
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> ensureLayouted [
 
 	self owner ensureLayouted
