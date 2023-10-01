@@ -12,7 +12,7 @@ DCChawatheScriptGenerator >> alignChildrenSrc: w dest: x srcInOrder: srcInOrder 
 	x submorphs do: [:c | destInOrder remove: c ifAbsent: []].
 	
 	s1 := w submorphs select: [:c | (aMapping isSrcMapped: c) and: [x submorphs includes: (aMapping destForSrc: c)]].
-	s2 := x submorphs select: [:c | (aMapping isDestMapped: c) and: [x submorphs includes: (aMapping srcForDest: c)]].
+	s2 := x submorphs select: [:c | (aMapping isDestMapped: c) and: [w submorphs includes: (aMapping srcForDest: c)]].
 	
 	lcs := self lcsWith: s1 and: s2 in: aMapping.
 	lcs do: [:mapping |
@@ -21,8 +21,9 @@ DCChawatheScriptGenerator >> alignChildrenSrc: w dest: x srcInOrder: srcInOrder 
 	
 	s2 do: [:b |
 		s1 do: [:a |
-			(aMapping includes: {a. b}) ifFalse: [ | k |
+			((aMapping includes: {a. b}) and: [(lcs includes: {a. b}) not]) ifTrue: [ | k |
 				"FIXME delete first or find position first?"
+				"a delete."
 				k := self findPosition: b dest: destInOrder in: aMapping.
 				self move: a to: w at: k.
 				srcInOrder add: a.
@@ -101,7 +102,7 @@ DCChawatheScriptGenerator >> insert: aMorph at: aNumber in: anOwnerMorph [
 DCChawatheScriptGenerator >> lcsWith: x and: y in: aMapping [
 
 	| opt lcs ix jy |
-	opt := Matrix rows: x size + 1 columns: y size + 1.
+	opt := Matrix rows: x size + 1 columns: y size + 1 element: 0.
 	lcs := OrderedCollection new.
 	
 	x size to: 1 by: -1 do: [:i |
@@ -110,9 +111,9 @@ DCChawatheScriptGenerator >> lcsWith: x and: y in: aMapping [
 				ifTrue: [(opt at: i + 1 at: j + 1) + 1]
 				ifFalse: [(opt at: i + 1 at: j) max: (opt at: i at: j + 1)])]].
 	
-	ix := 0.
-	jy := 0.
-	[ix < x size and: [jy < y size]] whileTrue: [
+	ix := 1.
+	jy := 1.
+	[ix <= x size and: [jy <= y size]] whileTrue: [
 		(aMapping srcForDest: (y at: jy)) = (x at: ix)
 			ifTrue: [
 				lcs add: {x at: ix. y at: jy}.

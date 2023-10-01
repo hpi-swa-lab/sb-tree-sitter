@@ -48,6 +48,12 @@ DCMappingStore >> destToSrc [
 ]
 
 { #category : #'as yet unclassified' }
+DCMappingStore >> includes: aMapping [
+
+	^ (self destForSrc: aMapping first) = aMapping second
+]
+
+{ #category : #'as yet unclassified' }
 DCMappingStore >> initialize [
 
 	super initialize.
