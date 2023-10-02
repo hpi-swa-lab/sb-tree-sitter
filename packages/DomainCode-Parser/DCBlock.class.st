@@ -72,6 +72,14 @@ DCBlock class >> fromCursor: aCursor language: aLanguage [
 				range: aCursor range]
 ]
 
+{ #category : #generic }
+DCBlock class >> genericAddMarker [
+	<query: #shortcut>
+
+	^ {
+		[:x | x registerShortcut: #addMarker do: [{[:block | block attachDecorator: SBMarkedDecorator new]}]]}
+]
+
 { #category : #'as yet unclassified' }
 DCBlock class >> parse: aString language: aLanguage [
 
@@ -132,7 +140,8 @@ DCBlock class >> registerShortcuts: aProvider [
 	aProvider cmdShortcut: $[ do: #wrapInSquareBrackets.
 	aProvider cmdShortcut: $' do: #wrapInSingleQuotes.
 	aProvider cmdShortcut: $" do: #wrapInDoubleQuotes.
-	aProvider cmdShortcut: $` do: #wrapInBackticks
+	aProvider cmdShortcut: $` do: #wrapInBackticks.
+	aProvider shortcut: $M command do: #addMarker
 ]
 
 { #category : #smalltalk }
@@ -179,6 +188,20 @@ DCBlock class >> smalltalkBrowseReferencesSend [
 											requestor: #modelMenu]
 									ifFalse: [self systemNavigation browseAllCallsOn: sel asSymbol]]
 							ifFalse: [message sandblockEditor open: calls first compiledMethod]]}]]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkCheckbox [
+	<query: #change>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x isReplacement not].
+		[:x | {#true. #false} includes: x type].
+		[:x |
+			x installReplacement: (DCCheckbox new
+				fromSource: [:source :repl | repl checked: source contents = 'true']
+				toSource: [:source :repl | source contents: (repl checked ifTrue: ['true'] ifFalse: ['false'])])]}
 ]
 
 { #category : #smalltalk }
@@ -267,7 +290,7 @@ DCBlock class >> smalltalkUndeclaredVariable [
 									container: temporaries;
 									index: temporaries submorphCount)]
 							ifNone: [ | index |
-								index := block submorphs findFirst: [:s | s treeLabel = '|'].
+								index := block children findFirst: [:s | s treeLabel = '|'].
 								node sandblockEditor do: (SBInsertCommand new
 									morph: (DCBlock new
 										type: #temporaries;
@@ -297,9 +320,12 @@ DCBlock class >> smalltalkUnusedVariable [
 DCBlock class >> smalltalkUsesOfDeclaration [
 
 	^ {
-		[:decl | {#args. decl. decl orAnyParent: #(block method)}].
-		[:decl :scope | {#args. decl. scope allBlocksSelect: [:x | (#(identifier block_argument) includes: x type) and: [(x contents withoutLeading: #($:)) = (decl contents withoutLeading: #($:))]]}]
-	}
+		[:decl | {#args. decl. decl orAnyParent: #(#block #method)}].
+		[:decl :scope |
+			{
+				#args.
+				decl.
+				scope allChildrenSelect: [:x | (#(#identifier #'block_argument') includes: x type) and: [(x contents withoutLeading: #($:)) = (decl contents withoutLeading: #($:))]]}]}
 ]
 
 { #category : #'as yet unclassified' }
@@ -307,7 +333,7 @@ DCBlock >> absolutePositionOf: aMorph [
 
 	| n |
 	n := 0.
-	self allMorphsDo: [:m |
+	self allChildrenDo: [:m |
 		n := n + 1.
 		m = aMorph ifTrue: [^ n]].
 	^ self assert: false
@@ -365,7 +391,7 @@ DCBlock >> allParentsUpTo: aBlock [
 { #category : #'as yet unclassified' }
 DCBlock >> allTextMorphsDo: aBlock [
 
-	self allMorphsDo: [:m | m isTextMorph ifTrue: [aBlock value: m]]
+	self allChildrenDo: [:m | m isTextMorph ifTrue: [aBlock value: m]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -383,7 +409,7 @@ DCBlock >> attachHighlight [
 { #category : #'as yet unclassified' }
 DCBlock >> blockFor: aRange [
 
-	self allMorphsDo: [:block | (block isTSMorph and: [block range = aRange]) ifTrue: [^ block]].
+	self allChildrenDo: [:block | (block isTSMorph and: [block range = aRange]) ifTrue: [^ block]].
 	^ nil
 ]
 
@@ -403,7 +429,7 @@ DCBlock >> contentsToDisplay [
 DCBlock >> copyRangesFrom: newTree to: oldTree [
 
 	oldTree range: newTree range.
-	newTree submorphs with: oldTree submorphs do: [:a :b | self copyRangesFrom: a to: b]
+	newTree children with: oldTree children do: [:a :b | self copyRangesFrom: a to: b]
 ]
 
 { #category : #'as yet unclassified' }
@@ -494,7 +520,7 @@ DCBlock >> findLastMatchingAncesors: aCollection oldTree: aBlock [
 	| oldCurrent |
 	oldCurrent := aBlock.
 	aCollection allButLast reverseDo: [:newCurrent |
-		oldCurrent := oldCurrent submorphs at: newCurrent submorphIndex ifAbsent: [
+		oldCurrent := oldCurrent children at: newCurrent submorphIndex ifAbsent: [
 			self assert: oldCurrent type = newCurrent owner type.
 			^ {oldCurrent. newCurrent owner}].
 		oldCurrent type = newCurrent type ifFalse: [
@@ -618,7 +644,7 @@ DCBlock >> inputClosestTextMorphTo: cursorPosition [
 	atStart := false.
 	
 	"match on same line"
-	self allMorphsDo: [:t |
+	self allChildrenDo: [:t |
 		t isTextMorph ifTrue: [
 			t range start line = cursorPosition line ifTrue: [ | distance |
 				distance := (t range start character - cursorPosition character) abs.
@@ -635,7 +661,7 @@ DCBlock >> inputClosestTextMorphTo: cursorPosition [
 	
 	"match on different line"
 	best ifNil: [
-		self allMorphsDo: [:t |
+		self allChildrenDo: [:t |
 			t isTextMorph ifTrue: [ | distance |
 				distance := (t range start line - cursorPosition line) abs min: (t range end line - cursorPosition line) abs.
 				distance < bestDistance ifTrue: [
@@ -691,6 +717,12 @@ DCBlock >> insertStatementHasCandidate [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> installReplacement: aBlock [
+
+	self sandblockEditor do: (SBReplaceCommand new target: self replacer: (aBlock source: self))
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> intoWorld: aWorld [
 
 	super intoWorld: aWorld.
@@ -699,7 +731,8 @@ DCBlock >> intoWorld: aWorld [
 		self sandblockEditor
 			when: #selectionChanged
 			send: #updateSelectionQueries
-			to: self queryState]
+			to: self queryState.
+		self queryState updateChangeQueries]
 ]
 
 { #category : #'as yet unclassified' }
@@ -728,6 +761,12 @@ DCBlock >> isOrHasParent: aCollectionOrSymbol [
 DCBlock >> isPart [
 
 	^ self highlight notNil and: [self highlight endsWith: '.part']
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> isReplacement [
+
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -949,7 +988,7 @@ DCBlock >> printOn: aStream [
 DCBlock >> queryAll: aString [
 
 	^ Array streamContents: [:stream |
-		self allMorphsDo: [:block |
+		self allChildrenDo: [:block |
 			block isTSMorph ifTrue: [
 				(SBTSQuery new
 					prepare: aString;
@@ -1143,7 +1182,7 @@ DCBlock >> template [
 { #category : #'as yet unclassified' }
 DCBlock >> textMorphForPosition: aPosition [
 
-	self allMorphsDo: [:t | (t isTextMorph and: [t range contains: aPosition]) ifTrue: [^ t]].
+	self allChildrenDo: [:t | (t isTextMorph and: [t range contains: aPosition]) ifTrue: [^ t]].
 	^ nil
 ]
 
@@ -1156,8 +1195,8 @@ DCBlock >> textMorphs [
 { #category : #'as yet unclassified' }
 DCBlock >> treeHash [
 
-	self hasSubmorphs ifFalse: [^ self treeHashChildren: 0].
-	^ self treeHashChildren: (self submorphs inject: 0 into: [:hash :morph | hash bitXor: morph treeHash])
+	self hasChildren ifFalse: [^ self treeHashChildren: 0].
+	^ self treeHashChildren: (self children inject: 0 into: [:hash :morph | hash bitXor: morph treeHash])
 ]
 
 { #category : #'as yet unclassified' }

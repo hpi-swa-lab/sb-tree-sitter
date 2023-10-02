@@ -8,11 +8,11 @@ Class {
 DCChawatheScriptGenerator >> alignChildrenSrc: w dest: x srcInOrder: srcInOrder destInOrder: destInOrder in: aMapping [
 
 	| s1 s2 lcs |
-	w submorphs do: [:c | srcInOrder remove: c ifAbsent: []].
-	x submorphs do: [:c | destInOrder remove: c ifAbsent: []].
+	w children do: [:c | srcInOrder remove: c ifAbsent: []].
+	x children do: [:c | destInOrder remove: c ifAbsent: []].
 	
-	s1 := w submorphs select: [:c | (aMapping isSrcMapped: c) and: [x submorphs includes: (aMapping destForSrc: c)]].
-	s2 := x submorphs select: [:c | (aMapping isDestMapped: c) and: [w submorphs includes: (aMapping srcForDest: c)]].
+	s1 := w children select: [:c | (aMapping isSrcMapped: c) and: [x children includes: (aMapping destForSrc: c)]].
+	s2 := x children select: [:c | (aMapping isDestMapped: c) and: [w children includes: (aMapping srcForDest: c)]].
 	
 	lcs := self lcsWith: s1 and: s2 in: aMapping.
 	lcs do: [:mapping |
@@ -21,7 +21,7 @@ DCChawatheScriptGenerator >> alignChildrenSrc: w dest: x srcInOrder: srcInOrder 
 	
 	s2 do: [:b |
 		s1 do: [:a |
-			((aMapping includes: {a. b}) and: [(lcs includes: {a. b}) not]) ifTrue: [ 
+			((aMapping includes: {a. b}) and: [(lcs includes: {a. b}) not]) ifTrue: [
 				self move: a to: w postDeleteDo: [self findPosition: b dest: destInOrder in: aMapping].
 				srcInOrder add: a.
 				destInOrder add: b]]]
@@ -37,7 +37,7 @@ DCChawatheScriptGenerator >> delete: aMorph [
 DCChawatheScriptGenerator >> findPosition: aTree dest: destInOrder in: aMapping [
 
 	| siblings v u |
-	siblings := aTree owner submorphs.
+	siblings := aTree owner children.
 	siblings do: [:c | (destInOrder includes: c) ifTrue: [c = aTree ifTrue: [^ 1]]].
 	
 	v := nil.
@@ -64,7 +64,7 @@ DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping [
 	destInOrder := Set new.
 	inserted := Set new.
 	
-	dest allMorphsBreadthFirstDo: [:x | | y z w |
+	dest allChildrenBreadthFirstDo: [:x | | y z w |
 		w := nil.
 		y := x owner.
 		z := aMapping srcForDest: y.
@@ -81,13 +81,13 @@ DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping [
 					v := w owner.
 					w treeLabel = x treeLabel ifFalse: [self update: w with: x contents].
 					k := self findPosition: x dest: destInOrder in: aMapping.
-					z = v ifFalse: [self move: w to: z postDeleteDo: [k]]]].
+					(z isNode: v) ifFalse: [self move: w to: z postDeleteDo: [k]]]].
 		
 		srcInOrder add: w.
 		destInOrder add: x.
 		self alignChildrenSrc: w dest: x srcInOrder: srcInOrder destInOrder: destInOrder in: aMapping].
 	
-	(Array streamContents: [:s | src allMorphsDo: [:w | ((aMapping isSrcMapped: w) not and: [(inserted includes: w) not]) ifTrue: [s nextPut: w]]]) do: [:w | self delete: w]
+	(Array streamContents: [:s | src allChildrenDo: [:w | ((aMapping isSrcMapped: w) not and: [(inserted includes: w) not]) ifTrue: [s nextPut: w]]]) do: [:w | self delete: w]
 ]
 
 { #category : #actions }

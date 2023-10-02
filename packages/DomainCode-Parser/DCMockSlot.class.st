@@ -154,8 +154,8 @@ DCMockSlot >> type [
 DCMockSlot >> updateAllHighlightsFor: aBlock [
 
 	morph language instance grammar hasHighlight ifFalse: [^ #'_sb_none'].
-	aBlock allMorphsDo: [:m | m isTSMorph ifTrue: [m highlight: #'_sb_none']].
-	aBlock allMorphsBreadthFirstDo: [:m | m isTSMorph ifTrue: [m slot updateHighlightFor: m]].
+	aBlock allChildrenDo: [:m | m isTSMorph ifTrue: [m highlight: #'_sb_none']].
+	aBlock allChildrenBreadthFirstDo: [:m | m isTSMorph ifTrue: [m slot updateHighlightFor: m]].
 	^ aBlock highlight
 ]
 

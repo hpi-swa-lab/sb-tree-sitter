@@ -11,10 +11,6 @@ Class {
 { #category : #'as yet unclassified' }
 DCMappingStore >> addMappingFrom: src to: dest [
 
-	SBToggledCode
-		comment: ''
-		active: 1
-		do: {[src type = 'lexical_declaration' ifTrue: [self halt]]}.
 	srcToDest at: src put: dest.
 	destToSrc at: dest put: src
 ]
@@ -23,7 +19,7 @@ DCMappingStore >> addMappingFrom: src to: dest [
 DCMappingStore >> addRecursiveMappingFrom: src to: dest [
 
 	self addMappingFrom: src to: dest.
-	src submorphs with: dest submorphs do: [:a :b | self addRecursiveMappingFrom: a to: b]
+	src children with: dest children do: [:a :b | self addRecursiveMappingFrom: a to: b]
 ]
 
 { #category : #'as yet unclassified' }

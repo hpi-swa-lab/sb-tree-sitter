@@ -8,10 +8,9 @@ Class {
 DCMatchTest >> testAppendBinary [
 
 	| src dest |
-	Transcript clear.
 	src := DCBlock parseBlock: 'a' language: SBJavascript.
 	dest := DCBlock parseBlock: 'a+' language: SBJavascript.
-	DCMatcher new matchFrom: src to: dest.
+	DCMatcher new applyEditsIn: dest to: src.
 	self assert: 'a+' equals: src sourceString
 ]
 
@@ -19,9 +18,8 @@ DCMatchTest >> testAppendBinary [
 DCMatchTest >> testSplitBinary [
 
 	| src dest |
-	Transcript clear.
 	src := DCBlock parseBlock: 'a2' language: SBJavascript.
 	dest := DCBlock parseBlock: 'a+2' language: SBJavascript.
-	DCMatcher new matchFrom: src to: dest.
+	DCMatcher new applyEditsIn: dest to: src.
 	self assert: 'a+2' equals: src sourceString
 ]

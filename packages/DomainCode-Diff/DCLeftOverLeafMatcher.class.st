@@ -17,9 +17,9 @@ DCLeftOverLeafMatcher >> handleAmbiguousMappings: aCollection for: aMapping [
 		mappingStore: aMapping.
 	
 	aCollection sort: [:m1 :m2 | | s1 s2 |
-		s1 := m1 first detectMax: [:t | t recursiveSubmorphCount].
-		s2 := m2 first detectMax: [:t | t recursiveSubmorphCount].
-		s1 recursiveSubmorphCount < s2 recursiveSubmorphCount].
+		s1 := m1 first detectMax: [:t | t treeSize].
+		s2 := m2 first detectMax: [:t | t treeSize].
+		s1 treeSize < s2 treeSize].
 	
 	aCollection do: [:entry | | candidates |
 		candidates := Array streamContents: [:s | entry first do: [:src | entry second do: [:dest | s nextPut: {src. dest}]]].
@@ -37,10 +37,10 @@ DCLeftOverLeafMatcher >> matchFrom: src to: dest in: aMapping [
 	ambiguousMappings := OrderedCollection new.
 	srcTrees := DCPriorityTreeQueue new
 		minimumHeight: 0;
-		addAll: (Array streamContents: [:s | src allMorphsDo: [:k | (aMapping isSrcMapped: k) ifFalse: [s nextPut: k]]]).
+		addAll: (Array streamContents: [:s | src allChildrenDo: [:k | (aMapping isSrcMapped: k) ifFalse: [s nextPut: k]]]).
 	destTrees := DCPriorityTreeQueue new
 		minimumHeight: 0;
-		addAll: (Array streamContents: [:s | dest allMorphsDo: [:k | (aMapping isDestMapped: k) ifFalse: [s nextPut: k]]]).
+		addAll: (Array streamContents: [:s | dest allChildrenDo: [:k | (aMapping isDestMapped: k) ifFalse: [s nextPut: k]]]).
 	
 	[
 		self synchronizePriority: srcTrees with: destTrees.

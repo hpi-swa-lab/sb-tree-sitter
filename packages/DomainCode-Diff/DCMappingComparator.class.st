@@ -24,8 +24,8 @@ DCMappingComparator class >> diceSimilarityFrom: src to: dest in: aMapping [
 
 	^ self
 		diceCoefficientCommon: (self numberOfMappedDescendantsFrom: src to: dest in: aMapping)
-		left: src recursiveSubmorphCount - 1
-		right: dest recursiveSubmorphCount - 1
+		left: src treeSize - 1
+		right: dest treeSize - 1
 ]
 
 { #category : #'as yet unclassified' }

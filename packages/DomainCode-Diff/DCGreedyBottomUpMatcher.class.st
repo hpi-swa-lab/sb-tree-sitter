@@ -33,7 +33,7 @@ DCGreedyBottomUpMatcher >> destCandidatesFor: src in: aMapping [
 { #category : #'as yet unclassified' }
 DCGreedyBottomUpMatcher >> lastChanceMatchFrom: src to: dest in: aMapping [
 
-	(src recursiveSubmorphCount < self sizeThreshold or: [dest recursiveSubmorphCount < self sizeThreshold]) ifTrue: [ | m zsMappings |
+	(src treeSize < self sizeThreshold or: [dest treeSize < self sizeThreshold]) ifTrue: [ | m zsMappings |
 		m := DCZhangShashaMatcher new.
 		zsMappings := DCMappingStore new.
 		m matchFrom: src to: dest in: zsMappings.
@@ -44,13 +44,13 @@ DCGreedyBottomUpMatcher >> lastChanceMatchFrom: src to: dest in: aMapping [
 DCGreedyBottomUpMatcher >> matchFrom: src to: dest in: aMapping [
 
 	rootDest := dest.
-	src allMorphsDo: [:t |
+	src allChildrenDo: [:t |
 		src = t
 			ifTrue: [
 				aMapping addMappingFrom: t to: dest.
 				self lastChanceMatchFrom: t to: dest in: aMapping]
 			ifFalse: [
-				((aMapping isSrcMapped: t) not or: [t hasSubmorphs not]) ifTrue: [
+				((aMapping isSrcMapped: t) not or: [t hasChildren not]) ifTrue: [
 					(((self destCandidatesFor: t in: aMapping) select: [:candidate | (DCMappingComparator diceSimilarityFrom: t to: candidate in: aMapping) >= self similarityThreshold]) detectMax: [:candidate | DCMappingComparator diceSimilarityFrom: t to: candidate in: aMapping]) ifNotNil: [:best |
 						self lastChanceMatchFrom: t to: best in: aMapping.
 						aMapping addMappingFrom: t to: best]]]]

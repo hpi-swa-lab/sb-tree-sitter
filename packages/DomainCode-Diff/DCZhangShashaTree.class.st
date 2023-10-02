@@ -15,18 +15,18 @@ Class {
 DCZhangShashaTree >> for: aTree [
 
 	| index tmpData visited k |
-	nodeCount := aTree recursiveSubmorphCount.
+	nodeCount := aTree treeSize.
 	leafCount := 0.
 	llds := Array new: nodeCount.
 	labels := Array new: nodeCount.
 	
 	index := 1.
 	tmpData := Dictionary new.
-	aTree allMorphsDo: [:n |
+	aTree allChildrenDo: [:n |
 		tmpData at: n put: index.
 		labels at: index put: n.
-		llds at: index put: (tmpData at: n firstDeepSubmorph) - 1.
-		n hasSubmorphs ifFalse: [leafCount := leafCount + 1].
+		llds at: index put: (tmpData at: n firstDeepChildNode) - 1.
+		n hasChildren ifFalse: [leafCount := leafCount + 1].
 		index := index + 1].
 	
 	keyRoots := Array new: leafCount + 1.

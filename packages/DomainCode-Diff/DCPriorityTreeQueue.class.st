@@ -23,7 +23,7 @@ DCPriorityTreeQueue >> addAll: aCollection [
 { #category : #'as yet unclassified' }
 DCPriorityTreeQueue >> addTree: tree [
 
-	tree submorphs do: [:child | self add: child]
+	tree children do: [:child | self add: child]
 ]
 
 { #category : #'as yet unclassified' }

@@ -68,7 +68,7 @@ DCCommandScriptGenerator >> move: aMorph to: anOwnerMorph postDeleteDo: aBlock [
 	self editor do: command.
 	
 	self maybeAttachFlash: aMorph.
-	self logChanges ifTrue: [Transcript showln: {#move. anOwnerMorph. aBlock. aMorph}]
+	self logChanges ifTrue: [Transcript showln: {#move. anOwnerMorph. command index. aMorph}]
 ]
 
 { #category : #actions }

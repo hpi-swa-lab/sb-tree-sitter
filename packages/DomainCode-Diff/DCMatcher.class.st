@@ -47,10 +47,10 @@ DCMatcher >> fineGrainedMatch2From: src to: dest in: aMapping [
 
 	| topSrc topDest |
 	topSrc := self
-		commonAncestorOf: (Array streamContents: [:s | src allMorphsDo: [:k | (aMapping isSrcMapped: k) ifFalse: [s nextPut: k]]])
+		commonAncestorOf: (Array streamContents: [:s | src allChildrenDo: [:k | (aMapping isSrcMapped: k) ifFalse: [s nextPut: k]]])
 		root: src.
 	topDest := self
-		commonAncestorOf: (Array streamContents: [:s | dest allMorphsDo: [:k | (aMapping isDestMapped: k) ifFalse: [s nextPut: k]]])
+		commonAncestorOf: (Array streamContents: [:s | dest allChildrenDo: [:k | (aMapping isDestMapped: k) ifFalse: [s nextPut: k]]])
 		root: dest.
 	(topSrc notNil and: [topDest notNil]) ifTrue: [
 		"see if we can answer quickly, otherwise we accept a worse diff result"
@@ -66,8 +66,8 @@ DCMatcher >> fineGrainedMatch2From: src to: dest in: aMapping [
 DCMatcher >> fineGrainedMatchFrom: src to: dest in: aMapping [
 
 	| topSrc topDest |
-	topSrc := (Array streamContents: [:s | src allMorphsDo: [:k | (aMapping isSrcMapped: k) ifFalse: [s nextPut: k]]]) detectMax: #treeHeight.
-	topDest := (Array streamContents: [:s | dest allMorphsDo: [:k | (aMapping isDestMapped: k) ifFalse: [s nextPut: k]]]) detectMax: #treeHeight.
+	topSrc := (Array streamContents: [:s | src allChildrenDo: [:k | (aMapping isSrcMapped: k) ifFalse: [s nextPut: k]]]) detectMax: #treeHeight.
+	topDest := (Array streamContents: [:s | dest allChildrenDo: [:k | (aMapping isDestMapped: k) ifFalse: [s nextPut: k]]]) detectMax: #treeHeight.
 	
 	self halt.
 	topSrc ifNotNil: [
@@ -80,7 +80,7 @@ DCMatcher >> fineGrainedMatchFrom: src to: dest in: aMapping [
 { #category : #'as yet unclassified' }
 DCMatcher >> largestUnmappedFor: aTree isSrc: aBoolean in: aMapping [
 
-	^ (Array streamContents: [:s | aTree allMorphsDo: [:k | (aBoolean ifTrue: [aMapping isSrcMapped: k] ifFalse: [aMapping isDestMapped: k]) ifFalse: [s nextPut: k]]]) detectMax: #treeHeight
+	^ (Array streamContents: [:s | aTree allChildrenDo: [:k | (aBoolean ifTrue: [aMapping isSrcMapped: k] ifFalse: [aMapping isDestMapped: k]) ifFalse: [s nextPut: k]]]) detectMax: #treeHeight
 ]
 
 { #category : #'as yet unclassified' }
