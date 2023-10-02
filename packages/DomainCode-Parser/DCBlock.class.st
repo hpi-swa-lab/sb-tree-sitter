@@ -264,7 +264,7 @@ DCBlock class >> smalltalkMessageSendSelector [
 
 { #category : #smalltalk }
 DCBlock class >> smalltalkUndeclaredVariable [
-	<query: #change>
+	<query: #type>
 
 	^ {
 		[:x | x language = SBTSSmalltalk].
@@ -447,7 +447,8 @@ DCBlock >> deleteAfterCursor [
 		self
 			deleteFrom: source
 			at: cursorIndex + 1
-			do: [:new :edit | apply value: new value: edit value: cursorIndex]]
+			do: [:new :edit | apply value: new value: edit value: cursorIndex]].
+	self batchedChangeStep
 ]
 
 { #category : #'as yet unclassified' }
@@ -458,7 +459,8 @@ DCBlock >> deleteBeforeCursor [
 		self
 			deleteFrom: source
 			at: cursorIndex
-			do: [:new :edit | apply value: new value: edit value: cursorIndex - 1]]
+			do: [:new :edit | apply value: new value: edit value: cursorIndex - 1]].
+	self batchedChangeStep
 ]
 
 { #category : #'text modify' }
@@ -732,7 +734,13 @@ DCBlock >> intoWorld: aWorld [
 			when: #selectionChanged
 			send: #updateSelectionQueries
 			to: self queryState.
-		self queryState updateChangeQueries]
+		self sandblockEditor
+			when: #batchedChange
+			send: #updateTypeQueries
+			to: self queryState.
+		self queryState
+			updateTypeQueries;
+			updateChangeQueries]
 ]
 
 { #category : #'as yet unclassified' }
@@ -798,13 +806,14 @@ DCBlock >> keyStroke: anEvent [
 					insert: text
 					in: source
 					at: cursorIndex + 1
-					do: [:new :edit | apply value: new value: edit value: cursorIndex + 1]]]]
+					do: [:new :edit | apply value: new value: edit value: cursorIndex + 1]]]].
+	self batchedChangeStep
 ]
 
 { #category : #'as yet unclassified' }
 DCBlock >> language [
 
-	^ language ifNil: [self owner language]
+	^ language ifNil: [self owner ifNotNil: #language]
 ]
 
 { #category : #'as yet unclassified' }
@@ -895,8 +904,8 @@ DCBlock >> outOfWorld: aWorld [
 	
 	self isRootBlock ifTrue: [
 		self sandblockEditor
-			removeActionsWithReceiver: self queryState
-			forEvent: #selectionChanged]
+			removeActionsWithReceiver: self queryState forEvent: #selectionChanged;
+			removeActionsWithReceiver: self queryState forEvent: #batchedChange]
 ]
 
 { #category : #'as yet unclassified' }

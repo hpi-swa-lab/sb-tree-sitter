@@ -31,6 +31,7 @@ DCQueryState >> initialize [
 	currentDecorators := Dictionary new
 		at: #selection put: WeakKeyDictionary new;
 		at: #change put: WeakKeyDictionary new;
+		at: #type put: WeakKeyDictionary new;
 		yourself.
 	updateQueued := Dictionary new
 ]
@@ -97,7 +98,8 @@ DCQueryState >> tryShortcut: aSymbol do: aBlock [
 { #category : #'as yet unclassified' }
 DCQueryState >> updateChangeQueries [
 
-	self updateQueriesFor: #change
+	self updateQueriesFor: #change.
+	self updateTypeQueries
 ]
 
 { #category : #'as yet unclassified' }
@@ -117,4 +119,10 @@ DCQueryState >> updateQueriesFor: aSymbol [
 DCQueryState >> updateSelectionQueries [
 
 	self updateQueriesFor: #selection
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> updateTypeQueries [
+
+	self updateQueriesFor: #type
 ]
