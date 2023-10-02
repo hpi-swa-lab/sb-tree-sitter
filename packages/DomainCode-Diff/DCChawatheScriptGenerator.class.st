@@ -21,11 +21,8 @@ DCChawatheScriptGenerator >> alignChildrenSrc: w dest: x srcInOrder: srcInOrder 
 	
 	s2 do: [:b |
 		s1 do: [:a |
-			((aMapping includes: {a. b}) and: [(lcs includes: {a. b}) not]) ifTrue: [ | k |
-				"FIXME delete first or find position first?"
-				"a delete."
-				k := self findPosition: b dest: destInOrder in: aMapping.
-				self move: a to: w at: k.
+			((aMapping includes: {a. b}) and: [(lcs includes: {a. b}) not]) ifTrue: [ 
+				self move: a to: w postDeleteDo: [self findPosition: b dest: destInOrder in: aMapping].
 				srcInOrder add: a.
 				destInOrder add: b]]]
 ]
@@ -80,10 +77,11 @@ DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping [
 			ifTrue: [
 				w := aMapping srcForDest: x.
 				w range: x range.
-				x = dest ifFalse: [ | v |
+				x = dest ifFalse: [ | v k |
 					v := w owner.
 					w treeLabel = x treeLabel ifFalse: [self update: w with: x contents].
-					z = v ifFalse: [self move: w to: z at: (self findPosition: x dest: destInOrder in: aMapping)]]].
+					k := self findPosition: x dest: destInOrder in: aMapping.
+					z = v ifFalse: [self move: w to: z postDeleteDo: [k]]]].
 		
 		srcInOrder add: w.
 		destInOrder add: x.
@@ -134,9 +132,12 @@ DCChawatheScriptGenerator >> maybeAttachFlash: aMorph [
 ]
 
 { #category : #actions }
-DCChawatheScriptGenerator >> move: aMorph to: anOwnerMorph at: aNumber [
+DCChawatheScriptGenerator >> move: aMorph to: anOwnerMorph postDeleteDo: aBlock [
 
-	anOwnerMorph addMorph: aMorph asElementNumber: aNumber
+	| index |
+	aMorph delete.
+	index := aBlock value.
+	anOwnerMorph addMorph: aMorph asElementNumber: index
 ]
 
 { #category : #actions }

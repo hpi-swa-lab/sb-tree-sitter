@@ -100,10 +100,11 @@ DCMockSlot >> preferredColorIn: aColorPolicy for: aHighlightString [
 			['escape'] -> [aColorPolicy literal].
 			['punctuation.bracket'] -> [aColorPolicy builtIn].
 			['constant.builtin'] -> [aColorPolicy builtIn].
+			['annotation'] -> [aColorPolicy builtIn].
 			['operator'] -> [aColorPolicy identifier].
 			['property'] -> [aColorPolicy important].
-			['important'] -> [aColorPolicy important].
-			['major_declaration'] -> [aColorPolicy default]}
+			['major_declaration'] -> [aColorPolicy default].
+			['important'] -> [aColorPolicy important]}
 		otherwise: [aColorPolicy default]
 ]
 

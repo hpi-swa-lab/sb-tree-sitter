@@ -91,3 +91,21 @@ DCMappingStore >> srcToDest [
 
 	^ srcToDest
 ]
+
+{ #category : #'as yet unclassified' }
+DCMappingStore >> visualizeFrom: src to: dest [
+
+	| destExtent srcExtent editor |
+	srcExtent := src fullBounds; extent.
+	destExtent := dest fullBounds; extent.
+	
+	"container := SBBlock new.
+	 listDirection: #leftToRight; hResizing: #shrinkWrap; vResizing: #shrinkWrap; changeTableLayout; layoutInset: 10; cellGap: 50; addMorphBack: src; addMorphBack: dest."
+	
+	editor := SBEditor openFor: src.
+	editor openMorphInView: dest.
+	self keysAndValuesDo: [:from :to |
+		from layoutInset: 10.
+		to layoutInset: 10.
+		((editor connectFrom: from to: to) color: (Color random alpha: 0.2))].
+]

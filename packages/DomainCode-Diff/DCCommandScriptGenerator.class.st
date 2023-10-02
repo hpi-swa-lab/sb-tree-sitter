@@ -51,19 +51,24 @@ DCCommandScriptGenerator >> insert: aMorph at: aNumber in: anOwnerMorph [
 { #category : #testing }
 DCCommandScriptGenerator >> logChanges [
 
-	^ false
+^true
 ]
 
 { #category : #actions }
-DCCommandScriptGenerator >> move: aMorph to: anOwnerMorph at: aNumber [
+DCCommandScriptGenerator >> move: aMorph to: anOwnerMorph postDeleteDo: aBlock [
 
-	self editor do: (SBMoveCommand new
+	| command |
+	command := SBMoveCommand new
 		shouldMergeWithNext: true;
 		container: anOwnerMorph;
 		morph: aMorph;
-		index: aNumber).
+		notePosition.
+	aMorph delete.
+	command index: aBlock value.
+	self editor do: command.
+	
 	self maybeAttachFlash: aMorph.
-	self logChanges ifTrue: [Transcript showln: {#move. anOwnerMorph. aNumber. aMorph}]
+	self logChanges ifTrue: [Transcript showln: {#move. anOwnerMorph. aBlock. aMorph}]
 ]
 
 { #category : #actions }

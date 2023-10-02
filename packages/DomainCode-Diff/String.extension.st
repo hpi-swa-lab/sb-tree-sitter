@@ -30,3 +30,11 @@ String >> levenshteinRatioTo: anotherString [
 	lengthSum := self size + anotherString size.
 	^ (lengthSum - (self levenshteinDistanceTo: anotherString) / lengthSum) asFloat
 ]
+
+{ #category : #'*DomainCode-Diff' }
+String >> withoutLeading: aCollection [
+
+	| firstValid |
+	firstValid := self findFirst: [:m | (aCollection includes: m) not].
+	^ firstValid > 0 ifTrue: [self copyFrom: firstValid to: self size] ifFalse: ['']
+]

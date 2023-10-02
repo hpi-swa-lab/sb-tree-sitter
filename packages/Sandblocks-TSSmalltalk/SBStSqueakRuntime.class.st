@@ -37,7 +37,7 @@ SBStSqueakRuntime >> evaluate: aString [
 { #category : #'as yet unclassified' }
 SBStSqueakRuntime >> prettyPrint: aString [
 
-	^ [PPFormatter formatString: aString class: nil class noPattern: false]
+	^ [PPFormatter formatString: aString class: nil class noPattern: true]
 		on: SyntaxErrorNotification
 		do: [aString]
 ]

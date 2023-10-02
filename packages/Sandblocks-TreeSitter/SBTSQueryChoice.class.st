@@ -23,9 +23,9 @@ SBTSQueryChoice >> elements: aCollection [
 SBTSQueryChoice >> evaluateAgainst: aBlock captures: aDictionary [
 
 	self elements do: [:element | | captures |
-		captures := Dictionary new.
+		captures := aDictionary species new.
 		(element evaluateAgainst: aBlock captures: captures) ifNotNil: [
-			aDictionary addAll: captures associations.
+			aDictionary addAll: (captures isDictionary ifTrue: [captures associations] ifFalse: [captures]).
 			^ aBlock]].
 	^ nil
 ]

@@ -91,6 +91,7 @@ SBTSSmalltalk class >> fileSuffix [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> gapBetween: aBlock and: anotherBlock [
 
+	aBlock parentSandblock type = 'pragma' ifTrue: [^ false].
 	anotherBlock type = 'ERROR' ifTrue: [^ false].
 	^ super gapBetween: aBlock and: anotherBlock
 ]
@@ -1141,6 +1142,7 @@ SBTSSmalltalk class >> grammarJson [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
+	aBlock type = 'pragma' ifTrue: [^ true].
 	aBlock contents = '.' ifTrue: [^ true].
 	anotherBlock type = 'ERROR' ifTrue: [^ false].
 	anotherBlock contents = '.' ifTrue: [^ false].
@@ -1155,8 +1157,8 @@ SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 	(#(#'keyword_selector' #'unary_selector' #'binary_selector') includes: aBlock type) ifTrue: [^ true].
 	((aBlock slot isStatementIn: aBlock parentSandblock) and: [aBlock ~= aBlock parentSandblock childSandblocks last]) ifTrue: [^ true].
 	(aBlock field = 'receiver' and: [
-		aBlock parentSandblock
-			ifNotNil: [:p | p parentSandblock ifNotNil: [:p2 | p2 type = #cascade]]
+		(aBlock parentNode
+			ifNotNil: [:p | p parentNode ifNotNil: [:p2 | p2 type = #cascade]])
 			ifNil: [false]]) ifTrue: [^ true].
 	^ false
 ]
@@ -1166,6 +1168,8 @@ SBTSSmalltalk class >> highlightQuery [
 	" https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
 
 	^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
+
+(pragma) @annotation
 
 (number) @number
 
@@ -1184,6 +1188,8 @@ SBTSSmalltalk class >> highlightQuery [
 (keyword) @variable.part
 
 ["^" "[" "]" "{" "}"] @important
+
+["(" ")"] @punctuation
 
 (keyword_selector (keyword) @major_declaration.part) @structure.part
 (binary_selector (binary_operator) @major_declaration.part) @structure.part

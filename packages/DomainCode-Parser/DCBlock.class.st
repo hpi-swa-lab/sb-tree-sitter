@@ -135,6 +135,120 @@ DCBlock class >> registerShortcuts: aProvider [
 	aProvider cmdShortcut: $` do: #wrapInBackticks
 ]
 
+{ #category : #smalltalk }
+DCBlock class >> smalltalkBrowseImplementors [
+	<query: #(#shortcut)>
+
+	^ {
+		self smalltalkMessageSend.
+		[:msg |
+			msg registerShortcut: #browseImplementors do: [
+				{
+					self smalltalkMessageSendSelector.
+					[:selector :message | {#args. selector. self systemNavigation allImplementorsOf: selector asSymbol. message}].
+					[:selector :list :message |
+						(message sandblockEditor isSingleArtefactView or: [list size > 1])
+							ifTrue: [
+								(message sandblockEditor model notNil and: [message sandblockEditor model isKindOf: MessageTrace])
+									ifTrue: [
+										message sandblockEditor model
+											browseAllImplementorsOf: selector asSymbol
+											requestor: #modelMenu]
+									ifFalse: [message systemNavigation browseAllImplementorsOf: selector asSymbol]]
+							ifFalse: [message sandblockEditor open: list first compiledMethod]]}]]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkBrowseReferencesSend [
+	<query: #(#shortcut)>
+
+	^ {
+		self smalltalkMessageSend.
+		[:msg |
+			msg registerShortcut: #browseSenders do: [
+				{
+					self smalltalkMessageSendSelector.
+					[:sel :message | {#args. message. sel. self systemNavigation allCallsOn: sel asSymbol}].
+					[:message :sel :calls |
+						(message sandblockEditor isSingleArtefactView or: [calls size > 1])
+							ifTrue: [
+								(message sandblockEditor model notNil and: [message sandblockEditor model isKindOf: MessageTrace])
+									ifTrue: [
+										message sandblockEditor model
+											browseAllCallsOn: sel asSymbol
+											requestor: #modelMenu]
+									ifFalse: [self systemNavigation browseAllCallsOn: sel asSymbol]]
+							ifFalse: [message sandblockEditor open: calls first compiledMethod]]}]]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkDeclaration [
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x type = #identifier].
+		[:id | {#args. id. id orAllParents: #(method block)}].
+		[:id :scopes |
+			DCQuery script: {
+				[:scope | DCQuery firstScript: {
+					{ "temporaries"
+						[:block | block childSandblocks detect: [:a | a type = #temporaries] ifNone: [nil]].
+						[:args | args childSandblocks detect: [:arg | arg contents = id contents] ifNone: [nil]].
+					}.
+					{ "block args"
+						[:block | block childSandblocks select: [:a | a type = #block_argument]].
+						[:args | args detect: [:arg | arg contents allButFirst = id contents] ifNone: [nil]].
+					}.
+					{ "method args"
+						[:method | method queryAll: '[(keyword_selector (identifier) @) (binary_selector (identifier) @)]'].
+						[:args | args detect: [:arg | arg contents = id contents] ifNone: [nil]].
+					}} with: scope].
+				} first: scopes
+		]
+	}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkHighlightIdentifiers [
+	<query: #(selection)>
+
+	^ {
+		[:x | x isSelected].
+		self smalltalkDeclaration.
+		self smalltalkUsesOfDeclaration.
+		[:decl :identifiers | identifiers do: #attachHighlight]
+	}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkMessageSend [
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | #(keyword_message binary_message unary_message keyword binary_operator unary_identifier) includes: x type].
+		[:x | x orParent: #(keyword_message binary_message unary_message)]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkMessageSendSelector [
+
+	^ {
+		self smalltalkMessageSend.
+		[:message | {#args. message queryAll: '[(keyword) (binary_operator) (unary_identifier)] @part'. message}].
+		[:hits :message | {#args. hits select: [:part | part owner = message]. message}].
+		[:hits :message | {#args. hits collect: #contents. message}].
+		[:parts :message | {#args. parts joinSeparatedBy: ''. message}]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkUsesOfDeclaration [
+
+	^ {
+		[:decl | {#args. decl. decl orAnyParent: #(block method)}].
+		[:decl :scope | {#args. decl. scope allBlocksSelect: [:x | (#(identifier block_argument) includes: x type) and: [(x contents withoutLeading: #($:)) = (decl contents withoutLeading: #($:))]]}]
+	}
+]
+
 { #category : #'as yet unclassified' }
 DCBlock >> absolutePositionOf: aMorph [
 
@@ -178,13 +292,13 @@ DCBlock >> alias [
 	^ nil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 DCBlock >> allParents [
 
 	^ self allParentsUpTo: self rootBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 DCBlock >> allParentsUpTo: aBlock [
 
 	self = aBlock ifTrue: [^ #()].
@@ -199,6 +313,12 @@ DCBlock >> allParentsUpTo: aBlock [
 DCBlock >> allTextMorphsDo: aBlock [
 
 	self allMorphsDo: [:m | m isTextMorph ifTrue: [aBlock value: m]]
+]
+
+{ #category : #'query actions' }
+DCBlock >> attachHighlight [
+
+	self queryState highlight: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -500,15 +620,43 @@ DCBlock >> insertStatementHasCandidate [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> intoWorld: aWorld [
+
+	super intoWorld: aWorld.
+	
+	self isRootBlock ifTrue: [
+		self sandblockEditor
+			when: #selectionChanged
+			send: #updateSelectionQueries
+			to: self queryState]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> isBlockBody [
 
 	^ self language blockBodyTypes includes: self type
+]
+
+{ #category : #queries }
+DCBlock >> isOrHasParent: aCollectionOrSymbol [
+
+	| matches |
+	matches := aCollectionOrSymbol isSymbol
+		ifTrue: [{aCollectionOrSymbol}]
+		ifFalse: [aCollectionOrSymbol].
+	^ (matches includes: self type) or: [matches includes: self owner type]
 ]
 
 { #category : #'as yet unclassified' }
 DCBlock >> isPart [
 
 	^ self highlight notNil and: [self highlight endsWith: '.part']
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> isRootBlock [
+
+	^ self type = self language rootRuleName
 ]
 
 { #category : #'as yet unclassified' }
@@ -577,9 +725,62 @@ DCBlock >> layoutInset [
 
 	self isBlockBody ifTrue: [^ 2 @ 2].
 	
+	true ifTrue: [^ super layoutInset].
+	
 	^ (self type = 'ERROR' and: [self childSandblocks notEmpty])
 		ifTrue: [0]
 		ifFalse: [2 @ (self submorphCount > 3 ifTrue: [1] ifFalse: [0])]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> orAllParents: aCollectionOrSymbol [
+
+	| matches current res |
+	matches := aCollectionOrSymbol isSymbol
+		ifTrue: [{aCollectionOrSymbol}]
+		ifFalse: [aCollectionOrSymbol].
+	
+	current := self.
+	res := OrderedCollection new.
+	[
+		(matches includes: current type) ifTrue: [res add: current].
+		current isRootBlock ifTrue: [^ res].
+		current := current owner] repeat
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> orAnyParent: aCollectionOrSymbol [
+
+	| matches |
+	matches := aCollectionOrSymbol isSymbol
+		ifTrue: [{aCollectionOrSymbol}]
+		ifFalse: [aCollectionOrSymbol].
+	(matches includes: self type) ifTrue: [^ self].
+	self = self rootBlock ifTrue: [^ nil].
+	^ self owner orAnyParent: aCollectionOrSymbol
+]
+
+{ #category : #queries }
+DCBlock >> orParent: aCollectionOrSymbol [
+
+	| matches |
+	matches := aCollectionOrSymbol isSymbol
+		ifTrue: [{aCollectionOrSymbol}]
+		ifFalse: [aCollectionOrSymbol].
+	(matches includes: self type) ifTrue: [^ self].
+	(matches includes: self owner type) ifTrue: [^ self owner].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> outOfWorld: aWorld [
+
+	super outOfWorld: aWorld.
+	
+	self isRootBlock ifTrue: [
+		self sandblockEditor
+			removeActionsWithReceiver: self queryState
+			forEvent: #selectionChanged]
 ]
 
 { #category : #'as yet unclassified' }
@@ -594,6 +795,33 @@ DCBlock >> ownerWithForegroundColor [
 DCBlock >> pairMap [
 
 	^ Dictionary newFrom: {'(' -> ')'. '''' -> ''''. '"' -> '"'. '`' -> '`'. '{' -> '}'. '[' -> ']'}
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> parentNode [
+
+	^ self parentSandblock ifNotNil: [:p | p isTSBlock ifTrue: [p] ifFalse: [nil]]
+]
+
+{ #category : #'actions smalltalk' }
+DCBlock >> pasteReplace [
+	<action>
+
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | str |
+		str := Clipboard clipboardText string.
+		self
+			insert: str
+			in: source
+			at: cursorIndex
+			do: [:new :edit | apply value: new value: edit value: cursorIndex + str size]]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> performAction: aSymbol [
+
+	(super performAction: aSymbol) ifTrue: [^ true].
+	
+	^ self queryState performShortcut: aSymbol for: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -645,9 +873,18 @@ DCBlock >> queryAll: aString [
 
 	^ Array streamContents: [:stream |
 		self allMorphsDo: [:block |
-			block isTSMorph ifTrue: [ | captures |
-				captures := nil.
-				(SBTSQuery new execute: aString against: block capturesDo: [:cap | captures := cap]) ifTrue: [stream nextPut: captures anyOne]]]]
+			block isTSMorph ifTrue: [
+				(SBTSQuery new
+					prepare: aString;
+					executeCaptureAgainst: block) do: [:assoc | stream nextPut: assoc value]]]]
+]
+
+{ #category : #accessing }
+DCBlock >> queryState [
+
+	^ self rootBlock
+		valueOfProperty: #queryState
+		ifAbsentPut: [DCQueryState new rootBlock: self]
 ]
 
 { #category : #'as yet unclassified' }
@@ -660,6 +897,12 @@ DCBlock >> range [
 DCBlock >> range: aRange [
 
 	range := aRange
+]
+
+{ #category : #'query actions' }
+DCBlock >> registerShortcut: aSymbol do: aBlock [
+
+	self queryState tryShortcut: aSymbol do: aBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -684,8 +927,7 @@ DCBlock >> replace: oldTree with: newTree [
 { #category : #'as yet unclassified' }
 DCBlock >> rootBlock [
 
-	self owner ifNil: [^ self].
-	^ self ownerSatisfying: [:o | o isTSBlock and: [o type = self language rootRuleName]]
+	^ self orOwnerSuchThat: [:o | o isTSBlock and: [o type = self language rootRuleName]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -890,7 +1132,9 @@ DCBlock >> type [
 { #category : #'as yet unclassified' }
 DCBlock >> type: aSymbol [
 
-	type := aSymbol
+	type := aSymbol.
+	
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -958,6 +1202,7 @@ DCBlock >> wrapInRoundParenthesis [
 DCBlock >> wrapInSingleQuotes [
 	<action>
 
+	self halt.
 	self wrapIn: ''''
 ]
 

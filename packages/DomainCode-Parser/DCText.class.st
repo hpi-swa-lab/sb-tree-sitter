@@ -112,6 +112,12 @@ DCText >> ownerWithForegroundColor [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> parentNode [
+
+	^ self owner
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> preferredColorIn: aColorPolicy [
 
 	^ self slot preferredColorIn: aColorPolicy for: self highlight
