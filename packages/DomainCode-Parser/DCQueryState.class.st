@@ -2,19 +2,25 @@ Class {
 	#name : #DCQueryState,
 	#superclass : #Object,
 	#instVars : [
-		'highlights',
-		'newHighlights',
+		'currentDecorators',
+		'newDecorators',
 		'rootBlock',
-		'selectionUpdateQueued',
-		'currentShortcut'
+		'currentShortcut',
+		'updateQueued'
 	],
 	#category : #'DomainCode-Parser'
 }
 
 { #category : #'as yet unclassified' }
+DCQueryState >> errors [
+
+	^ Array streamContents: [:s | self rootBlock allBlocksDo: [:b | b withDecorator: SBErrorDecorator do: [:d | s nextPut: d] ifAbsent: []]]
+]
+
+{ #category : #'as yet unclassified' }
 DCQueryState >> highlight: aBlock [
 
-	newHighlights add: aBlock
+	(newDecorators at: aBlock ifAbsentPut: [OrderedCollection new]) add: SBHighlightDecorator new
 ]
 
 { #category : #'as yet unclassified' }
@@ -22,11 +28,14 @@ DCQueryState >> initialize [
 
 	super initialize.
 	
-	highlights := WeakSet new.
-	selectionUpdateQueued := false
+	currentDecorators := Dictionary new
+		at: #selection put: WeakKeyDictionary new;
+		at: #change put: WeakKeyDictionary new;
+		yourself.
+	updateQueued := Dictionary new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #shortcuts }
 DCQueryState >> performShortcut: aSymbol for: aBlock [
 
 	[
@@ -42,32 +51,42 @@ DCQueryState >> queriesFor: aSymbol do: aBlock [
 
 	Pragma
 		withPragmasIn: DCBlock class
-		do: [:pragma | (pragma keyword = #query: and: [pragma arguments first includes: aSymbol]) ifTrue: [aBlock value: pragma selector]]
+		do: [:pragma | (pragma keyword = #query: and: [pragma arguments first = aSymbol]) ifTrue: [aBlock value: pragma selector]]
 ]
 
 { #category : #'as yet unclassified' }
-DCQueryState >> rerunQueriesDo: aBlock [
+DCQueryState >> reportError: aDecorator for: aBlock [
 
-	newHighlights := WeakSet new.
+	(newDecorators at: aBlock ifAbsentPut: [OrderedCollection new]) add: aDecorator
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> rerunQueriesFor: aSymbol do: aBlock [
+
+	| oldDecorators |
+	newDecorators := WeakKeyDictionary new.
+	
 	aBlock value.
-	highlights do: [:block | (newHighlights includes: block) ifFalse: [block detachDecorators: SBHighlightDecorator]].
-	newHighlights do: [:block | (highlights includes: block) ifFalse: [block attachDecorator: SBHighlightDecorator new]].
-	highlights := newHighlights
+	
+	oldDecorators := currentDecorators at: aSymbol.
+	oldDecorators do: [:list | list do: [:d | d detach]].
+	newDecorators keysAndValuesDo: [:block :list | list do: [:d | block attachDecorator: d]].
+	currentDecorators at: aSymbol put: newDecorators
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 DCQueryState >> rootBlock [
 
 	^ rootBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 DCQueryState >> rootBlock: aBlock [
 
 	rootBlock := aBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #shortcuts }
 DCQueryState >> tryShortcut: aSymbol do: aBlock [
 
 	currentShortcut = aSymbol ifTrue: [
@@ -76,14 +95,26 @@ DCQueryState >> tryShortcut: aSymbol do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+DCQueryState >> updateChangeQueries [
+
+	self updateQueriesFor: #change
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> updateQueriesFor: aSymbol [
+
+	(updateQueued at: aSymbol ifAbsent: [false]) ifTrue: [^ self].
+	updateQueued at: aSymbol put: true.
+	Project current addDeferredUIMessage: [
+		updateQueued at: aSymbol put: false.
+		self rerunQueriesFor: aSymbol do: [
+			self
+				queriesFor: aSymbol
+				do: [:selector | self rootBlock allBlocksDo: [:b | DCQuery script: (DCBlock perform: selector) with: b]]]]
+]
+
+{ #category : #'as yet unclassified' }
 DCQueryState >> updateSelectionQueries [
 
-	selectionUpdateQueued ifTrue: [^ self].
-	selectionUpdateQueued := true.
-	Project current addDeferredUIMessage: [
-		selectionUpdateQueued := false.
-		self rerunQueriesDo: [
-			self
-				queriesFor: #selection
-				do: [:selector | self rootBlock allBlocksDo: [:b | DCQuery script: (DCBlock perform: selector) with: b]]]]
+	self updateQueriesFor: #selection
 ]

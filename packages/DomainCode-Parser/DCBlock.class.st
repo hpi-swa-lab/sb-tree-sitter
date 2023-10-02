@@ -137,7 +137,7 @@ DCBlock class >> registerShortcuts: aProvider [
 
 { #category : #smalltalk }
 DCBlock class >> smalltalkBrowseImplementors [
-	<query: #(#shortcut)>
+	<query: #shortcut>
 
 	^ {
 		self smalltalkMessageSend.
@@ -160,7 +160,7 @@ DCBlock class >> smalltalkBrowseImplementors [
 
 { #category : #smalltalk }
 DCBlock class >> smalltalkBrowseReferencesSend [
-	<query: #(#shortcut)>
+	<query: #shortcut>
 
 	^ {
 		self smalltalkMessageSend.
@@ -210,14 +210,13 @@ DCBlock class >> smalltalkDeclaration [
 
 { #category : #smalltalk }
 DCBlock class >> smalltalkHighlightIdentifiers [
-	<query: #(selection)>
+	<query: #selection>
 
 	^ {
 		[:x | x isSelected].
 		self smalltalkDeclaration.
 		self smalltalkUsesOfDeclaration.
-		[:decl :identifiers | identifiers do: #attachHighlight]
-	}
+		[:decl :identifiers | identifiers do: #attachHighlight]}
 ]
 
 { #category : #smalltalk }
@@ -238,6 +237,60 @@ DCBlock class >> smalltalkMessageSendSelector [
 		[:hits :message | {#args. hits select: [:part | part owner = message]. message}].
 		[:hits :message | {#args. hits collect: #contents. message}].
 		[:parts :message | {#args. parts joinSeparatedBy: ''. message}]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkUndeclaredVariable [
+	<query: #change>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x type = #identifier].
+		[:x |
+			(DCQuery script: self smalltalkDeclaration with: x)
+				ifNil: [x]
+				ifNotNil: [nil]].
+		[:x |
+			x reportError: (SBErrorDecorator new
+				message: 'undeclared variable';
+				fixActions: {
+					SBCodeAction labeled: 'Declare block-local' for: x do: [:node | | block decl |
+						decl := DCBlock new
+							type: #identifier;
+							addMorphBack: (DCText new contents: node contents).
+						block := node orAnyParent: {#block. #method}.
+						block childSandblocks
+							detect: [:b | b type = #temporaries]
+							ifFound: [:temporaries |
+								node sandblockEditor do: (SBInsertCommand new
+									morph: decl;
+									container: temporaries;
+									index: temporaries submorphCount)]
+							ifNone: [ | index |
+								index := block submorphs findFirst: [:s | s treeLabel = '|'].
+								node sandblockEditor do: (SBInsertCommand new
+									morph: (DCBlock new
+										type: #temporaries;
+										addMorphBack: (DCText new contents: '|');
+										addMorphBack: decl;
+										addMorphBack: (DCText new contents: '|'));
+									index: (index = 0 ifTrue: [2] ifFalse: [index + 1]);
+									container: block)]]})]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkUnusedVariable [
+	<query: #change>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x hasParent: #temporaries].
+		self smalltalkUsesOfDeclaration.
+		[:decl :uses | uses size = 1].
+		[:decl :uses |
+			decl reportError: (SBErrorDecorator new
+				message: 'unused variable';
+				fixActions: {SBCodeAction labeled: 'Remove unused declaration' for: decl do: [:node | node deleteBlock]})]}
 ]
 
 { #category : #smalltalk }
@@ -313,6 +366,12 @@ DCBlock >> allParentsUpTo: aBlock [
 DCBlock >> allTextMorphsDo: aBlock [
 
 	self allMorphsDo: [:m | m isTextMorph ifTrue: [aBlock value: m]]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> artefactChanged: aMethodBlock [
+
+	self = aMethodBlock ifTrue: [self queryState updateChangeQueries]
 ]
 
 { #category : #'query actions' }
@@ -505,6 +564,18 @@ DCBlock >> handleInsertEvent: anEvent in: textMorph [
 	^ super keyStroke: anEvent
 ]
 
+{ #category : #queries }
+DCBlock >> hasParent: aCollectionOrSymbol [
+
+	| matches |
+	self isRootBlock ifTrue: [^ false].
+	
+	matches := aCollectionOrSymbol isSymbol
+		ifTrue: [{aCollectionOrSymbol}]
+		ifFalse: [aCollectionOrSymbol].
+	^ matches includes: self owner type
+]
+
 { #category : #'as yet unclassified' }
 DCBlock >> highlight [
 
@@ -632,6 +703,12 @@ DCBlock >> intoWorld: aWorld [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> isArtefact [
+
+	^ self isRootBlock
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> isBlockBody [
 
 	^ self language blockBodyTypes includes: self type
@@ -688,7 +765,7 @@ DCBlock >> keyStroke: anEvent [
 { #category : #'as yet unclassified' }
 DCBlock >> language [
 
-	^ language
+	^ language ifNil: [self owner language]
 ]
 
 { #category : #'as yet unclassified' }
@@ -924,10 +1001,23 @@ DCBlock >> replace: oldTree with: newTree [
 				yourself]}
 ]
 
+{ #category : #'query actions' }
+DCBlock >> reportError: anError [
+
+	self queryState reportError: anError for: self
+]
+
 { #category : #'as yet unclassified' }
 DCBlock >> rootBlock [
 
 	^ self orOwnerSuchThat: [:o | o isTSBlock and: [o type = self language rootRuleName]]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
+
+	self queryState errors ifNotEmpty: [:errors | aFixBoolean ifTrue: [errors do: [:error | error tryFixIfFail: [^ false]]] ifFalse: [^ false]].
+	^ true
 ]
 
 { #category : #'as yet unclassified' }

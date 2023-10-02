@@ -11,7 +11,10 @@ Class {
 { #category : #'as yet unclassified' }
 DCMappingStore >> addMappingFrom: src to: dest [
 
-	SBToggledCode comment: '' active: 0 do: {[src treeLabel = 'function' ifTrue: [self halt]]}.
+	SBToggledCode
+		comment: ''
+		active: 1
+		do: {[src type = 'lexical_declaration' ifTrue: [self halt]]}.
 	srcToDest at: src put: dest.
 	destToSrc at: dest put: src
 ]
@@ -96,8 +99,12 @@ DCMappingStore >> srcToDest [
 DCMappingStore >> visualizeFrom: src to: dest [
 
 	| destExtent srcExtent editor |
-	srcExtent := src fullBounds; extent.
-	destExtent := dest fullBounds; extent.
+	srcExtent := src
+		fullBounds;
+		extent.
+	destExtent := dest
+		fullBounds;
+		extent.
 	
 	"container := SBBlock new.
 	 listDirection: #leftToRight; hResizing: #shrinkWrap; vResizing: #shrinkWrap; changeTableLayout; layoutInset: 10; cellGap: 50; addMorphBack: src; addMorphBack: dest."
@@ -107,5 +114,5 @@ DCMappingStore >> visualizeFrom: src to: dest [
 	self keysAndValuesDo: [:from :to |
 		from layoutInset: 10.
 		to layoutInset: 10.
-		((editor connectFrom: from to: to) color: (Color random alpha: 0.2))].
+		(editor connectFrom: from to: to) color: (Color random alpha: 0.5)]
 ]
