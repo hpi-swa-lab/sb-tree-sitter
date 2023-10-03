@@ -85,9 +85,14 @@ DCSmalltalkMethod >> object [
 DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 
 	| text newSelector |
-	text := aQuickBoolean
-		ifTrue: [self method sourceString]
-		ifFalse: [self method prettySourceString].
+	text := aQuickBoolean ifTrue: [self method sourceString] ifFalse: [
+		[
+			PPFormatter
+				formatString: self method sourceString
+				class: (self containingArtefact ifNotNil: #relatedClass ifNil: [nil class])
+				noPattern: self ~= self containingArtefact]
+			on: SyntaxErrorNotification
+			do: [self method sourceString]].
 	newSelector := self methodClass compile: text asText classified: nil.
 	^ true
 ]

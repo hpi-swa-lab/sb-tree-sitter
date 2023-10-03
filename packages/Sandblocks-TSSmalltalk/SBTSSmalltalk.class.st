@@ -91,6 +91,8 @@ SBTSSmalltalk class >> fileSuffix [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> gapBetween: aBlock and: anotherBlock [
 
+	anotherBlock type = #'block_argument' ifTrue: [^ true].
+	aBlock treeLabel = '#' ifTrue: [^ false].
 	aBlock parentSandblock type = 'pragma' ifTrue: [^ false].
 	anotherBlock type = 'ERROR' ifTrue: [^ false].
 	^ super gapBetween: aBlock and: anotherBlock
@@ -1142,6 +1144,7 @@ SBTSSmalltalk class >> grammarJson [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
+	(#(')' ']' '}') includes: anotherBlock treeLabel) ifTrue: [^ false].
 	aBlock type = 'pragma' ifTrue: [^ true].
 	aBlock contents = '.' ifTrue: [^ true].
 	anotherBlock type = 'ERROR' ifTrue: [^ false].
@@ -1156,10 +1159,7 @@ SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 		do: {[(aBlock parentSandblock ifNotNil: #type) = #method ifTrue: [^ true]]}.
 	(#(#'keyword_selector' #'unary_selector' #'binary_selector') includes: aBlock type) ifTrue: [^ true].
 	((aBlock slot isStatementIn: aBlock parentSandblock) and: [aBlock ~= aBlock parentSandblock childSandblocks last]) ifTrue: [^ true].
-	(aBlock field = 'receiver' and: [
-		(aBlock parentNode
-			ifNotNil: [:p | p parentNode ifNotNil: [:p2 | p2 type = #cascade]])
-			ifNil: [false]]) ifTrue: [^ true].
+	(aBlock field = 'receiver' and: [(aBlock parentNode ifNotNil: [:p | p parentNode ifNotNil: [:p2 | p2 type = #cascade]]) ifNil: [false]]) ifTrue: [^ true].
 	^ false
 ]
 
@@ -1259,6 +1259,7 @@ SBTSSmalltalk class >> rootRuleName [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
 
+	(#(')' ']' '}') includes: anotherBlock treeLabel) ifTrue: [^ false].
 	anotherBlock type = 'ERROR' ifTrue: [^ false].
 	aBlock type = #'block_argument' ifTrue: [^ false].
 	anotherBlock contents = '.' ifTrue: [^ false].
@@ -1275,7 +1276,9 @@ SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
-	anotherBlock type = 'ERROR' ifTrue: [^ false].
+	anotherBlock type = #'block_argument' ifTrue: [^ true].
+	aCharacter = $: ifTrue: [^ true].
+	(anotherBlock type = 'ERROR' and: [anotherBlock firstDeepChild contents ifNotEmpty: [:e | e first isLetter not] ifEmpty: [false]]) ifTrue: [^ false].
 	(aBlock contents = ':=' or: [anotherBlock contents = ':=']) ifTrue: [^ true].
 	anotherBlock alias = #'unary_identifier' ifTrue: [^ true].
 	^ super spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter

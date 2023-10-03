@@ -1,9 +1,9 @@
 Extension { #name : #CompiledMethod }
 
 { #category : #'*DomainCode-Core' }
-CompiledMethod >> openDC:convert [
-<convert>
-<convertPriority:1>
+CompiledMethod >> openDC: convert [
+	<convert>
+	<convertPriority: 13>
 
-convert do:[DCSmalltalkMethod for:self]
+	convert do: [DCSmalltalkMethod for: self]
 ]

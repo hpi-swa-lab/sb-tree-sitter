@@ -53,7 +53,7 @@ DCChawatheScriptGenerator >> findPosition: aTree dest: destInOrder in: aMapping 
 { #category : #'as yet unclassified' }
 DCChawatheScriptGenerator >> flashChanges [
 
-	^ true
+	^ false
 ]
 
 { #category : #'as yet unclassified' }

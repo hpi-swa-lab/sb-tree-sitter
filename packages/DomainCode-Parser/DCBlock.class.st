@@ -11,7 +11,7 @@ Class {
 	#category : #'DomainCode-Parser'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 DCBlock class >> addUncapturedTextTo: aNode in: aCursor language: aLanguage isLeaf: aBoolean [
 
 	| text |
@@ -24,10 +24,10 @@ DCBlock class >> addUncapturedTextTo: aNode in: aCursor language: aLanguage isLe
 		aNode addMorphBack: (DCText new
 			contents: t;
 			field: aCursor fieldName;
-			range: aCursor range)]
+			range: (aBoolean ifTrue: [aCursor range] ifFalse: [SBTSRange start: aCursor position size: t size]))]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 DCBlock class >> findChangeRangeFrom: original to: new [
 
 	| start end maxSize |
@@ -45,7 +45,7 @@ DCBlock class >> findChangeRangeFrom: original to: new [
 		bytesToPointsIn: original new: new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 DCBlock class >> fromCursor: aCursor language: aLanguage [
 
 	^ aCursor isNamed
@@ -80,7 +80,7 @@ DCBlock class >> genericAddMarker [
 		[:x | x registerShortcut: #addMarker do: [{[:block | block attachDecorator: SBMarkedDecorator new]}]]}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 DCBlock class >> parse: aString language: aLanguage [
 
 	^ (self parseBlock: aString language: aLanguage)
@@ -91,7 +91,7 @@ DCBlock class >> parse: aString language: aLanguage [
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 DCBlock class >> parse: aString old: oldBlock edit: anEdit language: aLanguage [
 
 	| api oldTree |
@@ -116,7 +116,7 @@ DCBlock class >> parse: aString old: oldBlock edit: anEdit language: aLanguage [
 		{block. changedRanges. self findChangeRangeFrom: (oldBlock valueOfProperty: #tsSource) to: aString}]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #parsing }
 DCBlock class >> parseBlock: aString language: aLanguage [
 
 	| api |
@@ -132,7 +132,7 @@ DCBlock class >> parseBlock: aString language: aLanguage [
 			yourself]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #shortcuts }
 DCBlock class >> registerShortcuts: aProvider [
 
 	aProvider cmdShortcut: $( do: #wrapInRoundParenthesis.
@@ -195,6 +195,7 @@ DCBlock class >> smalltalkCheckbox [
 	<query: #change>
 
 	^ {
+		[:x | false].
 		[:x | x language = SBTSSmalltalk].
 		[:x | x isReplacement not].
 		[:x | {#true. #false} includes: x type].
@@ -212,7 +213,7 @@ DCBlock class >> smalltalkDeclaration [
 		[:x | x type = #identifier].
 		[:id | {#args. id. id orAllParents: #(method block)}].
 		[:id :scopes |
-			DCQuery script: {
+			(DCQuery script: {
 				[:scope | DCQuery firstScript: {
 					{ "temporaries"
 						[:block | block childSandblocks detect: [:a | a type = #temporaries] ifNone: [nil]].
@@ -226,7 +227,8 @@ DCBlock class >> smalltalkDeclaration [
 						[:method | method queryAll: '[(keyword_selector (identifier) @) (binary_selector (identifier) @)]'].
 						[:args | args detect: [:arg | arg contents = id contents] ifNone: [nil]].
 					}} with: scope].
-				} first: scopes
+				} first: scopes) ifNil: [
+					(Symbol lookup: id contents) ifNotNil: [:sym | id containingArtefact methodClass bindingOf: sym environment: id containingArtefact methodClass environment]]
 		]
 	}
 ]
@@ -242,7 +244,37 @@ DCBlock class >> smalltalkHighlightIdentifiers [
 		[:decl :identifiers | identifiers do: #attachHighlight]}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #smalltalk }
+DCBlock class >> smalltalkIdentifierAutocompletion [
+	<query: #type>
+
+	^ {
+		[:x | x isSelected].
+		[:x | x type = #identifier].
+		[:x |
+			x addSuggestions: ((self
+				sortedSuggestions: (Smalltalk globals declarations
+					collect: [:class | class value name]
+					into: OrderedCollection new)
+				for: x contents
+				addAll: false
+				max: 10) collect: [:sel | DCSuggestionItem new selector: sel label: 'class' source: sel])]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkInsertArg [
+	<query: #shortcut>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x |
+			#(#First #Second #Third #Fourth #Fifith) withIndexDo: [:name :index |
+				x registerShortcut: #use, name, #Argument do: [
+					{
+						[:block | block replaceWith: (DCQuery script: {self smalltalkMethodArguments. [:args | (args at: index) contents]} with: block)]}]]]}
+]
+
+{ #category : #smalltalk }
 DCBlock class >> smalltalkJumpPlaceholder [
 	<query: #change>
 
@@ -270,7 +302,7 @@ DCBlock class >> smalltalkMessageSendAutoCompletion [
 		[:x | x isSelected].
 		[:x | (DCQuery script: self smalltalkMessageSendSelector with: x) ifNotNil: [:res | res, {x}]].
 		[:selector :message :part |
-			part addSuggestions: ((SBBlock basicNew sortedSuggestions: Symbol allSymbols for: selector) collect: [:sel |
+			part addSuggestions: ((self sortedSuggestions: Symbol allSymbols for: selector addAll: false max: 10) collect: [:sel |
 				DCSuggestionItem new selector: sel label: 'send' source: ((sel allSatisfy: #isSpecial) ifTrue: [sel, ' __sb'] ifFalse: [
 					(sel includes: $:)
 						ifTrue: [((sel splitBy: ':') allButLast collect: [:p | p, ': __sb']) joinSeparatedBy: ' ']
@@ -286,6 +318,24 @@ DCBlock class >> smalltalkMessageSendSelector [
 		[:hits :message | {#args. hits select: [:part | part owner = message]. message}].
 		[:hits :message | {#args. hits collect: #contents. message}].
 		[:parts :message | {#args. parts joinSeparatedBy: ''. message}]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkMethodArguments [
+
+	^ {self smalltalkMethodSelector. [:x | x childSandblocks select: [:c | c type = #identifier]]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkMethodSelector [
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x orAnyParent: #method].
+		[:x |
+			x childSandblocks
+				detect: [:c | #(#'keyword_selector' #'binary_selector' #'unary_selector') includes: c type]
+				ifNone: [nil]]}
 ]
 
 { #category : #smalltalk }
@@ -346,7 +396,10 @@ DCBlock class >> smalltalkUnusedVariable [
 DCBlock class >> smalltalkUsesOfDeclaration [
 
 	^ {
-		[:decl | {#args. decl. decl orAnyParent: #(#block #method)}].
+		[:decl |
+			decl isSandblock
+				ifTrue: [{#args. decl. decl orAnyParent: #(#block #method)}]
+				ifFalse: [nil]].
 		[:decl :scope |
 			{
 				#args.
@@ -384,7 +437,7 @@ DCBlock >> adaptInput: input in: source at: cursorIndex textMorph: textMorph eve
 		^ input, complete].
 	
 	"for separators, don't re-parse immediately, as those get discarded during parse"
-	^ input first isSeparator
+	^ (input first isSeparator and: [textMorph isCursorAtEnd or: [textMorph isCursorAtStart]])
 		ifTrue: [
 			textMorph keyStroke: anEvent.
 			'']
@@ -442,7 +495,7 @@ DCBlock >> applyEdit: edit source: newSource cursorAt: newIndex [
 { #category : #'as yet unclassified' }
 DCBlock >> artefactChanged: aMethodBlock [
 
-	self = aMethodBlock ifTrue: [self queryState updateChangeQueries]
+	(self containingArtefact = aMethodBlock and: [self isRootBlock]) ifTrue: [self queryState updateChangeQueries]
 ]
 
 { #category : #'query actions' }
@@ -601,6 +654,12 @@ DCBlock >> getSourceStringAndMark [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> grammarHandler [
+
+	^ DCGrammarHandler new
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> handleInsertEvent: anEvent in: textMorph [
 
 	| pairMap input |
@@ -739,6 +798,12 @@ DCBlock >> insert: aString in: aContainerString at: aNumber do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> insertCommandRequest: aMorph near: aBlock before: aBoolean [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 
 	self isBlockBody ifTrue: [
@@ -791,13 +856,13 @@ DCBlock >> intoWorld: aWorld [
 { #category : #'as yet unclassified' }
 DCBlock >> isArtefact [
 
-	^ self isRootBlock
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
 DCBlock >> isBlockBody [
 
-	^ self language blockBodyTypes includes: self type
+	^ self language ifNotNil: [:l | l blockBodyTypes includes: self type] ifNil: [false]
 ]
 
 { #category : #queries }
@@ -825,7 +890,7 @@ DCBlock >> isReplacement [
 { #category : #'as yet unclassified' }
 DCBlock >> isRootBlock [
 
-	^ self type = self language rootRuleName
+	^ self type = (self language ifNotNil: #rootRuleName)
 ]
 
 { #category : #'as yet unclassified' }
@@ -979,11 +1044,20 @@ DCBlock >> pasteReplace [
 
 	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | str |
 		str := Clipboard clipboardText string.
-		self
-			insert: str
-			in: source
-			at: cursorIndex
-			do: [:new :edit | apply value: new value: edit value: cursorIndex + str size]]
+		
+		cursorIndex class = SBTSRange
+			ifTrue: [
+				self
+					replace: cursorIndex
+					in: source
+					with: str
+					do: [:new :edit | apply value: new value: edit value: cursorIndex + str size]]
+			ifFalse: [
+				self
+					insert: str
+					in: source
+					at: cursorIndex
+					do: [:new :edit | apply value: new value: edit value: cursorIndex + str size]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1072,7 +1146,20 @@ DCBlock >> range: aRange [
 { #category : #'query actions' }
 DCBlock >> registerShortcut: aSymbol do: aBlock [
 
+	" a previous shortcut may have removed us from the world, abort "
+	self isInWorld ifFalse: [^ self].
+	
 	self queryState tryShortcut: aSymbol do: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> reloadArtefact [
+	<action>
+
+	self sandblockEditor do: (SBReplaceCommand new target: self containingArtefact replacer: ((DCSmalltalkMethod for: self containingArtefact object)
+		hResizing: self containingArtefact hResizing;
+		width: self containingArtefact width;
+		yourself))
 ]
 
 { #category : #'text modify' }
@@ -1109,6 +1196,17 @@ DCBlock >> replace: oldTree with: newTree [
 				position: oldTree position;
 				width: oldTree width;
 				yourself]}
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> replaceWith: aString [
+
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+		self
+			replace: textMorph range
+			in: source
+			with: aString
+			do: [:new :edit | apply value: new value: edit value: textMorph range start index + aString size]]
 ]
 
 { #category : #'query actions' }
@@ -1297,8 +1395,10 @@ DCBlock >> tryApplyChange: aClosure [
 	
 	aClosure
 		value: oldSource
-		value: self activeTextMorph
-		value: (self activeTextMorph ifNotNil: [self activeTextMorph range start index + (oldCursorOffset - 1)])
+		value: (self activeTextMorph ifNil: [self])
+		value: (self activeTextMorph
+			ifNotNil: [self activeTextMorph range start index + (oldCursorOffset - 1)]
+			ifNil: [self range])
 		value: [:newSource :edit :newIndex | self applyEdit: edit source: newSource cursorAt: newIndex]
 ]
 
@@ -1392,7 +1492,6 @@ DCBlock >> wrapInRoundParenthesis [
 DCBlock >> wrapInSingleQuotes [
 	<action>
 
-	self halt.
 	self wrapIn: ''''
 ]
 

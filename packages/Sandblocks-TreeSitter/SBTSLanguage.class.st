@@ -619,6 +619,10 @@ SBTSLanguage class >> softLineBreakBetween: aBlock and: anotherBlock [
 { #category : #'configuration - layout' }
 SBTSLanguage class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
+	anotherBlock type = 'ERROR' ifTrue: [^ true].
+	aBlock contents ifEmpty: [^ true].
+	anotherBlock contents ifEmpty: [^ true].
+	
 	^ (aCharacter isAlphaNumeric or: [aCharacter = $_]) and: [
 		anotherBlock firstSourceCharacter
 			ifNotNil: [:c | c isAlphaNumeric or: [c = $_]]
