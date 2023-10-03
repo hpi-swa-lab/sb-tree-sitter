@@ -6,10 +6,20 @@ Class {
 		'newDecorators',
 		'rootBlock',
 		'currentShortcut',
-		'updateQueued'
+		'updateQueued',
+		'suggestions'
 	],
 	#category : #'DomainCode-Parser'
 }
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> addSuggestions: aCollection for: aBlock [
+
+	suggestions := aBlock -> aCollection.
+	
+	aBlock sandblockEditor suggestionMenu focusOnOpen: true.
+	aBlock updateSuggestions
+]
 
 { #category : #'as yet unclassified' }
 DCQueryState >> errors [
@@ -85,6 +95,12 @@ DCQueryState >> rootBlock [
 DCQueryState >> rootBlock: aBlock [
 
 	rootBlock := aBlock
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> suggestionsFor: aBlock [
+
+	^ suggestions key = aBlock ifTrue: [suggestions value] ifFalse: [{}]
 ]
 
 { #category : #shortcuts }

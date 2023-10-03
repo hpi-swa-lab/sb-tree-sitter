@@ -16,10 +16,10 @@ DCBlock class >> addUncapturedTextTo: aNode in: aCursor language: aLanguage isLe
 
 	| text |
 	text := aCursor textToNext.
-	(text occurrencesOf: Character lf) - 1 timesRepeat: [aNode addMorphBack: (DCUnknown new language: aLanguage)].
+	(text occurrencesOf: Character lf) - 1 timesRepeat: [aNode addMorphBack: (DCEmptyStatement new language: aLanguage)].
 	
 	aBoolean ifTrue: [text := aLanguage instance grammar trimExtra: aCursor uncapturedText].
-
+	
 	(aLanguage instance grammar trimExtra: text) ifNotEmpty: [:t |
 		aNode addMorphBack: (DCText new
 			contents: t;
@@ -252,6 +252,23 @@ DCBlock class >> smalltalkMessageSend [
 ]
 
 { #category : #smalltalk }
+DCBlock class >> smalltalkMessageSendAutoCompletion [
+	<query: #type>
+
+	^ {
+		[:x | x isSelected].
+		[:x | (DCQuery script: self smalltalkMessageSendSelector with: x) ifNotNil: [:res | res, {x}]].
+		[:selector :message :part |
+			part addSuggestions: ((SBBlock basicNew sortedSuggestions: Symbol allSymbols for: selector) collect: [:sel |
+				SBSuggestionItem
+					selector: ((sel allSatisfy: #isSpecial) ifTrue: [sel, ' __sb'] ifFalse: [
+						(sel includes: $:)
+							ifTrue: [((sel splitBy: ':') allButLast collect: [:p | p, ': __sb']) joinSeparatedBy: ' ']
+							ifFalse: [sel]])
+					label: 'send'])]}
+]
+
+{ #category : #smalltalk }
 DCBlock class >> smalltalkMessageSendSelector [
 
 	^ {
@@ -363,6 +380,12 @@ DCBlock >> adaptInput: input in: source at: cursorIndex textMorph: textMorph eve
 			textMorph keyStroke: anEvent.
 			'']
 		ifFalse: [input]
+]
+
+{ #category : #'query actions' }
+DCBlock >> addSuggestions: aCollection [
+
+	self queryState addSuggestions: aCollection for: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -701,13 +724,13 @@ DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 			near: self activeTextMorph
 			before: anAboveBoolean
 			in: self
-			morph: (DCUnknown new language: self language))].
+			morph: (DCEmptyStatement new language: self language))].
 	
 	(self orOwnerSuchThat: [:morph | morph isTSBlock and: [morph isStatement]]) ifNotNil: [:statement | | target |
 		target := (anAboveBoolean not and: [(statement submorphAfter ifNotNil: #treeLabel) = self language statementTerminator])
 			ifTrue: [statement submorphAfter]
 			ifFalse: [statement].
-		self sandblockEditor do: (SBRelInsertCommand new near: target before: anAboveBoolean in: statement owner morph: (DCUnknown new
+		self sandblockEditor do: (SBRelInsertCommand new near: target before: anAboveBoolean in: statement owner morph: (DCEmptyStatement new
 			language: self language;
 			contents: (SBToggledCode comment: '' active: 1 do: {['']. [self language statementTerminator]})))]
 ]
@@ -1129,6 +1152,12 @@ DCBlock >> statements [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> suggestions [
+
+	^ self queryState suggestionsFor: self
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> swap: aNumber [
 
 	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | pivot outerPivot |
@@ -1279,6 +1308,12 @@ DCBlock >> type: aSymbol [
 DCBlock >> updateAllHighlights [
 
 	^ self slot updateAllHighlightsFor: self
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> useSuggestion: anItem [
+
+	self tryApplyChange: []
 ]
 
 { #category : #'as yet unclassified' }
