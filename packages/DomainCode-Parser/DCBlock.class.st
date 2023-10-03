@@ -242,6 +242,17 @@ DCBlock class >> smalltalkHighlightIdentifiers [
 		[:decl :identifiers | identifiers do: #attachHighlight]}
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock class >> smalltalkJumpPlaceholder [
+	<query: #change>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x type = #identifier].
+		[:x | x contents = '__sb'].
+		[:x | x installReplacement: DCJumpPlaceholder new]}
+]
+
 { #category : #smalltalk }
 DCBlock class >> smalltalkMessageSend [
 
@@ -260,12 +271,10 @@ DCBlock class >> smalltalkMessageSendAutoCompletion [
 		[:x | (DCQuery script: self smalltalkMessageSendSelector with: x) ifNotNil: [:res | res, {x}]].
 		[:selector :message :part |
 			part addSuggestions: ((SBBlock basicNew sortedSuggestions: Symbol allSymbols for: selector) collect: [:sel |
-				SBSuggestionItem
-					selector: ((sel allSatisfy: #isSpecial) ifTrue: [sel, ' __sb'] ifFalse: [
-						(sel includes: $:)
-							ifTrue: [((sel splitBy: ':') allButLast collect: [:p | p, ': __sb']) joinSeparatedBy: ' ']
-							ifFalse: [sel]])
-					label: 'send'])]}
+				DCSuggestionItem new selector: sel label: 'send' source: ((sel allSatisfy: #isSpecial) ifTrue: [sel, ' __sb'] ifFalse: [
+					(sel includes: $:)
+						ifTrue: [((sel splitBy: ':') allButLast collect: [:p | p, ': __sb']) joinSeparatedBy: ' ']
+						ifFalse: [sel]])])]}
 ]
 
 { #category : #smalltalk }
@@ -415,6 +424,19 @@ DCBlock >> allParentsUpTo: aBlock [
 DCBlock >> allTextMorphsDo: aBlock [
 
 	self allChildrenDo: [:m | m isTextMorph ifTrue: [aBlock value: m]]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> applyEdit: edit source: newSource cursorAt: newIndex [
+
+	| oldTree newTree |
+	oldTree := self rootBlock.
+	newTree := DCBlock parse: newSource old: oldTree edit: edit language: self language.
+	self replace: oldTree with: newTree first.
+	oldTree
+		setProperty: #tsTree toValue: (newTree first valueOfProperty: #tsTree);
+		setProperty: #tsSource toValue: (newTree first valueOfProperty: #tsSource).
+	self placeCursorIn: oldTree at: newIndex
 ]
 
 { #category : #'as yet unclassified' }
@@ -1053,6 +1075,23 @@ DCBlock >> registerShortcut: aSymbol do: aBlock [
 	self queryState tryShortcut: aSymbol do: aBlock
 ]
 
+{ #category : #'text modify' }
+DCBlock >> replace: aRange in: aContainerString with: aString do: aBlock [
+
+	| new |
+	self
+		example: [DCBlock new]
+		args: [{SBTSRange start: 3 size: 3. 'abcxxxghi'. 'def'. [:a :b | ]}]
+		label: 'example'.
+	
+	new := (aContainerString first: aRange start index), aString, (aContainerString allButFirst: aRange end index).
+	^ aBlock value: new value: (SBTSInputEdit new
+		startByte: aRange start index;
+		oldEndByte: aRange end index;
+		newEndByte: aRange start index + aString size;
+		bytesToPointsIn: aString new: new)
+]
+
 { #category : #'as yet unclassified' }
 DCBlock >> replace: oldTree with: newTree [
 
@@ -1252,42 +1291,15 @@ DCBlock >> treeLabel [
 { #category : #'as yet unclassified' }
 DCBlock >> tryApplyChange: aClosure [
 
-	| newTree oldTree oldCursorOffset oldSource |
+	| oldCursorOffset oldSource |
 	oldCursorOffset := self activeTextMorph ifNotNil: #cursor.
-	oldTree := self rootBlock.
-	oldSource := oldTree getSourceStringAndMark.
+	oldSource := self rootBlock getSourceStringAndMark.
 	
 	aClosure
 		value: oldSource
 		value: self activeTextMorph
 		value: (self activeTextMorph ifNotNil: [self activeTextMorph range start index + (oldCursorOffset - 1)])
-		value: [:newSource :edit :newIndex |
-			newTree := DCBlock parse: newSource old: oldTree edit: edit language: self language.
-			
-			SBToggledCode comment: '' active: 1 do: {
-				[self replace: oldTree with: newTree first].
-				[
-					newTree second
-						ifNotEmpty: [:changedRanges | | change newContained pair |
-							change := SBTSRange merging: changedRanges.
-							newContained := newTree first smallestBlockEncompassig: change.
-							pair := self findLastMatchingAncesors: {newContained}, newContained allParents oldTree: oldTree.
-							self replace: pair first with: pair second]
-						ifEmpty: [ | pair |
-							"empty change means no structures were changed, only contents"
-							pair := self
-								findLastMatchingAncesors: {
-									self sandblockEditor currentInputCommand ifNotNil: #textMorph.
-									self sandblockEditor currentInputCommand ifNotNil: #block}, (self sandblockEditor currentInputCommand ifNotNil: #block) allParents
-								oldTree: newTree first.
-							pair second contents: pair first contents].
-					self copyRangesFrom: newTree first to: oldTree]}.
-			
-			oldTree
-				setProperty: #tsTree toValue: (newTree first valueOfProperty: #tsTree);
-				setProperty: #tsSource toValue: (newTree first valueOfProperty: #tsSource).
-			
-			self placeCursorIn: oldTree at: newIndex]
+		value: [:newSource :edit :newIndex | self applyEdit: edit source: newSource cursorAt: newIndex]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1313,7 +1325,12 @@ DCBlock >> updateAllHighlights [
 { #category : #'as yet unclassified' }
 DCBlock >> useSuggestion: anItem [
 
-	self tryApplyChange: []
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+		self
+			replace: textMorph range
+			in: source
+			with: anItem source
+			do: [:new :edit | apply value: new value: edit value: textMorph range start index + anItem source size]]
 ]
 
 { #category : #'as yet unclassified' }

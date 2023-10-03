@@ -48,6 +48,12 @@ DCReplacement >> layoutCommands [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> range [
+
+	^ self source range
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> source [
 
 	^ source

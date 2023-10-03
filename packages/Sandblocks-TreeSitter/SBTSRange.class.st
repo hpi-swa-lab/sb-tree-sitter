@@ -108,6 +108,12 @@ SBTSRange >> isEmpty [
 	^ self start = self end
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSRange >> isNull [
+
+	^ self start index = 0 and: [self end index = 0]
+]
+
 { #category : #testing }
 SBTSRange >> isSingleLine [
 

@@ -132,7 +132,7 @@ DCText >> printOn: aStream [
 { #category : #'as yet unclassified' }
 DCText >> range [
 
-	^ range
+	^ range isNull ifTrue: [self owner range] ifFalse: [range]
 ]
 
 { #category : #'as yet unclassified' }

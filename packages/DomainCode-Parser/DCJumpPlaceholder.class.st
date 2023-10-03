@@ -5,6 +5,18 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCJumpPlaceholder >> adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent [
+
+	(super adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent) ifNotEmpty: [:newInput |
+		self
+			replace: self range
+			in: source
+			with: newInput
+			do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex + 1]].
+	^ ''
+]
+
+{ #category : #'as yet unclassified' }
 DCJumpPlaceholder >> initialize [
 
 	super initialize.
