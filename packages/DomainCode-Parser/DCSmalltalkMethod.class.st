@@ -8,9 +8,15 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCSmalltalkMethod class >> emptyIn: aClass [
+
+	^ self new emptyIn: aClass
+]
+
+{ #category : #'as yet unclassified' }
 DCSmalltalkMethod class >> for: aCompiledMethod [
 
-	^ self new for: aCompiledMethod
+	^ aCompiledMethod isSandblock ifFalse: [self new for: aCompiledMethod] ifTrue: [self new emptyIn: aCompiledMethod methodClass]
 ]
 
 { #category : #'as yet unclassified' }
@@ -18,6 +24,13 @@ DCSmalltalkMethod >> browse [
 	<action>
 
 	Browser newOnClass: self methodClass selector: self selector
+]
+
+{ #category : #'as yet unclassified' }
+DCSmalltalkMethod >> emptyIn: aClass [
+
+	methodClass := aClass.
+	self addMorphBack: (DCBlock parseBlock: '__sb' language: SBTSSmalltalk)
 ]
 
 { #category : #'as yet unclassified' }

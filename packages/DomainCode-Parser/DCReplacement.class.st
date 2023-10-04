@@ -85,6 +85,21 @@ DCReplacement >> type [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> uninstall [
+
+	| hadFocus |
+	self parent ifNil: [^ self].
+	hadFocus := self sandblockEditor textFocus
+		ifNotNil: [:t | t hasAnyParent: self]
+		ifNil: [false].
+	
+	self source replacedParent: nil.
+	self replaceBy: self source.
+	
+	hadFocus ifTrue: [self source startInputAtEnd]
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> updateSourceDuring: aBlock [
 
 	bindings do: [:assoc | assoc value value: self source value: self].

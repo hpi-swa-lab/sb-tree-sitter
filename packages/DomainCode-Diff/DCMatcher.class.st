@@ -71,7 +71,7 @@ DCMatcher >> fineGrainedMatchFrom: src to: dest in: aMapping [
 	
 	self halt.
 	topSrc ifNotNil: [
-		self assert: (aMapping destForSrc: topSrc owner) = topDest parent.
+		self assert: (aMapping destForSrc: topSrc parent) = topDest parent.
 		DCGreedyBottomUpMatcher new
 			sizeThreshold: 900000000;
 			lastChanceMatchFrom: topSrc to: topDest in: aMapping]

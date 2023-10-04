@@ -1176,6 +1176,8 @@ SBTSSmalltalk class >> highlightQuery [
 (string) @string
 (symbol) @string
 (character) @string
+(comment) @comment
+(block "|" @punctuation)
 
 (identifier) @variable
 (block_argument) @variable
@@ -1194,6 +1196,8 @@ SBTSSmalltalk class >> highlightQuery [
 (keyword_selector (keyword) @major_declaration.part) @structure.part
 (binary_selector (binary_operator) @major_declaration.part) @structure.part
 (unary_selector (unary_identifier) @major_declaration.part) @structure.part
+
+[(pragma_keyword_selector) (pragma_unary_selector) (pragma_binary_selector)] @structure.part
 
 (temporaries) @punctuation.part
 (temporaries (identifier) @punctuation)'

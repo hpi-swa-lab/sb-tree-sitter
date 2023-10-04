@@ -7,7 +7,9 @@ Class {
 		'rootBlock',
 		'currentShortcut',
 		'updateQueued',
-		'suggestions'
+		'suggestions',
+		'transientReplacements',
+		'currentTrigger'
 	],
 	#category : #'DomainCode-Parser'
 }
@@ -21,6 +23,24 @@ DCQueryState >> addSuggestions: aCollection for: aBlock [
 	
 	aBlock sandblockEditor suggestionMenu focusOnOpen: true.
 	aBlock updateSuggestions
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> ensureReplacement: aClass for: aBlock initDo: aClosure [
+
+	| replacement |
+	replacement := aBlock class = aClass
+		ifFalse: [ | r hadFocus |
+			hadFocus := aBlock sandblockEditor textFocus ifNotNil: [:t | t hasAnyParent: aBlock] ifNil: [false].
+			r := aClass new.
+			aBlock replacedParent: r.
+			aClosure value: r.
+			r source: aBlock.
+			aBlock replaceBy: r.
+			hadFocus ifTrue: [r startInputAtEnd].
+			r]
+		ifTrue: [aBlock].
+	(transientReplacements at: currentTrigger) add: replacement
 ]
 
 { #category : #'as yet unclassified' }
@@ -40,11 +60,11 @@ DCQueryState >> initialize [
 
 	super initialize.
 	
-	currentDecorators := Dictionary new
-		at: #selection put: WeakKeyDictionary new;
-		at: #change put: WeakKeyDictionary new;
-		at: #type put: WeakKeyDictionary new;
-		yourself.
+	currentDecorators := Dictionary new.
+	transientReplacements := Dictionary new.
+	self triggers do: [:t |
+		currentDecorators at: t put: WeakKeyDictionary new.
+		transientReplacements at: t put: WeakSet new].
 	updateQueued := Dictionary new
 ]
 
@@ -76,15 +96,11 @@ DCQueryState >> reportError: aDecorator for: aBlock [
 { #category : #'as yet unclassified' }
 DCQueryState >> rerunQueriesFor: aSymbol do: aBlock [
 
-	| oldDecorators |
-	newDecorators := WeakKeyDictionary new.
+	currentTrigger := aSymbol.
 	
-	aBlock value.
+	self updateTransientReplacementsDuring: [self updateDecoratorsDuring: [aBlock value]].
 	
-	oldDecorators := currentDecorators at: aSymbol.
-	oldDecorators do: [:list | list do: [:d | d detach]].
-	newDecorators keysAndValuesDo: [:block :list | list do: [:d | block attachDecorator: d]].
-	currentDecorators at: aSymbol put: newDecorators
+	currentTrigger := nil
 ]
 
 { #category : #accessing }
@@ -105,6 +121,12 @@ DCQueryState >> suggestionsFor: aBlock [
 	^ suggestions key = aBlock ifTrue: [suggestions value] ifFalse: [{}]
 ]
 
+{ #category : #'as yet unclassified' }
+DCQueryState >> triggers [
+
+	^ #(#shortcut #change #type #selection)
+]
+
 { #category : #shortcuts }
 DCQueryState >> tryShortcut: aSymbol do: aBlock [
 
@@ -118,6 +140,20 @@ DCQueryState >> updateChangeQueries [
 
 	self updateQueriesFor: #change.
 	self updateTypeQueries
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> updateDecoratorsDuring: aBlock [
+
+	| oldDecorators |
+	newDecorators := WeakKeyDictionary new.
+	
+	aBlock value.
+	
+	oldDecorators := currentDecorators at: currentTrigger.
+	oldDecorators do: [:list | list do: [:d | d detach]].
+	newDecorators keysAndValuesDo: [:block :list | list do: [:d | block attachDecorator: d]].
+	currentDecorators at: currentTrigger put: newDecorators
 ]
 
 { #category : #'as yet unclassified' }
@@ -137,6 +173,17 @@ DCQueryState >> updateQueriesFor: aSymbol [
 DCQueryState >> updateSelectionQueries [
 
 	self updateQueriesFor: #selection
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> updateTransientReplacementsDuring: aBlock [
+
+	| old new |
+	old := transientReplacements at: currentTrigger.
+	new := WeakSet new.
+	transientReplacements at: currentTrigger put: new.
+	aBlock value.
+	old do: [:r | (new includes: r) ifFalse: [r uninstall]]
 ]
 
 { #category : #'as yet unclassified' }

@@ -206,6 +206,21 @@ DCBlock class >> smalltalkCheckbox [
 ]
 
 { #category : #smalltalk }
+DCBlock class >> smalltalkCreateNewMethod [
+	<query: #shortcut>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x |
+			x registerShortcut: #createNewEmptyModule do: [
+				{
+					[:e | | method |
+						method := DCSmalltalkMethod emptyIn: e containingArtefact methodClass.
+						e sandblockEditor openMorphInView: method.
+						method firstDeepChild startInputAtEnd]}]]}
+]
+
+{ #category : #smalltalk }
 DCBlock class >> smalltalkDeclaration [
 
 	^ {
@@ -303,20 +318,20 @@ DCBlock class >> smalltalkInsertArg [
 							id := DCQuery
 								script: {self smalltalkMethodArguments. [:args | (args at: index) contents]}
 								with: block.
-							block type ~= #identifier
-								ifTrue: [block insert: id]
-								ifFalse: [block replaceWith: id]]}]]]}
+							(block type = #identifier or: [block sandblockEditor mode = #command])
+								ifTrue: [block replaceWith: id]
+								ifFalse: [block insert: id]]}]]]}
 ]
 
 { #category : #smalltalk }
 DCBlock class >> smalltalkJumpPlaceholder [
-	<query: #change>
+	<query: #type>
 
 	^ {
 		[:x | x language = SBTSSmalltalk].
-		[:x | x type = #identifier].
+		[:x | #(#identifier #'unary_identifier') includes: x type].
 		[:x | x contents = '__sb'].
-		[:x | x installReplacement: DCJumpPlaceholder new]}
+		[:x | x ensureReplacement: DCJumpPlaceholder initDo: [:b | ]]}
 ]
 
 { #category : #smalltalk }
@@ -519,8 +534,9 @@ DCBlock >> allParentsUpTo: aBlock [
 
 { #category : #'as yet unclassified' }
 DCBlock >> allTextMorphsDo: aBlock [
+	"iterate over morphs, not children, as we're looking for visible text morphs"
 
-	self allChildrenDo: [:m | m isTextMorph ifTrue: [aBlock value: m]]
+	self allMorphsDo: [:m | m isTextMorph ifTrue: [aBlock value: m]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -644,6 +660,12 @@ DCBlock >> emphasis [
 DCBlock >> encompasses: aRange [
 
 	^ self range encompasses: aRange
+]
+
+{ #category : #'query actions' }
+DCBlock >> ensureReplacement: aClass initDo: aBlock [
+
+	self queryState ensureReplacement: aClass for: self initDo: aBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -861,13 +883,16 @@ DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 			in: self
 			morph: (DCEmptyStatement new language: self language))].
 	
-	(self orOwnerSuchThat: [:morph | morph isTSBlock and: [morph isStatement]]) ifNotNil: [:statement | | target |
+	(self orOwnerSuchThat: [:morph | morph isTSBlock and: [morph isStatement]]) ifNotNil: [:statement | | target after |
 		target := (anAboveBoolean not and: [(statement submorphAfter ifNotNil: #treeLabel) = self language statementTerminator])
 			ifTrue: [statement submorphAfter]
-			ifFalse: [statement].
+			ifFalse: [
+				"if we do not have a trailing dot, we need to insert the dot before the element"
+				after := anAboveBoolean not.
+				statement].
 		self sandblockEditor do: (SBRelInsertCommand new near: target before: anAboveBoolean in: statement owner morph: (DCEmptyStatement new
 			language: self language;
-			after: anAboveBoolean not;
+			after: after;
 			contents: (SBToggledCode comment: '' active: 1 do: {['']. [self language statementTerminator]})))]
 ]
 
@@ -970,7 +995,7 @@ DCBlock >> keyStroke: anEvent [
 					insert: text
 					in: source
 					at: cursorIndex + 1
-					do: [:new :edit | apply value: new value: edit value: cursorIndex + 1]]]].
+					do: [:new :edit | apply value: new value: edit value: (cursorIndex + (text indexOf: anEvent keyCharacter))]]]].
 	self batchedChangeStep
 ]
 
@@ -1012,13 +1037,13 @@ DCBlock >> layoutCommands [
 { #category : #'as yet unclassified' }
 DCBlock >> layoutInset [
 
-	self isBlockBody ifTrue: [^ 2 @ 2].
+	self isBlockBody ifTrue: [^ 4 @ 3].
 	
-	true ifTrue: [^ super layoutInset].
+	SBToggledCode comment: '' active: 0 do: {[true ifTrue: [^ super layoutInset]]}.
 	
 	^ (self type = 'ERROR' and: [self childSandblocks notEmpty])
 		ifTrue: [0]
-		ifFalse: [2 @ (self submorphCount > 3 ifTrue: [1] ifFalse: [0])]
+		ifFalse: [2 @ (self submorphCount > 3 ifTrue: [2] ifFalse: [0])]
 ]
 
 { #category : #hierarchy }
@@ -1236,10 +1261,15 @@ DCBlock >> registerShortcut: aSymbol do: aBlock [
 DCBlock >> reloadArtefact [
 	<action>
 
-	self sandblockEditor do: (SBReplaceCommand new target: self containingArtefact replacer: ((DCSmalltalkMethod for: self containingArtefact object)
+	| method |
+	method := (DCSmalltalkMethod for: self containingArtefact object)
 		hResizing: self containingArtefact hResizing;
 		width: self containingArtefact width;
-		yourself))
+		yourself.
+	
+	self sandblockEditor do: (SBReplaceCommand new target: self containingArtefact replacer: method).
+	
+	method firstDeepChild startInputAtEnd
 ]
 
 { #category : #'text modify' }
