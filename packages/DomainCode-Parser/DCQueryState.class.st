@@ -15,7 +15,9 @@ Class {
 { #category : #'as yet unclassified' }
 DCQueryState >> addSuggestions: aCollection for: aBlock [
 
-	suggestions := aBlock -> aCollection.
+	(suggestions notNil and: [suggestions key = aBlock])
+		ifTrue: [suggestions value: suggestions value, aCollection]
+		ifFalse: [suggestions := aBlock -> aCollection].
 	
 	aBlock sandblockEditor suggestionMenu focusOnOpen: true.
 	aBlock updateSuggestions
@@ -140,5 +142,6 @@ DCQueryState >> updateSelectionQueries [
 { #category : #'as yet unclassified' }
 DCQueryState >> updateTypeQueries [
 
+	suggestions := nil.
 	self updateQueriesFor: #type
 ]

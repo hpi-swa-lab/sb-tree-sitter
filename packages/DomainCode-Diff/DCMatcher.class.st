@@ -19,10 +19,10 @@ DCMatcher >> commonAncestorOf: aCollection root: aTree [
 	| current |
 	aCollection ifEmpty: [^ nil].
 	
-	current := aCollection first owner.
+	current := aCollection first parent.
 	[current ~= aTree] whileTrue: [
-		(aCollection allSatisfy: [:t | t = current or: [t hasOwner: current]]) ifTrue: [^ current].
-		current := current owner].
+		(aCollection allSatisfy: [:t | t = current or: [t hasAnyParent: current]]) ifTrue: [^ current].
+		current := current parent].
 	
 	^ aTree
 ]
@@ -71,7 +71,7 @@ DCMatcher >> fineGrainedMatchFrom: src to: dest in: aMapping [
 	
 	self halt.
 	topSrc ifNotNil: [
-		self assert: (aMapping destForSrc: topSrc owner) = topDest owner.
+		self assert: (aMapping destForSrc: topSrc owner) = topDest parent.
 		DCGreedyBottomUpMatcher new
 			sizeThreshold: 900000000;
 			lastChanceMatchFrom: topSrc to: topDest in: aMapping]

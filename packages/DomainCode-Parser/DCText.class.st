@@ -15,10 +15,10 @@ DCText >> alias [
 	^ nil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 DCText >> allParentsUpTo: aBlock [
 
-	^ {self}, (self containingSandblock allParentsUpTo: aBlock)
+	^ {self parent}, (self parent allParentsUpTo: aBlock)
 ]
 
 { #category : #'as yet unclassified' }
@@ -69,6 +69,13 @@ DCText >> foregroundColor [
 	^ self containingSandblock colorPolicy foregroundColorForBlock: self
 ]
 
+{ #category : #hierarchy }
+DCText >> hasAnyParent: aBlock [
+
+	self parent = aBlock ifTrue: [^ true].
+	^ self parent hasAnyParent: aBlock
+]
+
 { #category : #'as yet unclassified' }
 DCText >> highlight [
 
@@ -92,6 +99,12 @@ DCText >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> isRootBlock [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> isTSMorph [
 
 	^ true
@@ -112,6 +125,12 @@ DCText >> ownerWithForegroundColor [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> parent [
+
+	^ self owner
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> parentNode [
 
 	^ self owner
@@ -127,6 +146,15 @@ DCText >> preferredColorIn: aColorPolicy [
 DCText >> printOn: aStream [
 
 	aStream nextPutAll: ('"{1}"' format: {self contents})
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> printTreeOn: aStream indent: aNumber [
+
+	aNumber timesRepeat: [aStream tab].
+	aStream nextPutAll: '"'.
+	aStream nextPutAll: self contents.
+	aStream nextPutAll: '"'
 ]
 
 { #category : #'as yet unclassified' }
@@ -161,6 +189,12 @@ DCText >> shallowCopyBlock [
 DCText >> shownColor [
 
 	^ self containingSandblock shownColor
+]
+
+{ #category : #hierarchy }
+DCText >> siblingIndex [
+
+	^ self parent children indexOf: self
 ]
 
 { #category : #'as yet unclassified' }

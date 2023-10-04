@@ -377,6 +377,12 @@ SBTSLanguage class >> isStatementContainer: aRepeatNode in: aBlock [
 	^ aRepeatNode element type = 'statement' or: [aRepeatNode element type = '_statement']
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSLanguage class >> isStatementTerminatorBetween [
+
+	^ false
+]
+
 { #category : #configuration }
 SBTSLanguage class >> language [
 

@@ -211,26 +211,31 @@ DCBlock class >> smalltalkDeclaration [
 	^ {
 		[:x | x language = SBTSSmalltalk].
 		[:x | x type = #identifier].
-		[:id | {#args. id. id orAllParents: #(method block)}].
+		[:id | {#args. id. id orAllParents: #(#method #block)}].
 		[:id :scopes |
-			(DCQuery script: {
-				[:scope | DCQuery firstScript: {
-					{ "temporaries"
-						[:block | block childSandblocks detect: [:a | a type = #temporaries] ifNone: [nil]].
-						[:args | args childSandblocks detect: [:arg | arg contents = id contents] ifNone: [nil]].
-					}.
-					{ "block args"
-						[:block | block childSandblocks select: [:a | a type = #block_argument]].
-						[:args | args detect: [:arg | arg contents allButFirst = id contents] ifNone: [nil]].
-					}.
-					{ "method args"
-						[:method | method queryAll: '[(keyword_selector (identifier) @) (binary_selector (identifier) @)]'].
-						[:args | args detect: [:arg | arg contents = id contents] ifNone: [nil]].
-					}} with: scope].
-				} first: scopes) ifNil: [
-					(Symbol lookup: id contents) ifNotNil: [:sym | id containingArtefact methodClass bindingOf: sym environment: id containingArtefact methodClass environment]]
-		]
-	}
+			((DCQuery
+				script: {
+					[:scope |
+						DCQuery
+							firstScript: {
+								{
+									[:block | "temporaries"
+									block childSandblocks detect: [:a | a type = #temporaries] ifNone: [nil]].
+									[:args | args childSandblocks detect: [:arg | arg contents = id contents] ifNone: [nil]]}.
+								{
+									[:block | "block args"
+									block childSandblocks select: [:a | a type = #'block_argument']].
+									[:args | args detect: [:arg | arg contents allButFirst = id contents] ifNone: [nil]]}.
+								{
+									[:method | "method args"
+									method queryAll: '[(keyword_selector (identifier) @) (binary_selector (identifier) @)]'].
+									[:args | args detect: [:arg | arg contents = id contents] ifNone: [nil]]}}
+							with: scope]}
+				first: scopes) ifNil: [
+				(Symbol lookup: id contents) ifNotNil: [:sym |
+					id containingArtefact methodClass
+						bindingOf: sym
+						environment: id containingArtefact methodClass environment]]) ifNil: [id containingArtefact ifNotNil: [:m | m methodClass instVarNames detect: [:n | n = id contents] ifNone: [nil]]]]}
 ]
 
 { #category : #smalltalk }
@@ -252,13 +257,36 @@ DCBlock class >> smalltalkIdentifierAutocompletion [
 		[:x | x isSelected].
 		[:x | x type = #identifier].
 		[:x |
-			x addSuggestions: ((self
-				sortedSuggestions: (Smalltalk globals declarations
+			x
+				addOwnSuggestions: (Smalltalk globals declarations
 					collect: [:class | class value name]
 					into: OrderedCollection new)
-				for: x contents
-				addAll: false
-				max: 10) collect: [:sel | DCSuggestionItem new selector: sel label: 'class' source: sel])]}
+				label: 'class'].
+		[:id | {#args. id. id orAllParents: #(#method #block)}].
+		[:id :scopes |
+			scopes do: [:scope |
+				DCQuery
+					script: {
+						[:block | block childSandblocks detect: [:a | a type = #temporaries] ifNone: [nil]].
+						[:temps | temps childSandblocks].
+						[:vars | id addOwnSuggestions: (vars collect: [:c | c contents]) label: 'temp']}
+					with: scope.
+				DCQuery
+					script: {
+						[:block | block childSandblocks select: [:a | a type = #'block_argument']].
+						[:vars | id addOwnSuggestions: (vars collect: [:c | c contents]) label: 'block arg']}
+					with: scope].
+			id].
+		[:id |
+			DCQuery
+				script: {
+					self smalltalkMethodSelector.
+					[:selector | selector children select: [:c | c type = #identifier]].
+					[:args | id addOwnSuggestions: (args collect: [:c | c contents]) label: 'method arg']}
+				with: id.
+			id].
+		[:id | {#args. id. id containingArtefact}].
+		[:id :method | id addOwnSuggestions: method methodClass instVarNames label: 'inst var']}
 ]
 
 { #category : #smalltalk }
@@ -271,7 +299,13 @@ DCBlock class >> smalltalkInsertArg [
 			#(#First #Second #Third #Fourth #Fifith) withIndexDo: [:name :index |
 				x registerShortcut: #use, name, #Argument do: [
 					{
-						[:block | block replaceWith: (DCQuery script: {self smalltalkMethodArguments. [:args | (args at: index) contents]} with: block)]}]]]}
+						[:block | | id |
+							id := DCQuery
+								script: {self smalltalkMethodArguments. [:args | (args at: index) contents]}
+								with: block.
+							block type ~= #identifier
+								ifTrue: [block insert: id]
+								ifFalse: [block replaceWith: id]]}]]]}
 ]
 
 { #category : #smalltalk }
@@ -445,6 +479,12 @@ DCBlock >> adaptInput: input in: source at: cursorIndex textMorph: textMorph eve
 ]
 
 { #category : #'query actions' }
+DCBlock >> addOwnSuggestions: aCollection label: aString [
+
+	self addSuggestions: ((self class sortedSuggestions: aCollection for: self contents addAll: false max: 10) collect: [:sel | DCSuggestionItem new selector: sel label: aString source: sel])
+]
+
+{ #category : #'query actions' }
 DCBlock >> addSuggestions: aCollection [
 
 	self queryState addSuggestions: aCollection for: self
@@ -456,21 +496,25 @@ DCBlock >> alias [
 	^ nil
 ]
 
-{ #category : #queries }
+{ #category : #hierarchy }
 DCBlock >> allParents [
 
 	^ self allParentsUpTo: self rootBlock
 ]
 
-{ #category : #queries }
+{ #category : #hierarchy }
 DCBlock >> allParentsUpTo: aBlock [
 
+	| current parents |
 	self = aBlock ifTrue: [^ #()].
 	
-	^ Array streamContents: [:s |
-		self assert: (self ownerSatisfying: [:o |
-			s nextPut: o.
-			o = aBlock]) notNil]
+	current := self parent.
+	parents := OrderedCollection new.
+	
+	[
+		parents add: current.
+		current = aBlock ifTrue: [^ parents].
+		current := current parent] repeat
 ]
 
 { #category : #'as yet unclassified' }
@@ -615,23 +659,6 @@ DCBlock >> field: aString [
 ]
 
 { #category : #'as yet unclassified' }
-DCBlock >> findLastMatchingAncesors: aCollection oldTree: aBlock [
-
-	| oldCurrent |
-	oldCurrent := aBlock.
-	aCollection allButLast reverseDo: [:newCurrent |
-		oldCurrent := oldCurrent children at: newCurrent submorphIndex ifAbsent: [
-			self assert: oldCurrent type = newCurrent owner type.
-			^ {oldCurrent. newCurrent owner}].
-		oldCurrent type = newCurrent type ifFalse: [
-			self assert: oldCurrent owner type = newCurrent owner type.
-			^ {oldCurrent owner. newCurrent owner}]].
-	
-	self assert: aCollection first type = oldCurrent type.
-	^ {oldCurrent. aCollection first}
-]
-
-{ #category : #'as yet unclassified' }
 DCBlock >> firstSourceCharacter [
 
 	self writeSourceOn: (SBImmediateStream with: [:c | ^ c]) indent: 0 forCompare: false.
@@ -696,7 +723,17 @@ DCBlock >> handleInsertEvent: anEvent in: textMorph [
 	^ super keyStroke: anEvent
 ]
 
-{ #category : #queries }
+{ #category : #hierarchy }
+DCBlock >> hasAnyParent: aBlock [
+
+	self isRootBlock ifTrue: [^ false].
+	
+	self parent = aBlock ifTrue: [^ true].
+	
+	^ self parent hasAnyParent: aBlock
+]
+
+{ #category : #hierarchy }
 DCBlock >> hasParent: aCollectionOrSymbol [
 
 	| matches |
@@ -783,6 +820,17 @@ DCBlock >> inputClosestTextMorphTo: cursorPosition [
 			in: best]
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock >> insert: aString [
+
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+		self
+			insert: aString
+			in: source
+			at: cursorIndex + 1
+			do: [:new :edit | apply value: new value: edit value: cursorIndex + aString size]]
+]
+
 { #category : #'text modify' }
 DCBlock >> insert: aString in: aContainerString at: aNumber do: aBlock [
 
@@ -819,6 +867,7 @@ DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 			ifFalse: [statement].
 		self sandblockEditor do: (SBRelInsertCommand new near: target before: anAboveBoolean in: statement owner morph: (DCEmptyStatement new
 			language: self language;
+			after: anAboveBoolean not;
 			contents: (SBToggledCode comment: '' active: 1 do: {['']. [self language statementTerminator]})))]
 ]
 
@@ -831,7 +880,12 @@ DCBlock >> insertStatementHasCandidate [
 { #category : #'as yet unclassified' }
 DCBlock >> installReplacement: aBlock [
 
-	self sandblockEditor do: (SBReplaceCommand new target: self replacer: (aBlock source: self))
+	self sandblockEditor do: (SBCombinedCommand newWith: {
+		SBReplaceCommand new target: self replacer: (aBlock source: self).
+		SBMutatePropertyCommand new
+			target: self;
+			selector: #replacedParent;
+			value: aBlock})
 ]
 
 { #category : #'as yet unclassified' }
@@ -865,14 +919,14 @@ DCBlock >> isBlockBody [
 	^ self language ifNotNil: [:l | l blockBodyTypes includes: self type] ifNil: [false]
 ]
 
-{ #category : #queries }
+{ #category : #hierarchy }
 DCBlock >> isOrHasParent: aCollectionOrSymbol [
 
 	| matches |
 	matches := aCollectionOrSymbol isSymbol
 		ifTrue: [{aCollectionOrSymbol}]
 		ifFalse: [aCollectionOrSymbol].
-	^ (matches includes: self type) or: [matches includes: self owner type]
+	^ (matches includes: self type) or: [matches includes: self parent type]
 ]
 
 { #category : #'as yet unclassified' }
@@ -967,7 +1021,7 @@ DCBlock >> layoutInset [
 		ifFalse: [2 @ (self submorphCount > 3 ifTrue: [1] ifFalse: [0])]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 DCBlock >> orAllParents: aCollectionOrSymbol [
 
 	| matches current res |
@@ -980,10 +1034,10 @@ DCBlock >> orAllParents: aCollectionOrSymbol [
 	[
 		(matches includes: current type) ifTrue: [res add: current].
 		current isRootBlock ifTrue: [^ res].
-		current := current owner] repeat
+		current := current parent] repeat
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #hierarchy }
 DCBlock >> orAnyParent: aCollectionOrSymbol [
 
 	| matches |
@@ -992,10 +1046,10 @@ DCBlock >> orAnyParent: aCollectionOrSymbol [
 		ifFalse: [aCollectionOrSymbol].
 	(matches includes: self type) ifTrue: [^ self].
 	self = self rootBlock ifTrue: [^ nil].
-	^ self owner orAnyParent: aCollectionOrSymbol
+	^ self parent orAnyParent: aCollectionOrSymbol
 ]
 
-{ #category : #queries }
+{ #category : #hierarchy }
 DCBlock >> orParent: aCollectionOrSymbol [
 
 	| matches |
@@ -1003,7 +1057,7 @@ DCBlock >> orParent: aCollectionOrSymbol [
 		ifTrue: [{aCollectionOrSymbol}]
 		ifFalse: [aCollectionOrSymbol].
 	(matches includes: self type) ifTrue: [^ self].
-	(matches includes: self owner type) ifTrue: [^ self owner].
+	(matches includes: self parent type) ifTrue: [^ self parent].
 	^ nil
 ]
 
@@ -1032,6 +1086,12 @@ DCBlock >> pairMap [
 	^ Dictionary newFrom: {'(' -> ')'. '''' -> ''''. '"' -> '"'. '`' -> '`'. '{' -> '}'. '[' -> ']'}
 ]
 
+{ #category : #hierarchy }
+DCBlock >> parent [
+
+	^ self replacedParent ifNotNil: [:p | p owner] ifNil: [self owner]
+]
+
 { #category : #'as yet unclassified' }
 DCBlock >> parentNode [
 
@@ -1056,7 +1116,7 @@ DCBlock >> pasteReplace [
 				self
 					insert: str
 					in: source
-					at: cursorIndex
+					at: cursorIndex + 1
 					do: [:new :edit | apply value: new value: edit value: cursorIndex + str size]]]
 ]
 
@@ -1110,6 +1170,26 @@ DCBlock >> prettySourceString [
 DCBlock >> printOn: aStream [
 
 	aStream nextPutAll: self type
+]
+
+{ #category : #'text modify' }
+DCBlock >> printTree [
+
+	| s |
+	s := '' writeStream.
+	self printTreeOn: s indent: 0.
+	^ s contents
+]
+
+{ #category : #'text modify' }
+DCBlock >> printTreeOn: aStream indent: aNumber [
+
+	aNumber timesRepeat: [aStream tab].
+	aStream nextPutAll: '('.
+	aStream nextPutAll: self type.
+	aStream cr.
+	self children do: [:c | c printTreeOn: aStream indent: aNumber + 1] separatedBy: [aStream cr].
+	aStream nextPutAll: ')'
 ]
 
 { #category : #'as yet unclassified' }
@@ -1209,6 +1289,18 @@ DCBlock >> replaceWith: aString [
 			do: [:new :edit | apply value: new value: edit value: textMorph range start index + aString size]]
 ]
 
+{ #category : #accessing }
+DCBlock >> replacedParent [
+
+	^ self valueOfProperty: #replacedParent
+]
+
+{ #category : #accessing }
+DCBlock >> replacedParent: aBlock [
+
+	self setProperty: #replacedParent toValue: aBlock
+]
+
 { #category : #'query actions' }
 DCBlock >> reportError: anError [
 
@@ -1237,6 +1329,14 @@ DCBlock >> shallowCopyBlock [
 		range: range;
 		field: field;
 		highlight: highlight
+]
+
+{ #category : #hierarchy }
+DCBlock >> siblingIndex [
+
+	self parent ifNil: [^ 0].
+	
+	^ self parent children indexOf: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -1377,7 +1477,7 @@ DCBlock >> treeHash [
 { #category : #'as yet unclassified' }
 DCBlock >> treeHashChildren: anotherNumber [
 
-	^ (((self type hash bitXor: 'ENTER' hash) bitXor: anotherNumber) bitXor: self submorphIndex hash) bitXor: 'LEAVE' hash
+	^ ((((self type hash bitXor: 'ENTER' hash) bitXor: anotherNumber) bitXor: self siblingIndex hash) bitXor: self children size) bitXor: 'LEAVE' hash
 ]
 
 { #category : #'as yet unclassified' }

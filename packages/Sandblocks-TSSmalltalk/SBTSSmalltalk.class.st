@@ -1229,6 +1229,12 @@ SBTSSmalltalk class >> isStatementContainer: aRepeatNode in: aBlock [
 	^ aRepeatNode element type = #statement
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSSmalltalk class >> isStatementTerminatorBetween [
+
+	^ true
+]
+
 { #category : #configuration }
 SBTSSmalltalk class >> language [
 

@@ -37,17 +37,17 @@ DCChawatheScriptGenerator >> delete: aMorph [
 DCChawatheScriptGenerator >> findPosition: aTree dest: destInOrder in: aMapping [
 
 	| siblings v u |
-	siblings := aTree owner children.
+	siblings := aTree parent children.
 	siblings do: [:c | (destInOrder includes: c) ifTrue: [c = aTree ifTrue: [^ 1]]].
 	
 	v := nil.
-	(siblings viewFirst: aTree submorphIndex) do: [:c | (destInOrder includes: c) ifTrue: [v := c]].
+	(siblings viewFirst: aTree siblingIndex) do: [:c | (destInOrder includes: c) ifTrue: [v := c]].
 	
 	v ifNil: [^ 1].
 	
 	u := aMapping srcForDest: v.
 	
-	^ u submorphIndex + 1
+	^ u siblingIndex + 1
 ]
 
 { #category : #'as yet unclassified' }
@@ -66,7 +66,7 @@ DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping [
 	
 	dest allChildrenBreadthFirstDo: [:x | | y z w |
 		w := nil.
-		y := x owner.
+		y := x parent.
 		z := aMapping srcForDest: y.
 		(aMapping isDestMapped: x)
 			ifFalse: [
@@ -78,7 +78,7 @@ DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping [
 				w := aMapping srcForDest: x.
 				w range: x range.
 				x = dest ifFalse: [ | v k |
-					v := w owner.
+					v := w parent.
 					w treeLabel = x treeLabel ifFalse: [self update: w with: x contents].
 					k := self findPosition: x dest: destInOrder in: aMapping.
 					(z isNode: v) ifFalse: [self move: w to: z postDeleteDo: [k]]]].

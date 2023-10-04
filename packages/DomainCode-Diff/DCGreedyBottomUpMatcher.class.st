@@ -21,7 +21,7 @@ DCGreedyBottomUpMatcher >> destCandidatesFor: src in: aMapping [
 		current := seed.
 		self assert: seed notNil.
 		[
-			parent := current owner.
+			parent := current parent.
 			parent notNil and: [(visited includes: parent) not]] whileTrue: [
 			visited add: parent.
 			(parent type = src type and: [((aMapping isDestMapped: parent) or: [parent = rootDest]) not]) ifTrue: [candidates add: parent].

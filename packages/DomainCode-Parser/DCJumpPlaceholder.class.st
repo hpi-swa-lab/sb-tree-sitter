@@ -7,6 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 DCJumpPlaceholder >> adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent [
 
+	self halt.
 	(super adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent) ifNotEmpty: [:newInput |
 		self
 			replace: self range

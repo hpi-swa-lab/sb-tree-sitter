@@ -157,7 +157,7 @@ DCMappingComparator >> rootSrc: aBlock rootDest: anotherBlock [
 DCMappingComparator >> similarityParentsCompare: aMapping with: anotherMapping [
 
 	| s1 s2 |
-	(aMapping first owner = anotherMapping first owner and: [aMapping second owner = anotherMapping second owner]) ifTrue: [^ 0].
+	(aMapping first parent = anotherMapping first parent and: [aMapping second parent = anotherMapping second parent]) ifTrue: [^ 0].
 	
 	srcAncestors at: aMapping first ifAbsentPut: (aMapping first allParentsUpTo: rootSrc).
 	destAncestors at: aMapping second ifAbsentPut: (aMapping second allParentsUpTo: rootDest).
@@ -187,9 +187,9 @@ DCMappingComparator >> similarityPositionInParentsCompare: aMapping with: anothe
 	indicesInOwnerSubmorphs := [:src | | current indices |
 		indices := OrderedCollection new.
 		current := src.
-		[current notNil and: [current owner notNil]] whileTrue: [
-			indices add: current submorphIndex.
-			current := current owner].
+		[current notNil and: [current isRootBlock not]] whileTrue: [
+			indices add: current siblingIndex.
+			current := current parent].
 		indices].
 	distance := [:mapping | | indicesVec1 indicesVec2 sum |
 		indicesVec1 := indicesInOwnerSubmorphs value: mapping first.
@@ -206,16 +206,16 @@ DCMappingComparator >> similarityPositionInParentsCompare: aMapping with: anothe
 DCMappingComparator >> similaritySiblingsCompare: aMapping with: anotherMapping [
 
 	| s1 s2 |
-	(aMapping first owner = anotherMapping first owner and: [aMapping second owner = anotherMapping second owner]) ifTrue: [^ 0].
+	(aMapping first parent = anotherMapping first parent and: [aMapping second parent = anotherMapping second parent]) ifTrue: [^ 0].
 	
 	s1 := self class
-		diceCoefficientCommon: (self numberOfCommonDescendantsIn: aMapping first owner and: aMapping second owner)
-		left: (srcDescendants at: aMapping first owner) size
-		right: (destDescendants at: aMapping second owner) size.
+		diceCoefficientCommon: (self numberOfCommonDescendantsIn: aMapping first parent and: aMapping second parent)
+		left: (srcDescendants at: aMapping first parent) size
+		right: (destDescendants at: aMapping second parent) size.
 	s2 := self class
-		diceCoefficientCommon: (self numberOfCommonDescendantsIn: anotherMapping first owner and: anotherMapping second owner)
-		left: (srcDescendants at: anotherMapping first owner) size
-		right: (destDescendants at: anotherMapping second owner) size.
+		diceCoefficientCommon: (self numberOfCommonDescendantsIn: anotherMapping first parent and: anotherMapping second parent)
+		left: (srcDescendants at: anotherMapping first parent) size
+		right: (destDescendants at: anotherMapping second parent) size.
 	
 	^ (s1 - s2) sign
 ]
