@@ -10,10 +10,12 @@ Class {
 { #category : #actions }
 DCCommandScriptGenerator >> delete: aMorph [
 
+	| target |
+	target := aMorph replacedParent ifNil: [aMorph].
 	self editor do: (SBDeleteCommand new
-		target: aMorph;
+		target: target;
 		shouldMergeWithNext: true).
-	self logChanges ifTrue: [Transcript showln: {#delete. aMorph}]
+	self logChanges ifTrue: [Transcript showln: {#delete. target}]
 ]
 
 { #category : #accessing }
@@ -57,18 +59,19 @@ DCCommandScriptGenerator >> logChanges [
 { #category : #actions }
 DCCommandScriptGenerator >> move: aMorph to: anOwnerMorph postDeleteDo: aBlock [
 
-	| command |
+	| command target |
+	target := aMorph replacedParent ifNil: [aMorph].
 	command := SBMoveCommand new
 		shouldMergeWithNext: true;
 		container: anOwnerMorph;
-		morph: aMorph;
+		morph: target;
 		notePosition.
-	aMorph delete.
+	target delete.
 	command index: aBlock value.
 	self editor do: command.
 	
-	self maybeAttachFlash: aMorph.
-	self logChanges ifTrue: [Transcript showln: {#move. anOwnerMorph. command index. aMorph}]
+	self maybeAttachFlash: target.
+	self logChanges ifTrue: [Transcript showln: {#move. anOwnerMorph. command index. target}]
 ]
 
 { #category : #actions }

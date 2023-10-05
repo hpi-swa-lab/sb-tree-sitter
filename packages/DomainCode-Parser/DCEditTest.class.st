@@ -55,7 +55,7 @@ x := 3' language: SBTSSmalltalk.
 	editor := self editorAndWorldFor: program.
 	program lastDeepChild startInputAtEnd.
 	self type: '4' in: editor.
-	self assert: 'a:arg
+	self assert: 'a: arg
 x := 34' equals: editor childSandblocks first sourceString
 ]
 
@@ -111,7 +111,7 @@ let a;' language: SBJavascript.
 	program firstDeepChild startInputAtEnd.
 	self type: 'mport a from a;' in: editor.
 	self assert: 'import a from a;
-let a;' equals: editor childSandblocks first sourceString
+let a ;' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -122,5 +122,5 @@ DCEditTest >> testTypeKeywordWithSpace [
 	editor := self editorAndWorldFor: program.
 	program firstDeepChild startInputAtEnd.
 	self type: ' a' in: editor.
-	self assert: 'let a;' equals: editor childSandblocks first sourceString
+	self assert: 'let a ;' equals: editor childSandblocks first sourceString
 ]

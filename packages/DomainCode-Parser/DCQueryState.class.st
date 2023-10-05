@@ -29,9 +29,11 @@ DCQueryState >> addSuggestions: aCollection for: aBlock [
 DCQueryState >> ensureReplacement: aClass for: aBlock initDo: aClosure [
 
 	| replacement |
-	replacement := aBlock class = aClass
+	replacement := (aBlock class = aClass or: [(aBlock replacedParent ifNotNil: #class) = aClass])
 		ifFalse: [ | r hadFocus |
-			hadFocus := aBlock sandblockEditor textFocus ifNotNil: [:t | t hasAnyParent: aBlock] ifNil: [false].
+			hadFocus := aBlock sandblockEditor textFocus
+				ifNotNil: [:t | t hasAnyParent: aBlock]
+				ifNil: [false].
 			r := aClass new.
 			aBlock replacedParent: r.
 			aClosure value: r.
@@ -39,7 +41,7 @@ DCQueryState >> ensureReplacement: aClass for: aBlock initDo: aClosure [
 			aBlock replaceBy: r.
 			hadFocus ifTrue: [r startInputAtEnd].
 			r]
-		ifTrue: [aBlock].
+		ifTrue: [aBlock class = aClass ifFalse: [aBlock replacedParent] ifTrue: [aBlock]].
 	(transientReplacements at: currentTrigger) add: replacement
 ]
 
@@ -82,9 +84,21 @@ DCQueryState >> performShortcut: aSymbol for: aBlock [
 { #category : #'as yet unclassified' }
 DCQueryState >> queriesFor: aSymbol do: aBlock [
 
-	Pragma
-		withPragmasIn: DCBlock class
-		do: [:pragma | (pragma keyword = #query: and: [pragma arguments first = aSymbol]) ifTrue: [aBlock value: pragma selector]]
+	Pragma withPragmasIn: DCBlock class do: [:pragma |
+		(pragma keyword = #query: and: [
+			pragma arguments first isSymbol
+				ifTrue: [pragma arguments first = aSymbol]
+				ifFalse: [pragma arguments first includes: aSymbol]]) ifTrue: [aBlock value: pragma selector]]
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> queueUpdateQueriesFor: aSymbol [
+
+	(updateQueued at: aSymbol ifAbsent: [false]) ifTrue: [^ self].
+	updateQueued at: aSymbol put: true.
+	Project current addDeferredUIMessage: [
+		updateQueued at: aSymbol put: false.
+		self updateQueriesFor: aSymbol]
 ]
 
 { #category : #'as yet unclassified' }
@@ -124,7 +138,7 @@ DCQueryState >> suggestionsFor: aBlock [
 { #category : #'as yet unclassified' }
 DCQueryState >> triggers [
 
-	^ #(#shortcut #change #type #selection)
+	^ #(#shortcut #change #type #selection #doubleClick #open #always)
 ]
 
 { #category : #shortcuts }
@@ -138,8 +152,9 @@ DCQueryState >> tryShortcut: aSymbol do: aBlock [
 { #category : #'as yet unclassified' }
 DCQueryState >> updateChangeQueries [
 
-	self updateQueriesFor: #change.
-	self updateTypeQueries
+	self queueUpdateQueriesFor: #change.
+	self queueUpdateQueriesFor: #type.
+	self queueUpdateQueriesFor: #always
 ]
 
 { #category : #'as yet unclassified' }
@@ -159,20 +174,24 @@ DCQueryState >> updateDecoratorsDuring: aBlock [
 { #category : #'as yet unclassified' }
 DCQueryState >> updateQueriesFor: aSymbol [
 
-	(updateQueued at: aSymbol ifAbsent: [false]) ifTrue: [^ self].
-	updateQueued at: aSymbol put: true.
-	Project current addDeferredUIMessage: [
-		updateQueued at: aSymbol put: false.
-		self rerunQueriesFor: aSymbol do: [
-			self
-				queriesFor: aSymbol
-				do: [:selector | self rootBlock allBlocksDo: [:b | DCQuery script: (DCBlock perform: selector) with: b]]]]
+	self rerunQueriesFor: aSymbol do: [
+		self
+			queriesFor: aSymbol
+			do: [:selector | self rootBlock allChildrenDo: [:b | b isSandblock ifTrue: [DCQuery script: (DCBlock perform: selector) with: b]]]]
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> updateQueriesFor: aSymbol at: aBlock [
+
+	self
+		rerunQueriesFor: aSymbol
+		do: [self queriesFor: aSymbol do: [:selector | DCQuery script: (DCBlock perform: selector) with: aBlock]]
 ]
 
 { #category : #'as yet unclassified' }
 DCQueryState >> updateSelectionQueries [
 
-	self updateQueriesFor: #selection
+	self queueUpdateQueriesFor: #selection
 ]
 
 { #category : #'as yet unclassified' }
@@ -183,12 +202,13 @@ DCQueryState >> updateTransientReplacementsDuring: aBlock [
 	new := WeakSet new.
 	transientReplacements at: currentTrigger put: new.
 	aBlock value.
-	old do: [:r | (new includes: r) ifFalse: [r uninstall]]
+	old do: [:r | (new includes: r) ifFalse: [r passiveUninstall]]
 ]
 
 { #category : #'as yet unclassified' }
 DCQueryState >> updateTypeQueries [
 
 	suggestions := nil.
-	self updateQueriesFor: #type
+	self queueUpdateQueriesFor: #type.
+	self queueUpdateQueriesFor: #always
 ]

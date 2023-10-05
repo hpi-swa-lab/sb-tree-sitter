@@ -421,8 +421,13 @@ SBTSSmalltalk class >> grammarJson [
       "type": "PREC",
       "value": -2,
       "content": {
-        "type": "SYMBOL",
-        "name": "identifier"
+        "type": "ALIAS",
+        "content": {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        "named": true,
+        "value": "unary_identifier"
       }
     },
     "cascaded_binary_message": {
@@ -482,39 +487,42 @@ SBTSSmalltalk class >> grammarJson [
       }
     },
     "symbol": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "#"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "PATTERN",
-              "value": "[A-Za-z0-9_:]+|[-+\\\\/*~<>=@,%|&?!]+"
-            },
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": "''"
-                },
-                {
-                  "type": "PATTERN",
-                  "value": "[^'']*"
-                },
-                {
-                  "type": "STRING",
-                  "value": "''"
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "#"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "PATTERN",
+                "value": "[A-Za-z0-9_:]+|[-+\\\\/*~<>=@,%|&?!]+"
+              },
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "''"
+                  },
+                  {
+                    "type": "PATTERN",
+                    "value": "[^'']*"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "''"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     },
     "character": {
       "type": "PATTERN",
@@ -1149,7 +1157,7 @@ SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 	aBlock contents = '.' ifTrue: [^ true].
 	anotherBlock type = 'ERROR' ifTrue: [^ false].
 	anotherBlock contents = '.' ifTrue: [^ false].
-	(({#statement. #empty. #comment} includes: aBlock slot lastNode type) and: [{#statement. #empty. #comment} includes: anotherBlock slot lastNode type]) ifTrue: [^ true].
+	(({#statement. #empty. #comment} includes: aBlock slot lastNode type) and: [{#statement. #empty. #comment. #temporaries} includes: anotherBlock slot lastNode type]) ifTrue: [^ true].
 	aBlock contents = ';' ifTrue: [^ true].
 	aBlock contents = '[' ifTrue: [^ false].
 	(({#statement. #empty. #comment} includes: anotherBlock slot lastNode type) and: [(anotherBlock owner submorphs count: [:m | m slot lastNode type = #statement]) > 1]) ifTrue: [^ true].
@@ -1165,25 +1173,18 @@ SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 { #category : #properties }
 SBTSSmalltalk class >> highlightQuery [
-	" https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
 
-	^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
-
-(pragma) @annotation
+    " https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
+    ^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
 
 (number) @number
 
 (string) @string
 (symbol) @string
 (character) @string
-(comment) @comment
-(block "|" @punctuation)
 
 (identifier) @variable
 (block_argument) @variable
-
-";" @punctuation
-"." @punctuation
 
 (unary_message (_) (unary_identifier) @variable.part)
 (binary_operator) @variable.part
@@ -1191,16 +1192,10 @@ SBTSSmalltalk class >> highlightQuery [
 
 ["^" "[" "]" "{" "}"] @important
 
-["(" ")"] @punctuation
-
-(keyword_selector (keyword) @major_declaration.part) @structure.part
-(binary_selector (binary_operator) @major_declaration.part) @structure.part
-(unary_selector (unary_identifier) @major_declaration.part) @structure.part
-
-[(pragma_keyword_selector) (pragma_unary_selector) (pragma_binary_selector)] @structure.part
-
-(temporaries) @punctuation.part
-(temporaries (identifier) @punctuation)'
+(keyword_selector (keyword) @major_declaration)
+(binary_selector (binary_operator) @major_declaration)
+(unary_selector (unary_identifier) @major_declaration)
+'
 ]
 
 { #category : #configuration }
@@ -1260,6 +1255,12 @@ SBTSSmalltalk class >> preferNoPopup [
 	^ true
 ]
 
+{ #category : #properties }
+SBTSSmalltalk class >> repo [
+
+	^ {'tom95/tree-sitter-smalltalk'. 'main'. ''}
+]
+
 { #category : #configuration }
 SBTSSmalltalk class >> rootRuleName [
 
@@ -1286,9 +1287,13 @@ SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter [
 
+	(aBlock type = 'string' and: [anotherBlock type = 'string']) ifTrue: [^ true].
 	anotherBlock type = #'block_argument' ifTrue: [^ true].
 	aCharacter = $: ifTrue: [^ true].
-	(anotherBlock type = 'ERROR' and: [anotherBlock firstDeepChild contents ifNotEmpty: [:e | e first isLetter not] ifEmpty: [false]]) ifTrue: [^ false].
+	(anotherBlock type = 'ERROR' and: [
+		anotherBlock firstDeepChild contents
+			ifNotEmpty: [:e | e first isLetter not]
+			ifEmpty: [false]]) ifTrue: [^ false].
 	(aBlock contents = ':=' or: [anotherBlock contents = ':=']) ifTrue: [^ true].
 	anotherBlock alias = #'unary_identifier' ifTrue: [^ true].
 	^ super spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter

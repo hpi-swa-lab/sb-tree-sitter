@@ -28,11 +28,28 @@ DCGreedySubtreeMatcher >> handleAmbiguousMappings: aCollection for: aMapping [
 ]
 
 { #category : #'as yet unclassified' }
+DCGreedySubtreeMatcher >> handleAmbiguousMappings: aCollection for: aMapping using: aComparator [
+
+	aCollection sort: [:m1 :m2 | | s1 s2 |
+		s1 := m1 first detectMax: [:t | t treeSize].
+		s2 := m2 first detectMax: [:t | t treeSize].
+		s1 treeSize < s2 treeSize].
+	
+	aCollection do: [:entry | | candidates |
+		candidates := Array streamContents: [:s | entry first do: [:src | entry second do: [:dest | s nextPut: {src. dest}]]].
+		
+		(candidates sort: [:m1 :m2 | (aComparator compare: m1 with: m2) <= 0]) do: [:mapping | (aMapping areBothUnmappedSrc: mapping first dest: mapping second) ifTrue: [aMapping addRecursiveMappingFrom: mapping first to: mapping second]]]
+]
+
+{ #category : #'as yet unclassified' }
 DCGreedySubtreeMatcher >> matchFrom: src to: dest in: aMapping [
 
-	| ambiguousMappings srcTrees destTrees |
+	| ambiguousMappings srcTrees destTrees comparator |
 	rootSrc := src.
 	rootDest := dest.
+	comparator := DCMappingComparator new
+		rootSrc: src rootDest: dest;
+		mappingStore: aMapping.
 	
 	ambiguousMappings := OrderedCollection new.
 	srcTrees := DCPriorityTreeQueue new add: src.
@@ -49,7 +66,7 @@ DCGreedySubtreeMatcher >> matchFrom: src to: dest in: aMapping [
 		mapper unmappedEntries do: [:entry |
 			entry first do: [:t | srcTrees addTree: t].
 			entry second do: [:t | destTrees addTree: t]]].
-	self handleAmbiguousMappings: ambiguousMappings for: aMapping
+	self handleAmbiguousMappings: ambiguousMappings for: aMapping using: comparator
 ]
 
 { #category : #'as yet unclassified' }

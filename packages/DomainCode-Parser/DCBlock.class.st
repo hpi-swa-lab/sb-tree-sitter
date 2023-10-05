@@ -144,16 +144,42 @@ DCBlock class >> registerShortcuts: aProvider [
 	aProvider shortcut: $M command do: #addMarker
 ]
 
+{ #category : #'smalltalk - helpers' }
+DCBlock class >> smalltalkBlockWithSelector [
+
+	^ {
+		[:x |
+			DCQuery
+				firstScript: {
+					self smalltalkMessageSend.
+					{[:b | b type = #symbol]}.
+					{[:b | b orParent: #(#'keyword_selector' #'binary_selector' #'unary_selector')]}}
+				with: x]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkBrowseClass [
+	<query: #shortcut>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x type = #identifier].
+		[:x |
+			x
+				registerShortcut: #browse
+				do: [{self smalltalkDeclaration. [:decl | decl class = ClassBinding ifTrue: [decl value browse]]}]]}
+]
+
 { #category : #smalltalk }
 DCBlock class >> smalltalkBrowseImplementors [
 	<query: #shortcut>
 
 	^ {
-		self smalltalkMessageSend.
+		self smalltalkBlockWithSelector.
 		[:msg |
 			msg registerShortcut: #browseImplementors do: [
 				{
-					self smalltalkMessageSendSelector.
+					self smalltalkSelector.
 					[:selector :message | {#args. selector. self systemNavigation allImplementorsOf: selector asSymbol. message}].
 					[:selector :list :message |
 						(message sandblockEditor isSingleArtefactView or: [list size > 1])
@@ -168,15 +194,34 @@ DCBlock class >> smalltalkBrowseImplementors [
 ]
 
 { #category : #smalltalk }
+DCBlock class >> smalltalkBrowseReferences [
+	<query: #shortcut>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x type = #identifier].
+		[:x |
+			x registerShortcut: #browseSenders do: [
+				{
+					self smalltalkDeclaration.
+					[:decl |
+						decl class = ClassBinding ifTrue: [self systemNavigation browseAllCallsOnClass: decl value].
+						decl isString ifTrue: [
+							self systemNavigation
+								browseAllAccessesTo: decl
+								from: x containingArtefact methodClass]]}]]}
+]
+
+{ #category : #smalltalk }
 DCBlock class >> smalltalkBrowseReferencesSend [
 	<query: #shortcut>
 
 	^ {
-		self smalltalkMessageSend.
+		self smalltalkBlockWithSelector.
 		[:msg |
 			msg registerShortcut: #browseSenders do: [
 				{
-					self smalltalkMessageSendSelector.
+					self smalltalkSelector.
 					[:sel :message | {#args. message. sel. self systemNavigation allCallsOn: sel asSymbol}].
 					[:message :sel :calls |
 						(message sandblockEditor isSingleArtefactView or: [calls size > 1])
@@ -200,9 +245,30 @@ DCBlock class >> smalltalkCheckbox [
 		[:x | x isReplacement not].
 		[:x | {#true. #false} includes: x type].
 		[:x |
-			x installReplacement: (DCCheckbox new
+			x installActiveReplacement: (DCCheckbox new
 				fromSource: [:source :repl | repl checked: source contents = 'true']
 				toSource: [:source :repl | source contents: (repl checked ifTrue: ['true'] ifFalse: ['false'])])]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkCollapseBlocks [
+	<query: #open>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x type = #block].
+		[:x | x sourceString size > 200].
+		[:x | x installPassiveReplacement: DCCollapsed new]}
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock class >> smalltalkCollapseBlocksOnDoubleClick [
+	<query: #doubleClick>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x type = #block].
+		[:x | x installPassiveReplacement: DCCollapsed new]}
 ]
 
 { #category : #smalltalk }
@@ -220,12 +286,12 @@ DCBlock class >> smalltalkCreateNewMethod [
 						method firstDeepChild startInputAtEnd]}]]}
 ]
 
-{ #category : #smalltalk }
+{ #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkDeclaration [
 
 	^ {
 		[:x | x language = SBTSSmalltalk].
-		[:x | x type = #identifier].
+		[:x | #(#identifier #'block_argument') includes: x type].
 		[:id | {#args. id. id orAllParents: #(#method #block)}].
 		[:id :scopes |
 			((DCQuery
@@ -240,7 +306,10 @@ DCBlock class >> smalltalkDeclaration [
 								{
 									[:block | "block args"
 									block childSandblocks select: [:a | a type = #'block_argument']].
-									[:args | args detect: [:arg | arg contents allButFirst = id contents] ifNone: [nil]]}.
+									[:args |
+										args
+											detect: [:arg | (arg contents withoutLeading: #($:)) = (id contents withoutLeading: #($:))]
+											ifNone: [nil]]}.
 								{
 									[:method | "method args"
 									method queryAll: '[(keyword_selector (identifier) @) (binary_selector (identifier) @)]'].
@@ -251,6 +320,17 @@ DCBlock class >> smalltalkDeclaration [
 					id containingArtefact methodClass
 						bindingOf: sym
 						environment: id containingArtefact methodClass environment]]) ifNil: [id containingArtefact ifNotNil: [:m | m methodClass instVarNames detect: [:n | n = id contents] ifNone: [nil]]]]}
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock class >> smalltalkFlagMarker [
+	<query: #always>
+
+	^ {
+		self smalltalkMessageSendSelector.
+		[:x :b | true].
+		[:selector :message | selector = #flag: and: [message children first type = #self and: [message children last type = #symbol]]].
+		[:selector :message | message ensureReplacement: DCFlagMarker initDo: [:m | ]]}
 ]
 
 { #category : #smalltalk }
@@ -274,7 +354,7 @@ DCBlock class >> smalltalkIdentifierAutocompletion [
 		[:x |
 			x
 				addOwnSuggestions: (Smalltalk globals declarations
-					collect: [:class | class value name]
+					collect: [:class | class key]
 					into: OrderedCollection new)
 				label: 'class'].
 		[:id | {#args. id. id orAllParents: #(#method #block)}].
@@ -325,7 +405,7 @@ DCBlock class >> smalltalkInsertArg [
 
 { #category : #smalltalk }
 DCBlock class >> smalltalkJumpPlaceholder [
-	<query: #type>
+	<query: #always>
 
 	^ {
 		[:x | x language = SBTSSmalltalk].
@@ -334,7 +414,7 @@ DCBlock class >> smalltalkJumpPlaceholder [
 		[:x | x ensureReplacement: DCJumpPlaceholder initDo: [:b | ]]}
 ]
 
-{ #category : #smalltalk }
+{ #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkMessageSend [
 
 	^ {
@@ -358,7 +438,7 @@ DCBlock class >> smalltalkMessageSendAutoCompletion [
 						ifFalse: [sel]])])]}
 ]
 
-{ #category : #smalltalk }
+{ #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkMessageSendSelector [
 
 	^ {
@@ -369,13 +449,13 @@ DCBlock class >> smalltalkMessageSendSelector [
 		[:parts :message | {#args. parts joinSeparatedBy: ''. message}]}
 ]
 
-{ #category : #smalltalk }
+{ #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkMethodArguments [
 
 	^ {self smalltalkMethodSelector. [:x | x childSandblocks select: [:c | c type = #identifier]]}
 ]
 
-{ #category : #smalltalk }
+{ #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkMethodSelector [
 
 	^ {
@@ -385,6 +465,43 @@ DCBlock class >> smalltalkMethodSelector [
 			x childSandblocks
 				detect: [:c | #(#'keyword_selector' #'binary_selector' #'unary_selector') includes: c type]
 				ifNone: [nil]]}
+]
+
+{ #category : #'smalltalk - helpers' }
+DCBlock class >> smalltalkSelector [
+
+	^ {
+		[:x |
+			DCQuery
+				firstScript: {
+					self smalltalkMessageSendSelector.
+					{
+						[:b | b language = SBTSSmalltalk].
+						[:b | b type = #symbol].
+						[:sym | {#args. sym lastSubmorph contents. sym}]}.
+					{
+						[:b | b language = SBTSSmalltalk].
+						[:b | b orParent: #(#'keyword_selector' #'binary_selector' #'unary_selector')].
+						[:sel |
+							{
+								#args.
+								DCQuery
+									script: {
+										[:s | s queryAll: '[(keyword) (binary_operator) (unary_identifier)] @part'].
+										[:hits | (hits collect: #contents) joinSeparatedBy: '']}
+									with: sel.
+								sel}]}}
+				with: x]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkToggleBoolean [
+	<query: #doubleClick>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | #('true' 'false') includes: x type].
+		[:x | x replaceWith: (x type = 'true' ifTrue: ['false'] ifFalse: ['true'])]}
 ]
 
 { #category : #smalltalk }
@@ -428,7 +545,7 @@ DCBlock class >> smalltalkUndeclaredVariable [
 
 { #category : #smalltalk }
 DCBlock class >> smalltalkUnusedVariable [
-	<query: #change>
+	<query: #(#always)>
 
 	^ {
 		[:x | x language = SBTSSmalltalk].
@@ -441,7 +558,7 @@ DCBlock class >> smalltalkUnusedVariable [
 				fixActions: {SBCodeAction labeled: 'Remove unused declaration' for: decl do: [:node | node deleteBlock]})]}
 ]
 
-{ #category : #smalltalk }
+{ #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkUsesOfDeclaration [
 
 	^ {
@@ -572,9 +689,30 @@ DCBlock >> blockFor: aRange [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> children [
+
+	^ super children collect: [:c | c isReplacement ifTrue: [c source] ifFalse: [c]]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> clearCache [
+
+	super clearCache.
+	self removeProperty: #treeHash
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> compatibleWithType: aSymbol [
 
 	^ self type = aSymbol
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> containingArtefact [
+
+	^ self isArtefact
+		ifTrue: [self]
+		ifFalse: [self parent ifNotNil: [:b | b containingArtefact]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -637,6 +775,12 @@ DCBlock >> deleteFrom: aString at: aNumber do: aBlock [
 DCBlock >> diff: oldTree to: newTree [
 
 	
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> doubleClick: anEvent [
+
+	self queryState updateQueriesFor: #doubleClick at: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -764,7 +908,7 @@ DCBlock >> hasParent: aCollectionOrSymbol [
 	matches := aCollectionOrSymbol isSymbol
 		ifTrue: [{aCollectionOrSymbol}]
 		ifFalse: [aCollectionOrSymbol].
-	^ matches includes: self owner type
+	^ matches includes: self parent type
 ]
 
 { #category : #'as yet unclassified' }
@@ -903,7 +1047,7 @@ DCBlock >> insertStatementHasCandidate [
 ]
 
 { #category : #'as yet unclassified' }
-DCBlock >> installReplacement: aBlock [
+DCBlock >> installActiveReplacement: aBlock [
 
 	self sandblockEditor do: (SBCombinedCommand newWith: {
 		SBReplaceCommand new target: self replacer: (aBlock source: self).
@@ -911,6 +1055,14 @@ DCBlock >> installReplacement: aBlock [
 			target: self;
 			selector: #replacedParent;
 			value: aBlock})
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> installPassiveReplacement: aBlock [
+
+	aBlock source: self.
+	self replaceBy: aBlock.
+	self replacedParent: aBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -928,8 +1080,8 @@ DCBlock >> intoWorld: aWorld [
 			send: #updateTypeQueries
 			to: self queryState.
 		self queryState
-			updateTypeQueries;
-			updateChangeQueries]
+			updateQueriesFor: #open;
+			updateQueriesFor: #always]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1066,11 +1218,11 @@ DCBlock >> orAllParents: aCollectionOrSymbol [
 DCBlock >> orAnyParent: aCollectionOrSymbol [
 
 	| matches |
-	matches := aCollectionOrSymbol isSymbol
+	matches := aCollectionOrSymbol isString
 		ifTrue: [{aCollectionOrSymbol}]
 		ifFalse: [aCollectionOrSymbol].
 	(matches includes: self type) ifTrue: [^ self].
-	self = self rootBlock ifTrue: [^ nil].
+	self isRootBlock ifTrue: [^ nil].
 	^ self parent orAnyParent: aCollectionOrSymbol
 ]
 
@@ -1082,6 +1234,7 @@ DCBlock >> orParent: aCollectionOrSymbol [
 		ifTrue: [{aCollectionOrSymbol}]
 		ifFalse: [aCollectionOrSymbol].
 	(matches includes: self type) ifTrue: [^ self].
+	self isRootBlock ifTrue: [^ nil].
 	(matches includes: self parent type) ifTrue: [^ self parent].
 	^ nil
 ]
@@ -1148,9 +1301,12 @@ DCBlock >> pasteReplace [
 { #category : #'as yet unclassified' }
 DCBlock >> performAction: aSymbol [
 
+	
+	(self queryState performShortcut: aSymbol for: self) ifTrue: [^ true].
+	
 	(super performAction: aSymbol) ifTrue: [^ true].
 	
-	^ self queryState performShortcut: aSymbol for: self
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -1340,7 +1496,7 @@ DCBlock >> reportError: anError [
 { #category : #'as yet unclassified' }
 DCBlock >> rootBlock [
 
-	^ self orOwnerSuchThat: [:o | o isTSBlock and: [o type = self language rootRuleName]]
+	^ self orAnyParent: self language rootRuleName
 ]
 
 { #category : #'as yet unclassified' }
@@ -1364,6 +1520,8 @@ DCBlock >> shallowCopyBlock [
 { #category : #hierarchy }
 DCBlock >> siblingIndex [
 
+	self replacedParent ifNotNil: [^ self replacedParent siblingIndex].
+	
 	self parent ifNil: [^ 0].
 	
 	^ self parent children indexOf: self
@@ -1500,14 +1658,31 @@ DCBlock >> textMorphs [
 { #category : #'as yet unclassified' }
 DCBlock >> treeHash [
 
-	self hasChildren ifFalse: [^ self treeHashChildren: 0].
-	^ self treeHashChildren: (self children inject: 0 into: [:hash :morph | hash bitXor: morph treeHash])
+	true ifTrue: [^ self treeHashCount: {0}].
+	^ self valueOfProperty: #treeHash ifAbsentPut: [self treeHashCount: {0}]
 ]
 
 { #category : #'as yet unclassified' }
 DCBlock >> treeHashChildren: anotherNumber [
 
 	^ ((((self type hash bitXor: 'ENTER' hash) bitXor: anotherNumber) bitXor: self siblingIndex hash) bitXor: self children size) bitXor: 'LEAVE' hash
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> treeHashChildren: anotherNumber countPtr: aCollection [
+
+	aCollection at: 1 put: aCollection first + 1.
+	
+	^ ((((self type hash + 'ENTER' hash) + anotherNumber) bitXor: (2 * aCollection first + 1) hash) bitXor: self children size) bitXor: 'LEAVE' hash
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> treeHashCount: aPtr [
+
+	self hasChildren ifFalse: [^ self treeHashChildren: 0 countPtr: aPtr].
+	^ self
+		treeHashChildren: (self children inject: 0 into: [:hash :morph | hash bitXor: (morph treeHashCount: aPtr)])
+		countPtr: aPtr
 ]
 
 { #category : #'as yet unclassified' }

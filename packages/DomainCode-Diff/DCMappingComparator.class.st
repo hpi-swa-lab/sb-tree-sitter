@@ -8,7 +8,8 @@ Class {
 		'srcAncestors',
 		'destAncestors',
 		'rootSrc',
-		'rootDest'
+		'rootDest',
+		'absolutePositions'
 	],
 	#category : #'DomainCode-Diff'
 }
@@ -67,7 +68,7 @@ DCMappingComparator >> distanceAbsoluteCompare: aMapping with: anotherMapping [
 
 	| position distance |
 	"compare the post-order position in the tree of the mapping, between src and dest"
-	position := [:tree :root | root absolutePositionOf: tree].
+	position := [:tree :root | absolutePositions at: tree ifAbsentPut: [root absolutePositionOf: tree]].
 	distance := [:mapping | ((position value: mapping first value: rootSrc) - (position value: mapping second value: rootDest)) abs].
 	^ ((distance value: aMapping) - (distance value: anotherMapping)) sign
 ]
@@ -89,7 +90,8 @@ DCMappingComparator >> initialize [
 	srcDescendants := Dictionary new.
 	destDescendants := Dictionary new.
 	srcAncestors := Dictionary new.
-	destAncestors := Dictionary new
+	destAncestors := Dictionary new.
+	absolutePositions := Dictionary new
 ]
 
 { #category : #'as yet unclassified' }

@@ -28,6 +28,12 @@ DCText >> compatibleWithType: aSymbol [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> doubleClick: anEvent [
+
+	self parent doubleClick: anEvent
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> effectiveContents [
 
 	^ self contents
@@ -96,6 +102,12 @@ DCText >> initialize [
 	super initialize.
 	
 	range := SBTSRange null
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> isReplacement [
+
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -170,6 +182,12 @@ DCText >> range: aRange [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> replacedParent [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> rootBlock [
 
 	^ self owner rootBlock
@@ -206,7 +224,13 @@ DCText >> slot [
 { #category : #'as yet unclassified' }
 DCText >> treeHash [
 
-	^ (self contents hash bitXor: 'LABEL_ENTER' hash) bitXor: 'LABEL_LEAVE' hash
+	^ self treeHashCount: {0}
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> treeHashCount: aPtr [
+
+	^ ((self contents hash bitXor: 'LABEL_ENTER' hash) bitXor: aPtr first * 2 + 1) bitXor: 'LABEL_LEAVE' hash
 ]
 
 { #category : #'as yet unclassified' }

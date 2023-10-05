@@ -704,6 +704,12 @@ SBTSLanguage class >> unknownFor: aSymbol [
 	^ SBTSUnknownBlock new slot: (SBTSSlot with: (SBTSNodeSymbol new type: aSymbol factory: self instance grammar))
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSLanguage class >> update [
+
+	self updateFrom: self repo first branch: self repo second
+]
+
 { #category : #loading }
 SBTSLanguage class >> updateFrom: aGithubString branch: aString [
 

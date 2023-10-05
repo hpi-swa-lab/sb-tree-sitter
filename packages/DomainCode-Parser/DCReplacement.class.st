@@ -9,9 +9,27 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCReplacement >> activeUninstall [
+
+	self sandblockEditor do: (SBCombinedCommand newWith: {
+		SBReplaceCommand new target: self replacer: self source.
+		SBMutatePropertyCommand new
+			target: self source;
+			selector: #replacedParent;
+			value: nil}).
+	self source startInputAtEnd
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> children [
 
 	^ self source children
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> contents [
+
+	^ self source contents
 ]
 
 { #category : #'as yet unclassified' }
@@ -48,6 +66,21 @@ DCReplacement >> layoutCommands [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> passiveUninstall [
+
+	| hadFocus |
+	self sandblockEditor ifNil: [^ self].
+	hadFocus := self sandblockEditor textFocus
+		ifNotNil: [:t | t hasAnyParent: self]
+		ifNil: [false].
+	
+	self source replacedParent: nil.
+	self replaceBy: self source.
+	
+	hadFocus ifTrue: [self source startInputAtEnd]
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> range [
 
 	^ self source range
@@ -63,7 +96,8 @@ DCReplacement >> source [
 DCReplacement >> source: aBlock [
 
 	source := aBlock.
-	bindings do: [:assoc | assoc key value: self source value: self]
+	bindings do: [:assoc | assoc key value: self source value: self].
+	self language: aBlock language
 ]
 
 { #category : #'as yet unclassified' }
@@ -82,21 +116,6 @@ DCReplacement >> treeLabel [
 DCReplacement >> type [
 
 	^ self source type
-]
-
-{ #category : #'as yet unclassified' }
-DCReplacement >> uninstall [
-
-	| hadFocus |
-	self parent ifNil: [^ self].
-	hadFocus := self sandblockEditor textFocus
-		ifNotNil: [:t | t hasAnyParent: self]
-		ifNil: [false].
-	
-	self source replacedParent: nil.
-	self replaceBy: self source.
-	
-	hadFocus ifTrue: [self source startInputAtEnd]
 ]
 
 { #category : #'as yet unclassified' }

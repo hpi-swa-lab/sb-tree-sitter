@@ -11,6 +11,7 @@ Class {
 { #category : #'as yet unclassified' }
 DCMappingStore >> addMappingFrom: src to: dest [
 
+	self assert: src type = dest type.
 	srcToDest at: src put: dest.
 	destToSrc at: dest put: src
 ]
