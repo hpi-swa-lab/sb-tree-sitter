@@ -132,8 +132,8 @@ DCMappingComparator >> mappingStore: aMapping [
 DCMappingComparator >> numberOfCommonDescendantsIn: src and: dest [
 
 	| common |
-	srcDescendants at: src ifAbsentPut: src descendantsPreOrder asSet.
-	destDescendants at: dest ifAbsentPut: dest descendantsPreOrder asSet.
+	srcDescendants at: src ifAbsentPut: [src descendantsPreOrder asSet].
+	destDescendants at: dest ifAbsentPut: [dest descendantsPreOrder asSet].
 	
 	common := 0.
 	srcDescendants keysDo: [:t | | m |
@@ -161,14 +161,14 @@ DCMappingComparator >> similarityParentsCompare: aMapping with: anotherMapping [
 	| s1 s2 |
 	(aMapping first parent = anotherMapping first parent and: [aMapping second parent = anotherMapping second parent]) ifTrue: [^ 0].
 	
-	srcAncestors at: aMapping first ifAbsentPut: (aMapping first allParentsUpTo: rootSrc).
-	destAncestors at: aMapping second ifAbsentPut: (aMapping second allParentsUpTo: rootDest).
+	srcAncestors at: aMapping first ifAbsentPut: [aMapping first allParentsUpTo: rootSrc].
+	destAncestors at: aMapping second ifAbsentPut: [aMapping second allParentsUpTo: rootDest].
 	srcAncestors
 		at: anotherMapping first
-		ifAbsentPut: (anotherMapping first allParentsUpTo: rootSrc).
+		ifAbsentPut: [anotherMapping first allParentsUpTo: rootSrc].
 	destAncestors
 		at: anotherMapping second
-		ifAbsentPut: (anotherMapping second allParentsUpTo: rootDest).
+		ifAbsentPut: [anotherMapping second allParentsUpTo: rootDest].
 	
 	s1 := self class
 		diceCoefficientCommon: (self numberOfCommonParentsIn: aMapping first and: aMapping second)

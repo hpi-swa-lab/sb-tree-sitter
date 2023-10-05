@@ -90,6 +90,15 @@ DCReplacement >> passiveUninstall [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> printOn: aStream [
+
+	aStream nextPutAll: self className.
+	aStream nextPut: $(.
+	super printOn: aStream.
+	aStream nextPut: $)
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> range [
 
 	^ self source range

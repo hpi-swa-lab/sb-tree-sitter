@@ -1273,7 +1273,7 @@ DCBlock >> pairMap [
 { #category : #hierarchy }
 DCBlock >> parent [
 
-	^ self replacedParent ifNotNil: [:p | p parent] ifNil: [self parentSandblock]
+	^ self replacedParent ifNotNil: [:p | p isReplacement ifTrue: [p parent] ifFalse: [p]] ifNil: [self parentSandblock]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1822,29 +1822,23 @@ DCBlock >> writeSourceOn: aStream [
 { #category : #'as yet unclassified' }
 DCBlock >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
 
-	| parens |
-	self submorphs ifEmpty: [^ self].
-	parens := self parentSandblock notNil and: [self parentSandblock isTSBlock and: [self slot needsParenthesis: self]].
+	self children ifEmpty: [^ self].
 	(self language indentMatch: self) ifTrue: [self slot indent: 1 on: aStream].
 	aStream hasLineInfo ifTrue: [
 		range start
 			line: aStream currentLine
 			character: aStream currentIndexInLine
 			index: aStream position].
-	parens ifTrue: [aStream nextPut: $(].
-	self submorphs overlappingPairsDo: [:first :second |
+	self children overlappingPairsDo: [:first :second |
 		first writeSourceOn: aStream indent: (self indentFor: first current: aNumber) forCompare: aBoolean.
 		aStream nextPutAll: (self slot
 			separatorBetween: first
 			and: second
 			indent: aNumber
 			lastCharacterOfFirst: (aStream position > 0 ifFalse: [$ ] ifTrue: [aStream last]))].
-	self lastSubmorph
+	self children last
 		writeSourceOn: aStream
-		indent: (self indentFor: self lastSubmorph current: aNumber)
+		indent: (self indentFor: self children last current: aNumber)
 		forCompare: aBoolean.
-	SBToggledCode comment: '' active: 0 do: {
-		[self slot nodes do: [:node | node bodyTemplate andParentsDo: [:type | type hasStatementTerminator ifTrue: [aStream nextPutAll: self language statementTerminator]]]]}.
-	parens ifTrue: [aStream nextPut: $)].
 	aStream hasLineInfo ifTrue: [range end line: aStream currentLine character: aStream currentIndexInLine index: aStream position]
 ]

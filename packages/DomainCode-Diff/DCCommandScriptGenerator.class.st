@@ -53,7 +53,7 @@ DCCommandScriptGenerator >> insert: aMorph at: aNumber in: anOwnerMorph [
 { #category : #testing }
 DCCommandScriptGenerator >> logChanges [
 
-	^ false
+	^ true
 ]
 
 { #category : #actions }
