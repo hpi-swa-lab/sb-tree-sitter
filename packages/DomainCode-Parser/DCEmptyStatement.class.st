@@ -12,9 +12,9 @@ DCEmptyStatement >> adaptInput: input in: source at: cursorIndex textMorph: text
 
 	| text |
 	text := super adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent.
-	^ self insertSeparatorBefore
-		ifTrue: [self language statementTerminator, text]
-		ifFalse: [text, self language statementTerminator]
+	^ self insertSeparatorAfter
+		ifTrue: [text, self language statementTerminator]
+		ifFalse: [self language statementTerminator, text]
 ]
 
 { #category : #'as yet unclassified' }
@@ -24,15 +24,15 @@ DCEmptyStatement >> after [
 ]
 
 { #category : #'as yet unclassified' }
-DCEmptyStatement >> after: aBoolean [
+DCEmptyStatement >> insertSeparatorAfter [
 
-	after := aBoolean
+	^ self language isStatementTerminatorBetween not or: [after ifNil: [false]]
 ]
 
 { #category : #'as yet unclassified' }
-DCEmptyStatement >> insertSeparatorBefore [
+DCEmptyStatement >> insertSeparatorAfter: aBoolean [
 
-	^ self language isStatementTerminatorBetween and: [self after]
+	after := aBoolean
 ]
 
 { #category : #'as yet unclassified' }
@@ -41,7 +41,7 @@ DCEmptyStatement >> pasteReplace [
 
 	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | str |
 		str := Clipboard clipboardText string.
-		str := self insertSeparatorBefore
+		str := self insertSeparatorAfter
 			ifTrue: [str, self language statementTerminator]
 			ifFalse: [self language statementTerminator, str].
 		

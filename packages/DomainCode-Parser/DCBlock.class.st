@@ -328,9 +328,11 @@ DCBlock class >> smalltalkFlagMarker [
 
 	^ {
 		self smalltalkMessageSendSelector.
-		[:x :b | true].
 		[:selector :message | selector = #flag: and: [message children first type = #self and: [message children last type = #symbol]]].
-		[:selector :message | message ensureReplacement: DCFlagMarker initDo: [:m | ]]}
+		[:selector :message |
+			message
+				ensureReplacement: DCFlagMarker
+				initDo: [:m | m addMorphBack: (m embedSource: message childSandblocks last)]]}
 ]
 
 { #category : #smalltalk }
@@ -1025,18 +1027,22 @@ DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 			near: self activeTextMorph
 			before: anAboveBoolean
 			in: self
-			morph: (DCEmptyStatement new language: self language))].
+			morph: (DCEmptyStatement new
+				language: self language;
+				insertSeparatorAfter: true))].
 	
-	(self orOwnerSuchThat: [:morph | morph isTSBlock and: [morph isStatement]]) ifNotNil: [:statement | | target after |
+	(self orOwnerSuchThat: [:morph | morph isTSBlock and: [morph isStatement]]) ifNotNil: [:statement | | target insertSeparatorAfter |
 		target := (anAboveBoolean not and: [(statement submorphAfter ifNotNil: #treeLabel) = self language statementTerminator])
-			ifTrue: [statement submorphAfter]
+			ifTrue: [
+				insertSeparatorAfter := true.
+				statement submorphAfter]
 			ifFalse: [
 				"if we do not have a trailing dot, we need to insert the dot before the element"
-				after := anAboveBoolean not.
+				insertSeparatorAfter := anAboveBoolean.
 				statement].
 		self sandblockEditor do: (SBRelInsertCommand new near: target before: anAboveBoolean in: statement owner morph: (DCEmptyStatement new
 			language: self language;
-			after: after;
+			insertSeparatorAfter: insertSeparatorAfter;
 			contents: (SBToggledCode comment: '' active: 1 do: {['']. [self language statementTerminator]})))]
 ]
 
@@ -1267,7 +1273,7 @@ DCBlock >> pairMap [
 { #category : #hierarchy }
 DCBlock >> parent [
 
-	^ self replacedParent ifNotNil: [:p | p owner] ifNil: [self owner]
+	^ self replacedParent ifNotNil: [:p | p parent] ifNil: [self parentSandblock]
 ]
 
 { #category : #'as yet unclassified' }

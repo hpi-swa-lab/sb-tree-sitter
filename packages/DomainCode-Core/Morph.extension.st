@@ -19,6 +19,13 @@ Morph >> allChildrenDo: aBlock [
 ]
 
 { #category : #'*DomainCode-Core' }
+Morph >> allChildrenPreorderDo: aBlock [
+
+	aBlock value: self.
+	self children do: [:m | m allChildrenPreorderDo: aBlock]
+]
+
+{ #category : #'*DomainCode-Core' }
 Morph >> allChildrenSelect: aBlock [
 
 	^ Array streamContents: [:stream | self allChildrenDo: [:b | (aBlock value: b) ifTrue: [stream nextPut: b]]]

@@ -33,6 +33,15 @@ DCReplacement >> contents [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> embedSource: aBlock [
+
+	aBlock replacedParent: aBlock parent.
+	aBlock replaceBy: (DCEmbedMarker new source: aBlock).
+	
+	^ aBlock
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> fromSource: aBlock toSource: anotherBlock [
 
 	bindings add: aBlock -> anotherBlock
