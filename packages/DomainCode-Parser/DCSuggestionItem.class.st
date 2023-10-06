@@ -19,3 +19,10 @@ DCSuggestionItem >> source [
 
 	^ source
 ]
+
+{ #category : #'as yet unclassified' }
+DCSuggestionItem >> useSuggestionOn: aBlock in: anEditor [
+
+	aBlock useSuggestion: self.
+	self completionAction ifNotNil: [self completionAction cull: anEditor]
+]

@@ -51,12 +51,6 @@ DCChawatheScriptGenerator >> findPosition: aTree dest: destInOrder in: aMapping 
 ]
 
 { #category : #'as yet unclassified' }
-DCChawatheScriptGenerator >> flashChanges [
-
-	^ false
-]
-
-{ #category : #'as yet unclassified' }
 DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping [
 
 	| srcInOrder destInOrder inserted |
@@ -126,9 +120,15 @@ DCChawatheScriptGenerator >> lcsWith: x and: y in: aMapping [
 ]
 
 { #category : #'as yet unclassified' }
+DCChawatheScriptGenerator >> logChanges [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 DCChawatheScriptGenerator >> maybeAttachFlash: aMorph [
 
-	self flashChanges ifTrue: [aMorph containingSandblock attachDecorator: SBFlashDecorator new]
+	self logChanges ifTrue: [aMorph containingSandblock attachDecorator: SBFlashDecorator new]
 ]
 
 { #category : #actions }

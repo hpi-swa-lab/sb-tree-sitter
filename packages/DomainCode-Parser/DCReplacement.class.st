@@ -1,9 +1,36 @@
+"
+* replace:
+	- block replacedParent -> replacement
+	- replace block w replacement
+	- embed --> replace block with marker (cmd!)
+	- embed replacedParent -> marker
+* uninstall
+	- block replacedParent -> nil
+	- replace replacement w block
+	- embed -> replace marker with block
+	- embed replacedParent -> nil
+* move
+	- block has replacedParent? move replacedParent
+* delete
+	- block has replacedParent? delete replacedParent
+* changed ast and replacement gone?
+	- uninstall will be called --> gotta make sure clean up
+* changed ast and an embed is now a child?
+	- move will be called --> replace the embed with the new parent?!??
+		(watch (number))
+		= (keyword (marker -> number))
+
+		(watch (add (number) (number)))
+		= (keyword (marker -> add))
+"
 Class {
 	#name : #DCReplacement,
 	#superclass : #DCBlock,
 	#instVars : [
 		'source',
-		'bindings'
+		'bindings',
+		'collectEmbeds',
+		'currentEmbeds'
 	],
 	#category : #'DomainCode-Parser'
 }
@@ -33,12 +60,9 @@ DCReplacement >> contents [
 ]
 
 { #category : #'as yet unclassified' }
-DCReplacement >> embedSource: aBlock [
+DCReplacement >> embed: aClosure [
 
-	aBlock replacedParent: aBlock parent.
-	aBlock replaceBy: (DCEmbedMarker new source: aBlock).
-	
-	^ aBlock
+	collectEmbeds := aClosure
 ]
 
 { #category : #'as yet unclassified' }
@@ -48,10 +72,18 @@ DCReplacement >> fromSource: aBlock toSource: anotherBlock [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> gapFor: aMorph [
+
+	self allMorphsDo: [:m | (m valueOfProperty: #waitingFor) = aMorph ifTrue: [^ m]].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> initialize [
 
 	super initialize.
-	bindings := OrderedCollection new
+	bindings := OrderedCollection new.
+	embeds := OrderedCollection new
 ]
 
 { #category : #'as yet unclassified' }
@@ -78,12 +110,13 @@ DCReplacement >> layoutCommands [
 DCReplacement >> passiveUninstall [
 
 	| hadFocus |
+	self source replacedParent: nil.
+	currentEmbeds ifNotNil: [:e | e do: [:embed | embed replacedParent uninstall]].
+	
 	self sandblockEditor ifNil: [^ self].
 	hadFocus := self sandblockEditor textFocus
 		ifNotNil: [:t | t hasAnyParent: self]
 		ifNil: [false].
-	
-	self source replacedParent: nil.
 	self replaceBy: self source.
 	
 	hadFocus ifTrue: [self source startInputAtEnd]
@@ -102,6 +135,18 @@ DCReplacement >> printOn: aStream [
 DCReplacement >> range [
 
 	^ self source range
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> resolveSource [
+
+	^ self source resolveSource
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> siblingIndex [
+
+	^ self submorphIndex
 ]
 
 { #category : #'as yet unclassified' }
@@ -133,7 +178,40 @@ DCReplacement >> treeLabel [
 { #category : #'as yet unclassified' }
 DCReplacement >> type [
 
-	^ self source type
+	^ ''
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> updateEmbeds [
+
+	| newEmbeds |
+	newEmbeds := collectEmbeds value: self source.
+	currentEmbeds
+		ifNil: [
+			currentEmbeds := newEmbeds collect: [:embed |
+				embed = self source
+					ifFalse: [ | marker |
+						marker := DCEmbedMarker new source: embed.
+						embed replaceBy: marker.
+						embed]
+					ifTrue: [
+						self assert: embed replacedParent = self.
+						embed]]]
+		ifNotNil: [
+			newEmbeds do: [:e |
+				self
+					assert: e class ~= DCEmbedMarker
+					description: 'use children to navigate the tree for embedding (selected marker block)'].
+			currentEmbeds with: newEmbeds do: [:current :new |
+				current = new ifFalse: [ | marker |
+					current replacedParent uninstall.
+					
+					marker := DCEmbedMarker new source: new.
+					new replaceBy: marker.
+					self addMorphBack: new]].
+			currentEmbeds := newEmbeds].
+	
+	^ currentEmbeds
 ]
 
 { #category : #'as yet unclassified' }

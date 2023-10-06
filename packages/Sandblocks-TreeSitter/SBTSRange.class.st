@@ -27,7 +27,7 @@ SBTSRange class >> merging: aCollection [
 
 	| min max |
 	min := (aCollection detectMin: [:range | range start index]) start index.
-	max := (aCollection detectMin: [:range | range end index]) end index.
+	max := (aCollection detectMax: [:range | range end index]) end index.
 	^ SBTSRange start: min size: max - min
 ]
 

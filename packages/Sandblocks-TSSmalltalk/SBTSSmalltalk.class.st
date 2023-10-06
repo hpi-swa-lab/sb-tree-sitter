@@ -1173,18 +1173,26 @@ SBTSSmalltalk class >> hardLineBreakBetween: aBlock and: anotherBlock [
 
 { #category : #properties }
 SBTSSmalltalk class >> highlightQuery [
+	" https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
 
-    " https://github.com/smalltalk/blob/master/src/queries/highlights.scm "
-    ^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
+	^ '[(self) (true) (false) (thisContext) (super) (nil)] @keyword
+
+(pragma) @annotation
+(pragma (unary_identifier) @structure.part)
 
 (number) @number
 
 (string) @string
 (symbol) @string
 (character) @string
+(comment) @comment
+(block "|" @punctuation)
 
 (identifier) @variable
 (block_argument) @variable
+
+";" @punctuation
+"." @punctuation
 
 (unary_message (_) (unary_identifier) @variable.part)
 (binary_operator) @variable.part
@@ -1192,10 +1200,16 @@ SBTSSmalltalk class >> highlightQuery [
 
 ["^" "[" "]" "{" "}"] @important
 
-(keyword_selector (keyword) @major_declaration)
-(binary_selector (binary_operator) @major_declaration)
-(unary_selector (unary_identifier) @major_declaration)
-'
+["(" ")"] @punctuation
+
+(keyword_selector (keyword) @major_declaration.part) @structure.part
+(binary_selector (binary_operator) @major_declaration.part) @structure.part
+(unary_selector (unary_identifier) @major_declaration.part) @structure.part
+
+[(pragma_keyword_selector) (pragma_unary_selector) (pragma_binary_selector)] @structure.part
+
+(temporaries) @punctuation.part
+(temporaries (identifier) @punctuation)'
 ]
 
 { #category : #configuration }

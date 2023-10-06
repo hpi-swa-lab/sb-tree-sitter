@@ -167,7 +167,7 @@ DCBlock class >> smalltalkBrowseClass [
 		[:x |
 			x
 				registerShortcut: #browse
-				do: [{self smalltalkDeclaration. [:decl | decl class = ClassBinding ifTrue: [decl value browse]]}]]}
+				do: [{self smalltalkDeclaration. [:id :decl | decl class = ClassBinding ifTrue: [decl value browse]]}]]}
 ]
 
 { #category : #smalltalk }
@@ -204,7 +204,7 @@ DCBlock class >> smalltalkBrowseReferences [
 			x registerShortcut: #browseSenders do: [
 				{
 					self smalltalkDeclaration.
-					[:decl |
+					[:id :decl |
 						decl class = ClassBinding ifTrue: [self systemNavigation browseAllCallsOnClass: decl value].
 						decl isString ifTrue: [
 							self systemNavigation
@@ -257,11 +257,11 @@ DCBlock class >> smalltalkCollapseBlocks [
 	^ {
 		[:x | x language = SBTSSmalltalk].
 		[:x | x type = #block].
-		[:x | x sourceString size > 200].
+		[:x | x sourceString size > 400].
 		[:x | x installPassiveReplacement: DCCollapsed new]}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #smalltalk }
 DCBlock class >> smalltalkCollapseBlocksOnDoubleClick [
 	<query: #doubleClick>
 
@@ -293,8 +293,8 @@ DCBlock class >> smalltalkDeclaration [
 		[:x | x language = SBTSSmalltalk].
 		[:x | #(#identifier #'block_argument') includes: x type].
 		[:id | {#args. id. id orAllParents: #(#method #block)}].
-		[:id :scopes |
-			((DCQuery
+		[:id :scopes | | decl |
+			decl := ((DCQuery
 				script: {
 					[:scope |
 						DCQuery
@@ -319,10 +319,11 @@ DCBlock class >> smalltalkDeclaration [
 				(Symbol lookup: id contents) ifNotNil: [:sym |
 					id containingArtefact methodClass
 						bindingOf: sym
-						environment: id containingArtefact methodClass environment]]) ifNil: [id containingArtefact ifNotNil: [:m | m methodClass instVarNames detect: [:n | n = id contents] ifNone: [nil]]]]}
+						environment: id containingArtefact methodClass environment]]) ifNil: [id containingArtefact ifNotNil: [:m | m methodClass instVarNames detect: [:n | n = id contents] ifNone: [nil]]].
+			{#args. id. decl}]}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #smalltalk }
 DCBlock class >> smalltalkFlagMarker [
 	<query: #always>
 
@@ -332,7 +333,8 @@ DCBlock class >> smalltalkFlagMarker [
 		[:selector :message |
 			message
 				ensureReplacement: DCFlagMarker
-				initDo: [:m | m addMorphBack: (m embedSource: message childSandblocks last)]]}
+				embed: [:m | {m children last}]
+				initDo: [:m :expr | m addMorphBack: expr]]}
 ]
 
 { #category : #smalltalk }
@@ -401,8 +403,23 @@ DCBlock class >> smalltalkInsertArg [
 								script: {self smalltalkMethodArguments. [:args | (args at: index) contents]}
 								with: block.
 							(block type = #identifier or: [block sandblockEditor mode = #command])
-								ifTrue: [block replaceWith: id]
-								ifFalse: [block insert: id]]}]]]}
+								ifTrue: [block replaceWith: id, ' ']
+								ifFalse: [block insert: id, ' ']]}]]]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkInsertWatch [
+	<query: #shortcut>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x |
+			x registerShortcut: #wrapWithWatch do: [
+				{
+					[:expr |
+						expr class = DCWatch
+							ifTrue: [expr replaceWith: expr expression sourceString]
+							ifFalse: [expr wrapWithBefore: '(DCWatch report: (' after: ') for: ', UUID new asString storeString, ')']]}]]}
 ]
 
 { #category : #smalltalk }
@@ -434,10 +451,16 @@ DCBlock class >> smalltalkMessageSendAutoCompletion [
 		[:x | (DCQuery script: self smalltalkMessageSendSelector with: x) ifNotNil: [:res | res, {x}]].
 		[:selector :message :part |
 			part addSuggestions: ((self sortedSuggestions: Symbol allSymbols for: selector addAll: false max: 10) collect: [:sel |
-				DCSuggestionItem new selector: sel label: 'send' source: ((sel allSatisfy: #isSpecial) ifTrue: [sel, ' __sb'] ifFalse: [
-					(sel includes: $:)
-						ifTrue: [((sel splitBy: ':') allButLast collect: [:p | p, ': __sb']) joinSeparatedBy: ' ']
-						ifFalse: [sel]])])]}
+				DCSuggestionItem new
+					selector: sel label: 'send' source: ((sel allSatisfy: #isSpecial) ifTrue: [sel, ' __sb'] ifFalse: [
+						(sel includes: $:)
+							ifTrue: [((sel splitBy: ':') allButLast collect: [:p | p, ': __sb']) joinSeparatedBy: ' ']
+							ifFalse: [sel]]);
+					completionAction: [:editor |
+						editor selection parent
+							allChildrenDetect: [:c | c contents = '__sb']
+							ifFound: [:c | c containingSandblock startInputAtStart]
+							ifNone: []]])]}
 ]
 
 { #category : #'smalltalk - helpers' }
@@ -467,6 +490,23 @@ DCBlock class >> smalltalkMethodSelector [
 			x childSandblocks
 				detect: [:c | #(#'keyword_selector' #'binary_selector' #'unary_selector') includes: c type]
 				ifNone: [nil]]}
+]
+
+{ #category : #nil }
+DCBlock class >> smalltalkRunTest [
+	<query: #save>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x containingArtefact].
+		[:x | (x selector beginsWith: 'test') and: [x methodClass inheritsFrom: TestCase]].
+		[:x | | result case |
+			Project current addDeferredUIMessage: [
+				result := TestResult new.
+				case := x methodClass selector: x selector.
+				result runCase: case.
+				result defects ifNotEmpty: [:d | d anyOne debug].
+				(result respondsTo: #dispatchResultsIntoHistory) ifTrue: [result dispatchResultsIntoHistory]]]}
 ]
 
 { #category : #'smalltalk - helpers' }
@@ -552,6 +592,7 @@ DCBlock class >> smalltalkUnusedVariable [
 	^ {
 		[:x | x language = SBTSSmalltalk].
 		[:x | x hasParent: #temporaries].
+		[:x | {#args. x. x}].
 		self smalltalkUsesOfDeclaration.
 		[:decl :uses | uses size = 1].
 		[:decl :uses |
@@ -564,15 +605,42 @@ DCBlock class >> smalltalkUnusedVariable [
 DCBlock class >> smalltalkUsesOfDeclaration [
 
 	^ {
-		[:decl |
+		[:id :decl |
 			decl isSandblock
 				ifTrue: [{#args. decl. decl orAnyParent: #(#block #method)}]
-				ifFalse: [nil]].
-		[:decl :scope |
+				ifFalse: [{#args. decl. id containingArtefact}]].
+		[:decl :scope | | search |
+			search := decl isSandblock
+				ifTrue: [decl contents withoutLeading: #($:)]
+				ifFalse: [decl isString ifTrue: [decl] ifFalse: [decl name]].
 			{
 				#args.
 				decl.
-				scope allChildrenSelect: [:x | (#(#identifier #'block_argument') includes: x type) and: [(x contents withoutLeading: #($:)) = (decl contents withoutLeading: #($:))]]}]}
+				scope allChildrenSelect: [:x | (#(#identifier #'block_argument') includes: x type) and: [(x contents withoutLeading: #($:)) = search]]}]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkWatch [
+	<query: #always>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x type = #'keyword_message'].
+		[:x | true].
+		self smalltalkMessageSendSelector.
+		[:selector :message | selector = #report:for:].
+		[:selector :message |
+			(message parent type = 'parenthesized_expression'
+				ifTrue: [message parent]
+				ifFalse: [message])
+				ensureReplacement: DCWatch
+				embed: [:w | | expr |
+					expr := message children third.
+					{
+						expr type = 'parenthesized_expression'
+							ifTrue: [expr children first]
+							ifFalse: [expr]}]
+				initDo: [:w :expr | w addMorphBack: expr]]}
 ]
 
 { #category : #'as yet unclassified' }
@@ -630,6 +698,13 @@ DCBlock >> alias [
 	^ nil
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock >> allChildrenDetect: aBlock ifFound: aSuccessBlock ifNone: aFailBlock [
+
+	self allChildrenDo: [:block | (aBlock value: block) ifTrue: [^ aSuccessBlock value: block]].
+	^ aFailBlock value
+]
+
 { #category : #hierarchy }
 DCBlock >> allParents [
 
@@ -677,6 +752,12 @@ DCBlock >> artefactChanged: aMethodBlock [
 	(self containingArtefact = aMethodBlock and: [self isRootBlock]) ifTrue: [self queryState updateChangeQueries]
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock >> artefactSaved: aMethodBlock [
+
+	(self containingArtefact = aMethodBlock and: [self isRootBlock]) ifTrue: [self queryState updateQueriesFor: #save at: self]
+]
+
 { #category : #'query actions' }
 DCBlock >> attachHighlight [
 
@@ -693,7 +774,7 @@ DCBlock >> blockFor: aRange [
 { #category : #'as yet unclassified' }
 DCBlock >> children [
 
-	^ super children collect: [:c | c isReplacement ifTrue: [c source] ifFalse: [c]]
+	^ super children collect: [:c | c isReplacement ifTrue: [c resolveSource] ifFalse: [c]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -761,6 +842,31 @@ DCBlock >> deleteBeforeCursor [
 	self batchedChangeStep
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock >> deleteBlock [
+	<action>
+
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | delRange nextLeaf |
+		nextLeaf := self nextMorphThat: [:m | m hasSubmorphs not].
+		delRange := textMorph range.
+		(self language isStatementTerminatorBetween and: [(nextLeaf ifNotNil: [:l | l isTSMorph ifTrue: [l treeLabel] ifFalse: ['']] ifNil: ['']) = self language statementTerminator]) ifTrue: [
+			delRange := SBTSRange merging: {delRange. nextLeaf range}.
+			(source atPin: delRange end index + 1) = Character cr ifTrue: [delRange := SBTSRange start: delRange start end: delRange end + 1]].
+		self
+			replace: delRange
+			in: source
+			with: ''
+			do: [:new :edit | apply value: new value: edit value: textMorph range start index]]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> deleteBlockWithCopy [
+	<action>
+
+	self sandblockEditor copyBuffer: self preferQuick: true.
+	self deleteBlock
+]
+
 { #category : #'text modify' }
 DCBlock >> deleteFrom: aString at: aNumber do: aBlock [
 
@@ -809,9 +915,15 @@ DCBlock >> encompasses: aRange [
 ]
 
 { #category : #'query actions' }
+DCBlock >> ensureReplacement: aClass embed: aCollection initDo: aBlock [
+
+	self queryState ensureReplacement: aClass for: self embed: aCollection initDo: aBlock
+]
+
+{ #category : #'query actions' }
 DCBlock >> ensureReplacement: aClass initDo: aBlock [
 
-	self queryState ensureReplacement: aClass for: self initDo: aBlock
+	self queryState ensureReplacement: aClass for: self embed: [:m | {}] initDo: aBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -1093,7 +1205,7 @@ DCBlock >> intoWorld: aWorld [
 { #category : #'as yet unclassified' }
 DCBlock >> isArtefact [
 
-	^ false
+	^ self floating and: [self isRootBlock]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1202,6 +1314,16 @@ DCBlock >> layoutInset [
 	^ (self type = 'ERROR' and: [self childSandblocks notEmpty])
 		ifTrue: [0]
 		ifFalse: [2 @ (self submorphCount > 3 ifTrue: [2] ifFalse: [0])]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> noteNewOwner: aMorph [
+
+	super noteNewOwner: aMorph.
+	
+	"check if we have just been moved out of a replacement"
+	(self replacedParent notNil and: [aMorph notNil and: [aMorph class = DCBlock]]) ifTrue: ["self replacedParent: nil"
+	]
 ]
 
 { #category : #hierarchy }
@@ -1497,6 +1619,12 @@ DCBlock >> replacedParent: aBlock [
 DCBlock >> reportError: anError [
 
 	self queryState reportError: anError for: self
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> resolveSource [
+
+	^ self
 ]
 
 { #category : #'as yet unclassified' }
@@ -1811,6 +1939,17 @@ DCBlock >> wrapInSquareBrackets [
 	<action>
 
 	self wrapIn: '['
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> wrapWithBefore: aString after: anotherString [
+
+	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+		self
+			replace: textMorph range
+			in: source
+			with: aString, self sourceString, anotherString
+			do: [:new :edit | apply value: new value: edit value: textMorph range start index + aString size]]
 ]
 
 { #category : #'as yet unclassified' }

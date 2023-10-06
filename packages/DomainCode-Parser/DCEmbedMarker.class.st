@@ -1,6 +1,11 @@
+"
+Acts as a reference to another node -- effectively allowing a subtree to have two parents. Consequently, the marker is treated as a normal node and moved around in place of the subtree it is representing. The marker exists only in the AST world (and allows its reference to exist in the UI world).
+
+The marker is updated/uninstalled by subsequent queries on the replacement.
+"
 Class {
 	#name : #DCEmbedMarker,
-	#superclass : #Morph,
+	#superclass : #DCBlock,
 	#instVars : [
 		'source'
 	],
@@ -8,9 +13,47 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCEmbedMarker >> contents [
+
+	^ ''
+]
+
+{ #category : #'as yet unclassified' }
 DCEmbedMarker >> isReplacement [
 
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+DCEmbedMarker >> parent [
+
+	^ self owner
+]
+
+{ #category : #'as yet unclassified' }
+DCEmbedMarker >> printOn [
+
+	
+]
+
+{ #category : #'as yet unclassified' }
+DCEmbedMarker >> printOn: aStream [
+
+	aStream nextPutAll: 'EmbedMarker('.
+	aStream print: self source.
+	aStream nextPut: $)
+]
+
+{ #category : #'as yet unclassified' }
+DCEmbedMarker >> resolveSource [
+
+	^ self source resolveSource
+]
+
+{ #category : #'as yet unclassified' }
+DCEmbedMarker >> siblingIndex [
+
+	^ self submorphIndex
 ]
 
 { #category : #'as yet unclassified' }
@@ -22,5 +65,25 @@ DCEmbedMarker >> source [
 { #category : #'as yet unclassified' }
 DCEmbedMarker >> source: aBlock [
 
-	source := aBlock
+	source := aBlock.
+	aBlock replacedParent: self
+]
+
+{ #category : #'as yet unclassified' }
+DCEmbedMarker >> treeLabel [
+
+	^ ''
+]
+
+{ #category : #'as yet unclassified' }
+DCEmbedMarker >> type [
+
+	^ ''
+]
+
+{ #category : #'as yet unclassified' }
+DCEmbedMarker >> uninstall [
+
+	self replaceBy: source.
+	source replacedParent: nil
 ]

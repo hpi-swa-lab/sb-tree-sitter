@@ -109,6 +109,7 @@ DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 			on: SyntaxErrorNotification
 			do: [self method sourceString]].
 	newSelector := self methodClass compile: text asText classified: nil.
+	
 	^ true
 ]
 

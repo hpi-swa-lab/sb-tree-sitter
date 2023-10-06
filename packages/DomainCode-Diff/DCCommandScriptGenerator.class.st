@@ -11,7 +11,9 @@ Class {
 DCCommandScriptGenerator >> delete: aMorph [
 
 	| target |
-	target := aMorph replacedParent ifNil: [aMorph].
+	target := aMorph replacedParent
+		ifNotNil: [:p | p isReplacement ifTrue: [p] ifFalse: [aMorph]]
+		ifNil: [aMorph].
 	self editor do: (SBDeleteCommand new
 		target: target;
 		shouldMergeWithNext: true).
@@ -50,17 +52,14 @@ DCCommandScriptGenerator >> insert: aMorph at: aNumber in: anOwnerMorph [
 	self logChanges ifTrue: [Transcript showln: {#insert. anOwnerMorph. aNumber. aMorph}]
 ]
 
-{ #category : #testing }
-DCCommandScriptGenerator >> logChanges [
-
-	^ true
-]
-
 { #category : #actions }
 DCCommandScriptGenerator >> move: aMorph to: anOwnerMorph postDeleteDo: aBlock [
 
 	| command target |
-	target := aMorph replacedParent ifNil: [aMorph].
+	target := aMorph replacedParent
+		ifNotNil: [:p | p isReplacement ifTrue: [p] ifFalse: [aMorph]]
+		ifNil: [aMorph].
+	
 	command := SBMoveCommand new
 		shouldMergeWithNext: true;
 		container: anOwnerMorph;

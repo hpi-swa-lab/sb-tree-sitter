@@ -25,6 +25,12 @@ DCJumpPlaceholder >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+DCJumpPlaceholder >> isJumpPoint [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 DCJumpPlaceholder >> valid [
 
 	^ false
