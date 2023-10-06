@@ -822,11 +822,11 @@ DCBlock >> currentTextMorph [
 DCBlock >> deleteAfterCursor [
 	<action>
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+	self tryApplyChange: [:source :textMorph :cursorIndex |
 		self
 			deleteFrom: source
 			at: cursorIndex + 1
-			do: [:new :edit | apply value: new value: edit value: cursorIndex]].
+			do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex]].
 	self batchedChangeStep
 ]
 
@@ -834,11 +834,11 @@ DCBlock >> deleteAfterCursor [
 DCBlock >> deleteBeforeCursor [
 	<action>
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+	self tryApplyChange: [:source :textMorph :cursorIndex |
 		self
 			deleteFrom: source
 			at: cursorIndex
-			do: [:new :edit | apply value: new value: edit value: cursorIndex - 1]].
+			do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex - 1]].
 	self batchedChangeStep
 ]
 
@@ -846,7 +846,7 @@ DCBlock >> deleteBeforeCursor [
 DCBlock >> deleteBlock [
 	<action>
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | delRange nextLeaf |
+	self tryApplyChange: [:source :textMorph :cursorIndex | | delRange nextLeaf |
 		nextLeaf := self nextMorphThat: [:m | m hasSubmorphs not].
 		delRange := textMorph range.
 		(self language isStatementTerminatorBetween and: [(nextLeaf ifNotNil: [:l | l isTSMorph ifTrue: [l treeLabel] ifFalse: ['']] ifNil: ['']) = self language statementTerminator]) ifTrue: [
@@ -856,7 +856,7 @@ DCBlock >> deleteBlock [
 			replace: delRange
 			in: source
 			with: ''
-			do: [:new :edit | apply value: new value: edit value: textMorph range start index]]
+			do: [:new :edit | self applyEdit: edit source: new cursorAt: textMorph range start index]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1103,12 +1103,12 @@ DCBlock >> inputClosestTextMorphTo: cursorPosition [
 { #category : #'as yet unclassified' }
 DCBlock >> insert: aString [
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+	self tryApplyChange: [:source :textMorph :cursorIndex |
 		self
 			insert: aString
 			in: source
 			at: cursorIndex + 1
-			do: [:new :edit | apply value: new value: edit value: cursorIndex + aString size]]
+			do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex + aString size]]
 ]
 
 { #category : #'text modify' }
@@ -1257,7 +1257,7 @@ DCBlock >> isTSMorph [
 { #category : #'as yet unclassified' }
 DCBlock >> keyStroke: anEvent [
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | input |
+	self tryApplyChange: [:source :textMorph :cursorIndex | | input |
 		input := anEvent keyCharacter asString.
 		(input first isPrintable and: [anEvent commandKeyPressed not]) ifTrue: [
 			(self adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent) ifNotEmpty: [:text |
@@ -1265,7 +1265,7 @@ DCBlock >> keyStroke: anEvent [
 					insert: text
 					in: source
 					at: cursorIndex + 1
-					do: [:new :edit | apply value: new value: edit value: (cursorIndex + (text indexOf: anEvent keyCharacter))]]]].
+					do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex + (text indexOf: anEvent keyCharacter)]]]].
 	self batchedChangeStep
 ]
 
@@ -1408,7 +1408,7 @@ DCBlock >> parentNode [
 DCBlock >> pasteReplace [
 	<action>
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | str |
+	self tryApplyChange: [:source :textMorph :cursorIndex | | str |
 		str := Clipboard clipboardText string.
 		
 		cursorIndex class = SBTSRange
@@ -1417,13 +1417,13 @@ DCBlock >> pasteReplace [
 					replace: cursorIndex
 					in: source
 					with: str
-					do: [:new :edit | apply value: new value: edit value: cursorIndex + str size]]
+					do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex + str size]]
 			ifFalse: [
 				self
 					insert: str
 					in: source
 					at: cursorIndex + 1
-					do: [:new :edit | apply value: new value: edit value: cursorIndex + str size]]]
+					do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex + str size]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1595,12 +1595,12 @@ DCBlock >> replace: oldTree with: newTree [
 { #category : #'as yet unclassified' }
 DCBlock >> replaceWith: aString [
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+	self tryApplyChange: [:source :textMorph :cursorIndex |
 		self
 			replace: textMorph range
 			in: source
 			with: aString
-			do: [:new :edit | apply value: new value: edit value: textMorph range start index + aString size]]
+			do: [:new :edit | self applyEdit: edit source: new cursorAt: textMorph range start index + aString size]]
 ]
 
 { #category : #accessing }
@@ -1719,7 +1719,7 @@ DCBlock >> suggestions [
 { #category : #'as yet unclassified' }
 DCBlock >> swap: aNumber [
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply | | pivot outerPivot |
+	self tryApplyChange: [:source :textMorph :cursorIndex | | pivot outerPivot |
 		pivot := (self sandblockEditor mode = #input
 			ifTrue: [textMorph]
 			ifFalse: [self]) orOwnerSuchThat: [:morph | morph owner submorphCount > 1].
@@ -1732,11 +1732,11 @@ DCBlock >> swap: aNumber [
 				ifTrue: [outerPivot morphAfterThat: #isSandblock]
 				ifFalse: [outerPivot morphBeforeThat: #isSandblock].
 			startIndex := target range start index + (aNumber > 0 ifTrue: [target range size - pivot range size] ifFalse: [0]).
-			self swap: pivot range with: target range in: source do: [:new :edit |
-				apply value: new value: edit value: (SBToggledCode
-					comment: ''
-					active: 1
-					do: {[SBTSRange start: startIndex size: pivot range size]. [startIndex]})]]]
+			self
+				swap: pivot range
+				with: target range
+				in: source
+				do: [:new :edit | self applyEdit: edit source: new cursorAt: (SBTSRange start: startIndex size: pivot range size)]]]
 ]
 
 { #category : #'text modify' }
@@ -1838,7 +1838,6 @@ DCBlock >> tryApplyChange: aClosure [
 		value: (self activeTextMorph
 			ifNotNil: [self activeTextMorph range start index + (oldCursorOffset - 1)]
 			ifNil: [self range])
-		value: [:newSource :edit :newIndex | self applyEdit: edit source: newSource cursorAt: newIndex]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1864,12 +1863,12 @@ DCBlock >> updateAllHighlights [
 { #category : #'as yet unclassified' }
 DCBlock >> useSuggestion: anItem [
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+	self tryApplyChange: [:source :textMorph :cursorIndex |
 		self
 			replace: textMorph range
 			in: source
 			with: anItem source
-			do: [:new :edit | apply value: new value: edit value: textMorph range start index + anItem source size]]
+			do: [:new :edit | self applyEdit: edit source: new cursorAt: textMorph range start index + anItem source size]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1892,11 +1891,11 @@ DCBlock >> wrap: aRange in: aString open: anotherString close: aThirdString [
 { #category : #'action helpers' }
 DCBlock >> wrapIn: aString [
 
-	^ self tryApplyChange: [:source :textMorph :cursorIndex :apply |
-		apply
-			value: (self wrap: self range in: source open: aString close: (self pairMap at: aString))
-			value: nil
-			value: self range]
+	^ self tryApplyChange: [:source :textMorph :cursorIndex |
+		self
+			applyEdit: nil
+			source: (self wrap: self range in: source open: aString close: (self pairMap at: aString))
+			cursorAt: self range]
 ]
 
 { #category : #actions }
@@ -1944,12 +1943,12 @@ DCBlock >> wrapInSquareBrackets [
 { #category : #'as yet unclassified' }
 DCBlock >> wrapWithBefore: aString after: anotherString [
 
-	self tryApplyChange: [:source :textMorph :cursorIndex :apply |
+	self tryApplyChange: [:source :textMorph :cursorIndex |
 		self
 			replace: textMorph range
 			in: source
 			with: aString, self sourceString, anotherString
-			do: [:new :edit | apply value: new value: edit value: textMorph range start index + aString size]]
+			do: [:new :edit | self applyEdit: edit source: new cursorAt: textMorph range start index + aString size]]
 ]
 
 { #category : #'as yet unclassified' }

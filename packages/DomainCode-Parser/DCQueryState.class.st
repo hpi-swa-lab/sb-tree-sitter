@@ -58,6 +58,12 @@ DCQueryState >> errors [
 ]
 
 { #category : #'as yet unclassified' }
+DCQueryState >> errorsDo: aBlock [
+
+	self rootBlock allBlocksDo: [:b | b withDecorator: SBErrorDecorator do: [:d | aBlock value: d] ifAbsent: []]
+]
+
+{ #category : #'as yet unclassified' }
 DCQueryState >> highlight: aBlock [
 
 	(newDecorators at: aBlock ifAbsentPut: [OrderedCollection new]) add: SBHighlightDecorator new

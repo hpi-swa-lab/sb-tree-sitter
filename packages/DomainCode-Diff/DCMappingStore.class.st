@@ -3,7 +3,9 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'srcToDest',
-		'destToSrc'
+		'destToSrc',
+		'srcRoot',
+		'destRoot'
 	],
 	#category : #'DomainCode-Diff'
 }
@@ -11,7 +13,7 @@ Class {
 { #category : #'as yet unclassified' }
 DCMappingStore >> addMappingFrom: src to: dest [
 
-	self assert: src type = dest type.
+	self assert: (src type = dest type or: [src = srcRoot]).
 	srcToDest at: src put: dest.
 	destToSrc at: dest put: src
 ]
@@ -45,6 +47,13 @@ DCMappingStore >> destForSrc: t [
 DCMappingStore >> destToSrc [
 
 	^ destToSrc
+]
+
+{ #category : #'as yet unclassified' }
+DCMappingStore >> from: aSrc to: aDest [
+
+	srcRoot := aSrc.
+	destRoot := aDest
 ]
 
 { #category : #'as yet unclassified' }

@@ -31,6 +31,20 @@ DCJumpPlaceholder >> isJumpPoint [
 ]
 
 { #category : #'as yet unclassified' }
+DCJumpPlaceholder >> pasteReplace [
+	<action>
+
+	self tryApplyChange: [:source :textMorph :cursorIndex | | str |
+		str := Clipboard clipboardText string.
+		
+		self
+			replace: self range
+			in: source
+			with: str
+			do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex + str size]]
+]
+
+{ #category : #'as yet unclassified' }
 DCJumpPlaceholder >> valid [
 
 	^ false

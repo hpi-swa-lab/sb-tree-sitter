@@ -87,7 +87,7 @@ DCMatcher >> largestUnmappedFor: aTree isSrc: aBoolean in: aMapping [
 DCMatcher >> matchFrom: src to: dest [
 
 	| mappings |
-	mappings := DCMappingStore new.
+	mappings := DCMappingStore new from: src to: dest.
 	DCGreedySubtreeMatcher new matchFrom: src to: dest in: mappings.
 	DCGreedyBottomUpMatcher new matchFrom: src to: dest in: mappings.
 	SBToggledCode

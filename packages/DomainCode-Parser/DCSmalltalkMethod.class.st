@@ -98,7 +98,7 @@ DCSmalltalkMethod >> object [
 DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 
 	| text newSelector |
-	self firstSubmorph queryState errors ifNotEmpty: [:errors | aFixBoolean ifTrue: [errors do: [:error | error tryFixIfFail: [^ false]]] ifFalse: [^ false]].
+	self firstSubmorph queryState errorsDo: [:error | aFixBoolean ifTrue: [error tryFixIfFail: [^ false]] ifFalse: [^ false]].
 	
 	text := aQuickBoolean ifTrue: [self method sourceString] ifFalse: [
 		[
