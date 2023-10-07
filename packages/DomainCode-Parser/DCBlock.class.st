@@ -846,11 +846,10 @@ DCBlock >> deleteBeforeCursor [
 DCBlock >> deleteBlock [
 	<action>
 
-	self tryApplyChange: [:source :textMorph :cursorIndex | | delRange nextLeaf |
-		nextLeaf := self nextMorphThat: [:m | m hasSubmorphs not].
+	self tryApplyChange: [:source :textMorph :cursorIndex | | delRange |
 		delRange := textMorph range.
-		(self language isStatementTerminatorBetween and: [(nextLeaf ifNotNil: [:l | l isTSMorph ifTrue: [l treeLabel] ifFalse: ['']] ifNil: ['']) = self language statementTerminator]) ifTrue: [
-			delRange := SBTSRange merging: {delRange. nextLeaf range}.
+		self trailingTerminator ifNotNil: [:t |
+			delRange := SBTSRange merging: {delRange. t range}.
 			(source atPin: delRange end index + 1) = Character cr ifTrue: [delRange := SBTSRange start: delRange start end: delRange end + 1]].
 		self
 			replace: delRange
@@ -1705,6 +1704,14 @@ DCBlock >> startInputCommandIn: aTextMorph [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> statementWithTerminatorRange [
+
+	^ self trailingTerminator
+		ifNotNil: [:t | SBTSRange merging: {self range. t range}]
+		ifNil: [self range]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> statements [
 
 	^ self childSandblocks
@@ -1727,14 +1734,16 @@ DCBlock >> swap: aNumber [
 			(aNumber > 0
 				ifTrue: [morph morphAfterThat: #isSandblock]
 				ifFalse: [morph morphBeforeThat: #isSandblock]) notNil].
-		outerPivot ifNotNil: [ | target startIndex |
+		outerPivot ifNotNil: [ | target startIndex targetRange pivotRange |
 			target := aNumber > 0
 				ifTrue: [outerPivot morphAfterThat: #isSandblock]
 				ifFalse: [outerPivot morphBeforeThat: #isSandblock].
-			startIndex := target range start index + (aNumber > 0 ifTrue: [target range size - pivot range size] ifFalse: [0]).
+			targetRange := target statementWithTerminatorRange.
+			pivotRange := pivot statementWithTerminatorRange.
+			startIndex := targetRange start index + (aNumber > 0 ifTrue: [targetRange size - pivotRange size] ifFalse: [0]).
 			self
-				swap: pivot range
-				with: target range
+				swap: pivotRange
+				with: targetRange
 				in: source
 				do: [:new :edit | self applyEdit: edit source: new cursorAt: (SBTSRange start: startIndex size: pivot range size)]]]
 ]
@@ -1787,6 +1796,16 @@ DCBlock >> textMorphForPosition: aPosition [
 DCBlock >> textMorphs [
 
 	^ self submorphs select: [:t | t isTextMorph]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> trailingTerminator [
+
+	| nextLeaf |
+	self language isStatementTerminatorBetween ifFalse: [^ nil].
+	nextLeaf := self nextMorphThat: [:m | m hasSubmorphs not].
+	(nextLeaf ifNotNil: [:l | l isTSMorph ifTrue: [l treeLabel] ifFalse: ['']] ifNil: ['']) = self language statementTerminator ifTrue: [^ nextLeaf].
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -1852,6 +1871,13 @@ DCBlock >> type: aSymbol [
 	type := aSymbol.
 	
 	
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> typeNewLine [
+	<inputAction>
+
+	self insert: String cr
 ]
 
 { #category : #'as yet unclassified' }

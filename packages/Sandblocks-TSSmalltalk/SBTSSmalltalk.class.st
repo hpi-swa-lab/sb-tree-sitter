@@ -1284,6 +1284,7 @@ SBTSSmalltalk class >> rootRuleName [
 { #category : #'configuration - layout' }
 SBTSSmalltalk class >> softLineBreakBetween: aBlock and: anotherBlock [
 
+	anotherBlock type = #'binary_operator' ifTrue: [^ false].
 	(#(')' ']' '}') includes: anotherBlock treeLabel) ifTrue: [^ false].
 	anotherBlock type = 'ERROR' ifTrue: [^ false].
 	aBlock type = #'block_argument' ifTrue: [^ false].

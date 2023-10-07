@@ -5,18 +5,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-DCEditTest >> testAcceptJS [
-	<timeout: 9000>
-
-	| src editor |
-	src := 'function() {}'.
-	editor := self editorFor: (DCBlock parseBlock: src first asString language: SBJavascript).
-	src allButFirst
-		do: [:char | editor handle: (self keyboardEvent: char)]
-		displayingProgress: 'a'
-]
-
-{ #category : #'as yet unclassified' }
 DCEditTest >> testDeleteEmptyLine [
 
 	| program editor |
@@ -38,12 +26,12 @@ b.
 c.' language: SBTSSmalltalk.
 	editor := self editorAndWorldFor: program.
 	program childSandblocks second startInputAtEnd.
-	self type: '
-x' in: editor.
+	editor handle: (self keyboardEvent: Character cr).
+	self type: 'x' in: editor.
 	self assert: 'a
-b.
-x.
-c.' equals: editor childSandblocks first sourceString
+b .
+x .
+c .' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -57,6 +45,45 @@ x := 3' language: SBTSSmalltalk.
 	self type: '4' in: editor.
 	self assert: 'a: arg
 x := 34' equals: editor childSandblocks first sourceString
+]
+
+{ #category : #'as yet unclassified' }
+DCEditTest >> testSmalltalkDeleteStatement [
+
+	| program editor |
+	program := DCBlock parse: 'a
+b.
+c.' language: SBTSSmalltalk.
+	editor := self editorAndWorldFor: program.
+	editor selectNoInput: program childSandblocks second.
+	
+	editor selection deleteBlock.
+	self assert: 'a
+c .' equals: editor childSandblocks first sourceString
+]
+
+{ #category : #'as yet unclassified' }
+DCEditTest >> testSmalltalkSwapStatementsWithEmpty [
+
+	| program editor |
+	program := DCBlock parse: 'a
+b.
+
+c.' language: SBTSSmalltalk.
+	editor := self editorAndWorldFor: program.
+	editor selectNoInput: program childSandblocks second.
+	
+	editor selection swapRight.
+	self assert: 'a
+
+b .
+c .' equals: editor childSandblocks first sourceString.
+	
+	editor selection swapRight.
+	self assert: 'a
+
+c .
+b .' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -97,8 +124,8 @@ let b;' language: SBJavascript.
 	editor := self editorAndWorldFor: program.
 	editor selectNoInput: program childSandblocks first.
 	editor selection swapRight.
-	self assert: 'let b;
-let a;' equals: editor childSandblocks first sourceString
+	self assert: 'let b ;
+let a ;' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }

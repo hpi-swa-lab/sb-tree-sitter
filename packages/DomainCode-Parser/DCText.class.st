@@ -222,6 +222,12 @@ DCText >> slot [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> statementWithTerminatorRange [
+
+	^ self range
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> treeHash [
 
 	^ self treeHashCount: {0}

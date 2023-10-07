@@ -34,10 +34,30 @@ DCSmalltalkMethod >> emptyIn: aClass [
 ]
 
 { #category : #'as yet unclassified' }
+DCSmalltalkMethod >> externalModification: aBoolean [
+
+	self setProperty: #externalModificationFlag toValue: aBoolean
+]
+
+{ #category : #'as yet unclassified' }
 DCSmalltalkMethod >> for: aCompiledMethod [
 
 	methodClass := aCompiledMethod methodClass.
 	self addMorphBack: (DCBlock parseBlock: aCompiledMethod getSource asString language: SBTSSmalltalk)
+]
+
+{ #category : #'as yet unclassified' }
+DCSmalltalkMethod >> hasExternalModification [
+
+^ self valueOfProperty: #externalModificationFlag ifAbsent: [ false ]
+]
+
+{ #category : #'as yet unclassified' }
+DCSmalltalkMethod >> ignoreChangeNotifierDuring: aBlock [
+
+	self setProperty: #ignoreChangeNotifier toValue: true.
+	
+	aBlock ensure: [self removeProperty: #ignoreChangeNotifier]
 ]
 
 { #category : #'as yet unclassified' }
@@ -52,6 +72,15 @@ DCSmalltalkMethod >> initialize [
 		attachDecorator: SBMoveDecorator new;
 		attachDecorator: SBResizableDecorator new;
 		layoutInset: 4
+]
+
+{ #category : #'as yet unclassified' }
+DCSmalltalkMethod >> intoWorld: aWorld [
+
+	super intoWorld: aWorld.
+	SystemChangeNotifier uniqueInstance
+		noMoreNotificationsFor: self;
+		notify: self ofSystemChangesOfItem: #method using: #methodChanged:
 ]
 
 { #category : #'as yet unclassified' }
@@ -81,6 +110,17 @@ DCSmalltalkMethod >> method [
 ]
 
 { #category : #'as yet unclassified' }
+DCSmalltalkMethod >> methodChanged: anEvent [
+
+	((self hasProperty: #ignoreChangeNotifier) not and: (anEvent item selector = self selector and: [anEvent item methodClass = self methodClass])) ifTrue: [
+		anEvent isRemoved ifTrue: [^ self delete].
+		anEvent isModified ifTrue: [
+			^ self hasUnsavedChanges
+				ifTrue: [self externalModification: true]
+				ifFalse: [self reloadMethodInPlaceUndoable: false]]]
+]
+
+{ #category : #'as yet unclassified' }
 DCSmalltalkMethod >> methodClass [
 
 	^ methodClass
@@ -95,9 +135,30 @@ DCSmalltalkMethod >> object [
 ]
 
 { #category : #'as yet unclassified' }
+DCSmalltalkMethod >> reloadMethodInPlaceUndoable: aBoolean [
+
+	| reloaded |
+	self externalModification: false.
+	reloaded := (DCSmalltalkMethod for: self containingArtefact object)
+		hResizing: self containingArtefact hResizing;
+		width: self containingArtefact width;
+		yourself.
+	
+	self isInWorld ifTrue: [
+		aBoolean
+			ifTrue: [self sandblockEditor do: (SBReplaceCommand new target: self replacer: reloaded)]
+			ifFalse: [self replaceBy: reloaded]].
+	^ reloaded
+]
+
+{ #category : #'as yet unclassified' }
 DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 
 	| text newSelector |
+	(self hasExternalModification not or: [UIManager default confirm: 'Method may have changed elsewhere, continue?'])
+		ifTrue: [self externalModification: false]
+		ifFalse: [^ false].
+	
 	self firstSubmorph queryState errorsDo: [:error | aFixBoolean ifTrue: [error tryFixIfFail: [^ false]] ifFalse: [^ false]].
 	
 	text := aQuickBoolean ifTrue: [self method sourceString] ifFalse: [
@@ -108,7 +169,11 @@ DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 				noPattern: self ~= self containingArtefact]
 			on: SyntaxErrorNotification
 			do: [self method sourceString]].
-	newSelector := self methodClass compile: text asText classified: nil.
+	
+	self ignoreChangeNotifierDuring: [
+		newSelector := self methodClass
+			compile: text withSqueakLineEndings asText
+			classified: nil].
 	
 	^ true
 ]
