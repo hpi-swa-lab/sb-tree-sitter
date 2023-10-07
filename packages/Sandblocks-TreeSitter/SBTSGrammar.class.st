@@ -358,6 +358,14 @@ SBTSGrammar >> inlinedRules [
 ]
 
 { #category : #testing }
+SBTSGrammar >> is: aSymbol subtypeOf: anotherSymbol [
+
+	self assert: (self isSuperType: anotherSymbol).
+	aSymbol = anotherSymbol ifTrue: [^ true].
+	^ (self bodyNodeForRule: anotherSymbol) allSubTypesRecursive anySatisfy: [:node | node type = aSymbol]
+]
+
+{ #category : #testing }
 SBTSGrammar >> isBlockInlined: aSymbol [
 
 	^ self language isBlockInlined: aSymbol

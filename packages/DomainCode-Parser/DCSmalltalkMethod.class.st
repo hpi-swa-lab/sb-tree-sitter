@@ -20,10 +20,22 @@ DCSmalltalkMethod class >> for: aCompiledMethod [
 ]
 
 { #category : #'as yet unclassified' }
+DCSmalltalkMethod class >> newWith: aString in: aClass [
+
+	^ self new in: aClass with: aString
+]
+
+{ #category : #'as yet unclassified' }
 DCSmalltalkMethod >> browse [
 	<action>
 
 	Browser newOnClass: self methodClass selector: self selector
+]
+
+{ #category : #'as yet unclassified' }
+DCSmalltalkMethod >> category [
+
+	^ self methodClass organization categoryOfElement: self selector
 ]
 
 { #category : #'as yet unclassified' }
@@ -58,6 +70,13 @@ DCSmalltalkMethod >> ignoreChangeNotifierDuring: aBlock [
 	self setProperty: #ignoreChangeNotifier toValue: true.
 	
 	aBlock ensure: [self removeProperty: #ignoreChangeNotifier]
+]
+
+{ #category : #'as yet unclassified' }
+DCSmalltalkMethod >> in: aClass with: aString [
+
+	methodClass := aClass.
+	self addMorphBack: (DCBlock parseBlock: aString language: SBTSSmalltalk)
 ]
 
 { #category : #'as yet unclassified' }
@@ -135,6 +154,12 @@ DCSmalltalkMethod >> object [
 ]
 
 { #category : #'as yet unclassified' }
+DCSmalltalkMethod >> relatedClass [
+
+	^ self methodClass
+]
+
+{ #category : #'as yet unclassified' }
 DCSmalltalkMethod >> reloadMethodInPlaceUndoable: aBoolean [
 
 	| reloaded |
@@ -159,7 +184,10 @@ DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 		ifTrue: [self externalModification: false]
 		ifFalse: [^ false].
 	
-	self firstSubmorph queryState errorsDo: [:error | aFixBoolean ifTrue: [error tryFixIfFail: [^ false]] ifFalse: [^ false]].
+	self firstSubmorph queryState errorsDo: [:error |
+		aFixBoolean ifTrue: [error tryFixIfFail: [^ false]] ifFalse: [^ false].
+		"errors are applied and removed on the next tick only"
+		self world ifNotNil: #doOneCycleNow].
 	
 	text := aQuickBoolean ifTrue: [self method sourceString] ifFalse: [
 		[
@@ -173,7 +201,7 @@ DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 	self ignoreChangeNotifierDuring: [
 		newSelector := self methodClass
 			compile: text withSqueakLineEndings asText
-			classified: nil].
+			classified: self category].
 	
 	^ true
 ]
@@ -182,7 +210,7 @@ DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 DCSmalltalkMethod >> selector [
 
 	| selector |
-	selector := (self method queryAll: '[(unary_selector) (binary_selector) (keyword_selector)] @') first.
+	selector := (self method queryAll: '[(unary_selector) (binary_selector) (keyword_selector)] @') ifEmpty: [^ ''] ifNotEmpty: #first.
 	
 	^ (((selector childSandblocks viewFrom: 1 by: 2) collect: [:p | p contents]) joinSeparatedBy: '') asSymbol
 ]

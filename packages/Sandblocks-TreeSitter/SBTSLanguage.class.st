@@ -146,6 +146,12 @@ SBTSLanguage class >> emptyLineSymbol [
 	^ #empty
 ]
 
+{ #category : #configuration }
+SBTSLanguage class >> expressionTypes [
+
+	^ #(#expression)
+]
+
 { #category : #'loading - helper' }
 SBTSLanguage class >> fetchLibrary: aGithubString branch: aString [
 

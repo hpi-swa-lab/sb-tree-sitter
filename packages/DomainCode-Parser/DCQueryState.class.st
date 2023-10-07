@@ -122,7 +122,9 @@ DCQueryState >> queueUpdateQueriesFor: aSymbol [
 { #category : #'as yet unclassified' }
 DCQueryState >> reportError: aDecorator for: aBlock [
 
-	(newDecorators at: aBlock ifAbsentPut: [OrderedCollection new]) add: aDecorator
+	| errors |
+	errors := newDecorators at: aBlock ifAbsentPut: [OrderedCollection new].
+	(errors noneSatisfy: [:e | e message = aDecorator message]) ifTrue: [errors add: aDecorator]
 ]
 
 { #category : #'as yet unclassified' }

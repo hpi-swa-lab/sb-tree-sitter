@@ -45,6 +45,12 @@ DCJumpPlaceholder >> pasteReplace [
 ]
 
 { #category : #'as yet unclassified' }
+DCJumpPlaceholder >> type [
+
+	^ #identifier
+]
+
+{ #category : #'as yet unclassified' }
 DCJumpPlaceholder >> valid [
 
 	^ false

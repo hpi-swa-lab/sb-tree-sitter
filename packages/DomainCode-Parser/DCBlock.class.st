@@ -257,7 +257,7 @@ DCBlock class >> smalltalkCollapseBlocks [
 	^ {
 		[:x | x language = SBTSSmalltalk].
 		[:x | x type = #block].
-		[:x | x sourceString size > 400].
+		[:x | x sourceString size > 3000].
 		[:x | x installPassiveReplacement: DCCollapsed new]}
 ]
 
@@ -269,6 +269,16 @@ DCBlock class >> smalltalkCollapseBlocksOnDoubleClick [
 		[:x | x language = SBTSSmalltalk].
 		[:x | x type = #block].
 		[:x | x installPassiveReplacement: DCCollapsed new]}
+]
+
+{ #category : #'smalltalk - helpers' }
+DCBlock class >> smalltalkCreateClassFor: aBlock [
+
+	aBlock sandblockEditor do: (SBStCreateClassCommand new
+		name: aBlock contents;
+		source: aBlock;
+		editor: aBlock sandblockEditor;
+		artefact: aBlock containingArtefact)
 ]
 
 { #category : #smalltalk }
@@ -321,6 +331,78 @@ DCBlock class >> smalltalkDeclaration [
 						bindingOf: sym
 						environment: id containingArtefact methodClass environment]]) ifNil: [id containingArtefact ifNotNil: [:m | m methodClass instVarNames detect: [:n | n = id contents] ifNone: [nil]]].
 			{#args. id. decl}]}
+]
+
+{ #category : #'smalltalk - helpers' }
+DCBlock class >> smalltalkDeclareBlockLocal: aBlock [
+
+	| block decl |
+	decl := DCBlock new
+		type: #identifier;
+		addMorphBack: (DCText new contents: aBlock contents).
+	block := aBlock orAnyParent: {#block. #method}.
+	block childSandblocks
+		detect: [:b | b type = #temporaries]
+		ifFound: [:temporaries |
+			aBlock sandblockEditor do: (SBInsertCommand new
+				morph: decl;
+				container: temporaries;
+				index: temporaries submorphCount)]
+		ifNone: [ | index |
+			index := block children findFirst: [:s | s treeLabel = '|'].
+			aBlock sandblockEditor do: (SBInsertCommand new
+				morph: (DCBlock new
+					type: #temporaries;
+					addMorphBack: (DCText new contents: '|');
+					addMorphBack: decl;
+					addMorphBack: (DCText new contents: '|'));
+				index: (index = 0 ifTrue: [2] ifFalse: [index + 1]);
+				container: block)]
+]
+
+{ #category : #'smalltalk - helpers' }
+DCBlock class >> smalltalkDeclareClassVariable: aBlock [
+
+	aBlock sandblockEditor do: (SBStDeclareClassVarCommand new
+		class: aBlock containingArtefact methodClass theNonMetaClass;
+		name: aBlock contents;
+		source: aBlock)
+]
+
+{ #category : #'smalltalk - helpers' }
+DCBlock class >> smalltalkDeclareInstanceVariable: aBlock [
+
+	aBlock sandblockEditor do: (SBStDeclareInstVarCommand new
+		class: aBlock containingArtefact methodClass;
+		name: aBlock contents;
+		source: aBlock)
+]
+
+{ #category : #'smalltalk - helpers' }
+DCBlock class >> smalltalkDeclareTemporary: aBlock [
+
+	| block decl |
+	decl := DCBlock new
+		type: #identifier;
+		addMorphBack: (DCText new contents: aBlock contents).
+	block := aBlock orAnyParent: {#method}.
+	block childSandblocks
+		detect: [:b | b type = #temporaries]
+		ifFound: [:temporaries |
+			aBlock sandblockEditor do: (SBInsertCommand new
+				morph: decl;
+				container: temporaries;
+				index: temporaries submorphCount)]
+		ifNone: [ | index |
+			index := block children findFirst: [:s | s treeLabel = '|'].
+			aBlock sandblockEditor do: (SBInsertCommand new
+				morph: (DCBlock new
+					type: #temporaries;
+					addMorphBack: (DCText new contents: '|');
+					addMorphBack: decl;
+					addMorphBack: (DCText new contents: '|'));
+				index: (index = 0 ifTrue: [2] ifFalse: [index + 1]);
+				container: block)]
 ]
 
 { #category : #smalltalk }
@@ -398,13 +480,11 @@ DCBlock class >> smalltalkInsertArg [
 			#(#First #Second #Third #Fourth #Fifith) withIndexDo: [:name :index |
 				x registerShortcut: #use, name, #Argument do: [
 					{
-						[:block | | id |
-							id := DCQuery
-								script: {self smalltalkMethodArguments. [:args | (args at: index) contents]}
-								with: block.
-							(block type = #identifier or: [block sandblockEditor mode = #command])
-								ifTrue: [block replaceWith: id, ' ']
-								ifFalse: [block insert: id, ' ']]}]]]}
+						[:block |
+							(DCQuery script: {self smalltalkMethodArguments. [:args | (args at: index) contents]} with: block) ifNotNil: [:id |
+								(block type = #identifier or: [block sandblockEditor mode = #command])
+									ifTrue: [block replaceWith: id, ' ']
+									ifFalse: [block insert: id, ' ']]]}]]]}
 ]
 
 { #category : #smalltalk }
@@ -448,13 +528,19 @@ DCBlock class >> smalltalkMessageSendAutoCompletion [
 
 	^ {
 		[:x | x isSelected].
+		[:x | "only autocomplete for the first message part (just after receiver)"
+		x siblingIndex = 2].
 		[:x | (DCQuery script: self smalltalkMessageSendSelector with: x) ifNotNil: [:res | res, {x}]].
 		[:selector :message :part |
 			part addSuggestions: ((self sortedSuggestions: Symbol allSymbols for: selector addAll: false max: 10) collect: [:sel |
 				DCSuggestionItem new
 					selector: sel label: 'send' source: ((sel allSatisfy: #isSpecial) ifTrue: [sel, ' __sb'] ifFalse: [
 						(sel includes: $:)
-							ifTrue: [((sel splitBy: ':') allButLast collect: [:p | p, ': __sb']) joinSeparatedBy: ' ']
+							ifTrue: [
+								((sel splitBy: ':') allButLast collectWithIndex: [:p :index |
+									p, ((index = 1 and: [part nextBlock ifNotNil: #isExpression ifNil: [false]])
+										ifTrue: [':']
+										ifFalse: [': __sb'])]) joinSeparatedBy: ' ']
 							ifFalse: [sel]]);
 					completionAction: [:editor |
 						editor selection parent
@@ -492,7 +578,7 @@ DCBlock class >> smalltalkMethodSelector [
 				ifNone: [nil]]}
 ]
 
-{ #category : #nil }
+{ #category : #smalltalk }
 DCBlock class >> smalltalkRunTest [
 	<query: #save>
 
@@ -536,6 +622,25 @@ DCBlock class >> smalltalkSelector [
 				with: x]}
 ]
 
+{ #category : #'smalltalk - helpers' }
+DCBlock class >> smalltalkSelectorWithPlaceholders: aString [
+
+	(aString allSatisfy: #isSpecial) ifTrue: [^ aString, ' __sb'].
+	(aString includes: $:) ifFalse: [^ aString].
+	^ ((aString splitBy: ':') allButLast collect: [:part | part, ': __sb']) joinSeparatedBy: ' '
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkSymbolAutocompletion [
+	<query: #type>
+
+	^ {
+		[:x | x isSelected].
+		[:x | x language = SBTSSmalltalk].
+		[:x | x type = #symbol].
+		[:x | x addSuggestions: ((self sortedSuggestions: Symbol allSymbols for: x contents allButFirst addAll: false max: 10) collect: [:sel | DCSuggestionItem new selector: sel label: 'symbol' source: sel])]}
+]
+
 { #category : #smalltalk }
 DCBlock class >> smalltalkToggleBoolean [
 	<query: #doubleClick>
@@ -560,29 +665,57 @@ DCBlock class >> smalltalkUndeclaredVariable [
 		[:x |
 			x reportError: (SBErrorDecorator new
 				message: 'undeclared variable';
+				fixActions: (x contents first isUppercase
+					ifTrue: [
+						{
+							SBCodeAction
+								labeled: 'Declare class var'
+								for: x
+								do: [:block | self smalltalkDeclareClassVariable: block].
+							SBCodeAction
+								labeled: 'Create class ', x contents
+								for: x
+								do: [:block | self smalltalkCreateClassFor: block]}]
+					ifFalse: [
+						{
+							SBCodeAction
+								labeled: 'Declare block-local'
+								for: x
+								do: [:block | self smalltalkDeclareBlockLocal: block].
+							SBCodeAction
+								labeled: 'Declare method temporary'
+								for: x
+								do: [:block | self smalltalkDeclareTemporary block].
+							SBCodeAction
+								labeled: 'Declare instance variable'
+								for: x
+								do: [:block | self smalltalkDeclareInstanceVariable: block]}]))]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkUnknownSelector [
+	<query: #type>
+
+	^ {
+		self smalltalkMessageSendSelector.
+		[:selector :message | (Symbol lookup: selector) isNil].
+		[:selector :message |
+			message children second reportError: (SBErrorDecorator new
+				message: 'unknown message';
 				fixActions: {
-					SBCodeAction labeled: 'Declare block-local' for: x do: [:node | | block decl |
-						decl := DCBlock new
-							type: #identifier;
-							addMorphBack: (DCText new contents: node contents).
-						block := node orAnyParent: {#block. #method}.
-						block childSandblocks
-							detect: [:b | b type = #temporaries]
-							ifFound: [:temporaries |
-								node sandblockEditor do: (SBInsertCommand new
-									morph: decl;
-									container: temporaries;
-									index: temporaries submorphCount)]
-							ifNone: [ | index |
-								index := block children findFirst: [:s | s treeLabel = '|'].
-								node sandblockEditor do: (SBInsertCommand new
-									morph: (DCBlock new
-										type: #temporaries;
-										addMorphBack: (DCText new contents: '|');
-										addMorphBack: decl;
-										addMorphBack: (DCText new contents: '|'));
-									index: (index = 0 ifTrue: [2] ifFalse: [index + 1]);
-									container: block)]]})]}
+					SBCodeAction labeled: 'Create method on ...' for: message do: [:node | | method class |
+						class := UIManager default chooseClassOrTrait.
+						class ifNotNil: [
+							self halt.
+							method := DCSmalltalkMethod
+								newWith: (self smalltalkSelectorWithPlaceholders: selector)
+								in: class.
+							node sandblockEditor do: (SBEditorOpenMorphCommand new
+								morph: method;
+								editor: node sandblockEditor;
+								isUnsaved: true;
+								yourself)]].
+					SBCodeAction labeled: 'Confirm selector' for: message do: [:node | node selector asSymbol]})]}
 ]
 
 { #category : #smalltalk }
@@ -638,7 +771,7 @@ DCBlock class >> smalltalkWatch [
 					expr := message children third.
 					{
 						expr type = 'parenthesized_expression'
-							ifTrue: [expr children first]
+							ifTrue: [expr children second]
 							ifFalse: [expr]}]
 				initDo: [:w :expr | w addMorphBack: expr]]}
 ]
@@ -1213,6 +1346,14 @@ DCBlock >> isBlockBody [
 	^ self language ifNotNil: [:l | l blockBodyTypes includes: self type] ifNil: [false]
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock >> isExpression [
+
+	(self type = #ERROR and: [self submorphCount = 1]) ifTrue: [^ self firstSubmorph isExpression].
+	
+	^ self language expressionTypes anySatisfy: [:type | self language instance grammar is: self type subtypeOf: type]
+]
+
 { #category : #hierarchy }
 DCBlock >> isOrHasParent: aCollectionOrSymbol [
 
@@ -1503,6 +1644,8 @@ DCBlock >> printTreeOn: aStream indent: aNumber [
 { #category : #'as yet unclassified' }
 DCBlock >> queryAll: aString [
 
+	self assert: (aString includes: $@) description: 'query needs a capture (@) to be useful'.
+	
 	^ Array streamContents: [:stream |
 		self allChildrenDo: [:block |
 			block isTSMorph ifTrue: [

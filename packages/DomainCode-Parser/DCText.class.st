@@ -105,6 +105,12 @@ DCText >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> isExpression [
+
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> isReplacement [
 
 	^ false

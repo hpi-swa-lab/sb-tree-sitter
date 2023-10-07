@@ -58,6 +58,19 @@ SBTSNodeBase >> allSubTypesDo: aBlock parents: aCollection [
 ]
 
 { #category : #hierarchy }
+SBTSNodeBase >> allSubTypesRecursive [
+
+	| found pending |
+	found := OrderedCollection new.
+	pending := OrderedCollection with: self.
+	[pending notEmpty] whileTrue: [
+		pending removeFirst allSubTypes do: [:type |
+			found add: type.
+			pending add: type]].
+	^ found
+]
+
+{ #category : #hierarchy }
 SBTSNodeBase >> allSuperTypesDo: aBlock [
 
 	self parent ifNotNil: [:o | o allSuperTypesDo: aBlock]

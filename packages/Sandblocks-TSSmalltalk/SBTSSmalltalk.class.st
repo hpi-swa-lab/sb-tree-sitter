@@ -1305,10 +1305,7 @@ SBTSSmalltalk class >> spaceBetween: aBlock and: anotherBlock lastCharacterOfFir
 	(aBlock type = 'string' and: [anotherBlock type = 'string']) ifTrue: [^ true].
 	anotherBlock type = #'block_argument' ifTrue: [^ true].
 	aCharacter = $: ifTrue: [^ true].
-	(anotherBlock type = 'ERROR' and: [
-		anotherBlock firstDeepChild contents
-			ifNotEmpty: [:e | e first isLetter not]
-			ifEmpty: [false]]) ifTrue: [^ false].
+	"( anotherBlock type ='ERROR' and: [ anotherBlock firstDeepChild contents ifNotEmpty: [ :e| e first isLetter not ]ifEmpty: [ false ] ] )ifTrue: [ ^false ]"
 	(aBlock contents = ':=' or: [anotherBlock contents = ':=']) ifTrue: [^ true].
 	anotherBlock alias = #'unary_identifier' ifTrue: [^ true].
 	^ super spaceBetween: aBlock and: anotherBlock lastCharacterOfFirst: aCharacter

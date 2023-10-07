@@ -63,6 +63,44 @@ c .' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }
+DCEditTest >> testSmalltalkEditMessageWithAutoCompl [
+
+	| block editor |
+	block := DCSmalltalkMethod newWith: 'a
+
+a with: 3' in: self class.
+	editor := self editorAndWorldFor: block.
+	(block method queryAll: '(keyword) @') first
+		select;
+		clearInput.
+	self type: 'with' in: editor.
+	self tick.
+	editor handle: (SBTest keyboardEvent: Character tab).
+	self assert: 'a
+
+a with: 3' equals: block method sourceString
+]
+
+{ #category : #'as yet unclassified' }
+DCEditTest >> testSmalltalkFillPlaceholderWithArg [
+
+	| block editor |
+	block := DCSmalltalkMethod newWith: 'a: arg
+
+a' in: self class.
+	editor := self editorAndWorldFor: block.
+	block lastDeepChild startInputAtEnd.
+	self type: ' with' in: editor.
+	self tick.
+	editor handle: (SBTest keyboardEvent: Character tab).
+	self tick.
+	editor handle: (SBTest keyboardEvent: $1 shift: false command: true).
+	self assert: 'a: arg
+
+a with: arg' equals: block method sourceString
+]
+
+{ #category : #'as yet unclassified' }
 DCEditTest >> testSmalltalkSwapStatementsWithEmpty [
 
 	| program editor |
