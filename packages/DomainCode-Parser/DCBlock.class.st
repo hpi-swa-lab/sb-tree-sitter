@@ -586,13 +586,33 @@ DCBlock class >> smalltalkRunTest [
 		[:x | x language = SBTSSmalltalk].
 		[:x | x containingArtefact].
 		[:x | (x selector beginsWith: 'test') and: [x methodClass inheritsFrom: TestCase]].
-		[:x | | result case |
-			Project current addDeferredUIMessage: [
-				result := TestResult new.
-				case := x methodClass selector: x selector.
-				result runCase: case.
-				result defects ifNotEmpty: [:d | d anyOne debug].
-				(result respondsTo: #dispatchResultsIntoHistory) ifTrue: [result dispatchResultsIntoHistory]]]}
+		[:x |
+			Project current addDeferredUIMessage: [ | addIcon displayedError |
+				x method all: {[:p | p purpose = #testResult]} do: #passiveUninstall.
+				addIcon := [:icon | x method addMorphFront: ((SBIcon perform: icon) wrapped: #testResult)].
+				displayedError := false.
+				
+				[(x methodClass selector: x selector) runCase]
+					on: TestResult failure
+					do: [:signal |
+						x messageSendForError: signal argsDo: [:message :args |
+							message run: {
+								self smalltalkMessageSendSelector.
+								[:selector :m | selector = #assert:equals:].
+								[:selector :m |
+									displayedError := true.
+									args do: [:arg |
+										DCPreviewValue new
+											value: arg value;
+											purpose: #testResult;
+											installFor: arg key]]}].
+						addIcon value: #iconTimesCircle.
+						displayedError ifFalse: [signal signal]]
+					on: TestResult exError
+					do: [:signal |
+						addIcon value: #iconTimesCircle.
+						signal signal].
+				displayedError ifFalse: [addIcon value: #iconCheckCircle]]]}
 ]
 
 { #category : #'smalltalk - helpers' }
@@ -638,7 +658,7 @@ DCBlock class >> smalltalkSymbolAutocompletion [
 		[:x | x isSelected].
 		[:x | x language = SBTSSmalltalk].
 		[:x | x type = #symbol].
-		[:x | x addSuggestions: ((self sortedSuggestions: Symbol allSymbols for: x contents allButFirst addAll: false max: 10) collect: [:sel | DCSuggestionItem new selector: sel label: 'symbol' source: sel])]}
+		[:x | x addSuggestions: ((self sortedSuggestions: Symbol allSymbols for: x contents allButFirst addAll: false max: 10) collect: [:sel | DCSuggestionItem new selector: sel label: 'symbol' source: '#', sel])]}
 ]
 
 { #category : #smalltalk }
@@ -706,7 +726,6 @@ DCBlock class >> smalltalkUnknownSelector [
 					SBCodeAction labeled: 'Create method on ...' for: message do: [:node | | method class |
 						class := UIManager default chooseClassOrTrait.
 						class ifNotNil: [
-							self halt.
 							method := DCSmalltalkMethod
 								newWith: (self smalltalkSelectorWithPlaceholders: selector)
 								in: class.
@@ -831,6 +850,12 @@ DCBlock >> alias [
 	^ nil
 ]
 
+{ #category : #queries }
+DCBlock >> all: aCollection do: aBlock [
+
+	(self allBlocksSelect: [:b | (DCQuery script: aCollection with: b) notNil]) do: aBlock
+]
+
 { #category : #'as yet unclassified' }
 DCBlock >> allChildrenDetect: aBlock ifFound: aSuccessBlock ifNone: aFailBlock [
 
@@ -907,7 +932,7 @@ DCBlock >> blockFor: aRange [
 { #category : #'as yet unclassified' }
 DCBlock >> children [
 
-	^ super children collect: [:c | c isReplacement ifTrue: [c resolveSource] ifFalse: [c]]
+	^ Array streamContents: [:s | super children do: [:c | c isReplacement ifTrue: [c resolveSource ifNotNil: [:child | s nextPut: child]] ifFalse: [s nextPut: c]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1308,11 +1333,32 @@ DCBlock >> installActiveReplacement: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> installActiveReplacement: aBlock do: aClosure [
+
+	self sandblockEditor do: (SBCombinedCommand newWith: {
+		SBReplaceCommand new target: self replacer: (aBlock source: self).
+		SBMutatePropertyCommand new
+			target: self;
+			selector: #replacedParent;
+			value: aBlock}).
+	aClosure value: aBlock
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> installPassiveReplacement: aBlock [
 
 	aBlock source: self.
 	self replaceBy: aBlock.
 	self replacedParent: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> installPassiveReplacement: aBlock do: aClosure [
+
+	aBlock source: self.
+	self replaceBy: aBlock.
+	self replacedParent: aBlock.
+	aClosure value: aBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -1773,6 +1819,12 @@ DCBlock >> resolveSource [
 DCBlock >> rootBlock [
 
 	^ self orAnyParent: self language rootRuleName
+]
+
+{ #category : #queries }
+DCBlock >> run: aCollection [
+
+	^ DCQuery script: aCollection with: self
 ]
 
 { #category : #'as yet unclassified' }

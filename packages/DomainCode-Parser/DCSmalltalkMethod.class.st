@@ -26,6 +26,15 @@ DCSmalltalkMethod class >> newWith: aString in: aClass [
 ]
 
 { #category : #'as yet unclassified' }
+DCSmalltalkMethod >> blockForPC: aNumber isActiveFrame: aBoolean [
+
+	| pc |
+	pc := aBoolean ifTrue: [aNumber] ifFalse: [self compiledMethod pcPreviousTo: aNumber].
+	(self method getSourceStringAndMark parseAsMethodFor: self methodClass) rawSourceRanges keysAndValuesDo: [:node :range | node pc = pc ifTrue: [^ self method smallestBlockEncompassig: (SBTSRange start: range start - 1 size: range size)]].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 DCSmalltalkMethod >> browse [
 	<action>
 
@@ -36,6 +45,12 @@ DCSmalltalkMethod >> browse [
 DCSmalltalkMethod >> category [
 
 	^ self methodClass organization categoryOfElement: self selector
+]
+
+{ #category : #'as yet unclassified' }
+DCSmalltalkMethod >> compiledMethod [
+
+	^ self methodClass >> self selector
 ]
 
 { #category : #'as yet unclassified' }
@@ -120,6 +135,17 @@ DCSmalltalkMethod >> layoutCommands [
 	^ SBAlgebraCommand container
 		data: (self submorphs collect: [:b | b layoutCommands] separatedBy: [SBAlgebraCommand hardLine]);
 		morph: self
+]
+
+{ #category : #'as yet unclassified' }
+DCSmalltalkMethod >> messageSendForError: anError argsDo: aBlock [
+
+	| context message |
+	context := anError signalerContext findContextSuchThat: [:c | c method = self compiledMethod].
+	message := self blockForPC: context pc isActiveFrame: context = anError signalerContext.
+	aBlock
+		value: message
+		value: ((anError signalerContext findContextSuchThat: [:c | c sender = context]) arguments collectWithIndex: [:arg :index | (message children at: 2 + (index - 1 * 2) + 1) -> arg])
 ]
 
 { #category : #'as yet unclassified' }

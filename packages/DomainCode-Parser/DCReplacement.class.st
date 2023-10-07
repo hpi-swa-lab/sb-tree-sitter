@@ -48,15 +48,30 @@ DCReplacement >> activeUninstall [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> addEmbed: aBlock [
+
+	currentEmbeds ifNil: [currentEmbeds := OrderedCollection new].
+	
+	^ currentEmbeds add: (aBlock = self source
+		ifFalse: [ | marker |
+			marker := DCEmbedMarker new source: aBlock.
+			aBlock replaceBy: marker.
+			aBlock]
+		ifTrue: [
+			self assert: aBlock replacedParent = self.
+			aBlock])
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> children [
 
-	^ self source children
+	^ self source ifNotNil: #children ifNil: [#()]
 ]
 
 { #category : #'as yet unclassified' }
 DCReplacement >> contents [
 
-	^ self source contents
+	^ self source ifNotNil: #contents ifNil: ['']
 ]
 
 { #category : #'as yet unclassified' }
@@ -110,14 +125,14 @@ DCReplacement >> layoutCommands [
 DCReplacement >> passiveUninstall [
 
 	| hadFocus |
-	self source replacedParent: nil.
-	currentEmbeds ifNotNil: [:e | e do: [:embed | embed replacedParent uninstall]].
+	currentEmbeds ifNotNil: [:e | e do: [:embed | embed = self source ifFalse: [embed replacedParent uninstall]]].
+	self source ifNotNil: [self source replacedParent: nil].
 	
 	self sandblockEditor ifNil: [^ self].
 	hadFocus := self sandblockEditor textFocus
 		ifNotNil: [:t | t hasAnyParent: self]
 		ifNil: [false].
-	self replaceBy: self source.
+	self source ifNotNil: [self replaceBy: self source] ifNil: [self delete].
 	
 	hadFocus ifTrue: [self source startInputAtEnd]
 ]
@@ -132,15 +147,27 @@ DCReplacement >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> purpose [
+
+	^ self valueOfProperty: #purpose
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> purpose: aSymbol [
+
+	self setProperty: #purpose toValue: aSymbol
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> range [
 
-	^ self source range
+	^ self source ifNotNil: #range ifNil: [SBTSRange null]
 ]
 
 { #category : #'as yet unclassified' }
 DCReplacement >> resolveSource [
 
-	^ self source resolveSource
+	^ self source ifNotNil: [:c | c resolveSource]
 ]
 
 { #category : #'as yet unclassified' }
@@ -172,7 +199,7 @@ DCReplacement >> treeHash [
 { #category : #'as yet unclassified' }
 DCReplacement >> treeLabel [
 
-	^ self source treeLabel
+	^ self source ifNotNil: #treeLabel ifNil: ['']
 ]
 
 { #category : #'as yet unclassified' }
@@ -188,15 +215,8 @@ DCReplacement >> updateEmbeds [
 	newEmbeds := collectEmbeds value: self source.
 	currentEmbeds
 		ifNil: [
-			currentEmbeds := newEmbeds collect: [:embed |
-				embed = self source
-					ifFalse: [ | marker |
-						marker := DCEmbedMarker new source: embed.
-						embed replaceBy: marker.
-						embed]
-					ifTrue: [
-						self assert: embed replacedParent = self.
-						embed]]]
+			newEmbeds do: [:embed | self addEmbed: embed].
+			currentEmbeds ifNil: [currentEmbeds := {}]]
 		ifNotNil: [
 			newEmbeds do: [:e |
 				self

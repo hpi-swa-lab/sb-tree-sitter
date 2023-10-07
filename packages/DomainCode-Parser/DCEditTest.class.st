@@ -105,7 +105,7 @@ DCEditTest >> testSmalltalkSwapStatementsWithEmpty [
 
 	| program editor |
 	program := DCBlock parse: 'a
-b.
+b .
 
 c.' language: SBTSSmalltalk.
 	editor := self editorAndWorldFor: program.

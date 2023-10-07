@@ -59,10 +59,30 @@ Morph >> isNode: aNode [
 ]
 
 { #category : #'*DomainCode-Core' }
+Morph >> isReplacement [
+
+	^ false
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> purpose [
+
+	^ nil
+]
+
+{ #category : #'*DomainCode-Core' }
 Morph >> treeSize [
 
 	| i |
 	i := 0.
 	self allChildrenDo: [:m | i := i + 1].
 	^ i
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> wrapped: aSymbol [
+
+	^ DCReplacement new
+		addMorph: self;
+		purpose: aSymbol
 ]
