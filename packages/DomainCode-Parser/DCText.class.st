@@ -111,6 +111,13 @@ DCText >> isExpression [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> isExtra [
+	"TODO: use language isExtra: instead"
+
+	^ self treeLabel notEmpty and: [self treeLabel allSatisfy: [:x | x isSeparator]]
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> isReplacement [
 
 	^ false
@@ -202,7 +209,7 @@ DCText >> rootBlock [
 { #category : #'as yet unclassified' }
 DCText >> shallowCopyBlock [
 
-	^ DCText new
+	^ self class new
 		range: range;
 		contents: contents;
 		highlight: highlight;

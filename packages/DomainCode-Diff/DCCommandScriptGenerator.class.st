@@ -32,14 +32,6 @@ DCCommandScriptGenerator >> editor: anEditor [
 	editor := anEditor
 ]
 
-{ #category : #'initialize-release' }
-DCCommandScriptGenerator >> initialize [
-
-	super initialize.
-	
-	commands := OrderedCollection new
-]
-
 { #category : #actions }
 DCCommandScriptGenerator >> insert: aMorph at: aNumber in: anOwnerMorph [
 

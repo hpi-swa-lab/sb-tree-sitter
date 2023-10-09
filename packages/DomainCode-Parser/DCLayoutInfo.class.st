@@ -1,0 +1,174 @@
+Class {
+	#name : #DCLayoutInfo,
+	#superclass : #Object,
+	#instVars : [
+		'x',
+		'y',
+		'lineHeight',
+		'bounds',
+		'lineStart',
+		'depth',
+		'padding'
+	],
+	#category : #'DomainCode-Parser'
+}
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> advance: aPoint [
+
+	x := x + aPoint x.
+	lineHeight := lineHeight max: aPoint y
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> bounds [
+
+	^ bounds
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> depth [
+
+	^ depth
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> depth: aNumber [
+
+	depth := aNumber
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> extent [
+
+	^ self position + (0 @ lineHeight)
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> initialize [
+
+	lineHeight := 0.
+	depth := 0
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> lineBreak [
+
+	y := y + lineHeight.
+	x := lineStart + (self padding * depth).
+	lineHeight := 0
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> lineHeight [
+
+	^ lineHeight
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> lineHeight: aNumber [
+
+	lineHeight := aNumber
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> lineStart: aNumber [
+
+	lineStart := aNumber
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> measure: aMorph [
+
+	| minBounds |
+	minBounds := self minBoundsOf: aMorph.
+	bounds := bounds quickMerge: minBounds.
+	aMorph class = DCLineBreak
+		ifTrue: [self lineBreak]
+		ifFalse: [aMorph class = DCBlock ifFalse: [self advance: minBounds width @ (minBounds height + (self padding * 2))]]
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> minBoundsOf: aMorph [
+
+	| oldBounds |
+	^ aMorph class = DCBlock
+		ifTrue: [ | b |
+			oldBounds := bounds.
+			bounds := x @ y extent: 0 @ 0.
+			b := (aMorph minBoundsWith: self) extendBy: self padding * 2.
+			bounds := oldBounds.
+			b]
+		ifFalse: [self position extent: aMorph minExtent]
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> origin: aPoint [
+
+	x := aPoint x.
+	y := aPoint y.
+	bounds := aPoint extent: 0 @ 0
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> padding [
+
+	^ padding
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> padding: aNumber [
+
+	padding := aNumber
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> place: aMorph [
+
+	| minBounds |
+	aMorph class = DCLineBreak ifTrue: [
+		minBounds := self position extent: 0 @ aMorph minExtent y.
+		aMorph setBoundsDirect: minBounds.
+		self advance: aMorph minExtent.
+		bounds := bounds quickMerge: minBounds.
+		^ self lineBreak].
+	
+	minBounds := self copy minBoundsOf: aMorph.
+	aMorph setBoundsDirect: minBounds.
+	bounds := bounds quickMerge: minBounds.
+	aMorph class = DCBlock ifTrue: [aMorph layoutWith: self] ifFalse: [
+		aMorph doLayoutIn: minBounds.
+		self advance: minBounds width @ (minBounds height + (self padding * 2))]
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> position [
+
+	^ x @ y
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> x [
+
+	^ x
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> x: aNumber [
+
+	self assert: aNumber isNumber.
+	x := aNumber
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> y [
+
+	^ y
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> y: aNumber [
+
+	self assert: aNumber isNumber.
+	y := aNumber
+]

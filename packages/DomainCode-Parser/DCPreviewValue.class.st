@@ -14,6 +14,14 @@ DCPreviewValue >> drawnColor [
 ]
 
 { #category : #'as yet unclassified' }
+DCPreviewValue >> initialize [
+
+	super initialize.
+	
+	self listDirection: #topToBottom
+]
+
+{ #category : #'as yet unclassified' }
 DCPreviewValue >> installFor: aBlock [
 
 	aBlock installPassiveReplacement: self do: [:r |

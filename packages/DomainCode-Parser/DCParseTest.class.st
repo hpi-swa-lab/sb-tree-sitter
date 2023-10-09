@@ -149,24 +149,26 @@ DCParseTest >> testChangeInsertWithRepeating [
 { #category : #'as yet unclassified' }
 DCParseTest >> testEditDeleteFirstLine [
 
-	DCBlock new deleteFrom: 'abc' at: 2 do: [:new :edit |
+	DCBlock deleteFrom: 'abc' at: 2 do: [:new :edit :undo |
 		self assert: 'ac' equals: new.
 		self assert: 1 equals: edit startByte.
 		self assert: 2 equals: edit oldEndByte.
 		self assert: 1 equals: edit newEndByte.
 		self assert: (SBTSPoint row: 0 column: 1) equals: edit startPoint.
 		self assert: (SBTSPoint row: 0 column: 2) equals: edit oldEndPoint.
-		self assert: (SBTSPoint row: 0 column: 1) equals: edit newEndPoint]
+		self assert: (SBTSPoint row: 0 column: 1) equals: edit newEndPoint.
+		
+		undo value: 'ac' value: [:undoNew :undoEdit :undoUndo | self assert: 'abc' equals: undoNew]]
 ]
 
 { #category : #'as yet unclassified' }
 DCParseTest >> testEditDeleteLaterLine [
 
-	DCBlock new deleteFrom: 'abc
+	DCBlock deleteFrom: 'abc
 
 
 def
-ghi' at: 8 do: [:new :edit |
+ghi' at: 8 do: [:new :edit :undo |
 		self assert: 'abc
 
 
@@ -183,11 +185,11 @@ ghi' equals: new.
 { #category : #'as yet unclassified' }
 DCParseTest >> testEditDeleteLineBreak [
 
-	DCBlock new deleteFrom: 'abc
+	DCBlock deleteFrom: 'abc
 
 
 def
-ghi' at: 4 do: [:new :edit |
+ghi' at: 4 do: [:new :edit :undo |
 		self assert: 'abc
 
 def
@@ -203,20 +205,22 @@ ghi' equals: new.
 { #category : #'as yet unclassified' }
 DCParseTest >> testEditInsert [
 
-	DCBlock new insert: 'b' in: 'ac' at: 2 do: [:new :edit |
+	DCBlock insert: 'b' in: 'ac' at: 2 do: [:new :edit :undo |
 		self assert: 'abc' equals: new.
 		self assert: 1 equals: edit startByte.
 		self assert: 1 equals: edit oldEndByte.
 		self assert: 2 equals: edit newEndByte.
 		self assert: (SBTSPoint row: 0 column: 1) equals: edit startPoint.
 		self assert: (SBTSPoint row: 0 column: 1) equals: edit oldEndPoint.
-		self assert: (SBTSPoint row: 0 column: 2) equals: edit newEndPoint]
+		self assert: (SBTSPoint row: 0 column: 2) equals: edit newEndPoint.
+		
+		undo value: 'abc' value: [:undoNew :undoEdit :undoUndo | self assert: 'ac' equals: undoNew]]
 ]
 
 { #category : #'as yet unclassified' }
 DCParseTest >> testEditInsertAtEnd [
 
-	DCBlock new insert: 'cd' in: 'ab' at: 3 do: [:new :edit |
+	DCBlock insert: 'cd' in: 'ab' at: 3 do: [:new :edit :undo |
 		self assert: 'abcd' equals: new.
 		self assert: 2 equals: edit startByte.
 		self assert: 2 equals: edit oldEndByte.
@@ -229,9 +233,9 @@ DCParseTest >> testEditInsertAtEnd [
 { #category : #'as yet unclassified' }
 DCParseTest >> testEditInsertOnLaterLine [
 
-	DCBlock new insert: 'b' in: 'a
+	DCBlock insert: 'b' in: 'a
 
-ac' at: 5 do: [:new :edit |
+ac' at: 5 do: [:new :edit :undo |
 		self assert: 'a
 
 abc' equals: new.
@@ -246,11 +250,11 @@ abc' equals: new.
 { #category : #'as yet unclassified' }
 DCParseTest >> testEditInsertStringWithLinebreak [
 
-	DCBlock new insert: 'bc
+	DCBlock insert: 'bc
 def
 gh' in: 'a
 
-ai' at: 5 do: [:new :edit |
+ai' at: 5 do: [:new :edit :undo |
 		self assert: 'a
 
 abc
@@ -265,16 +269,27 @@ ghi' equals: new.
 ]
 
 { #category : #'as yet unclassified' }
+DCParseTest >> testEditReplace [
+
+	DCBlock replace: (SBTSRange start: 2 size: 4) in: 'abxxxxef' with: 'cd' do: [:new :edit :undo |
+		self assert: 'abcdef' equals: new.
+		
+		undo
+			value: 'abcdef'
+			value: [:undoNew :undoEdit :undoUndo | self assert: 'abxxxxef' equals: undoNew]]
+]
+
+{ #category : #'as yet unclassified' }
 DCParseTest >> testEditSwapString [
 
-	DCBlock new
+	DCBlock
 		swap: (SBTSRange start: 4 size: 3)
 		with: (SBTSRange start: 8 size: 6)
 		in: 'abc
 def
 ghijkl
 mno'
-		do: [:new :edit |
+		do: [:new :edit :undo |
 			self assert: 'abc
 ghijkl
 def
@@ -284,7 +299,17 @@ mno' equals: new.
 			self assert: 14 equals: edit newEndByte.
 			self assert: (SBTSPoint row: 1 column: 0) equals: edit startPoint.
 			self assert: (SBTSPoint row: 2 column: 6) equals: edit oldEndPoint.
-			self assert: (SBTSPoint row: 2 column: 3) equals: edit newEndPoint]
+			self assert: (SBTSPoint row: 2 column: 3) equals: edit newEndPoint.
+			
+			undo
+				value: 'abc
+ghijkl
+def
+mno'
+				value: [:undoNew :undoEdit :undoUndo | self assert: 'abc
+def
+ghijkl
+mno' equals: undoNew]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -297,5 +322,15 @@ b;' language: SBJavascript.
 	editor := self editorAndWorldFor: program.
 	program lastDeepChild startInputAtEnd.
 	self type: 'b' in: editor.
-	self assert: 3 equals: editor childSandblocks first childSandblocks size
+	self assert: 4 equals: editor childSandblocks first submorphs size
+]
+
+{ #category : #'as yet unclassified' }
+DCParseTest >> testParseIdentifierWithPrecedingLineBreak [
+
+	| program |
+	program := DCBlock parse: '
+
+b' language: SBJavascript.
+	self assert: 3 equals: program submorphCount
 ]

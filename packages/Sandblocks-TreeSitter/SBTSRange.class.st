@@ -22,7 +22,7 @@ SBTSRange class >> fromLSPWithRange: aJsonObject [
 	^ self fromLSP: (aJsonObject at: 'range')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SBTSRange class >> merging: aCollection [
 
 	| min max |
@@ -31,10 +31,16 @@ SBTSRange class >> merging: aCollection [
 	^ SBTSRange start: min size: max - min
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SBTSRange class >> null [
 
 	^ SBTSRange start: SBTSPosition null end: SBTSPosition null
+]
+
+{ #category : #'instance creation' }
+SBTSRange class >> point: aPoint [
+
+	^ self start: aPoint end: aPoint
 ]
 
 { #category : #'instance creation' }
@@ -160,4 +166,10 @@ SBTSRange >> start [
 SBTSRange >> start: aTSPosition [
 
 	start := aTSPosition
+]
+
+{ #category : #'as yet unclassified' }
+SBTSRange >> withSize: aNumber [
+
+	^ self copy end: self start + aNumber
 ]

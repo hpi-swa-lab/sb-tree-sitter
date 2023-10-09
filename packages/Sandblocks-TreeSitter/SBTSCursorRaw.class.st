@@ -368,9 +368,8 @@ SBTSCursorRaw >> textToNext [
 			previous := self node]
 		ifFalse: [
 			current := self node.
-			previous := self previousNode: current.
-			previous ifNil: [^ '']].
-	self position > (self endByteIndex: previous) ifTrue: [^ ''].
+			previous := self previousNode: current].
+	(previous notNil and: [self position > (self endByteIndex: previous)]) ifTrue: [^ ''].
 	^ self textBetween: previous and: current
 ]
 

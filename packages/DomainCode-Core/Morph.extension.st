@@ -32,6 +32,12 @@ Morph >> allChildrenSelect: aBlock [
 ]
 
 { #category : #'*DomainCode-Core' }
+Morph >> allDomainBlocksWithDepthDo: aBlock leafDo: anotherBlock depth: aNumber [
+
+	anotherBlock value: self value: aNumber
+]
+
+{ #category : #'*DomainCode-Core' }
 Morph >> children [
 
 	^ submorphs
@@ -68,6 +74,19 @@ Morph >> isReplacement [
 Morph >> purpose [
 
 	^ nil
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> setBoundsDirect: aRectangle [
+
+	| priorBounds box |
+	priorBounds := self outerBounds.
+	
+	bounds := aRectangle.
+	fullBounds := aRectangle.
+	
+	box := self outerBounds.
+	box = priorBounds ifFalse: [self invalidRect: (priorBounds quickMerge: box)]
 ]
 
 { #category : #'*DomainCode-Core' }

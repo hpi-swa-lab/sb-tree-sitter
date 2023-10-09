@@ -57,11 +57,7 @@ DCEmptyStatement >> pasteReplace [
 			ifTrue: [str, self language statementTerminator]
 			ifFalse: [self language statementTerminator, str].
 		
-		self
-			insert: str
-			in: source
-			at: cursorIndex + 1
-			do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex + str size]]
+		self class insert: str in: source at: cursorIndex + 1 do: self applyBlock]
 ]
 
 { #category : #'as yet unclassified' }

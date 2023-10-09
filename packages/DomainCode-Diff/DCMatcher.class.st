@@ -30,7 +30,7 @@ DCMatcher >> commonAncestorOf: aCollection root: aTree [
 { #category : #'as yet unclassified' }
 DCMatcher >> doCommandForEditsIn: aDest to: aSrc in: anEditor [
 
-	SBToggledCode comment: '' active: 2 do: {
+	SBToggledCode comment: '' active: 1 do: {
 		[
 			DCChawatheScriptGenerator new
 				generateFrom: aSrc
@@ -97,4 +97,13 @@ DCMatcher >> matchFrom: src to: dest [
 	self fineGrainedMatch2From: src to: dest in: mappings.
 	
 	^ mappings
+]
+
+{ #category : #'as yet unclassified' }
+DCMatcher >> performEditsIn: aDest to: aSrc [
+
+	DCChawatheScriptGenerator new
+		generateFrom: aSrc
+		to: aDest
+		in: (self matchFrom: aSrc to: aDest)
 ]

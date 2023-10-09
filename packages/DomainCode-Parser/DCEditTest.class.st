@@ -18,6 +18,23 @@ b;' language: SBJavascript.
 ]
 
 { #category : #'as yet unclassified' }
+DCEditTest >> testInsertsStatementAboveTerminatorWithIndent [
+
+	| program editor |
+	program := DCBlock parse: 'a
+	b.
+	c.' language: SBTSSmalltalk.
+	editor := self editorAndWorldFor: program.
+	program childSandblocks second startInputAtEnd.
+	editor handle: (self keyboardEvent: Character cr shift: true command: false).
+	self type: 'x' in: editor.
+	self assert: 'a
+	x.
+	b.
+	c.' equals: editor childSandblocks first sourceString
+]
+
+{ #category : #'as yet unclassified' }
 DCEditTest >> testInsertsStatementTerminator [
 
 	| program editor |
@@ -29,9 +46,26 @@ c.' language: SBTSSmalltalk.
 	editor handle: (self keyboardEvent: Character cr).
 	self type: 'x' in: editor.
 	self assert: 'a
-b .
-x .
-c .' equals: editor childSandblocks first sourceString
+b.
+x.
+c.' equals: editor childSandblocks first sourceString
+]
+
+{ #category : #'as yet unclassified' }
+DCEditTest >> testInsertsStatementTerminatorWithIndent [
+
+	| program editor |
+	program := DCBlock parse: 'a
+	b.
+	c.' language: SBTSSmalltalk.
+	editor := self editorAndWorldFor: program.
+	program childSandblocks second startInputAtEnd.
+	editor handle: (self keyboardEvent: Character cr).
+	self type: 'x' in: editor.
+	self assert: 'a
+	b.
+	x.
+	c.' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -59,26 +93,25 @@ c.' language: SBTSSmalltalk.
 	
 	editor selection deleteBlock.
 	self assert: 'a
-c .' equals: editor childSandblocks first sourceString
+c.' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }
 DCEditTest >> testSmalltalkEditMessageWithAutoCompl [
 
 	| block editor |
-	block := DCSmalltalkMethod newWith: 'a
+	block := DCSmalltalkMethod newWith: 'a: arg
 
-a with: 3' in: self class.
+a' in: self class.
 	editor := self editorAndWorldFor: block.
-	(block method queryAll: '(keyword) @') first
-		select;
-		clearInput.
-	self type: 'with' in: editor.
+	block lastDeepChild startInputAtEnd.
+	
+	editor handle: (SBTest keyboardEvent: $1 shift: false command: true).
 	self tick.
-	editor handle: (SBTest keyboardEvent: Character tab).
-	self assert: 'a
+	editor handle: (SBTest keyboardEvent: $+).
+	self assert: 'a: arg
 
-a with: 3' equals: block method sourceString
+arg +' equals: block method sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -97,7 +130,18 @@ a' in: self class.
 	editor handle: (SBTest keyboardEvent: $1 shift: false command: true).
 	self assert: 'a: arg
 
-a with: arg' equals: block method sourceString
+a with: arg ' equals: block method sourceString
+]
+
+{ #category : #'as yet unclassified' }
+DCEditTest >> testSmalltalkInsertMessage [
+
+	| block editor |
+	block := DCSmalltalkMethod newWith: 'a: arg   a squared' in: self class.
+	editor := self editorAndWorldFor: block.
+	block childSandblocks last childSandblocks last firstDeepChild startInputAtEnd.
+	self type: ' a' in: editor.
+	self assert: 'a: arg   a a squared' equals: block method sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -114,14 +158,14 @@ c.' language: SBTSSmalltalk.
 	editor selection swapRight.
 	self assert: 'a
 
-b .
-c .' equals: editor childSandblocks first sourceString.
+b.
+c.' equals: editor childSandblocks first sourceString.
 	
 	editor selection swapRight.
 	self assert: 'a
 
-c .
-b .' equals: editor childSandblocks first sourceString
+c.
+b.' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -132,7 +176,7 @@ DCEditTest >> testSwapBinaryAddition [
 	editor := self editorAndWorldFor: program.
 	program firstDeepChild select.
 	editor selection swapRight.
-	self assert: 'b+a' equals: editor childSandblocks first sourceString
+	self assert: 'b + a' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -148,8 +192,8 @@ b;' language: SBJavascript.
 	editor selection activeTextMorph contents.
 	editor selection swapRight.
 	self assert: '{
-a;
-b;
+	a;
+	b;
 }' equals: editor childSandblocks first sourceString
 ]
 
@@ -162,8 +206,8 @@ let b;' language: SBJavascript.
 	editor := self editorAndWorldFor: program.
 	editor selectNoInput: program childSandblocks first.
 	editor selection swapRight.
-	self assert: 'let b ;
-let a ;' equals: editor childSandblocks first sourceString
+	self assert: 'let b;
+let a;' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -176,7 +220,7 @@ let a;' language: SBJavascript.
 	program firstDeepChild startInputAtEnd.
 	self type: 'mport a from a;' in: editor.
 	self assert: 'import a from a;
-let a ;' equals: editor childSandblocks first sourceString
+let a;' equals: editor childSandblocks first sourceString
 ]
 
 { #category : #'as yet unclassified' }
@@ -187,5 +231,5 @@ DCEditTest >> testTypeKeywordWithSpace [
 	editor := self editorAndWorldFor: program.
 	program firstDeepChild startInputAtEnd.
 	self type: ' a' in: editor.
-	self assert: 'let a ;' equals: editor childSandblocks first sourceString
+	self assert: 'let a;' equals: editor childSandblocks first sourceString
 ]

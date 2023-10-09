@@ -575,9 +575,14 @@ SBTreeSitter >> textBetween: aNode and: anEndNode [
 
 	^ self
 		textBetweenIndex: (aNode
-			ifNil: [
+			ifNil: [ | parent |
+				parent := self nodeParent: anEndNode.
 				self assert: anEndNode notNil.
-				(self nodeStartByte: (self nodeParent: anEndNode)) + 1 max: 1]
+				
+				" the root (node without a parent) starts after all whitespace, so special-case this " 
+				(self nodeIsNull: (self nodeParent: parent))
+					ifTrue: [1]
+					ifFalse: [(self nodeStartByte: parent) + 1 max: 1]]
 			ifNotNil: [(self nodeEndByte: aNode) + 1])
 		and: (anEndNode
 			ifNil: [self nodeEndByte: (self nodeParent: aNode)]
@@ -595,6 +600,13 @@ SBTreeSitter >> textForNode: aNode [
 
 	self assert: (aNode isNull not and: [aNode tree isNull not]).
 	^ (currentString copyFrom: (self nodeStartByte: aNode) + 1 to: (self nodeEndByte: aNode)) utf8Decoded
+]
+
+{ #category : #'ffi languages' }
+SBTreeSitter >> tlaplus [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_tlaplus () module: 'tree-sitter-tlaplus'>
+	^ SBTSLanguage tryPatchLibrary: 'tlaplus-community/tree-sitter-tlaplus' name: 'tlaplus' context: thisContext branch: 'main' subpath: ''
 ]
 
 { #category : #ffi }

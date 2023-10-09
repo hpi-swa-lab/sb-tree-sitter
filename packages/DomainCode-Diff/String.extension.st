@@ -1,6 +1,12 @@
 Extension { #name : #String }
 
 { #category : #'*DomainCode-Diff' }
+String >> isolateLineBreaks [
+
+	^ (self splitBy: String lf) collect: #yourself separatedBy: String cr
+]
+
+{ #category : #'*DomainCode-Diff' }
 String >> levenshteinDistanceTo: anotherString [
 
 	| stab cost |

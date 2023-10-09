@@ -25,9 +25,10 @@
 "
 Class {
 	#name : #DCReplacement,
-	#superclass : #DCBlock,
+	#superclass : #SBBlock,
 	#instVars : [
 		'source',
+		'language',
 		'bindings',
 		'collectEmbeds',
 		'currentEmbeds'
@@ -98,7 +99,11 @@ DCReplacement >> initialize [
 
 	super initialize.
 	bindings := OrderedCollection new.
-	embeds := OrderedCollection new
+	self
+		changeTableLayout;
+		listDirection: #leftToRight;
+		hResizing: #shrinkWrap;
+		vResizing: #shrinkWrap
 ]
 
 { #category : #'as yet unclassified' }
@@ -111,6 +116,18 @@ DCReplacement >> isNode: aNode [
 DCReplacement >> isReplacement [
 
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> language [
+
+	^ language
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> language: aLanguage [
+
+	language := aLanguage
 ]
 
 { #category : #'as yet unclassified' }

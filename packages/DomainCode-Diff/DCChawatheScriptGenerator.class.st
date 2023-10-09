@@ -30,7 +30,14 @@ DCChawatheScriptGenerator >> alignChildrenSrc: w dest: x srcInOrder: srcInOrder 
 { #category : #actions }
 DCChawatheScriptGenerator >> delete: aMorph [
 
-	aMorph delete
+	| target |
+	target := aMorph replacedParent
+		ifNotNil: [:p | p isReplacement ifTrue: [p] ifFalse: [aMorph]]
+		ifNil: [aMorph].
+	
+	aMorph delete.
+	
+	self logChanges ifTrue: [Transcript showln: {#delete. target}]
 ]
 
 { #category : #'as yet unclassified' }
@@ -87,7 +94,9 @@ DCChawatheScriptGenerator >> generateFrom: src to: dest in: aMapping [
 { #category : #actions }
 DCChawatheScriptGenerator >> insert: aMorph at: aNumber in: anOwnerMorph [
 
-	anOwnerMorph addMorph: aMorph asElementNumber: aNumber
+	anOwnerMorph addMorph: aMorph asElementNumber: aNumber.
+	self maybeAttachFlash: aMorph.
+	self logChanges ifTrue: [Transcript showln: {#insert. anOwnerMorph. aNumber. aMorph}]
 ]
 
 { #category : #'as yet unclassified' }
@@ -134,14 +143,23 @@ DCChawatheScriptGenerator >> maybeAttachFlash: aMorph [
 { #category : #actions }
 DCChawatheScriptGenerator >> move: aMorph to: anOwnerMorph postDeleteDo: aBlock [
 
-	| index |
+	| index target |
+	target := aMorph replacedParent
+		ifNotNil: [:p | p isReplacement ifTrue: [p] ifFalse: [aMorph]]
+		ifNil: [aMorph].
+	
 	aMorph delete.
 	index := aBlock value.
-	anOwnerMorph addMorph: aMorph asElementNumber: index
+	anOwnerMorph addMorph: aMorph asElementNumber: index.
+	
+	self maybeAttachFlash: target.
+	self logChanges ifTrue: [Transcript showln: {#move. anOwnerMorph. index. target}]
 ]
 
 { #category : #actions }
 DCChawatheScriptGenerator >> update: aMorph with: aString [
 
-	aMorph contents: aString
+	aMorph contents: aString.
+	self maybeAttachFlash: aMorph.
+	self logChanges ifTrue: [Transcript showln: {#update. aMorph. aString}]
 ]

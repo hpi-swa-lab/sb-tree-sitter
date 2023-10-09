@@ -100,12 +100,12 @@ DCSmalltalkMethod >> initialize [
 	super initialize.
 	
 	self
-		hResizing: #rigid;
+		hResizing: #shrinkWrap;
 		vResizing: #shrinkWrap;
-		layoutPolicy: SBAlgebraLayout new;
+		layoutPolicy: TableLayout new;
 		attachDecorator: SBMoveDecorator new;
 		attachDecorator: SBResizableDecorator new;
-		layoutInset: 4
+		layoutInset: 0
 ]
 
 { #category : #'as yet unclassified' }
@@ -145,7 +145,7 @@ DCSmalltalkMethod >> messageSendForError: anError argsDo: aBlock [
 	message := self blockForPC: context pc isActiveFrame: context = anError signalerContext.
 	aBlock
 		value: message
-		value: ((anError signalerContext findContextSuchThat: [:c | c sender = context]) arguments collectWithIndex: [:arg :index | (message children at: 2 + (index - 1 * 2) + 1) -> arg])
+		value: ((anError signalerContext findContextSuchThat: [:c | c sender = context]) arguments collectWithIndex: [:arg :index | (message childNodes at: 2 + (index - 1 * 2) + 1) -> arg])
 ]
 
 { #category : #'as yet unclassified' }
@@ -215,14 +215,8 @@ DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 		"errors are applied and removed on the next tick only"
 		self world ifNotNil: #doOneCycleNow].
 	
-	text := aQuickBoolean ifTrue: [self method sourceString] ifFalse: [
-		[
-			PPFormatter
-				formatString: self method sourceString
-				class: (self containingArtefact ifNotNil: #relatedClass ifNil: [nil class])
-				noPattern: self ~= self containingArtefact]
-			on: SyntaxErrorNotification
-			do: [self method sourceString]].
+	aQuickBoolean ifFalse: [self method prettyPrint].
+	text := self method sourceString.
 	
 	self ignoreChangeNotifierDuring: [
 		newSelector := self methodClass

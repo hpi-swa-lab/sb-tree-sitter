@@ -83,7 +83,8 @@ DCWatch >> id [
 DCWatch >> initialize [
 
 	super initialize.
-	exampleValues := Dictionary new
+	exampleValues := Dictionary new.
+	self layoutPolicy: TableLayout new
 ]
 
 { #category : #'as yet unclassified' }

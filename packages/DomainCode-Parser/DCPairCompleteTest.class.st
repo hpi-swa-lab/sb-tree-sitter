@@ -54,9 +54,7 @@ DCPairCompleteTest >> testInputWhenImbalanced [
 	program lastDeepChild startInputAtEnd.
 	self type: '}' in: editor.
 	self assert: '{
-a
-{
-}
+	a {}
 }' equals: editor childSandblocks first sourceString
 ]
 
