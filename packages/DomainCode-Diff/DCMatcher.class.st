@@ -102,6 +102,8 @@ DCMatcher >> matchFrom: src to: dest [
 { #category : #'as yet unclassified' }
 DCMatcher >> performEditsIn: aDest to: aSrc [
 
+	aSrc allChildrenDo: [:m | m clearDiffCache].
+	
 	DCChawatheScriptGenerator new
 		generateFrom: aSrc
 		to: aDest

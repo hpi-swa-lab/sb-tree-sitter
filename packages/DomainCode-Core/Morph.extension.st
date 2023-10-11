@@ -14,7 +14,7 @@ Morph >> allChildrenBreadthFirstDo: aBlock [
 { #category : #'*DomainCode-Core' }
 Morph >> allChildrenDo: aBlock [
 
-	self children do: [:c | c allChildrenDo: aBlock].
+	self childrenDo: [:c | c allChildrenDo: aBlock].
 	aBlock value: self
 ]
 
@@ -38,9 +38,30 @@ Morph >> allDomainBlocksWithDepthDo: aBlock leafDo: anotherBlock depth: aNumber 
 ]
 
 { #category : #'*DomainCode-Core' }
+Morph >> childCount [
+
+	| i |
+	i := 0.
+	self childrenDo: [:c | i := i + 1].
+	^ i
+]
+
+{ #category : #'*DomainCode-Core' }
 Morph >> children [
 
 	^ submorphs
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> childrenDo: aBlock [
+
+	submorphs do: aBlock
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> childrenSelect: aBlock [
+
+	^ Array streamContents: [:s | self childrenDo: [:c | (aBlock value: c) ifTrue: [s nextPut: c]]]
 ]
 
 { #category : #'*DomainCode-Core' }
@@ -55,7 +76,8 @@ Morph >> firstDeepChildNode [
 { #category : #'*DomainCode-Core' }
 Morph >> hasChildren [
 
-	^ self children notEmpty
+	self childrenDo: [:c | ^ true].
+	^ false
 ]
 
 { #category : #'*DomainCode-Core' }

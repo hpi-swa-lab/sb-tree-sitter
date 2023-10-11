@@ -16,7 +16,7 @@ Morph >> containingInlineBlock [
 { #category : #'*Sandblocks-TreeSitter' }
 Morph >> descendantsPreOrder [
 
-	^ Array streamContents: [:s | self children do: [:p | p allChildrenPreorderDo: [:m | s nextPut: m]]]
+	^ Array streamContents: [:s | self childrenDo: [:p | p allChildrenPreorderDo: [:m | s nextPut: m]]]
 ]
 
 { #category : #'*Sandblocks-TreeSitter' }

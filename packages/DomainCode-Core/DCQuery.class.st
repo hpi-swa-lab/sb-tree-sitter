@@ -61,9 +61,22 @@ DCQuery class >> removeProperty: anObject from: aDomainObject [
 ]
 
 { #category : #'as yet unclassified' }
+DCQuery class >> script: aCollection allDeep: anotherCollection [
+
+	^ Array streamContents: [:s | anotherCollection allChildrenDo: [:obj | (self script: aCollection with: obj) ifNotNil: [:res | s nextPut: res]]]
+]
+
+{ #category : #'as yet unclassified' }
 DCQuery class >> script: aCollection first: anotherCollection [
 
 	anotherCollection do: [:obj | (self script: aCollection with: obj) ifNotNil: [:res | ^ res]].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+DCQuery class >> script: aCollection firstDeep: anotherCollection [
+
+	anotherCollection allChildrenDo: [:obj | (self script: aCollection with: obj) ifNotNil: [:res | ^ res]].
 	^ nil
 ]
 

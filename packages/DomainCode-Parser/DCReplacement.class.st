@@ -76,6 +76,13 @@ DCReplacement >> contents [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> currentTextMorph [
+
+	self submorphsDo: [:m | m isTextMorph ifTrue: [^ m]].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> embed: aClosure [
 
 	collectEmbeds := aClosure

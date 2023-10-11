@@ -176,6 +176,6 @@ DCReplacementTest >> testUninstallWithEmbeddedRoot [
 			
 			replacement := block childSandblocks first childSandblocks first.
 			self assert: DCBlock equals: replacement class.
-			self assert: #identifier equals: block children first children first type.
+			self assert: #ideantifier equals: block children first children first type.
 			self assert: 'a2' equals: block children first children first contents]
 ]

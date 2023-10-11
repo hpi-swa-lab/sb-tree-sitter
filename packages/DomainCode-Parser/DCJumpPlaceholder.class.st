@@ -5,18 +5,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-DCJumpPlaceholder >> adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent [
-
-	(super adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent) ifNotEmpty: [:newInput |
-		self
-			replace: self range
-			in: source
-			with: newInput
-			do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex + 1]].
-	^ ''
-]
-
-{ #category : #'as yet unclassified' }
 DCJumpPlaceholder >> initialize [
 
 	super initialize.
@@ -25,16 +13,24 @@ DCJumpPlaceholder >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
-DCJumpPlaceholder >> isJumpPoint [
+DCJumpPlaceholder >> keyStroke: anEvent [
 
-	^ true
+	(anEvent keyCharacter isPrintable and: [anEvent commandKeyPressed not]) ifTrue: [
+		self source infoForEditDo: [:source :textMorph :cursorIndex |
+			self source replaceWith: (self source
+				adaptInput: anEvent keyCharacter asString
+				in: source
+				at: cursorIndex
+				textMorph: textMorph
+				event: anEvent)]].
+	self batchedChangeStep
 ]
 
 { #category : #'as yet unclassified' }
 DCJumpPlaceholder >> pasteReplace [
 	<action>
 
-	self tryApplyChange: [:source :textMorph :cursorIndex | | str |
+	self infoForEditDo: [:source :textMorph :cursorIndex | | str |
 		str := Clipboard clipboardText string.
 		
 		self

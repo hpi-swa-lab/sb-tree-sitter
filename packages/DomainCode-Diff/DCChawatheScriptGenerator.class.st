@@ -8,11 +8,11 @@ Class {
 DCChawatheScriptGenerator >> alignChildrenSrc: w dest: x srcInOrder: srcInOrder destInOrder: destInOrder in: aMapping [
 
 	| s1 s2 lcs |
-	w children do: [:c | srcInOrder remove: c ifAbsent: []].
-	x children do: [:c | destInOrder remove: c ifAbsent: []].
+	w childrenDo: [:c | srcInOrder remove: c ifAbsent: []].
+	x childrenDo: [:c | destInOrder remove: c ifAbsent: []].
 	
-	s1 := w children select: [:c | (aMapping isSrcMapped: c) and: [x children includes: (aMapping destForSrc: c)]].
-	s2 := x children select: [:c | (aMapping isDestMapped: c) and: [w children includes: (aMapping srcForDest: c)]].
+	s1 := w childrenSelect: [:c | (aMapping isSrcMapped: c) and: [x children includes: (aMapping destForSrc: c)]].
+	s2 := x childrenSelect: [:c | (aMapping isDestMapped: c) and: [w children includes: (aMapping srcForDest: c)]].
 	
 	lcs := self lcsWith: s1 and: s2 in: aMapping.
 	lcs do: [:mapping |

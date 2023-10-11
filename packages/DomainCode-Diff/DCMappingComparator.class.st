@@ -9,7 +9,8 @@ Class {
 		'destAncestors',
 		'rootSrc',
 		'rootDest',
-		'absolutePositions'
+		'absolutePositions',
+		'indicesInParents'
 	],
 	#category : #'DomainCode-Diff'
 }
@@ -102,17 +103,17 @@ DCMappingComparator >> longestCommonSubsequenceWith: aCollection and: anotherCol
 	1 to: aCollection size do: [:i |
 		1 to: anotherCollection size do: [:j |
 			(aCollection at: i) type = (anotherCollection at: j) type
-				ifTrue: [lengths at: i + 1 at: j + 1 put: (lengths at: i at: j)]
-				ifFalse: [lengths at: i + 1 at: j + 1 put: ((lengths at: i + 1 at: j) max: (lengths at: i at: j + 1))]]].
+				ifTrue: [lengths atFast: i + 1 at: j + 1 put: (lengths atFast: i at: j)]
+				ifFalse: [lengths atFast: i + 1 at: j + 1 put: ((lengths atFast: i + 1 at: j) max: (lengths at: i at: j + 1))]]].
 	
 	indices := OrderedCollection new.
 	x := aCollection size + 1.
 	y := anotherCollection size + 1.
 	[x > 1 and: [y > 1]] whileTrue: [
-		(lengths at: x at: y) = (lengths at: x - 1 at: y)
+		(lengths atFast: x at: y) = (lengths atFast: x - 1 at: y)
 			ifTrue: [x := x - 1]
 			ifFalse: [
-				(lengths at: x at: y) = (lengths at: x at: y - 1)
+				(lengths atFast: x at: y) = (lengths atFast: x at: y - 1)
 					ifTrue: [y := y - 1]
 					ifFalse: [
 						indices add: {x - 1. y - 1}.
@@ -193,9 +194,12 @@ DCMappingComparator >> similarityPositionInParentsCompare: aMapping with: anothe
 			indices add: current siblingIndex.
 			current := current parent].
 		indices].
+	
+	indicesInParents ifNil: [indicesInParents := Dictionary new].
+	
 	distance := [:mapping | | indicesVec1 indicesVec2 sum |
-		indicesVec1 := indicesInOwnerSubmorphs value: mapping first.
-		indicesVec2 := indicesInOwnerSubmorphs value: mapping second.
+		indicesVec1 := indicesInParents at: mapping first ifAbsentPut: [indicesInOwnerSubmorphs value: mapping first].
+		indicesVec2 := indicesInParents at: mapping second ifAbsentPut: [indicesInOwnerSubmorphs value: mapping second].
 		sum := 0.0.
 		1
 			to: (indicesVec1 size min: indicesVec2 size)

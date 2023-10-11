@@ -24,5 +24,6 @@ DCSuggestionItem >> source [
 DCSuggestionItem >> useSuggestionOn: aBlock in: anEditor [
 
 	aBlock useSuggestion: self.
-	self completionAction ifNotNil: [self completionAction cull: anEditor]
+	self completionAction ifNotNil: [self completionAction cull: anEditor].
+	aBlock batchedChangeStep
 ]

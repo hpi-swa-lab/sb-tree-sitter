@@ -114,9 +114,14 @@ DCQueryState >> querySourceOverride: aBlock [
 { #category : #'as yet unclassified' }
 DCQueryState >> queueUpdateQueriesFor: aSymbol [
 
-	(updateQueued at: aSymbol ifAbsent: [false]) ifTrue: [^ self].
+	(self triggers anySatisfy: [:t | updateQueued at: aSymbol ifAbsent: [false]]) ifTrue: [^ self].
+	
 	updateQueued at: aSymbol put: true.
-	rootBlock world addAlarm: #updateQueriesFor: withArguments: {aSymbol} for: self at: Time millisecondClockValue
+	rootBlock world
+		addAlarm: #updatePendingQueries
+		withArguments: {}
+		for: self
+		at: Time millisecondClockValue
 ]
 
 { #category : #'as yet unclassified' }
@@ -188,6 +193,15 @@ DCQueryState >> updateDecoratorsDuring: aBlock [
 	oldDecorators do: [:list | list do: [:d | d detach]].
 	newDecorators keysAndValuesDo: [:block :list | list do: [:d | block attachDecorator: d]].
 	currentDecorators at: currentTrigger put: newDecorators
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> updatePendingQueries [
+
+	updateQueued keysAndValuesDo: [:trigger :queued | queued ifTrue: [self updateQueriesFor: trigger]].
+	
+	" FIXME disallows processing to trigger another update -- intentional? "
+	self triggers do: [:t | updateQueued at: t put: false]
 ]
 
 { #category : #'as yet unclassified' }

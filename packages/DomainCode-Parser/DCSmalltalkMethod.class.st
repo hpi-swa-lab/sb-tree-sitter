@@ -26,11 +26,11 @@ DCSmalltalkMethod class >> newWith: aString in: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-DCSmalltalkMethod >> blockForPC: aNumber isActiveFrame: aBoolean [
+DCSmalltalkMethod >> blockForPC: aNumber isActiveFrame: aBoolean in: aCompiledCode [
 
 	| pc |
-	pc := aBoolean ifTrue: [aNumber] ifFalse: [self compiledMethod pcPreviousTo: aNumber].
-	(self method getSourceStringAndMark parseAsMethodFor: self methodClass) rawSourceRanges keysAndValuesDo: [:node :range | node pc = pc ifTrue: [^ self method smallestBlockEncompassig: (SBTSRange start: range start - 1 size: range size)]].
+	pc := aBoolean ifTrue: [aNumber] ifFalse: [aCompiledCode pcPreviousTo: aNumber].
+	(self method sourceString parseAsMethodFor: self methodClass) rawSourceRanges keysAndValuesDo: [:node :range | (node pc = pc or: [node pc = (aCompiledCode -> pc)]) ifTrue: [^ self method smallestBlockEncompassig: (SBTSRange start: range start - 1 size: range size)]].
 	^ nil
 ]
 
@@ -141,8 +141,12 @@ DCSmalltalkMethod >> layoutCommands [
 DCSmalltalkMethod >> messageSendForError: anError argsDo: aBlock [
 
 	| context message |
-	context := anError signalerContext findContextSuchThat: [:c | c method = self compiledMethod].
-	message := self blockForPC: context pc isActiveFrame: context = anError signalerContext.
+	context := anError signalerContext findContextSuchThat: [:c | " don't look for a block but for the home method of a block "
+	c method method = self compiledMethod].
+	message := self
+		blockForPC: context pc
+		isActiveFrame: context = anError signalerContext
+		in: context method.
 	aBlock
 		value: message
 		value: ((anError signalerContext findContextSuchThat: [:c | c sender = context]) arguments collectWithIndex: [:arg :index | (message childNodes at: 2 + (index - 1 * 2) + 1) -> arg])
@@ -230,7 +234,7 @@ DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 DCSmalltalkMethod >> selector [
 
 	| selector |
-	selector := (self method queryAll: '[(unary_selector) (binary_selector) (keyword_selector)] @') ifEmpty: [^ ''] ifNotEmpty: #first.
+	selector := (self method queryFirst: {[:x | x is: #(#'unary_selector' #'binary_selector' #'keyword_selector')]}) ifNil: [^ ''].
 	
 	^ (((selector childSandblocks viewFrom: 1 by: 2) collect: [:p | p contents]) joinSeparatedBy: '') asSymbol
 ]

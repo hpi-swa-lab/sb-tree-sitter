@@ -22,6 +22,14 @@ DCText >> allParentsUpTo: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> childrenDo: aBlock [
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> clearDiffCache [
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> compatibleWithType: aSymbol [
 
 	^ false
@@ -102,6 +110,12 @@ DCText >> initialize [
 	super initialize.
 	
 	range := SBTSRange null
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> is: aCollectionOrSymbol [
+
+	^ false
 ]
 
 { #category : #'as yet unclassified' }
@@ -225,7 +239,12 @@ DCText >> shownColor [
 { #category : #hierarchy }
 DCText >> siblingIndex [
 
-	^ self parent children indexOf: self
+	| i |
+	i := 1.
+	self parent childrenDo: [:c |
+		c = self ifTrue: [^ i].
+		i := i + 1].
+	^ 0
 ]
 
 { #category : #'as yet unclassified' }

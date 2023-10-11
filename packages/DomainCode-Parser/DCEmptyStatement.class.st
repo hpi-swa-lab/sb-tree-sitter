@@ -51,7 +51,7 @@ DCEmptyStatement >> insertSeparatorAfter: aBoolean [
 DCEmptyStatement >> pasteReplace [
 	<action>
 
-	self tryApplyChange: [:source :textMorph :cursorIndex | | str |
+	self infoForEditDo: [:source :textMorph :cursorIndex | | str |
 		str := Clipboard clipboardText string.
 		str := self insertSeparatorAfter
 			ifTrue: [str, self language statementTerminator]
