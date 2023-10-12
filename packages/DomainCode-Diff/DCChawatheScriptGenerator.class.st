@@ -131,7 +131,7 @@ DCChawatheScriptGenerator >> lcsWith: x and: y in: aMapping [
 { #category : #'as yet unclassified' }
 DCChawatheScriptGenerator >> logChanges [
 
-	^ false
+	^ true
 ]
 
 { #category : #'as yet unclassified' }

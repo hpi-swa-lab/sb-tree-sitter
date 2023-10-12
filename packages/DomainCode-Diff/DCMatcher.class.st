@@ -90,10 +90,6 @@ DCMatcher >> matchFrom: src to: dest [
 	mappings := DCMappingStore new from: src to: dest.
 	DCGreedySubtreeMatcher new matchFrom: src to: dest in: mappings.
 	DCGreedyBottomUpMatcher new matchFrom: src to: dest in: mappings.
-	SBToggledCode
-		comment: ''
-		active: 0
-		do: {[DCLeftOverLeafMatcher new matchFrom: src to: dest in: mappings]}.
 	self fineGrainedMatch2From: src to: dest in: mappings.
 	
 	^ mappings
