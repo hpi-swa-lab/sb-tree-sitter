@@ -38,7 +38,9 @@ DCReplacementTest >> testEditEmbeddedChild [
 			self assert: DCTestReplacement equals: replacement class.
 			self assert: #'parenthesized_expression' equals: block children first children first type.
 			self assert: #'binary_expression' equals: block children first children first children second type.
-			self assert: '2+3' equals: block children first children first children second sourceString.
+			self
+				assert: '2+3'
+				equals: block children first children first children second generatedSourceString.
 			
 			self assert: #'binary_expression' equals: replacement firstSubmorph type.
 			self assert: DCBlock equals: replacement firstSubmorph class.
@@ -176,6 +178,6 @@ DCReplacementTest >> testUninstallWithEmbeddedRoot [
 			
 			replacement := block childSandblocks first childSandblocks first.
 			self assert: DCBlock equals: replacement class.
-			self assert: #ideantifier equals: block children first children first type.
+			self assert: #identifier equals: block children first children first type.
 			self assert: 'a2' equals: block children first children first contents]
 ]

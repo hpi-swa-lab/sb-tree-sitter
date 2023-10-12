@@ -1,6 +1,6 @@
 Class {
 	#name : #DCEmptyStatement,
-	#superclass : #DCUnknown,
+	#superclass : #DCReplacement,
 	#instVars : [
 		'after'
 	],
@@ -58,6 +58,12 @@ DCEmptyStatement >> pasteReplace [
 			ifFalse: [self language statementTerminator, str].
 		
 		self class insert: str in: source at: cursorIndex + 1 do: self applyBlock]
+]
+
+{ #category : #'as yet unclassified' }
+DCEmptyStatement >> range: aRange [
+
+	
 ]
 
 { #category : #'as yet unclassified' }

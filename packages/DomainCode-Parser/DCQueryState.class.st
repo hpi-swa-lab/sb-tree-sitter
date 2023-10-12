@@ -33,7 +33,7 @@ DCQueryState >> ensureReplacement: aClass for: aBlock embed: aClosure initDo: an
 	replacement := (aBlock class = aClass or: [(aBlock replacedParent ifNotNil: #class) = aClass])
 		ifFalse: [ | r hadFocus |
 			hadFocus := (aBlock sandblockEditor ifNotNil: #textFocus)
-				ifNotNil: [:t | t hasAnyParent: aBlock]
+				ifNotNil: [:t | (t ownerSatisfying: [:o | o = aBlock]) notNil]
 				ifNil: [false].
 			r := aClass new.
 			aBlock replacedParent: r.
@@ -169,7 +169,7 @@ DCQueryState >> triggers [
 DCQueryState >> tryShortcut: aSymbol do: aBlock [
 
 	currentShortcut = aSymbol ifTrue: [
-		DCQuery script: aBlock value with: self rootBlock sandblockEditor selection.
+		DCQuery script: aBlock value with: self rootBlock sandblockEditor selection source.
 		currentShortcut := nil]
 ]
 

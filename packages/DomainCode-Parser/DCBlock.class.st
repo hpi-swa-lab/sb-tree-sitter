@@ -738,7 +738,7 @@ DCBlock class >> smalltalkUndeclaredVariable [
 		[:x |
 			x reportError: (SBErrorDecorator new
 				message: 'undeclared variable';
-				fixActions: (x contents first isUppercase
+				fixActions: ((x contents notEmpty and: [x contents first isUppercase])
 					ifTrue: [
 						{
 							SBCodeAction
@@ -787,7 +787,10 @@ DCBlock class >> smalltalkUnknownSelector [
 								editor: node sandblockEditor;
 								isUnsaved: true;
 								yourself)]].
-					SBCodeAction labeled: 'Confirm selector' for: message do: [:node | node selector asSymbol]})]}
+					SBCodeAction
+						labeled: 'Confirm selector "', selector, '"'
+						for: message
+						do: [:node | node selector asSymbol]})]}
 ]
 
 { #category : #smalltalk }
@@ -923,7 +926,7 @@ DCBlock >> adaptInput: input in: source at: cursorIndex textMorph: textMorph eve
 		(complete = '''' and: [source at: cursorIndex ifPresent: #isAlphaNumeric ifAbsent: [false]]) ifTrue: [^ input].
 		
 		"do not autocomplete after backslash"
-		textMorph characterBeforeCursor = $\ ifTrue: [^ input].
+		(source at: (cursorIndex isNumber ifFalse: [cursorIndex start index] ifTrue: [cursorIndex]) ifPresent: [:c | c = $\] ifAbsent: [false]) ifTrue: [^ input].
 		
 		^ input, complete].
 	
@@ -966,6 +969,14 @@ DCBlock >> allDomainBlocksWithDepthDo: aBlock leafDo: anotherBlock depth: aNumbe
 
 	self submorphs do: [:m | m allDomainBlocksWithDepthDo: aBlock leafDo: anotherBlock depth: aNumber + 1].
 	aBlock value: self value: aNumber
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> allLayoutMorphsDo: aBlock [
+
+	aBlock value: self.
+	self submorphs do: [:m | m allLayoutMorphsDo: aBlock].
+	aBlock value: {#leave. self}
 ]
 
 { #category : #hierarchy }
@@ -1019,17 +1030,20 @@ DCBlock >> applyEdit: edit source: newSource cursorAt: newIndex undoDo: aBlock [
 		DCMatcher new performEditsIn: newTree to: oldTree.
 		oldTree
 			privateTSTree: newTree privateTSTree;
-			privateSource: newTree privateSource].
+			privateSource: newTree privateSource.
+		nil].
 	
 	aBlock
 		ifNotNil: [
 			self sandblockEditor do: (SBDoItCommand new
 				do: apply;
+				artefact: self containingArtefact;
 				undo: [
 					oldTree infoForEditDo: [:source |
 						aBlock
 							value: source
-							value: [:new :undoEdit :undo | oldTree applyEdit: undoEdit source: new cursorAt: undoEdit newEndByte undoDo: nil]]])]
+							value: [:new :undoEdit :undo | oldTree applyEdit: undoEdit source: new cursorAt: undoEdit newEndByte undoDo: nil]].
+					nil])]
 		ifNil: [apply value].
 	
 	oldTree placeCursorIn: oldTree at: newIndex
@@ -1082,22 +1096,22 @@ DCBlock >> borderVertices [
 	self firstDeepSubmorph firstOwnerSuchThat: [:o |
 		level := level + 1.
 		o = self].
-	level := level * self layoutInset.
+	level := (self layoutInset * level) asEdgeInsets.
 	endLevel := 0.
 	self lastDeepSubmorph firstOwnerSuchThat: [:o |
 		endLevel := endLevel + 1.
 		o = self].
-	endLevel := endLevel * self layoutInset.
+	endLevel := (self layoutInset * endLevel) asEdgeInsets.
 	
 	^ {
 		self bounds bottomLeft.
-		self left @ (self firstDeepSubmorph bottom + level).
-		self firstDeepSubmorph left - level @ (self firstDeepSubmorph bottom + level).
-		self firstDeepSubmorph left - level @ self top.
+		self left @ (self firstDeepSubmorph bottom + level bottom).
+		self firstDeepSubmorph left - level left @ (self firstDeepSubmorph bottom + level bottom).
+		self firstDeepSubmorph left - level left @ self top.
 		self bounds topRight.
-		self right @ (self lastDeepSubmorph top - endLevel).
-		self lastDeepSubmorph right + endLevel @ (self lastDeepSubmorph top - endLevel).
-		self lastDeepSubmorph right + endLevel @ self bottom}
+		self right @ (self lastDeepSubmorph top - endLevel top).
+		self lastDeepSubmorph right + endLevel right @ (self lastDeepSubmorph top - endLevel top).
+		self lastDeepSubmorph right + endLevel right @ self bottom}
 ]
 
 { #category : #'as yet unclassified' }
@@ -1218,15 +1232,12 @@ DCBlock >> diff: oldTree to: newTree [
 DCBlock >> doLayoutIn: layoutBounds [
 
 	| info |
-	self hasSubmorphs ifFalse: [^ fullBounds := self outerBounds].
+	self isLayoutRoot ifFalse: [
+		" if we've been called as a child, just assign whatever we have stored. the root will take of correcting things if needed "
+		fullBounds := self bounds.
+		^ self].
 	
-	info := DCLayoutInfo new
-		origin: layoutBounds origin;
-		lineStart: layoutBounds left;
-		padding: self layoutInset.
-	
-	self layoutWith: info.
-	self setBoundsDirect: (info bounds extendBy: info padding).
+	info := DCLayoutInfo new layoutRoot: self at: layoutBounds origin.
 	
 	self assert: fullBounds notNil
 ]
@@ -1321,6 +1332,12 @@ DCBlock >> firstSourceCharacter [
 DCBlock >> fixedNumberOfChildren [
 
 	^ false
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> generatedSourceString [
+
+	^ String streamContents: [:s | self writeSourceOn: s indent: 0 forCompare: false]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1534,18 +1551,20 @@ DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 				in: source
 				at: index + 1
 				do: (self applyBlockWithCursor: index + (anAboveBoolean ifTrue: [-1] ifFalse: [2]) + indent size).
-			self sandblockEditor do: (SBRelInsertCommand new
-				near: (target owner submorphs detect: [:m |
-					anAboveBoolean
-						ifTrue: [m range start index = index]
-						ifFalse: [m range end index = (index + (1 + indent size))]])
-				before: anAboveBoolean
-				in: statement owner
-				morph: (DCEmptyStatement new
-					language: self language;
-					range: (SBTSRange point: (anAboveBoolean ifTrue: [point] ifFalse: [point + 1 + indent size]));
-					insertSeparatorAfter: insertSeparatorAfter;
-					contents: ''))]]
+			SBToggledCode comment: '' active: 0 do: {
+				[
+					self sandblockEditor do: (SBRelInsertCommand new
+						near: (target owner submorphs detect: [:m |
+							anAboveBoolean
+								ifTrue: [m range start index = index]
+								ifFalse: [m range end index = (index + (1 + indent size))]])
+						before: anAboveBoolean
+						in: statement owner
+						morph: (DCEmptyStatement new
+							language: self language;
+							range: (SBTSRange point: (anAboveBoolean ifTrue: [point] ifFalse: [point + 1 + indent size]));
+							insertSeparatorAfter: insertSeparatorAfter;
+							contents: ''))]}]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1649,6 +1668,12 @@ DCBlock >> isExtra [
 	^ false
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock >> isLayoutRoot [
+
+	^ self owner ifNotNil: [:o | o class ~= self class] ifNil: [true]
+]
+
 { #category : #hierarchy }
 DCBlock >> isOrHasParent: aCollectionOrSymbol [
 
@@ -1732,25 +1757,13 @@ DCBlock >> layoutCommands [
 { #category : #'as yet unclassified' }
 DCBlock >> layoutInset [
 
-	SBToggledCode comment: '' active: 1 do: {[true ifTrue: [^ 0]]}.
+	SBToggledCode comment: '' active: 1 do: {[true ifTrue: [^ 2 @ 1]]}.
 	
 	self isBlockBody ifTrue: [^ 4 @ 3].
 	
 	^ (self type = 'ERROR' and: [self childSandblocks notEmpty])
 		ifTrue: [0]
 		ifFalse: [2 @ (self submorphCount > 3 ifTrue: [2] ifFalse: [0])]
-]
-
-{ #category : #'as yet unclassified' }
-DCBlock >> layoutWith: info [
-
-	info depth: info depth + 1.
-	info x: info x + (info padding asPoint) x.
-	info y: info y + (info padding asPoint) y.
-	self submorphs do: [:morph | info place: morph].
-	info y: info y - (info padding asPoint) y.
-	info x: info x + (info padding asPoint) x.
-	info depth: info depth - 1
 ]
 
 { #category : #'as yet unclassified' }
@@ -2042,7 +2055,7 @@ DCBlock >> range: aRange [
 DCBlock >> registerShortcut: aSymbol do: aBlock [
 
 	" a previous shortcut may have removed us from the world, abort "
-	self isInWorld ifFalse: [^ self].
+	(self rootBlock isNil or: [self rootBlock isInWorld not]) ifTrue: [^ self].
 	
 	self queryState tryShortcut: aSymbol do: aBlock
 ]
@@ -2183,17 +2196,26 @@ DCBlock >> smallestBlockEncompassig: aRange [
 	^ min
 ]
 
+{ #category : #accessing }
+DCBlock >> source [
+
+	^ self
+]
+
 { #category : #'as yet unclassified' }
 DCBlock >> startInputAtSourceIndex: aNumber [
 
-	self allTextMorphsDo: [:m |
-		(m isTSMorph and: [m range end index >= aNumber]) ifTrue: [
-			^ aNumber <= m range end index
+	self allTextMorphsDo: [:m | | range |
+		range := m isTSMorph
+			ifTrue: [m range]
+			ifFalse: [(m ownerSatisfying: [:o | o isTSMorph]) ifNotNil: [:o | o range]].
+		(range notNil and: [range end index >= aNumber]) ifTrue: [
+			^ aNumber <= range end index
 				ifTrue: [
 					"we're now inside!"
 					self sandblockEditor
 						startInput: m containingSandblock
-						at: aNumber - m range start index + 1
+						at: aNumber - range start index + 1
 						replacingContents: false
 						in: m]
 				ifFalse: [

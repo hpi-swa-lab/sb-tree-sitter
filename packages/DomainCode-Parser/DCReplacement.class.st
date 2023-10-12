@@ -70,6 +70,12 @@ DCReplacement >> children [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> childrenDo: aBlock [
+
+	^ self source ifNotNil: [:s | s childrenDo: aBlock]
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> contents [
 
 	^ self source ifNotNil: #contents ifNil: ['']
@@ -154,7 +160,7 @@ DCReplacement >> passiveUninstall [
 	
 	self sandblockEditor ifNil: [^ self].
 	hadFocus := self sandblockEditor textFocus
-		ifNotNil: [:t | t hasAnyParent: self]
+		ifNotNil: [:t | (t ownerSatisfying: [:o | o = self]) notNil]
 		ifNil: [false].
 	self source ifNotNil: [self replaceBy: self source] ifNil: [self delete].
 	
@@ -162,11 +168,21 @@ DCReplacement >> passiveUninstall [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> performAction: aSymbol [
+
+	(self queryState performShortcut: aSymbol for: self source) ifTrue: [^ true].
+	
+	(super performAction: aSymbol) ifTrue: [^ true].
+	
+	^ false
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> printOn: aStream [
 
 	aStream nextPutAll: self className.
 	aStream nextPut: $(.
-	super printOn: aStream.
+	aStream print: self source.
 	aStream nextPut: $)
 ]
 
@@ -183,6 +199,14 @@ DCReplacement >> purpose: aSymbol [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> queryState [
+
+	^ self rootBlock
+		valueOfProperty: #queryState
+		ifAbsentPut: [DCQueryState new rootBlock: self]
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> range [
 
 	^ self source ifNotNil: #range ifNil: [SBTSRange null]
@@ -192,6 +216,12 @@ DCReplacement >> range [
 DCReplacement >> resolveSource [
 
 	^ self source ifNotNil: [:c | c resolveSource]
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> rootBlock [
+
+	^ self ownerSatisfying: [:b | b isTSMorph and: [b type = self language rootRuleName]]
 ]
 
 { #category : #'as yet unclassified' }

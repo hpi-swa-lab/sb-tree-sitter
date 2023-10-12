@@ -2,13 +2,16 @@ Class {
 	#name : #DCLayoutInfo,
 	#superclass : #Object,
 	#instVars : [
+		'morphs',
 		'x',
 		'y',
 		'lineHeight',
 		'bounds',
 		'lineStart',
 		'depth',
-		'padding'
+		'padding',
+		'baseline',
+		'lineStartY'
 	],
 	#category : #'DomainCode-Parser'
 }
@@ -49,6 +52,64 @@ DCLayoutInfo >> initialize [
 
 	lineHeight := 0.
 	depth := 0
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> layoutRoot: aMorph at: aPoint [
+
+	| line flushLine |
+	self
+		origin: aPoint;
+		lineStart: aPoint x;
+		padding: aMorph layoutInset.
+	
+	morphs := Array streamContents: [:s | aMorph allLayoutMorphsDo: [:b | s nextPut: b]].
+	
+	line := OrderedCollection new.
+	baseline := 0.
+	lineStartY := aPoint y - aMorph layoutInset asEdgeInsets top.
+	
+	flushLine := [
+		line do: [:tuple | | bounds |
+			bounds := tuple size = 3
+				ifTrue: [tuple second @ (lineStartY + baseline) extent: tuple third]
+				ifFalse: [tuple first submorphBounds expandBy: tuple first layoutInset asEdgeInsets].
+			tuple first setBoundsDirect: bounds.
+			y := y max: bounds bottom.
+			tuple size = 3 ifTrue: [tuple first doLayoutIn: bounds]].
+		line removeAll.
+		
+		x := lineStart.
+		lineStartY := y.
+		baseline := 0].
+	
+	morphs viewAllButFirstAndLast do: [:m |
+		m class
+			caseOf: {
+				[Array] -> [ | inset |
+					"leave"
+					line add: {m second. x}.
+					inset := m second layoutInset asEdgeInsets.
+					x := x + inset right.
+					y := y - inset top.
+					lineStart := lineStart - inset left].
+				[DCLineBreak] -> [
+					line add: {m. x. m minExtent}.
+					flushLine value].
+				[DCBlock] -> [ | inset |
+					inset := m layoutInset asEdgeInsets.
+					x := x + inset left.
+					y := y + inset top.
+					lineStart := lineStart + inset left.
+					baseline := baseline max: y - lineStartY]}
+			otherwise: [ | extent |
+				extent := m minExtent.
+				line add: {m. x. extent}.
+				x := x + extent x]].
+	
+	flushLine value.
+	
+	aMorph setBoundsDirect: (aPoint - aMorph layoutInset asEdgeInsets topLeft extent: (aMorph submorphBounds expandBy: aMorph layoutInset asEdgeInsets) extent)
 ]
 
 { #category : #'as yet unclassified' }

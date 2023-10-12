@@ -9,7 +9,7 @@ DCJumpPlaceholder >> initialize [
 
 	super initialize.
 	
-	self addMorphBack: DCText new
+	self addMorphBack: SBMultilineOwnTextMorph new
 ]
 
 { #category : #'as yet unclassified' }

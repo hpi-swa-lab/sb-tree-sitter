@@ -76,7 +76,7 @@ DCWatch >> expression [
 { #category : #'as yet unclassified' }
 DCWatch >> id [
 
-	^ (self source type = 'parenthesized_expression' ifTrue: [self source childSandblocks first] ifFalse: [self source]) children fifth contents allButFirst allButLast
+	^ (self source type = 'parenthesized_expression' ifTrue: [self source childSandblocks first] ifFalse: [self source]) childNodes fifth contents allButFirst allButLast
 ]
 
 { #category : #'as yet unclassified' }
@@ -84,7 +84,8 @@ DCWatch >> initialize [
 
 	super initialize.
 	exampleValues := Dictionary new.
-	self layoutPolicy: TableLayout new
+	self layoutPolicy: TableLayout new.
+	self listDirection: #topToBottom
 ]
 
 { #category : #'as yet unclassified' }

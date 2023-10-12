@@ -38,6 +38,12 @@ Morph >> allDomainBlocksWithDepthDo: aBlock leafDo: anotherBlock depth: aNumber 
 ]
 
 { #category : #'*DomainCode-Core' }
+Morph >> allLayoutMorphsDo: aBlock [
+
+	aBlock value: self
+]
+
+{ #category : #'*DomainCode-Core' }
 Morph >> childCount [
 
 	| i |

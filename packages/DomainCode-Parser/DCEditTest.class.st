@@ -1,7 +1,7 @@
 Class {
 	#name : #DCEditTest,
 	#superclass : #SBTest,
-	#category : #'DomainCode-Parser'
+	#category : #'DomainCode-Parser-Test'
 }
 
 { #category : #'as yet unclassified' }

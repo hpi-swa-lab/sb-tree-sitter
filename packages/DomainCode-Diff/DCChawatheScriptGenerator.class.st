@@ -32,10 +32,10 @@ DCChawatheScriptGenerator >> delete: aMorph [
 
 	| target |
 	target := aMorph replacedParent
-		ifNotNil: [:p | p isReplacement ifTrue: [p] ifFalse: [aMorph]]
+		ifNotNil: [:p | p isReplacement ifTrue: [p] ifFalse: [p]]
 		ifNil: [aMorph].
 	
-	aMorph delete.
+	target delete.
 	
 	self logChanges ifTrue: [Transcript showln: {#delete. target}]
 ]
@@ -148,9 +148,9 @@ DCChawatheScriptGenerator >> move: aMorph to: anOwnerMorph postDeleteDo: aBlock 
 		ifNotNil: [:p | p isReplacement ifTrue: [p] ifFalse: [aMorph]]
 		ifNil: [aMorph].
 	
-	aMorph delete.
+	target delete.
 	index := aBlock value.
-	anOwnerMorph addMorph: aMorph asElementNumber: index.
+	anOwnerMorph addMorph: target asElementNumber: index.
 	
 	self maybeAttachFlash: target.
 	self logChanges ifTrue: [Transcript showln: {#move. anOwnerMorph. index. target}]
