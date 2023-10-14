@@ -73,7 +73,7 @@ DCLayoutInfo >> layoutRoot: aMorph at: aPoint [
 		line do: [:tuple | | bounds |
 			bounds := tuple size = 3
 				ifTrue: [tuple second @ (lineStartY + baseline) extent: tuple third]
-				ifFalse: [tuple first submorphBounds expandBy: tuple first layoutInset asEdgeInsets].
+				ifFalse: [tuple first nonExtraChildrenBounds expandBy: tuple first layoutInset asEdgeInsets].
 			tuple first setBoundsDirect: bounds.
 			y := y max: bounds bottom.
 			tuple size = 3 ifTrue: [tuple first doLayoutIn: bounds]].
@@ -84,19 +84,19 @@ DCLayoutInfo >> layoutRoot: aMorph at: aPoint [
 		baseline := 0].
 	
 	morphs viewAllButFirstAndLast do: [:m |
-		m class
+		true
 			caseOf: {
-				[Array] -> [ | inset |
+				[m class = Array] -> [ | inset |
 					"leave"
 					line add: {m second. x}.
 					inset := m second layoutInset asEdgeInsets.
 					x := x + inset right.
 					y := y - inset top.
 					lineStart := lineStart - inset left].
-				[DCLineBreak] -> [
+				[m isLineBreak] -> [
 					line add: {m. x. m minExtent}.
 					flushLine value].
-				[DCBlock] -> [ | inset |
+				[m class = DCBlock] -> [ | inset |
 					inset := m layoutInset asEdgeInsets.
 					x := x + inset left.
 					y := y + inset top.

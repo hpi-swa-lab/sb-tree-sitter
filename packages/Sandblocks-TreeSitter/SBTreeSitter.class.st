@@ -576,11 +576,11 @@ SBTreeSitter >> textBetween: aNode and: anEndNode [
 	^ self
 		textBetweenIndex: (aNode
 			ifNil: [ | parent |
-				parent := self nodeParent: anEndNode.
 				self assert: anEndNode notNil.
+				parent := self nodeParent: anEndNode.
 				
-				" the root (node without a parent) starts after all whitespace, so special-case this " 
-				(self nodeIsNull: (self nodeParent: parent))
+				" the root (node without a parent) starts after all whitespace, so special-case this "
+				((self nodeIsNull: parent) or: [self nodeIsNull: (self nodeParent: parent)])
 					ifTrue: [1]
 					ifFalse: [(self nodeStartByte: parent) + 1 max: 1]]
 			ifNotNil: [(self nodeEndByte: aNode) + 1])

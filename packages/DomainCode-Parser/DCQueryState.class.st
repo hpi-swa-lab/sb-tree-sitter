@@ -30,11 +30,15 @@ DCQueryState >> addSuggestions: aCollection for: aBlock [
 DCQueryState >> ensureReplacement: aClass for: aBlock embed: aClosure initDo: anotherClosure [
 
 	| replacement |
+	" do not replace off-screen nodes "
+	aBlock sandblockEditor ifNil: [^ self].
+	
 	replacement := (aBlock class = aClass or: [(aBlock replacedParent ifNotNil: #class) = aClass])
 		ifFalse: [ | r hadFocus |
 			hadFocus := (aBlock sandblockEditor ifNotNil: #textFocus)
 				ifNotNil: [:t | (t ownerSatisfying: [:o | o = aBlock]) notNil]
 				ifNil: [false].
+			
 			r := aClass new.
 			aBlock replacedParent: r.
 			aBlock replaceBy: r.
@@ -125,6 +129,13 @@ DCQueryState >> queueUpdateQueriesFor: aSymbol [
 ]
 
 { #category : #'as yet unclassified' }
+DCQueryState >> replacementDeleted: aReplacement [
+
+	aReplacement passiveUninstall.
+	self triggers do: [:t | (transientReplacements at: t) remove: aReplacement ifAbsent: []]
+]
+
+{ #category : #'as yet unclassified' }
 DCQueryState >> reportError: aDecorator for: aBlock [
 
 	| errors |
@@ -157,6 +168,16 @@ DCQueryState >> rootBlock: aBlock [
 DCQueryState >> suggestionsFor: aBlock [
 
 	^ suggestions key = aBlock ifTrue: [suggestions value] ifFalse: [{}]
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> textQueriesFor: aSymbol do: aBlock [
+
+	querySourceOverride ifNotNil: [^ querySourceOverride value: aSymbol value: aBlock].
+	
+	Pragma
+		withPragmasIn: DCBlock class
+		do: [:pragma | (pragma keyword = #query: and: [pragma arguments first = aSymbol and: [pragma method hasPragma: #text]]) ifTrue: [aBlock value: (DCBlock perform: pragma selector)]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -211,7 +232,10 @@ DCQueryState >> updateQueriesFor: aSymbol [
 	self rerunQueriesFor: aSymbol do: [
 		self
 			queriesFor: aSymbol
-			do: [:script | self rootBlock allChildrenDo: [:b | b isSandblock ifTrue: [DCQuery script: script with: b]]]]
+			do: [:script | self rootBlock allChildrenDo: [:b | b isSandblock ifTrue: [DCQuery script: script with: b]]].
+		self
+			textQueriesFor: aSymbol
+			do: [:script | self rootBlock allChildrenDo: [:b | b isTextMorph ifTrue: [DCQuery script: script with: b]]]]
 ]
 
 { #category : #'as yet unclassified' }

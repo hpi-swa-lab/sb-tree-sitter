@@ -87,6 +87,18 @@ Morph >> hasChildren [
 ]
 
 { #category : #'*DomainCode-Core' }
+Morph >> isExtra [
+
+	^ false
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> isLineBreak [
+
+	^ false
+]
+
+{ #category : #'*DomainCode-Core' }
 Morph >> isNode: aNode [
 
 	^ self = aNode

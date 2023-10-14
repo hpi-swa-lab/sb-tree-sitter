@@ -70,7 +70,9 @@ DCWatch >> exampleStopped: anExample [
 { #category : #'as yet unclassified' }
 DCWatch >> expression [
 
-	^ (self source type = 'parenthesized_expression' ifTrue: [self source childSandblocks first] ifFalse: [self source]) children third
+	^ (self source type = 'parenthesized_expression'
+		ifTrue: [self source childNodes second]
+		ifFalse: [self source]) childNodes third
 ]
 
 { #category : #'as yet unclassified' }

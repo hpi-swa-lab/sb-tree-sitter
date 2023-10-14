@@ -29,7 +29,7 @@ DCLayout >> layout: aMorph in: newBounds [
 	aMorph submorphsDo: [:morph | | extent |
 		extent := morph minExtent.
 		line add: morph.
-		morph class = DCLineBreak
+		morph isLineBreak
 			ifTrue: [flushLine value]
 			ifFalse: [lineHeight := lineHeight max: extent y]].
 	flushLine value
@@ -45,7 +45,7 @@ DCLayout >> minExtentOf: aMorph in: newBounds [
 	lineLength := 0.
 	aMorph submorphsDo: [:morph | | extent |
 		extent := morph minExtent.
-		morph class = DCLineBreak ifTrue: [
+		morph isLineBreak ifTrue: [
 			y := y + lineHeight.
 			lineHeight := 0.
 			lineLength := lineLength max: x.

@@ -32,7 +32,12 @@ DCChawatheScriptGenerator >> delete: aMorph [
 
 	| target |
 	target := aMorph replacedParent
-		ifNotNil: [:p | p isReplacement ifTrue: [p] ifFalse: [p]]
+		ifNotNil: [:p |
+			p isReplacement
+				ifTrue: [
+					p queryState replacementDeleted: p.
+					p]
+				ifFalse: [p]]
 		ifNil: [aMorph].
 	
 	target delete.
@@ -131,7 +136,7 @@ DCChawatheScriptGenerator >> lcsWith: x and: y in: aMapping [
 { #category : #'as yet unclassified' }
 DCChawatheScriptGenerator >> logChanges [
 
-	^ true
+	^ false
 ]
 
 { #category : #'as yet unclassified' }

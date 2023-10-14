@@ -155,7 +155,7 @@ DCReplacement >> layoutCommands [
 DCReplacement >> passiveUninstall [
 
 	| hadFocus |
-	currentEmbeds ifNotNil: [:e | e do: [:embed | embed = self source ifFalse: [embed replacedParent uninstall]]].
+	self uninstallEmbeds.
 	self source ifNotNil: [self source replacedParent: nil].
 	
 	self sandblockEditor ifNil: [^ self].
@@ -260,6 +260,12 @@ DCReplacement >> treeLabel [
 DCReplacement >> type [
 
 	^ ''
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> uninstallEmbeds [
+
+	currentEmbeds ifNotNil: [:e | e do: [:embed | embed = self source ifFalse: [embed replacedParent uninstall]]]
 ]
 
 { #category : #'as yet unclassified' }

@@ -382,35 +382,14 @@ DCBlock class >> smalltalkDeclaration [
 				(Symbol lookup: id contents) ifNotNil: [:sym |
 					id containingArtefact methodClass
 						bindingOf: sym
-						environment: id containingArtefact methodClass environment]]) ifNil: [id containingArtefact ifNotNil: [:m | m methodClass instVarNames detect: [:n | n = id contents] ifNone: [nil]]].
+						environment: id containingArtefact methodClass environment]]) ifNil: [id containingArtefact ifNotNil: [:m | m methodClass allInstVarNames detect: [:n | n = id contents] ifNone: [nil]]].
 			{#args. id. decl}]}
 ]
 
 { #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkDeclareBlockLocal: aBlock [
 
-	| block decl |
-	decl := DCBlock new
-		type: #identifier;
-		addMorphBack: (DCText new contents: aBlock contents).
-	block := aBlock orAnyParent: {#block. #method}.
-	block childSandblocks
-		detect: [:b | b type = #temporaries]
-		ifFound: [:temporaries |
-			aBlock sandblockEditor do: (SBInsertCommand new
-				morph: decl;
-				container: temporaries;
-				index: temporaries submorphCount)]
-		ifNone: [ | index |
-			index := block children findFirst: [:s | s treeLabel = '|'].
-			aBlock sandblockEditor do: (SBInsertCommand new
-				morph: (DCBlock new
-					type: #temporaries;
-					addMorphBack: (DCText new contents: '|');
-					addMorphBack: decl;
-					addMorphBack: (DCText new contents: '|'));
-				index: (index = 0 ifTrue: [2] ifFalse: [index + 1]);
-				container: block)]
+	self smalltalkDeclareTemporary: aBlock inScopes: #(block method)
 ]
 
 { #category : #'smalltalk - helpers' }
@@ -434,28 +413,29 @@ DCBlock class >> smalltalkDeclareInstanceVariable: aBlock [
 { #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkDeclareTemporary: aBlock [
 
+		self smalltalkDeclareTemporary: aBlock inScopes: #(method)
+]
+
+{ #category : #'smalltalk - helpers' }
+DCBlock class >> smalltalkDeclareTemporary: aBlock inScopes: aCollection [
+
 	| block decl |
 	decl := DCBlock new
 		type: #identifier;
+		language: SBTSSmalltalk;
 		addMorphBack: (DCText new contents: aBlock contents).
-	block := aBlock orAnyParent: {#method}.
+	block := aBlock orAnyParent: aCollection.
 	block childSandblocks
 		detect: [:b | b type = #temporaries]
 		ifFound: [:temporaries |
-			aBlock sandblockEditor do: (SBInsertCommand new
-				morph: decl;
-				container: temporaries;
-				index: temporaries submorphCount)]
+			temporaries
+				insert: (' {1} ' format: {decl sourceString})
+				atChildIndex: temporaries submorphCount]
 		ifNone: [ | index |
 			index := block children findFirst: [:s | s treeLabel = '|'].
-			aBlock sandblockEditor do: (SBInsertCommand new
-				morph: (DCBlock new
-					type: #temporaries;
-					addMorphBack: (DCText new contents: '|');
-					addMorphBack: decl;
-					addMorphBack: (DCText new contents: '|'));
-				index: (index = 0 ifTrue: [2] ifFalse: [index + 1]);
-				container: block)]
+			block
+				insert: ('| {1} |' format: {decl sourceString})
+				atChildIndex: (index = 0 ifTrue: [2] ifFalse: [index + 1])]
 ]
 
 { #category : #smalltalk }
@@ -550,8 +530,8 @@ DCBlock class >> smalltalkInsertWatch [
 			x registerShortcut: #wrapWithWatch do: [
 				{
 					[:expr |
-						expr class = DCWatch
-							ifTrue: [expr replaceWith: expr expression sourceString]
+						expr replacedParent class = DCWatch
+							ifTrue: [expr replaceWith: expr replacedParent expression sourceString]
 							ifFalse: [expr wrapWithBefore: '(DCWatch report: (' after: ') for: ', UUID new asString storeString, ')']]}]]}
 ]
 
@@ -837,6 +817,7 @@ DCBlock class >> smalltalkWatch [
 		[:x | true].
 		self smalltalkMessageSendSelector.
 		[:selector :message | selector = #report:for:].
+		[:selector :message | message childrenHaveErrors not].
 		[:selector :message |
 			(message parent type = 'parenthesized_expression'
 				ifTrue: [message parent]
@@ -916,17 +897,19 @@ DCBlock >> absolutePositionOf: aMorph [
 DCBlock >> adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent [
 	"do not place closing pair characters if they are coming up right after"
 
+	| index |
+	index := cursorIndex isNumber ifTrue: [cursorIndex] ifFalse: [cursorIndex start index].
 	(self pairMap keyAtValue: input ifAbsent: nil) ifNotNil: [:openChar |
-		(source at: cursorIndex + 1 ifPresent: [:char | input first = char] ifAbsent: [false]) ifTrue: [
-			self owner startInputAtSourceIndex: cursorIndex + 1.
+		(source at: index + 1 ifPresent: [:char | input first = char] ifAbsent: [false]) ifTrue: [
+			self owner startInputAtSourceIndex: index + 1.
 			^ '']].
 	
 	self pairMap at: input ifPresent: [:complete |
 		"do not autocomplete quotes in words"
-		(complete = '''' and: [source at: cursorIndex ifPresent: #isAlphaNumeric ifAbsent: [false]]) ifTrue: [^ input].
+		(complete = '''' and: [source at: index ifPresent: #isAlphaNumeric ifAbsent: [false]]) ifTrue: [^ input].
 		
 		"do not autocomplete after backslash"
-		(source at: (cursorIndex isNumber ifFalse: [cursorIndex start index] ifTrue: [cursorIndex]) ifPresent: [:c | c = $\] ifAbsent: [false]) ifTrue: [^ input].
+		(source at: index ifPresent: [:c | c = $\] ifAbsent: [false]) ifTrue: [^ input].
 		
 		^ input, complete].
 	
@@ -1042,7 +1025,7 @@ DCBlock >> applyEdit: edit source: newSource cursorAt: newIndex undoDo: aBlock [
 					oldTree infoForEditDo: [:source |
 						aBlock
 							value: source
-							value: [:new :undoEdit :undo | oldTree applyEdit: undoEdit source: new cursorAt: undoEdit newEndByte undoDo: nil]].
+							value: [:new :undoEdit :undo | oldTree applyEdit: undoEdit source: new cursorAt: (undoEdit ifNotNil: #newEndByte) undoDo: nil]].
 					nil])]
 		ifNil: [apply value].
 	
@@ -1070,7 +1053,7 @@ DCBlock >> assertConsecutiveRanges [
 		m class = DCText ifTrue: [
 			self assert: m range start index = current.
 			current := m range end index].
-		m class = DCLineBreak ifTrue: [
+		m isLineBreak ifTrue: [
 			self assert: m range start index = current.
 			current := m range end index]]
 ]
@@ -1135,6 +1118,12 @@ DCBlock >> childrenDo: aBlock [
 			ifFalse: [aBlock value: c]]
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock >> childrenHaveErrors [
+
+	^ self childNodes anySatisfy: [:c | c type = 'ERROR']
+]
+
 { #category : #hierarchy }
 DCBlock >> clearDiffCache [
 
@@ -1162,6 +1151,16 @@ DCBlock >> containingArtefact [
 	^ self isArtefact
 		ifTrue: [self]
 		ifFalse: [self parent ifNotNil: [:b | b containingArtefact]]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> containsPoint: aPoint [
+
+	| inside |
+	(super containsPoint: aPoint) ifFalse: [^ false].
+	inside := false.
+	self borderVertices overlappingPairsLoopedDo: [:a :b | (a y > aPoint y ~= (b y > aPoint y) and: [aPoint x < (b x - a x * (b y - a y) / (b y - a y) + a x)]) ifTrue: [inside := inside not]].
+	^ inside
 ]
 
 { #category : #'as yet unclassified' }
@@ -1208,9 +1207,9 @@ DCBlock >> deleteBlock [
 	
 	self infoForEditDo: [:source :textMorph :cursorIndex | | delRange |
 		delRange := textMorph range.
-		self trailingTerminator ifNotNil: [:t |
-			delRange := SBTSRange merging: {delRange. t range}.
-			(source atPin: delRange end index + 1) = Character cr ifTrue: [delRange := SBTSRange start: delRange start end: delRange end + 1]].
+		self trailingTerminator ifNotNil: [:t | | clearUntil |
+			clearUntil := (t nextMorphThat: [:m | m submorphAfter isNil or: [m submorphAfter isExtra not]]) ifNil: [t].
+			delRange := SBTSRange merging: {delRange. clearUntil range}].
 		self class replace: delRange in: source with: '' do: self applyBlock]
 ]
 
@@ -1254,7 +1253,7 @@ DCBlock >> drawBackgroundOn: aCanvas [
 	| policy |
 	policy := self colorPolicy.
 	self allMorphsDo: [:c |
-		c class = DCLineBreak ifTrue: [ | level |
+		c isLineBreak ifTrue: [ | level |
 			level := 0.
 			c firstOwnerSuchThat: [:o |
 				level := level + 1.
@@ -1518,6 +1517,18 @@ DCBlock >> insert: aString [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> insert: aString atChildIndex: aNumber [
+
+	self infoForEditDo: [:source :textMorph :cursorIndex |
+		self class
+			insert: aString
+			in: source
+			at: (self children at: aNumber) range start index + 1
+			do: self applyBlock].
+	self batchedChangeStep
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> insertCommandRequest: aMorph near: aBlock before: aBoolean [
 
 	^ nil
@@ -1526,45 +1537,21 @@ DCBlock >> insertCommandRequest: aMorph near: aBlock before: aBoolean [
 { #category : #'as yet unclassified' }
 DCBlock >> insertStatementAboveOrBelow: anAboveBoolean [
 
-	(self orOwnerSuchThat: [:morph | morph isTSBlock and: [morph isStatement]]) ifNotNil: [:statement | | target insertSeparatorAfter indent point index |
-		target := (anAboveBoolean not and: [(statement submorphAfter ifNotNil: #treeLabel) = self language statementTerminator])
-			ifTrue: [
-				insertSeparatorAfter := true.
-				statement submorphAfter]
-			ifFalse: [
-				"if we do not have a trailing dot, we need to insert the dot before the element"
-				insertSeparatorAfter := anAboveBoolean.
-				statement].
-		
-		indent := ''.
-		[ | cur |
-			cur := target morphBeforeOrAfter: anAboveBoolean.
-			[cur notNil and: [cur isExtra and: [anAboveBoolean not or: [cur class ~= DCLineBreak]]]] whileTrue: [
-				indent := indent, (cur treeLabel select: [:c | c = Character space or: [c = Character tab]]).
-				cur := cur morphBeforeOrAfter: anAboveBoolean]] value.
-		
-		point := anAboveBoolean ifTrue: [target range start] ifFalse: [target range end].
-		index := point index.
-		self infoForEditDo: [:source |
-			self class
-				insert: String cr, indent
-				in: source
-				at: index + 1
-				do: (self applyBlockWithCursor: index + (anAboveBoolean ifTrue: [-1] ifFalse: [2]) + indent size).
-			SBToggledCode comment: '' active: 0 do: {
-				[
-					self sandblockEditor do: (SBRelInsertCommand new
-						near: (target owner submorphs detect: [:m |
-							anAboveBoolean
-								ifTrue: [m range start index = index]
-								ifFalse: [m range end index = (index + (1 + indent size))]])
-						before: anAboveBoolean
-						in: statement owner
-						morph: (DCEmptyStatement new
-							language: self language;
-							range: (SBTSRange point: (anAboveBoolean ifTrue: [point] ifFalse: [point + 1 + indent size]));
-							insertSeparatorAfter: insertSeparatorAfter;
-							contents: ''))]}]]
+	| lineBreak target |
+	target := self activeTextMorph ifNil: [self].
+	lineBreak := anAboveBoolean
+		ifTrue: [target previousMorphThat: [:c | c isLineBreak]]
+		ifFalse: [target nextMorphThat: [:c | c isLineBreak]].
+	
+	lineBreak ifNil: [^ self].
+	lineBreak containingSandblock containingArtefact = self containingArtefact ifFalse: [^ self].
+	
+	self infoForEditDo: [:source :textMorph :cursorIndex |
+		self class
+			insert: String cr, lineBreak getIndentString
+			in: source
+			at: lineBreak range start index + 1
+			do: (self applyBlockWithCursor: lineBreak range start index + 2)]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1722,7 +1709,7 @@ DCBlock >> keyStroke: anEvent [
 		(input first isPrintable and: [anEvent commandKeyPressed not]) ifTrue: [
 			(self adaptInput: input in: source at: cursorIndex textMorph: textMorph event: anEvent) ifNotEmpty: [:text |
 				self class
-					insert: text
+					insert: (self maybeAddSeparator: text textMorph: textMorph)
 					in: source
 					at: cursorIndex + 1
 					do: (self applyBlockWithCursor: cursorIndex + (text indexOf: anEvent keyCharacter))]]].
@@ -1757,7 +1744,7 @@ DCBlock >> layoutCommands [
 { #category : #'as yet unclassified' }
 DCBlock >> layoutInset [
 
-	SBToggledCode comment: '' active: 1 do: {[true ifTrue: [^ 2 @ 1]]}.
+	SBToggledCode comment: '' active: 1 do: {[true ifTrue: [^ 1 @ 1]]}.
 	
 	self isBlockBody ifTrue: [^ 4 @ 3].
 	
@@ -1767,10 +1754,26 @@ DCBlock >> layoutInset [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> maybeAddSeparator: input textMorph: aTextMorph [
+
+	aTextMorph isLineBreak ifTrue: [^ input, self language statementTerminator].
+	^ input
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> minBoundsWith: info [
 
 	self submorphs do: [:morph | info measure: morph].
 	^ info bounds
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> nonExtraChildrenBounds [
+
+	| box |
+	self submorphs do: [:m | m isExtra ifFalse: [box ifNil: [box := m fullBounds copy] ifNotNil: [box := box quickMerge: m fullBounds]]].
+	box ifNil: [^ self bounds].
+	^ box
 ]
 
 { #category : #hierarchy }
@@ -1797,6 +1800,7 @@ DCBlock >> orAnyParent: aCollectionOrSymbol [
 		ifTrue: [{aCollectionOrSymbol}]
 		ifFalse: [aCollectionOrSymbol].
 	(matches includes: self type) ifTrue: [^ self].
+	self parent ifNil: [^ nil].
 	self isRootBlock ifTrue: [^ nil].
 	self parent isTSMorph ifFalse: [^ nil].
 	^ self parent orAnyParent: aCollectionOrSymbol
@@ -1907,7 +1911,7 @@ DCBlock >> prefersNoBorder [
 { #category : #'as yet unclassified' }
 DCBlock >> prettyPrint [
 
-	self infoForEditDo: [:source | | new |
+	self infoForEditDo: [:source :textMorph :index | | new |
 		new := [
 			PPFormatter
 				formatString: source
@@ -1916,11 +1920,12 @@ DCBlock >> prettyPrint [
 			on: SyntaxErrorNotification
 			do: [source].
 		source = new ifFalse: [
-			self
-				applyEdit: nil
-				source: new
-				cursorAt: 1
-				undoDo: [:undoSource :block | block value: source value: nil value: nil]]]
+			self restoreCursorAfter: [
+				self
+					applyEdit: nil
+					source: new
+					cursorAt: index start index
+					undoDo: [:undoSource :block | block value: source value: nil value: nil]]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -2061,6 +2066,12 @@ DCBlock >> registerShortcut: aSymbol do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> rejectsEvent: anEvent [
+
+	^ (self containsPoint: anEvent position) not
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> reloadArtefact [
 	<action>
 
@@ -2129,6 +2140,20 @@ DCBlock >> resolveSource [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> restoreCursorAfter: aBlock [
+
+	| current textMorph index editor |
+	editor := self sandblockEditor.
+	current := editor selection.
+	textMorph := current activeTextMorph.
+	index := textMorph ifNotNil: #cursor.
+	aBlock value.
+	textMorph
+		ifNotNil: [editor startInput: current at: index replacingContents: false in: textMorph]
+		ifNil: [current select]
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> rootBlock [
 
 	^ self orAnyParent: self language rootRuleName
@@ -2152,6 +2177,39 @@ DCBlock >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 
 	self queryState errors ifNotEmpty: [:errors | aFixBoolean ifTrue: [errors do: [:error | error tryFixIfFail: [^ false]]] ifFalse: [^ false]].
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> selectRightMostBlock [
+	<action>
+	<inputAction>
+
+	| lineBreak |
+	self activeTextMorph isLineBreak ifTrue: [^ self].
+	
+	lineBreak := (self activeTextMorph ifNil: [self]) nextMorphThat: [:m | m isLineBreak].
+	(lineBreak isNil or: [lineBreak containingSandblock containingFloat ~= self containingFloat]) ifTrue: [^ self containingFloat lastDeepChild startInputAtEnd].
+	self sandblockEditor
+		startInput: lineBreak containingSandblock
+		at: 1
+		replacingContents: false
+		in: lineBreak
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> selectStartOfStatement [
+	<action>
+	<inputAction>
+
+	| lineBreak first |
+	lineBreak := (self activeTextMorph ifNil: [self]) previousMorphThat: [:m | m isLineBreak].
+	(lineBreak isNil or: [lineBreak containingSandblock containingFloat ~= self containingFloat]) ifTrue: [^ self containingFloat firstDeepChild startInputAtStart].
+	first := lineBreak nextMorphThat: [:m | m isExtra not].
+	self sandblockEditor
+		startInput: first containingSandblock
+		at: 1
+		replacingContents: false
+		in: first
 ]
 
 { #category : #'as yet unclassified' }

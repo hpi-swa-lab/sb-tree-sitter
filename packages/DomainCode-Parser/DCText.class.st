@@ -60,6 +60,12 @@ DCText >> ensureLayouted [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> ensureReplacement: aClass initDo: aBlock [
+
+	self queryState ensureReplacement: aClass for: self embed: [:m | {}] initDo: aBlock
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> field [
 
 	^ field
@@ -150,9 +156,20 @@ DCText >> isTSMorph [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> isTSSymbol [
+	^false
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> isTextMorph [
+
+	^ (self contents allSatisfy: [:t | t = Character tab]) not or: [self contents isEmpty]
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> language [
 
-	^ self containingSandblock language
+	^ self parent language
 ]
 
 { #category : #'as yet unclassified' }
@@ -166,7 +183,7 @@ DCText >> ownerWithForegroundColor [
 { #category : #'as yet unclassified' }
 DCText >> parent [
 
-	^ self owner
+	^ self replacedParent ifNotNil: [:p | p isReplacement ifTrue: [p owner] ifFalse: [p]] ifNil: [self parentSandblock]
 ]
 
 { #category : #'as yet unclassified' }
@@ -197,6 +214,14 @@ DCText >> printTreeOn: aStream indent: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> queryState [
+
+	^ self rootBlock
+		valueOfProperty: #queryState
+		ifAbsentPut: [DCQueryState new rootBlock: self]
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> range [
 
 	^ range isNull ifTrue: [self owner range] ifFalse: [range]
@@ -211,7 +236,19 @@ DCText >> range: aRange [
 { #category : #'as yet unclassified' }
 DCText >> replacedParent [
 
-	^ nil
+	^ self valueOfProperty: #replacedParent
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> replacedParent: aBlock [
+
+	self setProperty: #replacedParent toValue: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> resolveSource [
+
+	^ self
 ]
 
 { #category : #'as yet unclassified' }

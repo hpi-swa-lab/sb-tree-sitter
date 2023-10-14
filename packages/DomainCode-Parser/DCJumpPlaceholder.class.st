@@ -16,13 +16,18 @@ DCJumpPlaceholder >> initialize [
 DCJumpPlaceholder >> keyStroke: anEvent [
 
 	(anEvent keyCharacter isPrintable and: [anEvent commandKeyPressed not]) ifTrue: [
-		self source infoForEditDo: [:source :textMorph :cursorIndex |
-			self source replaceWith: (self source
+		self source infoForEditDo: [:source :textMorph :cursorIndex | | text |
+			text := self source
 				adaptInput: anEvent keyCharacter asString
 				in: source
 				at: cursorIndex
 				textMorph: textMorph
-				event: anEvent)]].
+				event: anEvent.
+			DCBlock
+				replace: self source range
+				in: source
+				with: text
+				do: (self source applyBlockWithCursor: self source range start index + (text indexOf: anEvent keyCharacter))]].
 	self batchedChangeStep
 ]
 
@@ -30,14 +35,7 @@ DCJumpPlaceholder >> keyStroke: anEvent [
 DCJumpPlaceholder >> pasteReplace [
 	<action>
 
-	self infoForEditDo: [:source :textMorph :cursorIndex | | str |
-		str := Clipboard clipboardText string.
-		
-		self
-			replace: self range
-			in: source
-			with: str
-			do: [:new :edit | self applyEdit: edit source: new cursorAt: cursorIndex + str size]]
+	self source pasteReplace
 ]
 
 { #category : #'as yet unclassified' }
