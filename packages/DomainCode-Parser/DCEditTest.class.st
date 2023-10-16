@@ -18,6 +18,35 @@ b;' language: SBJavascript.
 ]
 
 { #category : #'as yet unclassified' }
+DCEditTest >> testHtmTagIndent [
+
+	| program editor |
+	program := DCBlock parse: '<html' language: SBHtml.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self type: '>' in: editor.
+	self tick.
+	self type: '
+' in: editor.
+	self assert: '<html>
+	
+</html>' equals: editor childSandblocks first sourceString
+]
+
+{ #category : #'as yet unclassified' }
+DCEditTest >> testHtmlCompleteTag [
+
+	| program editor |
+	program := DCBlock parse: '<html' language: SBHtml.
+	editor := self editorAndWorldFor: program.
+	program lastDeepChild startInputAtEnd.
+	self type: '>' in: editor.
+	self tick.
+	self type: 'a' in: editor.
+	self assert: '<html>a</html>' equals: editor childSandblocks first sourceString
+]
+
+{ #category : #'as yet unclassified' }
 DCEditTest >> testInsertsStatementAboveTerminatorWithIndent [
 
 	| program editor |

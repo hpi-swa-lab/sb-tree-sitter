@@ -106,6 +106,18 @@ DCBlock class >> genericAddMarker [
 		[:x | x registerShortcut: #addMarker do: [{[:block | block attachDecorator: SBMarkedDecorator new]}]]}
 ]
 
+{ #category : #html }
+DCBlock class >> htmlCompleteTag [
+	<query: #type>
+
+	^ {
+		[:x | x language = SBHtml].
+		[:x | x isSelected].
+		[:x | x type = #'start_tag'].
+		[:x | {#args. (x childOfType: #'tag_name') contents. x}].
+		[:tagName :open | open insertAfter: ('</{1}>' format: {tagName})]}
+]
+
 { #category : #'text modify' }
 DCBlock class >> insert: aString in: aContainerString at: aNumber do: aBlock [
 
@@ -124,11 +136,21 @@ DCBlock class >> insert: aString in: aContainerString at: aNumber do: aBlock [
 ]
 
 { #category : #parsing }
+DCBlock class >> maybeAddTrailingLineBreak: aBlock [
+
+	| last |
+	last := aBlock lastDeepSubmorph.
+	aBlock addMorphBack: (DCLineBreak new range: (SBTSRange start: last range end end: last range end + 1)).
+	^ aBlock
+]
+
+{ #category : #parsing }
 DCBlock class >> parse: aString language: aLanguage [
 
 	^ (self parseBlock: aString language: aLanguage)
 		layoutInset: 4;
 		hResizing: #rigid;
+		setProperty: #isArtefact toValue: true;
 		attachDecorator: SBResizableDecorator new;
 		attachDecorator: SBForceMoveDecorator newConfigured;
 		yourself
@@ -144,13 +166,13 @@ DCBlock class >> parse: aString old: oldBlock language: aLanguage [
 			api treeEdit: tsTree edit: (self findChangeRangeFrom: oldBlock privateSource to: aString).
 			tsTree]].
 	
-	^ api parseAsCursor: aString language: aLanguage language oldTree: oldTree do: [:cursor :newTree |
+	^ self maybeAddTrailingLineBreak: (api parseAsCursor: aString language: aLanguage language oldTree: oldTree do: [:cursor :newTree |
 		(self
 			fromCursor: (SBTSCursorRaw new library: api cursor: cursor factory: aLanguage instance grammar)
 			language: aLanguage)
 			privateTSTree: newTree;
 			privateSource: aString;
-			yourself]
+			yourself])
 ]
 
 { #category : #parsing }
@@ -282,6 +304,15 @@ DCBlock class >> smalltalkBrowseReferencesSend [
 											requestor: #modelMenu]
 									ifFalse: [self systemNavigation browseAllCallsOn: sel asSymbol]]
 							ifFalse: [message sandblockEditor open: calls first compiledMethod]]}]]}
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock class >> smalltalkCascadedMessageSend [
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | #(#'keyword_message' #'binary_message' #'unary_message' #keyword #'binary_operator' #'unary_identifier') includes: x type].
+		[:x | x orParent: #(#'cascaded_keyword_message' #'cascaded_binary_message' #'cascaded_unary_message')]}
 ]
 
 { #category : #smalltalk }
@@ -561,9 +592,7 @@ DCBlock class >> smalltalkMessageSendAutoCompletion [
 
 	^ {
 		[:x | x isSelected].
-		[:x | "only autocomplete for the first message part (just after receiver)"
-		x childIndex = 2].
-		[:x | (DCQuery script: self smalltalkMessageSendSelector with: x) ifNotNil: [:res | res, {x}]].
+		[:x | (DCQuery script: self smalltalkMessageSendSelectorIncludingCascaded with: x) ifNotNil: [:res | res, {x}]].
 		[:selector :message :part | selector size > 2].
 		[:selector :message :part |
 			part addSuggestions: ((self sortedSymbolSuggestionsFor: selector max: 10) collect: [:sel |
@@ -593,6 +622,16 @@ DCBlock class >> smalltalkMessageSendSelector [
 		[:parts :message | {#args. parts joinSeparatedBy: ''. message}]}
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock class >> smalltalkMessageSendSelectorIncludingCascaded [
+
+	^ {
+		[:x | DCQuery firstScript: {self smalltalkMessageSend. self smalltalkCascadedMessageSend} with: x].
+		[:message | {#args. message children select: [:c | c is: #(#keyword #'binary_operator' #'unary_identifier')]. message}].
+		[:hits :message | {#args. hits collect: #contents. message}].
+		[:parts :message | {#args. parts joinSeparatedBy: ''. message}]}
+]
+
 { #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkMethodArguments [
 
@@ -609,6 +648,27 @@ DCBlock class >> smalltalkMethodSelector [
 			x childSandblocks
 				detect: [:c | #(#'keyword_selector' #'binary_selector' #'unary_selector') includes: c type]
 				ifNone: [nil]]}
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock class >> smalltalkReloadArtefact [
+	<query: #shortcut>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x containingArtefact class = DCSmalltalkMethod].
+		[:x |
+			x registerShortcut: #reloadArtefact do: [
+				{
+					[:m | | method |
+						method := (DCSmalltalkMethod for: m containingArtefact object)
+							hResizing: m containingArtefact hResizing;
+							width: m containingArtefact width;
+							yourself.
+						
+						m sandblockEditor do: (SBReplaceCommand new target: m containingArtefact replacer: method).
+						
+						method firstDeepChild startInputAtEnd]}]]}
 ]
 
 { #category : #smalltalk }
@@ -770,7 +830,7 @@ DCBlock class >> smalltalkUnknownSelector [
 					SBCodeAction
 						labeled: 'Confirm selector "', selector, '"'
 						for: message
-						do: [:node | node selector asSymbol]})]}
+						do: [:node | selector asSymbol]})]}
 ]
 
 { #category : #smalltalk }
@@ -869,6 +929,40 @@ DCBlock class >> swap: aRange with: anotherRange in: aString do: aBlock [
 				with: (second withSize: first size) + (second size - first size)
 				in: source
 				do: block]
+]
+
+{ #category : #tlaplus }
+DCBlock class >> tlaplusSourceFile [
+	<query: #always>
+
+	^ {
+		[:x | x language = SBTlaplus].
+		[:x | x type = #module].
+		[:x |
+			x
+				ensureReplacement: DCTlaplusModule
+				embed: [:m | {m children select: [:c | c type = #'operator_definition']}]
+				initDo: [:m :definitions | | wrap |
+					m layoutPolicy: TableLayout new.
+					m hResizing: #rigid.
+					m vResizing: #rigid.
+					m extent: 800 @ 500.
+					m addMorphBack: (SBEditorCanvas new
+						color: Color transparent;
+						hResizing: #spaceFill;
+						vResizing: #spaceFill;
+						yourself).
+					wrap := [:c |
+						SBBlock new
+							addMorphBack: c;
+							layoutInset: 10;
+							position: 300 @ 100;
+							attachDecorator: SBForceMoveDecorator newConfigured;
+							layoutPolicy: TableLayout new;
+							hResizing: #shrinkWrap;
+							vResizing: #shrinkWrap;
+							yourself].
+					m firstSubmorph addAllMorphs: (definitions collect: wrap)]]}
 ]
 
 { #category : #'text modify' }
@@ -1074,33 +1168,43 @@ DCBlock >> blockFor: aRange [
 { #category : #'as yet unclassified' }
 DCBlock >> borderVertices [
 
-	| level endLevel |
+	| level endLevel corners first last |
 	level := 0.
-	self firstDeepSubmorph firstOwnerSuchThat: [:o |
+	corners := self cornerMorphs.
+	first := corners first.
+	last := corners last.
+	first firstOwnerSuchThat: [:o |
 		level := level + 1.
 		o = self].
 	level := (self layoutInset * level) asEdgeInsets.
 	endLevel := 0.
-	self lastDeepSubmorph firstOwnerSuchThat: [:o |
+	last firstOwnerSuchThat: [:o |
 		endLevel := endLevel + 1.
 		o = self].
 	endLevel := (self layoutInset * endLevel) asEdgeInsets.
 	
 	^ {
 		self bounds bottomLeft.
-		self left @ (self firstDeepSubmorph bottom + level bottom).
-		self firstDeepSubmorph left - level left @ (self firstDeepSubmorph bottom + level bottom).
-		self firstDeepSubmorph left - level left @ self top.
+		self left @ (first bottom + level bottom).
+		first left - level left @ (first bottom + level bottom).
+		first left - level left @ self top.
 		self bounds topRight.
-		self right @ (self lastDeepSubmorph top - endLevel top).
-		self lastDeepSubmorph right + endLevel right @ (self lastDeepSubmorph top - endLevel top).
-		self lastDeepSubmorph right + endLevel right @ self bottom}
+		self right @ (last top - endLevel top).
+		last right + endLevel right @ (last top - endLevel top).
+		last right + endLevel right @ self bottom}
 ]
 
 { #category : #'as yet unclassified' }
 DCBlock >> childNodes [
 
 	^ self children reject: [:c | c isExtra]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> childOfType: aSymbol [
+
+	self childrenDo: [:c | c type = aSymbol ifTrue: [^ c]].
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -1174,6 +1278,17 @@ DCBlock >> copyRangesFrom: newTree to: oldTree [
 
 	oldTree range: newTree range.
 	newTree children with: oldTree children do: [:a :b | self copyRangesFrom: a to: b]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> cornerMorphs [
+
+	| currentStart currentEnd |
+	currentStart := self.
+	[currentStart submorphs notEmpty and: [{DCBlock. DCText} includes: currentStart firstSubmorph class]] whileTrue: [currentStart := currentStart firstSubmorph].
+	currentEnd := self.
+	[currentEnd submorphs notEmpty and: [{DCBlock. DCText} includes: currentEnd lastSubmorph class]] whileTrue: [currentEnd := currentEnd lastSubmorph].
+	^ {currentStart. currentEnd}
 ]
 
 { #category : #'as yet unclassified' }
@@ -1529,6 +1644,18 @@ DCBlock >> insert: aString atChildIndex: aNumber [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> insertAfter: aString [
+
+	self infoForEditDo: [:source :textMorph :cursorIndex |
+		self class
+			insert: aString
+			in: source
+			at: self range end index + 1
+			do: (self applyBlockWithCursor: self range end index)].
+	self batchedChangeStep
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> insertCommandRequest: aMorph near: aBlock before: aBoolean [
 
 	^ nil
@@ -1632,7 +1759,7 @@ DCBlock >> is: aCollectionOrSymbol [
 { #category : #'as yet unclassified' }
 DCBlock >> isArtefact [
 
-	^ self floating and: [self isRootBlock]
+	^ self isRootBlock and: [self valueOfProperty: #isArtefact ifAbsent: [false]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1756,7 +1883,8 @@ DCBlock >> layoutInset [
 { #category : #'as yet unclassified' }
 DCBlock >> maybeAddSeparator: input textMorph: aTextMorph [
 
-	aTextMorph isLineBreak ifTrue: [^ input, self language statementTerminator].
+	self language statementTerminator ifNil: [^ input].
+	(aTextMorph isLineBreak and: [input ~= self language statementTerminator]) ifTrue: [^ input, self language statementTerminator].
 	^ input
 ]
 
@@ -2072,21 +2200,6 @@ DCBlock >> rejectsEvent: anEvent [
 ]
 
 { #category : #'as yet unclassified' }
-DCBlock >> reloadArtefact [
-	<action>
-
-	| method |
-	method := (DCSmalltalkMethod for: self containingArtefact object)
-		hResizing: self containingArtefact hResizing;
-		width: self containingArtefact width;
-		yourself.
-	
-	self sandblockEditor do: (SBReplaceCommand new target: self containingArtefact replacer: method).
-	
-	method firstDeepChild startInputAtEnd
-]
-
-{ #category : #'as yet unclassified' }
 DCBlock >> replace: oldTree with: newTree [
 
 	^ SBToggledCode comment: '' active: 1 do: {
@@ -2144,10 +2257,17 @@ DCBlock >> restoreCursorAfter: aBlock [
 
 	| current textMorph index editor |
 	editor := self sandblockEditor.
+	editor ifNil: [^ aBlock value].
+	
 	current := editor selection.
 	textMorph := current activeTextMorph.
 	index := textMorph ifNotNil: #cursor.
 	aBlock value.
+	
+	(textMorph ifNotNil: #isInWorld ifNil: [false]) ifFalse: [textMorph := nil].
+	
+	current isInWorld ifFalse: [^ self].
+	
 	textMorph
 		ifNotNil: [editor startInput: current at: index replacingContents: false in: textMorph]
 		ifNil: [current select]
@@ -2188,7 +2308,7 @@ DCBlock >> selectRightMostBlock [
 	self activeTextMorph isLineBreak ifTrue: [^ self].
 	
 	lineBreak := (self activeTextMorph ifNil: [self]) nextMorphThat: [:m | m isLineBreak].
-	(lineBreak isNil or: [lineBreak containingSandblock containingFloat ~= self containingFloat]) ifTrue: [^ self containingFloat lastDeepChild startInputAtEnd].
+	(lineBreak isNil or: [lineBreak containingSandblock containingFloat ~= self containingFloat]) ifTrue: [^ self selectLast].
 	self sandblockEditor
 		startInput: lineBreak containingSandblock
 		at: 1

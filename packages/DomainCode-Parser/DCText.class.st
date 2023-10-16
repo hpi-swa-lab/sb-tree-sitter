@@ -138,6 +138,12 @@ DCText >> isExtra [
 ]
 
 { #category : #'as yet unclassified' }
+DCText >> isFirstChild [
+
+	^ self siblingIndex = 1
+]
+
+{ #category : #'as yet unclassified' }
 DCText >> isReplacement [
 
 	^ false

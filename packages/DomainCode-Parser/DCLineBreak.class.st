@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCLineBreak >> contents: aString [
+
+	aString ifNotEmpty: [^ self error: 'line break erroneously assigned content']
+]
+
+{ #category : #'as yet unclassified' }
 DCLineBreak >> getIndentString [
 
 	| s current |
@@ -23,15 +29,15 @@ DCLineBreak >> isLineBreak [
 ]
 
 { #category : #'as yet unclassified' }
-DCLineBreak >> keyStroke: anEvent [
-
-	self halt
-]
-
-{ #category : #'as yet unclassified' }
 DCLineBreak >> printOn: aStream [
 
 	aStream nextPutAll: '<linebreak>'
+]
+
+{ #category : #'as yet unclassified' }
+DCLineBreak >> treeHash [
+
+	^ 'LABEL' hash + self siblingIndex
 ]
 
 { #category : #'as yet unclassified' }
@@ -43,5 +49,5 @@ DCLineBreak >> treeLabel [
 { #category : #'as yet unclassified' }
 DCLineBreak >> type [
 
-	^ ''
+	^ '<linebreak>'
 ]

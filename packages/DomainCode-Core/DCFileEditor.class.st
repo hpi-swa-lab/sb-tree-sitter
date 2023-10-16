@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+DCFileEditor >> file [
+
+	^ self firstSubmorph firstSubmorph firstSubmorph
+]
+
+{ #category : #'as yet unclassified' }
 DCFileEditor >> file: aFile [
 
 	file := aFile.
@@ -22,7 +28,6 @@ DCFileEditor >> file: aFile [
 			hScrollBarPolicy: #never;
 			in: [:scroll |
 				scroll scroller
-					changeTableLayout;
 					hResizing: #spaceFill;
 					addMorphBack: ((SBTSFile languageForPathAskInstall: aFile basename)
 						ifNotNil: [:language |
@@ -31,4 +36,26 @@ DCFileEditor >> file: aFile [
 								vResizing: #shrinkWrap]
 						ifNil: [self shouldBeImplemented])];
 			yourself)
+]
+
+{ #category : #'as yet unclassified' }
+DCFileEditor >> isArtefact [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
+DCFileEditor >> reloadArtefact [
+	<action>
+
+	self replaceBy: (DCFileEditor new file: file)
+]
+
+{ #category : #'as yet unclassified' }
+DCFileEditor >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
+
+	FileStream
+		forceNewFileNamed: file asString
+		do: [:stream | stream nextPutAll: self file sourceString withUnixLineEndings].
+	^ true
 ]

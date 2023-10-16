@@ -271,8 +271,9 @@ DCReplacement >> uninstallEmbeds [
 { #category : #'as yet unclassified' }
 DCReplacement >> updateEmbeds [
 
-	| newEmbeds |
-	newEmbeds := collectEmbeds value: self source.
+	| newEmbeds collected |
+	collected := collectEmbeds value: self source.
+	newEmbeds := collected flatten.
 	currentEmbeds
 		ifNil: [
 			newEmbeds do: [:embed | self addEmbed: embed].
@@ -282,16 +283,17 @@ DCReplacement >> updateEmbeds [
 				self
 					assert: e class ~= DCEmbedMarker
 					description: 'use children to navigate the tree for embedding (selected marker block)'].
-			currentEmbeds with: newEmbeds do: [:current :new |
-				current = new ifFalse: [ | marker |
-					current replacedParent uninstall.
-					
-					marker := DCEmbedMarker new source: new.
-					new replaceBy: marker.
-					self addMorphBack: new]].
+			
+			(currentEmbeds copyWithoutAll: newEmbeds) do: [:gone | gone replacedParent uninstall].
+			
+			(newEmbeds copyWithoutAll: currentEmbeds) do: [:new | | marker |
+				marker := DCEmbedMarker new source: new.
+				new replaceBy: marker.
+				self addMorphBack: new].
+			
 			currentEmbeds := newEmbeds].
 	
-	^ currentEmbeds
+	^ collected
 ]
 
 { #category : #'as yet unclassified' }

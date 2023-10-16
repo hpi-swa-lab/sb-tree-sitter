@@ -189,8 +189,10 @@ DCQueryState >> triggers [
 { #category : #shortcuts }
 DCQueryState >> tryShortcut: aSymbol do: aBlock [
 
-	currentShortcut = aSymbol ifTrue: [
-		DCQuery script: aBlock value with: self rootBlock sandblockEditor selection source.
+	currentShortcut = aSymbol ifTrue: [| script |
+		script := aBlock value.
+		self assert: script isArray description: 'shortcut should return a script array'.
+		DCQuery script: script with: self rootBlock sandblockEditor selection source.
 		currentShortcut := nil]
 ]
 

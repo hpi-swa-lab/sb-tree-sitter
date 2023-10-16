@@ -94,6 +94,7 @@ DCMockSlot >> preferredColorIn: aColorPolicy for: aHighlightString [
 			['comment'] -> [aColorPolicy defaultLight].
 			['punctuation'] -> [aColorPolicy defaultLight].
 			['variable'] -> [aColorPolicy identifier].
+			['tag'] -> [aColorPolicy identifier].
 			['type'] -> [aColorPolicy keyword].
 			['number'] -> [aColorPolicy literal].
 			['string'] -> [aColorPolicy literal].
