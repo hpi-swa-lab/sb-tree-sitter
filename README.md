@@ -14,4 +14,6 @@ Metacello new
   get; load.
 ```
 
+(Note that you may be warned about unknown selectors -- just confirm and proceed.)
+
 Then open Sandblocks via the Apps menu and create a new file via the Add menu in the top bar.
