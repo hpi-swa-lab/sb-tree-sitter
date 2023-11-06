@@ -17,7 +17,7 @@ SBFileTree >> childNamed: aString [
 SBFileTree >> createFile [
 
 	| name |
-	name := UIManager default request: 'File name?'.
+	name := (UIManager default request: 'File name?') ifNil: [^ self].
 	(self directory / name) ensureFile.
 	self isExpanded ifFalse: [self toggleExpand] ifTrue: [self reload].
 	(self childNamed: name) open

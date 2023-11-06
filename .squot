@@ -22,5 +22,6 @@ OrderedDictionary {
 	'packages/Sandblocks-Wing' : #SquotTonelSerializer,
 	'packages/DomainCode-Parser' : #SquotTonelSerializer,
 	'packages/DomainCode-Core' : #SquotTonelSerializer,
-	'packages/DomainCode-Diff' : #SquotTonelSerializer
+	'packages/DomainCode-Diff' : #SquotTonelSerializer,
+	'packages/DomainCode-Truediff' : #SquotTonelSerializer
 }

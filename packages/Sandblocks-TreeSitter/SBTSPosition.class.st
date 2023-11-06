@@ -100,6 +100,21 @@ SBTSPosition >> column [
 	^ self character
 ]
 
+{ #category : #'as yet unclassified' }
+SBTSPosition >> distance: aPoint [
+
+	(aPoint line isNil or: [self line isNil]) ifTrue: ["FIXME: not the right solution, but we usually dont want to compare these"
+	^ Float infinity].
+	
+	^ self line = aPoint line
+		ifTrue: [(aPoint character - self character) abs]
+		ifFalse: [ | a b width |
+			width := 60.
+			a := self min: aPoint.
+			b := self max: aPoint.
+			width - a character + b character + (b line - a line - 1 * width)]
+]
+
 { #category : #converting }
 SBTSPosition >> end [
 

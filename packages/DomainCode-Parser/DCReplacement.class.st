@@ -89,6 +89,13 @@ DCReplacement >> currentTextMorph [
 ]
 
 { #category : #'as yet unclassified' }
+DCReplacement >> deleteBlock [
+	<action>
+
+	self source deleteBlock
+]
+
+{ #category : #'as yet unclassified' }
 DCReplacement >> embed: aClosure [
 
 	collectEmbeds := aClosure

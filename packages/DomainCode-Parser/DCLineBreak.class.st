@@ -29,9 +29,21 @@ DCLineBreak >> isLineBreak [
 ]
 
 { #category : #'as yet unclassified' }
+DCLineBreak >> literalMatch [
+
+	^ self valueOfProperty: #literalMatch ifAbsent: [false]
+]
+
+{ #category : #'as yet unclassified' }
 DCLineBreak >> printOn: aStream [
 
 	aStream nextPutAll: '<linebreak>'
+]
+
+{ #category : #'as yet unclassified' }
+DCLineBreak >> structureHash [
+
+	^ 1
 ]
 
 { #category : #'as yet unclassified' }

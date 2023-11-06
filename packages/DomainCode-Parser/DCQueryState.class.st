@@ -10,7 +10,10 @@ Class {
 		'suggestions',
 		'transientReplacements',
 		'currentTrigger',
-		'querySourceOverride'
+		'querySourceOverride',
+		'lastSelection',
+		'data',
+		'tokens'
 	],
 	#category : #'DomainCode-Parser'
 }
@@ -24,6 +27,84 @@ DCQueryState >> addSuggestions: aCollection for: aBlock [
 	
 	aBlock sandblockEditor suggestionMenu focusOnOpen: true.
 	aBlock updateSuggestions
+]
+
+{ #category : #accessing }
+DCQueryState >> atData: aSymbol [
+
+	^ data at: aSymbol
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> atData: aSymbol gather: aBlock newestDo: anotherBlock [
+
+	| token |
+	token := UUID new.
+	tokens at: aSymbol put: token.
+	data at: aSymbol put: OrderedCollection new.
+	
+	aBlock value: [:element |
+		(tokens at: aSymbol) = token ifTrue: [
+			(data at: aSymbol) add: element.
+			anotherBlock value: element]]
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> atData: aSymbol gather: aBlock newestDo: anotherBlock oldDo: aThirdBlock [
+
+	| token |
+	token := UUID new.
+	tokens at: aSymbol put: token.
+	
+	data at: aSymbol ifPresent: [:list | list do: aThirdBlock].
+	data at: aSymbol put: OrderedCollection new.
+	
+	aBlock value: [:element |
+		(tokens at: aSymbol) = token ifTrue: [
+			(data at: aSymbol) add: element.
+			anotherBlock value: element]]
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> atData: aSymbol get: aBlock newestDo: anotherBlock oldDo: aThirdBlock [
+
+	| token |
+	token := UUID new.
+	tokens at: aSymbol put: token.
+	
+	data at: aSymbol ifPresent: aThirdBlock.
+	data at: aSymbol put: OrderedCollection new.
+	
+	aBlock value: [:elements |
+		(tokens at: aSymbol) = token ifTrue: [
+			(data at: aSymbol) addAll: elements.
+			anotherBlock value: elements]]
+]
+
+{ #category : #accessing }
+DCQueryState >> atData: aSymbol ifAbsentPut: aBlock [
+
+	^ data at: aSymbol ifAbsentPut: aBlock
+]
+
+{ #category : #accessing }
+DCQueryState >> atData: aSymbol ifPresent: aBlock [
+
+	
+	^ data at: aSymbol ifPresent: aBlock
+]
+
+{ #category : #accessing }
+DCQueryState >> atData: aSymbol ifPresent: aBlock ifAbsent: anotherBlock [
+
+	
+	^ data at: aSymbol ifPresent: aBlock ifAbsent: anotherBlock
+]
+
+{ #category : #accessing }
+DCQueryState >> atData: aSymbol put: anObject [
+
+	^ data at: aSymbol put: anObject
 ]
 
 { #category : #'as yet unclassified' }
@@ -83,7 +164,9 @@ DCQueryState >> initialize [
 	self triggers do: [:t |
 		currentDecorators at: t put: WeakKeyDictionary new.
 		transientReplacements at: t put: WeakSet new].
-	updateQueued := Dictionary new
+	updateQueued := Dictionary new.
+	data := Dictionary new.
+	tokens := Dictionary new
 ]
 
 { #category : #shortcuts }
@@ -165,6 +248,14 @@ DCQueryState >> rootBlock: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+DCQueryState >> showHoverHint: anObject for: aBlock [
+
+	| cleanup |
+	cleanup := [aBlock removeActionsSatisfying: [:a | a == cleanup]].
+	aBlock when: #mouseLeave evaluate: cleanup
+]
+
+{ #category : #'as yet unclassified' }
 DCQueryState >> suggestionsFor: aBlock [
 
 	^ suggestions key = aBlock ifTrue: [suggestions value] ifFalse: [{}]
@@ -183,7 +274,7 @@ DCQueryState >> textQueriesFor: aSymbol do: aBlock [
 { #category : #'as yet unclassified' }
 DCQueryState >> triggers [
 
-	^ #(#shortcut #change #type #selection #doubleClick #open #always #save)
+	^ #(#shortcut #change #type #selection #doubleClick #open #always #save #hover)
 ]
 
 { #category : #shortcuts }
@@ -251,7 +342,13 @@ DCQueryState >> updateQueriesFor: aSymbol at: aBlock [
 { #category : #'as yet unclassified' }
 DCQueryState >> updateSelectionQueries [
 
-	self queueUpdateQueriesFor: #selection
+	| selection |
+	selection := rootBlock sandblockEditor selection.
+	lastSelection = selection ifTrue: [^ self].
+	(selection notNil and: [(selection hasOwner: rootBlock) not and: [selection ~= rootBlock]]) ifTrue: [^ self].
+	
+	self queueUpdateQueriesFor: #selection.
+	lastSelection := selection
 ]
 
 { #category : #'as yet unclassified' }

@@ -61,6 +61,20 @@ DCSmalltalkMethod >> emptyIn: aClass [
 ]
 
 { #category : #'as yet unclassified' }
+DCSmalltalkMethod >> evaluationContext [
+
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+DCSmalltalkMethod >> evaluationReceiver [
+
+	^ self relatedClass isMeta
+		ifTrue: [self relatedClass theNonMetaClass]
+		ifFalse: [self relatedClass basicNew]
+]
+
+{ #category : #'as yet unclassified' }
 DCSmalltalkMethod >> externalModification: aBoolean [
 
 	self setProperty: #externalModificationFlag toValue: aBoolean
@@ -234,6 +248,8 @@ DCSmalltalkMethod >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 DCSmalltalkMethod >> selector [
 
 	| selector |
+	self hasSubmorphs ifFalse: [^ ''].
+	
 	selector := (self method queryFirst: {[:x | x is: #(#'unary_selector' #'binary_selector' #'keyword_selector')]}) ifNil: [^ ''].
 	
 	^ (((selector childSandblocks viewFrom: 1 by: 2) collect: [:p | p contents]) joinSeparatedBy: '') asSymbol

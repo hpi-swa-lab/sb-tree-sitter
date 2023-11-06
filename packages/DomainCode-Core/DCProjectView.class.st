@@ -2,10 +2,18 @@ Class {
 	#name : #DCProjectView,
 	#superclass : #SBBlock,
 	#instVars : [
-		'files'
+		'files',
+		'languageSemantics',
+		'project'
 	],
 	#category : #'DomainCode-Core'
 }
+
+{ #category : #'as yet unclassified' }
+DCProjectView class >> on: aFilePathString [
+
+	^ self new project: (DCProject new directory: (FileDirectory on: aFilePathString))
+]
 
 { #category : #'as yet unclassified' }
 DCProjectView class >> queryOpenProject: aRoot [
@@ -18,6 +26,12 @@ DCProjectView class >> queryOpenProject: aRoot [
 ]
 
 { #category : #'as yet unclassified' }
+DCProjectView >> languageSemanticsFor: aBlock [
+
+	^ {#args. aBlock. languageSemantics}
+]
+
+{ #category : #'as yet unclassified' }
 DCProjectView >> openFile: aFile [
 
 	self submorphCount > 1 ifTrue: [self lastSubmorph delete].
@@ -27,6 +41,8 @@ DCProjectView >> openFile: aFile [
 { #category : #'as yet unclassified' }
 DCProjectView >> project: aProject [
 
+	project := aProject.
+	
 	self
 		changeTableLayout;
 		hResizing: #rigid;
@@ -42,4 +58,17 @@ DCProjectView >> project: aProject [
 		queryFirst: [:obj | obj class = FSReference and: [obj = aProject directory]]
 		ifFound: [:rootFile | files addMorphBack: ((SBFileTree new on: rootFile) when: #open send: #openFile: to: self)]
 		ifNone: []
+]
+
+{ #category : #'as yet unclassified' }
+DCProjectView >> startPythonLSP [
+	<action>
+
+	languageSemantics := SBTSLSPSemantics new
+		on: project directory
+		transport: (SBLSPStdioTransport new
+			command: (SBTSLanguageRuntime which: 'pylsp');
+			arguments: {};
+			workingDirectory: project directory asString)
+		onReady: []
 ]

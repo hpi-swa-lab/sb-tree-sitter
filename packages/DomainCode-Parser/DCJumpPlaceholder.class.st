@@ -15,6 +15,9 @@ DCJumpPlaceholder >> initialize [
 { #category : #'as yet unclassified' }
 DCJumpPlaceholder >> keyStroke: anEvent [
 
+	| artefact |
+	artefact := self containingArtefact.
+	
 	(anEvent keyCharacter isPrintable and: [anEvent commandKeyPressed not]) ifTrue: [
 		self source infoForEditDo: [:source :textMorph :cursorIndex | | text |
 			text := self source
@@ -27,8 +30,8 @@ DCJumpPlaceholder >> keyStroke: anEvent [
 				replace: self source range
 				in: source
 				with: text
-				do: (self source applyBlockWithCursor: self source range start index + (text indexOf: anEvent keyCharacter))]].
-	self batchedChangeStep
+				do: (self source applyBlockWithCursor: self source range start index + (text indexOf: anEvent keyCharacter))].
+		artefact batchedChangeStep]
 ]
 
 { #category : #'as yet unclassified' }

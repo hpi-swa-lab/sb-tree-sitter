@@ -135,6 +135,82 @@ DCBlock class >> insert: aString in: aContainerString at: aNumber do: aBlock [
 		value: [:source :block | self deleteFrom: source at: aNumber do: block]
 ]
 
+{ #category : #lsp }
+DCBlock class >> lspAutocompletion [
+	<query: #never>
+
+	^ {
+		[:x | x isSelected].
+		[:x | x containingArtefact languageSemanticsFor: x].
+		[:block :semantics | block isLeafIdentifier].
+		[:block :semantics |
+			block queryState
+				atData: #lspAutocompletion
+				get: [:add | (semantics loadSuggestionsFor: block) then: [:all | all do: add]]
+				newestDo: [:list | list addOwnSuggestions: list label: 'lsp']
+				oldDo: [:list | ]]}
+]
+
+{ #category : #lsp }
+DCBlock class >> lspDidChange [
+	<query: #type>
+
+	^ {
+		[:x | x isRootBlock].
+		[:x | x containingArtefact languageSemanticsFor: x].
+		[:block :semantics | semantics didChange: block containingArtefact]}
+]
+
+{ #category : #lsp }
+DCBlock class >> lspDidOpen [
+	<query: #open>
+
+	^ {
+		[:x | x isRootBlock].
+		[:x | x containingArtefact languageSemanticsFor: x].
+		[:block :semantics | semantics didOpen: block containingArtefact]}
+]
+
+{ #category : #lsp }
+DCBlock class >> lspHighlightUsages [
+	<query: #selection>
+
+	^ {
+		[:x | x isSelected].
+		[:x | x containingArtefact languageSemanticsFor: x].
+		[:block :semantics |
+			block queryState
+				atData: #lspHighlightUsages
+				gather: [:add | semantics usagesOf: block do: add]
+				newestDo: [:b | b containingSandblock attachDecorator: SBHighlightDecorator new]
+				oldDo: [:b | b detachDecorators: SBHighlightDecorator]]}
+]
+
+{ #category : #lsp }
+DCBlock class >> lspShowHover [
+	<query: #hover>
+
+	^ {
+		[:x | x containingArtefact languageSemanticsFor: x].
+		[:block :semantics | block isLeafIdentifier].
+		[:block :semantics |
+			semantics
+				hoverFor: block
+				do: [:contents | | hover |
+					contents ifNotEmpty: [ | cancel |
+						hover := SBTSHoverMorph new
+							morph: block;
+							contents: contents;
+							openInWorld;
+							reposition;
+							yourself.
+						cancel := [
+							hover deleteSoon.
+							block removeActionsSatisfying: [:a | a == cancel]].
+						block when: #mouseLeaveNextTick evaluate: cancel]]
+				blocking: false]}
+]
+
 { #category : #parsing }
 DCBlock class >> maybeAddTrailingLineBreak: aBlock [
 
@@ -306,7 +382,7 @@ DCBlock class >> smalltalkBrowseReferencesSend [
 							ifFalse: [message sandblockEditor open: calls first compiledMethod]]}]]}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkCascadedMessageSend [
 
 	^ {
@@ -470,6 +546,29 @@ DCBlock class >> smalltalkDeclareTemporary: aBlock inScopes: aCollection [
 ]
 
 { #category : #smalltalk }
+DCBlock class >> smalltalkEvaluateExpression [
+	<query: #shortcut>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x |
+			x registerShortcut: #evaluateExpression do: [
+				{
+					[:block | | result artefact |
+						artefact := block containingArtefact.
+						result := SBExecutionEnvironment value: artefact during: [
+							Compiler new
+								evaluate: block sourceString
+								in: artefact evaluationContext
+								to: (artefact evaluationContext
+									ifNil: [artefact evaluationReceiver]
+									ifNotNil: #receiver)
+								notifying: nil
+								ifFail: nil].
+						result explore]}]]}
+]
+
+{ #category : #smalltalk }
 DCBlock class >> smalltalkFlagMarker [
 	<query: #always>
 
@@ -500,6 +599,7 @@ DCBlock class >> smalltalkIdentifierAutocompletion [
 
 	^ {
 		[:x | x isSelected].
+		[:x | x language = SBTSSmalltalk].
 		[:x | x type = #identifier].
 		[:x |
 			x
@@ -622,7 +722,7 @@ DCBlock class >> smalltalkMessageSendSelector [
 		[:parts :message | {#args. parts joinSeparatedBy: ''. message}]}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'smalltalk - helpers' }
 DCBlock class >> smalltalkMessageSendSelectorIncludingCascaded [
 
 	^ {
@@ -650,7 +750,7 @@ DCBlock class >> smalltalkMethodSelector [
 				ifNone: [nil]]}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #smalltalk }
 DCBlock class >> smalltalkReloadArtefact [
 	<query: #shortcut>
 
@@ -719,7 +819,7 @@ DCBlock class >> smalltalkSelector [
 					{
 						[:b | b language = SBTSSmalltalk].
 						[:b | b type = #symbol].
-						[:sym | {#args. sym lastSubmorph contents. sym}]}.
+						[:sym | {#args. sym lastSubmorph contents allButFirst. sym}]}.
 					{
 						[:b | b language = SBTSSmalltalk].
 						[:b | b orParent: #(#'keyword_selector' #'binary_selector' #'unary_selector')].
@@ -1104,7 +1204,7 @@ DCBlock >> applyEdit: edit source: newSource cursorAt: newIndex undoDo: aBlock [
 	
 	apply := [ | newTree |
 		newTree := DCBlock parse: newSource old: oldTree language: oldTree language.
-		DCMatcher new performEditsIn: newTree to: oldTree.
+		self applyEditsIn: newTree to: oldTree.
 		oldTree
 			privateTSTree: newTree privateTSTree;
 			privateSource: newTree privateSource.
@@ -1124,6 +1224,15 @@ DCBlock >> applyEdit: edit source: newSource cursorAt: newIndex undoDo: aBlock [
 		ifNil: [apply value].
 	
 	oldTree placeCursorIn: oldTree at: newIndex
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> applyEditsIn: newTree to: oldTree [
+
+	false ifTrue: [
+		oldTree allChildrenDo: [:m | m clearDiffCache].
+		^ DCTrueDiff new compare: oldTree to: newTree].
+	DCMatcher new performEditsIn: newTree to: oldTree
 ]
 
 { #category : #'as yet unclassified' }
@@ -1169,19 +1278,20 @@ DCBlock >> blockFor: aRange [
 DCBlock >> borderVertices [
 
 	| level endLevel corners first last |
-	level := 0.
 	corners := self cornerMorphs.
 	first := corners first.
 	last := corners last.
-	first firstOwnerSuchThat: [:o |
-		level := level + 1.
-		o = self].
-	level := (self layoutInset * level) asEdgeInsets.
-	endLevel := 0.
-	last firstOwnerSuchThat: [:o |
-		endLevel := endLevel + 1.
-		o = self].
-	endLevel := (self layoutInset * endLevel) asEdgeInsets.
+	
+	level := 0 asEdgeInsets.
+	first = self ifFalse: [
+		first firstOwnerSuchThat: [:o |
+			level := level + o layoutInset asEdgeInsets.
+			o = self]].
+	endLevel := 0 asEdgeInsets.
+	last = self ifFalse: [
+		last firstOwnerSuchThat: [:o |
+			endLevel := endLevel + o layoutInset asEdgeInsets.
+			o = self]].
 	
 	^ {
 		self bounds bottomLeft.
@@ -1233,7 +1343,8 @@ DCBlock >> clearDiffCache [
 
 	self removeProperty: #treeHash.
 	self removeProperty: #treeSize.
-	self removeProperty: #treeHeight
+	self removeProperty: #treeHeight.
+	self removeProperty: #structureHash
 ]
 
 { #category : #'as yet unclassified' }
@@ -1334,12 +1445,6 @@ DCBlock >> deleteBlockWithCopy [
 
 	self sandblockEditor copyBuffer: self preferQuick: true.
 	self deleteBlock
-]
-
-{ #category : #'as yet unclassified' }
-DCBlock >> diff: oldTree to: newTree [
-
-	
 ]
 
 { #category : #'as yet unclassified' }
@@ -1504,6 +1609,20 @@ DCBlock >> handleInsertEvent: anEvent in: textMorph [
 				(textMorph contents notEmpty and: [textMorph contents includesSubstring: input]) ifTrue: [^ self]]]}.
 	
 	^ super keyStroke: anEvent
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> handleMouseEnter: anEvent [
+
+	super handleMouseEnter: anEvent.
+	self queryState updateQueriesFor: #hover at: self
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> handleMouseLeave: anEvent [
+
+	super handleMouseLeave: anEvent.
+	self addAlarm: #triggerEvent: with: #mouseLeaveNextTick after: 1
 ]
 
 { #category : #hierarchy }
@@ -1788,6 +1907,12 @@ DCBlock >> isLayoutRoot [
 	^ self owner ifNotNil: [:o | o class ~= self class] ifNil: [true]
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock >> isLeafIdentifier [
+
+	^ self contents anySatisfy: [:c | c isLetter]
+]
+
 { #category : #hierarchy }
 DCBlock >> isOrHasParent: aCollectionOrSymbol [
 
@@ -1871,13 +1996,9 @@ DCBlock >> layoutCommands [
 { #category : #'as yet unclassified' }
 DCBlock >> layoutInset [
 
-	SBToggledCode comment: '' active: 1 do: {[true ifTrue: [^ 1 @ 1]]}.
-	
 	self isBlockBody ifTrue: [^ 4 @ 3].
 	
-	^ (self type = 'ERROR' and: [self childSandblocks notEmpty])
-		ifTrue: [0]
-		ifFalse: [2 @ (self submorphCount > 3 ifTrue: [2] ifFalse: [0])]
+	^ 2 @ (self submorphCount > 3 ifTrue: [2] ifFalse: [0])
 ]
 
 { #category : #'as yet unclassified' }
@@ -2305,7 +2426,7 @@ DCBlock >> selectRightMostBlock [
 	<inputAction>
 
 	| lineBreak |
-	self activeTextMorph isLineBreak ifTrue: [^ self].
+	(self activeTextMorph notNil and: [self activeTextMorph isLineBreak]) ifTrue: [^ self].
 	
 	lineBreak := (self activeTextMorph ifNil: [self]) nextMorphThat: [:m | m isLineBreak].
 	(lineBreak isNil or: [lineBreak containingSandblock containingFloat ~= self containingFloat]) ifTrue: [^ self selectLast].

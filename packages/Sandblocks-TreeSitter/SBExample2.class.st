@@ -8,13 +8,16 @@ Class {
 SBExample2 >> artefactSaved: aMethodBlock [
 
 	aMethodBlock = self containingArtefact ifTrue: [
-		(self firstOwnerSuchThat: [:owner | owner isTSBlock and: [owner type = #'function_definition']]) ifNotNil: [:method | | name arguments |
+		(self firstOwnerSuchThat: [:owner | owner isTSBlock and: [owner type = #'function_definition']]) ifNotNil: [:method | | name arguments a |
 			name := (method get: 'name') contents.
 			arguments := self updateDuring: [(bindings at: 'arguments') sourceString].
+			self sandblockEditor allBlocksDo: [:morph | morph listensToExamples ifTrue: [morph exampleStarting: self]].
 			SBExecutionEnvironment value: self.
-			self runtime
+			a := self runtime
 				evaluate: ('import {1}; {1}.{2}(*{3})' format: {(self containingArtefact file basename splitBy: '.') first. name. arguments})
-				in: self containingArtefact file parent]]
+				in: self containingArtefact file parent.
+			self world doOneCycle.
+			self sandblockEditor allBlocksDo: [:morph | morph listensToExamples ifTrue: [morph exampleFinished: self]]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -79,6 +82,12 @@ SBExample2 >> buildPython [
 SBExample2 >> drawnColor [
 
 	^ Color veryDarkGray
+]
+
+{ #category : #'as yet unclassified' }
+SBExample2 >> label [
+
+	^ self submorphs second contents
 ]
 
 { #category : #'as yet unclassified' }

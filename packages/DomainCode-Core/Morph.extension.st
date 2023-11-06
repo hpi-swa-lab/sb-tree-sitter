@@ -111,6 +111,12 @@ Morph >> isReplacement [
 ]
 
 { #category : #'*DomainCode-Core' }
+Morph >> onlyChildrenDo: aBlock [
+
+	self childrenDo: [:c | c allChildrenDo: aBlock]
+]
+
+{ #category : #'*DomainCode-Core' }
 Morph >> purpose [
 
 	^ nil

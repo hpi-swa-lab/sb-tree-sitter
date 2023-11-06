@@ -82,8 +82,16 @@ SBTSLSPSemantics >> applyEdit: anEdit [
 { #category : #helper }
 SBTSLSPSemantics >> blockFor: aRange in: aRootBlock [
 
-	aRootBlock allMorphsDo: [:block | (block isTSMorph and: [block range = aRange]) ifTrue: [^ block]].
-	^ nil
+	| closest best distance |
+	closest := nil.
+	best := 900000000.
+	aRootBlock allMorphsDo: [:block |
+		(block isTSMorph and: [
+			distance := block range distance: aRange.
+			distance < best]) ifTrue: [
+			closest := block containingSandblock.
+			best := distance]].
+	^ closest
 ]
 
 { #category : #helper }
@@ -234,6 +242,35 @@ SBTSLSPSemantics >> findFileByUri: aUri [
 		ifNone: [nil]
 ]
 
+{ #category : #requests }
+SBTSLSPSemantics >> formatDocumentOf: aBlock [
+
+	client connected ifFalse: [^ self].
+	
+	client
+		sendRequest: 'textDocument/formatting'
+		params: (Dictionary newFrom: {
+			'textDocument' -> (self textDocumentFor: aBlock).
+			'options' -> (Dictionary newFrom: {'tabSize' -> 4. 'insertSpaces' -> false})})
+		do: [:response |
+			response ifNotNil: [
+				aBlock infoForEditDo: [:source | | s undo |
+					s := source.
+					undo := [].
+					response do: [:edit |
+						DCBlock
+							replace: (SBTSRange fromLSPWithRange: (edit at: 'range'))
+							in: s
+							with: (edit at: 'newText')
+							do: [:new :e :u |
+								s := new.
+								undo := [
+									undo value.
+									u value]].
+						aBlock applyEdit: nil source: s cursorAt: nil undoDo: undo]]]]
+		blocking: true
+]
+
 { #category : #helper }
 SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 
@@ -245,11 +282,11 @@ SBTSLSPSemantics >> handleServerMessage: aJsonObject [
 				currentDiagnostics at: file put: OrderedCollection new.
 				aJsonObject params diagnostics do: [:diagnostic |
 					(self blockFor: (SBTSRange fromLSPWithRange: diagnostic) in: file) ifNotNil: [:block | | decorator |
-						decorator := SBTSDiagnosticDecorator new
+						({'space'. 'newline'. 'too long'} noneSatisfy: [:x | diagnostic message includesSubstring: x]) ifTrue: [decorator := SBTSDiagnosticDecorator new
 							diagnostic: diagnostic;
 							yourself.
 						(currentDiagnostics at: file) add: decorator.
-						block attachDecorator: decorator]]].
+						block attachDecorator: decorator]]]].
 			['workspace/applyEdit'] -> [
 				self applyEdit: aJsonObject params edit.
 				client respondToRequest: aJsonObject id result: (Dictionary newFrom: {'applied' -> false})]}

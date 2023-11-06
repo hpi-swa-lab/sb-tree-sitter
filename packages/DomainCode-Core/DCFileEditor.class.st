@@ -10,7 +10,7 @@ Class {
 { #category : #'as yet unclassified' }
 DCFileEditor >> file [
 
-	^ self firstSubmorph firstSubmorph firstSubmorph
+	^ self childSandblocks first
 ]
 
 { #category : #'as yet unclassified' }
@@ -39,9 +39,28 @@ DCFileEditor >> file: aFile [
 ]
 
 { #category : #'as yet unclassified' }
+DCFileEditor >> filepath [
+
+	^ file asString
+]
+
+{ #category : #'as yet unclassified' }
+DCFileEditor >> getSourceStringAndMark [
+	"for compatibility with lsp"
+
+	^ self file sourceString
+]
+
+{ #category : #'as yet unclassified' }
 DCFileEditor >> isArtefact [
 
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+DCFileEditor >> languageSemanticsFor: aBlock [
+
+	^ self owner languageSemanticsFor: aBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -49,6 +68,12 @@ DCFileEditor >> reloadArtefact [
 	<action>
 
 	self replaceBy: (DCFileEditor new file: file)
+]
+
+{ #category : #'as yet unclassified' }
+DCFileEditor >> root [
+
+	^ self file
 ]
 
 { #category : #'as yet unclassified' }

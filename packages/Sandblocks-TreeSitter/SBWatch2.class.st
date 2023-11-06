@@ -217,7 +217,8 @@ SBWatch2 >> reportValue: aString env: anEnvironment [
 			ifFalse: [aString].
 		converted = 'inf' ifTrue: [converted := Float infinity].
 		
-		display reportValue: converted name: (anEnvironment ifNotNil: #label ifNil: [''])].
+		display reportValue: converted name: (anEnvironment ifNotNil: #label ifNil: ['']).
+		anEnvironment ifNil: [display exampleFinished: anEnvironment]].
 	self triggerEvent: #reportedValue with: aString
 ]
 

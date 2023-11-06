@@ -3,7 +3,8 @@ Class {
 	#superclass : #ScrollPane,
 	#instVars : [
 		'morph',
-		'container'
+		'container',
+		'isHovered'
 	],
 	#category : #'Sandblocks-TreeSitter-LanguageClient'
 }
@@ -53,13 +54,14 @@ SBTSHoverMorph >> delete [
 SBTSHoverMorph >> deleteSoon [
 	"essentially just the next tick: the user needs to be able to have moved their mouse on to the popup"
 
-	self addAlarm: #delete after: 1
+	isHovered ifFalse: [self addAlarm: #delete after: 1]
 ]
 
 { #category : #'events-processing' }
 SBTSHoverMorph >> handleMouseEnter: anEvent [
 
 	super handleMouseEnter: anEvent.
+	isHovered := true.
 	self cancelDelete
 ]
 
@@ -67,6 +69,7 @@ SBTSHoverMorph >> handleMouseEnter: anEvent [
 SBTSHoverMorph >> handleMouseLeave: anEvent [
 
 	super handleMouseLeave: anEvent.
+	isHovered := false.
 	self delete
 ]
 
@@ -74,6 +77,7 @@ SBTSHoverMorph >> handleMouseLeave: anEvent [
 SBTSHoverMorph >> initialize [
 
 	super initialize.
+	isHovered := false.
 	self
 		hResizing: #shrinkWrap;
 		disableLayout: true.

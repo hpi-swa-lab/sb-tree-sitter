@@ -13,7 +13,7 @@ SBTSRange class >> fromLSP: aJsonObject [
 
 	^ self
 		start: (SBTSPosition fromLSP: (aJsonObject at: 'start'))
-		end: (SBTSPosition fromLSP: (aJsonObject at: 'end'))
+		end: ((SBTSPosition fromLSP: (aJsonObject at: 'end')))
 ]
 
 { #category : #'instance creation' }
@@ -76,6 +76,12 @@ SBTSRange >> = anObject [
 SBTSRange >> contains: aTSPosition [
 
 	^ self start <= aTSPosition and: [self end >= aTSPosition]
+]
+
+{ #category : #'as yet unclassified' }
+SBTSRange >> distance: aRange [
+
+	^ (self start distance: aRange start) + (self end distance: aRange end)
 ]
 
 { #category : #testing }

@@ -53,7 +53,7 @@ SBTSLanguageClient >> formatRequest: aString params: anObject seq: myId [
 { #category : #'as yet unclassified' }
 SBTSLanguageClient >> handleMessage: aJsonObject [
 
-	(aJsonObject includesKey: 'event')
+	(aJsonObject includesKey: 'method')
 		ifTrue: [self onUIThread: [self handleServerMessage: aJsonObject]]
 		ifFalse: [
 			pending
