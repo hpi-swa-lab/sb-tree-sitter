@@ -37,6 +37,65 @@ DCBlock class >> addUncapturedTextTo: aNode in: aCursor language: aLanguage isLe
 			range: aCursor range)]
 ]
 
+{ #category : #cards }
+DCBlock class >> cardsCard [
+	<query: #always>
+
+	^ {
+		[:x | x language = SBCards].
+		[:x | x type = #card].
+		[:x |
+			x
+				ensureReplacement: CardsCard
+				embed: [:g | {g childNodes first}]
+				initDo: [:g :name | g addMorphBack: name]]}
+]
+
+{ #category : #cards }
+DCBlock class >> cardsGroup [
+	<query: #always>
+
+	^ {
+		[:x | x language = SBCards].
+		[:x | x type = #group].
+		[:x |
+			x
+				ensureReplacement: CardsGroup
+				embed: [:g | {g childNodes second. (g childNodes viewAllButFirst: 3 andLast: 1) select: [:n | n contents ~= '.']}]
+				initDo: [:g :name :statements |
+					g
+						addMorphBack: name;
+						addAllMorphsBack: statements]]}
+]
+
+{ #category : #cards }
+DCBlock class >> cardsPool [
+	<query: #always>
+
+	^ {
+		[:x | x language = SBCards].
+		[:x | x type = #pool].
+		[:x |
+			x
+				ensureReplacement: CardsPool
+				embed: [:g | {g childNodes second}]
+				initDo: [:g :name | g addMorphBack: name]]}
+]
+
+{ #category : #cards }
+DCBlock class >> cardsSequence [
+	<query: #always>
+
+	^ {
+		[:x | x language = SBCards].
+		[:x | x type = #sequence].
+		[:x |
+			x
+				ensureReplacement: CardsSequence
+				embed: [:g | {g children}]
+				initDo: [:g :cards | g addAllMorphsBack: cards]]}
+]
+
 { #category : #'text modify' }
 DCBlock class >> deleteFrom: aString at: aNumber do: aBlock [
 
@@ -133,6 +192,12 @@ DCBlock class >> insert: aString in: aContainerString at: aNumber do: aBlock [
 			newEndByte: aNumber - 1 + aString size;
 			bytesToPointsIn: aContainerString new: new)
 		value: [:source :block | self deleteFrom: source at: aNumber do: block]
+]
+
+{ #category : #parsing }
+DCBlock class >> language: aLanguage [
+
+	^ self parse: '' language: aLanguage
 ]
 
 { #category : #lsp }
@@ -274,7 +339,7 @@ DCBlock class >> replace: aRange in: aContainerString with: aString do: aBlock [
 
 	| new original newLength |
 	self
-		example: [DCBlock new]
+		example: [DCBlock]
 		args: [{SBTSRange start: 3 size: 3. 'abcxxxghi'. 'def'. [:a :b | ]}]
 		label: 'example'.
 	
@@ -289,6 +354,99 @@ DCBlock class >> replace: aRange in: aContainerString with: aString do: aBlock [
 			newEndByte: aRange start index + aString size;
 			bytesToPointsIn: aString new: new)
 		value: [:source :block | self replace: (aRange withSize: newLength) in: source with: original do: block]
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkBabylonianBuildExample [
+	<query: #always>
+
+	^ {
+		self smalltalkMessageSendSelector.
+		[:selector :message | selector = #example:args:label:].
+		[:selector :message |
+			message
+				ensureReplacement: DCExample
+				embed: [:m | {m childNodes third. m childNodes fifth. m childNodes seventh}]
+				initDo: [:m :selfBlock :argsBlock :label |
+					m
+						addMorphBack: label;
+						addMorphBack: (SBStringMorph new contents: 'self: ');
+						addMorphBack: selfBlock;
+						addMorphBack: (SBStringMorph new contents: 'args: ');
+						addMorphBack: argsBlock]]}
+]
+
+{ #category : #'smalltalk - helpers' }
+DCBlock class >> smalltalkBabylonianExample [
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x containingArtefact].
+		[:x |
+			x method childNodes
+				detect: [:node | node type = #statement and: [node childSandblocks first class = DCExample]]
+				ifFound: [:stmt | stmt childSandblocks first]
+				ifNone: [nil]]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkBabylonianLivePreview [
+	<query: #selection>
+
+	^ {
+		[:x | x language = SBTSSmalltalk].
+		[:x | x isSelected].
+		[:x | x orParentExpression].
+		[:x | {#args. x. DCQuery script: self smalltalkBabylonianExample with: x}].
+		[:block :example | | source |
+			source := DCBlock
+				replace: block range
+				in: block containingArtefact method sourceString
+				with: '(', block sourceString, ') sbLivePreview'
+				do: [:s :edit :undo | s].
+			
+			([
+				(block containingArtefact methodClass newParser
+					parse: source
+					class: block containingArtefact methodClass
+					noPattern: false
+					notifying: nil
+					ifFail: nil) generateWithTempNames]
+				on: SyntaxErrorNotification
+				do: [nil]) ifNotNil: [:newMethod | | oldMethod popup |
+				oldMethod := block containingArtefact compiledMethod.
+				popup := block queryState
+					onDelete: #babylonianLivePreviewPopup do: #delete;
+					atData: #babylonianLivePreviewPopup ifAbsentPut: [SBPopup new].
+				popup removeAllMorphs.
+				[
+					oldMethod methodClass
+						addSelectorSilently: oldMethod selector
+						withMethod: newMethod.
+					[example run]
+						on: Error, Halt, TestFailure
+						do: [:err |
+							popup
+								addMorphBack: SBIcon iconBolt;
+								addMorphBack: (SBStringMorph new contents: (err printStringLimitedTo: 40))]
+						on: TimedOut
+						do: [
+							popup
+								addMorphBack: SBIcon iconClockO;
+								addMorphBack: (SBStringMorph new contents: 'timed out')]
+						on: SBStRunUntilValue
+						do: [:val |
+							popup
+								addMorphBack: SBIcon iconInfoCircle;
+								addMorphBack: (SBStringMorph new contents: val value printString)]] ensure: [newMethod methodClass addSelectorSilently: newMethod selector withMethod: oldMethod].
+				popup showBelow: block closeOnDeselect: false]]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkBabylonianRunExample [
+	<query: #save>
+
+	^ {self smalltalkBabylonianExample. [:example | Project current addDeferredUIMessage: [example run]]}
 ]
 
 { #category : #'smalltalk - helpers' }
@@ -393,7 +551,7 @@ DCBlock class >> smalltalkCascadedMessageSend [
 
 { #category : #smalltalk }
 DCBlock class >> smalltalkCheckbox [
-	<query: #change>
+	<query: #always>
 
 	^ {
 		[:x | false].
@@ -401,9 +559,10 @@ DCBlock class >> smalltalkCheckbox [
 		[:x | x isReplacement not].
 		[:x | {#true. #false} includes: x type].
 		[:x |
-			x installActiveReplacement: (DCCheckbox new
-				fromSource: [:source :repl | repl checked: source contents = 'true']
-				toSource: [:source :repl | source contents: (repl checked ifTrue: ['true'] ifFalse: ['false'])])]}
+			x ensureReplacement: DCCheckbox initDo: [:c |
+				c
+					fromSource: [:source :repl | repl checked: source contents = 'true']
+					toSource: [:source :repl | source contents: (repl checked ifTrue: ['true'] ifFalse: ['false'])]]]}
 ]
 
 { #category : #smalltalk }
@@ -449,6 +608,9 @@ DCBlock class >> smalltalkCreateNewMethod [
 				{
 					[:e | | method |
 						method := DCSmalltalkMethod emptyIn: e containingArtefact methodClass.
+						method category: (e sandblockEditor class = SBBrowserEditor
+							ifTrue: [e sandblockEditor model selectedMessageCategoryName]
+							ifFalse: [nil]).
 						e sandblockEditor openMorphInView: method.
 						method firstDeepChild startInputAtEnd]}]]}
 ]
@@ -618,8 +780,11 @@ DCBlock class >> smalltalkIdentifierAutocompletion [
 					with: scope.
 				DCQuery
 					script: {
-						[:block | block childSandblocks select: [:a | a type = #'block_argument']].
-						[:vars | id addOwnSuggestions: (vars collect: [:c | c contents]) label: 'block arg']}
+						[:block |
+							DCWatch
+								report: (block childSandblocks select: [:a | a type = #'block_argument'])
+								for: '33d56e88-3979-4a35-815d-ec9c4250d2c3'].
+						[:vars | id addOwnSuggestions: (vars collect: [:c | c contents allButFirst]) label: 'block arg']}
 					with: scope].
 			id].
 		[:id |
@@ -844,6 +1009,28 @@ DCBlock class >> smalltalkSelectorWithPlaceholders: aString [
 ]
 
 { #category : #smalltalk }
+DCBlock class >> smalltalkShowImplementor [
+	<query: #doubleClick>
+
+	^ {
+		self smalltalkBlockWithSelector.
+		self smalltalkSelector.
+		[:selector :message | {#args. selector. message. self systemNavigation allImplementorsOf: selector asSymbol}].
+		[:selector :message :list |
+			list ifNotEmpty: [ | method preview |
+				method := DCSmalltalkMethod for: list first compiledMethod.
+				preview := DCReplacement new
+					embed: [:msg | {msg}];
+					listDirection: #topToBottom;
+					cellGap: 0.
+				message installActiveReplacement: preview.
+				preview
+					addMorphBack: preview updateEmbeds first;
+					addMorphBack: method;
+					addMorphBack: (SBIcon iconRemove on: #click send: #activeUninstall to: preview)]]}
+]
+
+{ #category : #smalltalk }
 DCBlock class >> smalltalkSymbolAutocompletion [
 	<query: #type>
 
@@ -965,6 +1152,17 @@ DCBlock class >> smalltalkUsesOfDeclaration [
 				#args.
 				decl.
 				scope allChildrenSelect: [:x | (#(#identifier #'block_argument') includes: x type) and: [(x contents withoutLeading: #($:)) = search]]}]}
+]
+
+{ #category : #smalltalk }
+DCBlock class >> smalltalkVisualSelf [
+	<query: #always>
+
+	^ {
+		[:x | false].
+		[:x | x language = SBTSSmalltalk].
+		[:x | x type = 'self'].
+		[:x | x ensureReplacement: DCReplacement initDo: [:r | r addMorphBack: SBIcon iconHeart]]}
 ]
 
 { #category : #smalltalk }
@@ -1211,8 +1409,8 @@ DCBlock >> applyEdit: edit source: newSource cursorAt: newIndex undoDo: aBlock [
 		nil].
 	
 	aBlock
-		ifNotNil: [
-			self sandblockEditor do: (SBDoItCommand new
+		ifNotNil: [ | cmd |
+			cmd := SBDoItCommand new
 				do: apply;
 				artefact: self containingArtefact;
 				undo: [
@@ -1220,16 +1418,17 @@ DCBlock >> applyEdit: edit source: newSource cursorAt: newIndex undoDo: aBlock [
 						aBlock
 							value: source
 							value: [:new :undoEdit :undo | oldTree applyEdit: undoEdit source: new cursorAt: (undoEdit ifNotNil: #newEndByte) undoDo: nil]].
-					nil])]
+					nil].
+			self sandblockEditor ifNotNil: [:e | e do: cmd] ifNil: [cmd do]]
 		ifNil: [apply value].
 	
-	oldTree placeCursorIn: oldTree at: newIndex
+	oldTree sandblockEditor ifNotNil: [oldTree placeCursorIn: oldTree at: newIndex]
 ]
 
 { #category : #'as yet unclassified' }
 DCBlock >> applyEditsIn: newTree to: oldTree [
 
-	false ifTrue: [
+	true ifTrue: [
 		oldTree allChildrenDo: [:m | m clearDiffCache].
 		^ DCTrueDiff new compare: oldTree to: newTree].
 	DCMatcher new performEditsIn: newTree to: oldTree
@@ -1833,7 +2032,7 @@ DCBlock >> installActiveReplacement: aBlock do: aClosure [
 DCBlock >> installPassiveReplacement: aBlock [
 
 	aBlock source: self.
-	self replaceBy: aBlock.
+	self replaceNodeBy: aBlock.
 	self replacedParent: aBlock
 ]
 
@@ -1841,7 +2040,7 @@ DCBlock >> installPassiveReplacement: aBlock [
 DCBlock >> installPassiveReplacement: aBlock do: aClosure [
 
 	aBlock source: self.
-	self replaceBy: aBlock.
+	self replaceNodeBy: aBlock.
 	self replacedParent: aBlock.
 	aClosure value: aBlock
 ]
@@ -1996,6 +2195,7 @@ DCBlock >> layoutCommands [
 { #category : #'as yet unclassified' }
 DCBlock >> layoutInset [
 
+	false ifTrue: [^ 5].
 	self isBlockBody ifTrue: [^ 4 @ 3].
 	
 	^ 2 @ (self submorphCount > 3 ifTrue: [2] ifFalse: [0])
@@ -2069,11 +2269,24 @@ DCBlock >> orParent: aCollectionOrSymbol [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> orParentExpression [
+
+	| current |
+	current := self.
+	[current notNil] whileTrue: [
+		current isExpression ifTrue: [^ current].
+		current isRootBlock ifTrue: [^ nil].
+		current := current parent].
+	^ nil
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> outOfWorld: aWorld [
 
 	super outOfWorld: aWorld.
 	
 	self isRootBlock ifTrue: [
+		self queryState onDelete.
 		self sandblockEditor
 			removeActionsWithReceiver: self queryState forEvent: #selectionChanged;
 			removeActionsWithReceiver: self queryState forEvent: #batchedChange]
@@ -2096,7 +2309,9 @@ DCBlock >> pairMap [
 { #category : #hierarchy }
 DCBlock >> parent [
 
-	^ self replacedParent ifNotNil: [:p | p isReplacement ifTrue: [p owner] ifFalse: [p]] ifNil: [self parentSandblock]
+	^ self replacedParent
+		ifNotNil: [:p | p parent ifNotNil: #source]
+		ifNil: [self parentSandblock]
 ]
 
 { #category : #'as yet unclassified' }
@@ -2347,18 +2562,6 @@ DCBlock >> replace: oldTree with: newTree [
 DCBlock >> replaceWith: aString [
 
 	self infoForEditDo: [:source :textMorph :cursorIndex | self class replace: textMorph range in: source with: aString do: self applyBlock]
-]
-
-{ #category : #accessing }
-DCBlock >> replacedParent [
-
-	^ self valueOfProperty: #replacedParent
-]
-
-{ #category : #accessing }
-DCBlock >> replacedParent: aBlock [
-
-	self setProperty: #replacedParent toValue: aBlock
 ]
 
 { #category : #'query actions' }

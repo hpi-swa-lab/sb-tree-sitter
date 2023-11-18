@@ -33,6 +33,13 @@ SBTreeSitter >> c [
 	^ SBTSLanguage tryPatchLibrary: 'tree-sitter/tree-sitter-c' name: 'c' context: thisContext branch: 'master' subpath: ''
 ]
 
+{ #category : #'ffi languages' }
+SBTreeSitter >> cards [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_cards () module: 'tree-sitter-cards'>
+	^ SBTSLanguage tryPatchLibrary: 'tom95/tree-sitter-cards' name: 'cards' context: thisContext branch: 'master' subpath: ''
+]
+
 { #category : #helper }
 SBTreeSitter >> changedRangesFrom: anOldTree to: aNewTree [
 
@@ -234,6 +241,13 @@ SBTreeSitter >> languageVersion: language [
 
 	<apicall: uint32_t ts_language_version (SBTSLanguageStruct*)>
 	^ self externalCallFailed
+]
+
+{ #category : #'ffi languages' }
+SBTreeSitter >> markdown [
+
+	<apicall: SBTSLanguageStruct* tree_sitter_markdown () module: 'tree-sitter-markdown'>
+	^ SBTSLanguage tryPatchLibrary: 'ikatyang/tree-sitter-markdown' name: 'markdown' context: thisContext branch: 'master' subpath: ''
 ]
 
 { #category : #ffi }

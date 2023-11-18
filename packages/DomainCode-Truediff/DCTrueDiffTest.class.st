@@ -16,6 +16,7 @@ DCTrueDiffTest >> testAddStatement [
 	
 	new := DCTrueDiff new compare: a to: b.
 	
+	self assert: program identical: new.
 	self assert: first identical: new children first.
 	self assert: last identical: new children last
 ]
@@ -33,8 +34,24 @@ DCTrueDiffTest >> testKeepIdentityLeafAdd [
 	new := DCTrueDiff new compare: a to: b.
 	
 	self assert: program identical: new.
+	self assert: one identical: new children first children first children second.
+	self assert: array identical: new children first children first
+]
+
+{ #category : #'as yet unclassified' }
+DCTrueDiffTest >> testKeepIdentityLeafRemove [
+
+	| a b new program array one |
+	a := DCBlock parse: '[1,2]' language: SBJavascript.
+	program := a.
+	array := program children first children first.
+	one := array children second.
+	b := DCBlock parse: '[1,]' language: SBJavascript.
+	
+	new := DCTrueDiff new compare: a to: b.
+	
+	self assert: program identical: new.
 	self assert: one identical: new children first children first children second
-	"self assert: array identical: new children first children first"
 ]
 
 { #category : #'as yet unclassified' }

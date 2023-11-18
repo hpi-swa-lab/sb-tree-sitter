@@ -84,6 +84,6 @@ DCEmbedMarker >> type [
 { #category : #'as yet unclassified' }
 DCEmbedMarker >> uninstall [
 
-	self replaceBy: source.
+	self replaceNodeBy: source.
 	source replacedParent: nil
 ]

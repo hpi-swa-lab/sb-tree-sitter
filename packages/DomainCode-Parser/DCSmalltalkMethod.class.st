@@ -2,7 +2,8 @@ Class {
 	#name : #DCSmalltalkMethod,
 	#superclass : #SBBlock,
 	#instVars : [
-		'methodClass'
+		'methodClass',
+		'category'
 	],
 	#category : #'DomainCode-Parser'
 }
@@ -44,7 +45,13 @@ DCSmalltalkMethod >> browse [
 { #category : #'as yet unclassified' }
 DCSmalltalkMethod >> category [
 
-	^ self methodClass organization categoryOfElement: self selector
+	^ category ifNil: [self methodClass organization categoryOfElement: self selector]
+]
+
+{ #category : #'as yet unclassified' }
+DCSmalltalkMethod >> category: aSymbol [
+
+		category := aSymbol
 ]
 
 { #category : #'as yet unclassified' }

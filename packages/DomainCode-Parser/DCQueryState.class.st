@@ -13,6 +13,7 @@ Class {
 		'querySourceOverride',
 		'lastSelection',
 		'data',
+		'destructors',
 		'tokens'
 	],
 	#category : #'DomainCode-Parser'
@@ -121,13 +122,14 @@ DCQueryState >> ensureReplacement: aClass for: aBlock embed: aClosure initDo: an
 				ifNil: [false].
 			
 			r := aClass new.
+			aBlock replaceNodeBy: r.
 			aBlock replacedParent: r.
-			aBlock replaceBy: r.
 			r
 				source: aBlock;
 				embed: aClosure.
 			anotherClosure valueWithArguments: {r}, r updateEmbeds.
 			hadFocus ifTrue: [r startInputAtEnd].
+			r updateReplacement.
 			r]
 		ifTrue: [ | r |
 			r := aBlock class = aClass ifFalse: [aBlock replacedParent] ifTrue: [aBlock].
@@ -166,7 +168,20 @@ DCQueryState >> initialize [
 		transientReplacements at: t put: WeakSet new].
 	updateQueued := Dictionary new.
 	data := Dictionary new.
+	destructors := Dictionary new.
 	tokens := Dictionary new
+]
+
+{ #category : #'as yet unclassified' }
+DCQueryState >> onDelete [
+
+	destructors keysAndValuesDo: [:key :block | block value: (data at: key)]
+]
+
+{ #category : #shortcuts }
+DCQueryState >> onDelete: aSymbol do: aBlock [
+
+	destructors at: aSymbol put: aBlock
 ]
 
 { #category : #shortcuts }
@@ -336,7 +351,9 @@ DCQueryState >> updateQueriesFor: aSymbol at: aBlock [
 
 	self
 		rerunQueriesFor: aSymbol
-		do: [self queriesFor: aSymbol do: [:script | DCQuery script: script with: aBlock]]
+		do: [self queriesFor: aSymbol do: [:script |
+				" a prior script may have removed us from the world "
+				aBlock isInWorld ifTrue: [DCQuery script: script with: aBlock]]]
 ]
 
 { #category : #'as yet unclassified' }

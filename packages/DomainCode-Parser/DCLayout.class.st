@@ -11,5 +11,5 @@ DCLayout >> layout: aMorph in: newBounds [
 { #category : #'as yet unclassified' }
 DCLayout >> minExtentOf: aMorph in: newBounds [
 
-	^ 0@0
+	^ (DCLayoutInfo new measureRoot: aMorph at: newBounds topLeft) extent
 ]

@@ -76,7 +76,7 @@ DCLayoutInfo >> layoutRoot: aMorph at: aPoint [
 				ifFalse: [tuple first nonExtraChildrenBounds expandBy: tuple first layoutInset asEdgeInsets].
 			tuple first setBoundsDirect: bounds.
 			y := y max: bounds bottom.
-			tuple size = 3 ifTrue: [tuple first doLayoutIn: bounds]].
+			tuple size = 3 ifTrue: [tuple first doLayoutIn: (bounds insetBy: tuple first layoutInset)]].
 		line removeAll.
 		
 		x := lineStart.
@@ -147,6 +147,62 @@ DCLayoutInfo >> measure: aMorph [
 	aMorph class = DCLineBreak
 		ifTrue: [self lineBreak]
 		ifFalse: [aMorph class = DCBlock ifFalse: [self advance: minBounds width @ (minBounds height + (self padding * 2))]]
+]
+
+{ #category : #'as yet unclassified' }
+DCLayoutInfo >> measureRoot: aMorph at: aPoint [
+
+	| line flushLine |
+	self
+		origin: aPoint;
+		lineStart: aPoint x;
+		padding: aMorph layoutInset.
+	
+	morphs := Array streamContents: [:s | aMorph allLayoutMorphsDo: [:b | s nextPut: b]].
+	
+	line := OrderedCollection new.
+	baseline := 0.
+	lineStartY := aPoint y - aMorph layoutInset asEdgeInsets top.
+	
+	flushLine := [
+		line do: [:tuple | | bounds |
+			bounds := tuple size = 3
+				ifTrue: [tuple second @ (lineStartY + baseline) extent: tuple third]
+				ifFalse: [tuple first nonExtraChildrenBounds expandBy: tuple first layoutInset asEdgeInsets].
+			y := y max: bounds bottom].
+		line removeAll.
+		
+		x := lineStart.
+		lineStartY := y.
+		baseline := 0].
+	
+	morphs viewAllButFirstAndLast do: [:m |
+		true
+			caseOf: {
+				[m class = Array] -> [ | inset |
+					"leave"
+					line add: {m second. x}.
+					inset := m second layoutInset asEdgeInsets.
+					x := x + inset right.
+					y := y - inset top.
+					lineStart := lineStart - inset left].
+				[m isLineBreak] -> [
+					line add: {m. x. m minExtent}.
+					flushLine value].
+				[m class = DCBlock] -> [ | inset |
+					inset := m layoutInset asEdgeInsets.
+					x := x + inset left.
+					y := y + inset top.
+					lineStart := lineStart + inset left.
+					baseline := baseline max: y - lineStartY]}
+			otherwise: [ | extent |
+				extent := m minExtent.
+				line add: {m. x. extent}.
+				x := x + extent x]].
+	
+	flushLine value.
+	
+	^ aPoint - aMorph layoutInset asEdgeInsets topLeft extent: (aMorph submorphBounds expandBy: aMorph layoutInset asEdgeInsets) extent
 ]
 
 { #category : #'as yet unclassified' }

@@ -240,18 +240,6 @@ DCText >> range: aRange [
 ]
 
 { #category : #'as yet unclassified' }
-DCText >> replacedParent [
-
-	^ self valueOfProperty: #replacedParent
-]
-
-{ #category : #'as yet unclassified' }
-DCText >> replacedParent: aBlock [
-
-	self setProperty: #replacedParent toValue: aBlock
-]
-
-{ #category : #'as yet unclassified' }
 DCText >> resolveSource [
 
 	^ self

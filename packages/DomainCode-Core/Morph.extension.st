@@ -117,9 +117,48 @@ Morph >> onlyChildrenDo: aBlock [
 ]
 
 { #category : #'*DomainCode-Core' }
+Morph >> parent [
+
+	^ self replacedParent
+		ifNotNil: [:p | p parent ifNotNil: #source]
+		ifNil: [self parentSandblock]
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> parentMorph [
+
+	^ self replacedParent ifNotNil: [:p | p parentMorph] ifNil: [self parentSandblock]
+]
+
+{ #category : #'*DomainCode-Core' }
 Morph >> purpose [
 
 	^ nil
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> replaceNodeBy: aMorph [
+
+	| currentOwner index target |
+	target := self parentMorph.
+	currentOwner := target owner.
+	self assert: currentOwner notNil.
+	index := currentOwner submorphIndexOf: target.
+	target delete.
+	currentOwner addMorph: aMorph asElementNumber: index.
+	^ aMorph
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> replacedParent [
+
+	^ self valueOfProperty: #replacedParent
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> replacedParent: aBlock [
+
+	self setProperty: #replacedParent toValue: aBlock
 ]
 
 { #category : #'*DomainCode-Core' }

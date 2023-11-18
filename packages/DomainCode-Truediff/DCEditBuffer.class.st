@@ -19,16 +19,20 @@ DCEditBuffer >> apply [
 { #category : #'as yet unclassified' }
 DCEditBuffer >> attach: aNode to: aParentNode at: aNumber [
 
-	(detachListNext includes: {aParentNode -> aNode})
-		ifTrue: [self halt]
-		ifFalse: [posBuf add: [aParentNode ifNotNil: [aParentNode addMorph: aNode asElementNumber: aNumber]]].
+	self assert: aNode ~~ aParentNode.
+	posBuf add: [
+		aParentNode ifNotNil: [ | target |
+			target := aNode replacedParent ifNil: [aNode].
+			aParentNode addMorph: target asElementNumber: aNumber]].
 	self logChanges: {#attach. aNode. aParentNode. aNumber}
 ]
 
 { #category : #'as yet unclassified' }
 DCEditBuffer >> detach: aNode [
 
-	negBuf add: [aNode delete].
+	negBuf add: [ | target |
+		target := aNode replacedParent ifNil: [aNode].
+		target delete].
 	detachListNext add: {aNode parent -> aNode}.
 	self logChanges: {#detach. aNode}
 ]
@@ -52,6 +56,8 @@ DCEditBuffer >> logChanges: aCollection [
 { #category : #'as yet unclassified' }
 DCEditBuffer >> remove: aNode [
 
+	negBuf add: ["aNode replacedParent ifNotNil: [:p | p isReplacement ifTrue: [p queryState replacementDeleted: p]]"
+	].
 	self logChanges: {#remove. aNode}
 ]
 

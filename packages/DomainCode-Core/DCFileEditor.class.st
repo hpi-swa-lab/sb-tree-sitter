@@ -79,6 +79,8 @@ DCFileEditor >> root [
 { #category : #'as yet unclassified' }
 DCFileEditor >> saveTryFixing: aFixBoolean quick: aQuickBoolean [
 
+	(self languageSemanticsFor: self root) ifNotNil: [:l | l third formatDocumentOf: self root].
+	
 	FileStream
 		forceNewFileNamed: file asString
 		do: [:stream | stream nextPutAll: self file sourceString withUnixLineEndings].

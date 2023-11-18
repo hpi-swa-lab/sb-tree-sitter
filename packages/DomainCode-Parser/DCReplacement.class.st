@@ -56,7 +56,7 @@ DCReplacement >> addEmbed: aBlock [
 	^ currentEmbeds add: (aBlock = self source
 		ifFalse: [ | marker |
 			marker := DCEmbedMarker new source: aBlock.
-			aBlock replaceBy: marker.
+			aBlock replaceNodeBy: marker.
 			aBlock]
 		ifTrue: [
 			self assert: aBlock replacedParent = self.
@@ -169,7 +169,7 @@ DCReplacement >> passiveUninstall [
 	hadFocus := self sandblockEditor textFocus
 		ifNotNil: [:t | (t ownerSatisfying: [:o | o = self]) notNil]
 		ifNil: [false].
-	self source ifNotNil: [self replaceBy: self source] ifNil: [self delete].
+	self source ifNotNil: [self replaceNodeBy: self source] ifNil: [self delete].
 	
 	hadFocus ifTrue: [self source startInputAtEnd]
 ]
@@ -295,12 +295,24 @@ DCReplacement >> updateEmbeds [
 			
 			(newEmbeds copyWithoutAll: currentEmbeds) do: [:new | | marker |
 				marker := DCEmbedMarker new source: new.
-				new replaceBy: marker.
+				new replaceNodeBy: marker.
 				self addMorphBack: new].
 			
 			currentEmbeds := newEmbeds].
 	
 	^ collected
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> updateReplacement [
+
+	bindings do: [:assoc | assoc key value: self source value: self]
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> updateSource [
+
+	bindings do: [:assoc | assoc value value: self source value: self]
 ]
 
 { #category : #'as yet unclassified' }

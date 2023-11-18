@@ -16,7 +16,22 @@ DCTrueDiff >> assignSharesFrom: this to: that subtreeReg: aRegistry [
 ]
 
 { #category : #'as yet unclassified' }
-DCTrueDiff >> assignSharesRecurseFrom: this to: that subtreeReg: aRegistry [
+DCTrueDiff >> assignSharesListFrom: thisList to: thatList subtreeReg: aRegistry [
+
+	([thisList notEmpty and: [thatList notEmpty]]) whileTrue: [ | thisShare thatShare |
+		thisShare := aRegistry assignShare: thisList first.
+		thatShare := aRegistry assignShare: thatList first.
+		thisShare = thatShare
+			ifTrue: [
+				self assignTreeFrom: thisList first to: thatList first literalMatch: false.
+				thisList removeFirst.
+				thatList removeFirst]
+			ifFalse: [^ {thisList. thatList}]].
+	^ {thisList. thatList}
+]
+
+{ #category : #'as yet unclassified' }
+DCTrueDiff >> assignSharesRecurseFrom1: this to: that subtreeReg: aRegistry [
 
 	(this type = that type and: [this children size = that children size])
 		ifTrue: [
@@ -26,6 +41,27 @@ DCTrueDiff >> assignSharesRecurseFrom: this to: that subtreeReg: aRegistry [
 				do: [:l :r | self assignSharesFrom: l to: r subtreeReg: aRegistry]]
 		ifFalse: [
 			this allChildrenDo: [:c | aRegistry assignShareAndRegisterTree: c].
+			that onlyChildrenDo: [:c | aRegistry assignShare: c]]
+]
+
+{ #category : #'as yet unclassified' }
+DCTrueDiff >> assignSharesRecurseFrom: this to: that subtreeReg: aRegistry [
+
+	this type = that type
+		ifTrue: [ | thisList thatList |
+			thisList := this children asOrderedCollection.
+			thatList := that children asOrderedCollection.
+			self assignSharesListFrom: thisList to: thatList subtreeReg: aRegistry.
+			self assignSharesListFrom: thisList reverseInPlace to: thatList reverseInPlace subtreeReg: aRegistry.
+			
+			thisList withOrNil: thatList do: [:l :r |
+				l ifNil: [r allChildrenDo: [:c | aRegistry assignShare: c]] ifNotNil: [
+					r ifNil: [l allChildrenDo: [:c | aRegistry assignShareAndRegisterTree: c]] ifNotNil: [
+						aRegistry assignShareAndRegisterTree: l.
+						aRegistry assignShare: r.
+						self assignSharesRecurseFrom: l to: r subtreeReg: aRegistry]]]]
+		ifFalse: [
+			this onlyChildrenDo: [:c | aRegistry assignShareAndRegisterTree: c].
 			that onlyChildrenDo: [:c | aRegistry assignShare: c]]
 ]
 
@@ -104,11 +140,121 @@ DCTrueDiff >> computeEditScriptFrom: this to: that parent: anotherNode parentTyp
 			link: aLink
 			in: anEditBuffer) ifNotNil: [:new | ^ new]].
 	
-	anEditBuffer detach: this.
-	self unloadUnassigned: this in: anEditBuffer.
-	newTree := self loadUnassigned: that in: anEditBuffer.
-	anEditBuffer attach: newTree to: anotherNode at: aLink.
+	(this type = that type and: [this assigned isNil and: [that assigned isNil]])
+		ifTrue: [
+			this children do: [:c |
+				anEditBuffer detach: c.
+				self unloadUnassigned: c in: anEditBuffer].
+			that children withIndexDo: [:c :index | | new |
+				new := self loadUnassigned: c in: anEditBuffer.
+				anEditBuffer attach: new to: this at: index].
+			newTree := this]
+		ifFalse: [
+			anEditBuffer detach: this.
+			self unloadUnassigned: this in: anEditBuffer.
+			newTree := self loadUnassigned: that in: anEditBuffer.
+			anEditBuffer attach: newTree to: anotherNode at: aLink].
 	^ newTree
+]
+
+{ #category : #'as yet unclassified' }
+DCTrueDiff >> computeEditScriptListsFrom: thisList to: thatList parent: aNode link: aNumber edits: anEditBuffer [
+
+	| result |
+	result := OrderedCollection new.
+	
+	[thisList notEmpty and: [thatList notEmpty]] whileTrue: [
+		(self
+			tryReuseListElementFrom: thisList first
+			to: thatList first
+			parent: aNode
+			link: aNumber
+			edits: anEditBuffer)
+			ifNotNil: [:reusedNode | result add: reusedNode]
+			ifNil: [ | newTree |
+				anEditBuffer detach: thisList first.
+				self unloadUnassigned: thisList first in: anEditBuffer.
+				newTree := self loadUnassigned: thatList first in: anEditBuffer.
+				anEditBuffer attach: newTree to: aNode at: aNumber.
+				result add: newTree].
+		thisList removeFirst.
+		thatList removeFirst].
+	
+	[thatList isEmpty] whileFalse: [ | newTree |
+		newTree := self loadUnassigned: thatList first in: anEditBuffer.
+		anEditBuffer attach: newTree to: aNode at: aNumber.
+		result add: newTree.
+		thatList removeFirst].
+	
+	[thisList isEmpty] whileFalse: [
+		anEditBuffer detach: thisList first.
+		self unloadUnassigned: thisList first in: anEditBuffer.
+		thisList removeFirst].
+	
+	^ result
+]
+
+{ #category : #'as yet unclassified' }
+DCTrueDiff >> computeEditScriptRecurse2From: this to: that parent: aNode parentType: aSymbol link: aLink in: anEditBuffer [
+
+	^ this type = that type
+		ifTrue: [ | thatList thisList |
+			this range: that range.
+			
+			thisList := this children asOrderedCollection.
+			thatList := that children asOrderedCollection.
+			[thisList notEmpty and: [thatList notEmpty]] whileTrue: [
+				(thisList first assigned isNil and: [thatList first assigned isNil])
+					ifTrue: [
+						self
+							computeEditScriptFrom: thisList first
+							to: thatList first
+							parent: this
+							parentType: this type
+							link: thatList first siblingIndex
+							edits: anEditBuffer.
+						thisList removeFirst.
+						thatList removeFirst]
+					ifFalse: [
+						(thisList first assigned notNil and: [thisList first assigned uri = thatList first uri])
+							ifTrue: [
+								self updateLiteralsFrom: thisList first to: thatList first in: anEditBuffer.
+								thisList removeFirst.
+								thatList removeFirst]
+							ifFalse: [
+								(thisList first assigned notNil and: [thatList includes: thisList first assigned])
+									ifTrue: [
+										anEditBuffer detach: thisList first.
+										anEditBuffer attach: thisList first to: this at: thisList first assigned siblingIndex.
+										self updateLiteralsFrom: thisList first to: thisList first assigned in: anEditBuffer.
+										thatList remove: thisList first assigned.
+										thisList removeFirst]
+									ifFalse: [
+										thatList first assigned
+											ifNotNil: [
+												anEditBuffer detach: thisList first.
+												self unloadUnassigned: thisList first in: anEditBuffer.
+												thisList removeFirst]
+											ifNil: [
+												self
+													computeEditScriptFrom: thisList first
+													to: thatList first
+													parent: this
+													parentType: this type
+													link: thatList first siblingIndex
+													edits: anEditBuffer.
+												thisList removeFirst.
+												thatList removeFirst]]]]].
+			thatList do: [:thatNode |
+				anEditBuffer
+					attach: (self loadUnassigned: thatNode in: anEditBuffer)
+					to: aNode
+					at: thatNode siblingIndex].
+			thisList do: [:thisNode |
+				anEditBuffer detach: thisNode.
+				self unloadUnassigned: thisNode in: anEditBuffer].
+			this]
+		ifFalse: [nil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -124,8 +270,7 @@ DCTrueDiff >> computeEditScriptRecurseFrom: this to: that parent: aNode parentTy
 					parent: this
 					parentType: this type
 					link: thisNode siblingIndex
-					edits: anEditBuffer
-				"thisNode = newNode ifFalse: [thisNode replaceBy: newNode]"].
+					edits: anEditBuffer].
 			this]
 		ifFalse: [nil]
 ]
@@ -151,6 +296,26 @@ DCTrueDiff >> selectAvailableTreeFrom: aCollection literalMatch: aBoolean subtre
 					self assignTreeFrom: availableTree to: node literalMatch: aBoolean.
 					false]
 				ifNil: [true]]]
+]
+
+{ #category : #'as yet unclassified' }
+DCTrueDiff >> tryReuseListElementFrom: this to: that parent: aNode link: aNumber edits: anEditBuffer [
+
+	(that assigned notNil and: [that assigned uri = this uri]) ifTrue: [ | newTree |
+		newTree := self updateLiteralsFrom: this to: that in: anEditBuffer.
+		this assigned: nil.
+		^ newTree].
+	
+	(this assigned isNil and: [that assigned isNil]) ifTrue: [
+		^ self
+			computeEditScriptRecurseFrom: this
+			to: that
+			parent: aNode
+			parentType: aNode type
+			link: aNumber
+			in: anEditBuffer].
+	
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }

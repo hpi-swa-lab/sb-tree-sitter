@@ -61,6 +61,19 @@ DCProjectView >> project: aProject [
 ]
 
 { #category : #'as yet unclassified' }
+DCProjectView >> startHTMLLSP [
+	<action>
+
+	languageSemantics := SBTSLSPSemantics new
+		on: project directory
+		transport: (SBLSPStdioTransport new
+			command: (SBTSLanguageRuntime which: 'node');
+			arguments: {'/home/tom/Code/squeak/coc/node_modules/coc-html/lib/server.js'. '--stdio'};
+			workingDirectory: project directory asString)
+		onReady: []
+]
+
+{ #category : #'as yet unclassified' }
 DCProjectView >> startPythonLSP [
 	<action>
 
