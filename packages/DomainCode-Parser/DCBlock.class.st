@@ -1306,6 +1306,7 @@ DCBlock class >> tlaplusSourceFile [
 	^ {
 		[:x | x language = SBTlaplus].
 		[:x | x type = #module].
+		[:x | false].
 		[:x |
 			x
 				ensureReplacement: DCTlaplusModule
@@ -2416,10 +2417,10 @@ DCBlock >> layoutCommands [
 { #category : #'as yet unclassified' }
 DCBlock >> layoutInset [
 
-	false ifTrue: [^ 5].
-	self isBlockBody ifTrue: [^ 4 @ 3].
+	false ifTrue: [^ 5 sbScaled].
+	self isBlockBody ifTrue: [^ (4 @ 3) sbScaled].
 	
-	^ 2 @ (self submorphCount > 3 ifTrue: [2] ifFalse: [0])
+	^ (2 @ (self submorphCount > 3 ifTrue: [2] ifFalse: [0])) sbScaled
 ]
 
 { #category : #'as yet unclassified' }
