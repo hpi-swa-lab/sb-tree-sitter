@@ -16,24 +16,25 @@ DCEditBuffer >> apply [
 	posBuf do: [:b | b value]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #operations }
 DCEditBuffer >> attach: aNode to: aParentNode at: aNumber [
 
 	self assert: aNode ~~ aParentNode.
+	self assert: aNumber >= 1.
 	posBuf add: [
-		aParentNode ifNotNil: [ | target |
-			target := aNode replacedParent ifNil: [aNode].
-			aParentNode addMorph: target asElementNumber: aNumber]].
+		aParentNode ifNotNil: [
+			aParentNode addBaseChild: aNode at: aNumber.
+			aParentNode addMorph: aNode baseMorph asElementNumber: aNumber]].
 	self logChanges: {#attach. aNode. aParentNode. aNumber}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #operations }
 DCEditBuffer >> detach: aNode [
 
-	negBuf add: [ | target |
-		target := aNode replacedParent ifNil: [aNode].
-		target delete].
-	detachListNext add: {aNode parent -> aNode}.
+	negBuf add: [
+		aNode baseRemoveFromParent.
+		aNode replacedParent ifNotNil: #delete ifNil: [aNode delete]].
+	detachListNext add: {aNode baseParent -> aNode}.
 	self logChanges: {#detach. aNode}
 ]
 
@@ -50,18 +51,18 @@ DCEditBuffer >> initialize [
 { #category : #'as yet unclassified' }
 DCEditBuffer >> logChanges: aCollection [
 
-	true ifTrue: [Transcript showln: aCollection]
+	false ifTrue: [Transcript showln: aCollection]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #operations }
 DCEditBuffer >> remove: aNode [
+	"used to deallocate deattached children, gc does that for us"
 
-	negBuf add: ["aNode replacedParent ifNotNil: [:p | p isReplacement ifTrue: [p queryState replacementDeleted: p]]"
-	].
+	negBuf add: [].
 	self logChanges: {#remove. aNode}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #operations }
 DCEditBuffer >> update: aNode to: aString [
 
 	posBuf add: [aNode contents: aString].

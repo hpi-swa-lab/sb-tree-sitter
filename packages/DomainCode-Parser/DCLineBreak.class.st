@@ -61,5 +61,5 @@ DCLineBreak >> treeLabel [
 { #category : #'as yet unclassified' }
 DCLineBreak >> type [
 
-	^ '<linebreak>'
+	^ ''
 ]

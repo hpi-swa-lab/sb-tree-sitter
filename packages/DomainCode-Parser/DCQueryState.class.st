@@ -112,9 +112,6 @@ DCQueryState >> atData: aSymbol put: anObject [
 DCQueryState >> ensureReplacement: aClass for: aBlock embed: aClosure initDo: anotherClosure [
 
 	| replacement |
-	" do not replace off-screen nodes "
-	aBlock sandblockEditor ifNil: [^ self].
-	
 	replacement := (aBlock class = aClass or: [(aBlock replacedParent ifNotNil: #class) = aClass])
 		ifFalse: [ | r hadFocus |
 			hadFocus := (aBlock sandblockEditor ifNotNil: #textFocus)
@@ -122,18 +119,16 @@ DCQueryState >> ensureReplacement: aClass for: aBlock embed: aClosure initDo: an
 				ifNil: [false].
 			
 			r := aClass new.
-			aBlock replaceNodeBy: r.
+			aBlock replaceBy: r.
 			aBlock replacedParent: r.
-			r
-				source: aBlock;
-				embed: aClosure.
-			anotherClosure valueWithArguments: {r}, r updateEmbeds.
+			r source: aBlock.
+			anotherClosure valueWithArguments: {r}.
 			hadFocus ifTrue: [r startInputAtEnd].
 			r updateReplacement.
 			r]
 		ifTrue: [ | r |
 			r := aBlock class = aClass ifFalse: [aBlock replacedParent] ifTrue: [aBlock].
-			r updateEmbeds.
+			r updateReplacement.
 			r].
 	(transientReplacements at: currentTrigger) add: replacement
 ]

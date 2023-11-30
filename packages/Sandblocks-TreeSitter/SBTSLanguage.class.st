@@ -4,6 +4,9 @@ Class {
 	#instVars : [
 		'grammar'
 	],
+	#classVars : [
+		'RawGrammar'
+	],
 	#classInstVars : [
 		'instance'
 	],

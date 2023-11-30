@@ -31,23 +31,11 @@ DCEmbedMarker >> parent [
 ]
 
 { #category : #'as yet unclassified' }
-DCEmbedMarker >> printOn [
-
-	
-]
-
-{ #category : #'as yet unclassified' }
 DCEmbedMarker >> printOn: aStream [
 
 	aStream nextPutAll: 'EmbedMarker('.
 	aStream print: self source.
 	aStream nextPut: $)
-]
-
-{ #category : #'as yet unclassified' }
-DCEmbedMarker >> resolveSource [
-
-	^ self source resolveSource
 ]
 
 { #category : #'as yet unclassified' }

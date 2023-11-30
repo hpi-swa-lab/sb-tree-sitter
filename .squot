@@ -23,5 +23,6 @@ OrderedDictionary {
 	'packages/DomainCode-Parser' : #SquotTonelSerializer,
 	'packages/DomainCode-Core' : #SquotTonelSerializer,
 	'packages/DomainCode-Diff' : #SquotTonelSerializer,
-	'packages/DomainCode-Truediff' : #SquotTonelSerializer
+	'packages/DomainCode-Truediff' : #SquotTonelSerializer,
+	'packages/Sandblocks-Tlaplus' : #SquotTonelSerializer
 }

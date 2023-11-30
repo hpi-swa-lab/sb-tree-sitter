@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'range',
 		'highlight',
-		'field'
+		'field',
+		'baseParent'
 	],
 	#category : #'DomainCode-Parser'
 }
@@ -15,10 +16,70 @@ DCText >> alias [
 	^ nil
 ]
 
+{ #category : #'base accessing' }
+DCText >> allBaseChildrenDo: aBlock [
+
+	aBlock value: self
+]
+
+{ #category : #'base accessing' }
+DCText >> allBaseChildrenExceptSelfDo: aBlock [
+
+	
+]
+
 { #category : #hierarchy }
 DCText >> allParentsUpTo: aBlock [
 
 	^ {self parent}, (self parent allParentsUpTo: aBlock)
+]
+
+{ #category : #'base accessing' }
+DCText >> baseChildren [
+
+	^ #()
+]
+
+{ #category : #'base accessing' }
+DCText >> baseMorph [
+
+	^ self replacedParent ifNotNil: [:p | p baseMorph] ifNil: [self]
+]
+
+{ #category : #'base accessing' }
+DCText >> baseParent [
+
+	^ baseParent
+]
+
+{ #category : #'base accessing' }
+DCText >> baseParent: aNode [
+
+	baseParent := aNode
+]
+
+{ #category : #'base accessing' }
+DCText >> baseRemoveFromParent [
+
+	self parent baseChildren remove: self.
+	self baseParent: nil
+]
+
+{ #category : #'base accessing' }
+DCText >> baseSiblingIndex [
+
+	| i |
+	i := 1.
+	self baseParent baseChildren do: [:c |
+		c = self ifTrue: [^ i].
+		i := i + 1].
+	^ 0
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> baseTreeHeight [
+
+	^ 0
 ]
 
 { #category : #'as yet unclassified' }
@@ -115,7 +176,9 @@ DCText >> initialize [
 
 	super initialize.
 	
-	range := SBTSRange null
+	range := SBTSRange null.
+	self hResizing: #shrinkWrap.
+	self vResizing: #shrinkWrap
 ]
 
 { #category : #'as yet unclassified' }
@@ -189,7 +252,7 @@ DCText >> ownerWithForegroundColor [
 { #category : #'as yet unclassified' }
 DCText >> parent [
 
-	^ self replacedParent ifNotNil: [:p | p isReplacement ifTrue: [p owner] ifFalse: [p]] ifNil: [self parentSandblock]
+	^ self owner showInQuery ifTrue: [self owner] ifFalse: [self baseParent]
 ]
 
 { #category : #'as yet unclassified' }
@@ -240,12 +303,6 @@ DCText >> range: aRange [
 ]
 
 { #category : #'as yet unclassified' }
-DCText >> resolveSource [
-
-	^ self
-]
-
-{ #category : #'as yet unclassified' }
 DCText >> rootBlock [
 
 	^ self owner rootBlock
@@ -259,6 +316,12 @@ DCText >> shallowCopyBlock [
 		contents: contents;
 		highlight: highlight;
 		field: field
+]
+
+{ #category : #'as yet unclassified' }
+DCText >> showInQuery [
+
+	^ true
 ]
 
 { #category : #'as yet unclassified' }

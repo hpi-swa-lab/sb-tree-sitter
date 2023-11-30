@@ -6,7 +6,9 @@ Class {
 		'language',
 		'range',
 		'highlight',
-		'field'
+		'field',
+		'baseChildren',
+		'baseParent'
 	],
 	#category : #'DomainCode-Parser'
 }
@@ -20,20 +22,18 @@ DCBlock class >> addUncapturedTextTo: aNode in: aCursor language: aLanguage isLe
 	text isolateLineBreaks do: [:part |
 		part isEmpty ifFalse: [
 			part = String cr
-				ifTrue: [aNode addMorphBack: (DCLineBreak new range: (SBTSRange start: start size: 1))]
+				ifTrue: [aNode baseAndMorphAdd: (DCLineBreak new range: (SBTSRange start: start size: 1))]
 				ifFalse: [
-					aNode addMorphBack: (DCText new
+					aNode baseAndMorphAdd: (DCText new
 						contents: part;
-						field: aCursor fieldName;
 						range: (SBTSRange start: start size: part size))]].
 		start := start + part size].
 	aCursor advance: text size.
 	
 	aBoolean ifTrue: [
 		text := aCursor uncapturedText.
-		aNode addMorphBack: (DCText new
+		aNode baseAndMorphAdd: (DCText new
 			contents: text;
-			field: aCursor fieldName;
 			range: aCursor range)]
 ]
 
@@ -45,10 +45,23 @@ DCBlock class >> cardsCard [
 		[:x | x language = SBCards].
 		[:x | x type = #card].
 		[:x |
-			x
-				ensureReplacement: CardsCard
-				embed: [:g | {g childNodes first}]
-				initDo: [:g :name | g addMorphBack: name]]}
+			x ensureReplacement: CardsCardContainer initDo: [:g |
+				g syncTextFrom: [:source | source childNodes first] to: g card name.
+				g embedMany: [:s | (s atType: #arguments) namedChildren] onChange: [:list | g card arguments: list].
+				g
+					embedMany: [:source |
+						source baseChildren
+							detect: [:c | c type = #resources]
+							ifFound: [:scope | scope namedChildren]
+							ifNone: [{}]]
+					onChange: [:list | g resources: list].
+				g
+					embedMany: [:source |
+						source baseChildren
+							detect: [:c | c type = #scope]
+							ifFound: [:scope | scope namedChildren]
+							ifNone: [{}]]
+					onChange: [:list | g scope: list]]]}
 ]
 
 { #category : #cards }
@@ -59,13 +72,13 @@ DCBlock class >> cardsGroup [
 		[:x | x language = SBCards].
 		[:x | x type = #group].
 		[:x |
-			x
-				ensureReplacement: CardsGroup
-				embed: [:g | {g childNodes second. (g childNodes viewAllButFirst: 3 andLast: 1) select: [:n | n contents ~= '.']}]
-				initDo: [:g :name :statements |
-					g
-						addMorphBack: name;
-						addAllMorphsBack: statements]]}
+			x ensureReplacement: CardsGroup initDo: [:g |
+				g syncTextFrom: [:source | source childNodes second] to: g name.
+				g
+					embedMany: [:s | (s childNodes viewAllButFirst: 3 andLast: 1) select: [:n | n contents ~= '.']]
+					onChange: [:list |
+						g submorphs allButFirstDo: #delete.
+						g addAllMorphsBack: list]]]}
 ]
 
 { #category : #cards }
@@ -75,11 +88,20 @@ DCBlock class >> cardsPool [
 	^ {
 		[:x | x language = SBCards].
 		[:x | x type = #pool].
+		[:x | x ensureReplacement: CardsPool initDo: [:g | g addMorphBack: (g embed: [:s | s childNodes second])]]}
+]
+
+{ #category : #cards }
+DCBlock class >> cardsResources [
+	<query: #always>
+
+	^ {
+		[:x | x language = SBCards].
+		[:x | x type = #identifier and: [x parent type = #resources]].
 		[:x |
 			x
-				ensureReplacement: CardsPool
-				embed: [:g | {g childNodes second}]
-				initDo: [:g :name | g addMorphBack: name]]}
+				ensureReplacement: CardsCard
+				initDo: [:c | c syncTextFrom: [:source | source childNodes first] to: c name]]}
 ]
 
 { #category : #cards }
@@ -90,10 +112,10 @@ DCBlock class >> cardsSequence [
 		[:x | x language = SBCards].
 		[:x | x type = #sequence].
 		[:x |
-			x
-				ensureReplacement: CardsSequence
-				embed: [:g | {g children}]
-				initDo: [:g :cards | g addAllMorphsBack: cards]]}
+			x ensureReplacement: CardsSequence initDo: [:g |
+				g embedMany: #namedChildren onChange: [:list |
+					g removeAllMorphs.
+					g addAllMorphsBack: list]]]}
 ]
 
 { #category : #'text modify' }
@@ -145,7 +167,7 @@ DCBlock class >> fromCursor: aCursor language: aLanguage [
 				ifTrue: [
 					[
 						self addUncapturedTextTo: node in: aCursor language: aLanguage isLeaf: false.
-						node addMorphBack: (self fromCursor: aCursor language: aLanguage)] doWhileFalse: [aCursor gotoNextSibling].
+						node baseAndMorphAdd: (self fromCursor: aCursor language: aLanguage)] doWhileFalse: [aCursor gotoNextSibling].
 					self addUncapturedTextTo: node in: aCursor language: aLanguage isLeaf: false.
 					aCursor gotoParent]
 				ifFalse: [self addUncapturedTextTo: node in: aCursor language: aLanguage isLeaf: true].
@@ -192,6 +214,45 @@ DCBlock class >> insert: aString in: aContainerString at: aNumber do: aBlock [
 			newEndByte: aNumber - 1 + aString size;
 			bytesToPointsIn: aContainerString new: new)
 		value: [:source :block | self deleteFrom: source at: aNumber do: block]
+]
+
+{ #category : #javascript }
+DCBlock class >> jsExtractTableOfContents: aBlock into: aMorph toc: aReplacement [
+
+	(aBlock type = #'class_declaration' or: [aBlock type = #'function_declaration'])
+		ifTrue: [ | container |
+			container := self jsToCContainer.
+			container addMorphBack: (aReplacement embed: [:s | aBlock atField: #name]).
+			
+			aBlock children do: [:c | self jsExtractTableOfContents: c into: container toc: aReplacement].
+			
+			aMorph addMorphBack: container]
+		ifFalse: [aBlock children do: [:c | self jsExtractTableOfContents: c into: aMorph toc: aReplacement]]
+]
+
+{ #category : #javascript }
+DCBlock class >> jsTableOfContents [
+	<query: #always>
+
+	^ {
+		[:x | x language = SBJavascript].
+		[:x | x type = #program].
+		[:x | false].
+		[:x |
+			x
+				ensureReplacement: DCJsTableOfContents
+				initDo: [:toc | self jsExtractTableOfContents: x into: toc toc: toc]]}
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock class >> jsToCContainer [
+
+	^ SBBlock new
+		layoutPolicy: TableLayout new;
+		hResizing: #shrinkWrap;
+		vResizing: #shrinkWrap;
+		layoutInset: 4;
+		yourself
 ]
 
 { #category : #parsing }
@@ -280,8 +341,8 @@ DCBlock class >> lspShowHover [
 DCBlock class >> maybeAddTrailingLineBreak: aBlock [
 
 	| last |
-	last := aBlock lastDeepSubmorph.
-	aBlock addMorphBack: (DCLineBreak new range: (SBTSRange start: last range end end: last range end + 1)).
+	last := aBlock lastDeepBaseChild.
+	aBlock baseAndMorphAdd: (DCLineBreak new range: (SBTSRange start: last range end end: last range end + 1)).
 	^ aBlock
 ]
 
@@ -361,19 +422,17 @@ DCBlock class >> smalltalkBabylonianBuildExample [
 	<query: #always>
 
 	^ {
+		[:x | true].
 		self smalltalkMessageSendSelector.
 		[:selector :message | selector = #example:args:label:].
 		[:selector :message |
-			message
-				ensureReplacement: DCExample
-				embed: [:m | {m childNodes third. m childNodes fifth. m childNodes seventh}]
-				initDo: [:m :selfBlock :argsBlock :label |
-					m
-						addMorphBack: label;
-						addMorphBack: (SBStringMorph new contents: 'self: ');
-						addMorphBack: selfBlock;
-						addMorphBack: (SBStringMorph new contents: 'args: ');
-						addMorphBack: argsBlock]]}
+			message ensureReplacement: DCExample initDo: [:r |
+				r
+					addMorphBack: (r embed: [:s | s childNodes seventh]);
+					addMorphBack: (SBStringMorph new contents: 'self: ');
+					addMorphBack: (r embed: [:s | s childNodes third]);
+					addMorphBack: (SBStringMorph new contents: 'args: ');
+					addMorphBack: (r embed: [:s | s childNodes fifth])]]}
 ]
 
 { #category : #'smalltalk - helpers' }
@@ -382,6 +441,7 @@ DCBlock class >> smalltalkBabylonianExample [
 	^ {
 		[:x | x language = SBTSSmalltalk].
 		[:x | x containingArtefact].
+		[:x | x class = DCSmalltalkMethod].
 		[:x |
 			x method childNodes
 				detect: [:node | node type = #statement and: [node childSandblocks first class = DCExample]]
@@ -554,7 +614,7 @@ DCBlock class >> smalltalkCheckbox [
 	<query: #always>
 
 	^ {
-		[:x | false].
+		[:x | true].
 		[:x | x language = SBTSSmalltalk].
 		[:x | x isReplacement not].
 		[:x | {#true. #false} includes: x type].
@@ -649,9 +709,18 @@ DCBlock class >> smalltalkDeclaration [
 							with: scope]}
 				first: scopes) ifNil: [
 				(Symbol lookup: id contents) ifNotNil: [:sym |
-					id containingArtefact methodClass
-						bindingOf: sym
-						environment: id containingArtefact methodClass environment]]) ifNil: [id containingArtefact ifNotNil: [:m | m methodClass allInstVarNames detect: [:n | n = id contents] ifNone: [nil]]].
+					id containingArtefact class = DCSmalltalkMethod
+						ifTrue: [
+							id containingArtefact methodClass
+								bindingOf: sym
+								environment: id containingArtefact methodClass environment]
+						ifFalse: [nil]]]) ifNil: [
+				id containingArtefact class = DCSmalltalkMethod
+					ifTrue: [
+						id containingArtefact methodClass allInstVarNames
+							detect: [:n | n = id contents]
+							ifNone: [nil]]
+					ifFalse: [nil]].
 			{#args. id. decl}]}
 ]
 
@@ -740,8 +809,7 @@ DCBlock class >> smalltalkFlagMarker [
 		[:selector :message |
 			message
 				ensureReplacement: DCFlagMarker
-				embed: [:m | {m children last}]
-				initDo: [:m :expr | m addMorphBack: expr]]}
+				initDo: [:m | m addMorphBack: (m embed: [:s | s children last])]]}
 ]
 
 { #category : #smalltalk }
@@ -796,6 +864,7 @@ DCBlock class >> smalltalkIdentifierAutocompletion [
 				with: id.
 			id].
 		[:id | {#args. id. id containingArtefact}].
+		[:id :method | method class = DCSmalltalkMethod].
 		[:id :method | id addOwnSuggestions: method methodClass instVarNames label: 'inst var']}
 ]
 
@@ -1159,7 +1228,7 @@ DCBlock class >> smalltalkVisualSelf [
 	<query: #always>
 
 	^ {
-		[:x | false].
+		[:x | true].
 		[:x | x language = SBTSSmalltalk].
 		[:x | x type = 'self'].
 		[:x | x ensureReplacement: DCReplacement initDo: [:r | r addMorphBack: SBIcon iconHeart]]}
@@ -1181,13 +1250,14 @@ DCBlock class >> smalltalkWatch [
 				ifTrue: [message parent]
 				ifFalse: [message])
 				ensureReplacement: DCWatch
-				embed: [:w | | expr |
-					expr := message childNodes third.
-					{
+				initDo: [:w |
+					w addMorphBack: (w embed: [:s | | expr |
+						expr := (s type = #'parenthesized_expression'
+							ifTrue: [s childNodes second]
+							ifFalse: [s]) childNodes third.
 						expr type = 'parenthesized_expression'
 							ifTrue: [expr childNodes second]
-							ifFalse: [expr]}]
-				initDo: [:w :expr | w addMorphBack: expr]]}
+							ifFalse: [expr]])]]}
 ]
 
 { #category : #'text modify' }
@@ -1308,6 +1378,13 @@ DCBlock >> adaptInput: input in: source at: cursorIndex textMorph: textMorph eve
 	^ input
 ]
 
+{ #category : #'base accessing' }
+DCBlock >> addBaseChild: aNode at: aNumber [
+
+	self baseChildren add: aNode beforeIndex: aNumber.
+	aNode baseParent: self
+]
+
 { #category : #'query actions' }
 DCBlock >> addOwnSuggestions: aCollection label: aString [
 
@@ -1327,9 +1404,28 @@ DCBlock >> alias [
 ]
 
 { #category : #queries }
+DCBlock >> all: aCollection [
+
+	^ Array streamContents: [:s | self allBlocksDo: [:b | (DCQuery script: aCollection with: b) ifNotNil: [:res | s nextPut: res]]]
+]
+
+{ #category : #queries }
 DCBlock >> all: aCollection do: aBlock [
 
 	(self allBlocksSelect: [:b | (DCQuery script: aCollection with: b) notNil]) do: aBlock
+]
+
+{ #category : #'base accessing' }
+DCBlock >> allBaseChildrenDo: aBlock [
+
+	self baseChildren do: [:c | c allBaseChildrenDo: aBlock].
+	aBlock value: self
+]
+
+{ #category : #'base accessing' }
+DCBlock >> allBaseChildrenExceptSelfDo: aBlock [
+
+	self baseChildren do: [:c | c allBaseChildrenDo: aBlock]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1429,7 +1525,7 @@ DCBlock >> applyEdit: edit source: newSource cursorAt: newIndex undoDo: aBlock [
 DCBlock >> applyEditsIn: newTree to: oldTree [
 
 	true ifTrue: [
-		oldTree allChildrenDo: [:m | m clearDiffCache].
+		oldTree allBaseChildrenDo: [:m | m clearDiffCache].
 		^ DCTrueDiff new compare: oldTree to: newTree].
 	DCMatcher new performEditsIn: newTree to: oldTree
 ]
@@ -1460,10 +1556,92 @@ DCBlock >> assertConsecutiveRanges [
 			current := m range end index]]
 ]
 
+{ #category : #'as yet unclassified' }
+DCBlock >> atField: aSymbol [
+
+	^ self children detect: [:c | c field = aSymbol]
+]
+
+{ #category : #nil }
+DCBlock >> atType: aSymbol [
+
+	^ self children detect: [:c | c type = aSymbol]
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> atType: aSymbol ifPresent: aBlock ifAbsent: anotherBlock [
+
+	^ self children detect: [:c | c type = aSymbol] ifFound: aBlock ifNone: anotherBlock
+]
+
 { #category : #'query actions' }
 DCBlock >> attachHighlight [
 
 	self queryState highlight: self
+]
+
+{ #category : #'base accessing' }
+DCBlock >> baseAndMorphAdd: aNode [
+
+	self addMorphBack: aNode.
+	self addBaseChild: aNode at: self baseChildren size + 1
+]
+
+{ #category : #'base accessing' }
+DCBlock >> baseChildren [
+
+	^ baseChildren
+]
+
+{ #category : #'base accessing' }
+DCBlock >> baseChildren: aCollection [
+
+	baseChildren := aCollection
+]
+
+{ #category : #'base accessing' }
+DCBlock >> baseMorph [
+
+	^ self replacedParent ifNotNil: [:p | p] ifNil: [self]
+]
+
+{ #category : #'base accessing' }
+DCBlock >> baseParent [
+
+	^ baseParent
+]
+
+{ #category : #'base accessing' }
+DCBlock >> baseParent: aNode [
+
+	baseParent := aNode
+]
+
+{ #category : #'base accessing' }
+DCBlock >> baseRemoveFromParent [
+
+	self baseParent baseChildren remove: self.
+	self baseParent: nil
+]
+
+{ #category : #'base accessing' }
+DCBlock >> baseSiblingIndex [
+
+	| i |
+	i := 1.
+	self baseParent baseChildren do: [:c |
+		c = self ifTrue: [^ i].
+		i := i + 1].
+	^ 0
+]
+
+{ #category : #'base accessing' }
+DCBlock >> baseTreeHeight [
+
+	^ self baseChildren size = 0 ifTrue: [0] ifFalse: [ | max |
+		max := 0.
+		self baseChildren do: [:c | max := c baseTreeHeight max: max].
+		max + 1]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1525,10 +1703,8 @@ DCBlock >> children [
 { #category : #'as yet unclassified' }
 DCBlock >> childrenDo: aBlock [
 
-	^ self submorphs do: [:c |
-		c isReplacement
-			ifTrue: [c resolveSource ifNotNil: [:child | aBlock value: child]]
-			ifFalse: [aBlock value: c]]
+	^ self baseChildren do: [:c |
+		(c replacedParent notNil and: [c replacedParent showInQuery]) ifTrue: [aBlock value: c replacedParent] ifFalse: [aBlock value: c]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1551,6 +1727,14 @@ DCBlock >> clearInput [
 	<action>
 
 	self infoForEditDo: [:source :textMorph | self class replace: (self activeTextMorph ifNil: [self]) range in: source with: '' do: self applyBlock]
+]
+
+{ #category : #grammar }
+DCBlock >> commandForInsert: aNode at: aNumber [
+
+	| children |
+	children := self childNodes readStream.
+	self match: self grammarRule with: children do: [:child :rule | {rule. child}]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1606,6 +1790,22 @@ DCBlock >> currentTextMorph [
 
 	self submorphsDo: [:m | m isTextMorph ifTrue: [^ m]].
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> cursorPositionsDo: aBlock shallow: aBoolean [
+
+	true ifTrue: [^ super cursorPositionsDo: aBlock shallow: aBoolean].
+	
+	aBlock value: (SBCursorSelect new block: self).
+	self match: self grammarRule with: self childNodes readStream do: [:child :rule |
+		(rule type = 'SYMBOL' or: [rule type = 'ALIAS'])
+			ifTrue: [aBoolean ifFalse: [child cursorPositionsDo: aBlock shallow: aBoolean]]
+			ifFalse: [
+				(child containingSandblock startInputCommandIn: child) ifNotNil: [:command |
+					aBlock value: (SBCursorText new
+						block: child containingSandblock;
+						currentCommand: command)]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -1773,6 +1973,12 @@ DCBlock >> grammarHandler [
 	^ DCGrammarHandler new
 ]
 
+{ #category : #grammar }
+DCBlock >> grammarRule [
+
+	^ (self language grammarRule: self type) ifNil: [self resolveAlias: self type in: self owner grammarRule]
+]
+
 { #category : #'as yet unclassified' }
 DCBlock >> handleInsertEvent: anEvent in: textMorph [
 
@@ -1893,6 +2099,8 @@ DCBlock >> initialize [
 	super initialize.
 	
 	range := SBTSRange null.
+	baseParent := nil.
+	baseChildren := OrderedCollection new: 1.
 	
 	self
 		layoutPolicy: DCLayout new;
@@ -2155,6 +2363,10 @@ DCBlock >> isTSMorph [
 { #category : #'as yet unclassified' }
 DCBlock >> keyStroke: anEvent [
 
+	| editor artefact |
+	editor := self sandblockEditor.
+	artefact := self containingArtefact.
+	
 	self infoForEditDo: [:source :textMorph :cursorIndex | | input |
 		input := anEvent keyCharacter asString.
 		(input first isPrintable and: [anEvent commandKeyPressed not]) ifTrue: [
@@ -2164,7 +2376,7 @@ DCBlock >> keyStroke: anEvent [
 					in: source
 					at: cursorIndex + 1
 					do: (self applyBlockWithCursor: cursorIndex + (text indexOf: anEvent keyCharacter))]]].
-	self batchedChangeStep
+	editor batchedChangeStep: artefact
 ]
 
 { #category : #'as yet unclassified' }
@@ -2177,6 +2389,15 @@ DCBlock >> language [
 DCBlock >> language: aLanguage [
 
 	language := aLanguage
+]
+
+{ #category : #'base accessing' }
+DCBlock >> lastDeepBaseChild [
+
+	| current |
+	current := self.
+	[current baseChildren isEmpty] whileFalse: [current := current baseChildren last].
+	^ current
 ]
 
 { #category : #'as yet unclassified' }
@@ -2202,6 +2423,80 @@ DCBlock >> layoutInset [
 ]
 
 { #category : #'as yet unclassified' }
+DCBlock >> match: aRule with: aStream do: aBlock [
+
+	^ aRule type caseOf: {
+		['STRING'] -> [
+			aRule value = aStream peek contents
+				ifTrue: [
+					aBlock value: aStream next value: aRule.
+					true]
+				ifFalse: [false]].
+		['TOKEN'] -> [
+			" TODO match contents"
+			aStream peek class = DCText
+				ifTrue: [
+					aBlock value: aStream next value: aRule.
+					true]
+				ifFalse: [false]].
+		['IMMEDIATE_TOKEN'] -> [
+			" TODO match contents"
+			aStream peek class = DCText
+				ifTrue: [
+					aBlock value: aStream next value: aRule.
+					true]
+				ifFalse: [false]].
+		['PATTERN'] -> [
+			" TODO match contents"
+			aStream peek class = DCText
+				ifTrue: [
+					aBlock value: aStream next value: aRule.
+					true]
+				ifFalse: [false]].
+		['SYMBOL'] -> [
+			(self language ruleIsInlined: aRule name)
+				ifTrue: [
+					self
+						match: ((self language grammarRule: aRule name) ifNil: ["TODO external symbols"
+						JsonObject fromAssociations: {'type' -> 'BLANK'}])
+						with: aStream
+						do: aBlock]
+				ifFalse: [
+					(self language supertype: aRule name includes: aStream peek type)
+						ifTrue: [
+							aBlock value: aStream next value: aRule.
+							true]
+						ifFalse: [false]]].
+		['ALIAS'] -> [
+			(self language supertype: aRule value includes: aStream peek type)
+				ifTrue: [
+					aBlock value: aStream next value: aRule.
+					true]
+				ifFalse: [false]].
+		['SEQ'] -> [aRule members allSatisfy: [:childRule | self match: childRule with: aStream do: aBlock]].
+		['PREC_LEFT'] -> [self match: aRule content with: aStream do: aBlock].
+		['PREC_RIGHT'] -> [self match: aRule content with: aStream do: aBlock].
+		['PREC'] -> [self match: aRule content with: aStream do: aBlock].
+		['PREC_DYNAMIC'] -> [self match: aRule content with: aStream do: aBlock].
+		['FIELD'] -> [self match: aRule content with: aStream do: aBlock].
+		['CHOICE'] -> [
+			aRule members
+				detect: [:childRule | self match: childRule with: aStream copy do: [:child :rule | ]]
+				ifFound: [:childRule | self match: childRule with: aStream do: aBlock]
+				ifNone: [false]].
+		['BLANK'] -> [true].
+		['REPEAT'] -> [
+			[aStream atEnd not and: [self match: aRule content with: aStream do: aBlock]] whileTrue.
+			true].
+		['REPEAT1'] -> [
+			(self match: aRule content with: aStream do: aBlock)
+				ifTrue: [
+					[aStream atEnd not and: [self match: aRule content with: aStream do: aBlock]] whileTrue.
+					true]
+				ifFalse: [false]]}
+]
+
+{ #category : #'as yet unclassified' }
 DCBlock >> maybeAddSeparator: input textMorph: aTextMorph [
 
 	self language statementTerminator ifNil: [^ input].
@@ -2214,6 +2509,12 @@ DCBlock >> minBoundsWith: info [
 
 	self submorphs do: [:morph | info measure: morph].
 	^ info bounds
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> namedChildren [
+
+	^ self children select: [:c | c type notEmpty]
 ]
 
 { #category : #'as yet unclassified' }
@@ -2309,9 +2610,7 @@ DCBlock >> pairMap [
 { #category : #hierarchy }
 DCBlock >> parent [
 
-	^ self replacedParent
-		ifNotNil: [:p | p parent ifNotNil: #source]
-		ifNil: [self parentSandblock]
+	^ (self owner ifNotNil: [:o | o showInQuery] ifNil: [false]) ifTrue: [self owner] ifFalse: [self baseParent]
 ]
 
 { #category : #'as yet unclassified' }
@@ -2570,10 +2869,19 @@ DCBlock >> reportError: anError [
 	self queryState reportError: anError for: self
 ]
 
-{ #category : #'as yet unclassified' }
-DCBlock >> resolveSource [
+{ #category : #grammar }
+DCBlock >> resolveAlias: aSymbol in: aNode [
 
-	^ self
+	(aNode type = 'ALIAS' and: [(aNode at: #value) = aSymbol]) ifTrue: [
+		^ aNode content type = 'SYMBOL'
+			ifTrue: [self language grammarRule: aNode content name]
+			ifFalse: [aNode content]].
+	
+	aNode members ifNotNil: [aNode members do: [:m | (self resolveAlias: aSymbol in: m) ifNotNil: [:g | ^ g]]].
+	
+	aNode content ifNotNil: [^ self resolveAlias: aSymbol in: aNode content].
+	
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -2600,7 +2908,10 @@ DCBlock >> restoreCursorAfter: aBlock [
 { #category : #'as yet unclassified' }
 DCBlock >> rootBlock [
 
-	^ self orAnyParent: self language rootRuleName
+	| current |
+	current := self.
+	[current isRootBlock] whileFalse: [current := current baseParent].
+	^ current
 ]
 
 { #category : #queries }
@@ -2665,6 +2976,12 @@ DCBlock >> shallowCopyBlock [
 		range: range;
 		field: field;
 		highlight: highlight
+]
+
+{ #category : #'as yet unclassified' }
+DCBlock >> showInQuery [
+
+	^ true
 ]
 
 { #category : #hierarchy }

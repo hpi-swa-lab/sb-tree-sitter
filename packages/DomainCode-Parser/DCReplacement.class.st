@@ -49,30 +49,11 @@ DCReplacement >> activeUninstall [
 ]
 
 { #category : #'as yet unclassified' }
-DCReplacement >> addEmbed: aBlock [
-
-	currentEmbeds ifNil: [currentEmbeds := OrderedCollection new].
-	
-	^ currentEmbeds add: (aBlock = self source
-		ifFalse: [ | marker |
-			marker := DCEmbedMarker new source: aBlock.
-			aBlock replaceNodeBy: marker.
-			aBlock]
-		ifTrue: [
-			self assert: aBlock replacedParent = self.
-			aBlock])
-]
-
-{ #category : #'as yet unclassified' }
-DCReplacement >> children [
-
-	^ self source ifNotNil: #children ifNil: [#()]
-]
-
-{ #category : #'as yet unclassified' }
 DCReplacement >> childrenDo: aBlock [
 
-	^ self source ifNotNil: [:s | s childrenDo: aBlock]
+	self hasType
+		ifTrue: [currentEmbeds do: aBlock]
+		ifFalse: [self source baseChildren do: aBlock]
 ]
 
 { #category : #'as yet unclassified' }
@@ -88,20 +69,38 @@ DCReplacement >> currentTextMorph [
 	^ nil
 ]
 
-{ #category : #'as yet unclassified' }
-DCReplacement >> deleteBlock [
-	<action>
+{ #category : #binding }
+DCReplacement >> embed: aBlock [
 
-	self source deleteBlock
+	| shard |
+	shard := DCShard new.
+	self
+		fromSource: [:source :repl | | block |
+			block := aBlock value: source.
+			shard update: block.
+			currentEmbeds add: block]
+		toSource: [:source :repl | ].
+	^ shard
 ]
 
-{ #category : #'as yet unclassified' }
-DCReplacement >> embed: aClosure [
+{ #category : #binding }
+DCReplacement >> embedMany: aBlock onChange: anotherBlock [
 
-	collectEmbeds := aClosure
+	| shard current |
+	shard := DCShard new.
+	current := nil.
+	self
+		fromSource: [:source :repl | | new |
+			new := (aBlock value: source) collect: #baseMorph.
+			new do: [:block | currentEmbeds add: block].
+			current = new ifFalse: [
+				anotherBlock value: new.
+				current := new]]
+		toSource: [:source :repl | ].
+	^ shard
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #binding }
 DCReplacement >> fromSource: aBlock toSource: anotherBlock [
 
 	bindings add: aBlock -> anotherBlock
@@ -112,6 +111,12 @@ DCReplacement >> gapFor: aMorph [
 
 	self allMorphsDo: [:m | (m valueOfProperty: #waitingFor) = aMorph ifTrue: [^ m]].
 	^ nil
+]
+
+{ #category : #'as yet unclassified' }
+DCReplacement >> hasType [
+
+	^ self type notEmpty
 ]
 
 { #category : #'as yet unclassified' }
@@ -138,10 +143,16 @@ DCReplacement >> isReplacement [
 	^ true
 ]
 
+{ #category : #'block api' }
+DCReplacement >> isRootBlock [
+
+	^ self source isRootBlock
+]
+
 { #category : #'as yet unclassified' }
 DCReplacement >> language [
 
-	^ language
+	^ self source language
 ]
 
 { #category : #'as yet unclassified' }
@@ -169,7 +180,7 @@ DCReplacement >> passiveUninstall [
 	hadFocus := self sandblockEditor textFocus
 		ifNotNil: [:t | (t ownerSatisfying: [:o | o = self]) notNil]
 		ifNil: [false].
-	self source ifNotNil: [self replaceNodeBy: self source] ifNil: [self delete].
+	self source ifNotNil: [self replaceBy: self source] ifNil: [self delete].
 	
 	hadFocus ifTrue: [self source startInputAtEnd]
 ]
@@ -220,15 +231,17 @@ DCReplacement >> range [
 ]
 
 { #category : #'as yet unclassified' }
-DCReplacement >> resolveSource [
+DCReplacement >> rootBlock [
 
-	^ self source ifNotNil: [:c | c resolveSource]
+	source isRootBlock ifTrue: [^ source].
+	
+	^ self ownerSatisfying: [:b | b isTSMorph and: [b type = self language rootRuleName]]
 ]
 
 { #category : #'as yet unclassified' }
-DCReplacement >> rootBlock [
+DCReplacement >> showInQuery [
 
-	^ self ownerSatisfying: [:b | b isTSMorph and: [b type = self language rootRuleName]]
+	^ self hasType
 ]
 
 { #category : #'as yet unclassified' }
@@ -249,6 +262,17 @@ DCReplacement >> source: aBlock [
 	source := aBlock.
 	bindings do: [:assoc | assoc key value: self source value: self].
 	self language: aBlock language
+]
+
+{ #category : #binding }
+DCReplacement >> syncTextFrom: aClosure to: aTextBlock [
+
+	self
+		fromSource: [:source :repl | aTextBlock contents: (aClosure value: source) contents]
+		toSource: [:source :repl | ].
+	aTextBlock
+		when: #keyStroke
+		evaluate: [:e | (aClosure value: self source) replaceWith: aTextBlock contents]
 ]
 
 { #category : #'as yet unclassified' }
@@ -272,40 +296,13 @@ DCReplacement >> type [
 { #category : #'as yet unclassified' }
 DCReplacement >> uninstallEmbeds [
 
-	currentEmbeds ifNotNil: [:e | e do: [:embed | embed = self source ifFalse: [embed replacedParent uninstall]]]
-]
-
-{ #category : #'as yet unclassified' }
-DCReplacement >> updateEmbeds [
-
-	| newEmbeds collected |
-	collected := collectEmbeds value: self source.
-	newEmbeds := collected flatten.
-	currentEmbeds
-		ifNil: [
-			newEmbeds do: [:embed | self addEmbed: embed].
-			currentEmbeds ifNil: [currentEmbeds := {}]]
-		ifNotNil: [
-			newEmbeds do: [:e |
-				self
-					assert: e class ~= DCEmbedMarker
-					description: 'use children to navigate the tree for embedding (selected marker block)'].
-			
-			(currentEmbeds copyWithoutAll: newEmbeds) do: [:gone | gone replacedParent uninstall].
-			
-			(newEmbeds copyWithoutAll: currentEmbeds) do: [:new | | marker |
-				marker := DCEmbedMarker new source: new.
-				new replaceNodeBy: marker.
-				self addMorphBack: new].
-			
-			currentEmbeds := newEmbeds].
-	
-	^ collected
+	currentEmbeds ifNotNil: [:e | e do: [:embed | embed source ifNotNil: [:source | source baseParent addMorph: source asElementNumber: embed baseSiblingIndex]]]
 ]
 
 { #category : #'as yet unclassified' }
 DCReplacement >> updateReplacement [
 
+	currentEmbeds := OrderedCollection new.
 	bindings do: [:assoc | assoc key value: self source value: self]
 ]
 
@@ -313,17 +310,4 @@ DCReplacement >> updateReplacement [
 DCReplacement >> updateSource [
 
 	bindings do: [:assoc | assoc value value: self source value: self]
-]
-
-{ #category : #'as yet unclassified' }
-DCReplacement >> updateSourceDuring: aBlock [
-
-	bindings do: [:assoc | assoc value value: self source value: self].
-	aBlock value
-]
-
-{ #category : #'as yet unclassified' }
-DCReplacement >> writeSourceOn: aStream indent: aNumber forCompare: aBoolean [
-
-	self updateSourceDuring: [self source writeSourceOn: aStream indent: aNumber forCompare: aBoolean]
 ]

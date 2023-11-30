@@ -205,6 +205,14 @@ DCSmalltalkMethod >> object [
 ]
 
 { #category : #'as yet unclassified' }
+DCSmalltalkMethod >> outOfWorld: aWorld [
+
+	super outOfWorld: aWorld.
+	
+	SystemChangeNotifier uniqueInstance noMoreNotificationsFor: self
+]
+
+{ #category : #'as yet unclassified' }
 DCSmalltalkMethod >> relatedClass [
 
 	^ self methodClass
@@ -263,7 +271,13 @@ DCSmalltalkMethod >> selector [
 ]
 
 { #category : #'as yet unclassified' }
+DCSmalltalkMethod >> showInQuery [
+
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 DCSmalltalkMethod >> type [
 
-	^ nil
+	^ 'smalltalk_method'
 ]

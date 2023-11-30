@@ -55,7 +55,7 @@ Morph >> childCount [
 { #category : #'*DomainCode-Core' }
 Morph >> children [
 
-	^ submorphs
+	^ Array streamContents: [:s | self childrenDo: [:c | s nextPut: c]]
 ]
 
 { #category : #'*DomainCode-Core' }
@@ -172,6 +172,12 @@ Morph >> setBoundsDirect: aRectangle [
 	
 	box := self outerBounds.
 	box = priorBounds ifFalse: [self invalidRect: (priorBounds quickMerge: box)]
+]
+
+{ #category : #'*DomainCode-Core' }
+Morph >> showInQuery [
+
+	^ false
 ]
 
 { #category : #'*DomainCode-Core' }

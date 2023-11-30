@@ -24,7 +24,7 @@ DCBlock >> literalHash [
 
 	^ self
 		valueOfProperty: #literalHash
-		ifAbsentPut: [self children inject: 0 into: [:compound :node | compound + node literalHash]]
+		ifAbsentPut: [self baseChildren inject: 0 into: [:compound :node | compound + node literalHash]]
 ]
 
 { #category : #'*DomainCode-TrueDiff' }
@@ -58,7 +58,7 @@ DCBlock >> structureHash [
 	^ self valueOfProperty: #structureHash ifAbsentPut: [ | writer |
 		writer := #[] writeStream.
 		writer nextPutAll: self type.
-		self children do: [:c | writer nextLittleEndianNumber: 4 put: c structureHash].
+		self baseChildren do: [:c | writer nextLittleEndianNumber: 4 put: c structureHash].
 		SecureHashAlgorithm new hashStream: writer contents readStream]
 ]
 

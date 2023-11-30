@@ -33,15 +33,15 @@ DCTrueDiff >> assignSharesListFrom: thisList to: thatList subtreeReg: aRegistry 
 { #category : #'as yet unclassified' }
 DCTrueDiff >> assignSharesRecurseFrom1: this to: that subtreeReg: aRegistry [
 
-	(this type = that type and: [this children size = that children size])
+	(this type = that type and: [this baseChildren size = that baseChildren size])
 		ifTrue: [
 			this share registerAvailableTree: this.
-			this children
-				with: that children
+			this baseChildren
+				with: that baseChildren
 				do: [:l :r | self assignSharesFrom: l to: r subtreeReg: aRegistry]]
 		ifFalse: [
-			this allChildrenDo: [:c | aRegistry assignShareAndRegisterTree: c].
-			that onlyChildrenDo: [:c | aRegistry assignShare: c]]
+			this allBaseChildrenDo: [:c | aRegistry assignShareAndRegisterTree: c].
+			that allBaseChildrenExceptSelfDo: [:c | aRegistry assignShare: c]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -49,32 +49,32 @@ DCTrueDiff >> assignSharesRecurseFrom: this to: that subtreeReg: aRegistry [
 
 	this type = that type
 		ifTrue: [ | thisList thatList |
-			thisList := this children asOrderedCollection.
-			thatList := that children asOrderedCollection.
+			thisList := this baseChildren asOrderedCollection.
+			thatList := that baseChildren asOrderedCollection.
 			self assignSharesListFrom: thisList to: thatList subtreeReg: aRegistry.
 			self assignSharesListFrom: thisList reverseInPlace to: thatList reverseInPlace subtreeReg: aRegistry.
 			
 			thisList withOrNil: thatList do: [:l :r |
-				l ifNil: [r allChildrenDo: [:c | aRegistry assignShare: c]] ifNotNil: [
-					r ifNil: [l allChildrenDo: [:c | aRegistry assignShareAndRegisterTree: c]] ifNotNil: [
+				l ifNil: [r allBaseChildrenDo: [:c | aRegistry assignShare: c]] ifNotNil: [
+					r ifNil: [l allBaseChildrenDo: [:c | aRegistry assignShareAndRegisterTree: c]] ifNotNil: [
 						aRegistry assignShareAndRegisterTree: l.
 						aRegistry assignShare: r.
 						self assignSharesRecurseFrom: l to: r subtreeReg: aRegistry]]]]
 		ifFalse: [
-			this onlyChildrenDo: [:c | aRegistry assignShareAndRegisterTree: c].
-			that onlyChildrenDo: [:c | aRegistry assignShare: c]]
+			this allBaseChildrenExceptSelfDo: [:c | aRegistry assignShareAndRegisterTree: c].
+			that allBaseChildrenExceptSelfDo: [:c | aRegistry assignShare: c]]
 ]
 
 { #category : #'as yet unclassified' }
 DCTrueDiff >> assignSubtreesFrom: this to: that subtreeReg: aRegistry [
 
 	| queue |
-	queue := SortedCollection sortBlock: [:a :b | a treeHeight > b treeHeight].
+	queue := SortedCollection sortBlock: [:a :b | a baseTreeHeight > b baseTreeHeight].
 	queue add: that.
 	[queue isEmpty] whileFalse: [ | level nextNodes remainingMatchedNodes unassignedNodes |
-		level := queue first treeHeight.
+		level := queue first baseTreeHeight.
 		nextNodes := OrderedCollection new.
-		[queue notEmpty and: [queue first treeHeight = level]] whileTrue: [ | next |
+		[queue notEmpty and: [queue first baseTreeHeight = level]] whileTrue: [ | next |
 			next := queue removeFirst.
 			next assigned ifNil: [nextNodes add: next]].
 		remainingMatchedNodes := self
@@ -85,7 +85,7 @@ DCTrueDiff >> assignSubtreesFrom: this to: that subtreeReg: aRegistry [
 			selectAvailableTreeFrom: remainingMatchedNodes
 			literalMatch: false
 			subtreeReg: aRegistry.
-		unassignedNodes do: [:node | queue addAll: node children]]
+		unassignedNodes do: [:node | queue addAll: node baseChildren]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -105,7 +105,9 @@ DCTrueDiff >> assignTreeRecFrom: this to: that [
 
 	this assigned: that.
 	that assigned: this.
-	this children with: that children do: [:l :r | self assignTreeRecFrom: l to: r]
+	this baseChildren
+		with: that baseChildren
+		do: [:l :r | self assignTreeRecFrom: l to: r]
 ]
 
 { #category : #'as yet unclassified' }
@@ -142,10 +144,10 @@ DCTrueDiff >> computeEditScriptFrom: this to: that parent: anotherNode parentTyp
 	
 	(this type = that type and: [this assigned isNil and: [that assigned isNil]])
 		ifTrue: [
-			this children do: [:c |
+			this baseChildren do: [:c |
 				anEditBuffer detach: c.
 				self unloadUnassigned: c in: anEditBuffer].
-			that children withIndexDo: [:c :index | | new |
+			that baseChildren withIndexDo: [:c :index | | new |
 				new := self loadUnassigned: c in: anEditBuffer.
 				anEditBuffer attach: new to: this at: index].
 			newTree := this]
@@ -201,8 +203,8 @@ DCTrueDiff >> computeEditScriptRecurse2From: this to: that parent: aNode parentT
 		ifTrue: [ | thatList thisList |
 			this range: that range.
 			
-			thisList := this children asOrderedCollection.
-			thatList := that children asOrderedCollection.
+			thisList := this baseChildren asOrderedCollection.
+			thatList := that baseChildren asOrderedCollection.
 			[thisList notEmpty and: [thatList notEmpty]] whileTrue: [
 				(thisList first assigned isNil and: [thatList first assigned isNil])
 					ifTrue: [
@@ -211,7 +213,7 @@ DCTrueDiff >> computeEditScriptRecurse2From: this to: that parent: aNode parentT
 							to: thatList first
 							parent: this
 							parentType: this type
-							link: thatList first siblingIndex
+							link: thatList first baseSiblingIndex
 							edits: anEditBuffer.
 						thisList removeFirst.
 						thatList removeFirst]
@@ -225,7 +227,7 @@ DCTrueDiff >> computeEditScriptRecurse2From: this to: that parent: aNode parentT
 								(thisList first assigned notNil and: [thatList includes: thisList first assigned])
 									ifTrue: [
 										anEditBuffer detach: thisList first.
-										anEditBuffer attach: thisList first to: this at: thisList first assigned siblingIndex.
+										anEditBuffer attach: thisList first to: this at: thisList first assigned baseSiblingIndex.
 										self updateLiteralsFrom: thisList first to: thisList first assigned in: anEditBuffer.
 										thatList remove: thisList first assigned.
 										thisList removeFirst]
@@ -241,7 +243,7 @@ DCTrueDiff >> computeEditScriptRecurse2From: this to: that parent: aNode parentT
 													to: thatList first
 													parent: this
 													parentType: this type
-													link: thatList first siblingIndex
+													link: thatList first baseSiblingIndex
 													edits: anEditBuffer.
 												thisList removeFirst.
 												thatList removeFirst]]]]].
@@ -249,7 +251,7 @@ DCTrueDiff >> computeEditScriptRecurse2From: this to: that parent: aNode parentT
 				anEditBuffer
 					attach: (self loadUnassigned: thatNode in: anEditBuffer)
 					to: aNode
-					at: thatNode siblingIndex].
+					at: thatNode baseSiblingIndex].
 			thisList do: [:thisNode |
 				anEditBuffer detach: thisNode.
 				self unloadUnassigned: thisNode in: anEditBuffer].
@@ -260,16 +262,16 @@ DCTrueDiff >> computeEditScriptRecurse2From: this to: that parent: aNode parentT
 { #category : #'as yet unclassified' }
 DCTrueDiff >> computeEditScriptRecurseFrom: this to: that parent: aNode parentType: aSymbol link: aLink in: anEditBuffer [
 
-	^ (this type = that type and: [this children size = that children size])
+	^ (this type = that type and: [this baseChildren size = that baseChildren size])
 		ifTrue: [
 			this range: that range.
-			this children with: that children do: [:thisNode :thatNode | | newNode |
+			this baseChildren with: that baseChildren do: [:thisNode :thatNode | | newNode |
 				newNode := self
 					computeEditScriptFrom: thisNode
 					to: thatNode
 					parent: this
 					parentType: this type
-					link: thisNode siblingIndex
+					link: thisNode baseSiblingIndex
 					edits: anEditBuffer].
 			this]
 		ifFalse: [nil]
@@ -282,7 +284,7 @@ DCTrueDiff >> loadUnassigned: aNode in: anEditBuffer [
 		ifNotNil: [self updateLiteralsFrom: aNode assigned to: aNode in: anEditBuffer]
 		ifNil: [ | parent |
 			parent := aNode shallowCopyBlock.
-			aNode children withIndexDo: [:c :index | anEditBuffer attach: (self loadUnassigned: c in: anEditBuffer) to: parent at: index].
+			aNode baseChildren withIndexDo: [:c :index | anEditBuffer attach: (self loadUnassigned: c in: anEditBuffer) to: parent at: index].
 			parent]
 ]
 
@@ -323,7 +325,7 @@ DCTrueDiff >> unloadUnassigned: aNode in: anEditBuffer [
 
 	aNode assigned ifNotNil: [aNode assigned: nil] ifNil: [
 		anEditBuffer remove: aNode.
-		aNode children do: [:c | self unloadUnassigned: c in: anEditBuffer]]
+		aNode baseChildren do: [:c | self unloadUnassigned: c in: anEditBuffer]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -331,8 +333,8 @@ DCTrueDiff >> updateLiteralsFrom: this to: that in: anEditBuffer [
 
 	this range: that range.
 	this treeLabel = that treeLabel ifFalse: [anEditBuffer update: this to: that contents].
-	this children
-		with: that children
+	this baseChildren
+		with: that baseChildren
 		do: [:l :r | self updateLiteralsFrom: l to: r in: anEditBuffer].
 	^ this
 ]

@@ -21,12 +21,12 @@ DCSubtreeShare >> deregisterAvailableTree: aNode subtreeReg: aRegistry [
 		ifNotNil: [
 			aNode share availableTrees removeKey: aNode uri.
 			aNode share: nil.
-			aNode children do: [:t | self deregisterAvailableTree: t subtreeReg: aRegistry]]
+			aNode baseChildren do: [:t | self deregisterAvailableTree: t subtreeReg: aRegistry]]
 		ifNil: [
 			aNode assigned ifNotNil: [ | that |
 				that := aNode assigned.
 				aNode unassignTree.
-				that allChildrenDo: [:t | aRegistry assignShare: t]]]
+				that allBaseChildrenDo: [:t | aRegistry assignShare: t]]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -71,8 +71,8 @@ DCSubtreeShare >> takeTree: aNode that: anotherNode subtreeReg: aRegistry [
 	aNode share availableTrees removeKey: aNode uri.
 	aNode share hasPreferredTrees ifTrue: [aNode share preferredTrees removeKey: aNode literalHash ifAbsent: []].
 	aNode share: nil.
-	aNode children do: [:t | self deregisterAvailableTree: t subtreeReg: aRegistry].
-	anotherNode onlyChildrenDo: [:thatNode |
+	aNode baseChildren do: [:t | self deregisterAvailableTree: t subtreeReg: aRegistry].
+	anotherNode allBaseChildrenExceptSelfDo: [:thatNode |
 		thatNode assigned ifNotNil: [ | thisNode |
 			thisNode := thatNode assigned.
 			aRegistry assignShareAndRegisterTree: thisNode]].
