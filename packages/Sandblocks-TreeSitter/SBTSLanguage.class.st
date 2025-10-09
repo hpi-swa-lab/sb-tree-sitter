@@ -170,7 +170,7 @@ SBTSLanguage class >> fetchLibrary: aGithubString branch: aString [
 SBTSLanguage class >> fetchTreeSitter [
 
 	| path |
-	path := self fetchLibrary: 'tree-sitter/tree-sitter' branch: 'master'.
+	path := self fetchLibrary: 'tree-sitter/tree-sitter' branch: '9ba8f6dfe673e44083c8936277fb20e7f1206b5b'.
 	self assert: (OSProcess waitForCommand: ('cd {1}; make' format: {path fullName})) exitStatus = 0.
 	path / 'libtree-sitter.so' copyTo: FileDirectory default.
 	^ FileDirectory default / 'libtree-sitter.so'
